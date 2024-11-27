@@ -20,5 +20,8 @@
   },
   "dependencies": {
     "classnames": "^2.5.1"
+  },
+  "devDependencies": {
+    "vue": "^3.5.12"
   }
 }
