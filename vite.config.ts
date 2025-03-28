@@ -19,6 +19,9 @@ const comps = [
   'trigger',
   'dialog',
   'drawer',
+  'tooltip',
+  'slider',
+  'mini-decimal',
 ]
 
 export function genListAlias() {

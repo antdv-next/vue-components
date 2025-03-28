@@ -1,7 +1,6 @@
 import Popup from './Popup'
-import Tooltip from './Tooltip'
+import Tooltip from './Tooltip.tsx'
 
-export type { TooltipRef } from './Tooltip'
 export { Popup }
 
 export default Tooltip

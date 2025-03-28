@@ -234,6 +234,22 @@ importers:
         specifier: ^3.0.0
         version: 3.5.13(typescript@5.7.3)
 
+  packages/slider:
+    dependencies:
+      '@v-c/util':
+        specifier: workspace:*
+        version: link:../util
+      classnames:
+        specifier: ^2.5.1
+        version: 2.5.1
+      vue:
+        specifier: ^3.0.0
+        version: 3.5.13(typescript@5.7.3)
+    devDependencies:
+      '@v-c/tooltip':
+        specifier: workspace:*
+        version: link:../tooltip
+
   packages/steps:
     dependencies:
       '@v-c/util':

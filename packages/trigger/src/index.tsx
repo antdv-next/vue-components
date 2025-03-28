@@ -355,7 +355,7 @@ export const Trigger = defineComponent({
       }
     }
 
-    watch([mergedOpen, targetEle, popupEle], (newValue, oldValue, onCleanup) => useWatch(mergedOpen.value, targetEle.value, popupEle.value, triggerAlign, onScroll, onCleanup))
+    watch([mergedOpen, targetEle, popupEle], () => useWatch(mergedOpen.value, targetEle.value, popupEle.value, triggerAlign, onScroll))
     watch([mousePos, () => props.popupPlacement], () => {
       triggerAlign()
     })
@@ -669,10 +669,11 @@ export const Trigger = defineComponent({
       }
 
       passedEventList.forEach((eventName) => {
-        if (restProps[eventName]) {
+        if ((restProps as Record<string, any>)[eventName]) {
           passedProps[eventName] = (...args: any[]) => {
             mergedChildrenProps[eventName]?.(...args)
-            restProps[eventName](...args)
+            // eslint-disable-next-line no-unexpected-multiline
+            (restProps as Record<string, any>)[eventName](...args)
           }
         }
       })

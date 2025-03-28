@@ -36,7 +36,16 @@
       ],
       "@v-c/drawer": [
         "./packages/drawer/src"
-      ]
+      ],
+      "@v-c/tooltip": [
+        "./packages/tooltip/src"
+      ],
+      "@v-c/slider": [
+        "./packages/slider/src"
+      ],
+      "@v-c/mini-decimal": [
+        "./packages/mini-decimal/src"
+      ],
     },
     "resolveJsonModule": true,
     "allowImportingTsExtensions": true,
