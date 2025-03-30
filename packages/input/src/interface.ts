@@ -78,7 +78,7 @@ export function inputProps() {
     'size': { type: String as PropType<SizeType> },
     'autofocus': { type: Boolean, default: undefined },
     'lazy': { type: Boolean, default: true },
-    'maxlength': Number,
+    'maxLength': Number,
     'loading': { type: Boolean, default: undefined },
     'bordered': { type: Boolean, default: undefined },
     'showCount': { type: [Boolean, Object] as PropType<boolean | ShowCountProps> },
@@ -96,12 +96,13 @@ export function inputProps() {
     'valueModifiers': Object,
     'hidden': { type: Boolean, default: undefined },
     'status': String as PropType<InputStatus>,
+    'count': Object as PropType<CountConfig>,
   }
 }
 export type InputProps = Partial<ExtractPropTypes<ReturnType<typeof inputProps>>>
 
 export interface ShowCountProps {
-  formatter: (args: { count: number, maxlength?: number, value?: string }) => VueNode
+  formatter: (args: { count: number, maxLength: number | undefined }) => VueNode
 }
 
 export interface InputRef {

@@ -5,8 +5,12 @@ import type { InputProps } from './interface'
 import type { InputFocusOptions } from './utils/commonUtils'
 import omit from '@v-c/util/dist/omit'
 import classnames from 'classnames'
-import { defineComponent, nextTick, onMounted, shallowRef, watch, withDirectives } from 'vue'
+import { defineComponent, nextTick, onMounted, ref, shallowRef, watch, withDirectives } from 'vue'
+// import antInputDirective from '@v-c/util/dist/antInputDirective';
+import BaseInput from './BaseInput'
+import useCount from './hooks/useCount'
 import { inputProps } from './interface'
+
 import {
   fixControlledValue,
   hasAddon,
@@ -14,9 +18,6 @@ import {
   resolveOnChange,
   triggerFocus,
 } from './utils/commonUtils'
-
-// import antInputDirective from '@v-c/util/dist/antInputDirective';
-import BaseInput from './BaseInput'
 
 function onCompositionStart(e: any) {
   e.target.composing = true
@@ -108,6 +109,12 @@ export default defineComponent({
       inputRef.value?.select()
     }
 
+    // ====================== Count =======================
+    const countConfig = ref()
+    watch([() => props.count, () => props.showCount], () => {
+      countConfig.value = useCount(props.count, props.showCount)
+      console.log('input', countConfig.value)
+    }, { immediate: true })
     expose({
       focus,
       blur,
@@ -202,7 +209,6 @@ export default defineComponent({
         'lazy',
         'showCount',
         'valueModifiers',
-        'showCount',
         'affixWrapperClassName',
         'groupClassName',
         'inputClassName',
@@ -242,19 +248,23 @@ export default defineComponent({
       return withDirectives(inputNode as VNode, [[antInput]])
     }
     const getSuffix = () => {
-      const { maxlength, suffix = slots.suffix?.(), showCount, prefixCls } = props
+      const { maxLength, suffix = slots.suffix?.(), prefixCls } = props
       // Max length value
-      const hasMaxLength = Number(maxlength) > 0
-      if (suffix || showCount) {
+      const hasMaxLength = Number(maxLength) > 0
+      if (suffix || countConfig.value.show) {
+        const mergedMax = countConfig.value.max || props.maxLength
         const valueLength = [...fixControlledValue(stateValue.value!)].length
         const dataCount
-          = typeof showCount === 'object'
-            ? showCount.formatter({ count: valueLength, maxlength })
-            : `${valueLength}${hasMaxLength ? ` / ${maxlength}` : ''}`
-
+          = countConfig.value.showFormatter
+            ? countConfig.value.showFormatter({
+                value: stateValue.value,
+                count: valueLength,
+                maxLength: mergedMax,
+              })
+            : `${valueLength}${hasMaxLength ? ` / ${mergedMax}` : ''}`
         return (
           <>
-            {!!showCount && (
+            {countConfig.value.show && (
               <span
                 class={classnames(`${prefixCls}-show-count-suffix`, {
                   [`${prefixCls}-show-count-has-suffix`]: !!suffix,
