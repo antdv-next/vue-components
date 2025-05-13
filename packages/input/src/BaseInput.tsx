@@ -16,9 +16,10 @@ export default defineComponent({
     clearIcon: any
     addonAfter: any
     addonBefore: any
+    default: any
   }>,
   emits: ['update:value', 'change', 'input', 'focus', 'blur', 'clear'],
-  setup(props, { slots, attrs }) {
+  setup(props, { slots, attrs, expose }) {
     const containerRef = ref()
     const onInputMouseDown: MouseEventHandler = (e) => {
       if (containerRef.value?.contains(e.target as Element)) {
@@ -61,6 +62,10 @@ export default defineComponent({
       )
     }
 
+    expose({
+      nativeElement: () => containerRef.value,
+    })
+
     return () => {
       const {
         focused,
@@ -74,11 +79,17 @@ export default defineComponent({
         readonly,
         hidden,
         prefixCls,
-        inputElement,
+        inputElement: inputEl,
         affixWrapperClassName,
         wrapperClassName,
         groupClassName,
+        components,
       } = props
+      const inputElement = slots.default?.() || inputEl
+      const AffixWrapperComponent = components?.affixWrapper || 'span'
+      const GroupWrapperComponent = components?.groupWrapper || 'span'
+      const WrapperComponent = components?.wrapper || 'span'
+      const GroupAddonComponent = components?.groupAddon || 'span'
       let element = cloneElement(inputElement, {
         value,
         hidden,
@@ -106,7 +117,7 @@ export default defineComponent({
         )
 
         element = (
-          <span
+          <AffixWrapperComponent
             class={affixWrapperCls}
             style={attrs.style as CSSProperties}
             hidden={!hasAddon({ addonAfter, addonBefore }) && hidden}
@@ -120,7 +131,7 @@ export default defineComponent({
               hidden: null,
             })}
             {suffixNode}
-          </span>
+          </AffixWrapperComponent>
         )
       }
       // ================== Addon ================== //
@@ -143,13 +154,13 @@ export default defineComponent({
         // Need another wrapper for changing display:table to display:inline-block
         // and put style prop in wrapper
         return (
-          <span class={mergedGroupClassName} style={attrs.style as CSSProperties} hidden={hidden}>
-            <span class={mergedWrapperClassName}>
-              {addonBefore && <span class={addonCls}>{addonBefore()}</span>}
+          <GroupWrapperComponent class={mergedGroupClassName} style={attrs.style as CSSProperties} hidden={hidden}>
+            <WrapperComponent class={mergedWrapperClassName}>
+              {addonBefore && <GroupAddonComponent class={addonCls}>{addonBefore()}</GroupAddonComponent>}
               {cloneElement(element, { style: null, hidden: null })}
-              {addonAfter && <span class={addonCls}>{addonAfter()}</span>}
-            </span>
-          </span>
+              {addonAfter && <GroupAddonComponent class={addonCls}>{addonAfter()}</GroupAddonComponent>}
+            </WrapperComponent>
+          </GroupWrapperComponent>
         )
       }
       return element

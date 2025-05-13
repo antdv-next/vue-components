@@ -22,6 +22,7 @@ const comps = [
   'tooltip',
   'slider',
   'mini-decimal',
+  'input-number',
 ]
 
 export function genListAlias() {

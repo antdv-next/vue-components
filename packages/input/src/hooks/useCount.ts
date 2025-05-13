@@ -37,7 +37,6 @@ export default function useCount(
   }
 
   const { show, ...rest } = mergedConfig!
-  console.log('mergedConfig', mergedConfig, count)
 
   return {
     ...rest,

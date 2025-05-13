@@ -11,10 +11,10 @@ export type InputStatus = (typeof InputStatuses)[number]
 
 export function commonInputProps() {
   return {
-    addonBefore: Function,
-    addonAfter: Function,
-    prefix: Function,
-    suffix: Function,
+    addonBefore: [Function, Object],
+    addonAfter: [Function, Object],
+    prefix: [Function, Object],
+    suffix: [Function, Object],
     clearIcon: Function,
     affixWrapperClassName: String,
     groupClassName: String,
@@ -43,6 +43,14 @@ export function baseInputProps() {
     readonly: { type: Boolean, default: undefined },
     handleReset: Function as PropType<MouseEventHandler>,
     hidden: { type: Boolean, default: undefined },
+    components: {
+      type: Object as PropType<{
+        affixWrapper?: 'span' | 'div'
+        groupWrapper?: 'span' | 'div'
+        wrapper?: 'span' | 'div'
+        groupAddon?: 'span' | 'div'
+      }>,
+    },
   }
 }
 

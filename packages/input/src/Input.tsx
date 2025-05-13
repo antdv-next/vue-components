@@ -113,7 +113,6 @@ export default defineComponent({
     const countConfig = ref()
     watch([() => props.count, () => props.showCount], () => {
       countConfig.value = useCount(props.count, props.showCount)
-      console.log('input', countConfig.value)
     }, { immediate: true })
     expose({
       focus,

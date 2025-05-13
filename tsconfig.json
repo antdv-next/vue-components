@@ -46,6 +46,9 @@
       "@v-c/mini-decimal": [
         "./packages/mini-decimal/src"
       ],
+      "@v-c/input-number": [
+        "./packages/input-number/src"
+      ],
     },
     "resolveJsonModule": true,
     "allowImportingTsExtensions": true,
