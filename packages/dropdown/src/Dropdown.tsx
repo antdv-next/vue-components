@@ -51,7 +51,6 @@ export default defineComponent({
     const triggerVisible = ref()
     const mergedVisible = ref()
     watch(() => props.visible, (newVisible) => {
-      console.log('watch-visible', newVisible)
       if (newVisible === undefined) {
         mergedVisible.value = triggerVisible.value
       }
@@ -69,7 +68,6 @@ export default defineComponent({
     })
 
     const handleVisibleChange = (newVisible: boolean) => {
-      console.log('visible-change', newVisible)
       triggerVisible.value = newVisible
       emit('visibleChange', newVisible)
     }

@@ -268,8 +268,8 @@ export const Trigger = defineComponent({
           ?? mergedOpen.value) !== nextOpen
       ) {
         lastTriggerRef.value.push(nextOpen)
-        emit('popupVisibleChange', nextOpen)
       }
+      emit('popupVisibleChange', nextOpen)
     })
 
     // Trigger for delay
@@ -622,7 +622,7 @@ export const Trigger = defineComponent({
         getPopupClassNameFromAlign,
         ...restProps
       } = props
-console.log('trigger里', popupVisible)
+
       const {
         ready,
         offsetX,

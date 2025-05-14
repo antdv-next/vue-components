@@ -133,7 +133,7 @@ export const Popup = defineComponent({
     default: any
     popup: any
   }>,
-  emits: ['mouseEnter', 'mouseLeave', 'pointerEnter', 'click', 'prepare', 'getElement', 'pointerDownCapture', 'align'],
+  emits: ['mouseEnter', 'mouseLeave', 'pointerEnter', 'click', 'prepare', 'getElement', 'pointerDownCapture', 'align', 'visibleChanged'],
   setup(props, { attrs, emit, slots, expose }) {
     const popupRef = ref()
     // ======================= Container ========================
@@ -169,6 +169,7 @@ export const Popup = defineComponent({
     })
     const onPrepare = () => {
       emit('prepare')
+      emit('visibleChanged', (props.forceRender || props.open || props.keepDom))
     }
     const onResize = () => {
       emit('align')
@@ -194,7 +195,6 @@ export const Popup = defineComponent({
         align,
         prefixCls = 'vc-trigger-popup',
         target,
-        // onVisibleChanged,
         // fresh,
         // Motion
         motion,
