@@ -49,6 +49,9 @@
       "@v-c/input-number": [
         "./packages/input-number/src"
       ],
+      "@v-c/dropdown": [
+        "./packages/dropdown/src"
+      ],
     },
     "resolveJsonModule": true,
     "allowImportingTsExtensions": true,

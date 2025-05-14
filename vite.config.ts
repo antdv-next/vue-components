@@ -23,6 +23,7 @@ const comps = [
   'slider',
   'mini-decimal',
   'input-number',
+  'dropdown',
 ]
 
 export function genListAlias() {

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import Arrow from "./arrow.vue";
-import ContextMenu from "./context-menu.vue";
-import DropdownMenuWidth from "./dropdown-menu-width.vue";
-import Multiple from "./multiple.vue";
+import Arrow from './arrow.vue'
+import ContextMenu from './context-menu.vue'
+import DropdownMenuWidth from './dropdown-menu-width.vue'
+import Multiple from './multiple.vue'
 import Simple from './simple.vue'
 import './assets/index.less'
 </script>
