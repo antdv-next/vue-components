@@ -123,6 +123,8 @@ function triggerProps() {
     arrow: {
       type: [Boolean, Object] as PropType<boolean | ArrowTypeOuter>,
     },
+    onPopupVisibleChange: Function,
+    onAfterPopupVisibleChange: Function,
   }
 }
 
@@ -620,7 +622,7 @@ export const Trigger = defineComponent({
         getPopupClassNameFromAlign,
         ...restProps
       } = props
-
+console.log('trigger里', popupVisible)
       const {
         ready,
         offsetX,

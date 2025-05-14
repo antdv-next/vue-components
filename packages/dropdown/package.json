@@ -1,0 +1,31 @@
+{
+  "name": "@v-c/dropdown",
+  "type": "module",
+  "version": "1.0.0",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./dist/*": "./dist/*",
+    "./package.json": "./package.json"
+  },
+  "description": "dropdown ui component for vue",
+  "main": "index.js",
+  "scripts": {
+    "build": "vite build",
+    "test": "vitest"
+  },
+  "keywords": ["dropdown"],
+  "author": "",
+  "license": "MIT",
+  "peerDependencies": {
+    "vue": "^3.0.0"
+  },
+  "dependencies": {
+    "@v-c/util": "workspace:*",
+    "@v-c/trigger": "workspace:*",
+    "classnames": "^2.5.1"
+  }
+}

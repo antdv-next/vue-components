@@ -187,6 +187,7 @@ function preventDefault(e: Event) {
         :trigger="Object.keys(trigger)"
         :overlay-inner-style="overlayInnerStyle"
         @visible-change="onVisibleChange"
+        @after-visible-change="onVisibleChange"
       >
         <template #overlay>
           <div style="height: 50px; width: 50px">
