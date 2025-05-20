@@ -3,7 +3,7 @@ import type {
   ValueType,
 } from '@v-c/mini-decimal'
 import type { CSSProperties, ExtractPropTypes, PropType, SlotsType, VNode } from 'vue'
-import BaseInput from '@v-c/input'
+import { BaseInput } from '@v-c/input'
 import { triggerFocus } from '@v-c/input/utils/commonUtils'
 import getMiniDecimal, {
   getNumberPrecision,
