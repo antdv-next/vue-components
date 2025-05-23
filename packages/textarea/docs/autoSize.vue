@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import Textarea from '../src'
 
-const data = ref('')
+const data = ref('hello\nworld')
 function onChange(e: Event) {
   console.log((e.target as HTMLInputElement).value)
 }

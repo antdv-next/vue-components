@@ -163,16 +163,16 @@ export default function calculateAutoSizeStyle(
   }
 
   const style: CSSProperties = {
-    height,
+    height: `${height}px`,
     overflowY,
     resize: 'none',
   }
 
   if (minHeight) {
-    style.minHeight = minHeight
+    style.minHeight = `${minHeight}px`
   }
   if (maxHeight) {
-    style.maxHeight = maxHeight
+    style.maxHeight = `${maxHeight}px`
   }
 
   return style

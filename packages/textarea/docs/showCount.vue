@@ -1,14 +1,13 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 import Textarea from '../src'
 
 const data = ref('hello\nworld')
 function onChange(e: Event) {
   console.log('show-count-change', (e.target as HTMLInputElement).value)
 }
-watch(data, (val) => {
-  console.log(val, 'watch')
-})
+const format1 = ref('👨‍👨‍👧')
+const format2 = ref('🔥')
 </script>
 
 <template>
@@ -27,14 +26,14 @@ watch(data, (val) => {
     <hr>
     <p>Count.exceedFormatter</p>
     <Textarea
-      default-value="👨‍👨‍👧‍👦"
+      v-model:value="format1"
       :count="{
         show: true,
         max: 5,
       }"
     />
     <Textarea
-      default-value="🔥"
+      v-model:value="format2"
       :count="{
         show: true,
         max: 5,

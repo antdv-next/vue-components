@@ -3,7 +3,7 @@ import { BaseInput } from '@v-c/input'
 import useCount from '@v-c/input/hooks/useCount'
 import { resolveOnChange } from '@v-c/input/utils/commonUtils'
 import cls from 'classnames'
-import { computed, defineComponent, ref, shallowRef, watch } from 'vue'
+import { computed, defineComponent, nextTick, ref, shallowRef, watch } from 'vue'
 import ResizableTextArea from './ResizableTextArea'
 
 export default defineComponent({
@@ -36,10 +36,7 @@ export default defineComponent({
   },
   emits: ['update:value', 'change', 'compositionStart', 'compositionEnd', 'pressEnter', 'keydown', 'focus', 'blur', 'resize'],
   setup(props, { attrs, expose, slots, emit }) {
-    let triggerChange: Function
-
     function onChange(e: Event) {
-      console.log(e)
       emit('change', e)
     }
 
@@ -52,10 +49,16 @@ export default defineComponent({
         }
       },
     )
-    function setValue(newValue: string | number) {
-      if (stateValue.value !== newValue) {
-        stateValue.value = newValue
+    const setValue = (value: string | number, callback?: Function) => {
+      if (stateValue.value === value) {
+        return
       }
+      if (props.value === undefined) {
+        stateValue.value = value
+      }
+      nextTick(() => {
+        callback && callback()
+      })
     }
     const formatValue = computed(() =>
       stateValue.value === undefined || stateValue.value === null ? '' : String(stateValue.value),
@@ -70,7 +73,7 @@ export default defineComponent({
     // =============================== Ref ================================
     const holderRef = ref<InstanceType<typeof BaseInput>>()
     const resizableTextAreaRef = ref<InstanceType<typeof ResizableTextArea>>()
-    const getTextArea = () => resizableTextAreaRef.value?.textArea()
+    const getTextArea = () => resizableTextAreaRef.value?.textArea
 
     const focus = () => {
       getTextArea().focus()
@@ -102,6 +105,49 @@ export default defineComponent({
         }
       },
     )
+
+    // ============================== Count ===============================
+    const countConfig = useCount(props.count, props.showCount)
+    const mergedMax = countConfig.max ?? props.maxLength
+
+    // Max length value
+    const hasMaxLength = Number(mergedMax) > 0
+
+    const valueLength = computed(() => countConfig.strategy(formatValue.value))
+
+    const isOutOfRange = !!mergedMax && valueLength.value > mergedMax
+
+    // ============================== Change ==============================
+    const triggerChange = (
+      e: Event | CompositionEvent,
+      currentValue: string,
+    ) => {
+      let cutValue = currentValue
+      if (
+        !compositionRef.value
+        && countConfig.exceedFormatter
+        && countConfig.max
+        && countConfig.strategy(currentValue) > countConfig.max
+      ) {
+        cutValue = countConfig.exceedFormatter(currentValue, {
+          max: countConfig.max,
+        })
+
+        if (currentValue !== cutValue) {
+          selection.value = [
+            getTextArea().selectionStart || 0,
+            getTextArea().selectionEnd || 0,
+          ]
+        }
+      }
+      setValue(cutValue)
+      emit('update:value', cutValue)
+
+      nextTick(() => {
+        resizableTextAreaRef.value?.setValue?.(cutValue)
+      })
+      resolveOnChange((e.currentTarget as HTMLInputElement), e, onChange, cutValue)
+    }
 
     // =========================== Value Update ===========================
     const onInternalCompositionStart = (e: CompositionEvent) => {
@@ -138,11 +184,9 @@ export default defineComponent({
 
     // ============================== Reset ===============================
     const handleReset = (e: MouseEvent) => {
-      setValue('')
-      focus()
-      resolveOnChange(getTextArea(), e, onChange)
-      emit('update:value', stateValue.value)
-      console.log('清除')
+      resolveOnChange(getTextArea(), e, triggerChange)
+      setValue('', () => focus())
+      emit('update:value', '')
     }
 
     const handleResize = (size: { width: number, height: number }) => {
@@ -158,7 +202,6 @@ export default defineComponent({
         maxLength,
         prefixCls = 'vc-textarea',
         showCount,
-        count,
         disabled,
         hidden,
         classNames,
@@ -167,57 +210,18 @@ export default defineComponent({
         readOnly,
         autoSize,
       } = props
-
-      // ============================== Count ===============================
-      const countConfig = useCount(count, showCount)
-      const mergedMax = countConfig.max ?? maxLength
-
-      // Max length value
-      const hasMaxLength = Number(mergedMax) > 0
-
-      const valueLength = countConfig.strategy(formatValue.value)
-
-      const isOutOfRange = !!mergedMax && valueLength > mergedMax
-
-      // ============================== Change ==============================
-      triggerChange = (
-        e: Event | CompositionEvent,
-        currentValue: string,
-      ) => {
-        let cutValue = currentValue
-        if (
-          !compositionRef.value
-          && countConfig.exceedFormatter
-          && countConfig.max
-          && countConfig.strategy(currentValue) > countConfig.max
-        ) {
-          cutValue = countConfig.exceedFormatter(currentValue, {
-            max: countConfig.max,
-          })
-
-          if (currentValue !== cutValue) {
-            selection.value = [
-              getTextArea().selectionStart || 0,
-              getTextArea().selectionEnd || 0,
-            ]
-          }
-        }
-        setValue(cutValue)
-        emit('update:value', cutValue)
-        resolveOnChange((e.currentTarget as HTMLInputElement), e, onChange, cutValue)
-      }
       let suffixNode = slots.suffix?.()
       let dataCount: unknown
       if (countConfig.show) {
         if (countConfig.showFormatter) {
           dataCount = countConfig.showFormatter({
             value: formatValue.value,
-            count: valueLength,
+            count: valueLength.value,
             maxLength: mergedMax,
           })
         }
         else {
-          dataCount = `${valueLength}${hasMaxLength ? ` / ${mergedMax}` : ''}`
+          dataCount = `${valueLength.value}${hasMaxLength ? ` / ${mergedMax}` : ''}`
         }
 
         suffixNode = (
@@ -266,7 +270,7 @@ export default defineComponent({
           onClear={onClear}
         >
           <ResizableTextArea
-            {...attrs}
+            value={stateValue.value}
             autoSize={autoSize}
             maxLength={maxLength}
             onKeydown={handleKeyDown}

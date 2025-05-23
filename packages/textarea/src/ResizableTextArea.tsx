@@ -28,14 +28,21 @@ export default defineComponent({
     readOnly: Boolean,
     maxLength: Number,
   },
-  emits: ['update:value', 'change', 'internalAutoSize', 'resize'],
+  emits: ['change', 'internalAutoSize', 'resize'],
   setup(props, { expose, attrs, emit }) {
     // =============================== Value ================================
-    const mergedValue = ref(props.value || props.defaultValue)
+    const mergedValue = shallowRef(props.value || props.defaultValue)
+
+    watch(
+      () => props.value,
+      (val) => {
+        mergedValue.value = val
+      },
+    )
+
     const onInternalChange = (event: Event) => {
       const target = event.target as HTMLTextAreaElement
       mergedValue.value = target.value
-      emit('update:value', target.value)
       emit('change', event)
     }
 
@@ -43,7 +50,10 @@ export default defineComponent({
     const textareaRef = ref<HTMLTextAreaElement>()
 
     expose({
-      textArea: () => textareaRef.value,
+      textArea: textareaRef.value,
+      setValue: (val: string | number) => {
+        mergedValue.value = val
+      },
     })
 
     // ============================== AutoSize ==============================
@@ -149,8 +159,8 @@ export default defineComponent({
         autoSize,
         onResize,
         disabled,
+        ...resetProps
       } = props
-
       // =============================== Render ===============================
       const mergedAutoSizeStyle = needAutoSize.value ? autoSizeStyle.value : null
 
@@ -175,6 +185,7 @@ export default defineComponent({
         >
           <textarea
             {...attrs}
+            {...resetProps}
             ref={textareaRef}
             style={mergedStyle}
             class={classNames(prefixCls, [attrs.className], {

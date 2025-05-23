@@ -55,7 +55,6 @@ export function resolveOnChange(
 ) {
   if (!onChange)
     return
-
   const event: any = e
 
   if (e.type === 'click') {
