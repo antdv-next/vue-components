@@ -1,24 +1,19 @@
-import type {
-  BaseInputProps,
-  CommonInputProps,
-  InputProps,
+import type { ExtractPropTypes, PropType } from 'vue'
+import {
+  inputProps,
 } from '@v-c/input/interface'
-import type { CSSProperties, PropType } from 'vue'
+import omit from '@v-c/util/dist/omit'
 
 export interface AutoSizeType {
   minRows?: number
   maxRows?: number
 }
 
-// To compatible with origin usage. We have to wrap this
-export interface ResizableTextAreaRef {
-  textArea: HTMLTextAreaElement
-}
-
 export type HTMLTextareaProps = HTMLTextAreaElement
 
-function textareaProps() {
+export function textareaProps() {
   return {
+    ...omit(inputProps(), ['prefix', 'addonBefore', 'addonAfter', 'suffix', 'components']),
     value: {
       type: [String, Number] as PropType<HTMLTextareaProps['value']>,
     },
@@ -26,31 +21,13 @@ function textareaProps() {
     autoSize: Boolean,
     onPressEnter: Function,
     onResize: Function,
+    onClear: Function,
+    readOnly: Boolean,
+    classNames: Object,
+    styles: Object,
   }
 }
 
-export type TextAreaProps = Omit<HTMLTextareaProps, 'onResize' | 'value'> & {
-  value?: HTMLTextareaProps['value'] | bigint
-  prefixCls?: string
-  className?: string
-  style?: CSSProperties
-  autoSize?: boolean | AutoSizeType
-  onPressEnter?: HTMLTextAreaElement
-  onResize?: (size: { width: number, height: number }) => void
-  classNames?: CommonInputProps['classNames'] & {
-    textarea?: string
-    count?: string
-  }
-  styles?: {
-    textarea?: CSSProperties
-    count?: CSSProperties
-  }
-} & Pick<BaseInputProps, 'allowClear' | 'suffix'> &
-Pick<InputProps, 'showCount' | 'count' | 'onClear'>
+console.log(textareaProps(), omit(inputProps(), ['prefix', 'addonBefore', 'addonAfter', 'suffix', 'components']))
 
-export interface TextAreaRef {
-  resizableTextArea: ResizableTextAreaRef
-  focus: () => void
-  blur: () => void
-  nativeElement: HTMLElement
-}
+export type TextAreaProps = Partial<ExtractPropTypes<ReturnType<typeof textareaProps>>>

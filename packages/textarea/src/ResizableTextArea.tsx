@@ -50,7 +50,7 @@ export default defineComponent({
     const textareaRef = ref<HTMLTextAreaElement>()
 
     expose({
-      textArea: textareaRef.value,
+      textArea: () => textareaRef.value,
       setValue: (val: string | number) => {
         mergedValue.value = val
       },

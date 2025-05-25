@@ -1,38 +1,17 @@
-import type { CSSProperties, PropType, VNode } from 'vue'
+import type { CSSProperties } from 'vue'
 import { BaseInput } from '@v-c/input'
 import useCount from '@v-c/input/hooks/useCount'
 import { resolveOnChange } from '@v-c/input/utils/commonUtils'
 import cls from 'classnames'
 import { computed, defineComponent, nextTick, ref, shallowRef, watch } from 'vue'
+import { textareaProps } from './interface'
 import ResizableTextArea from './ResizableTextArea'
 
 export default defineComponent({
   name: 'TextArea',
   inheritAttrs: false,
   props: {
-    defaultValue: [String, Number],
-    value: [String, Number],
-    onFocus: Function,
-    onBlur: Function,
-    onChange: Function,
-    allowClear: Boolean,
-    maxLength: Number,
-    onCompositionStart: Function,
-    onCompositionEnd: Function,
-    suffix: [String, Object] as PropType<string | VNode>,
-    prefixCls: { type: String, default: 'vc-textarea' },
-    showCount: Boolean,
-    count: [Object, Boolean],
-    disabled: Boolean,
-    hidden: Boolean,
-    classNames: Object,
-    styles: Object,
-    onResize: Function,
-    onClear: Function,
-    onPressEnter: Function,
-    readOnly: Boolean,
-    autoSize: [Boolean, Object],
-    onKeyDown: Function,
+    ...textareaProps(),
   },
   emits: ['update:value', 'change', 'compositionStart', 'compositionEnd', 'pressEnter', 'keydown', 'focus', 'blur', 'resize'],
   setup(props, { attrs, expose, slots, emit }) {
@@ -73,7 +52,7 @@ export default defineComponent({
     // =============================== Ref ================================
     const holderRef = ref<InstanceType<typeof BaseInput>>()
     const resizableTextAreaRef = ref<InstanceType<typeof ResizableTextArea>>()
-    const getTextArea = () => resizableTextAreaRef.value?.textArea
+    const getTextArea = () => resizableTextAreaRef.value?.textArea()
 
     const focus = () => {
       getTextArea().focus()
