@@ -18,7 +18,7 @@ export function textareaProps() {
       type: [String, Number] as PropType<HTMLTextareaProps['value']>,
     },
     prefixCls: String,
-    autoSize: Boolean,
+    autoSize: [Boolean, Object],
     onPressEnter: Function,
     onResize: Function,
     onClear: Function,
@@ -27,7 +27,5 @@ export function textareaProps() {
     styles: Object,
   }
 }
-
-console.log(textareaProps(), omit(inputProps(), ['prefix', 'addonBefore', 'addonAfter', 'suffix', 'components']))
 
 export type TextAreaProps = Partial<ExtractPropTypes<ReturnType<typeof textareaProps>>>

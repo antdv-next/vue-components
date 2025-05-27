@@ -52,6 +52,9 @@
       "@v-c/dropdown": [
         "./packages/dropdown/src"
       ],
+      "@v-c/async-validator": [
+        "./packages/async-validator/src"
+      ],
     },
     "resolveJsonModule": true,
     "allowImportingTsExtensions": true,

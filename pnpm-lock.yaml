@@ -84,6 +84,12 @@ importers:
         specifier: ^3.5.13
         version: 3.5.13(typescript@5.7.3)
 
+  packages/async-validator:
+    dependencies:
+      '@babel/runtime':
+        specifier: ^7.24.4
+        version: 7.27.1
+
   packages/checkbox:
     dependencies:
       classnames:
@@ -140,6 +146,18 @@ importers:
       classnames:
         specifier: ^2.5.1
         version: 2.5.1
+      vue:
+        specifier: ^3.0.0
+        version: 3.5.13(typescript@5.7.3)
+
+  packages/field-form:
+    dependencies:
+      '@v-c/async-validator':
+        specifier: workspace:*
+        version: link:../async-validator
+      '@v-c/util':
+        specifier: workspace:*
+        version: link:../util
       vue:
         specifier: ^3.0.0
         version: 3.5.13(typescript@5.7.3)
@@ -520,6 +538,10 @@ packages:
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
+
+  '@babel/runtime@7.27.1':
+    resolution: {integrity: sha512-1x3D2xEk2fRo3PAhwQwu5UubzgiVWSXTBfWpVd2Mx2AzRqJuDJCsgaDVZ7HB5iGzDW1Hl1sWN2mFyKjmR9uAog==}
+    engines: {node: '>=6.9.0'}
 
   '@babel/template@7.26.8':
     resolution: {integrity: sha512-iNKaX3ZebKIsCvJ+0jd6embf+Aulaa3vNBqZ41kM7iTWjx5qzWKXGHiJUW3+nTpQ18SG11hdF8OAzKrpXkb96Q==}
@@ -3784,6 +3806,8 @@ snapshots:
       '@babel/plugin-syntax-typescript': 7.25.9(@babel/core@7.26.8)
     transitivePeerDependencies:
       - supports-color
+
+  '@babel/runtime@7.27.1': {}
 
   '@babel/template@7.26.8':
     dependencies:

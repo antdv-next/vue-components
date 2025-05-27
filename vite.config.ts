@@ -24,6 +24,7 @@ const comps = [
   'mini-decimal',
   'input-number',
   'dropdown',
+  'async-validator',
 ]
 
 export function genListAlias() {
