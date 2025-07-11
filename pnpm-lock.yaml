@@ -150,6 +150,16 @@ importers:
         specifier: ^3.0.0
         version: 3.5.13(typescript@5.7.3)
 
+  packages/fast-color:
+    dependencies:
+      vue:
+        specifier: ^3.0.0
+        version: 3.5.13(typescript@5.7.3)
+    devDependencies:
+      '@ctrl/tinycolor':
+        specifier: ^4.1.0
+        version: 4.1.0
+
   packages/input:
     dependencies:
       '@v-c/util':
@@ -581,6 +591,10 @@ packages:
 
   '@codemirror/view@6.36.2':
     resolution: {integrity: sha512-DZ6ONbs8qdJK0fdN7AB82CgI6tYXf4HWk1wSVa0+9bhVznCuuvhQtX8bFBoy3dv8rZSQqUd8GvhVAcielcidrA==}
+
+  '@ctrl/tinycolor@4.1.0':
+    resolution: {integrity: sha512-WyOx8cJQ+FQus4Mm4uPIZA64gbk3Wxh0so5Lcii0aJifqwoVOlfFtorjLE0Hen4OYyHZMXDWqMmaQemBhgxFRQ==}
+    engines: {node: '>=14'}
 
   '@es-joy/jsdoccomment@0.49.0':
     resolution: {integrity: sha512-xjZTSFgECpb9Ohuk5yMX5RhUEbfeQcuOp8IF60e+wyzWEF0M5xeSgqsfLtvPEX8BIyOX9saZqzuGPmZ8oWc+5Q==}
@@ -3886,6 +3900,8 @@ snapshots:
       '@codemirror/state': 6.5.2
       style-mod: 4.1.2
       w3c-keyname: 2.2.8
+
+  '@ctrl/tinycolor@4.1.0': {}
 
   '@es-joy/jsdoccomment@0.49.0':
     dependencies:
