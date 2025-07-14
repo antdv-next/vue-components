@@ -1,0 +1,71 @@
+import type { FunctionalComponent } from 'vue'
+import type { BaseColorPickerProps, TransformOffset } from '../interface'
+import useEvent from '@v-c/util/dist/hooks/useEvent.ts'
+import { ref } from 'vue'
+import useColorDrag from '../hooks/useColorDrag'
+
+import { calcOffset, calculateColor } from '../util'
+import Handler from './Handler'
+import Palette from './Palette'
+import Transform from './Transform'
+
+export type PickerProps = BaseColorPickerProps
+
+const Picker: FunctionalComponent<PickerProps> = (props, { emit }) => {
+  const {
+    color,
+    prefixCls,
+    disabled,
+  } = props
+
+  const pickerRef = ref()
+  const transformRef = ref()
+  const colorRef = ref(color)
+
+  const onDragChange = useEvent((offsetValue: TransformOffset) => {
+    const calcColor = calculateColor({
+      offset: offsetValue,
+      targetRef: transformRef,
+      containerRef: pickerRef,
+      color,
+    })
+    colorRef.value = calcColor
+    emit('change', calcColor)
+  })
+
+  const [offset, dragStartHandle] = useColorDrag({
+    color,
+    containerRef: pickerRef,
+    targetRef: transformRef,
+    calculate: () => calcOffset(color),
+    onDragChange,
+    onDragChangeComplete: () => emit('changeComplete', colorRef.value),
+    disabledDrag: disabled,
+  })
+
+  return (
+    <div
+      ref={pickerRef}
+      class={`${prefixCls}-select`}
+      onMousedown={dragStartHandle}
+      onTouchstart={dragStartHandle}
+    >
+      <Palette prefixCls={prefixCls}>
+        <Transform x={offset.value.x} y={offset.value.y} ref={transformRef}>
+          <Handler color={color.toRgbString()} prefixCls={prefixCls} />
+        </Transform>
+        <div
+          class={`${prefixCls}-saturation`}
+          style={{
+            backgroundColor: `hsl(${color.toHsb().h},100%, 50%)`,
+            backgroundImage: 'linear-gradient(0deg, #000, transparent),linear-gradient(90deg, #fff, hsla(0, 0%, 100%, 0))',
+          }}
+        />
+      </Palette>
+    </div>
+  )
+}
+
+Picker.inheritAttrs = false
+
+export default Picker
