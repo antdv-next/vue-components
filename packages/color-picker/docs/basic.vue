@@ -2,7 +2,6 @@
 import { ref } from 'vue'
 import ColorPicker, { Color } from '../src'
 
-const start = ref(true)
 const colorValue = ref(new Color('rgba(255,0,0,0)'))
 </script>
 
@@ -10,13 +9,7 @@ const colorValue = ref(new Color('rgba(255,0,0,0)'))
   <ColorPicker
     v-model:value="colorValue"
     @change="nextValue => {
-      let proxyValue = nextValue;
-      if (start.value) {
-        start.value = false;
-        proxyValue = nextValue.setA(1);
-      }
-
-      // colorValue.value = proxyValue
+      console.log('basic-demo', nextValue)
     }"
   />
   <br>
