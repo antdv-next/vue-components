@@ -1,24 +1,30 @@
-import type { FunctionalComponent } from 'vue'
+import type { PropType } from 'vue'
 import classNames from 'classnames'
+import { defineComponent } from 'vue'
 
 type HandlerSize = 'default' | 'small'
 
-const Handler: FunctionalComponent<{
-  size?: HandlerSize
-  color?: string
-  prefixCls?: string
-}> = (props) => {
-  const { size = 'default', color, prefixCls } = props
-  return (
-    <div
-      class={classNames(`${prefixCls}-handler`, {
-        [`${prefixCls}-handler-sm`]: size === 'small',
-      })}
-      style={{
-        backgroundColor: color,
-      }}
-    />
-  )
-}
+export default defineComponent({
+  props: {
+    size: String as PropType<HandlerSize>,
+    color: String,
+    prefixCls: String,
+  },
+  inheritAttrs: false,
+  setup(props) {
+    return () => {
+      const { size = 'default', color, prefixCls } = props
 
-export default Handler
+      return (
+        <div
+          class={classNames(`${prefixCls}-handler`, {
+            [`${prefixCls}-handler-sm`]: size === 'small',
+          })}
+          style={{
+            backgroundColor: color,
+          }}
+        />
+      )
+    }
+  },
+})

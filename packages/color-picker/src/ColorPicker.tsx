@@ -1,15 +1,16 @@
-import type { CSSProperties, VNode } from 'vue'
+import type { CSSProperties, PropType, VNode } from 'vue'
 import type { Components } from './hooks/useComponent'
 import type { BaseColorPickerProps, ColorGenInput } from './interface'
 
 import classNames from 'classnames'
-import { computed, defineComponent, watch } from 'vue'
+import { computed, defineComponent } from 'vue'
 import { Color } from './color'
 import ColorBlock from './components/ColorBlock'
 
 import Picker from './components/Picker'
 import Slider from './components/Slider'
 import useColorState from './hooks/useColorState'
+// import useComponent from './hooks/useComponent'
 import { ColorPickerPrefixCls, defaultColor } from './util'
 
 const HUE_COLORS = [
@@ -55,18 +56,34 @@ export interface ColorPickerProps extends Omit<BaseColorPickerProps, 'color'> {
   components?: Components
 }
 
+function colorPickerProps() {
+  return {
+    value: {
+      type: [String, Number, Object] as PropType<ColorGenInput>,
+    },
+    defaultValue: {
+      type: [String, Number, Object] as PropType<ColorGenInput>,
+    },
+    prefixCls: {
+      type: String,
+    },
+    onChange: {
+      type: Function,
+    },
+    onChangeComplete: {
+      type: Function,
+    },
+    disabledAlpha: Boolean,
+    disabled: Boolean,
+    panelRender: Function as PropType<(panel: VNode) => VNode>,
+    components: Object,
+  }
+}
+
 const ColorPicker = defineComponent({
-  props: [
-    'value',
-    'defaultValue',
-    'prefixCls',
-    'onChange',
-    'onChangeComplete',
-    'panelRender',
-    'disabledAlpha',
-    'disabled',
-    'components',
-  ],
+  props: {
+    ...colorPickerProps(),
+  },
   emits: ['change', 'changeComplete', 'update:value'],
   setup(props, { attrs, emit }) {
     // ========================== Components ==========================
@@ -74,21 +91,15 @@ const ColorPicker = defineComponent({
 
     // ============================ Color =============================
     const [colorValue, setColorValue] = useColorState(
-      props.defaultValue || defaultColor,
-      props.value,
+      defaultColor,
+      { value: props.value, defaultValue: props.defaultValue },
     )
 
-    watch(() => props.value, (newColor) => {
-      console.log('newColor', newColor, new Color(newColor))
-      setColorValue(new Color(newColor))
-    })
     const alphaColor = computed(() => colorValue.value.setA(1).toRgbString())
 
     // ============================ Events ============================
     const handleChange: BaseColorPickerProps['onChange'] = (data, type) => {
-      if (!props.value) {
-        setColorValue(data)
-      }
+      setColorValue(data)
       emit('change', data, type)
       emit('update:value', data)
     }
@@ -113,7 +124,7 @@ const ColorPicker = defineComponent({
     }
 
     const onAlphaChangeComplete = (alpha: number) => {
-      emit('changeComplete', getHueColor(alpha))
+      emit('changeComplete', getAlphaColor(alpha))
     }
 
     return () => {
@@ -124,6 +135,7 @@ const ColorPicker = defineComponent({
         disabledAlpha = false,
         disabled = false,
       } = props
+
       // ============================ Render ============================
       const mergeCls = classNames(`${prefixCls}-panel`, [attrs.class], {
         [`${prefixCls}-panel-disabled`]: disabled,
@@ -180,7 +192,7 @@ const ColorPicker = defineComponent({
       return (
         <div class={mergeCls} style={{ ...attrs.style as CSSProperties }}>
           {typeof panelRender === 'function'
-            ? props.panelRender(defaultPanel)
+            ? panelRender(defaultPanel)
             : defaultPanel}
         </div>
       )

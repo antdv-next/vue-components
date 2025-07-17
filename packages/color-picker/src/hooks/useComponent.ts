@@ -1,6 +1,5 @@
-import type { VNode } from 'vue'
+import type { FunctionalComponent, VNode } from 'vue'
 import type { BaseSliderProps } from '../components/Slider'
-import { computed } from 'vue'
 import Slider from '../components/Slider'
 
 export interface Components {
@@ -11,10 +10,8 @@ type RequiredComponents = Required<Components>
 
 export default function useComponent(
   components?: Components,
-): [Slider: RequiredComponents['slider']] {
-  return computed(() => {
-    const { slider } = components || {}
+): [Slider: RequiredComponents['slider'] | FunctionalComponent<BaseSliderProps>] {
+  const { slider } = components || {}
 
-    return [slider || Slider]
-  })
+  return [slider || Slider]
 }

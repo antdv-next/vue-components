@@ -1,7 +1,7 @@
 import type { Ref } from 'vue'
 import type { Color } from '../color'
 import type { TransformOffset } from '../interface'
-import { onUnmounted, onWatcherCleanup, ref, shallowRef, watch } from 'vue'
+import { onWatcherCleanup, ref, shallowRef, watch } from 'vue'
 
 type EventType =
   | MouseEvent
@@ -12,7 +12,7 @@ type EventHandle = (e: EventType) => void
 interface useColorDragProps {
   color: Color
   containerRef: Ref<HTMLDivElement>
-  targetRef: Ref<HTMLDivElement>
+  targetRef: Ref<{ transformDomRef: HTMLDivElement }>
   direction?: 'x' | 'y'
   onDragChange?: (offset: TransformOffset) => void
   onDragChangeComplete?: () => void
@@ -46,16 +46,16 @@ function useColorDrag(
   } = props
 
   const offsetValue = ref({ x: 0, y: 0 })
-  const mouseMoveRef = shallowRef<(event: MouseEvent) => void>(null)
-  const mouseUpRef = shallowRef<(event: MouseEvent) => void>(null)
+  const mouseMoveRef = shallowRef<EventHandle>(() => {})
+  const mouseUpRef = shallowRef<EventHandle>(() => {})
 
   const removeEventListener = () => {
     document.removeEventListener('mousemove', mouseMoveRef.value)
     document.removeEventListener('mouseup', mouseUpRef.value)
     document.removeEventListener('touchmove', mouseMoveRef.value)
     document.removeEventListener('touchend', mouseUpRef.value)
-    mouseMoveRef.value = null
-    mouseUpRef.value = null
+    mouseMoveRef.value = () => {}
+    mouseUpRef.value = () => {}
   }
   // Always get position from `color`
   watch(() => props.color, () => {
@@ -66,6 +66,9 @@ function useColorDrag(
   })
 
   const updateOffset: EventHandle = (e) => {
+    if (!containerRef.value || !targetRef.value) {
+      return false
+    }
     const { pageX, pageY } = getPosition(e)
     const {
       x: rectX,
@@ -73,13 +76,20 @@ function useColorDrag(
       width,
       height,
     } = containerRef.value.getBoundingClientRect()
-    const { width: targetWidth, height: targetHeight } = targetRef.value.getBoundingClientRect()
+    const { width: targetWidth, height: targetHeight }
+      = targetRef.value.transformDomRef.getBoundingClientRect()
 
-    const centerOffsetX = targetWidth / 2
-    const centerOffsetY = targetHeight / 2
+    // const centerOffsetX = targetWidth / 2
+    // const centerOffsetY = targetHeight / 2
 
-    const offsetX = Math.max(0, Math.min(pageX - rectX, width)) - centerOffsetX
-    const offsetY = Math.max(0, Math.min(pageY - rectY, height)) - centerOffsetY
+    const percentX = ((pageX - rectX) / width) * 100
+    const percentY = ((pageY - rectY) / height) * 100
+
+    // const offsetX = Math.max(0, Math.min(pageX - rectX, width)) - centerOffsetX
+    // const offsetY = Math.max(0, Math.min(pageY - rectY, height)) - centerOffsetY
+
+    const offsetX = Math.max(0, Math.min(percentX, 100))
+    const offsetY = Math.max(0, Math.min(percentY, 100))
 
     const calcOffset = {
       x: offsetX,
@@ -87,9 +97,13 @@ function useColorDrag(
     }
 
     // Exclusion of boundary cases
-    if ((targetWidth === 0 && targetHeight === 0) || targetWidth !== targetHeight) {
+    if (
+      (targetWidth === 0 && targetHeight === 0)
+      || targetWidth !== targetHeight
+    ) {
       return false
     }
+
     offsetValue.value = calcOffset
     onDragChange?.(calcOffset)
   }
@@ -109,8 +123,7 @@ function useColorDrag(
     // https://github.com/ant-design/ant-design/issues/43529
     // document.removeEventListener('mousemove', mouseMoveRef.value)
     // document.removeEventListener('mouseup', mouseUpRef.value)
-    // document.removeEventListener('touchmove', mouseMoveRef.value)
-    // document.removeEventListener('touchend', mouseUpRef.value)
+
     removeEventListener()
 
     if (disabledDrag) {

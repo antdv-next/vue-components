@@ -1,36 +1,42 @@
-import type { CSSProperties, FunctionalComponent } from 'vue'
+import type { CSSProperties } from 'vue'
 import classNames from 'classnames'
+import { defineComponent } from 'vue'
 
 export interface ColorBlockProps {
   color: string
   prefixCls?: string
 }
 
-const ColorBlock: FunctionalComponent<ColorBlockProps> = (props, { attrs, emit }) => {
-  const {
-    color,
-    prefixCls,
-  } = props
-  const colorBlockCls = `${prefixCls}-color-block`
-  const handleClickChange = (e: Event) => {
-    emit('click', e)
-  }
-  return (
-    <div
-      class={classNames(colorBlockCls, [attrs.class])}
-      style={{ ...attrs.style as CSSProperties }}
-      onClick={handleClickChange}
-    >
-      <div
-        class={`${colorBlockCls}-inner`}
-        style={{
-          background: color,
-        }}
-      />
-    </div>
-  )
-}
+export default defineComponent({
+  props: ['color', 'prefixCls'],
+  inheritAttrs: false,
+  setup(props, { attrs, emit }) {
+    const handleClickChange = (e: Event) => {
+      emit('click', e)
+    }
 
-ColorBlock.inheritAttrs = false
+    return () => {
+      const {
+        color,
+        prefixCls,
+      } = props
 
-export default ColorBlock
+      const colorBlockCls = `${prefixCls}-color-block`
+
+      return (
+        <div
+          class={classNames(colorBlockCls, [attrs.class])}
+          style={{ ...attrs.style as CSSProperties }}
+          onClick={handleClickChange}
+        >
+          <div
+            class={`${colorBlockCls}-inner`}
+            style={{
+              background: color,
+            }}
+          />
+        </div>
+      )
+    }
+  },
+})

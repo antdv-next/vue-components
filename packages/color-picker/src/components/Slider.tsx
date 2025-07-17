@@ -1,8 +1,8 @@
-import type { FunctionalComponent } from 'vue'
+import type { PropType } from 'vue'
 import type { HsbaColorType, TransformOffset } from '../interface'
 import useEvent from '@v-c/util/dist/hooks/useEvent.ts'
 import classNames from 'classnames'
-import { computed, ref } from 'vue'
+import { computed, defineComponent, ref } from 'vue'
 
 import { Color } from '../color'
 import useColorDrag from '../hooks/useColorDrag'
@@ -25,92 +25,125 @@ export interface BaseSliderProps {
   color: Color
 }
 
-const Slider: FunctionalComponent<BaseSliderProps> = (props, { emit }) => {
-  const {
-    prefixCls,
-    colors,
-    disabled,
-    color,
-    type,
-  } = props
-
-  const sliderRef = ref()
-  const transformRef = ref()
-  const colorRef = ref<Color>(color)
-
-  const getValue = (c: Color) => {
-    return type === 'hue' ? c.getHue() : c.a * 100
-  }
-
-  const onDragChange = useEvent((offsetValue: TransformOffset) => {
-    const calcColor = calculateColor({
-      offset: offsetValue,
-      targetRef: transformRef,
-      containerRef: sliderRef,
-      color,
-      type,
-    })
-
-    colorRef.value = calcColor
-    emit('change', getValue(calcColor))
-  })
-
-  const [offset, dragStartHandle] = useColorDrag({
-    color,
-    targetRef: transformRef,
-    containerRef: sliderRef,
-    calculate: () => calcOffset(color, type),
-    onDragChange,
-    onDragChangeComplete() {
-      emit('changeComplete', getValue(colorRef.value as Color))
+export default defineComponent({
+  name: 'Slider',
+  props: {
+    prefixCls: {
+      type: String,
+      required: true,
     },
-    direction: 'x',
-    disabledDrag: disabled,
-  })
+    colors: {
+      type: Array as PropType<{ percent: number, color: string }[]>,
+      required: true,
+    },
+    min: {
+      type: Number,
+      required: true,
+    },
+    max: {
+      type: Number,
+      required: true,
+    },
+    value: {
+      type: Number,
+      required: true,
+    },
+    disabled: {
+      type: Boolean,
+      default: false,
+    },
+    onChange: Function,
+    onChangeComplete: Function,
+    type: {
+      type: String as PropType<HsbaColorType>,
+      required: true,
+    },
+    color: {
+      type: Object as PropType<Color>,
+      required: true,
+    },
+  },
+  setup(props, { emit }) {
+    const sliderRef = ref()
+    const transformRef = ref()
+    const colorRef = ref<Color>(props.color)
 
-  const handleColor = computed(() => {
-    if (type === 'hue') {
-      const hsb = color.toHsb()
-      hsb.s = 1
-      hsb.b = 1
-      hsb.a = 1
-
-      const lightColor = new Color(hsb)
-      return lightColor
+    const getValue = (c: Color) => {
+      return props.type === 'hue' ? c.getHue() : c.a * 100
     }
 
-    return color
-  })
-  console.log('slider', color, handleColor.value)
+    const onDragChange = useEvent((offsetValue: TransformOffset) => {
+      const calcColor = calculateColor({
+        offset: offsetValue,
+        targetRef: transformRef,
+        containerRef: sliderRef,
+        color: props.color,
+        type: props.type,
+      })
 
-  // ========================= Gradient =========================
-  const gradientList = colors.map(info => `${info.color} ${info.percent}%`)
+      colorRef.value = calcColor
+      emit('change', getValue(calcColor))
+    })
 
-  // ========================== Render ==========================
-  return (
-    <div
-      ref={sliderRef}
-      class={classNames(
-        `${prefixCls}-slider`,
-        `${prefixCls}-slider-${type}`,
-      )}
-      onMousedown={dragStartHandle}
-      onTouchstart={dragStartHandle}
-    >
-      <Palette prefixCls={prefixCls}>
-        <Transform x={offset.value.x} y={offset.value.y} ref={transformRef}>
-          <Handler
-            size="small"
-            color={handleColor.value.toHexString()}
-            prefixCls={prefixCls}
-          />
-        </Transform>
-        <Gradient colors={gradientList} type={type} prefixCls={prefixCls} />
-      </Palette>
-    </div>
-  )
-}
+    const [offset, dragStartHandle] = useColorDrag({
+      color: props.color,
+      targetRef: transformRef,
+      containerRef: sliderRef,
+      calculate: () => calcOffset(props.color, props.type),
+      onDragChange,
+      onDragChangeComplete() {
+        emit('changeComplete', getValue(colorRef.value as Color))
+      },
+      direction: 'x',
+      disabledDrag: props.disabled,
+    })
 
-Slider.inheritAttrs = false
+    const handleColor = computed(() => {
+      if (props.type === 'hue') {
+        const hsb = props.color.toHsb()
+        hsb.s = 1
+        hsb.b = 1
+        hsb.a = 1
 
-export default Slider
+        const lightColor = new Color(hsb)
+        return lightColor
+      }
+
+      return props.color
+    })
+
+    // ========================== Render ==========================
+    return () => {
+      const {
+        prefixCls,
+        colors,
+        type,
+      } = props
+
+      // ========================= Gradient =========================
+      const gradientList = colors.map(info => `${info.color} ${info.percent}%`)
+      return (
+        <div
+          ref={sliderRef}
+          class={classNames(
+            `${prefixCls}-slider`,
+            `${prefixCls}-slider-${type}`,
+          )}
+          onMousedown={dragStartHandle}
+          onTouchstart={dragStartHandle}
+        >
+          <Palette prefixCls={prefixCls}>
+            <Transform x={offset.value.x} y={offset.value.y} ref={transformRef}>
+              <Handler
+                size="small"
+                color={handleColor.value.toHexString()}
+                prefixCls={prefixCls}
+              />
+            </Transform>
+            <Gradient colors={gradientList} type={type} prefixCls={prefixCls} />
+          </Palette>
+        </div>
+      )
+    }
+  },
+})

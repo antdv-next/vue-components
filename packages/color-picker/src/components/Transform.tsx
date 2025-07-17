@@ -1,26 +1,41 @@
-import type { FunctionalComponent } from 'vue'
+import { defineComponent, ref } from 'vue'
 
-const Transform: FunctionalComponent<{
-  x: number
-  y: number
-}> = (props, { slots }) => {
-  const { x, y } = props
+export default defineComponent({
+  name: 'Transform',
+  inheritAttrs: false,
+  props: {
+    x: {
+      type: Number,
+      required: true,
+    },
+    y: {
+      type: Number,
+      required: true,
+    },
+  },
+  setup(props, { slots, expose }) {
+    const transformDomRef = ref()
 
-  return (
-    <div
-      style={{
-        position: 'absolute',
-        left: `${x}%`,
-        top: `${y}%`,
-        zIndex: 1,
-        transform: 'translate(-50%, -50%)',
-      }}
-    >
-      {slots.default?.()}
-    </div>
-  )
-}
+    expose({
+      transformDomRef,
+    })
 
-Transform.inheritAttrs = false
-
-export default Transform
+    return () => {
+      const { x, y } = props
+      return (
+        <div
+          style={{
+            position: 'absolute',
+            left: `${x}%`,
+            top: `${y}%`,
+            zIndex: 1,
+            transform: 'translate(-50%, -50%)',
+          }}
+          ref={transformDomRef}
+        >
+          {slots.default?.()}
+        </div>
+      )
+    }
+  },
+})
