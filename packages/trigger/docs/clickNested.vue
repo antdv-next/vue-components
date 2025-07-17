@@ -48,7 +48,7 @@ const popupBorderStyle = {
         :builtin-placements="builtinPlacements"
         :popup-visible="open1"
         fresh
-        @popup-visible-change="e => open1 = e"
+        @open-change="e => open1 = e"
       >
         <span>Click Me</span>
         <template #popup>
@@ -58,7 +58,7 @@ const popupBorderStyle = {
             :builtin-placements="builtinPlacements"
             :popup-visible="open2"
             fresh
-            @popup-visible-change="e => open2 = e"
+            @open-change="e => open2 = e"
           >
             <div :style="popupBorderStyle">
               i am a click popup

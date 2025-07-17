@@ -300,7 +300,7 @@ function autoDestroy(e) {
           boxSizing: 'border-box',
         }"
         :popup-transition-name="state.transitionName"
-        @after-popup-visible-change="onVisibleChange"
+        @after-open-change="onVisibleChange"
         @click="() => console.log('click-popup')"
       >
         <a

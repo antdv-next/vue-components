@@ -60,7 +60,7 @@ function handleClickChange(num: number) {
         htmlRegion: 'scroll',
       }"
       popup-transition-name="vc-trigger-popup-zoom"
-      @popup-visible-change="next => open = next"
+      @open-change="next => open = next"
     >
       <button
         :style="commonStyle"
@@ -94,7 +94,7 @@ function handleClickChange(num: number) {
         },
         htmlRegion: 'scroll',
       }"
-      @popup-visible-change="(next) => open1 = next"
+      @open-change="(next) => open1 = next"
     >
       <span
         :style="{
@@ -129,7 +129,7 @@ function handleClickChange(num: number) {
         },
         htmlRegion: 'scroll',
       }"
-      @popup-visible-change="(next) => open2 = next"
+      @open-change="(next) => open2 = next"
     >
       <span
         :style="{
@@ -163,7 +163,7 @@ function handleClickChange(num: number) {
         },
         htmlRegion: 'scroll',
       }"
-      @popup-visible-change="(next) => open3 = next"
+      @open-change="(next) => open3 = next"
     >
       <span
         :style="{

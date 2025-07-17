@@ -39,7 +39,7 @@ const buttonRef = ref()
 onMounted(() => {
   const button = buttonRef.value
   if (button) {
-    button.addEventListener('mousedown', (e) => {
+    button.addEventListener('mousedown', (e: MouseEvent) => {
       console.log('button natives down')
       e.stopPropagation()
       e.preventDefault()
@@ -62,7 +62,7 @@ onMounted(() => {
       popup-placement="right"
       :action="['click']"
       :builtin-placements="builtinPlacements"
-      @popup-visible-change="(visible) => {
+      @open-change="(visible) => {
         console.log('visible change:', visible);
       }"
     >

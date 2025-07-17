@@ -123,8 +123,8 @@ function triggerProps() {
     arrow: {
       type: [Boolean, Object] as PropType<boolean | ArrowTypeOuter>,
     },
-    onPopupVisibleChange: Function,
-    onAfterPopupVisibleChange: Function,
+    onOpenChange: Function as PropType<(visible: boolean) => void>,
+    onAfterOpenChange: Function as PropType<(visible: boolean) => void>,
   }
 }
 
@@ -139,7 +139,7 @@ export const Trigger = defineComponent({
     default: any
     popup: any
   }>,
-  emits: ['afterPopupVisibleChange', 'popupVisibleChange', 'popupAlign', 'popupClick', 'update:popupVisible'],
+  emits: ['afterOpenChange', 'openChange', 'popupAlign', 'popupClick', 'update:popupVisible'],
   setup(props, { attrs, slots, emit, expose }) {
     const triggerNodeRef = ref()
     const popupNodeRef = ref()
@@ -269,7 +269,7 @@ export const Trigger = defineComponent({
       ) {
         lastTriggerRef.value.push(nextOpen)
       }
-      emit('popupVisibleChange', nextOpen)
+      emit('openChange', nextOpen)
     })
 
     // Trigger for delay
@@ -390,7 +390,7 @@ export const Trigger = defineComponent({
     const onVisibleChanged = (visible: boolean) => {
       inMotion.value = false
       alignDetails.value?.onAlign()
-      emit('afterPopupVisibleChange', visible)
+      emit('afterOpenChange', visible)
     }
 
     // We will trigger align when motion is in prepare

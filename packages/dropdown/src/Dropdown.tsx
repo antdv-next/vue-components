@@ -170,7 +170,7 @@ export default defineComponent({
           popupMotion={{ name: mergedMotionName }}
           popupVisible={mergedVisible.value}
           stretch={getMinOverlayWidthMatchTrigger() ? 'minWidth' : undefined}
-          onPopupVisibleChange={handleVisibleChange}
+          onOpenChange={handleVisibleChange}
           onPopupClick={onClick}
           getPopupContainer={getPopupContainer}
           v-slots={{ default: renderChildren, popup: getMenuElement }}

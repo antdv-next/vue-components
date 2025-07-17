@@ -114,8 +114,8 @@ export default defineComponent({
           popupPlacement={placement}
           popupAlign={align}
           getPopupContainer={getTooltipContainer}
-          onPopupVisibleChange={onVisibleChange}
-          onAfterPopupVisibleChange={afterVisibleChange}
+          onOpenChange={onVisibleChange}
+          onAfterOpenChange={afterVisibleChange}
           popupMotion={motion}
           defaultPopupVisible={defaultVisible}
           autoDestroy={destroyTooltipOnHide}

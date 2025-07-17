@@ -144,7 +144,7 @@ onMounted(() => {
           :popup-placement="popupPlacement"
           :builtin-placements="builtinPlacements"
           stretch="minWidth"
-          @popup-visible-change="(nextVisible) => {
+          @open-change="(nextVisible) => {
             visible = nextVisible;
           }"
           @popup-align="(domNode, align) => {

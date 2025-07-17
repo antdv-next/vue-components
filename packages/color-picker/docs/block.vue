@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { h } from 'vue'
 import { ColorBlock } from '../src'
 
 const colorPresets = [
