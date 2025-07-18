@@ -15,7 +15,16 @@ const comps = [
   'resize-observer',
   'input',
   'portal',
+  'collapse',
+  'pagination',
+  'nutate-observer',
   'notification',
+  'progress',
+  'rate',
+  'steps',
+  'virtual-list',
+  'switch',
+  'qrcode',
   'trigger',
   'dialog',
   'drawer',
@@ -24,7 +33,11 @@ const comps = [
   'mini-decimal',
   'input-number',
   'dropdown',
+  'textarea',
   'async-validator',
+  'segmented',
+  'fast-color',
+  'color-picker',
 ]
 
 export function genListAlias() {

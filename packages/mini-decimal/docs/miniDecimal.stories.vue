@@ -24,7 +24,7 @@ const negate = computed(() => getMiniDecimal('0.1').negate().toString()) // -0.1
 </script>
 
 <template>
-  <Story title="mini-decimal">
+  <Story title="MiniDecimal">
     <Variant title="base">
       <input v-model="num1" type="number">
       <kbd>&nbsp;+&nbsp;</kbd>

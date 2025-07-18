@@ -31,6 +31,39 @@
       "@v-c/portal": [
         "./packages/portal/src"
       ],
+      "@v-c/collapse": [
+        "./packages/collapse/src"
+      ],
+      "@v-c/pagination": [
+        "./packages/pagination/src"
+      ],
+      "@v-c/mutate-observer": [
+        "./packages/mutate-observer/src"
+      ],
+      "@v-c/notification": [
+        "./packages/notification/src"
+      ],
+      "@v-c/progress": [
+        "./packages/progress/src"
+      ],
+      "@v-c/qrcode": [
+        "./packages/qrcode/src"
+      ],
+      "@v-c/rate": [
+        "./packages/rate/src"
+      ],
+      "@v-c/steps": [
+        "./packages/steps/src"
+      ],
+      "@v-c/virtual-list": [
+        "./packages/virtual-list/src"
+      ],
+      "@v-c/switch": [
+        "./packages/switch/src"
+      ],
+      "@v-c/dialog": [
+        "./packages/dialog/src"
+      ],
       "@v-c/trigger": [
         "./packages/trigger/src"
       ],
@@ -52,9 +85,21 @@
       "@v-c/dropdown": [
         "./packages/dropdown/src"
       ],
+      "@v-c/textarea": [
+        "./packages/textarea/src"
+      ],
       "@v-c/async-validator": [
         "./packages/async-validator/src"
       ],
+      "@v-c/segmented": [
+        "./packages/segmented/src"
+      ],
+      "@v-c/fast-color": [
+        "./packages/fast-color/src"
+      ],
+      "@v-c/color-picker": [
+        "./packages/color-picker/src"
+      ]
     },
     "resolveJsonModule": true,
     "allowImportingTsExtensions": true,

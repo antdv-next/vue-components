@@ -9,7 +9,7 @@ import Simple from './simple.vue'
 </script>
 
 <template>
-  <Story title="tooltip">
+  <Story title="Tooltip">
     <Variant title="arrowContent">
       <ArrowContent />
     </Variant>

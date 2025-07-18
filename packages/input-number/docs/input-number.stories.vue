@@ -16,7 +16,7 @@ import './assets/index.less'
 </script>
 
 <template>
-  <Story title="input-number">
+  <Story title="InputNumber">
     <Variant title="simple">
       <Simple />
     </Variant>
