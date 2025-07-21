@@ -1,16 +1,25 @@
-import type { CSSProperties, InputHTMLAttributes } from 'vue'
+import clsx from 'classnames'
+import { computed, defineComponent } from 'vue'
+import { generatorUploadProps, type UploadProps } from './interface'
 
-export interface VcFile extends File {
-  uid: string
-}
+export const AjaxUploader = defineComponent<UploadProps>({
+  props: generatorUploadProps(),
+  setup(props) {
+    const cls = computed(() => {
+      const { prefixCls, disabled, className } = props
 
-export type BeforeUploadFileType = File | Blob | boolean | string
-
-export type Action = string | ((file: VcFile) => string | PromiseLike<string>)
-
-export interface UploadProps extends InputHTMLAttributes {
-  name?: string
-  style?: CSSProperties
-  className?: string
-  disabled?: boolean
-}
+      return clsx({
+        [prefixCls!]: true,
+        [`${prefixCls}-disabled`]: disabled,
+        [className!]: className,
+      })
+    })
+    return () => {
+      const Tag = props.component
+      return (
+        <Tag class={cls}>
+        </Tag>
+      )
+    }
+  },
+})
