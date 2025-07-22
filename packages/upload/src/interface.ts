@@ -51,12 +51,12 @@ export interface UploadProps extends Omit<InputHTMLAttributes, 'onError' | 'onPr
   accept?: string
   multiple?: boolean
   onBatchStart?: (
-    fileList: { file: VcFile, parsedFile: Exclude<BeforeUploadFileType, boolean> }[],
+    fileList: { file: VcFile, parsedFile: Exclude<BeforeUploadFileType, boolean> | null }[],
   ) => void
   onStart?: (file: VcFile) => void
-  onError?: (error: Error, ret: Record<string, unknown>, file: VcFile) => void
-  onSuccess?: (response: Record<string, unknown>, file: VcFile, xhr: XMLHttpRequest) => void
-  onProgress?: (event: UploadProgressEvent, file: VcFile) => void
+  onError?: (error: Error, ret: Record<string, unknown>, file: VcFile | null) => void
+  onSuccess?: (response: Record<string, unknown>, file: VcFile | null, xhr: XMLHttpRequest) => void
+  onProgress?: (event: UploadProgressEvent, file: VcFile | null) => void
   beforeUpload?: (
     file: VcFile,
     FileList: VcFile[],
