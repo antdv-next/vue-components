@@ -5,7 +5,7 @@ import type { InternalPreviewConfig, PreviewSemanticName, ToolbarRenderInfoType 
 import classnames from 'classnames'
 import { computed, defineComponent, ref } from 'vue'
 import { COMMON_PROPS } from './common'
-import { PreviewGroupContext, usePreviewGroupContext } from './context'
+import { usePreviewGroupContext } from './context'
 import useRegisterImage from './hooks/useRegisterImage'
 import useStatus from './hooks/useStatus'
 import Preview from './Preview'
@@ -70,10 +70,6 @@ export default defineComponent({
 
     // Styles
     rootClassName: String,
-    className: String,
-    style: Object,
-    classNames: Object,
-    styles: Object,
 
     // Image
     src: String,
@@ -93,9 +89,10 @@ export default defineComponent({
   emits: ['click', 'error'],
   slots: Object as SlotsType<{
     actionsRender: any
+    placeholder: any
+    imageRender: any
   }>,
   setup(props, { attrs, emit, slots }) {
-    PreviewGroupContext()
     const groupContext = usePreviewGroupContext()
 
     // ========================== Preview ===========================
@@ -181,6 +178,11 @@ export default defineComponent({
       }
       emit('click', e)
     }
+    const toSizePx = (val: string | number) => {
+      if (typeof val === 'number')
+        return `${val}px`
+      return val
+    }
 
     return () => {
       const {
@@ -222,8 +224,8 @@ export default defineComponent({
             )}
             onClick={handleClickChange}
             style={{
-              width,
-              height,
+              width: toSizePx(width!),
+              height: toSizePx(height!),
               ...attrs.style as CSSProperties,
             }}
           >
@@ -237,13 +239,12 @@ export default defineComponent({
                 },
                 [attrs.class],
               )}
-              src={imgSrc}
               style={{
                 height,
                 ...attrs.style as CSSProperties,
               }}
               ref={getImgRef}
-              {...srcAndOnload}
+              {...srcAndOnload.value}
               width={width}
               height={height}
               onError={onError}
@@ -251,7 +252,7 @@ export default defineComponent({
 
             {status.value === 'loading' && (
               <div aria-hidden="true" class={`${prefixCls}-placeholder`}>
-                {placeholder}
+                {slots.placeholder?.() || placeholder}
               </div>
             )}
 

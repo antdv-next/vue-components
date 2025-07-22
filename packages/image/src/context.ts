@@ -9,8 +9,8 @@ export interface PreviewGroupContextProps {
 
 export const PreviewGroupInjectionKey: InjectionKey<PreviewGroupContextProps | null> = Symbol('PreviewGroupInjectionKey')
 
-function PreviewGroupContext() {
-  return provide(PreviewGroupInjectionKey, null)
+function PreviewGroupContext(data?: PreviewGroupContextProps) {
+  return provide(PreviewGroupInjectionKey, data ?? null)
 }
 
 function usePreviewGroupContext(data?: PreviewGroupContextProps) {

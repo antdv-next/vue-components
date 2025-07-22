@@ -10,12 +10,13 @@ export interface PrevNextProps {
   icons: OperationIcons
 }
 
-const PrevNext: FunctionalComponent<PrevNextProps> = (props: PrevNextProps, { slots }) => {
+const PrevNext: FunctionalComponent<PrevNextProps> = (props: PrevNextProps) => {
   const {
     prefixCls,
     onActive,
     current,
     count,
+    icons: { left, right, prev, next },
   } = props
 
   const switchCls = `${prefixCls}-switch`
@@ -28,7 +29,7 @@ const PrevNext: FunctionalComponent<PrevNextProps> = (props: PrevNextProps, { sl
         })}
         onClick={() => onActive(-1)}
       >
-        {slots.prev?.() ?? slots.left?.()}
+        {prev ?? left}
       </div>
       <div
         class={classNames(switchCls, `${switchCls}-next`, {
@@ -36,7 +37,7 @@ const PrevNext: FunctionalComponent<PrevNextProps> = (props: PrevNextProps, { sl
         })}
         onClick={() => onActive(1)}
       >
-        {slots.next?.() ?? slots.right?.()}
+        {next ?? right}
       </div>
     </>
   )

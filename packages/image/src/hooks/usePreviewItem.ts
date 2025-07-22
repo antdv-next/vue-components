@@ -21,6 +21,7 @@ export default function usePreviewItems(
   const images = ref<Record<number, PreviewImageElementProps>>({})
 
   const registerImage: RegisterImage = (id: string, data) => {
+    console.log('registerImage--', id, data)
     // 添加/更新图片
     images.value = { ...images.value, [id]: data }
 
@@ -53,13 +54,14 @@ export default function usePreviewItems(
 
     // 其次使用注册的图片
     return Object.keys(images.value).reduce((total: Items, idStr) => {
-      const id = Number(idStr)
+      const id: number = Number(idStr)
       const { canPreview, data } = images.value[id]
 
       if (canPreview) {
         total.push({ data, id })
       }
 
+      console.log('usePreviewItem', total)
       return total
     }, [])
   })

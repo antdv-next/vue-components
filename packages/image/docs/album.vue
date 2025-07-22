@@ -15,7 +15,7 @@ const imgs = [jpg1, jpg2, jpg3]
       :icons="defaultIcons"
       :items="imgs"
     >
-      <Image :src="jpg1" />
+      <Image :src="jpg1" preview />
     </PreviewGroup>
   </div>
 </template>

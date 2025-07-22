@@ -9,7 +9,7 @@ const placement = ref('center')
 <template>
   <div>
     <div>
-      <label htmlFor="placement">
+      <label>
         <span>placement:</span>
       </label>
       <select id="placement" v-model="placement">
@@ -30,7 +30,7 @@ const placement = ref('center')
       width="200px"
       :preview="{
         icons: defaultIcons,
-        onOpenChange: open => {
+        onOpenChange: (open: boolean) => {
           console.log('open', open);
         },
         zIndex: 9999,

@@ -1,8 +1,9 @@
+import type { PropType } from 'vue'
 import type { TransformType } from './hooks/useImageTransform'
 import type { ImgInfo } from './Image'
 import type { ImageElementProps, OnGroupPreview } from './interface'
 import type { InternalPreviewConfig, PreviewProps, PreviewSemanticName } from './Preview'
-import { computed, defineComponent, inject, provide, ref, watch } from 'vue'
+import { computed, defineComponent, ref, watch } from 'vue'
 import { PreviewGroupContext, usePreviewGroupContext } from './context'
 import usePreviewItems from './hooks/usePreviewItem.ts'
 import Preview from './Preview'
@@ -36,14 +37,12 @@ export default defineComponent({
   props: {
     previewPrefixCls: {
       type: String,
-      default: 'rc-image-preview',
+      default: 'vc-image-preview',
     },
-    classNames: Object,
-    styles: Object,
-    icons: Object,
-    items: Array,
+    icons: Object as PropType<PreviewProps['icons']>,
+    items: Array as PropType<(string | ImageElementProps)[]>,
     fallback: String,
-    preview: [Boolean, Object],
+    preview: [Boolean, Object] as PropType<GroupPreviewConfig | boolean>,
   },
   setup(props, { slots }) {
     // ========================== Items ===========================
@@ -51,15 +50,12 @@ export default defineComponent({
 
     // ========================= Preview ==========================
     const previewConfig = computed(() =>
-      props.preview && typeof props.preview === 'object' ? props.preview : {} as GroupPreviewConfig
+      props.preview && typeof props.preview === 'object' ? props.preview : {} as GroupPreviewConfig,
     )
 
     // >>> Index
     const current = ref(previewConfig.value.current || 0)
     const keepOpenIndex = ref(false)
-
-    // >>> Image
-    const { src, ...imgCommonProps } = computed(() => mergedItems.value[current.value]?.data || {}).value
 
     // >>> Visible
     const isShowPreview = ref(!!previewConfig.value.open)
@@ -70,9 +66,13 @@ export default defineComponent({
     // >>> Position
     const mousePosition = ref<{ x: number, y: number } | null>(null)
 
-    const onPreviewFromImage = (id: string, imageSrc: string, mouseX: number, mouseY: number) => {
+    const onPreviewFromImage: OnGroupPreview = (id: string, imageSrc: string, mouseX: number, mouseY: number) => {
+      console.log(fromItems)
       const index = fromItems
-        ? mergedItems.value.findIndex(item => item.data.src === imageSrc)
+        ? mergedItems.value.findIndex((item) => {
+            console.log('item', item, imageSrc)
+            return item.data.src === imageSrc
+          })
         : mergedItems.value.findIndex(item => item.id === id)
 
       current.value = index < 0 ? 0 : index
@@ -105,17 +105,18 @@ export default defineComponent({
     }
 
     // ========================= Context ==========================
-    PreviewGroupContext()
+    PreviewGroupContext({ register, onPreview: onPreviewFromImage })
 
     // ========================== Render ==========================
     return () => {
       const {
         previewPrefixCls = 'vc-image-preview',
         icons = {},
-        items,
-        preview,
         fallback,
       } = props
+      // >>> Image
+      const { src, ...imgCommonProps } = mergedItems.value[current.value]?.data || {}
+console.log('preview-group', mergedItems.value[current.value - 1]?.data, src)
       return (
         <>
           {slots.default?.()}

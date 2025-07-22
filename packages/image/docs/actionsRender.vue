@@ -55,6 +55,24 @@ import { defaultIcons } from './assets/common.tsx'
       </div>
     </template>
   </Image>
+  <Image
+    src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
+    width="200px"
+    height="200px"
+    alt="test"
+    :preview="{
+      icons: defaultIcons,
+    }"
+  >
+    <template #imageRender="_, { image }">
+      {{ JSON.stringify(image) }}
+    </template>
+    <template #actionsRender="{ actionsNode, image }">
+      <component :is="actionsNode" />
+      <div>一些自定义</div>
+      {{ JSON.stringify(image) }}
+    </template>
+  </Image>
 </template>
 
 <style scoped>

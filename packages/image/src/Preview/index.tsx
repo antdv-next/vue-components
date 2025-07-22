@@ -5,9 +5,9 @@ import Portal, { type PortalProps } from '@v-c/portal'
 import useEvent from '@v-c/util/dist/hooks/useEvent.ts'
 import KeyCode from '@v-c/util/dist/KeyCode'
 import classnames from 'classnames'
-import { defineComponent, inject, ref, Transition, watch } from 'vue'
+import { defineComponent, ref, Transition, watch } from 'vue'
 
-import { PreviewGroupInjectionKey } from '../context'
+import { usePreviewGroupContext } from '../context'
 import useImageTransform from '../hooks/useImageTransform'
 import useMouseEvent from '../hooks/useMouseEvent'
 import useStatus from '../hooks/useStatus'
@@ -142,9 +142,6 @@ interface PreviewImageProps extends HTMLImageElement {
   fallback?: string
   imgRef: HTMLImageElement
 }
-interface PreviewImageExpose {
-  imgEl: HTMLImageElement
-}
 
 const PreviewImage = defineComponent({
   name: 'PreviewImage',
@@ -161,6 +158,7 @@ const PreviewImage = defineComponent({
       src: props.src,
       fallback: props.fallback,
     })
+    console.log('preview-image', props)
 
     const imgDom = ref<HTMLImageElement>()
     expose({
@@ -171,7 +169,7 @@ const PreviewImage = defineComponent({
       return (
         <img
           {...attrs}
-          {...srcAndOnload}
+          {...srcAndOnload.value}
           alt="img"
           ref={imgDom}
         />
@@ -268,7 +266,7 @@ export default defineComponent({
   emits: ['change', 'close', 'transform', 'afterOpenChange'],
   setup(props, { attrs, emit, slots }) {
     const imgRef = ref<{ imgEl: HTMLImageElement }>()
-    const groupContext = inject(PreviewGroupInjectionKey)
+    const groupContext = usePreviewGroupContext()
     const showLeftOrRightSwitches = groupContext && props.count > 1
     const showOperationsProgress = groupContext && props.count >= 1
 
@@ -364,7 +362,7 @@ export default defineComponent({
       if (nextCurrent >= 0 && nextCurrent <= props.count - 1) {
         enableTransition.value = false
         resetTransform(offset < 0 ? 'prev' : 'next')
-        props.onChange?.(nextCurrent, props.current)
+        emit('change', nextCurrent, props.current)
       }
     }
 
@@ -438,21 +436,22 @@ export default defineComponent({
         minScale = 1,
         maxScale = 50,
         motionName = 'fade',
-        imageRender,
+        imageRender = slots.imageRender,
         imgCommonProps,
         actionsRender = slots.actionsRender,
         mousePosition,
         zIndex,
         width,
         height,
+        fallback,
       } = props
-
+console.log('preview', props)
       const { x, y, rotate, scale, flipX, flipY } = transform.value
 
-      const image = {
+      const image: ImgInfo = {
         url: src,
-        alt,
-        ...imageInfo,
+        alt: 'image',
+        ...imageInfo!,
       }
 
       const imgNode = (
@@ -470,7 +469,7 @@ export default defineComponent({
             }${scale}, ${flipY ? '-' : ''}${scale}, 1) rotate(${rotate}deg)`,
             transitionDuration: (!enableTransition.value || isTouching.value) && '0s',
           }}
-          fallback={props.fallback}
+          fallback={fallback}
           src={src}
           onWheel={onWheel}
           onMouseDown={onMouseDown}

@@ -224,6 +224,7 @@ export default defineComponent({
           {progressNode}
           {actionsRender
             ? actionsRender({
+                actionsNode,
                 icons: {
                   prevIcon: switchPrevNode,
                   nextIcon: switchNextNode,

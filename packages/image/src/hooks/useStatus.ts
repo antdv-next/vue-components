@@ -1,4 +1,4 @@
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { isImageValid } from '../util'
 
 type ImageStatus = 'normal' | 'error' | 'loading'
@@ -14,7 +14,7 @@ export default function useStatus({
 }) {
   const status = ref<ImageStatus>(isCustomPlaceholder ? 'loading' : 'normal')
   const isLoaded = ref(false)
-  const isError = status.value === 'error'
+  const isError = computed(() => status.value === 'error')
 
   // https://github.com/react-component/image/pull/187
   watch(() => src, (_newSrc, _oldSrc, onCleanup) => {
@@ -30,7 +30,7 @@ export default function useStatus({
     if (isCustomPlaceholder && !isLoaded.value) {
       status.value = 'loading'
     }
-    else if (isError) {
+    else if (isError.value) {
       status.value = 'normal'
     }
     onCleanup(() => {
@@ -50,7 +50,7 @@ export default function useStatus({
     }
   }
 
-  const srcAndOnload = isError && fallback ? { src: fallback } : { onLoad, src }
+  const srcAndOnload = computed(() => isError.value && fallback ? { src: fallback } : { onLoad, src })
 
   return [getImgRef, srcAndOnload, status] as const
 }

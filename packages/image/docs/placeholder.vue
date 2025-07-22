@@ -31,7 +31,6 @@ const random = ref(Date.now())
     <h1>Custom placeholder</h1>
     <Image
       :src="`${jpg1}?random=${random + 1}`"
-      placeholder
       :preview="{ icons: defaultIcons }"
     >
       <template #placeholder>

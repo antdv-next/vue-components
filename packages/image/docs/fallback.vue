@@ -10,6 +10,12 @@ import { defaultIcons } from './assets/common.tsx'
     fallback="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
     width="200px"
   />
+  <Image
+    :preview="{ cover: 'preview2!', icons: defaultIcons }"
+    src="https://aliyuncdn.antdv.com/vue.png"
+    fallback="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
+    width="200px"
+  />
 </template>
 
 <style scoped>
