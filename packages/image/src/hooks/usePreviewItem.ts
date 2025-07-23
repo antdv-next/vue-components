@@ -21,11 +21,8 @@ export default function usePreviewItems(
   const images = ref<Record<number, PreviewImageElementProps>>({})
 
   const registerImage: RegisterImage = (id: string, data) => {
-    console.log('registerImage--', id, data)
-    // 添加/更新图片
     images.value = { ...images.value, [id]: data }
 
-    // 返回清理函数
     return () => {
       const updated = { ...images.value }
       delete updated[id]
@@ -35,7 +32,7 @@ export default function usePreviewItems(
 
   // items
   const mergedItems = computed<Items>(() => {
-    // 优先使用 items
+    // use `items` first
     if (items) {
       return items.map((item) => {
         if (typeof item === 'string') {
@@ -52,7 +49,7 @@ export default function usePreviewItems(
       })
     }
 
-    // 其次使用注册的图片
+    // use registered images secondly
     return Object.keys(images.value).reduce((total: Items, idStr) => {
       const id: number = Number(idStr)
       const { canPreview, data } = images.value[id]
@@ -61,7 +58,6 @@ export default function usePreviewItems(
         total.push({ data, id })
       }
 
-      console.log('usePreviewItem', total)
       return total
     }, [])
   })

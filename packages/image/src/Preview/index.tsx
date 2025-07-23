@@ -1,11 +1,11 @@
-import type { CSSProperties, PropType, VNode, Ref } from 'vue'
+import type { CSSProperties, PropType, VNode } from 'vue'
 import type { TransformAction, TransformType } from '../hooks/useImageTransform'
 import type { ImgInfo } from '../Image'
 import Portal, { type PortalProps } from '@v-c/portal'
 import useEvent from '@v-c/util/dist/hooks/useEvent.ts'
 import KeyCode from '@v-c/util/dist/KeyCode'
 import classnames from 'classnames'
-import { defineComponent, ref, Transition, watch } from 'vue'
+import { computed, defineComponent, ref, Transition, watch } from 'vue'
 
 import { usePreviewGroupContext } from '../context'
 import useImageTransform from '../hooks/useImageTransform'
@@ -16,6 +16,7 @@ import { BASE_SCALE_RATIO } from '../previewConfig'
 import CloseBtn from './CloseBtn'
 import Footer, { type FooterSemanticName } from './Footer'
 import PrevNext from './PrevNext'
+import {string} from "fast-glob/out/utils";
 
 // Note: if you want to add `action`,
 // pls contact @zombieJ or @thinkasany first.
@@ -138,7 +139,7 @@ export interface PreviewProps extends InternalPreviewConfig {
   mousePosition: null | { x: number, y: number }
 }
 
-interface PreviewImageProps extends HTMLImageElement {
+export interface PreviewImageProps extends HTMLImageElement {
   fallback?: string
   imgRef: HTMLImageElement
 }
@@ -152,13 +153,22 @@ const PreviewImage = defineComponent({
       type: String,
       required: true,
     },
+    width: [String, Number],
+    height: [String, Number],
+    alt: String,
+    onWheel: Function,
+    onMouseDown: Function,
+    onDoubleClick: Function,
+    onTouchStart: Function,
+    onTouchMove: Function,
+    onTouchEnd: Function,
+    onTouchCancel: Function,
   },
   setup(props, { attrs, expose }) {
     const [_getImgRef, srcAndOnload] = useStatus({
-      src: props.src,
+      src: ref(props.src),
       fallback: props.fallback,
     })
-    console.log('preview-image', props)
 
     const imgDom = ref<HTMLImageElement>()
     expose({
@@ -192,7 +202,7 @@ export default defineComponent({
     fallback: String,
 
     // Preview image
-    imgCommonProps: Object as PropType<HTMLImageElement>,
+    imgCommonProps: Object,
     width: [String, Number],
     height: [String, Number],
 
@@ -211,7 +221,7 @@ export default defineComponent({
     onClose: Function as PropType<(e: MouseEvent) => void>,
 
     // Display
-    mousePosition: Object as PropType<{ x: number, y: number }>,
+    mousePosition: Object as PropType<{ x: number, y: number } | undefined | null>,
     rootClassName: Array,
 
     // Image
@@ -248,7 +258,7 @@ export default defineComponent({
       default: true,
     },
     icons: Object as PropType<OperationIcons>,
-    closeIcon: Object as PropType<VNode>,
+    closeIcon: [Object, String, Boolean],
 
     onTransform: Function as PropType<(info: { transform: TransformType, action: TransformAction }) => void>,
 
@@ -267,8 +277,8 @@ export default defineComponent({
   setup(props, { attrs, emit, slots }) {
     const imgRef = ref<{ imgEl: HTMLImageElement }>()
     const groupContext = usePreviewGroupContext()
-    const showLeftOrRightSwitches = groupContext && props.count > 1
-    const showOperationsProgress = groupContext && props.count >= 1
+    const showLeftOrRightSwitches = computed(() => groupContext && props.count > 1)
+    const showOperationsProgress = computed(() => groupContext && props.count >= 1)
 
     // ======================== Transform =========================
     const enableTransition = ref(true)
@@ -375,7 +385,7 @@ export default defineComponent({
           emit('close')
         }
 
-        if (showLeftOrRightSwitches) {
+        if (showLeftOrRightSwitches.value) {
           if (keyCode === KeyCode.LEFT) {
             onActive(-1)
           }
@@ -445,7 +455,7 @@ export default defineComponent({
         height,
         fallback,
       } = props
-console.log('preview', props)
+
       const { x, y, rotate, scale, flipX, flipY } = transform.value
 
       const image: ImgInfo = {
@@ -456,6 +466,7 @@ console.log('preview', props)
 
       const imgNode = (
         <PreviewImage
+          key={src}
           {...imgCommonProps}
           width={width}
           height={height}
@@ -528,7 +539,7 @@ console.log('preview', props)
               )}
 
               {/* Switch prev or next */}
-              {showLeftOrRightSwitches && (
+              {showLeftOrRightSwitches.value && (
                 <PrevNext
                   prefixCls={prefixCls!}
                   current={current}
@@ -541,10 +552,10 @@ console.log('preview', props)
               {/* Footer */}
               <Footer
                 prefixCls={prefixCls}
-                showProgress={showOperationsProgress!}
+                showProgress={showOperationsProgress.value!}
                 current={current}
                 count={count}
-                showSwitch={showLeftOrRightSwitches!}
+                showSwitch={showLeftOrRightSwitches.value!}
                 // Style
                 class={[attrs.calss]}
                 style={{ ...attrs.style as CSSProperties }}

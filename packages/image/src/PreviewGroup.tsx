@@ -3,8 +3,8 @@ import type { TransformType } from './hooks/useImageTransform'
 import type { ImgInfo } from './Image'
 import type { ImageElementProps, OnGroupPreview } from './interface'
 import type { InternalPreviewConfig, PreviewProps, PreviewSemanticName } from './Preview'
-import { computed, defineComponent, ref, watch } from 'vue'
-import { PreviewGroupContext, usePreviewGroupContext } from './context'
+import { computed, defineComponent, ref, watch, nextTick } from 'vue'
+import { PreviewGroupContext } from './context'
 import usePreviewItems from './hooks/usePreviewItem.ts'
 import Preview from './Preview'
 
@@ -44,7 +44,8 @@ export default defineComponent({
     fallback: String,
     preview: [Boolean, Object] as PropType<GroupPreviewConfig | boolean>,
   },
-  setup(props, { slots }) {
+  emits: ['change', 'openChange'],
+  setup(props, { slots, emit }) {
     // ========================== Items ===========================
     const [mergedItems, register, fromItems] = usePreviewItems(props.items)
 
@@ -55,24 +56,24 @@ export default defineComponent({
 
     // >>> Index
     const current = ref(previewConfig.value.current || 0)
+    // watch(previewConfig, (newPreview) => {
+    //   current.value = newPreview.current || current.value
+    // })
     const keepOpenIndex = ref(false)
 
     // >>> Visible
     const isShowPreview = ref(!!previewConfig.value.open)
     watch(isShowPreview, (val) => {
       previewConfig.value.onOpenChange?.(val, { current: current.value })
+      emit('openChange', val, { current: current.value })
     })
 
     // >>> Position
     const mousePosition = ref<{ x: number, y: number } | null>(null)
 
     const onPreviewFromImage: OnGroupPreview = (id: string, imageSrc: string, mouseX: number, mouseY: number) => {
-      console.log(fromItems)
       const index = fromItems
-        ? mergedItems.value.findIndex((item) => {
-            console.log('item', item, imageSrc)
-            return item.data.src === imageSrc
-          })
+        ? mergedItems.value.findIndex(item => item.data.src === imageSrc)
         : mergedItems.value.findIndex(item => item.id === id)
 
       current.value = index < 0 ? 0 : index
@@ -96,17 +97,17 @@ export default defineComponent({
     // ========================== Events ==========================
     const onInternalChange: GroupPreviewConfig['onChange'] = (next, prev) => {
       current.value = next
-      previewConfig.value.onChange?.(next, prev)
+      emit('change', next, prev)
     }
 
     const onPreviewClose = () => {
       isShowPreview.value = false
       mousePosition.value = null
+      previewConfig.value.onOpenChange?.(false, { current: current.value })
     }
 
     // ========================= Context ==========================
     PreviewGroupContext({ register, onPreview: onPreviewFromImage })
-
     // ========================== Render ==========================
     return () => {
       const {
@@ -116,25 +117,27 @@ export default defineComponent({
       } = props
       // >>> Image
       const { src, ...imgCommonProps } = mergedItems.value[current.value]?.data || {}
-console.log('preview-group', mergedItems.value[current.value - 1]?.data, src)
+
       return (
         <>
           {slots.default?.()}
-          <Preview
-            aria-hidden={!isShowPreview.value}
-            open={isShowPreview.value}
-            prefixCls={previewPrefixCls}
-            onClose={onPreviewClose}
-            mousePosition={mousePosition.value}
-            imgCommonProps={imgCommonProps}
-            src={src}
-            fallback={fallback}
-            icons={icons}
-            current={current.value}
-            count={mergedItems.value.length}
-            onChange={onInternalChange}
-            {...previewConfig.value}
-          />
+          {mergedItems.value.length > 0 && (
+            <Preview
+              aria-hidden={!isShowPreview.value}
+              open={isShowPreview.value}
+              prefixCls={previewPrefixCls}
+              onClose={onPreviewClose}
+              mousePosition={mousePosition.value}
+              imgCommonProps={imgCommonProps}
+              src={src}
+              fallback={fallback}
+              icons={icons}
+              current={current.value}
+              count={mergedItems.value.length}
+              onChange={onInternalChange}
+              {...previewConfig.value}
+            />
+          )}
         </>
       )
     }

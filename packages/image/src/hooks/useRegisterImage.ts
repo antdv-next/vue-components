@@ -1,9 +1,10 @@
+import type { Ref } from 'vue'
 import { ref, watch } from 'vue'
 import { usePreviewGroupContext } from '../context'
 
 let uid = 0
 
-export default function useRegisterImage(canPreview: boolean, data: {
+export default function useRegisterImage(canPreview: Ref<boolean>, data: Ref<{
   src: any
   crossOrigin?: string | null
   decoding?: 'async' | 'sync' | 'auto'
@@ -14,12 +15,12 @@ export default function useRegisterImage(canPreview: boolean, data: {
   srcset?: string
   useMap?: string
   alt?: string
-}) {
+}>) {
   const id = ref(String(uid += 1))
   const groupContext = usePreviewGroupContext()
   const registerData = {
-    data,
-    canPreview,
+    data: data.value,
+    canPreview: canPreview.value,
   }
 
   // Keep order start

@@ -1,3 +1,4 @@
+import type { Ref } from 'vue'
 import { computed, ref, watch } from 'vue'
 import { isImageValid } from '../util'
 
@@ -8,18 +9,18 @@ export default function useStatus({
   isCustomPlaceholder,
   fallback,
 }: {
-  src: string
-  isCustomPlaceholder?: boolean
+  src: Ref<string>
+  isCustomPlaceholder?: Ref<boolean>
   fallback?: string
 }) {
-  const status = ref<ImageStatus>(isCustomPlaceholder ? 'loading' : 'normal')
+  const status = ref<ImageStatus>(isCustomPlaceholder?.value ? 'loading' : 'normal')
   const isLoaded = ref(false)
   const isError = computed(() => status.value === 'error')
 
   // https://github.com/react-component/image/pull/187
-  watch(() => src, (_newSrc, _oldSrc, onCleanup) => {
+  watch(src, (newSrc, _oldSrc, onCleanup) => {
     let isCurrentSrc = true
-    isImageValid(src).then((isValid) => {
+    isImageValid(newSrc).then((isValid) => {
       // https://github.com/ant-design/ant-design/issues/44948
       // If src changes, the previous status.value =  should not be triggered
       if (!isValid && isCurrentSrc) {
@@ -27,7 +28,7 @@ export default function useStatus({
       }
     })
 
-    if (isCustomPlaceholder && !isLoaded.value) {
+    if (isCustomPlaceholder?.value && !isLoaded.value) {
       status.value = 'loading'
     }
     else if (isError.value) {
@@ -50,7 +51,7 @@ export default function useStatus({
     }
   }
 
-  const srcAndOnload = computed(() => isError.value && fallback ? { src: fallback } : { onLoad, src })
+  const srcAndOnload = computed(() => isError.value && fallback ? { src: fallback } : { onLoad, src: src.value })
 
   return [getImgRef, srcAndOnload, status] as const
 }

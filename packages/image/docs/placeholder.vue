@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import Image from '../src'
-import jpg1 from './assets/1.jpeg'
 import { defaultIcons } from './assets/common.tsx'
+import placeholder from './assets/placeholder.png'
 
 const random = ref(Date.now())
 </script>
@@ -20,7 +20,7 @@ const random = ref(Date.now())
     <h1>Default placeholder</h1>
     <div>
       <Image
-        :src="`${jpg1}?random=${random}`"
+        :src="`${placeholder}?random=${random}`"
         width="400px"
         placeholder
         :preview="{ icons: defaultIcons }"
@@ -30,7 +30,8 @@ const random = ref(Date.now())
     <br>
     <h1>Custom placeholder</h1>
     <Image
-      :src="`${jpg1}?random=${random + 1}`"
+      :src="`${placeholder}?random=${random + 1}`"
+      width="400px"
       :preview="{ icons: defaultIcons }"
     >
       <template #placeholder>

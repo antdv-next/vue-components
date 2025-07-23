@@ -78,7 +78,10 @@ export default defineComponent({
     fallback: String,
 
     // Preview
-    preview: [Boolean, Object],
+    preview: {
+      type: [Boolean, Object],
+      default: true,
+    },
 
     // Events
     onClick: Function,
@@ -128,12 +131,12 @@ export default defineComponent({
     }
 
     // ========================= ImageProps =========================
-    const isCustomPlaceholder = computed(() => props.placeholder && props.placeholder !== true)
+    const isCustomPlaceholder = computed(() => (props.placeholder && props.placeholder !== true) || slots.placeholder)
 
     const src = computed(() => previewConfig.value.src ?? props.src)
     const [getImgRef, srcAndOnload, status] = useStatus({
-      src: props.src!,
-      isCustomPlaceholder: isCustomPlaceholder.value,
+      src: src!,
+      isCustomPlaceholder,
       fallback: props.fallback,
     })
 
@@ -153,7 +156,7 @@ export default defineComponent({
       src: src.value,
     }))
 
-    const imageId = useRegisterImage(canPreview.value, registerData.value)
+    const imageId = useRegisterImage(canPreview, registerData)
 
     // ========================== Preview ===========================
     const onPreview = (e: MouseEvent) => {
@@ -241,7 +244,7 @@ export default defineComponent({
               )}
               style={{
                 height,
-                ...attrs.style as CSSProperties,
+                // ...attrs.style as CSSProperties,
               }}
               ref={getImgRef}
               {...srcAndOnload.value}
