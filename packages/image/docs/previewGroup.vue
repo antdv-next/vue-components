@@ -4,18 +4,18 @@ import PreviewGroup from '../src/PreviewGroup.tsx'
 import jpg1 from './assets/1.jpeg'
 import jpg2 from './assets/2.jpeg'
 import jpg3 from './assets/3.jpeg'
-import disabled from './assets/disabled.jpeg'
 import { defaultIcons } from './assets/common.tsx'
+import disabled from './assets/disabled.jpeg'
 </script>
 
 <template>
   <PreviewGroup
     :icons="defaultIcons"
-    :preview="{
-      countRender: (current, total) => `第${current}张 / 总共${total}张`,
-    }"
     @change="(current, prev) => console.log(`当前第${current}张，上一次第${prev === undefined ? '-' : prev}张`)"
   >
+    <template #countRender="current, total">
+      <span>第{{ current }}张，总共{{ total }}张</span>
+    </template>
     <Image
       style="margin-right: 24px; width: 200px"
       :src="jpg1"

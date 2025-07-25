@@ -98,6 +98,8 @@ export default function useImageTransform(
     centerY?,
     isTouch?,
   ) => {
+    if (!imgRef?.value?.imgEl)
+      return {}
     const { width, height, offsetWidth, offsetHeight, offsetLeft, offsetTop } = imgRef.value.imgEl
 
     let newRatio = ratio

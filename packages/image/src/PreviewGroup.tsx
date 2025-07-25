@@ -1,9 +1,9 @@
-import type { PropType } from 'vue'
+import type { ExtractPropTypes, PropType, SlotsType } from 'vue'
 import type { TransformType } from './hooks/useImageTransform'
 import type { ImgInfo } from './Image'
 import type { ImageElementProps, OnGroupPreview } from './interface'
 import type { InternalPreviewConfig, PreviewProps, PreviewSemanticName } from './Preview'
-import { computed, defineComponent, ref, watch, nextTick } from 'vue'
+import { computed, defineComponent, ref, watch } from 'vue'
 import { PreviewGroupContext } from './context'
 import usePreviewItems from './hooks/usePreviewItem.ts'
 import Preview from './Preview'
@@ -12,25 +12,26 @@ export interface GroupPreviewConfig extends InternalPreviewConfig {
   current?: number
   imageRender?: (
     originalNode: any,
-    info: { transform: TransformType, current: number, image: ImgInfo },
+    info: { transform: TransformType, current?: number, image: ImgInfo },
   ) => any
   onOpenChange?: (value: boolean, info: { current: number }) => void
   onChange?: (current: number, prevCurrent: number) => void
 }
 
-export interface PreviewGroupProps {
-  previewPrefixCls?: string
-  classNames?: {
-    popup?: Partial<Record<PreviewSemanticName, string>>
+function previewGroupProps() {
+  return {
+    previewPrefixCls: {
+      type: String,
+      default: 'vc-image-preview',
+    },
+    icons: Object as PropType<PreviewProps['icons']>,
+    items: Array as PropType<(string | ImageElementProps)[]>,
+    fallback: String,
+    preview: [Boolean, Object] as PropType<GroupPreviewConfig | boolean>,
   }
-  styles?: {
-    popup?: Partial<Record<PreviewSemanticName, any>>
-  }
-  icons?: PreviewProps['icons']
-  items?: (string | ImageElementProps)[]
-  fallback?: string
-  preview?: boolean | GroupPreviewConfig
 }
+
+export type PreviewGroupProps = Partial<ExtractPropTypes<ReturnType<typeof previewGroupProps>>>
 
 export default defineComponent({
   name: 'PreviewGroup',
@@ -45,6 +46,10 @@ export default defineComponent({
     preview: [Boolean, Object] as PropType<GroupPreviewConfig | boolean>,
   },
   emits: ['change', 'openChange'],
+  slots: Object as SlotsType<{
+    default: any
+    countRender: (current: number, total: number) => any
+  }>,
   setup(props, { slots, emit }) {
     // ========================== Items ===========================
     const [mergedItems, register, fromItems] = usePreviewItems(props.items)
@@ -136,6 +141,7 @@ export default defineComponent({
               count={mergedItems.value.length}
               onChange={onInternalChange}
               {...previewConfig.value}
+              v-slots={{ countRender: slots.countRender }}
             />
           )}
         </>

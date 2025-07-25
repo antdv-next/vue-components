@@ -1,4 +1,4 @@
-import type { CSSProperties, PropType, VNode } from 'vue'
+import type { CSSProperties, ExtractPropTypes, PropType, SlotsType, VNode } from 'vue'
 import type { TransformAction, TransformType } from '../hooks/useImageTransform'
 import type { ImgInfo } from '../Image'
 import Portal, { type PortalProps } from '@v-c/portal'
@@ -16,7 +16,6 @@ import { BASE_SCALE_RATIO } from '../previewConfig'
 import CloseBtn from './CloseBtn'
 import Footer, { type FooterSemanticName } from './Footer'
 import PrevNext from './PrevNext'
-import {string} from "fast-glob/out/utils";
 
 // Note: if you want to add `action`,
 // pls contact @zombieJ or @thinkasany first.
@@ -48,6 +47,18 @@ export interface Actions {
   onZoomIn: () => void
   onClose: () => void
   onReset: () => void
+}
+
+export const actions = {
+  onActive: Function as PropType<(offset: number) => void>,
+  onFlipY: Function as PropType<() => void>,
+  onFlipX: Function as PropType<() => void>,
+  onRotateLeft: Function as PropType<() => void>,
+  onRotateRight: Function as PropType<() => void>,
+  onZoomOut: Function as PropType<() => void>,
+  onZoomIn: Function as PropType<() => void>,
+  onClose: Function as PropType<() => void>,
+  onReset: Function as PropType<() => void>,
 }
 
 export interface ToolbarRenderInfoType {
@@ -107,37 +118,71 @@ export interface InternalPreviewConfig {
     info: ToolbarRenderInfoType,
   ) => VNode
 }
-
-export interface PreviewProps extends InternalPreviewConfig {
-  // Misc
-  prefixCls: string
-
-  classNames?: Partial<Record<PreviewSemanticName, string>>
-  styles?: Partial<Record<PreviewSemanticName, CSSProperties>>
-
-  // Origin image Info
-  imageInfo?: {
-    width: number | string
-    height: number | string
+function previewProps() {
+  return {
+    prefixCls: String,
+    imageInfo: Object as PropType<{
+      width: number | string | undefined
+      height: number | string | undefined
+    }>,
+    fallback: String,
+    imgCommonProps: Object,
+    width: [String, Number],
+    height: [String, Number],
+    current: {
+      type: Number,
+      default: () => 0,
+    },
+    count: {
+      type: Number,
+      default: () => 1,
+    },
+    onChange: Function as PropType<(current: number, prev: number) => void>,
+    onClose: Function as PropType<(e: MouseEvent) => void>,
+    mousePosition: Object as PropType<{ x: number, y: number } | undefined | null>,
+    rootClassName: Array,
+    src: {
+      type: String,
+      required: true,
+    },
+    alt: String,
+    scaleStep: {
+      type: Number,
+      default: () => 0.5,
+    },
+    minScale: {
+      type: Number,
+      default: () => 1,
+    },
+    maxScale: {
+      type: Number,
+      default: () => 50,
+    },
+    motionName: String,
+    open: Boolean,
+    getContainer: Function as PropType<() => VNode>,
+    zIndex: Number,
+    onAfterOpenChange: Function as PropType<(open: boolean) => void>,
+    movable: {
+      type: Boolean,
+      default: true,
+    },
+    icons: Object as PropType<OperationIcons>,
+    closeIcon: [Object, String, Boolean],
+    onTransform: Function as PropType<(info: { transform: TransformType, action: TransformAction }) => void>,
+    countRender: Function as PropType<(current: number, total: number) => VNode>,
+    imageRender: Function as PropType<(
+      originalNode: VNode,
+      info: { transform: TransformType, current?: number, image: ImgInfo },
+    ) => VNode>,
+    actionsRender: Function as PropType<(
+      originalNode: VNode,
+      info: ToolbarRenderInfoType,
+    ) => VNode>,
   }
-  fallback?: string
-
-  // Preview image
-  imgCommonProps?: HTMLImageElement
-  width?: string | number
-  height?: string | number
-
-  // Pagination
-  current?: number
-  count?: number
-  onChange?: (current: number, prev: number) => void
-
-  // Events
-  onClose?: () => void
-
-  // Display
-  mousePosition: null | { x: number, y: number }
 }
+
+export type PreviewProps = Partial<ExtractPropTypes<ReturnType<typeof previewProps>>>
 
 export interface PreviewImageProps extends HTMLImageElement {
   fallback?: string
@@ -191,89 +236,14 @@ const PreviewImage = defineComponent({
 export default defineComponent({
   name: 'Preview',
   props: {
-    // Misc
-    prefixCls: String,
-
-    // Origin image Info
-    imageInfo: Object as PropType<{
-      width: number | string
-      height: number | string
-    }>,
-    fallback: String,
-
-    // Preview image
-    imgCommonProps: Object,
-    width: [String, Number],
-    height: [String, Number],
-
-    // Pagination
-    current: {
-      type: Number,
-      default: () => 0,
-    },
-    count: {
-      type: Number,
-      default: () => 1,
-    },
-    onChange: Function as PropType<(current: number, prev: number) => void>,
-
-    // Events
-    onClose: Function as PropType<(e: MouseEvent) => void>,
-
-    // Display
-    mousePosition: Object as PropType<{ x: number, y: number } | undefined | null>,
-    rootClassName: Array,
-
-    // Image
-    src: {
-      type: String,
-      required: true,
-    },
-    alt: String,
-
-    // Scale
-    scaleStep: {
-      type: Number,
-      default: () => 0.5,
-    },
-    minScale: {
-      type: Number,
-      default: () => 1,
-    },
-    maxScale: {
-      type: Number,
-      default: () => 50,
-    },
-
-    // Display
-    motionName: String,
-    open: Boolean,
-    getContainer: Function as PropType<() => VNode>,
-    zIndex: Number,
-    onAfterOpenChange: Function as PropType<(open: boolean) => void>,
-
-    // Operation
-    movable: {
-      type: Boolean,
-      default: true,
-    },
-    icons: Object as PropType<OperationIcons>,
-    closeIcon: [Object, String, Boolean],
-
-    onTransform: Function as PropType<(info: { transform: TransformType, action: TransformAction }) => void>,
-
-    // Render
-    countRender: Function as PropType<(current: number, total: number) => VNode>,
-    imageRender: Function as PropType<(
-      originalNode: VNode,
-      info: { transform: TransformType, current?: number, image: ImgInfo },
-    ) => VNode>,
-    actionsRender: Function as PropType<(
-      originalNode: VNode,
-      info: ToolbarRenderInfoType,
-    ) => VNode>,
+    ...previewProps(),
   },
   emits: ['change', 'close', 'transform', 'afterOpenChange'],
+  slots: Object as SlotsType<{
+    countRender: (current: number, total: number) => any
+    imageRender: any
+    actionsRender: any
+  }>,
   setup(props, { attrs, emit, slots }) {
     const imgRef = ref<{ imgEl: HTMLImageElement }>()
     const groupContext = usePreviewGroupContext()
@@ -407,18 +377,19 @@ export default defineComponent({
     // ======================= Lock Scroll ========================
     const lockScroll = ref(false)
 
-    watch(() => props.open, (open) => {
-      if (open) {
-        lockScroll.value = true
-      }
-    })
-
     const onVisibleChanged = (nextVisible: boolean) => {
       if (!nextVisible) {
         lockScroll.value = false
       }
       emit('afterOpenChange', nextVisible)
     }
+
+    watch(() => props.open, (open) => {
+      if (open) {
+        lockScroll.value = true
+      }
+      onVisibleChanged(open)
+    })
 
     // ========================== Portal ==========================
     const portalRender = ref(false)
@@ -442,7 +413,7 @@ export default defineComponent({
         getContainer,
         current = 0,
         count = 1,
-        countRender,
+        countRender = slots.countRender,
         minScale = 1,
         maxScale = 50,
         motionName = 'fade',
@@ -499,10 +470,9 @@ export default defineComponent({
       }
 
       return (
-        <Portal open={portalRender.value} getContainer={getContainer} autoLock={lockScroll.value}>
+        <Portal open={portalRender.value} getContainer={getContainer!} autoLock={lockScroll.value}>
           <Transition
             name={motionName}
-            onVisibleChanged={onVisibleChanged}
           >
             <div
               class={classnames(prefixCls, rootClassName, {

@@ -1,7 +1,7 @@
-import type { CSSProperties, SlotsType } from 'vue'
+import type { CSSProperties, ExtractPropTypes, SlotsType } from 'vue'
 import type { TransformType } from './hooks/useImageTransform'
 import type { ImageElementProps } from './interface'
-import type { InternalPreviewConfig, PreviewSemanticName, ToolbarRenderInfoType } from './Preview'
+import type { InternalPreviewConfig, ToolbarRenderInfoType } from './Preview'
 import classnames from 'classnames'
 import { computed, defineComponent, ref } from 'vue'
 import { COMMON_PROPS } from './common'
@@ -9,12 +9,13 @@ import { usePreviewGroupContext } from './context'
 import useRegisterImage from './hooks/useRegisterImage'
 import useStatus from './hooks/useStatus'
 import Preview from './Preview'
+import PreviewGroup from './PreviewGroup'
 
 export interface ImgInfo {
   url: string
   alt: string
-  width: string | number
-  height: string | number
+  width?: string | number
+  height?: string | number
 }
 
 export interface CoverConfig {
@@ -36,58 +37,31 @@ export interface PreviewConfig extends Omit<InternalPreviewConfig, 'countRender'
 }
 
 export type SemanticName = 'root' | 'image' | 'cover'
-
-export interface ImageProps {
-  prefixCls?: string
-  previewPrefixCls?: string
-  rootClassName?: string
-  classNames?: Partial<
-    Record<SemanticName, string> & {
-      popup?: Partial<Record<PreviewSemanticName, string>>
-    }
-  >
-  styles?: Partial<
-    Record<SemanticName, any> & {
-      popup?: Partial<Record<PreviewSemanticName, any>>
-    }
-  >
-  src?: string
-  placeholder?: any
-  fallback?: string
-  preview?: boolean | PreviewConfig
-  onClick?: (e: MouseEvent) => void
-  onError?: (e: Event) => void
-  width?: string | number
-  height?: string | number
-}
-
-export default defineComponent({
-  name: 'Image',
-  props: {
-    // Misc
+function imageProps() {
+  return {
     prefixCls: String,
     previewPrefixCls: String,
-
-    // Styles
     rootClassName: String,
-
-    // Image
     src: String,
     alt: String,
     placeholder: [Boolean, Object],
     fallback: String,
-
-    // Preview
     preview: {
       type: [Boolean, Object],
       default: true,
     },
-
-    // Events
     onClick: Function,
     onError: Function,
     width: [String, Number],
     height: [String, Number],
+  }
+}
+export type ImageProps = Partial<ExtractPropTypes<ReturnType<typeof imageProps>>>
+
+const ImageInternal = defineComponent({
+  name: 'Image',
+  props: {
+    ...imageProps(),
   },
   emits: ['click', 'error'],
   slots: Object as SlotsType<{
@@ -172,8 +146,6 @@ export default defineComponent({
         mousePosition.value = { x: left, y: top }
         triggerPreviewOpen(true)
       }
-
-      emit('click', e)
     }
     const handleClickChange = (e: MouseEvent) => {
       if (canPreview.value) {
@@ -292,3 +264,7 @@ export default defineComponent({
     }
   },
 })
+
+ImageInternal.PreviewGroup = PreviewGroup
+
+export default ImageInternal

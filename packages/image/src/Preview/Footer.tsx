@@ -1,9 +1,10 @@
-import type { PropType, VNode } from 'vue'
-import type { Actions, PreviewProps } from '.'
+import type { ExtractPropTypes, PropType, VNode } from 'vue'
+import type { PreviewProps } from '.'
 import type { TransformType } from '../hooks/useImageTransform'
 import type { ImgInfo } from '../Image'
 import classnames from 'classnames'
 import { computed, defineComponent } from 'vue'
+import { actions } from '.'
 
 export type FooterSemanticName = 'footer' | 'actions'
 
@@ -18,75 +19,55 @@ type OperationType =
   | 'zoomIn'
 
 interface RenderOperationParams {
-  icon: VNode
+  icon?: VNode
   type: OperationType
   disabled?: boolean
   onClick: (e: MouseEvent) => void
 }
 
-export interface FooterProps extends Actions {
-  prefixCls: string
-  showProgress: boolean
-  countRender?: PreviewProps['countRender']
-  actionsRender?: PreviewProps['actionsRender']
-  current: number
-  count: number
-  showSwitch: boolean
-  icons: PreviewProps['icons']
-  scale: number
-  minScale: number
-  maxScale: number
-  image: ImgInfo
-  transform: TransformType
+function footerProps() {
+  return {
+    prefixCls: String,
+    showProgress: Boolean,
+    countRender: Function,
+    actionsRender: Function,
+    current: {
+      type: Number,
+      default: 0,
+    },
+    count: {
+      type: Number,
+      default: 1,
+    },
+    showSwitch: Boolean,
+    icons: {
+      type: Object as PropType<PreviewProps['icons']>,
+      required: true,
+    },
+    scale: {
+      type: Number,
+      required: true,
+    },
+    minScale: {
+      type: Number,
+      required: true,
+    },
+    maxScale: {
+      type: Number,
+      required: true,
+    },
+    image: Object as PropType<ImgInfo>,
+    transform: Object as PropType<TransformType>,
+    ...actions,
+  }
 }
 
-const footerProps = {
-  prefixCls: String,
-  showProgress: Boolean,
-  countRender: Function,
-  actionsRender: Function,
-  current: {
-    type: Number,
-    default: 0,
-  },
-  count: {
-    type: Number,
-    default: 1,
-  },
-  showSwitch: Boolean,
-  icons: {
-    type: Object as PropType<PreviewProps['icons']>,
-    required: true,
-  },
-  scale: {
-    type: Number,
-    required: true,
-  },
-  minScale: {
-    type: Number,
-    required: true,
-  },
-  maxScale: {
-    type: Number,
-    required: true,
-  },
-  image: Object,
-  transform: Object,
-  onActive: Function as PropType<(offset: number) => void>,
-  onFlipY: Function as PropType<() => void>,
-  onFlipX: Function as PropType<() => void>,
-  onRotateLeft: Function as PropType<() => void>,
-  onRotateRight: Function as PropType<() => void>,
-  onZoomOut: Function as PropType<() => void>,
-  onZoomIn: Function as PropType<() => void>,
-  onClose: Function as PropType<() => void>,
-  onReset: Function as PropType<() => void>,
-}
+export type PreviewFooterProps = Partial<ExtractPropTypes<ReturnType<typeof footerProps>>>
 
 export default defineComponent({
   name: 'PreviewFooter',
   props: {
-    ...footerProps,
+    ...footerProps(),
   },
   emits: ['active', 'flipY', 'flipX', 'rotateLeft', 'rotateRight', 'zoomOut', 'zoomIn', 'close', 'reset'],
   setup(props, { emit }) {
@@ -120,7 +101,7 @@ export default defineComponent({
         showSwitch,
 
         // render
-        icons,
+        icons = {},
         image,
         transform,
         countRender,
