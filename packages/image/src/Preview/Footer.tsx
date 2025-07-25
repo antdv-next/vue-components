@@ -27,6 +27,7 @@ interface RenderOperationParams {
 
 function footerProps() {
   return {
+    ...actions(),
     prefixCls: String,
     showProgress: Boolean,
     countRender: Function,
@@ -58,7 +59,6 @@ function footerProps() {
     },
     image: Object as PropType<ImgInfo>,
     transform: Object as PropType<TransformType>,
-    ...actions,
   }
 }
 

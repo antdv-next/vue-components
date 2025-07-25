@@ -49,16 +49,18 @@ export interface Actions {
   onReset: () => void
 }
 
-export const actions = {
-  onActive: Function as PropType<(offset: number) => void>,
-  onFlipY: Function as PropType<() => void>,
-  onFlipX: Function as PropType<() => void>,
-  onRotateLeft: Function as PropType<() => void>,
-  onRotateRight: Function as PropType<() => void>,
-  onZoomOut: Function as PropType<() => void>,
-  onZoomIn: Function as PropType<() => void>,
-  onClose: Function as PropType<() => void>,
-  onReset: Function as PropType<() => void>,
+export function actions() {
+  return {
+    onActive: Function as PropType<(offset: number) => void>,
+    onFlipY: Function as PropType<() => void>,
+    onFlipX: Function as PropType<() => void>,
+    onRotateLeft: Function as PropType<() => void>,
+    onRotateRight: Function as PropType<() => void>,
+    onZoomOut: Function as PropType<() => void>,
+    onZoomIn: Function as PropType<() => void>,
+    onClose: Function as PropType<() => void>,
+    onReset: Function as PropType<() => void>,
+  }
 }
 
 export interface ToolbarRenderInfoType {
