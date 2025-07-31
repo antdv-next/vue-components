@@ -24,6 +24,10 @@ export interface UploadProgressEvent extends Partial<ProgressEvent> {
   percent?: number
 }
 
+export interface AjaxUploaderExpose {
+  abort: (file: any) => void
+}
+
 export interface UploadRequestOption<T = any> {
   onProgress?: (event: UploadProgressEvent, file?: UploadRequestFile) => void
   onError?: (event: UploadRequestError | ProgressEvent, body?: T) => void

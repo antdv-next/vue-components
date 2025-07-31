@@ -1,8 +1,8 @@
-import type { DefineComponent } from 'vue'
-import type { BeforeUploadFileType, UploadProgressEvent, UploadProps, UploadRequestError, VcFile } from './interface'
+import type { VNode } from 'vue'
+import type { AjaxUploaderExpose, BeforeUploadFileType, UploadProgressEvent, UploadProps, UploadRequestError, UploadRequestOption, VcFile } from './interface'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
 import clsx from 'classnames'
-import { computed, defineComponent, ref } from 'vue'
+import { computed, defineComponent, onMounted, ref } from 'vue'
 import attrAccept from './attrAccept'
 import { generatorUploadProps } from './interface'
 import defaultRequest from './request'
@@ -18,11 +18,15 @@ interface ParsedFileInfo {
   parsedFile: VcFile | null
 }
 
-export const AjaxUploader = defineComponent<UploadProps>({
+const AjaxUploader = defineComponent<UploadProps>({
   props: generatorUploadProps(),
-  setup(props, { attrs }) {
+  setup(props, { attrs, expose, slots }) {
     const uid = ref(getUid())
-    const _isMounted = false
+    let _isMounted = false
+
+    onMounted(() => {
+      _isMounted = true
+    })
 
     const reqs: Record<string, any> = {}
     const fileInputRef = ref<HTMLInputElement>()
@@ -94,11 +98,11 @@ export const AjaxUploader = defineComponent<UploadProps>({
         },
         onError: (err: UploadRequestError, ret: any) => {
           const { onError } = props
-          onError?.(err, ret, parsedFile)
+          onError?.(err as UploadRequestError, ret, parsedFile)
 
           delete reqs[uid]
         },
-      }
+      } as UploadRequestOption
 
       onStart?.(origin)
       reqs[uid] = request(requestOption)
@@ -235,12 +239,46 @@ export const AjaxUploader = defineComponent<UploadProps>({
         return onDataTransferFiles(dataTransfer)
       }
     }
+    const onFileDragOver = (e: DragEvent) => {
+      e.preventDefault()
+    }
+    const reset = () => {
+      uid.value = getUid()
+    }
+
+    const onChange = (e: Event) => {
+      const { accept, directory } = props
+      const { files } = e.target as HTMLInputElement
+      const acceptedFiles = [...(files || [])].filter(
+        (file: File) => !directory || attrAccept(file, accept),
+      )
+      uploadFiles(acceptedFiles)
+      reset()
+    }
 
     // ==============================================================
 
     const dirProps = computed(() => {
       return props.directory ? { directory: 'directory', webkitdirectory: 'webkitdirectory' } : {}
     })
+
+    const abort = (file?: any) => {
+      if (file) {
+        const uid = file.uid ? file.uid : file
+        if (reqs[uid] && reqs[uid].abort) {
+          reqs[uid].abort()
+        }
+        delete reqs[uid]
+      }
+      else {
+        Object.keys(reqs).forEach((uid) => {
+          if (reqs[uid] && reqs[uid].abort) {
+            reqs[uid].abort()
+          }
+          delete reqs[uid]
+        })
+      }
+    }
 
     const events = computed(() => {
       return props.disabled
@@ -250,18 +288,19 @@ export const AjaxUploader = defineComponent<UploadProps>({
             onKeyDown: props.openFileDialogOnClick ? onKeyDown : noop,
             onMouseEnter: props.onMouseEnter,
             onMouseLeave: props.onMouseLeave,
+            onDrop: onFileDrop,
+            onDragOver: onFileDragOver,
+            tabIndex: props.hasControlInside ? undefined : '0',
           }
     })
 
     return () => {
-      // FIXME 暂时没有找到优化的方法
-      const Tag = props.component as DefineComponent
       const {
         component,
         prefixCls,
         className,
         classNames = {},
-        disabled, // 注意原来是 disbaled，修正拼写
+        disabled,
         id,
         name,
         style,
@@ -269,7 +308,6 @@ export const AjaxUploader = defineComponent<UploadProps>({
         multiple,
         accept,
         capture,
-        // children,
         directory,
         openFileDialogOnClick,
         onMouseEnter,
@@ -280,8 +318,17 @@ export const AjaxUploader = defineComponent<UploadProps>({
         ...props,
         ...attrs,
       }
+      // 处理自定义组件
+      const Tag = component as {
+        new: () => VNode
+      }
+
+      const instance: AjaxUploaderExpose = {
+        abort,
+      }
+      expose(instance)
       return (
-        <Tag class={cls.value} {...events.value} role={hasControlInside ? undefined : 'button'} style={style}>
+        <component is={Tag} class={cls.value} {...events.value} role={hasControlInside ? undefined : 'button'} style={style}>
           <input
             {...pickAttrs(otherProps, { aria: true, data: true })}
             id={id}
@@ -296,10 +343,14 @@ export const AjaxUploader = defineComponent<UploadProps>({
             {...dirProps.value}
             multiple={multiple}
             accept={accept}
+            onChange={onChange}
             {...(capture != null ? { capture } : {})}
           />
-        </Tag>
+          {slots.default?.()}
+        </component>
       )
     }
   },
 })
+
+export default AjaxUploader

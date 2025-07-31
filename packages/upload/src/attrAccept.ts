@@ -1,7 +1,6 @@
-import type { VcFile } from './interface'
 import { warning } from '@v-c/util'
 
-export default (file: VcFile, acceptedFiles: undefined | string | string[]) => {
+export default (file: File, acceptedFiles: undefined | string | string[]) => {
   if (file && acceptedFiles) {
     const acceptedFilesArray = Array.isArray(acceptedFiles)
       ? acceptedFiles
