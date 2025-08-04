@@ -4,6 +4,7 @@ import type { TransformType } from '../hooks/useImageTransform'
 import type { ImgInfo } from '../Image'
 import classnames from 'classnames'
 import { computed, defineComponent } from 'vue'
+import { actions } from '.'
 
 export type FooterSemanticName = 'footer' | 'actions'
 
@@ -26,6 +27,7 @@ interface RenderOperationParams {
 
 function footerProps() {
   return {
+    ...actions(),
     prefixCls: String,
     showProgress: Boolean,
     countRender: Function,
@@ -57,15 +59,6 @@ function footerProps() {
     },
     image: Object as PropType<ImgInfo>,
     transform: Object as PropType<TransformType>,
-    onActive: Function as PropType<(offset: number) => void>,
-    onFlipY: Function as PropType<() => void>,
-    onFlipX: Function as PropType<() => void>,
-    onRotateLeft: Function as PropType<() => void>,
-    onRotateRight: Function as PropType<() => void>,
-    onZoomOut: Function as PropType<() => void>,
-    onZoomIn: Function as PropType<() => void>,
-    onClose: Function as PropType<() => void>,
-    onReset: Function as PropType<() => void>,
   }
 }
 

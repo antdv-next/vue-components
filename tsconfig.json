@@ -99,12 +99,6 @@
       ],
       "@v-c/color-picker": [
         "./packages/color-picker/src"
-      ],
-      "@v-c/image": [
-        "./packages/image/src"
-      ],
-      "@v-c/upload": [
-        "./packages/upload/src"
       ]
     },
     "resolveJsonModule": true,
