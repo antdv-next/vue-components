@@ -38,6 +38,8 @@ const comps = [
   'segmented',
   'fast-color',
   'color-picker',
+  'image',
+  'upload',
 ]
 
 export function genListAlias() {
