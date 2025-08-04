@@ -1,60 +1,73 @@
 <script setup lang="ts">
-import type { UploadProps } from '../src'
+import type { UploadRequestOption } from '../src/interface.ts'
 import axios from 'axios'
-import { ref } from 'vue'
 import Upload from '../src'
 
-const fileList = ref<any[]>([])
+const uploadProps = {
+  action: '/upload.do',
+  multiple: false,
+  data: { a: 1, b: 2 },
+  headers: {
+    Authorization: '$prefix $token',
+  },
+  onStart(file: any) {
+    console.log('onStart', file, file.name)
+  },
+  onSuccess(res: any, file: any) {
+    console.log('onSuccess', res, file.name)
+  },
+  onError(err: any) {
+    console.log('onError', err)
+  },
+  onProgress({ percent }: { percent: any }, file: any) {
+    console.log('onProgress', `${percent}%`, file.name)
+  },
+  customRequest({
+    action,
+    data,
+    file,
+    filename,
+    headers,
+    onError,
+    onProgress,
+    onSuccess,
+    withCredentials,
+  }: UploadRequestOption) {
+    // EXAMPLE: post form-data with 'axios'
 
-const customRequest: UploadProps['customRequest'] = ({ action, data, file, filename, headers, onError, onProgress, onSuccess, withCredentials, }) => {
-  // EXAMPLE: post form-data with 'axios'
+    const formData = new FormData()
+    if (data) {
+      Object.keys(data).forEach((key) => {
+        formData.append(key, data[key] as string)
+      })
+    }
+    formData.append(filename!, file)
 
-  const formData = new FormData()
-  if (data) {
-    Object.keys(data).forEach((key) => {
-      formData.append(key, data[key] as string)
-    })
-  }
-  formData.append(filename, file)
+    axios
+      .post(action, formData, {
+        withCredentials,
+        headers,
+        onUploadProgress: ({ total, loaded }) => {
+          onProgress?.({ percent: Number(Math.round((loaded / total!) * 100).toFixed(2)) }, file)
+        },
+      })
+      .then(({ data: response }) => {
+        onSuccess?.(response, file)
+      })
+      .catch(onError)
 
-  axios
-    .post(action, formData, {
-      withCredentials,
-      headers,
-      onUploadProgress: ({ total, loaded }) => {
-        onProgress({ percent: Number(Math.round((loaded / total) * 100).toFixed(2)) }, file)
+    return {
+      abort() {
+        console.log('upload progress is aborted.')
       },
-    })
-    .then(({ data: response }) => {
-      onSuccess(response, file)
-    })
-    .catch(onError)
-
-  return {
-    abort() {
-      console.log('upload progress is aborted.')
-    },
-  }
-}
-
-function handleChange(info: any) {
-  let fileListTemp = [...info.fileList]
-
-  // 限制文件数量为1
-  fileListTemp = fileListTemp.slice(-1)
-
-  fileList.value = fileListTemp
+    }
+  },
 }
 </script>
 
 <template>
   <div>
-    <Upload
-      v-model:file-list="fileList"
-      action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
-      :custom-request="customRequest"
-      @change="handleChange"
-    >
+    <Upload v-bind="uploadProps">
       <button>Upload</button>
     </Upload>
   </div>
