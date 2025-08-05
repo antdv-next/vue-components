@@ -105,6 +105,27 @@ const customRequestUploadProps = {
     }
   },
 }
+
+const directoryUploadProps = {
+  action: '/upload.do',
+  data: { a: 1, b: 2 },
+  directory: true,
+  beforeUpload(file: VcFile) {
+    console.log('beforeUpload', file.name)
+  },
+  onStart: (file: VcFile) => {
+    console.log('onStart', file.name)
+  },
+  onSuccess(file: any) {
+    console.log('onSuccess', file)
+  },
+  onProgress(step: { percent?: number }, file: VcFile | null) {
+    console.log('onProgress', Math.round(step.percent || 0), file?.name)
+  },
+  onError(err: Error) {
+    console.log('onError', err)
+  },
+}
 </script>
 
 <template>
@@ -133,6 +154,16 @@ const customRequestUploadProps = {
       <div style="margin: 100px">
         <div>
           <Upload v-bind="customRequestUploadProps">
+            <a>开始上传</a>
+          </Upload>
+        </div>
+      </div>
+    </Variant>
+
+    <Variant title="directoryUpload">
+      <div style="margin: 100px">
+        <div>
+          <Upload v-bind="directoryUploadProps">
             <a>开始上传</a>
           </Upload>
         </div>
