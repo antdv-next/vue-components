@@ -4,74 +4,75 @@ import type {
   UploadProps,
   UploadRequestOption,
   VcFile,
-} from "../src/interface";
-import axios from "axios";
-import Upload from "../src/Upload";
-import { ref } from "vue";
+} from '../src/interface'
+import axios from 'axios'
+import { ref } from 'vue'
+import Upload from '../src/Upload'
+import './assets/index.less'
 
 const asyncActionProps = {
   action: () => {
     return new Promise<string>((resolve) => {
       setTimeout(() => {
-        resolve("/upload.do");
-      }, 2000);
-    });
+        resolve('/upload.do')
+      }, 2000)
+    })
   },
   multiple: true,
   onStart(file: VcFile) {
-    console.log("onStart", file, file.name);
+    console.log('onStart', file, file.name)
   },
   onSuccess(ret: Record<string, unknown>) {
-    console.log("onSuccess", ret);
+    console.log('onSuccess', ret)
   },
   onError(err: Error) {
-    console.log("onError", err);
+    console.log('onError', err)
   },
-};
+}
 
 const beforeUploadProps = {
-  action: "/upload.do" as Action,
+  action: '/upload.do' as Action,
   multiple: true,
   onStart(file: VcFile) {
-    console.log("onStart", file, file.name);
+    console.log('onStart', file, file.name)
   },
   onSuccess(ret: Record<string, unknown>) {
-    console.log("onSuccess", ret);
+    console.log('onSuccess', ret)
   },
   onError(err: Error) {
-    console.log("onError", err);
+    console.log('onError', err)
   },
   beforeUpload(file: VcFile, fileList: VcFile[]) {
-    console.log(file, fileList);
+    console.log(file, fileList)
     return new Promise<VcFile>((resolve) => {
-      console.log("start check");
+      console.log('start check')
       setTimeout(() => {
-        console.log("check finshed", file);
-        resolve(file);
-      }, 3000);
-    });
+        console.log('check finshed', file)
+        resolve(file)
+      }, 3000)
+    })
   },
-};
+}
 
 // ==================== customRequest =====================
 const customRequestUploadProps = {
-  action: "/upload.do",
+  action: '/upload.do',
   multiple: false,
   data: { a: 1, b: 2 },
   headers: {
-    Authorization: "$prefix $token",
+    Authorization: '$prefix $token',
   },
   onStart(file: any) {
-    console.log("onStart", file, file.name);
+    console.log('onStart', file, file.name)
   },
   onSuccess(res: any, file: any) {
-    console.log("onSuccess", res, file.name);
+    console.log('onSuccess', res, file.name)
   },
   onError(err: any) {
-    console.log("onError", err);
+    console.log('onError', err)
   },
   onProgress({ percent }: { percent?: any }, file: VcFile | null) {
-    console.log("onProgress", `${percent}%`, file?.name);
+    console.log('onProgress', `${percent}%`, file?.name)
   },
   customRequest({
     action,
@@ -84,13 +85,13 @@ const customRequestUploadProps = {
     onSuccess,
     withCredentials,
   }: UploadRequestOption) {
-    const formData = new FormData();
+    const formData = new FormData()
     if (data) {
       Object.keys(data).forEach((key) => {
-        formData.append(key, data[key] as string);
-      });
+        formData.append(key, data[key] as string)
+      })
     }
-    formData.append(filename!, file);
+    formData.append(filename!, file)
     axios
       .post(action, formData, {
         withCredentials,
@@ -98,188 +99,185 @@ const customRequestUploadProps = {
         onUploadProgress: ({
           total,
           loaded,
-        }: {
-          total: number;
-          loaded: number;
         }) => {
           onProgress?.(
             { percent: Number(Math.round((loaded / total!) * 100).toFixed(2)) },
-            file
-          );
+            file,
+          )
         },
       })
       .then(({ data: response }: { data: unknown }) => {
-        onSuccess?.(response, file);
+        onSuccess?.(response, file)
       })
-      .catch(onError);
+      .catch(onError)
 
     return {
       abort() {
-        console.log("upload progress is aborted.");
+        console.log('upload progress is aborted.')
       },
-    };
+    }
   },
-};
+}
 
 const directoryUploadProps = {
-  action: "/upload.do",
+  action: '/upload.do',
   data: { a: 1, b: 2 },
   directory: true,
   beforeUpload(file: VcFile) {
-    console.log("beforeUpload", file.name);
+    console.log('beforeUpload', file.name)
   },
   onStart: (file: VcFile) => {
-    console.log("onStart", file.name);
+    console.log('onStart', file.name)
   },
   onSuccess(file: any) {
-    console.log("onSuccess", file);
+    console.log('onSuccess', file)
   },
   onProgress(step: { percent?: number }, file: VcFile | null) {
-    console.log("onProgress", Math.round(step.percent || 0), file?.name);
+    console.log('onProgress', Math.round(step.percent || 0), file?.name)
   },
   onError(err: Error) {
-    console.log("onError", err);
+    console.log('onError', err)
   },
-};
+}
 
 // ================ drag props ====================
 const dragProps = {
-  action: "/upload.do",
-  type: "drag",
-  accept: ".png",
+  action: '/upload.do',
+  type: 'drag',
+  accept: '.png',
   beforeUpload(file: VcFile) {
-    console.log("beforeUpload", file.name);
+    console.log('beforeUpload', file.name)
   },
   onStart: (file: VcFile) => {
-    console.log("onStart", file.name);
+    console.log('onStart', file.name)
   },
   onSuccess(ret: Record<string, unknown>) {
-    console.log("onSuccess", ret);
+    console.log('onSuccess', ret)
   },
   onProgress(step: { percent?: number }, file: VcFile | null) {
-    console.log("onProgress", Math.round(step.percent || 0), file?.name);
+    console.log('onProgress', Math.round(step.percent || 0), file?.name)
   },
   onError(err: Error) {
-    console.log("onError", err);
+    console.log('onError', err)
   },
   style: {
-    display: "inline-block",
+    display: 'inline-block',
     width: 200,
     height: 200,
-    background: "#eee",
+    background: '#eee',
   },
-};
+}
 
 // ======================== drag directory =====================
 const dragDirectoryProps = {
-  action: "/upload.do",
-  type: "drag",
+  action: '/upload.do',
+  type: 'drag',
   directory: true,
   beforeUpload(file: VcFile, fileList: VcFile[]) {
-    console.log("beforeUpload", file.name, fileList);
+    console.log('beforeUpload', file.name, fileList)
   },
   onStart: (file: VcFile) => {
-    console.log("onStart", file.name);
+    console.log('onStart', file.name)
   },
   onSuccess(ret: Record<string, unknown>) {
-    console.log("onSuccess", ret);
+    console.log('onSuccess', ret)
   },
   onProgress(step: { percent?: number }, file: VcFile | null) {
-    console.log("onProgress", Math.round(step.percent || 0), file?.name);
+    console.log('onProgress', Math.round(step.percent || 0), file?.name)
   },
   onError(err: Error) {
-    console.log("onError", err);
+    console.log('onError', err)
   },
   style: {
-    display: "inline-block",
+    display: 'inline-block',
     width: 200,
     height: 200,
-    background: "#eee",
+    background: '#eee',
   },
-};
+}
 
 // ======================= paste  =================================
 const pasteProps = {
-  action: "/upload.do",
-  type: "drag",
-  accept: ".png",
+  action: '/upload.do',
+  type: 'drag',
+  accept: '.png',
   pastable: true,
   beforeUpload(file: VcFile) {
-    console.log("beforeUpload", file.name);
+    console.log('beforeUpload', file.name)
   },
   onStart: (file: VcFile) => {
-    console.log("onStart", file.name);
+    console.log('onStart', file.name)
   },
   onSuccess(ret: Record<string, unknown>) {
-    console.log("onSuccess", ret);
+    console.log('onSuccess', ret)
   },
   onProgress(step: { percent?: number }, file: VcFile | null) {
-    console.log("onProgress", Math.round(step.percent || 0), file?.name || "");
+    console.log('onProgress', Math.round(step.percent || 0), file?.name || '')
   },
   onError(err: Error) {
-    console.log("onError", err);
+    console.log('onError', err)
   },
   style: {
-    display: "inline-block",
+    display: 'inline-block',
     width: 200,
     height: 200,
-    background: "#eee",
+    background: '#eee',
   },
-};
+}
 
 // ====================== paste directory ====================
 const pasteDirectoryProps = {
-  action: "/upload.do",
-  type: "drag",
-  accept: ".png",
+  action: '/upload.do',
+  type: 'drag',
+  accept: '.png',
   directory: true,
   pastable: true,
   beforeUpload(file: VcFile) {
-    console.log("beforeUpload", file.name);
+    console.log('beforeUpload', file.name)
   },
   onStart: (file: VcFile) => {
-    console.log("onStart", file.name);
+    console.log('onStart', file.name)
   },
   onSuccess(ret: Record<string, unknown>) {
-    console.log("onSuccess", ret);
+    console.log('onSuccess', ret)
   },
   onProgress(step: { percent?: number }, file: VcFile | null) {
-    console.log("onProgress", Math.round(step.percent || 0), file?.name || "");
+    console.log('onProgress', Math.round(step.percent || 0), file?.name || '')
   },
   onError(err: Error) {
-    console.log("onError", err);
+    console.log('onError', err)
   },
   style: {
-    display: "inline-block",
+    display: 'inline-block',
     width: 200,
     height: 200,
-    background: "#eee",
+    background: '#eee',
   },
-};
+}
 
 // ================== simple ======================
 
 const simpleUploaderProps: UploadProps = {
-  action: "/upload.do",
+  action: '/upload.do',
   data: { a: 1, b: 2 },
   multiple: true,
   beforeUpload(file) {
-    console.log("beforeUpload", file.name);
+    console.log('beforeUpload', file.name)
   },
   onStart: (file) => {
-    console.log("onStart", file.name);
+    console.log('onStart', file.name)
   },
   onSuccess(file) {
-    console.log("onSuccess", file);
+    console.log('onSuccess', file)
   },
   onProgress(step, file) {
-    console.log("onProgress", Math.round(step.percent || 0), file?.name || "");
+    console.log('onProgress', Math.round(step.percent || 0), file?.name || '')
   },
   onError(err) {
-    console.log("onError", err);
+    console.log('onError', err)
   },
-  capture: "user",
-};
+  capture: 'user',
+}
 
 const destroy = ref(false)
 </script>
@@ -367,13 +365,8 @@ const destroy = ref(false)
     </Variant>
 
     <Variant title="simple">
-      <div style="margin: 100px" v-if="destroy">
+      <div v-if="destroy" style="margin: 100px">
         <h2>固定位置</h2>
-        <style>
-         .rc-upload-disabled {
-           opacity:0.5;
-         }
-        </style>
 
         <div>
           <Upload v-bind="simpleUploaderProps">
@@ -382,11 +375,14 @@ const destroy = ref(false)
         </div>
 
         <h2>滚动</h2>
-        <div :style="{
-          height: '200px',
-          overflow: 'auto',
-          border: '1px solid red',
-        }"></div>
+
+        <div
+          :style="{
+            height: '200px',
+            overflow: 'auto',
+            border: '1px solid red',
+          }"
+        />
 
         <div style="height: 500px;">
           <Upload v-bind="simpleUploaderProps" id="test" component="div" :style="{ display: 'inline-block' }">
