@@ -147,10 +147,7 @@ const showTotal3 = (total: number, range: Array<number>) => `${range[0]} - ${ran
       <Pagination :total="100" :item-render="divItemRender" />
     </Variant>
 
-    <Variant title="jumper">
-
-
-    </Variant>
+    <Variant title="jumper" />
 
     <Variant title="lessPages">
       <div>

@@ -1,7 +1,8 @@
 import type { VueNode } from '@v-c/util/dist/type'
 import type {
   Component,
-  CSSProperties, ExtractPropTypes,
+  CSSProperties,
+  ExtractPropTypes,
   PropType,
   VNode,
   VNodeChild,
