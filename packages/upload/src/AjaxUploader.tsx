@@ -285,7 +285,7 @@ const AjaxUploader = defineComponent<UploadProps>({
             onMouseEnter: props.onMouseEnter,
             onMouseLeave: props.onMouseLeave,
             onDrop: onFileDrop,
-            onDragOver: onFileDragOver,
+            onDragover: onFileDragOver,
             tabIndex: props.hasControlInside ? undefined : '0',
           }
     })
