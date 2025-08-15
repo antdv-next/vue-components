@@ -1,9 +1,9 @@
-import type { UploadProps } from '../src/interface'
+import type { UploadProps, VcFile } from '../src/interface'
 import { format } from 'node:util'
 import { mount } from '@vue/test-utils'
 import { fakeXhr, type FakeXMLHttpRequest, type FakeXMLHttpRequestStatic } from 'nise'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { defineComponent, h } from 'vue'
+import { defineComponent, h, ref } from 'vue'
 import Upload from '../src/Upload'
 
 const sleep = (timeout = 500) => new Promise(resolve => setTimeout(resolve, timeout))
@@ -960,13 +960,14 @@ describe('uploader', () => {
     })
 
     it('accept if type is invalidate', async () => {
-      // resetWarned()
       const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
-      const wrapper = mount(Upload, { props: {
-        ...props,
-        accept: 'jpg,png',
-      } })
+      const wrapper = mount(Upload, {
+        props: {
+          ...props,
+          accept: 'jpg,png',
+        },
+      })
       const input = wrapper.find('input')!
       const files = [
         {
@@ -1000,10 +1001,12 @@ describe('uploader', () => {
     })
 
     it('paste directory', async () => {
-      const wrapper = mount(Upload, { props: {
-        ...props,
-        pastable: true,
-      } })
+      const wrapper = mount(Upload, {
+        props: {
+          ...props,
+          pastable: true,
+        },
+      })
       const vcUpload = wrapper.find('.vc-upload')!
       const files = {
         name: 'foo',
@@ -1037,5 +1040,509 @@ describe('uploader', () => {
       })
       return promises
     })
+  })
+
+  describe('accept', () => {
+    if (typeof FormData === 'undefined') {
+      return
+    }
+
+    let uploader: ReturnType<typeof mount>
+    const handlers: UploadProps = {}
+
+    const props: UploadProps = {
+      action: '/test',
+      data: { a: 1, b: 2 },
+      directory: true,
+      onStart(file) {
+        if (handlers.onStart) {
+          handlers.onStart(file)
+        }
+      },
+    }
+
+    function test(
+      desc: string,
+      value?: string,
+      files?: object[],
+      expectCallTimes?: number,
+      errorMessage?: string,
+      extraProps?: Partial<UploadProps>,
+    ) {
+      it(desc, async () => {
+        const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+        const wrapper = mount(Upload, {
+          props: {
+            ...props,
+            ...extraProps,
+            accept: value,
+          },
+        })
+        const input = wrapper.find('input')!
+        const inputElement = input.element as HTMLInputElement
+        Object.defineProperty(inputElement, 'files', {
+          value: files,
+          writable: false,
+        })
+        const mockStart = vi.fn()
+        handlers.onStart = mockStart
+
+        await input.trigger('change')
+
+        if (errorMessage) {
+          // console.log(errSpy)
+          expect(errSpy).toHaveBeenCalledWith(errorMessage)
+        }
+
+        const promises = new Promise<void>((resolve) => {
+          setTimeout(() => {
+            expect(mockStart.mock.calls.length).toBe(expectCallTimes)
+
+            errSpy.mockRestore()
+            resolve()
+            wrapper.unmount()
+          }, 100)
+        })
+        return promises
+      })
+    }
+
+    test(
+      'default',
+      undefined,
+      [
+        {
+          name: 'accepted.webp',
+        },
+        {
+          name: 'accepted.png',
+        },
+        {
+          name: 'accepted.txt',
+        },
+      ],
+      3,
+    )
+
+    test(
+      'support .png',
+      '.png',
+      [
+        {
+          name: 'unaccepted.webp',
+        },
+        {
+          name: 'accepted.png',
+        },
+      ],
+      1,
+    )
+
+    test(
+      'support .jpg and .jpeg',
+      '.jpg',
+      [
+        {
+          name: 'unaccepted.webp',
+        },
+        {
+          name: 'accepted.jpg',
+        },
+        {
+          name: 'accepted.jpeg',
+        },
+      ],
+      2,
+    )
+
+    test(
+      'support .ext,ext',
+      '.png,.txt',
+      [
+        {
+          name: 'accepted.png',
+        },
+        {
+          name: 'unaccepted.jpg',
+        },
+        {
+          name: 'accepted.txt',
+        },
+      ],
+      2,
+    )
+
+    test(
+      'support image/type',
+      'image/jpeg',
+      [
+        {
+          name: 'unaccepted.png',
+          type: 'image/png',
+        },
+        {
+          name: 'accepted.jpg',
+          type: 'image/jpeg',
+        },
+      ],
+      1,
+    )
+
+    test(
+      'support image/*',
+      'image/*',
+      [
+        {
+          name: 'accepted.png',
+          type: 'image/png',
+        },
+        {
+          name: 'accepted.jpg',
+          type: 'image/jpeg',
+        },
+        {
+          name: 'unaccepted.text',
+          type: 'text/plain',
+        },
+      ],
+      2,
+    )
+
+    test(
+      'support *',
+      '*',
+      [
+        {
+          name: 'accepted.png',
+          type: 'image/png',
+        },
+        {
+          name: 'accepted.text',
+          type: 'text/plain',
+        },
+      ],
+      2,
+    )
+
+    test(
+      'support */*',
+      '*/*',
+      [
+        {
+          name: 'accepted.png',
+          type: 'image/png',
+        },
+        {
+          name: 'accepted.text',
+          type: 'text/plain',
+        },
+      ],
+      2,
+    )
+
+    test(
+      'invalidate type should skip',
+      'jpg',
+      [
+        {
+          name: 'accepted.png',
+          type: 'image/png',
+        },
+        {
+          name: 'accepted.text',
+          type: 'text/plain',
+        },
+      ],
+      2,
+      'Warning: Upload takes an invalidate \'accept\' type \'jpg\'.Skip for check.',
+    )
+
+    test(
+      'should skip when select file',
+      '.png',
+      [
+        {
+          name: 'accepted.png',
+          type: 'image/png',
+        },
+        {
+          name: 'unaccepted.text',
+          type: 'text/plain',
+        },
+      ],
+      2,
+      '',
+      {
+        directory: false,
+      },
+    )
+
+    it('should trigger beforeUpload when uploading non-accepted files in folder mode', async () => {
+      const beforeUpload = vi.fn()
+      uploader = mount(Upload, {
+        props: {
+          folder: true,
+          accept: '.png',
+          beforeUpload,
+        },
+      })
+      const input = uploader.find('input')!
+
+      const inputElement = input.element as HTMLInputElement
+      Object.defineProperty(inputElement, 'files', {
+        value: [new File([], 'bamboo.png'), new File([], 'light.jpg')],
+        writable: false,
+      })
+      await input.trigger('change')
+      expect(beforeUpload).toHaveBeenCalledTimes(2)
+    })
+  })
+
+  describe('transform file before request', () => {
+    let uploader: ReturnType<typeof mount>
+    beforeEach(() => {
+      uploader = mount(Upload)
+    })
+
+    afterEach(() => {
+      uploader.unmount()
+    })
+
+    it('noes not affect receive origin file when transform file is null', async () => {
+      const handlers: UploadProps = {}
+      const props: UploadProps = {
+        action: '/test',
+        onSuccess(ret: Record<string, any>, file: VcFile) {
+          if (handlers.onSuccess) {
+            handlers.onSuccess(ret, file, null!)
+          }
+        },
+        transformFile() {
+          return null
+        },
+      } as any
+      const wrapper = mount(Upload, { props })
+      const input = wrapper.find('input')!
+
+      const files = [
+        {
+          name: 'success.png',
+          toString() {
+            return this.name
+          },
+        },
+      ];
+
+      (files as any).item = (i: number) => files[i]
+
+      const promises = new Promise((resolve) => {
+        handlers.onSuccess = (ret, file) => {
+          expect(ret[1]).toEqual(file!.name)
+          expect(file).toHaveProperty('uid')
+          resolve(file)
+        }
+      })
+
+      const inputElement = input.element as HTMLInputElement
+      Object.defineProperty(inputElement, 'files', {
+        value: files,
+        writable: false,
+      })
+      await input.trigger('change')
+
+      setTimeout(() => {
+        requests[0].respond(200, {}, `["","${files[0].name}"]`)
+      }, 100)
+
+      return promises
+    })
+  })
+
+  describe('onBatchStart', () => {
+    const files = [new File([], 'bamboo.png'), new File([], 'light.png')]
+
+    const batchEventFiles = files.map(file =>
+      expect.objectContaining({
+        file,
+      }),
+    )
+
+    async function testWrapper(props?: UploadProps) {
+      const onBatchStart = vi.fn()
+      const uploader = mount(Upload, {
+        props: {
+          onBatchStart,
+          ...props,
+        },
+      })
+      const input = uploader.find('input')!
+
+      Object.defineProperty(input.element as HTMLInputElement, 'files', {
+        value: files,
+        writable: false,
+      })
+      await input.trigger('change')
+
+      // Always wait 500ms to done the test
+      await sleep()
+
+      expect(onBatchStart).toHaveBeenCalled()
+
+      return onBatchStart
+    }
+
+    it('trigger without pending', async () => {
+      const onBatchStart = await testWrapper()
+      expect(onBatchStart).toHaveBeenCalledWith(batchEventFiles)
+    })
+
+    it('trigger with beforeUpload delay', async () => {
+      const beforeUpload = vi.fn(async (file) => {
+        if (file.name === 'bamboo.png') {
+          await sleep(100)
+          return true
+        }
+        return true
+      })
+
+      const onBatchStart = await testWrapper({ beforeUpload })
+
+      expect(beforeUpload).toHaveBeenCalledTimes(2)
+      expect(onBatchStart).toHaveBeenCalledWith(batchEventFiles)
+    })
+
+    it('beforeUpload but one is deny', async () => {
+      const beforeUpload = vi.fn(async (file) => {
+        if (file.name === 'light.png') {
+          await sleep(100)
+          return false
+        }
+        return true
+      })
+
+      const onStart = vi.fn()
+      const onBatchStart = await testWrapper({ beforeUpload, onStart })
+
+      expect(onStart).toHaveBeenCalledTimes(1)
+      expect(beforeUpload).toHaveBeenCalledTimes(2)
+      expect(onBatchStart).toHaveBeenCalledWith(
+        files.map(file =>
+          expect.objectContaining({
+            file,
+            parsedFile: file.name === 'light.png' ? null : file,
+          }),
+        ),
+      )
+    })
+
+    it('action delay', async () => {
+      const action = vi.fn(async () => {
+        await sleep(100)
+        return 'test'
+      })
+
+      const onBatchStart = await testWrapper({ action })
+
+      expect(action).toHaveBeenCalledTimes(2)
+      expect(onBatchStart).toHaveBeenCalledWith(batchEventFiles)
+    })
+
+    it('data delay', async () => {
+      const data = vi.fn(async () => {
+        await sleep(100)
+        return 'test'
+      }) as any
+
+      const onBatchStart = await testWrapper({ data })
+
+      expect(data).toHaveBeenCalledTimes(2)
+      expect(onBatchStart).toHaveBeenCalledWith(batchEventFiles)
+    })
+  })
+
+  it('dynamic change action in beforeUpload should work', async () => {
+    const Test = defineComponent(() => {
+      const action = ref('light')
+
+      async function beforeUpload() {
+        action.value = 'bamboo'
+        console.log('hello')
+        await sleep(100)
+        return true
+      }
+
+      return () => h(Upload, {
+        beforeUpload,
+        action: action.value,
+      })
+    })
+
+    const wrapper = mount(Test)
+
+    const input = wrapper.find('input')!
+
+    Object.defineProperty(input.element as HTMLInputElement, 'files', {
+      value: [
+        {
+          name: 'little.png',
+          toString() {
+            return this.name
+          },
+        },
+      ],
+      writable: false,
+    })
+
+    await input.trigger('change')
+
+    await sleep(200)
+
+    expect(requests[0].url).toEqual('bamboo')
+  })
+
+  it('input style defaults to display none', () => {
+    const wrapper = mount(Upload)
+    const input = wrapper.find('input')!
+
+    expect(input.element.style.display).toBe('none')
+  })
+
+  it('classNames and styles should work', () => {
+    const wrapper = mount(Upload, {
+      props: {
+        classNames: {
+          input: 'bamboo-input',
+        },
+        styles: {
+          input: {
+            color: 'red',
+          },
+        },
+      },
+    })
+    expect(wrapper.find('.bamboo-input').element).toBeTruthy()
+
+    const input = wrapper.find('.bamboo-input').element as HTMLInputElement
+    expect(input.style.color).toBe('red')
+    expect(input.style.display).toBe('none')
+  })
+
+  it('should be focusable and has role=button by default', () => {
+    const wrapper = mount(Upload)
+
+    expect(wrapper.find('span').element.tabIndex).toBe(0)
+    expect(wrapper.find('span').element.getAttribute('role')).toBe('button')
+  })
+
+  it('should not be focusable and doesn\'t have role=button with hasControlInside=true', () => {
+    const wrapper = mount(Upload, {
+      props: {
+        hasControlInside: true,
+      },
+    })
+
+    expect(wrapper.find('span').element.tabIndex).not.toBe(0)
+    expect(wrapper.find('span').element.getAttribute('role')).not.toBe('button')
   })
 })
