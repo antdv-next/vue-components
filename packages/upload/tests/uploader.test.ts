@@ -1,12 +1,19 @@
 import type { UploadProps, VcFile } from '../src/interface'
 import { format } from 'node:util'
+import { resetWarned } from '@v-c/util/dist/warning'
 import { mount } from '@vue/test-utils'
-import { fakeXhr, type FakeXMLHttpRequest, type FakeXMLHttpRequestStatic } from 'nise'
+import {
+  fakeXhr,
+  type FakeXMLHttpRequest,
+  type FakeXMLHttpRequestStatic,
+} from 'nise'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { defineComponent, h, ref } from 'vue'
 import Upload from '../src/Upload'
 
-const sleep = (timeout = 500) => new Promise(resolve => setTimeout(resolve, timeout))
+function sleep(timeout = 500) {
+  return new Promise(resolve => setTimeout(resolve, timeout))
+}
 
 // 修复 Item 构造函数的类型定义
 interface ItemInstance {
@@ -79,7 +86,9 @@ interface FileSystemItemAsync {
   error?: boolean
 }
 
-function makeFileSystemEntryAsync(item: FileSystemItemAsync): FileSystemEntryAsync {
+function makeFileSystemEntryAsync(
+  item: FileSystemItemAsync,
+): FileSystemEntryAsync {
   const isDirectory = Array.isArray(item.children)
   const ret: FileSystemEntryAsync = {
     isDirectory,
@@ -221,14 +230,18 @@ describe('uploader', () => {
 
       const input = wrapper.find('input')!.element
       expect(input.getAttribute('data-testid')).toBe('data-testid')
-      expect(input.getAttribute('data-my-custom-attr')).toBe('custom data attribute')
+      expect(input.getAttribute('data-my-custom-attr')).toBe(
+        'custom data attribute',
+      )
       expect(input.getAttribute('aria-label')).toBe('Upload a file')
       wrapper.unmount()
     })
 
     it('should pass through role attributes', () => {
       const wrapper = mount(Upload, { props: { role: 'button' } })
-      expect(wrapper.find('input')!.element.getAttribute('role')).toBe('button')
+      expect(wrapper.find('input')!.element.getAttribute('role')).toBe(
+        'button',
+      )
       wrapper.unmount()
     })
 
@@ -238,7 +251,9 @@ describe('uploader', () => {
           customProp: 'This shouldn\'t be rendered to DOM',
         },
       })
-      expect(wrapper.find('input')!.element.hasAttribute('customProp')).toBe(false)
+      expect(wrapper.find('input')!.element.hasAttribute('customProp')).toBe(
+        false,
+      )
       wrapper.unmount()
     })
 
@@ -517,7 +532,9 @@ describe('uploader', () => {
     })
 
     it('paste files with multiple false', async () => {
-      const wrapper = mount(Upload, { props: { ...props, multiple: false, pastable: true } })
+      const wrapper = mount(Upload, {
+        props: { ...props, multiple: false, pastable: true },
+      })
       const input = wrapper.find('input')!
       const files = [
         new File([''], 'success.png', { type: 'image/png' }),
@@ -616,7 +633,9 @@ describe('uploader', () => {
         resolve()
       })
 
-      const wrapper = mount(Upload, { props: { ...props, customRequest: fakeRequest } })
+      const wrapper = mount(Upload, {
+        props: { ...props, customRequest: fakeRequest },
+      })
       const input = wrapper.find('input')!
       const files = [new File([''], 'success.png', { type: 'image/png' })]
       Object.defineProperty(files, 'item', {
@@ -800,7 +819,9 @@ describe('uploader', () => {
         ],
       }
 
-      await input.trigger('drop', { dataTransfer: { items: [makeDataTransferItem(files)] } })
+      await input.trigger('drop', {
+        dataTransfer: { items: [makeDataTransferItem(files)] },
+      })
       const mockStart = vi.fn()
       handlers.onStart = mockStart
       const promises = new Promise<void>((resolve) => {
@@ -818,7 +839,9 @@ describe('uploader', () => {
         name: 'success.png',
       }
       await input.trigger('drop', {
-        dataTransfer: { items: [{ webkitGetAsEntry: () => null }, makeDataTransferItem(file)] },
+        dataTransfer: {
+          items: [{ webkitGetAsEntry: () => null }, makeDataTransferItem(file)],
+        },
       })
       const mockStart = vi.fn()
       handlers.onStart = mockStart
@@ -861,7 +884,9 @@ describe('uploader', () => {
           },
         ],
       }
-      await input.trigger('drop', { dataTransfer: { items: [makeDataTransferItemAsync(files)] } })
+      await input.trigger('drop', {
+        dataTransfer: { items: [makeDataTransferItemAsync(files)] },
+      })
       const mockStart = vi.fn()
       handlers.onStart = mockStart
 
@@ -919,7 +944,9 @@ describe('uploader', () => {
       await input.trigger('dragover')
       expect(preventDefaultSpy).toHaveBeenCalledTimes(1)
 
-      await input.trigger('drop', { dataTransfer: { items: [makeDataTransferItemAsync(files)] } })
+      await input.trigger('drop', {
+        dataTransfer: { items: [makeDataTransferItemAsync(files)] },
+      })
       const mockStart = vi.fn()
       handlers.onStart = mockStart
 
@@ -960,6 +987,7 @@ describe('uploader', () => {
     })
 
     it('accept if type is invalidate', async () => {
+      resetWarned()
       const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
       const wrapper = mount(Upload, {
@@ -1070,7 +1098,10 @@ describe('uploader', () => {
       extraProps?: Partial<UploadProps>,
     ) {
       it(desc, async () => {
-        const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+        resetWarned()
+        const errSpy = vi
+          .spyOn(console, 'error')
+          .mockImplementation((...args) => {})
 
         const wrapper = mount(Upload, {
           props: {
@@ -1091,14 +1122,12 @@ describe('uploader', () => {
         await input.trigger('change')
 
         if (errorMessage) {
-          // console.log(errSpy)
           expect(errSpy).toHaveBeenCalledWith(errorMessage)
         }
 
         const promises = new Promise<void>((resolve) => {
           setTimeout(() => {
             expect(mockStart.mock.calls.length).toBe(expectCallTimes)
-
             errSpy.mockRestore()
             resolve()
             wrapper.unmount()
@@ -1467,15 +1496,15 @@ describe('uploader', () => {
 
       async function beforeUpload() {
         action.value = 'bamboo'
-        console.log('hello')
         await sleep(100)
         return true
       }
 
-      return () => h(Upload, {
-        beforeUpload,
-        action: action.value,
-      })
+      return () =>
+        h(Upload, {
+          beforeUpload,
+          action: action.value,
+        })
     })
 
     const wrapper = mount(Test)
@@ -1543,6 +1572,8 @@ describe('uploader', () => {
     })
 
     expect(wrapper.find('span').element.tabIndex).not.toBe(0)
-    expect(wrapper.find('span').element.getAttribute('role')).not.toBe('button')
+    expect(wrapper.find('span').element.getAttribute('role')).not.toBe(
+      'button',
+    )
   })
 })
