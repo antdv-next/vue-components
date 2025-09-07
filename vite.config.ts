@@ -71,4 +71,7 @@ export default defineConfig({
       ...genListAlias(),
     ],
   },
+  optimizeDeps: {
+    include: ['classnames'],
+  },
 })
