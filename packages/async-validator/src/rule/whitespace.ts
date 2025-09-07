@@ -12,9 +12,9 @@ import { format } from '../util'
  *  @param options The validation options.
  *  @param options.messages The validation messages.
  */
-const whitespace: ExecuteRule = (rule, value, source, errors, options) => {
+const whitespace: ExecuteRule = (rule, value, _source, errors, options) => {
   if (/^\s+$/.test(value) || value === '') {
-    errors.push(format(options.messages.whitespace, rule.fullField))
+    errors.push(format((options as any).messages.whitespace, rule.fullField))
   }
 }
 

@@ -1,7 +1,7 @@
 import type { ExecuteRule } from '../interface'
 import { format } from '../util'
 
-const range: ExecuteRule = (rule, value, source, errors, options) => {
+const range: ExecuteRule = (rule, value, _source, errors, options) => {
   const len = typeof rule.len === 'number'
   const min = typeof rule.min === 'number'
   const max = typeof rule.max === 'number'
@@ -36,17 +36,17 @@ const range: ExecuteRule = (rule, value, source, errors, options) => {
   }
   if (len) {
     if (val !== rule.len) {
-      errors.push(format(options.messages[key].len, rule.fullField, rule.len))
+      errors.push(format((options as any).messages[key].len, rule.fullField, rule.len))
     }
   }
-  else if (min && !max && val < rule.min) {
-    errors.push(format(options.messages[key].min, rule.fullField, rule.min))
+  else if (min && !max && val < rule.min!) {
+    errors.push(format((options as any).messages[key].min, rule.fullField, rule.min))
   }
-  else if (max && !min && val > rule.max) {
-    errors.push(format(options.messages[key].max, rule.fullField, rule.max))
+  else if (max && !min && val > rule.max!) {
+    errors.push(format((options as any).messages[key].max, rule.fullField, rule.max))
   }
-  else if (min && max && (val < rule.min || val > rule.max)) {
-    errors.push(format(options.messages[key].range, rule.fullField, rule.min, rule.max))
+  else if (min && max && (val < rule.min! || val > rule.max!)) {
+    errors.push(format((options as any).messages[key].range, rule.fullField, rule.min, rule.max))
   }
 }
 

@@ -12,7 +12,6 @@ import type {
   ValidateFieldsError,
   ValidateMessages,
   ValidateOption,
-  ValidateResult,
   Values,
 } from './interface'
 import { messages as defaultMessages, newMessages } from './messages'
@@ -178,7 +177,7 @@ class Schema {
         })
       })
     })
-    const errorFields = {}
+    const errorFields: Record<string, any> = {}
     return asyncMap(
       series,
       options,
@@ -202,14 +201,14 @@ class Schema {
             Schema.warning('async-validator:', errorList)
           }
           if (errorList.length && rule.message !== undefined) {
-            errorList = [].concat(rule.message)
+            errorList = [].concat(rule.message as any)
           }
 
           // Fill error info
           let filledErrors = errorList.map(complementError(rule, source))
 
           if (options.first && filledErrors.length) {
-            errorFields[rule.field] = 1
+            errorFields[rule.field!] = 1
             return doIt(filledErrors)
           }
           if (!deep) {
@@ -221,18 +220,19 @@ class Schema {
             // go deeper
             if (rule.required && !data.value) {
               if (rule.message !== undefined) {
-                filledErrors = [].concat(rule.message).map(complementError(rule, source))
+                filledErrors = [].concat(rule.message as any).map(complementError(rule, source))
               }
               else if (options.error) {
-                filledErrors = [options.error(rule, format(options.messages.required, rule.field))]
+                filledErrors = [options.error(rule, format(options.messages!.required!, rule.field))]
               }
               return doIt(filledErrors)
             }
 
             let fieldsSchema: Record<string, Rule> = {}
             if (rule.defaultField) {
+              // eslint-disable-next-line array-callback-return
               Object.keys(data.value).map((key) => {
-                fieldsSchema[key] = rule.defaultField
+                fieldsSchema[key] = rule.defaultField as any
               })
             }
             fieldsSchema = {
@@ -261,12 +261,12 @@ class Schema {
               if (errs && errs.length) {
                 finalErrors.push(...errs)
               }
-              doIt(finalErrors.length ? finalErrors : null)
+              doIt((finalErrors.length ? finalErrors : null) as any)
             })
           }
         }
 
-        let res: ValidateResult
+        let res: any
         if (rule.asyncValidator) {
           res = rule.asyncValidator(rule, data.value, cb, data.source, options)
         }
@@ -282,7 +282,7 @@ class Schema {
                 throw error
               }, 0)
             }
-            cb(error.message)
+            cb((error as any).message)
           }
           if (res === true) {
             cb()
