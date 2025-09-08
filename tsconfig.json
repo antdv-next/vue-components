@@ -99,6 +99,9 @@
       ],
       "@v-c/color-picker": [
         "./packages/color-picker/src"
+      ],
+      "@v-c/overflow": [
+        "./packages/overflow/src"
       ]
     },
     "resolveJsonModule": true,

@@ -1,0 +1,27 @@
+{
+  "name": "@v-c/overflow",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./dist/*": "./dist/*",
+    "./package.json": "./package.json"
+  },
+  "main": "index.ts",
+  "scripts": {
+    "build": "vite build"
+  },
+  "peerDependencies": {
+    "vue": "^3.0.0"
+  },
+  "dependencies": {
+    "@v-c/util": "workspace:*",
+    "@v-c/resize-observer": "workspace:*",
+    "classnames": "^2.5.1"
+  }
+}

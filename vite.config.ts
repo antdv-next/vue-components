@@ -38,6 +38,7 @@ const comps = [
   'segmented',
   'fast-color',
   'color-picker',
+  'overflow',
 ]
 
 export function genListAlias() {
