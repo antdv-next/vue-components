@@ -1,0 +1,28 @@
+{
+  "name": "@v-c/menu",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "menu ui component for vue",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./dist/*": "./dist/*",
+    "./package.json": "./package.json"
+  },
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "vite build"
+  },
+  "peerDependencies": {
+    "vue": "^3.0.0"
+  },
+  "dependencies": {
+    "@v-c/util": "workspace:*",
+    "@v-c/trigger": "workspace:*",
+    "@v-c/overflow": "workspace:*",
+    "classnames": "^2.5.1"
+  }
+}

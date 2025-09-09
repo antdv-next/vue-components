@@ -102,6 +102,9 @@
       ],
       "@v-c/overflow": [
         "./packages/overflow/src"
+      ],
+      "@v-c/menu": [
+        "./packages/menu/src"
       ]
     },
     "resolveJsonModule": true,
