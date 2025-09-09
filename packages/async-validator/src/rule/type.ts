@@ -85,15 +85,15 @@ const type: ExecuteRule = (rule, value, source, errors, options) => {
     'url',
     'hex',
   ]
-  const ruleType = rule.type
+  const ruleType = rule.type!
   if (custom.includes(ruleType)) {
-    if (!types[ruleType](value)) {
-      errors.push(format(options.messages.types[ruleType], rule.fullField, rule.type))
+    if (!(types as any)[ruleType](value)) {
+      errors.push(format((options as any).messages.types[ruleType], rule.fullField, rule.type))
     }
     // straight typeof check
   }
-  else if (ruleType && typeof value !== rule.type) {
-    errors.push(format(options.messages.types[ruleType], rule.fullField, rule.type))
+  else if (ruleType && typeof value !== rule.type!) {
+    errors.push(format((options as any).messages.types[ruleType], rule.fullField, rule.type))
   }
 }
 

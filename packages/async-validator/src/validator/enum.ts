@@ -6,7 +6,7 @@ const ENUM = 'enum' as const
 
 const enumerable: ExecuteValidator = (rule, value, callback, source, options) => {
   const errors: string[] = []
-  const validate = rule.required || (!rule.required && source.hasOwnProperty(rule.field))
+  const validate = rule.required || (!rule.required && source.hasOwnProperty(rule.field!))
   if (validate) {
     if (isEmptyValue(value) && !rule.required) {
       return callback()

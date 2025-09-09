@@ -12,8 +12,9 @@ import type {
 
 const formatRegExp = /%[sdj%]/g
 
-declare let ASYNC_VALIDATOR_NO_WARNING
+declare let ASYNC_VALIDATOR_NO_WARNING: any
 
+// eslint-disable-next-line import/no-mutable-exports
 export let warning: (type: string, errors: SyncErrorType[]) => void = () => {}
 
 // don't print warning message when in production env or node runtime
@@ -39,10 +40,10 @@ if (
 
 export function convertFieldsError(errors: ValidateError[]): Record<string, ValidateError[]> {
   if (!errors || !errors.length)
-    return null
-  const fields = {}
+    return null as any
+  const fields: Record<string, any> = {}
   errors.forEach((error) => {
-    const field = error.field
+    const field = error.field!
     fields[field] = fields[field] || []
     fields[field].push(error)
   })
@@ -104,7 +105,7 @@ export function isEmptyValue(value: Value, type?: string) {
   if (type === 'array' && Array.isArray(value) && !value.length) {
     return true
   }
-  if (isNativeStringType(type) && typeof value === 'string' && !value) {
+  if (isNativeStringType(type!) && typeof value === 'string' && !value) {
     return true
   }
   return false
@@ -247,7 +248,7 @@ function isErrorObj(obj: ValidateError | string | (() => string)): obj is Valida
 function getValue(value: Values, path: string[]) {
   let v = value
   for (let i = 0; i < path.length; i++) {
-    if (v == undefined) {
+    if (v === undefined || v === null) {
       return v
     }
     v = v[path[i]]
@@ -289,7 +290,7 @@ export function deepMerge<T extends object>(target: T, source: Partial<T>): T {
           }
         }
         else {
-          target[s] = value
+          (target as any)[s] = value
         }
       }
     }

@@ -5,7 +5,7 @@ import { isEmptyValue } from '../util'
 const date: ExecuteValidator = (rule, value, callback, source, options) => {
   // console.log('integer rule called %j', rule);
   const errors: string[] = []
-  const validate = rule.required || (!rule.required && source.hasOwnProperty(rule.field))
+  const validate = rule.required || (!rule.required && source.hasOwnProperty(rule.field!))
   // console.log('validate on %s value', value);
   if (validate) {
     if (isEmptyValue(value, 'date') && !rule.required) {

@@ -2,7 +2,7 @@ import type { VNode } from 'vue'
 import type { AjaxUploaderExpose, BeforeUploadFileType, UploadProgressEvent, UploadProps, UploadRequestError, UploadRequestOption, VcFile } from './interface'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
 import clsx from 'classnames'
-import { computed, defineComponent, onMounted, ref } from 'vue'
+import { computed, defineComponent, onMounted, onUnmounted, onUpdated, ref } from 'vue'
 import attrAccept from './attrAccept'
 import { generatorUploadProps } from './interface'
 import defaultRequest from './request'
@@ -23,10 +23,6 @@ const AjaxUploader = defineComponent<UploadProps>({
   setup(props, { attrs, expose, slots }) {
     const uid = ref(getUid())
     let _isMounted = false
-
-    onMounted(() => {
-      _isMounted = true
-    })
 
     const reqs: Record<string, any> = {}
     const fileInputRef = ref<HTMLInputElement>()
@@ -157,7 +153,7 @@ const AjaxUploader = defineComponent<UploadProps>({
         // string type is from legacy `transformFile`.
         // Not sure if this will work since no related test case works with it
         = (typeof transformedFile === 'object' || typeof transformedFile === 'string')
-        && transformedFile
+          && transformedFile
           ? transformedFile
           : file
 
@@ -289,9 +285,53 @@ const AjaxUploader = defineComponent<UploadProps>({
             onMouseEnter: props.onMouseEnter,
             onMouseLeave: props.onMouseLeave,
             onDrop: onFileDrop,
-            onDragOver: onFileDragOver,
+            onDragover: onFileDragOver,
             tabIndex: props.hasControlInside ? undefined : '0',
           }
+    })
+
+    const onFilePaste = async (e: ClipboardEvent) => {
+      const { pastable } = props
+
+      if (!pastable) {
+        return
+      }
+
+      if (e.type === 'paste') {
+        const clipboardData = (e as ClipboardEvent).clipboardData
+        return onDataTransferFiles(clipboardData, () => {
+          e.preventDefault()
+        })
+      }
+    }
+
+    let prevPastable: boolean | undefined
+
+    onMounted(() => {
+      _isMounted = true
+
+      if (props.pastable) {
+        document.addEventListener('paste', onFilePaste)
+      }
+
+      prevPastable = props.pastable
+    })
+
+    onUpdated(() => {
+      const pastable = props.pastable
+      if (pastable && !prevPastable) {
+        document.addEventListener('paste', onFilePaste)
+      }
+      else if (!pastable && prevPastable) {
+        document.removeEventListener('paste', onFilePaste)
+      }
+      prevPastable = pastable
+    })
+
+    onUnmounted(() => {
+      _isMounted = false
+      abort()
+      document.removeEventListener('paste', onFilePaste)
     })
 
     return () => {

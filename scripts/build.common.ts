@@ -21,8 +21,11 @@ export function buildCommon(opt: BuildCommonOptions) {
   if (dtsOpen) {
     plugins.push(dts({
       entryRoot: opt.inputDir ?? 'src',
-      outDir: 'dist',
-      exclude: ['**/tests/**/*', '**/*.test.ts', '**/*.test.tsx'],
+      exclude: [
+        '**/tests/**/*',
+        '**/*.test.ts',
+        '**/*.test.tsx',
+      ],
     }))
   }
   return {
