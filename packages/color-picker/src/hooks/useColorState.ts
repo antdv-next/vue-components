@@ -1,7 +1,7 @@
 import type { ComputedRef } from 'vue'
 import type { Color } from '../color'
 import type { ColorGenInput } from '../interface'
-import useMergedState from '@v-c/util/dist/hooks/useMergedState.ts'
+import useMergedState from '@v-c/util/dist/hooks/useMergedState'
 import { computed, ref } from 'vue'
 import { generateColor } from '../util'
 

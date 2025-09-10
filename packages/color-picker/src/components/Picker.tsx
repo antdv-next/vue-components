@@ -1,6 +1,6 @@
 import type { PropType } from 'vue'
 import type { BaseColorPickerProps, TransformOffset } from '../interface'
-import useEvent from '@v-c/util/dist/hooks/useEvent.ts'
+import useEvent from '@v-c/util/dist/hooks/useEvent'
 import { defineComponent, ref } from 'vue'
 import useColorDrag from '../hooks/useColorDrag'
 
