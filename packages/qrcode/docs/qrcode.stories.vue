@@ -1,14 +1,19 @@
 <script setup>
-import { QRCodeCanvas, QRCodeSVG } from '../src'
+import Basic from './basic.vue'
+import CustomStyle from './customStyle.vue'
+import WithLogo from './withlogo.vue'
 </script>
 
 <template>
   <Story title="QRCode">
-    <Variant title="canvas">
-      <QRCodeCanvas value="https://www.baidu.com" />
+    <Variant title="basic">
+      <Basic />
     </Variant>
-    <Variant title="svg">
-      <QRCodeSVG value="https://www.baidu.com" />
+    <Variant title="customStyle">
+      <CustomStyle />
+    </Variant>
+    <Variant title="withLogo">
+      <WithLogo />
     </Variant>
   </Story>
 </template>

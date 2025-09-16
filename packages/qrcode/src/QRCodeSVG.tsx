@@ -1,5 +1,7 @@
-import { defineComponent, watchEffect } from 'vue'
 import type { VNode } from 'vue'
+import { defineComponent, watchEffect } from 'vue'
+import { useQRCode } from './hooks/useQRCode'
+import { qrProps } from './interface.ts'
 import {
   DEFAULT_BACKGROUND_COLOR,
   DEFAULT_FRONT_COLOR,
@@ -10,8 +12,6 @@ import {
   excavateModules,
   generatePath,
 } from './utils'
-import { useQRCode } from './hooks/useQRCode'
-import { qrProps } from './interface.ts'
 
 export const QRCodeSVG = defineComponent({
   name: 'QRCodeSVG',

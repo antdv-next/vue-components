@@ -1,7 +1,7 @@
 {
   "name": "@v-c/qrcode",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -14,7 +14,9 @@
   "description": "",
   "author": "",
   "license": "MIT",
-  "keywords": ["qrcode"],
+  "keywords": [
+    "qrcode"
+  ],
   "main": "index.js",
   "scripts": {
     "build": "vite build",

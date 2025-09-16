@@ -1,6 +1,6 @@
+import type { ErrorCorrectionLevel, ImageSettings } from '../interface'
 import { computed } from 'vue'
 import { QrCode, QrSegment } from '../libs/qrcodegen'
-import type { ErrorCorrectionLevel, ImageSettings } from '../interface'
 import { ERROR_LEVEL_MAP, getImageSettings, getMarginSize } from '../utils'
 
 export function useQRCode({

@@ -23,6 +23,7 @@ export const QRCodeCanvas = defineComponent({
     const _canvas = shallowRef<HTMLCanvasElement | null>(null)
     const _image = shallowRef<HTMLImageElement | null>(null)
     const isImgLoaded = shallowRef(false)
+		const calculated = shallowRef<ReturnType<typeof useQRCode>['calculatedImageSettings']>()
     let img: VNode | null = null
 
     watchEffect(() => {
@@ -105,24 +106,7 @@ export const QRCodeCanvas = defineComponent({
             calculatedImageSettings.h,
           )
         }
-      }
-
-      if (imgSrc.value != null) {
-        img = (
-          <img
-            src={imgSrc.value}
-            key={imgSrc.value}
-            style={{ display: 'none' }}
-            onLoad={() => {
-              isImgLoaded.value = true
-            }}
-            ref={_image}
-            // when crossOrigin is not set, the image will be tainted
-            // and the canvas cannot be exported to an image
-            crossorigin={calculatedImageSettings?.crossOrigin}
-            alt=""
-          />
-        )
+				calculated.value = calculatedImageSettings
       }
     }, { flush: 'post' })
 
@@ -138,6 +122,24 @@ export const QRCodeCanvas = defineComponent({
     return () => {
       const { size = DEFAULT_SIZE } = props
       const canvasStyle = { height: `${size}px`, width: `${size}px` }
+
+			if (imgSrc.value != null) {
+				img = (
+					<img
+						src={imgSrc.value}
+						key={imgSrc.value}
+						style={{ display: 'none' }}
+						onLoad={() => {
+							isImgLoaded.value = true
+						}}
+						ref={_image}
+						// when crossOrigin is not set, the image will be tainted
+						// and the canvas cannot be exported to an image
+						crossorigin={calculated.value?.crossOrigin}
+						alt=""
+					/>
+				)
+			}
       return (
         <>
           <canvas
