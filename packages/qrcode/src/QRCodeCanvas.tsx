@@ -37,9 +37,10 @@ export const QRCodeCanvas = defineComponent({
         size = DEFAULT_SIZE,
         bgColor = DEFAULT_BACKGROUND_COLOR,
         fgColor = DEFAULT_FRONT_COLOR,
+				boostLevel,
       } = props
 
-      const { margin, cells, numCells, calculatedImageSettings } = useQRCode({ value, level, minVersion, includeMargin, marginSize, imageSettings, size })
+      const { margin, cells, numCells, calculatedImageSettings } = useQRCode({ value, level, minVersion, includeMargin, marginSize, imageSettings, size, boostLevel })
       if (_canvas.value != null) {
         const canvas = _canvas.value
 
@@ -120,7 +121,7 @@ export const QRCodeCanvas = defineComponent({
       },
     })
     return () => {
-      const { size = DEFAULT_SIZE } = props
+      const { size = DEFAULT_SIZE, title } = props
       const canvasStyle = { height: `${size}px`, width: `${size}px` }
 
 			if (imgSrc.value != null) {
@@ -147,6 +148,7 @@ export const QRCodeCanvas = defineComponent({
             style={[canvasStyle, attrs.style as CSSProperties]}
             ref={_canvas}
             role="img"
+						title={title}
           />
           {img}
         </>

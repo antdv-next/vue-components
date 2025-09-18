@@ -11,6 +11,7 @@ export function useQRCode({
   marginSize,
   imageSettings,
   size,
+  boostLevel,
 }: {
   value: string
   level: ErrorCorrectionLevel
@@ -19,13 +20,21 @@ export function useQRCode({
   marginSize?: number
   imageSettings?: ImageSettings
   size: number
+  boostLevel?: boolean
 }) {
   const qrcode = computed(() => {
-    const segments = QrSegment.makeSegments(value)
+    const values = Array.isArray(value) ? value : [value]
+    const segments = values.reduce<QrSegment[]>((acc, val) => {
+      acc.push(...QrSegment.makeSegments(val))
+      return acc
+    }, [])
     return QrCode.encodeSegments(
       segments,
       ERROR_LEVEL_MAP[level],
       minVersion,
+      undefined,
+      undefined,
+      boostLevel,
     )
   })
 

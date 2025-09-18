@@ -31,6 +31,7 @@ export const QRCodeSVG = defineComponent({
         minVersion = DEFAULT_MINVERSION,
         marginSize,
         imageSettings,
+        boostLevel,
       } = props
 
       const { margin, cells, numCells: getNumCells, calculatedImageSettings } = useQRCode({
@@ -41,6 +42,7 @@ export const QRCodeSVG = defineComponent({
         marginSize,
         imageSettings,
         size,
+        boostLevel,
       })
 
       let cellsToDraw = cells

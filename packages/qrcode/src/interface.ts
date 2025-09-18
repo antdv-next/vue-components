@@ -1,4 +1,4 @@
-import type { ExtractPropTypes } from 'vue'
+import type { ExtractPropTypes, PropType } from 'vue'
 import type { Ecc, QrCode } from './libs/qrcodegen'
 import { objectType, stringType } from '@v-c/util/dist/type'
 
@@ -24,7 +24,8 @@ export interface ImageSettings {
 
 export function qrProps() {
   return {
-    value: { type: String, required: true },
+    value: { type: [String, Array] as PropType<string | string[]>, required: true },
+    boostLevel: Boolean,
     size: { type: Number, default: 160 },
     level: stringType<ErrorCorrectionLevel>('M'),
     bgColor: String,
