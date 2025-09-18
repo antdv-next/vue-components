@@ -29,7 +29,7 @@ export interface PropOptions<T = any, D = T> {
   validator?: (value: unknown) => boolean
 }
 
-declare type VNodeChildAtom = Component | VNode | string | number | boolean | null | undefined | void
+declare type VNodeChildAtom = Component | VNode | string | number | null | undefined | void
 
 export type VueNode = VNodeChildAtom | VNodeChildAtom[] | VNode
 
