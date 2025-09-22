@@ -30,6 +30,8 @@ export interface RangeConfig {
   maxCount?: number
 }
 
+type ValueType = number | number[]
+
 function sliderProps() {
   return {
     prefixCls: { type: String, default: 'vc-slider' },
@@ -43,8 +45,8 @@ function sliderProps() {
     min: { type: Number, default: 0 },
     max: { type: Number, default: 100 },
     step: { type: Number, default: 1 },
-    value: [Number, Array] as PropType<number | number[]>,
-    defaultValue: [Number, Array] as PropType<number | number[]>,
+    value: [Number, Array] as PropType<ValueType>,
+    defaultValue: [Number, Array] as PropType<ValueType>,
     range: [Boolean, Object] as PropType<boolean | RangeConfig>,
     count: Number,
     allowCross: { type: Boolean, default: true },
@@ -63,11 +65,19 @@ function sliderProps() {
     handleRender: Function,
     activeHandleRender: Function,
     track: { type: Boolean, default: true },
-    tabIndex: { type: [Number, Array] as PropType<number | number[]>, default: 0 },
+    tabIndex: { type: [Number, Array] as PropType<ValueType>, default: 0 },
     ariaLabelForHandle: [String, Array] as PropType<string | string[]>,
     ariaLabelledByForHandle: [String, Array] as PropType<string | string[]>,
     ariaRequired: Boolean,
     ariaValueTextFormatterForHandle: [Function, Array] as PropType<AriaValueFormat | AriaValueFormat[]>,
+    onFocus: Function as PropType<(e: FocusEvent) => void>,
+    onBlur: Function as PropType<(e: FocusEvent) => void>,
+    onChange: Function as PropType<(value: ValueType) => void>,
+    /** @deprecated It's always better to use `onChange` instead */
+    onBeforeChange: Function as PropType<(value: ValueType) => void>,
+    /** @deprecated Use `onChangeComplete` instead */
+    onAfterChange: Function as PropType<(value: ValueType) => void>,
+    onChangeComplete: Function as PropType<(value: ValueType) => void>,
   }
 }
 export type SliderProps = Partial<ExtractPropTypes<ReturnType<typeof sliderProps>>>
@@ -102,7 +112,7 @@ export default defineComponent({
     const mergedStep = shallowRef(1)
     const markList = ref<InternalMarkObj[]>([])
 
-    const mergedValue = ref<number | number[]>(props.defaultValue! || props.value!)
+    const mergedValue = ref<ValueType>(props.defaultValue! || props.value!)
     const rawValues = ref<number[] | ComputedRef<number[]>>([])
     const getRange = ref()
     const getOffset = ref()
