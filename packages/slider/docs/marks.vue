@@ -37,7 +37,16 @@ function log(value) {
         :default-value="20"
         @change="log"
         @change-complete="(v) => console.log('AfterChange', v)"
-      />
+      >
+        <template #mark="{ point, label }">
+          <template v-if="point === 100">
+            <strong>{{ label }}</strong>
+          </template>
+          <template v-else>
+            {{ label }}
+          </template>
+        </template>
+      </Slider>
     </div>
 
     <div :style="style">

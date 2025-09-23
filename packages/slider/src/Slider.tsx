@@ -1,4 +1,4 @@
-import type { ComputedRef, CSSProperties, ExtractPropTypes, PropType, Ref } from 'vue'
+import type { ComputedRef, CSSProperties, ExtractPropTypes, PropType, Ref, SlotsType } from 'vue'
 import type { HandlesRef } from './Handles'
 import type {
   AriaValueFormat,
@@ -93,7 +93,10 @@ export default defineComponent({
     ...sliderProps(),
   },
   emits: ['focus', 'blur', 'change', 'beforeChange', 'afterChange', 'changeComplete'],
-  setup(props, { attrs, emit, expose }) {
+  slots: Object as SlotsType<{
+    mark: ({ point: number, label: unknown }) => any
+  }>,
+  setup(props, { attrs, emit, expose, slots }) {
     const handlesRef = ref<HandlesRef>()
     const containerRef = ref<HTMLDivElement>()
 
@@ -389,7 +392,6 @@ export default defineComponent({
       }
 
       const nextValue = mergedMin.value + percent * (mergedMax.value - mergedMin.value)
-      console.log('click', nextValue, getOffset.value.formatValue(nextValue))
       changeToCloseValue(getOffset.value.formatValue(nextValue), e)
     }
 
@@ -430,7 +432,6 @@ export default defineComponent({
     })
 
     const onStartMove: OnStartMove = (e, valueIndex) => {
-      console.log('onStartMove-valueIndex', valueIndex)
       onStartDrag(e, valueIndex)
 
       emit('beforeChange', getTriggerValue(rawValues.value))
@@ -584,7 +585,7 @@ export default defineComponent({
             onDelete={getRange.value.rangeEditable ? onDelete : () => {}}
           />
 
-          <Marks prefixCls={prefixCls} marks={markList.value} onClick={changeToCloseValue} />
+          <Marks prefixCls={prefixCls} marks={markList.value} onClick={changeToCloseValue} v-slots={slots} />
         </div>
       )
     }

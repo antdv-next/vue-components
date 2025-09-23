@@ -16,7 +16,7 @@ export interface MarksProps {
   onClick?: (value: number) => void
 }
 
-const Marks: FunctionalComponent<MarksProps> = (props, { emit }) => {
+const Marks: FunctionalComponent<MarksProps> = (props, { emit, slots }) => {
   const { prefixCls, marks = [] } = props
 
   const markPrefixCls = `${prefixCls}-mark`
@@ -30,7 +30,7 @@ const Marks: FunctionalComponent<MarksProps> = (props, { emit }) => {
     <div class={markPrefixCls}>
       {marks.map(({ value, style, label }) => (
         <Mark key={value} prefixCls={markPrefixCls} style={style} value={value} onClick={() => emit('click', value)}>
-          {label}
+          {slots.mark?.({ point: value, label }) || label}
         </Mark>
       ))}
     </div>

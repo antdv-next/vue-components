@@ -47,19 +47,16 @@ export default defineComponent({
 
     // ============================ Events ============================
     const onInternalStartMove = (e: MouseEvent | TouchEvent) => {
-      console.log('emit-start')
       if (!disabled) {
         emit('startMove', e, props.valueIndex)
       }
     }
 
     const onInternalFocus = (e: FocusEvent) => {
-      console.log('emit-focus')
       emit('focus', e, props.valueIndex)
     }
 
     const onInternalMouseEnter = (e: MouseEvent) => {
-      console.log('emit-enter')
       emit('mouseenter', e, props.valueIndex)
     }
 
@@ -216,7 +213,7 @@ export default defineComponent({
           draggingDelete,
           node: handleNode,
         }
-        console.log('render', renderProps)
+
         const RenderNode = () => render(renderProps)
         return <RenderNode />
       }
