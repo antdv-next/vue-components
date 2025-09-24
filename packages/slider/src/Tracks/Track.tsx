@@ -36,8 +36,6 @@ const Track = defineComponent({
     }
 
     // ============================ Render ============================
-    const positionStyle: CSSProperties = {}
-
     return () => {
       const { prefixCls, index, onStartMove, replaceCls, start, end } = props
 
@@ -55,6 +53,8 @@ const Track = defineComponent({
             },
             classNames.track,
           )
+
+      const positionStyle: CSSProperties = {}
       switch (direction.value) {
         case 'rtl':
           positionStyle.right = `${offsetStart * 100}%`
