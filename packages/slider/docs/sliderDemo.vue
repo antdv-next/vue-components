@@ -80,6 +80,22 @@ function onDynamicStepChange(e: any) {
   dynamicStep.value = +e.target.value || 1
 }
 
+// 新增的data refs用于替换default-value
+const data1 = ref(50)
+const data2 = ref(100)
+const data3 = ref(100)
+const data4 = ref(30)
+
+const data5 = ref(50)
+const data6 = ref(30)
+const data7 = ref(30)
+const data8 = ref(30)
+const data9 = ref(50)
+const data10 = ref(null)
+const data11 = ref(null)
+const data12 = ref(20)
+const data13 = ref(0)
+
 const labelStyle = { minWidth: '60px', display: 'inline-block' }
 const inputStyle = { marginBottom: '10px' }
 </script>
@@ -88,33 +104,33 @@ const inputStyle = { marginBottom: '10px' }
   <div>
     <div :style="style">
       <p>Basic Slider</p>
-      <Slider @change="log" />
+      <Slider v-model:value="data5" @change="log" />
     </div>
     <div :style="style">
       <p>Basic Slider, `startPoint=50`</p>
-      <Slider :start-point="50" @change="log" />
+      <Slider v-model:value="data9" :start-point="50" @change="log" />
     </div>
     <div :style="style">
       <p>Slider reverse</p>
-      <Slider reverse :min="20" :max="60" @change="log" />
+      <Slider v-model:value="data13" reverse :min="20" :max="60" @change="log" />
     </div>
     <div :style="style">
       <p>Basic Slider，`step=20`</p>
-      <Slider :step="20" :default-value="50" @before-change="log" />
+      <Slider v-model:value="data1" :step="20" @before-change="log" />
     </div>
     <div :style="style">
       <p>Basic Slider，`step=20, dots`</p>
-      <Slider dots :step="20" :default-value="100" @change-complete="log" />
+      <Slider v-model:value="data2" dots :step="20" @change-complete="log" />
     </div>
     <div :style="style">
       <p>
-        Basic Slider，`step=20, dots, dotStyle={"borderColor: 'orange'"}, activeDotStyle=
-        {"borderColor: 'yellow'"}`
+        Basic Slider，`step=20, dots, dotStyle={"borderColor: 'orange'"}, activeDotStyle= {"borderColor: 'yellow'"}`
       </p>
+      />
       <Slider
+        v-model:value="data3"
         dots
         :step="20"
-        :default-value="100"
         :dot-style="{ borderColor: 'orange' }"
         :active-dot-style="{ borderColor: 'yellow' }"
         @change-complete="log"
@@ -133,7 +149,7 @@ const inputStyle = { marginBottom: '10px' }
         Slider with custom handle and track style.<strong>(old api, will be deprecated)</strong>
       </p>
       <Slider
-        :default-value="30"
+        v-model:value="data4"
         :rail-style="{ backgroundColor: 'red', height: 10 }"
         :track-style="{ backgroundColor: 'blue', height: 10 }"
         :handle-style="{
@@ -151,7 +167,7 @@ const inputStyle = { marginBottom: '10px' }
         Slider with custom handle and track style.<strong>(The recommended new api)</strong>
       </p>
       <Slider
-        :default-value="30"
+        v-model:value="data6"
         :track-style="{ backgroundColor: 'blue', height: 10 }"
         :handle-style="{
           borderColor: 'blue',
@@ -170,7 +186,7 @@ const inputStyle = { marginBottom: '10px' }
         <strong>(The recommended new api)</strong>
       </p>
       <Slider
-        :default-value="30"
+        v-model:value="data4"
         :track-style="{ backgroundColor: 'blue', height: 10 }"
         reverse
         :handle-style="{
@@ -186,16 +202,16 @@ const inputStyle = { marginBottom: '10px' }
     </div>
     <div :style="style">
       <p>Basic Slider, disabled</p>
-      <Slider disabled @change="log" />
+      <Slider v-model:value="data12" disabled @change="log" />
     </div>
     <div :style="style">
       <p>Controlled Slider</p>
-      <Slider :value="50" />
+      <Slider v-model:value="data5" />
     </div>
     <div :style="style">
       <p>Customized Slider</p>
       <Slider
-        :value="customizedValue"
+        v-model:value="customizedValue"
         @change="onCustomizedSliderChange"
         @change-complete="onCustomizedSliderAfterChange"
       />
@@ -204,7 +220,7 @@ const inputStyle = { marginBottom: '10px' }
       <p>Slider with null value and reset button</p>
       <div>
         <Slider
-          :value="nullableSliderValue"
+          v-model:value="nullableSliderValue"
           @change="onNullableSliderChange"
           @change-complete="onNullableSliderAfterChange"
         />
@@ -216,7 +232,7 @@ const inputStyle = { marginBottom: '10px' }
     <div :style="style">
       <p>Range Slider with null value and reset button</p>
       <div>
-        <Slider range :value="nullableRangeValue" @change="setNullableRangeValue" />
+        <Slider v-model:value="nullableRangeValue" range @change="setNullableRangeValue" />
         <button type="button" @click="resetNullableRange">
           Reset
         </button>
@@ -255,7 +271,7 @@ const inputStyle = { marginBottom: '10px' }
         <br>
         <br>
         <Slider
-          :value="dynamicValue"
+          v-model:value="dynamicValue"
           :min="dynamicMin"
           :max="dynamicMax"
           :step="dynamicStep"

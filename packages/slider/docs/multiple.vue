@@ -8,10 +8,6 @@ const style: CSSProperties = {
   margin: '50px',
 }
 
-// const NodeWrapper = ({ children }: { children: React.ReactElement }) => {
-//   return <div>{React.cloneElement(children, {}, <div>TOOLTIP</div>)}</div>;
-// };
-
 function NodeWrapper(props: any): VNode {
   return h('div', {}, [
     h('slot', {}, { default: () => props.node }),
@@ -28,10 +24,10 @@ const state = ref([0, 50, 80])
   <div>
     <div :style="style">
       <Slider
+        v-model:value="state"
         range
         :min="0"
         :max="100"
-        :value="state"
         :styles="{
           tracks: {
             background: `linear-gradient(to right, blue, red)`,

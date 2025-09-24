@@ -5,7 +5,7 @@ import { computed } from 'vue'
 type FormatRangeValue = (value: number) => number
 
 /** Format value align with step */
-type FormatStepValue = (value: number) => number
+type FormatStepValue = (value: number) => number | null
 
 /** Format value align with step & marks */
 type FormatValue = (value: number) => number
@@ -32,59 +32,58 @@ export type OffsetValues = (
 export default function useOffset(
   min: number,
   max: number,
-  step: number,
+  step: number | null,
   markList: InternalMarkObj[],
   allowCross: boolean,
-  pushable: false | number,
+  pushable: false | number | null,
 ): [FormatValue, OffsetValues] {
   const formatRangeValue = computed<FormatRangeValue>(() => {
     return (val: number) => Math.max(min, Math.min(max, val))
   }).value
 
-  const formatStepValue = computed<FormatStepValue>(() => {
-    return (val: number) => {
-      if (step !== null) {
-        const stepValue = min + Math.round((formatRangeValue(val) - min) / step) * step
+  const formatStepValue: FormatStepValue = (val: number) => {
+    if (step !== null) {
+      const stepValue = min + Math.round((formatRangeValue(val) - min) / step) * step
 
-        // Cut number in case to be like 0.30000000000000004
-        const getDecimal = (num: number) => (String(num).split('.')[1] || '').length
-        const maxDecimal = Math.max(getDecimal(step), getDecimal(max), getDecimal(min))
-        const fixedValue = Number(stepValue.toFixed(maxDecimal))
+      // Cut number in case to be like 0.30000000000000004
+      const getDecimal = (num: number) => (String(num).split('.')[1] || '').length
+      const maxDecimal = Math.max(getDecimal(step), getDecimal(max), getDecimal(min))
+      const fixedValue = Number(stepValue.toFixed(maxDecimal))
 
-        return min <= fixedValue && fixedValue <= max ? fixedValue : null
-      }
-      return null
+      return min <= fixedValue && fixedValue <= max ? fixedValue : null
     }
-  }).value
+    return null
+  }
 
-  const formatValue = computed<FormatValue>(() => {
-    return (val: number) => {
-      const formatNextValue = formatRangeValue(val)
+  const formatValue = (val: number) => {
+    const formatNextValue = formatRangeValue(val)
 
-      // List align values
-      const alignValues = markList.map<number>(mark => mark.value)
-      if (step !== null) {
-        alignValues.push(formatStepValue(val))
+    // List align values
+    const alignValues = markList.map<number>(mark => mark && mark.value)
+    if (step !== null) {
+      const stepValue = formatStepValue(val)
+      if (stepValue !== null) {
+        alignValues.push(stepValue)
       }
-
-      // min & max
-      alignValues.push(min, max)
-
-      // Align with marks
-      let closeValue = alignValues[0]
-      let closeDist = max - min
-
-      alignValues.forEach((alignValue) => {
-        const dist = Math.abs(formatNextValue - alignValue)
-        if (dist <= closeDist) {
-          closeValue = alignValue
-          closeDist = dist
-        }
-      })
-
-      return closeValue
     }
-  }).value
+
+    // min & max
+    alignValues.push(min, max)
+
+    // Align with marks
+    let closeValue = alignValues[0]
+    let closeDist = max - min
+
+    alignValues.forEach((alignValue) => {
+      const dist = Math.abs(formatNextValue - alignValue)
+      if (dist <= closeDist) {
+        closeValue = alignValue
+        closeDist = dist
+      }
+    })
+
+    return closeValue
+  }
 
   // ========================== Offset ==========================
   // Single Value
@@ -106,16 +105,25 @@ export default function useOffset(
       potentialValues.push(min, max)
 
       // In case origin value is align with mark but not with step
-      potentialValues.push(formatStepValue(originValue))
+      const originStepValue = formatStepValue(originValue)
+      if (originStepValue !== null) {
+        potentialValues.push(originStepValue)
+      }
 
       // Put offset step value also
       const sign = offset > 0 ? 1 : -1
 
       if (mode === 'unit') {
-        potentialValues.push(formatStepValue(originValue + sign * step))
+        const allStepValues = formatStepValue(originValue + sign * step)
+        if (allStepValues !== null) {
+          potentialValues.push(allStepValues)
+        }
       }
       else {
-        potentialValues.push(formatStepValue(targetDistValue))
+        const targetStepValue = formatStepValue(targetDistValue)
+        if (targetStepValue !== null) {
+          potentialValues.push(targetStepValue)
+        }
       }
 
       // Find close one

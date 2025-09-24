@@ -30,6 +30,15 @@ export interface RangeConfig {
   maxCount?: number
 }
 
+export interface RenderProps {
+  index: number
+  prefixCls: string
+  value: number
+  dragging: boolean
+  draggingDelete: boolean
+  node: any
+}
+
 type ValueType = number | number[]
 
 function sliderProps() {
@@ -44,8 +53,8 @@ function sliderProps() {
     autoFocus: Boolean,
     min: { type: Number, default: 0 },
     max: { type: Number, default: 100 },
-    step: { type: Number, default: 1 },
-    value: [Number, Array] as PropType<ValueType>,
+    step: { type: [Number, null], default: 1 },
+    value: [Number, Array, null] as PropType<ValueType | null>,
     defaultValue: [Number, Array] as PropType<ValueType>,
     range: [Boolean, Object] as PropType<boolean | RangeConfig>,
     count: Number,
@@ -62,8 +71,8 @@ function sliderProps() {
     activeDotStyle: [Object, Function] as PropType<Record<string, any> | ((dotValue: number) => Record<string, any>)>,
     marks: Object as PropType<Record<string | number, any | MarkObj>>,
     dots: Boolean,
-    handleRender: Function,
-    activeHandleRender: Function,
+    handleRender: Function as PropType<(props: RenderProps) => any>,
+    activeHandleRender: Function as PropType<(props: RenderProps) => any>,
     track: { type: Boolean, default: true },
     tabIndex: { type: [Number, Array] as PropType<ValueType>, default: 0 },
     ariaLabelForHandle: [String, Array] as PropType<string | string[]>,
@@ -94,7 +103,7 @@ export default defineComponent({
   },
   emits: ['focus', 'blur', 'change', 'beforeChange', 'afterChange', 'changeComplete'],
   slots: Object as SlotsType<{
-    mark: ({ point: number, label: unknown }) => any
+    mark: ({ point, label }: { point: number, label: unknown }) => any
   }>,
   setup(props, { attrs, emit, expose, slots }) {
     const handlesRef = ref<HandlesRef>()
@@ -112,10 +121,10 @@ export default defineComponent({
 
     const mergedMin = shallowRef(0)
     const mergedMax = shallowRef(100)
-    const mergedStep = shallowRef(1)
+    const mergedStep = shallowRef<number | null>(1)
     const markList = ref<InternalMarkObj[]>([])
 
-    const mergedValue = ref<ValueType>(props.defaultValue! || props.value!)
+    const mergedValue = ref<ValueType | null>(props.defaultValue! || props.value!)
     const rawValues = ref<number[] | ComputedRef<number[]>>([])
     const getRange = ref()
     const getOffset = ref()
@@ -210,7 +219,7 @@ export default defineComponent({
                 : [mergedValue.value]
 
         const [val0 = mergedMin.value] = valueList
-        let returnValues = mergedValue.value === null ? [] : [val0]
+        let returnValues: number[] = mergedValue.value === null ? [] : [val0]
 
         // Format as range
         if (rangeEnabled) {

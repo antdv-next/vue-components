@@ -4,6 +4,14 @@ import { defineComponent, ref } from 'vue'
 import { getIndex } from '../util'
 import Handle from './Handle'
 
+export interface RenderProps {
+	index: number
+	prefixCls: string
+	value: number
+	dragging: boolean
+	draggingDelete: boolean
+	node: any
+}
 export interface HandlesRef {
   focus: (index: number) => void
   hideHelp: VoidFunction
@@ -20,8 +28,8 @@ export default defineComponent({
     onFocus: { type: Function as PropType<(e: FocusEvent) => void> },
     onBlur: { type: Function as PropType<(e: FocusEvent) => void> },
     onDelete: { type: Function as PropType<(index: number) => void>, required: true },
-    handleRender: Function,
-    activeHandleRender: Function,
+    handleRender: { type: Function as PropType<(props: RenderProps) => any> },
+    activeHandleRender: { type: Function as PropType<(props: RenderProps) => any> },
     draggingIndex: { type: Number, default: -1 },
     draggingDelete: { type: Boolean, default: false },
     onChangeComplete: Function as PropType<() => void>,

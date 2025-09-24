@@ -20,12 +20,11 @@ function onDragChange(info: Parameters<UnstableContextProps['onDragChange']>[0])
   console.log('Move:', rawValues)
 }
 
-function handleChange(nextValue: number[]) {
+function handleChange(nextValue: number | number[]) {
   console.error('Change:', nextValue)
-  value.value = nextValue
 }
 
-function handleChangeComplete(nextValue: number[]) {
+function handleChangeComplete(nextValue: number | number[]) {
   console.log('Complete', nextValue)
 }
 </script>
@@ -34,6 +33,7 @@ function handleChangeComplete(nextValue: number[]) {
   <div>
     <div :style="style">
       <Slider
+        v-model:value="value"
         :range="{
           editable: true,
           minCount: 1,
@@ -41,7 +41,6 @@ function handleChangeComplete(nextValue: number[]) {
         }"
         :min="0"
         :max="100"
-        :value="value"
         :styles="{
           rail: {
             background: 'linear-gradient(to right, blue, red)',

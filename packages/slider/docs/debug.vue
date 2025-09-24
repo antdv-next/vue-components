@@ -10,7 +10,6 @@ const data = ref()
 
 function handleSliderChange(nextValues) {
   console.log('Change:', nextValues)
-  data.value = nextValues
 }
 
 function handleSliderChangeComplete(v) {
@@ -41,8 +40,8 @@ function handleSliderChangeComplete(v) {
 
     <div style="height: 300px; width: 600px;">
       <Slider
+        v-model:value="data"
         :disabled="disabled"
-        :value="data"
         :step="0.01"
         :default-value="0.81"
         :min="0"

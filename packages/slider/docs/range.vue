@@ -3,6 +3,19 @@ import type { CSSProperties } from 'vue'
 import Slider from '@v-c/slider'
 import { reactive, ref } from 'vue'
 
+const data1 = ref([0, 20])
+const data2 = ref([0, 20])
+const data3 = ref([20, 20])
+const data4 = ref([20, 40])
+const data5 = ref([0, 20])
+const data6 = ref([20, 40, 60, 80])
+const data7 = ref([20, 40, 60, 80])
+const data10 = ref([20, 50])
+const data11 = ref([20, 40, 60, 80])
+const data12 = ref([0, 40])
+const data13 = ref([0, 40])
+const data14 = ref([0, 20, 30, 40, 50])
+
 const style: CSSProperties = {
   width: '400px',
   margin: '50px',
@@ -82,23 +95,23 @@ function handlePureRenderRangeChange(value: any) {
   <div>
     <div :style="style">
       <p>Basic Range，`allowCross=false`</p>
-      <Slider range :allow-cross="false" :default-value="[0, 20]" @change="log" />
+      <Slider v-model:value="data1" range :allow-cross="false" @change="log" />
     </div>
     <div :style="style">
       <p>Basic reverse Range`</p>
-      <Slider range :allow-cross="false" :default-value="[0, 20]" reverse @change="log" />
+      <Slider v-model:value="data2" range :allow-cross="false" reverse @change="log" />
     </div>
     <div :style="style">
       <p>Basic Range，`step=20` </p>
-      <Slider range :step="20" :default-value="[20, 20]" @before-change="log" />
+      <Slider v-model:value="data3" range :step="20" @before-change="log" />
     </div>
     <div :style="style">
       <p>Basic Range，`step=20, dots` </p>
-      <Slider range dots :step="20" :default-value="[20, 40]" @change-complete="log" />
+      <Slider v-model:value="data4" range dots :step="20" @change-complete="log" />
     </div>
     <div :style="style">
       <p>Basic Range，disabled</p>
-      <Slider range :allow-cross="false" :default-value="[0, 20]" disabled @change="log" />
+      <Slider v-model:value="data5" range :allow-cross="false" disabled @change="log" />
     </div>
     <div :style="style">
       <p>Controlled Range</p>
@@ -125,14 +138,14 @@ function handlePureRenderRangeChange(value: any) {
     </div>
     <div :style="style">
       <p>Multi Range, count=3 and pushable=true</p>
-      <Slider range :count="3" :default-value="[20, 40, 60, 80]" pushable />
+      <Slider v-model:value="data6" range :count="3" pushable />
     </div>
     <div :style="style">
       <p>Multi Range with custom track and handle style and pushable</p>
       <Slider
+        v-model:value="data7"
         range
         :count="3"
-        :default-value="[20, 40, 60, 80]"
         pushable
         :track-style="[{ backgroundColor: 'red' }, { backgroundColor: 'green' }]"
         :handle-style="[{ backgroundColor: 'yellow' }, { backgroundColor: 'gray' }]"
@@ -167,8 +180,8 @@ function handlePureRenderRangeChange(value: any) {
         <br>
         <br>
         <Slider
+          v-model:value="data10"
           range
-          :default-value="[20, 50]"
           :min="dynamicBounds.min"
           :max="dynamicBounds.max"
           @change="onDynamicSliderChange"
@@ -178,32 +191,32 @@ function handlePureRenderRangeChange(value: any) {
     <div :style="style">
       <p>Range as child component</p>
       <Slider
+        v-model:value="data11"
         range
-        :default-value="[20, 40, 60, 80]"
         :allow-cross="false"
         @change="handlePureRenderRangeChange"
       />
     </div>
     <div :style="style">
       <p>draggableTrack two points</p>
-      <Slider :range="{ draggableTrack: true }" :allow-cross="false" :default-value="[0, 40]" @change="log" />
+      <Slider v-model:value="data12" :range="{ draggableTrack: true }" :allow-cross="false" @change="log" />
     </div>
     <div :style="style">
       <p>draggableTrack two points(reverse)</p>
       <Slider
+        v-model:value="data13"
         :range="{ draggableTrack: true }"
         :allow-cross="false"
         reverse
-        :default-value="[0, 40]"
         @change="log"
       />
     </div>
     <div :style="style">
       <p>draggableTrack multiple points</p>
       <Slider
+        v-model:value="data14"
         :range="{ draggableTrack: true }"
         :allow-cross="false"
-        :default-value="[0, 20, 30, 40, 50]"
         @change="log"
       />
     </div>

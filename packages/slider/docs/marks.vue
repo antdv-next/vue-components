@@ -1,6 +1,16 @@
 <script setup lang="ts">
 import type { CSSProperties } from 'vue'
 import Slider from '@v-c/slider'
+import { ref } from 'vue'
+
+const data1 = ref(20)
+const data2 = ref([-10, 0])
+const data3 = ref(20)
+const data4 = ref(20)
+const data5 = ref(20)
+const data6 = ref(20)
+const data7 = ref([20, 25, 35, 40])
+const data8 = ref([20, 40])
 
 const style: CSSProperties = {
   width: '400px',
@@ -21,8 +31,8 @@ const marks = {
   },
 }
 
-function log(value) {
-  console.log(value); //eslint-disable-line
+function log(value: unknown) {
+  console.log(value)
 }
 </script>
 
@@ -31,10 +41,10 @@ function log(value) {
     <div :style="style">
       <p>Slider with marks, `step=null`</p>
       <Slider
+        v-model:value="data1"
         :min="-10"
         :marks="marks"
         :step="null"
-        :default-value="20"
         @change="log"
         @change-complete="(v) => console.log('AfterChange', v)"
       >
@@ -52,11 +62,11 @@ function log(value) {
     <div :style="style">
       <p>Range Slider with marks, `step=null`, pushable, draggableTrack</p>
       <Slider
+        v-model:value="data2"
         range
         :min="-10"
         :marks="marks"
         :step="null"
-        :default-value="[-10, 0]"
         :allow-cross="false"
         pushable
         @change="log"
@@ -66,29 +76,29 @@ function log(value) {
 
     <div :style="style">
       <p>Slider with marks and steps</p>
-      <Slider dots :min="-10" :marks="marks" :step="10" :default-value="20" @change="log" />
+      <Slider v-model:value="data3" dots :min="-10" :marks="marks" :step="10" @change="log" />
     </div>
     <div :style="style">
       <p>Reversed Slider with marks and steps</p>
-      <Slider dots reverse :min="-10" :marks="marks" :step="10" :default-value="20" @change="log" />
+      <Slider v-model:value="data4" dots reverse :min="-10" :marks="marks" :step="10" @change="log" />
     </div>
 
     <div :style="style">
       <p>Slider with marks, `included=false`</p>
-      <Slider :min="-10" :marks="marks" :included="false" :default-value="20" />
+      <Slider v-model:value="data5" :min="-10" :marks="marks" :included="false" />
     </div>
     <div :style="style">
       <p>Slider with marks and steps, `included=false`</p>
-      <Slider :min="-10" :marks="marks" :step="10" :included="false" :default-value="20" />
+      <Slider v-model:value="data6" :min="-10" :marks="marks" :step="10" :included="false" />
     </div>
 
     <div :style="style">
       <p>Range with marks</p>
-      <Slider range :min="-10" :marks="marks" :default-value="[20, 25, 30, 40]" @change="log" />
+      <Slider v-model:value="data7" range :min="-10" :marks="marks" @change="log" />
     </div>
     <div :style="style">
       <p>Range with marks and steps</p>
-      <Slider range :min="-10" :marks="marks" :step="10" :default-value="[20, 40]" @change="log" />
+      <Slider v-model:value="data8" range :min="-10" :marks="marks" :step="10" @change="log" />
     </div>
   </div>
 </template>

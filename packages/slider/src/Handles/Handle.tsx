@@ -6,6 +6,15 @@ import { defineComponent, ref } from 'vue'
 import { useInjectSlider } from '../context'
 import { getDirectionStyle, getIndex } from '../util'
 
+export interface RenderProps {
+  index: number
+  prefixCls: string
+  value: number
+  dragging: boolean
+  draggingDelete: boolean
+  node: any
+}
+
 export default defineComponent({
   name: 'Handle',
   props: {
@@ -19,7 +28,7 @@ export default defineComponent({
     onOffsetChange: { type: Function as PropType<(value: number | 'min' | 'max', valueIndex: number) => void>, required: true },
     onFocus: { type: Function as PropType<(e: FocusEvent, index: number) => void>, required: true },
     onMouseenter: { type: Function as PropType<(e: MouseEvent, index: number) => void>, required: true },
-    render: Function,
+    render: { type: Function as PropType<(v: RenderProps) => any> },
     onChangeComplete: Function as PropType<() => void>,
     mock: Boolean,
     classNames: Object as PropType<SliderClassNames>,
