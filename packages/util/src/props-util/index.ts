@@ -24,12 +24,12 @@ export function filterEmpty(children: any[] = []) {
 }
 
 export const skipFlattenKey = Symbol('skipFlatten')
-function flattenChildren(children?: VNode | VNodeNormalizedChildren, filterEmpty = true) {
+function flattenChildren(children?: VNode | VNodeNormalizedChildren, isFilterEmpty = true) {
   const temp = Array.isArray(children) ? children : [children]
   const res = []
   temp.forEach((child) => {
     if (Array.isArray(child)) {
-      res.push(...flattenChildren(child, filterEmpty))
+      res.push(...flattenChildren(child, isFilterEmpty))
     }
     else if (isValid(child)) {
       res.push(child)
@@ -39,7 +39,7 @@ function flattenChildren(children?: VNode | VNodeNormalizedChildren, filterEmpty
         res.push(child)
       }
       else {
-        res.push(...flattenChildren(child.children, filterEmpty))
+        res.push(...flattenChildren(child.children, isFilterEmpty))
       }
     }
     else if (child && isVNode(child)) {
@@ -51,6 +51,9 @@ function flattenChildren(children?: VNode | VNodeNormalizedChildren, filterEmpty
       }
     }
   })
+  if (isFilterEmpty) {
+    return filterEmpty(res)
+  }
   return res
 }
 

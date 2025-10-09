@@ -1,11 +1,15 @@
 {
   "name": "@v-c/util",
   "type": "module",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Vue3 components utils",
   "publishConfig": {
     "access": "public"
   },
+  "files": [
+    "dist",
+    "package.json"
+  ],
   "author": {
     "name": "aibayanyu20",
     "email": "aibayanyu@qq.com",
