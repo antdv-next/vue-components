@@ -1,7 +1,6 @@
 import type { VNode, VNodeNormalizedChildren } from 'vue'
 import { Comment, Fragment, isVNode, Text } from 'vue'
 import isValid from '../isValid'
-import initDefaultProps from './initDefaultProps'
 
 export function isEmptyElement(c: any) {
   return (
@@ -43,10 +42,10 @@ function flattenChildren(children?: VNode | VNodeNormalizedChildren, isFilterEmp
       }
     }
     else if (child && isVNode(child)) {
-      if (filterEmpty && !isEmptyElement(child)) {
+      if (isFilterEmpty && !isEmptyElement(child)) {
         res.push(child)
       }
-      else if (!filterEmpty) {
+      else if (!isFilterEmpty) {
         res.push(child)
       }
     }
@@ -57,4 +56,4 @@ function flattenChildren(children?: VNode | VNodeNormalizedChildren, isFilterEmp
   return res
 }
 
-export { flattenChildren, initDefaultProps }
+export { flattenChildren }
