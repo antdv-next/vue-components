@@ -1,9 +1,8 @@
 import type { ChangeEvent } from '@v-c/util/dist/EventInterface'
 import type { CustomSlotsType, VueNode } from '@v-c/util/dist/type'
 import type { CSSProperties, ExtractPropTypes, FunctionalComponent, PropType } from 'vue'
-import { initDefaultProps } from '@v-c/util/dist/props-util'
-import { arrayType, booleanType, functionType, someType, stringType } from '@v-c/util/dist/type'
 import { classNames } from '@v-c/util'
+import { arrayType, booleanType, functionType, someType, stringType } from '@v-c/util/dist/type'
 import { computed, defineComponent, ref, shallowRef } from 'vue'
 import MotionThumb from './MotionThumb'
 
@@ -55,12 +54,15 @@ function normalizeOptions(options: (SegmentedOption | string | number)[]) {
 export function segmentedProps() {
   return {
     'prefixCls': String,
-    'options': arrayType<(SegmentedOption | string | number)[]>(),
+    'options': {
+      ...arrayType<(SegmentedOption | string | number)[]>(),
+      default: () => [],
+    },
     'block': booleanType(),
     'disabled': booleanType(),
     'size': stringType<segmentedSize>(),
     'value': { ...someType<SegmentedValue>([String, Number]), required: true },
-    'motionName': String,
+    'motionName': { type: String, default: 'thumb-motion' },
     'onChange': functionType<(val: SegmentedValue) => void>(),
     'onUpdate:value': functionType<(val: SegmentedValue) => void>(),
     'direction': String as PropType<'rtl' | 'ltr'>,
@@ -143,10 +145,9 @@ InternalSegmentedOption.inheritAttrs = false
 export default defineComponent({
   name: 'Segmented',
   inheritAttrs: false,
-  props: initDefaultProps(segmentedProps(), {
-    options: [],
-    motionName: 'thumb-motion',
-  }),
+  props: {
+    ...segmentedProps(),
+  },
   slots: Object as CustomSlotsType<{
     label: SegmentedBaseOption
   }>,
