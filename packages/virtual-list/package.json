@@ -22,7 +22,11 @@
   "main": "index.js",
   "scripts": {
     "build": "vite build",
-    "test": "vitest"
+    "test": "vitest",
+    "prepublish": "pnpm build"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "peerDependencies": {
     "vue": "^3.0.0"
