@@ -2,7 +2,7 @@ import type { ExtractPropTypes, PropType, VNode } from 'vue'
 import type { PreviewProps } from '.'
 import type { TransformType } from '../hooks/useImageTransform'
 import type { ImgInfo } from '../Image'
-import classnames from 'classnames'
+import { classNames as classnames } from '@v-c/util'
 import { computed, defineComponent } from 'vue'
 
 export type FooterSemanticName = 'footer' | 'actions'

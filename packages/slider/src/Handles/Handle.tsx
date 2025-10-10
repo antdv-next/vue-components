@@ -1,7 +1,7 @@
 import type { CSSProperties, PropType } from 'vue'
 import type { OnStartMove, SliderClassNames, SliderStyles } from '../interface'
 import KeyCode from '@v-c/util/dist/KeyCode'
-import cls from 'classnames'
+import { classNames as cls } from '@v-c/util'
 import { defineComponent, ref } from 'vue'
 import { useInjectSlider } from '../context'
 import { getDirectionStyle, getIndex } from '../util'

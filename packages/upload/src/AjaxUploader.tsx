@@ -1,7 +1,7 @@
 import type { VNode } from 'vue'
 import type { AjaxUploaderExpose, BeforeUploadFileType, UploadProgressEvent, UploadProps, UploadRequestError, UploadRequestOption, VcFile } from './interface'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
-import clsx from 'classnames'
+import { classNames as clsx } from '@v-c/util'
 import { computed, defineComponent, onMounted, onUnmounted, onUpdated, ref } from 'vue'
 import attrAccept from './attrAccept'
 import { generatorUploadProps } from './interface'

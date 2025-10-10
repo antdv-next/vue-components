@@ -6,7 +6,7 @@ import type {
 import type { ExtractPropTypes, PropType, SlotsType } from 'vue'
 import { Trigger } from '@v-c/trigger'
 import { cloneElement } from '@v-c/util/dist/vnode.ts'
-import classNames from 'classnames'
+import { classNames } from '@v-c/util'
 import { defineComponent, ref, watch } from 'vue'
 import useAccessibility from './hooks/useAccessibility'
 import Overlay from './Overlay'

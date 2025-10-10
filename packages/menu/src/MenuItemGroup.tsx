@@ -1,6 +1,6 @@
 import type { ExtractPropTypes } from 'vue'
 import omit from '@v-c/util/dist/omit'
-import classNames from 'classnames'
+import { classNames } from '@v-c/util'
 import { defineComponent } from 'vue'
 import { useInjectMenu } from './context/MenuContext'
 import { useFullPath, useMeasure } from './context/PathContext.tsx'

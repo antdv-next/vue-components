@@ -2,7 +2,7 @@ import type { CSSProperties, PropType, Ref, TransitionProps } from 'vue'
 import type { SegmentedValue } from '.'
 import { addClass, removeClass } from '@v-c/util/dist/Dom/class.ts'
 import { anyType } from '@v-c/util/dist/type'
-import classNames from 'classnames'
+import { classNames } from '@v-c/util'
 import { computed, defineComponent, onBeforeUnmount, ref, shallowRef, Transition, watch } from 'vue'
 
 type ThumbRect = {

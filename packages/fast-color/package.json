@@ -17,14 +17,15 @@
     "build": "vite build",
     "test": "vitest"
   },
-  "keywords": ["dropdown"],
+  "keywords": [
+    "dropdown"
+  ],
   "author": "",
   "license": "MIT",
   "peerDependencies": {
     "vue": "^3.0.0"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "@ctrl/tinycolor": "^4.1.0"
   }

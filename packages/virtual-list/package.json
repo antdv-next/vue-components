@@ -14,7 +14,11 @@
   "description": "Vue Virtual List Component",
   "author": "",
   "license": "MIT",
-  "keywords": ["vue", "virtual-list", "vue-component"],
+  "keywords": [
+    "vue",
+    "virtual-list",
+    "vue-component"
+  ],
   "main": "index.js",
   "scripts": {
     "build": "vite build",

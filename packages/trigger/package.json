@@ -14,7 +14,9 @@
   "description": "",
   "author": "",
   "license": "MIT",
-  "keywords": ["trigger"],
+  "keywords": [
+    "trigger"
+  ],
   "main": "index.js",
   "scripts": {
     "build": "vite build",
@@ -26,7 +28,6 @@
   "dependencies": {
     "@v-c/util": "workspace:*",
     "@v-c/resize-observer": "workspace:*",
-    "@v-c/portal": "workspace:*",
-    "classnames": "^2.5.1"
+    "@v-c/portal": "workspace:*"
   }
 }

@@ -20,7 +20,6 @@
     "vue": "^3.0.0"
   },
   "dependencies": {
-    "@v-c/util": "workspace:*",
-    "classnames": "^2.5.1"
+    "@v-c/util": "workspace:*"
   }
 }

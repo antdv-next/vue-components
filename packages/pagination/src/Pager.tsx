@@ -1,6 +1,6 @@
 import type { PropType } from 'vue'
 import type { ItemRender } from './interface'
-import classNames from 'classnames'
+import { classNames } from '@v-c/util'
 import { defineComponent } from 'vue'
 
 type OnClick = (page: number) => void

@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'vue'
 import type { MenuDividerType } from './interface'
-import classNames from 'classnames'
+import { classNames } from '@v-c/util'
 import { defineComponent } from 'vue'
 import { useInjectMenu } from './context/MenuContext'
 import { useMeasure } from './context/PathContext.tsx'

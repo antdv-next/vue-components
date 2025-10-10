@@ -2,7 +2,7 @@ import type { MouseEventHandler } from '@v-c/util/dist/EventInterface.ts'
 import type { CSSProperties } from 'vue'
 import type { IDialogPropTypes } from '../../IDialogPropTypes.ts'
 import pickAttrs from '@v-c/util/dist/pickAttrs.ts'
-import classNames from 'classnames'
+import { classNames } from '@v-c/util'
 import { defineComponent, shallowRef } from 'vue'
 import { useGetRefContext } from '../../context.ts'
 

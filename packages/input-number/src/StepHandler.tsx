@@ -1,7 +1,7 @@
 import type { SlotsType } from 'vue'
 import useMobile from '@v-c/util/dist/hooks/useMobile'
 import raf from '@v-c/util/dist/raf'
-import cls from 'classnames'
+import { classNames as cls } from '@v-c/util'
 import { defineComponent, onUnmounted, ref } from 'vue'
 
 /**

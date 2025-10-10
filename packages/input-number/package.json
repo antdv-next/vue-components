@@ -22,7 +22,6 @@
   "dependencies": {
     "@v-c/util": "workspace:*",
     "@v-c/input": "workspace:*",
-    "@v-c/mini-decimal": "workspace:*",
-    "classnames": "^2.5.1"
+    "@v-c/mini-decimal": "workspace:*"
   }
 }

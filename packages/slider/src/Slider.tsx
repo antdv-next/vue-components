@@ -10,7 +10,7 @@ import type {
 import type { InternalMarkObj, MarkObj } from './Marks'
 import isEqual from '@v-c/util/dist/isEqual'
 import warning from '@v-c/util/dist/warning'
-import cls from 'classnames'
+import { classNames as cls } from '@v-c/util'
 import { computed, defineComponent, isVNode, ref, shallowRef, watch, watchEffect } from 'vue'
 import { useProviderSliderContext } from './context'
 import Handles from './Handles'

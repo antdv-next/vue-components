@@ -3,7 +3,7 @@ import type { CustomSlotsType, VueNode } from '@v-c/util/dist/type'
 import type { CSSProperties, ExtractPropTypes, FunctionalComponent, PropType } from 'vue'
 import { initDefaultProps } from '@v-c/util/dist/props-util'
 import { arrayType, booleanType, functionType, someType, stringType } from '@v-c/util/dist/type'
-import classNames from 'classnames'
+import { classNames } from '@v-c/util'
 import { computed, defineComponent, ref, shallowRef } from 'vue'
 import MotionThumb from './MotionThumb'
 

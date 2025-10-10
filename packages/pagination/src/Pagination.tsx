@@ -4,7 +4,7 @@ import useMergedState from '@v-c/util/dist/hooks/useMergedState'
 import KeyCode from '@v-c/util/dist/KeyCode'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
 import { cloneElement } from '@v-c/util/dist/vnode'
-import classNames from 'classnames'
+import { classNames } from '@v-c/util'
 import {
   computed,
   defineComponent,

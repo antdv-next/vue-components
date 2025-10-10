@@ -1,7 +1,7 @@
 import type { Ref } from 'vue'
 import useMergedState from '@v-c/util/dist/hooks/useMergedState'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
-import classnames from 'classnames'
+import { classNames as classnames } from '@v-c/util'
 import { defineComponent, ref, toRef } from 'vue'
 import { useItems } from './hooks/useItems'
 import { generatorCollapseProps, type Key } from './interface'

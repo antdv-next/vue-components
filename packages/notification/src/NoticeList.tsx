@@ -1,7 +1,7 @@
 import type { CSSProperties, TransitionGroupProps } from 'vue'
 import type { InnerOpenConfig, Key, NoticeConfig, OpenConfig, Placement, StackConfig } from './interface.ts'
 import { unrefElement } from '@v-c/util/dist/vueuse/unref-element'
-import clsx from 'classnames'
+import { classNames as clsx } from '@v-c/util'
 import { computed, defineComponent, reactive, ref, toRef, TransitionGroup, watch } from 'vue'
 import useStack from './hooks/useStack.ts'
 import Notice from './Notice.tsx'

@@ -17,7 +17,11 @@
     "build": "vite build",
     "test": "vitest"
   },
-  "keywords": ["image", "vue-image", "img"],
+  "keywords": [
+    "image",
+    "vue-image",
+    "img"
+  ],
   "author": "",
   "license": "MIT",
   "peerDependencies": {
@@ -25,8 +29,7 @@
   },
   "dependencies": {
     "@v-c/portal": "workspace:*",
-    "@v-c/util": "workspace:*",
-    "classnames": "^2.5.1"
+    "@v-c/util": "workspace:*"
   },
   "devDependencies": {
     "@ant-design/icons-vue": "^7.0.1"

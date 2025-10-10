@@ -4,7 +4,7 @@ import type { ImgInfo } from '../Image'
 import Portal, { type PortalProps } from '@v-c/portal'
 import useEvent from '@v-c/util/dist/hooks/useEvent.ts'
 import KeyCode from '@v-c/util/dist/KeyCode'
-import classnames from 'classnames'
+import { classNames as classnames } from '@v-c/util'
 import { computed, defineComponent, ref, Transition, watch } from 'vue'
 
 import { usePreviewGroupContext } from '../context'

@@ -2,7 +2,7 @@ import type { CSSProperties, PropType, SlotsType, VNode } from 'vue'
 import type { MenuMode } from '../interface'
 import { Trigger } from '@v-c/trigger'
 import raf from '@v-c/util/dist/raf'
-import classNames from 'classnames'
+import { classNames } from '@v-c/util'
 import { defineComponent, ref, watch } from 'vue'
 
 import { useInjectMenu } from '../context/MenuContext'

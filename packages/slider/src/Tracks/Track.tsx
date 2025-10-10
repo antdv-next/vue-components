@@ -1,6 +1,6 @@
 import type { CSSProperties, PropType } from 'vue'
 import type { OnStartMove } from '../interface'
-import cls from 'classnames'
+import { classNames as cls } from '@v-c/util'
 import { defineComponent } from 'vue'
 import { useInjectSlider } from '../context'
 import { getOffset } from '../util'

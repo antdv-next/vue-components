@@ -1,6 +1,6 @@
 import type { FunctionalComponent } from 'vue'
 import type { OperationIcons } from '.'
-import classNames from 'classnames'
+import { classNames } from '@v-c/util'
 
 export interface PrevNextProps {
   prefixCls: string

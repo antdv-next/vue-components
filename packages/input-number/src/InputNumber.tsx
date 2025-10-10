@@ -11,7 +11,7 @@ import getMiniDecimal, {
   toFixed,
   validateNumber,
 } from '@v-c/mini-decimal'
-import clsx from 'classnames'
+import { classNames as clsx } from '@v-c/util'
 import { computed, defineComponent, ref, watch, watchEffect } from 'vue'
 import useCursor from './hooks/useCursor'
 import useFrame from './hooks/useFrame'

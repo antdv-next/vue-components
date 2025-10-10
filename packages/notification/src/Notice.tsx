@@ -1,7 +1,7 @@
 import type { Key, NoticeConfig } from './interface.ts'
 import KeyCode from '@v-c/util/dist/KeyCode.ts'
 import pickAttrs from '@v-c/util/dist/pickAttrs.ts'
-import classNames from 'classnames'
+import { classNames } from '@v-c/util'
 import { computed, defineComponent, onUnmounted, shallowRef, watch } from 'vue'
 
 export interface NoticeProps extends Omit<NoticeConfig, 'onClose'> {

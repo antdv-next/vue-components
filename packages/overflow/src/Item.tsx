@@ -1,7 +1,7 @@
 import type { Key } from '@v-c/util/dist/type'
 import type { CSSProperties, HTMLAttributes, PropType, SlotsType, VNode } from 'vue'
 import ResizeObserver from '@v-c/resize-observer'
-import classNames from 'classnames'
+import { classNames } from '@v-c/util'
 import { computed, defineComponent, onUnmounted, ref } from 'vue'
 
 // Use shared variable to save bundle size

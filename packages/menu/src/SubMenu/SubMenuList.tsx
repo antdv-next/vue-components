@@ -1,4 +1,4 @@
-import classNames from 'classnames'
+import { classNames } from '@v-c/util'
 import { defineComponent } from 'vue'
 import { useInjectMenu } from '../context/MenuContext'
 

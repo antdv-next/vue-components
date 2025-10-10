@@ -18,7 +18,5 @@
   "peerDependencies": {
     "vue": "^3.0.0"
   },
-  "dependencies": {
-    "classnames": "^2.5.1"
-  }
+  "dependencies": {}
 }

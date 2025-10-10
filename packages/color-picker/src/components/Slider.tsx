@@ -1,7 +1,7 @@
 import type { PropType } from 'vue'
 import type { HsbaColorType, TransformOffset } from '../interface'
 import useEvent from '@v-c/util/dist/hooks/useEvent'
-import classNames from 'classnames'
+import { classNames } from '@v-c/util'
 import { computed, defineComponent, ref } from 'vue'
 
 import { Color } from '../color'

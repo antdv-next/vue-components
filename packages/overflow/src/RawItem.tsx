@@ -1,5 +1,5 @@
 import type { PropType } from 'vue'
-import classNames from 'classnames'
+import { classNames } from '@v-c/util'
 import { defineComponent } from 'vue'
 import { useInjectOverflowContext } from './context.tsx'
 import Item from './Item'

@@ -1,5 +1,5 @@
 import type { CSSProperties, FunctionalComponent } from 'vue'
-import classNames from 'classnames'
+import { classNames } from '@v-c/util'
 import { useInjectSlider } from '../context'
 import { getDirectionStyle } from '../util'
 

@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'vue'
 import type { AlignType, ArrowPos, ArrowTypeOuter } from '../interface'
-import classNames from 'classnames'
+import { classNames } from '@v-c/util'
 import { defineComponent, ref } from 'vue'
 
 export interface ArrowProps {

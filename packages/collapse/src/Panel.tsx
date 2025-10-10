@@ -1,6 +1,6 @@
 import type { HTMLAttributes } from 'vue'
 import KeyCode from '@v-c/util/dist/KeyCode'
-import classnames from 'classnames'
+import { classNames as classnames } from '@v-c/util'
 import { computed, defineComponent, ref, Transition } from 'vue'
 import { generatorCollapsePanelProps } from './interface'
 import PanelContent from './PanelContent'

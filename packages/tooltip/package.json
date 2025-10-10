@@ -22,10 +22,11 @@
   },
   "dependencies": {
     "@v-c/util": "workspace:*",
-    "@v-c/trigger": "workspace:*",
-    "classnames": "^2.5.1"
+    "@v-c/trigger": "workspace:*"
   },
-  "keywords": ["tooltip"],
+  "keywords": [
+    "tooltip"
+  ],
   "author": "",
   "license": "MIT"
 }

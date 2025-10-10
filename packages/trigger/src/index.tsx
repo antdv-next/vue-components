@@ -15,7 +15,7 @@ import useEvent from '@v-c/util/dist/hooks/useEvent'
 import useId from '@v-c/util/dist/hooks/useId'
 import isMobile from '@v-c/util/dist/isMobile'
 import { cloneElement } from '@v-c/util/dist/vnode'
-import classNames from 'classnames'
+import { classNames } from '@v-c/util'
 
 import { computed, defineComponent, nextTick, onBeforeUnmount, onMounted, ref, watch, watchEffect } from 'vue'
 import { useProviderTriggerContext } from './context'

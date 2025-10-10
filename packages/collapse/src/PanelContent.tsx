@@ -1,4 +1,4 @@
-import classnames from 'classnames'
+import { classNames as classnames } from '@v-c/util'
 import { defineComponent, ref, watch } from 'vue'
 import { generatorCollapsePanelContentProps } from './interface'
 

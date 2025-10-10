@@ -17,7 +17,9 @@
     "build": "vite build",
     "test": "vitest"
   },
-  "keywords": ["decimal"],
+  "keywords": [
+    "decimal"
+  ],
   "author": "",
   "license": "MIT"
 }

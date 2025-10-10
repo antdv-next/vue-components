@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'vue'
-import classNames from 'classnames'
+import { classNames } from '@v-c/util'
 import { defineComponent } from 'vue'
 
 export interface ColorBlockProps {

@@ -32,9 +32,6 @@ importers:
       bootstrap:
         specifier: ^5.3.8
         version: 5.3.8(@popperjs/core@2.11.8)
-      classnames:
-        specifier: ^2.5.1
-        version: 2.5.1
       cross-env:
         specifier: ^7.0.3
         version: 7.0.3
@@ -95,9 +92,6 @@ importers:
 
   packages/checkbox:
     dependencies:
-      classnames:
-        specifier: ^2.5.1
-        version: 2.5.1
       vue:
         specifier: ^3.0.0
         version: 3.5.13(typescript@5.9.2)
@@ -107,9 +101,6 @@ importers:
       '@v-c/util':
         specifier: workspace:*
         version: link:../util
-      classnames:
-        specifier: ^2.5.1
-        version: 2.5.1
       vue:
         specifier: ^3.0.0
         version: 3.5.13(typescript@5.9.2)
@@ -122,18 +113,12 @@ importers:
       '@v-c/util':
         specifier: workspace:*
         version: link:../util
-      classnames:
-        specifier: ^2.5.1
-        version: 2.5.1
       vue:
         specifier: ^3.0.0
         version: 3.5.13(typescript@5.9.2)
 
   packages/dialog:
     dependencies:
-      classnames:
-        specifier: ^2.5.1
-        version: 2.5.1
       vue:
         specifier: ^3.0.0
         version: 3.5.13(typescript@5.9.2)
@@ -146,9 +131,6 @@ importers:
       '@v-c/util':
         specifier: workspace:*
         version: link:../util
-      classnames:
-        specifier: ^2.5.1
-        version: 2.5.1
       vue:
         specifier: ^3.0.0
         version: 3.5.13(typescript@5.9.2)
@@ -161,9 +143,6 @@ importers:
       '@v-c/util':
         specifier: workspace:*
         version: link:../util
-      classnames:
-        specifier: ^2.5.1
-        version: 2.5.1
       vue:
         specifier: ^3.0.0
         version: 3.5.13(typescript@5.9.2)
@@ -186,9 +165,6 @@ importers:
       '@v-c/util':
         specifier: workspace:*
         version: link:../util
-      classnames:
-        specifier: ^2.5.1
-        version: 2.5.1
       vue:
         specifier: ^3.0.0
         version: 3.5.13(typescript@5.9.2)
@@ -202,9 +178,6 @@ importers:
       '@v-c/util':
         specifier: workspace:*
         version: link:../util
-      classnames:
-        specifier: ^2.5.1
-        version: 2.5.1
       vue:
         specifier: ^3.0.0
         version: 3.5.13(typescript@5.9.2)
@@ -220,9 +193,6 @@ importers:
       '@v-c/util':
         specifier: workspace:*
         version: link:../util
-      classnames:
-        specifier: ^2.5.1
-        version: 2.5.1
       vue:
         specifier: ^3.0.0
         version: 3.5.13(typescript@5.9.2)
@@ -238,9 +208,6 @@ importers:
       '@v-c/util':
         specifier: workspace:*
         version: link:../util
-      classnames:
-        specifier: ^2.5.1
-        version: 2.5.1
       vue:
         specifier: ^3.0.0
         version: 3.5.21(typescript@5.9.2)
@@ -264,9 +231,6 @@ importers:
       '@v-c/util':
         specifier: workspace:*
         version: link:../util
-      classnames:
-        specifier: ^2.5.1
-        version: 2.5.1
       vue:
         specifier: ^3.0.0
         version: 3.5.13(typescript@5.9.2)
@@ -279,9 +243,6 @@ importers:
       '@v-c/util':
         specifier: workspace:*
         version: link:../util
-      classnames:
-        specifier: ^2.5.1
-        version: 2.5.1
       vue:
         specifier: ^3.0.0
         version: 3.5.21(typescript@5.9.2)
@@ -300,18 +261,11 @@ importers:
       '@v-c/util':
         specifier: workspace:*
         version: link:../util
-      classnames:
-        specifier: ^2.5.1
-        version: 2.5.1
       vue:
         specifier: ^3.0.0
         version: 3.5.13(typescript@5.9.2)
 
   packages/progress:
-    dependencies:
-      classnames:
-        specifier: ^2.5.1
-        version: 2.5.1
     devDependencies:
       vue:
         specifier: ^3.5.13
@@ -331,9 +285,6 @@ importers:
       '@v-c/util':
         specifier: workspace:*
         version: link:../util
-      classnames:
-        specifier: ^2.5.1
-        version: 2.5.1
       vue:
         specifier: ^3.0.0
         version: 3.5.13(typescript@5.9.2)
@@ -343,9 +294,6 @@ importers:
       '@v-c/util':
         specifier: workspace:*
         version: link:../util
-      classnames:
-        specifier: ^2.5.1
-        version: 2.5.1
       resize-observer-polyfill:
         specifier: ^1.5.1
         version: 1.5.1
@@ -358,9 +306,6 @@ importers:
       '@v-c/util':
         specifier: workspace:*
         version: link:../util
-      classnames:
-        specifier: ^2.5.1
-        version: 2.5.1
       vue:
         specifier: ^3.0.0
         version: 3.5.13(typescript@5.9.2)
@@ -370,9 +315,6 @@ importers:
       '@v-c/util':
         specifier: workspace:*
         version: link:../util
-      classnames:
-        specifier: ^2.5.1
-        version: 2.5.1
       vue:
         specifier: ^3.0.0
         version: 3.5.13(typescript@5.9.2)
@@ -386,9 +328,6 @@ importers:
       '@v-c/util':
         specifier: workspace:*
         version: link:../util
-      classnames:
-        specifier: ^2.5.1
-        version: 2.5.1
       vue:
         specifier: ^3.0.0
         version: 3.5.13(typescript@5.9.2)
@@ -410,9 +349,6 @@ importers:
       '@v-c/util':
         specifier: workspace:*
         version: link:../util
-      classnames:
-        specifier: 2.5.1
-        version: 2.5.1
       vue:
         specifier: ^3.0.0
         version: 3.5.13(typescript@5.9.2)
@@ -425,9 +361,6 @@ importers:
       '@v-c/util':
         specifier: workspace:*
         version: link:../util
-      classnames:
-        specifier: ^2.5.1
-        version: 2.5.1
       vue:
         specifier: ^3.0.0
         version: 3.5.13(typescript@5.9.2)
@@ -443,18 +376,11 @@ importers:
       '@v-c/util':
         specifier: workspace:*
         version: link:../util
-      classnames:
-        specifier: ^2.5.1
-        version: 2.5.1
       vue:
         specifier: ^3.0.0
         version: 3.5.13(typescript@5.9.2)
 
   packages/upload:
-    dependencies:
-      classnames:
-        specifier: ^2.5.1
-        version: 2.5.1
     devDependencies:
       '@types/nise':
         specifier: ^1.4.5
@@ -1821,9 +1747,6 @@ packages:
   ci-info@4.3.0:
     resolution: {integrity: sha512-l+2bNRMiQgcfILUi33labAZYIWlH1kWDp+ecNo5iisRKrbm0xcRyCww71/YU0Fkw0mAFpz9bJayXPjey6vkmaQ==}
     engines: {node: '>=8'}
-
-  classnames@2.5.1:
-    resolution: {integrity: sha512-saHYOzhIQs6wy2sVxTM6bUDsQO4F50V9RQ22qBpEdCW+I+/Wmke2HOl6lS6dTpdxVhb88/I6+Hs+438c3lfUow==}
 
   clean-regexp@1.0.0:
     resolution: {integrity: sha512-GfisEZEJvzKrmGWkvfhgzcz/BllN1USeqD2V6tg14OAOgaCD2Z/PUEuxnAZ/nPvmaHRG7a8y77p1T/IRQ4D1Hw==}
@@ -5491,8 +5414,6 @@ snapshots:
       readdirp: 4.1.2
 
   ci-info@4.3.0: {}
-
-  classnames@2.5.1: {}
 
   clean-regexp@1.0.0:
     dependencies:
