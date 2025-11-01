@@ -25,8 +25,8 @@ export function filterEmpty(children: any[] = []) {
 export const skipFlattenKey = Symbol('skipFlatten')
 function flattenChildren(children?: VNode | VNodeNormalizedChildren, isFilterEmpty = true) {
   const temp = Array.isArray(children) ? children : [children]
-  const res = []
-  temp.forEach((child) => {
+  const res: any[] = []
+  temp.forEach((child: any) => {
     if (Array.isArray(child)) {
       res.push(...flattenChildren(child, isFilterEmpty))
     }

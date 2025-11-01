@@ -1,4 +1,4 @@
-import type { Ref, ShallowRef } from 'vue'
+import type { Ref } from 'vue'
 import { ref, watchEffect } from 'vue'
 
 const defaultOptions: Ref<MutationObserverInit> = ref({
@@ -8,7 +8,7 @@ const defaultOptions: Ref<MutationObserverInit> = ref({
 })
 
 export default function useMutateObserver(
-  nodeOrList: ShallowRef<Element | Text | Element[] | null>,
+  nodeOrList: Ref<Element | Text | Element[] | null>,
   callback: MutationCallback,
   options: Ref<MutationObserverInit | undefined>,
 ) {

@@ -6,13 +6,17 @@ import { buildCommon } from '../../scripts/build.common'
 const entry = fg.sync(['src/**/*.ts', 'src/**/*.tsx', '!src/**/*.test.ts', '!src/**/tests'])
 
 export default defineConfig({
-  ...mergeConfig(buildCommon({
-    external: ['vue', /^@v-c\/util/],
-  }), {
-    build: {
-      lib: {
-        entry,
+  ...mergeConfig(
+    buildCommon({
+      external: ['vue', /^@v-c\/util/],
+      dts: true,
+    }),
+    {
+      build: {
+        lib: {
+          entry,
+        },
       },
-    },
-  } as UserConfig),
+    } as UserConfig,
+  ),
 })

@@ -73,6 +73,6 @@ export default defineConfig({
     ],
   },
   optimizeDeps: {
-    include: ['classnames'],
+    include: ['shiki'],
   },
 })

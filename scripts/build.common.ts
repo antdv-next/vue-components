@@ -20,6 +20,7 @@ export function buildCommon(opt: BuildCommonOptions) {
   ]
   if (dtsOpen) {
     plugins.push(dts({
+      root: process.cwd(),
       entryRoot: opt.inputDir ?? 'src',
       exclude: [
         '**/tests/**/*',

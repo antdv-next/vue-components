@@ -244,7 +244,7 @@ export const Popup = defineComponent({
             motion={maskMotion}
           />
           <ResizeObserver onResize={onResize} disabled={!open}>
-            <Transition onBeforeEnter={onPrepare} onAfterEnter={onPrepare} {...transitionProps} appear>
+            <Transition onBeforeEnter={onPrepare} onBeforeAppear={onPrepare} {...transitionProps} appear>
               <div
                 v-show={forceRender || isNodeVisible}
                 ref={popupRef}
