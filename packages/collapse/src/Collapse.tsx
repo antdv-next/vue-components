@@ -72,6 +72,7 @@ const Collapse = defineComponent<CollapseProps>({
         classNames,
         styles,
         items,
+        destroyOnHidden,
       } = props
 
       const collapseClassName = classnames(prefixCls, className)
@@ -86,6 +87,7 @@ const Collapse = defineComponent<CollapseProps>({
         collapsible,
         onItemClick,
         activeKey: activeKey.value,
+        destroyOnHidden,
         classNames,
         styles,
       })

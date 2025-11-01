@@ -65,6 +65,7 @@ const CollapsePanel = defineComponent<CollapsePanelProps>({
         onItemClick,
         classNames: customizeClassNames = {},
         showArrow = true,
+        destroyOnHidden,
         styles = {},
         header,
         panelKey,
@@ -166,7 +167,7 @@ const CollapsePanel = defineComponent<CollapsePanelProps>({
           </div>
 
           <Transition {...transitionProps}>
-            {isActive ? panelContent : null}
+            { !destroyOnHidden ? panelContent : (isActive ? panelContent : null) }
           </Transition>
         </div>
       )
