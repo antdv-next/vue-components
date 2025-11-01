@@ -10,7 +10,7 @@ const defaultOptions: Ref<MutationObserverInit> = ref({
 export default function useMutateObserver(
   nodeOrList: Ref<Element | Text | Element[] | null>,
   callback: MutationCallback,
-  options: Ref<MutationObserverInit> = defaultOptions,
+  options: Ref<MutationObserverInit | undefined> = defaultOptions,
 ) {
   watchEffect((onCleanup) => {
     if (!nodeOrList.value) {
