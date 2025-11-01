@@ -9,7 +9,9 @@ import '../assets/index.less'
 const basicCollapseItems: CollapseProps['items'] = [
   {
     label: h('input', {
-      on: { keydown: (e: MouseEvent) => e.stopPropagation() },
+      onKeydown: (e: KeyboardEvent) => {
+        e.stopPropagation()
+      },
     }),
     children: 'content',
   },
