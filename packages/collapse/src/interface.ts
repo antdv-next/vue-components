@@ -56,8 +56,6 @@ export interface CollapseProps {
   openMotion?: TransitionProps
   onChange?: (key: Key[]) => void
   accordion?: boolean
-  className?: string
-  style?: object
   destroyOnHidden?: boolean
   expandIcon?: (props: object) => any
   collapsible?: CollapsibleType

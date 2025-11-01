@@ -2,6 +2,7 @@ import type { Ref } from 'vue'
 import type { CollapseProps, Key } from './interface'
 import { classNames as classnames } from '@v-c/util'
 import useMergedState from '@v-c/util/dist/hooks/useMergedState'
+import omit from '@v-c/util/dist/omit'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
 import { defineComponent, ref, toRef } from 'vue'
 import { useItems } from './hooks/useItems'
@@ -63,8 +64,6 @@ const Collapse = defineComponent<CollapseProps>({
     return () => {
       const {
         prefixCls = 'vc-collapse',
-        className,
-        style,
         openMotion,
         expandIcon,
         collapsible,
@@ -75,9 +74,9 @@ const Collapse = defineComponent<CollapseProps>({
         destroyOnHidden,
       } = props
 
-      const collapseClassName = classnames(prefixCls, className)
+      const collapseClassName = classnames(prefixCls, (attrs as any).class)
 
-      const mergedProps = { ...props, ...attrs }
+      const mergedProps = { ...props, ...omit(attrs, ['class', 'style']) }
 
       const mergedChildren = useItems(items, slots.default, {
         prefixCls,
@@ -96,7 +95,7 @@ const Collapse = defineComponent<CollapseProps>({
         <div
           ref={refWrapper}
           class={collapseClassName}
-          style={style as any}
+          style={(attrs as any).style}
           role={accordion ? 'tablist' : undefined}
           {...pickAttrs(mergedProps, { aria: true, data: true })}
         >
