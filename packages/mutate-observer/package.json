@@ -1,7 +1,10 @@
 {
   "name": "@v-c/mutate-observer",
   "type": "module",
-  "version": "0.0.2",
+  "version": "0.0.1",
+  "publishConfig": {
+    "access": "public"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -13,7 +16,8 @@
   },
   "main": "dist/index.js",
   "scripts": {
-    "build": "vite build"
+    "build": "vite build",
+    "prepublish": "pnpm build"
   },
   "peerDependencies": {
     "vue": "^3.0.0"
