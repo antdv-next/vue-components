@@ -2,7 +2,7 @@ import type { HTMLAttributes } from 'vue'
 import type { CollapsePanelProps } from './interface'
 import { classNames as classnames } from '@v-c/util'
 import KeyCode from '@v-c/util/dist/KeyCode'
-import omit from '@v-c/util/dist/omit.ts'
+import omit from '@v-c/util/dist/omit'
 import { computed, defineComponent, ref, Transition } from 'vue'
 import PanelContent from './PanelContent'
 
@@ -167,7 +167,7 @@ const CollapsePanel = defineComponent<CollapsePanelProps>({
           </div>
 
           <Transition {...transitionProps}>
-            { !destroyOnHidden ? panelContent : (isActive ? panelContent : null) }
+            { !destroyOnHidden || isActive ? panelContent : null}
           </Transition>
         </div>
       )
