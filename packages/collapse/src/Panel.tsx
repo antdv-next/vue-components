@@ -1,4 +1,4 @@
-import type { HTMLAttributes } from 'vue'
+import type { HTMLAttributes, TransitionProps } from 'vue'
 import type { CollapsePanelProps } from './interface'
 import { classNames as classnames } from '@v-c/util'
 import KeyCode from '@v-c/util/dist/KeyCode'
@@ -132,9 +132,9 @@ const CollapsePanel = defineComponent<CollapsePanelProps>({
         />
       )
 
-      const transitionProps = {
-        'appear': false,
-        'leave-to-class': `${prefixCls}-panel-hidden`,
+      const transitionProps: TransitionProps = {
+        appear: false,
+        // leaveToClass: `${prefixCls}-panel-hidden`,
         ...openMotion,
       }
 
