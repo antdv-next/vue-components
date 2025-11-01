@@ -1,6 +1,12 @@
-import type { PropType } from 'vue'
 import type { Ecc, QrCode } from './libs/qrcodegen'
-import { objectType, stringType } from '@v-c/util/dist/type'
+import {
+  DEFAULT_BACKGROUND_COLOR,
+  DEFAULT_FRONT_COLOR,
+  DEFAULT_LEVEL,
+  DEFAULT_MINVERSION,
+  DEFAULT_NEED_MARGIN,
+  DEFAULT_SIZE,
+} from './utils.ts'
 
 export type Modules = ReturnType<QrCode['getModules']>
 export interface Excavation { x: number, y: number, w: number, h: number }
@@ -20,22 +26,6 @@ export interface ImageSettings {
   y?: number
   opacity?: number
   crossOrigin?: CrossOrigin
-}
-
-export function qrProps() {
-  return {
-    value: { type: [String, Array] as PropType<string | string[]>, required: true },
-    boostLevel: Boolean,
-    size: { type: Number, default: 160 },
-    level: stringType<ErrorCorrectionLevel>('M'),
-    bgColor: String,
-    fgColor: String,
-    includeMargin: Boolean,
-    marginSize: Number,
-    imageSettings: objectType<ImageSettings>(),
-    title: String,
-    minVersion: Number,
-  }
 }
 
 export interface QRProps {
@@ -108,3 +98,12 @@ export interface QRProps {
 }
 export type QRPropsCanvas = QRProps
 export type QRPropsSVG = QRProps
+
+export const defaults = {
+  size: DEFAULT_SIZE,
+  level: DEFAULT_LEVEL,
+  bgColor: DEFAULT_BACKGROUND_COLOR,
+  fgColor: DEFAULT_FRONT_COLOR,
+  includeMargin: DEFAULT_NEED_MARGIN,
+  minVersion: DEFAULT_MINVERSION,
+} as any

@@ -1,7 +1,8 @@
 import type { CSSProperties, VNode } from 'vue'
-import type { QRProps } from './interface'
+import type { QRPropsCanvas } from './interface'
 import { computed, defineComponent, shallowRef, watch, watchEffect } from 'vue'
 import { useQRCode } from './hooks/useQRCode'
+import { defaults } from './interface'
 import {
   DEFAULT_BACKGROUND_COLOR,
   DEFAULT_FRONT_COLOR,
@@ -14,15 +15,7 @@ import {
   isSupportPath2d,
 } from './utils'
 
-const defaults = {
-  size: DEFAULT_SIZE,
-  level: DEFAULT_LEVEL,
-  bgColor: DEFAULT_BACKGROUND_COLOR,
-  fgColor: DEFAULT_FRONT_COLOR,
-  includeMargin: DEFAULT_NEED_MARGIN,
-  minVersion: DEFAULT_MINVERSION,
-} as any
-export const QRCodeCanvas = defineComponent<QRProps>({
+export const QRCodeCanvas = defineComponent<QRPropsCanvas>({
   name: 'QRCodeCanvas',
   inheritAttrs: false,
   setup(props = defaults, { attrs, expose }) {

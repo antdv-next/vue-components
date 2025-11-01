@@ -1,7 +1,8 @@
 import type { VNode } from 'vue'
+import type { QRPropsSVG } from './interface.ts'
 import { computed, defineComponent, shallowRef, watchEffect } from 'vue'
 import { useQRCode } from './hooks/useQRCode'
-import { qrProps } from './interface.ts'
+import { defaults } from './interface.ts'
 import {
   DEFAULT_BACKGROUND_COLOR,
   DEFAULT_FRONT_COLOR,
@@ -13,11 +14,10 @@ import {
   generatePath,
 } from './utils'
 
-export const QRCodeSVG = defineComponent({
+export const QRCodeSVG = defineComponent<QRPropsSVG>({
   name: 'QRCodeSVG',
   inheritAttrs: false,
-  props: { ...qrProps(), value: { type: String, required: true } },
-  setup(props) {
+  setup(props = defaults) {
     const image = shallowRef<VNode | null>(null)
     const fgPath = shallowRef('')
     const numCells = shallowRef(0)
