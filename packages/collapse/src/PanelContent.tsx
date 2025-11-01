@@ -27,7 +27,7 @@ const PanelContent = defineComponent<CollapsePanelProps>({
         isActive,
         style,
         role,
-        className,
+        class: className,
         classNames: customizeClassNames,
         styles,
       } = props

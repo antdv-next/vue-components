@@ -55,7 +55,7 @@ const CollapsePanel = defineComponent<CollapsePanelProps>({
         extra,
         prefixCls,
         isActive,
-        className,
+        class: className,
         expandIcon,
         forceRender,
         headerClass,

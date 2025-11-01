@@ -5,8 +5,6 @@ import type {
   TransitionProps,
 } from 'vue'
 
-export type CollapsibleType = 'header' | 'icon' | 'disabled'
-
 export type SemanticName = 'header' | 'title' | 'body' | 'icon'
 
 export interface CollapsePanelProps {
@@ -15,7 +13,7 @@ export interface CollapsePanelProps {
   prefixCls?: string
   headerClass?: string
   showArrow?: boolean
-  className?: string
+  class?: string
   classNames?: Partial<Record<SemanticName, string>>
   style?: object
   styles?: Partial<Record<SemanticName, CSSProperties>>
@@ -33,6 +31,8 @@ export interface CollapsePanelProps {
   children?: VueNode | string
 }
 
+export type CollapsibleType = 'header' | 'icon' | 'disabled'
+
 export interface ItemType
   extends Omit<
     CollapsePanelProps,
@@ -46,7 +46,6 @@ export interface ItemType
   > {
   key?: CollapsePanelProps['panelKey']
   label?: CollapsePanelProps['header']
-  children?: VueNode
   ref?: Ref<HTMLDivElement>
 }
 
