@@ -10,7 +10,7 @@ const defaultOptions: Ref<MutationObserverInit> = ref({
 export default function useMutateObserver(
   nodeOrList: Ref<Element | Text | Element[] | null>,
   callback: MutationCallback,
-  options: Ref<MutationObserverInit | undefined>,
+  options: Ref<MutationObserverInit> = defaultOptions,
 ) {
   watchEffect((onCleanup) => {
     if (!nodeOrList.value) {
@@ -22,7 +22,7 @@ export default function useMutateObserver(
 
     if ('MutationObserver' in window) {
       ins = new MutationObserver(callback)
-      nodeList.forEach(node => ins.observe(node, options.value || defaultOptions.value))
+      nodeList.forEach(node => ins.observe(node, options.value))
     }
 
     onCleanup(() => {
