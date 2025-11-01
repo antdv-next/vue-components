@@ -39,7 +39,7 @@ export const DEFAULT_IMG_SCALE = 0.1
  * @param margin
  * @returns
  */
-export function generatePath(modules: Modules, margin: number = 0): string {
+export function generatePath(modules: Modules, margin: number = 0) {
   const ops: string[] = []
   modules.forEach((row, y) => {
     let start: number | null = null
@@ -76,13 +76,14 @@ export function generatePath(modules: Modules, margin: number = 0): string {
   })
   return ops.join('')
 }
+
 /**
  * Excavate modules
  * @param modules
  * @param excavation
  * @returns
  */
-export function excavateModules(modules: Modules, excavation: Excavation): Modules {
+export function excavateModules(modules: Modules, excavation: Excavation) {
   return modules.slice().map((row, y) => {
     if (y < excavation.y || y >= excavation.y + excavation.h) {
       return row
@@ -104,12 +105,7 @@ export function excavateModules(modules: Modules, excavation: Excavation): Modul
  * @param imageSettings
  * @returns
  */
-export function getImageSettings(
-  cells: Modules,
-  size: number,
-  margin: number,
-  imageSettings?: ImageSettings,
-): null | {
+export function getImageSettings(cells: Modules, size: number, margin: number, imageSettings?: ImageSettings): null | {
   x: number
   y: number
   h: number
@@ -156,20 +152,21 @@ export function getImageSettings(
  * @param marginSize Custom margin size
  * @returns
  */
-export function getMarginSize(needMargin: boolean, marginSize?: number): number {
+export function getMarginSize(needMargin: boolean, marginSize?: number) {
   if (marginSize != null) {
     return Math.max(Math.floor(marginSize), 0)
   }
   return needMargin ? SPEC_MARGIN_SIZE : DEFAULT_MARGIN_SIZE
 }
+
 /**
  * Check if Path2D is supported
  */
-export const isSupportPath2d = (function () {
+export const isSupportPath2d = (() => {
   try {
     new Path2D().addPath(new Path2D())
   }
-  catch (e) {
+  catch {
     return false
   }
   return true

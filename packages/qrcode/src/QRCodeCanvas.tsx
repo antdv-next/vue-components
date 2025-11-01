@@ -1,7 +1,7 @@
 import type { CSSProperties, VNode } from 'vue'
+import type { QRProps } from './interface'
 import { computed, defineComponent, shallowRef, watch, watchEffect } from 'vue'
 import { useQRCode } from './hooks/useQRCode'
-import { qrProps } from './interface'
 import {
   DEFAULT_BACKGROUND_COLOR,
   DEFAULT_FRONT_COLOR,
@@ -14,19 +14,25 @@ import {
   isSupportPath2d,
 } from './utils'
 
-export const QRCodeCanvas = defineComponent({
+const defaults = {
+  size: DEFAULT_SIZE,
+  level: DEFAULT_LEVEL,
+  bgColor: DEFAULT_BACKGROUND_COLOR,
+  fgColor: DEFAULT_FRONT_COLOR,
+  includeMargin: DEFAULT_NEED_MARGIN,
+  minVersion: DEFAULT_MINVERSION,
+} as any
+export const QRCodeCanvas = defineComponent<QRProps>({
   name: 'QRCodeCanvas',
   inheritAttrs: false,
-  props: { ...qrProps(), value: { type: String, required: true } },
-  setup(props, { attrs, expose }) {
+  setup(props = defaults, { attrs, expose }) {
     const imgSrc = computed(() => props.imageSettings?.src)
     const _canvas = shallowRef<HTMLCanvasElement | null>(null)
     const _image = shallowRef<HTMLImageElement | null>(null)
     const isImgLoaded = shallowRef(false)
-    const calculated = shallowRef<ReturnType<typeof useQRCode>['calculatedImageSettings']>()
-    let img: VNode | null = null
+    const calculated = shallowRef<any>()
 
-    watchEffect(() => {
+    const qrcode = useQRCode(computed(() => {
       const {
         value,
         level = DEFAULT_LEVEL,
@@ -35,12 +41,19 @@ export const QRCodeCanvas = defineComponent({
         marginSize,
         imageSettings,
         size = DEFAULT_SIZE,
-        bgColor = DEFAULT_BACKGROUND_COLOR,
-        fgColor = DEFAULT_FRONT_COLOR,
         boostLevel,
       } = props
+      return { value, level, minVersion, includeMargin, marginSize, imageSettings, size, boostLevel }
+    }))
+    let img: VNode | null = null
 
-      const { margin, cells, numCells, calculatedImageSettings } = useQRCode({ value, level, minVersion, includeMargin, marginSize, imageSettings, size, boostLevel })
+    watchEffect(() => {
+      const {
+        size = DEFAULT_SIZE,
+        bgColor = DEFAULT_BACKGROUND_COLOR,
+        fgColor = DEFAULT_FRONT_COLOR,
+      } = props
+      const { margin, cells, numCells, calculatedImageSettings } = qrcode.value
       if (_canvas.value != null) {
         const canvas = _canvas.value
 
@@ -137,7 +150,7 @@ export const QRCodeCanvas = defineComponent({
             // when crossOrigin is not set, the image will be tainted
             // and the canvas cannot be exported to an image
             crossorigin={calculated.value?.crossOrigin}
-            alt=""
+            alt="QR-Code"
           />
         )
       }
@@ -149,6 +162,8 @@ export const QRCodeCanvas = defineComponent({
             ref={_canvas}
             role="img"
             title={title}
+            height={size}
+            width={size}
           />
           {img}
         </>

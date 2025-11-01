@@ -1,7 +1,10 @@
 {
   "name": "@v-c/qrcode",
   "type": "module",
-  "version": "0.0.3",
+  "version": "0.0.4",
+  "publishConfig": {
+    "access": "public"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -20,6 +23,7 @@
   "main": "index.js",
   "scripts": {
     "build": "vite build",
+    "prepublish": "pnpm build",
     "test": "vitest"
   },
   "peerDependencies": {

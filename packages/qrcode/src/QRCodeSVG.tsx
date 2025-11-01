@@ -1,5 +1,5 @@
 import type { VNode } from 'vue'
-import { defineComponent, watchEffect } from 'vue'
+import { computed, defineComponent, shallowRef, watchEffect } from 'vue'
 import { useQRCode } from './hooks/useQRCode'
 import { qrProps } from './interface.ts'
 import {
@@ -18,35 +18,31 @@ export const QRCodeSVG = defineComponent({
   inheritAttrs: false,
   props: { ...qrProps(), value: { type: String, required: true } },
   setup(props) {
-    let image: VNode | null = null
-    let fgPath: string = ''
-    let numCells: number = 0
+    const image = shallowRef<VNode | null>(null)
+    const fgPath = shallowRef('')
+    const numCells = shallowRef(0)
 
-    watchEffect(() => {
+    const qrcode = useQRCode(computed(() => {
       const {
         value,
-        size = DEFAULT_SIZE,
         level = DEFAULT_LEVEL,
         includeMargin = DEFAULT_NEED_MARGIN,
         minVersion = DEFAULT_MINVERSION,
         marginSize,
         imageSettings,
+        size = DEFAULT_SIZE,
         boostLevel,
       } = props
+      return { value, level, minVersion, includeMargin, marginSize, imageSettings, size, boostLevel }
+    }))
 
-      const { margin, cells, numCells: getNumCells, calculatedImageSettings } = useQRCode({
-        value,
-        level,
-        minVersion,
-        includeMargin,
-        marginSize,
-        imageSettings,
-        size,
-        boostLevel,
-      })
+    watchEffect(() => {
+      const { imageSettings } = props
+
+      const { margin, cells, numCells: getNumCells, calculatedImageSettings } = qrcode.value
 
       let cellsToDraw = cells
-      numCells = getNumCells
+      numCells.value = getNumCells
 
       if (imageSettings != null && calculatedImageSettings != null) {
         if (calculatedImageSettings.excavation != null) {
@@ -56,7 +52,7 @@ export const QRCodeSVG = defineComponent({
           )
         }
 
-        image = (
+        image.value = (
           <image
             href={imageSettings.src}
             height={calculatedImageSettings.h}
@@ -72,7 +68,7 @@ export const QRCodeSVG = defineComponent({
         )
       }
 
-      fgPath = generatePath(cellsToDraw, margin)
+      fgPath.value = generatePath(cellsToDraw, margin)
     })
 
     return () => {
@@ -86,17 +82,17 @@ export const QRCodeSVG = defineComponent({
         <svg
           height={size}
           width={size}
-          viewBox={`0 0 ${numCells} ${numCells}`}
+          viewBox={`0 0 ${numCells.value} ${numCells.value}`}
           role="img"
         >
           {!!title && <title>{title}</title>}
           <path
             fill={bgColor}
-            d={`M0,0 h${numCells}v${numCells}H0z`}
+            d={`M0,0 h${numCells.value}v${numCells.value}H0z`}
             shape-rendering="crispEdges"
           />
-          <path fill={fgColor} d={fgPath} shape-rendering="crispEdges" />
-          {image}
+          <path fill={fgColor} d={fgPath.value} shape-rendering="crispEdges" />
+          {image.value}
         </svg>
       )
     }
