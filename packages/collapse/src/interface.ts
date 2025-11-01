@@ -1,7 +1,6 @@
-import type { VueNode } from '@v-c/util/dist/type'
+import type { Key, VueNode } from '@v-c/util/dist/type'
 import type {
   CSSProperties,
-  ExtractPropTypes,
   PropType,
   Ref,
   TransitionProps,
@@ -47,22 +46,29 @@ export function generatorCollapsePanelProps() {
   }
 }
 
-export type Key = string | number | bigint
-
-type InternalCollapsePanelProps = ExtractPropTypes<
-  ReturnType<typeof generatorCollapsePanelProps>
->
-
-export type CollapsePanelProps = Omit<
-  InternalCollapsePanelProps,
-  'showArrow' | 'classNames' | 'styles' | 'isActive' | 'accordion'
-> &
-Partial<
-  Pick<
-    InternalCollapsePanelProps,
-      'showArrow' | 'classNames' | 'styles' | 'isActive' | 'accordion'
-  >
->
+export interface CollapsePanelProps {
+  id?: string
+  header?: VueNode
+  prefixCls?: string
+  headerClass?: string
+  showArrow?: boolean
+  className?: string
+  classNames?: Partial<Record<SemanticName, string>>
+  style?: object
+  styles?: Partial<Record<SemanticName, CSSProperties>>
+  isActive?: boolean
+  openMotion?: TransitionProps
+  destroyOnHidden?: boolean
+  accordion?: boolean
+  forceRender?: boolean
+  extra?: VueNode
+  onItemClick?: (panelKey: Key) => void
+  expandIcon?: (props: object) => any
+  panelKey?: Key
+  role?: string
+  collapsible?: CollapsibleType
+  children?: VueNode | string
+}
 
 export interface ItemType
   extends Omit<
@@ -100,18 +106,26 @@ export function generatorCollapseProps() {
   }
 }
 
-type InternalCollapseProps = ExtractPropTypes<
-  ReturnType<typeof generatorCollapseProps>
->
-
-export type CollapseProps = Omit<
-  InternalCollapseProps,
-  'accordion' | 'destroyInactivePanel'
-> &
-Partial<
-  Pick<InternalCollapsePanelProps, 'accordion' | 'destroyInactivePanel'>
->
-
+export interface CollapseProps {
+  prefixCls?: string
+  activeKey?: Key | Key[]
+  defaultActiveKey?: Key | Key[]
+  openMotion?: TransitionProps
+  onChange?: (key: Key[]) => void
+  accordion?: boolean
+  className?: string
+  style?: object
+  destroyOnHidden?: boolean
+  expandIcon?: (props: object) => any
+  collapsible?: CollapsibleType
+  /**
+   * Collapse items content
+   * @since 3.6.0
+   */
+  items?: ItemType[]
+  classNames?: Partial<Record<SemanticName, string>>
+  styles?: Partial<Record<SemanticName, CSSProperties>>
+}
 export function generatorCollapsePanelContentProps() {
   return {
     isActive: Boolean,
@@ -126,4 +140,8 @@ export function generatorCollapsePanelContentProps() {
     role: String,
     forceRender: Boolean,
   }
+}
+
+export type {
+  Key,
 }

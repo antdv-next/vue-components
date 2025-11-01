@@ -1,11 +1,10 @@
+import type { CollapsePanelProps } from './interface'
 import { classNames as classnames } from '@v-c/util'
 import { defineComponent, ref, watch } from 'vue'
-import { generatorCollapsePanelContentProps } from './interface'
 
-const PanelContent = defineComponent({
+const PanelContent = defineComponent<CollapsePanelProps>({
   name: 'PanelContent',
   inheritAttrs: false,
-  props: generatorCollapsePanelContentProps(),
   setup(props, { slots }) {
     const rendered = ref(props.isActive || props.forceRender)
 
@@ -29,7 +28,7 @@ const PanelContent = defineComponent({
         style,
         role,
         className,
-        classNames: customizeizeClassNames,
+        classNames: customizeClassNames,
         styles,
       } = props
 
@@ -43,13 +42,13 @@ const PanelContent = defineComponent({
             },
             className,
           )}
-          style={style}
+          style={style as any}
           role={role}
         >
           <div
             class={classnames(
               `${prefixCls}-body`,
-              customizeizeClassNames?.body,
+              customizeClassNames?.body,
             )}
             style={styles?.body}
           >

@@ -25,7 +25,7 @@ type Props = Pick<
   | 'classNames'
   | 'styles'
 > &
-Pick<CollapseProps, 'accordion' | 'collapsible' | 'destroyInactivePanel'> & {
+Pick<CollapseProps, 'accordion' | 'collapsible'> & {
   activeKey: Key[]
 }
 
@@ -38,7 +38,6 @@ function convertItemsToNodes(items: ItemType[], props: Props) {
     prefixCls,
     accordion,
     collapsible,
-    destroyInactivePanel,
     onItemClick,
     activeKey,
     openMotion,
@@ -53,14 +52,11 @@ function convertItemsToNodes(items: ItemType[], props: Props) {
       key: rawKey,
       collapsible: rawCollapsible,
       onItemClick: rawOnItemClick,
-      destroyInactivePanel: rawDestroyInactivePanel,
       ...restProps
     } = item
 
     const key = String(rawKey ?? index)
     const mergeCollapsible = rawCollapsible ?? collapsible
-    const mergeDestroyInactivePanel
-      = rawDestroyInactivePanel ?? destroyInactivePanel
 
     const handleItemClick = (value: Key) => {
       if (mergeCollapsible === 'disabled')
@@ -94,7 +90,6 @@ function convertItemsToNodes(items: ItemType[], props: Props) {
         header={label}
         collapsible={mergeCollapsible}
         onItemClick={handleItemClick}
-        destroyInactivePanel={mergeDestroyInactivePanel}
       />
     )
   })
@@ -123,7 +118,6 @@ function getNewChild(
     prefixCls,
     accordion,
     collapsible,
-    destroyInactivePanel,
     onItemClick,
     activeKey,
     openMotion,
@@ -137,7 +131,6 @@ function getNewChild(
   const {
     header,
     headerClass,
-    destroyInactivePanel: childDestroyInactivePanel,
     collapsible: childCollapsible,
     onItemClick: childOnItemClick,
   } = child.props || {}
@@ -168,7 +161,6 @@ function getNewChild(
     styles,
     isActive,
     prefixCls,
-    destroyInactivePanel: childDestroyInactivePanel ?? destroyInactivePanel,
     openMotion,
     accordion,
     children: (child.children as ChildrenSlots)?.default?.(),

@@ -1,15 +1,21 @@
 import type { HTMLAttributes } from 'vue'
-import KeyCode from '@v-c/util/dist/KeyCode'
+import type { CollapsePanelProps } from './interface'
 import { classNames as classnames } from '@v-c/util'
+import KeyCode from '@v-c/util/dist/KeyCode'
+import omit from '@v-c/util/dist/omit.ts'
 import { computed, defineComponent, ref, Transition } from 'vue'
-import { generatorCollapsePanelProps } from './interface'
 import PanelContent from './PanelContent'
 
-const CollapsePanel = defineComponent({
+const defaults = {
+  showArrow: true,
+  classNames: {},
+  styles: {},
+} as any
+
+const CollapsePanel = defineComponent<CollapsePanelProps>({
   name: 'CollapsePanel',
-  props: generatorCollapsePanelProps(),
   inheritAttrs: false,
-  setup(props, { attrs, expose }) {
+  setup(props = defaults, { attrs, expose }) {
     const disabled = computed(() => props.collapsible === 'disabled')
     const refWrapper = ref()
     const ifExtraExist = computed(
@@ -57,7 +63,6 @@ const CollapsePanel = defineComponent({
         accordion,
         openMotion = {},
         onItemClick,
-        destroyInactivePanel,
         classNames: customizeClassNames = {},
         showArrow = true,
         styles = {},
@@ -134,12 +139,12 @@ const CollapsePanel = defineComponent({
 
       const mergedRestProps = {
         ...restProps,
-        ...attrs,
+        ...omit(attrs, ['class']),
       }
 
       return (
         <div
-          {...mergedRestProps}
+          {...mergedRestProps as any}
           ref={refWrapper}
           class={collapsePanelClassNames}
         >
@@ -161,7 +166,7 @@ const CollapsePanel = defineComponent({
           </div>
 
           <Transition {...transitionProps}>
-            {!destroyInactivePanel || isActive ? panelContent : null}
+            {isActive ? panelContent : null}
           </Transition>
         </div>
       )

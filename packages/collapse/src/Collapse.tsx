@@ -1,10 +1,10 @@
 import type { Ref } from 'vue'
+import type { CollapseProps, Key } from './interface'
+import { classNames as classnames } from '@v-c/util'
 import useMergedState from '@v-c/util/dist/hooks/useMergedState'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
-import { classNames as classnames } from '@v-c/util'
 import { defineComponent, ref, toRef } from 'vue'
 import { useItems } from './hooks/useItems'
-import { generatorCollapseProps, type Key } from './interface'
 
 function getActiveKeysArray(activeKey: Key | Array<Key>) {
   let currentActiveKey = activeKey
@@ -18,11 +18,14 @@ function getActiveKeysArray(activeKey: Key | Array<Key>) {
   return currentActiveKey.map(key => String(key))
 }
 
-const Collapse = defineComponent({
-  props: generatorCollapseProps(),
+const defaults = {
+  prefixCls: 'vc-collapse',
+} as any
+
+const Collapse = defineComponent<CollapseProps>({
   name: 'VcCollapse',
   inheritAttrs: false,
-  setup(props, { attrs, expose, slots }) {
+  setup(props = defaults, { attrs, expose, slots }) {
     const refWrapper = ref<HTMLDivElement>()
 
     const [activeKey, setActiveKey] = useMergedState<
@@ -66,7 +69,6 @@ const Collapse = defineComponent({
         expandIcon,
         collapsible,
         accordion,
-        destroyInactivePanel,
         classNames,
         styles,
         items,
@@ -82,7 +84,6 @@ const Collapse = defineComponent({
         openMotion,
         expandIcon,
         collapsible,
-        destroyInactivePanel,
         onItemClick,
         activeKey: activeKey.value,
         classNames,
@@ -93,7 +94,7 @@ const Collapse = defineComponent({
         <div
           ref={refWrapper}
           class={collapseClassName}
-          style={style}
+          style={style as any}
           role={accordion ? 'tablist' : undefined}
           {...pickAttrs(mergedProps, { aria: true, data: true })}
         >
