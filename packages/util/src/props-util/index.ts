@@ -1,5 +1,5 @@
-import type { VNode, VNodeNormalizedChildren } from 'vue'
-import { Comment, Fragment, isVNode, Text } from 'vue'
+import type { Ref, VNode, VNodeNormalizedChildren } from 'vue'
+import { Comment, Fragment, isVNode, Text, toRef } from 'vue'
 import isValid from '../isValid'
 
 export function isEmptyElement(c: any) {
@@ -57,3 +57,11 @@ function flattenChildren(children?: VNode | VNodeNormalizedChildren, isFilterEmp
 }
 
 export { flattenChildren }
+
+export function toPropsRefs<T extends Record<string, any>, K extends keyof T>(obj: T, ...args: K[]) {
+  const _res: Record<any, any> = {}
+  args.forEach((key) => {
+    _res[key] = toRef(obj, key)
+  })
+  return _res as { [key in K]-?: Ref<T[key]> }
+}
