@@ -6,7 +6,7 @@ import type {
   ArrowTypeOuter,
   BuildInPlacements,
 } from './interface'
-import { computed, defineComponent, inject, provide, ref } from 'vue'
+import { computed, defineComponent, inject, provide } from 'vue'
 // ===================== Nest =====================
 export interface TriggerContextProps {
   registerSubPopup: (id: string, node: HTMLElement) => void
@@ -15,9 +15,7 @@ export interface TriggerContextProps {
 const TriggerContextKey: InjectionKey<Ref<TriggerContextProps>> = Symbol('TriggerContextKey')
 
 export function useTriggerContext() {
-  return inject(TriggerContextKey, ref({
-    registerSubPopup: () => {},
-  }))
+  return inject(TriggerContextKey, undefined)
 }
 
 export const TriggerContextProvider = defineComponent(
@@ -64,10 +62,7 @@ export interface UniqueContextProps {
 export const UniqueContextKey: InjectionKey<UniqueContextProps> = Symbol('UniqueContextKey')
 
 export function useUniqueContext() {
-  return inject(UniqueContextKey, {
-    show: () => {},
-    hide: () => {},
-  })
+  return inject(UniqueContextKey, undefined)
 }
 
 export const UniqueContextProvider = defineComponent(

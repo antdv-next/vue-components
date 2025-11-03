@@ -61,8 +61,11 @@ export interface PortalWrapperProps {
   wrapperClassName?: string
   forceRender?: boolean
 }
+interface PortalWrapperEmits {
+  [key: string]: any
+}
 
-const PortalWrapper = defineComponent<PortalWrapperProps, any, string, DefaultSlotInfo>((props, ctx) => {
+const PortalWrapper = defineComponent<PortalWrapperProps, PortalWrapperEmits, string, DefaultSlotInfo>((props, ctx) => {
   const container = shallowRef<HTMLElement>()
   const componentRef = shallowRef<PortalRef>()
   const rafId = shallowRef<number>()
@@ -94,7 +97,7 @@ const PortalWrapper = defineComponent<PortalWrapperProps, any, string, DefaultSl
     // Clean up container if needed
     const getContainerIsFunc
             = typeof getContainer === 'function'
-            && typeof prevGetContainer === 'function'
+              && typeof prevGetContainer === 'function'
     if (
       getContainerIsFunc
         ? getContainer.toString() !== prevGetContainer.toString()

@@ -4,7 +4,7 @@ import type { AlignType, ArrowPos } from '../interface.ts'
 import { toPropsRefs } from '@v-c/util/dist/props-util'
 import { getTransitionProps } from '@v-c/util/dist/utils/transition'
 import { defineComponent, shallowRef, Transition, watchEffect } from 'vue'
-import useOffsetStyle from '../hooks/useOffsetStyle.ts'
+import useOffsetStyle from '../hooks/useOffsetStyle'
 
 export interface UniqueContainerProps {
   prefixCls: string // ${prefixCls}-unique-container
