@@ -1,13 +1,12 @@
 import type { VueNode } from '@v-c/util/dist/type'
 import type { CSSMotionProps } from '@v-c/util/dist/utils/transition'
 import type { CSSProperties } from 'vue'
-import type {
-  ActionType,
-  AlignType,
-  ArrowTypeOuter,
-  BuildInPlacements,
-} from './interface'
+import type { TriggerContextProps } from './context.ts'
+import type { ActionType, AlignType, ArrowTypeOuter, BuildInPlacements } from './interface'
 import type { MobileConfig } from './Popup'
+import Portal from '@v-c/portal'
+import { computed, defineComponent, ref } from 'vue'
+import { useTriggerContext } from './context.ts'
 
 export interface TriggerRef {
   nativeElement: HTMLElement
@@ -106,3 +105,43 @@ export interface TriggerProps {
    */
   mobile?: MobileConfig
 }
+
+const defaults = {
+  prefixCls: 'vc-trigger-popup',
+  action: 'hover',
+  mouseLeaveDelay: 0.1,
+  maskClosable: true,
+  builtinPlacements: {},
+  popupVisible: undefined,
+} as any
+export function generateTrigger(PortalComponent: any = Portal) {
+  return defineComponent<TriggerProps>(
+    (props = defaults, { expose }) => {
+      const mergedAutoDestroy = computed(() => props.autoDestroy ?? false)
+      const openUncontrolled = computed(() => props.popupVisible === undefined)
+      // =========================== Mobile ===========================
+      const isMobile = computed(() => !!props.mobile)
+      // ========================== Context ===========================
+      const subPopupElements = ref<Record<string, HTMLElement>>({})
+      const parentContext = useTriggerContext()
+      const context = computed<TriggerContextProps>(() => {
+        return {
+          registerSubPopup(id, subPopupEle) {
+            subPopupElements.value[id] = subPopupEle
+            parentContext?.value.registerSubPopup(id, subPopupEle)
+          },
+        }
+      })
+      // ======================== UniqueContext =========================
+
+      expose({
+
+      })
+      return () => {
+        return null
+      }
+    },
+  )
+}
+
+export default generateTrigger(Portal)

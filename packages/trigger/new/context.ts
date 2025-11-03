@@ -1,28 +1,28 @@
 import type { CSSMotionProps } from '@v-c/util/dist/utils/transition'
-import type { CSSProperties, InjectionKey } from 'vue'
+import type { CSSProperties, InjectionKey, Ref } from 'vue'
 import type { TriggerProps } from './index'
 import type {
   AlignType,
   ArrowTypeOuter,
   BuildInPlacements,
 } from './interface'
-import { defineComponent, inject, provide } from 'vue'
+import { computed, defineComponent, inject, provide, ref } from 'vue'
 // ===================== Nest =====================
 export interface TriggerContextProps {
   registerSubPopup: (id: string, node: HTMLElement) => void
 }
 
-const TriggerContextKey: InjectionKey<TriggerContextProps> = Symbol('TriggerContextKey')
+const TriggerContextKey: InjectionKey<Ref<TriggerContextProps>> = Symbol('TriggerContextKey')
 
 export function useTriggerContext() {
-  return inject(TriggerContextKey, {
+  return inject(TriggerContextKey, ref({
     registerSubPopup: () => {},
-  })
+  }))
 }
 
 export const TriggerContextProvider = defineComponent(
   (props, { slots }) => {
-    provide(TriggerContextKey, props)
+    provide(TriggerContextKey, computed(() => props))
     return () => {
       return slots?.default?.()
     }

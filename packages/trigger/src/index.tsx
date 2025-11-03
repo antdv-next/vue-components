@@ -9,14 +9,13 @@ import type {
 } from './interface'
 
 import ResizeObserver from '@v-c/resize-observer'
+import { classNames } from '@v-c/util'
 import { isDOM } from '@v-c/util/dist/Dom/findDOMNode'
 import { getShadowRoot } from '@v-c/util/dist/Dom/shadow'
 import useEvent from '@v-c/util/dist/hooks/useEvent'
 import useId from '@v-c/util/dist/hooks/useId'
 import isMobile from '@v-c/util/dist/isMobile'
 import { cloneElement } from '@v-c/util/dist/vnode'
-import { classNames } from '@v-c/util'
-
 import { computed, defineComponent, nextTick, onBeforeUnmount, onMounted, ref, watch, watchEffect } from 'vue'
 import { useProviderTriggerContext } from './context'
 import useAction from './hooks/useAction'

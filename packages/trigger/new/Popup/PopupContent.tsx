@@ -4,7 +4,7 @@ export interface PopupContextProps {
   cache?: boolean
 }
 
-const PopupContext = defineComponent<PopupContextProps>(
+const PopupContent = defineComponent<PopupContextProps>(
   (props, { slots }) => {
     return () => {
       if (props.cache) {
@@ -17,4 +17,4 @@ const PopupContext = defineComponent<PopupContextProps>(
     name: 'PopupContext',
   },
 )
-export default PopupContext
+export default PopupContent

@@ -53,7 +53,7 @@ export function collectScroller(ele: HTMLElement) {
 
   while (current) {
     const { overflowX, overflowY, overflow }
-            = getWin(current).getComputedStyle(current)
+            = getWin(current)!.getComputedStyle(current)
     if ([overflowX, overflowY, overflow].some(o => scrollStyle.includes(o))) {
       scrollerList.push(current)
     }
@@ -85,7 +85,7 @@ export interface VisibleArea {
  *  **************************************
  *  Border                *
  *  **************************     *
- *  
+ *
  *  B  *                  *  S  *  B  *
  *  o  *                  *  c  *  o  *
  *  r  *      Content     *  r  *  r  *
@@ -93,8 +93,8 @@ export interface VisibleArea {
  *  e  *                  *  l  *  e  *
  *  r  ********************  l  *  r  *
  *  Scroll          *     *
- *  *     **************************     *
- *  *              Border                *
+ *  **************************     *
+ *  Border                *
  *  **************************************
  *
  */
@@ -120,7 +120,7 @@ export function getVisibleArea(
       borderBottomWidth,
       borderLeftWidth,
       borderRightWidth,
-    } = getWin(ele).getComputedStyle(ele)
+    } = getWin(ele)!.getComputedStyle(ele)
 
     const eleRect = ele.getBoundingClientRect()
     const {

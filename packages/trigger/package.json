@@ -2,6 +2,12 @@
   "name": "@v-c/trigger",
   "type": "module",
   "version": "0.0.1",
+  "description": "",
+  "author": "",
+  "license": "MIT",
+  "keywords": [
+    "trigger"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -11,16 +17,14 @@
     "./dist/*": "./dist/*",
     "./package.json": "./package.json"
   },
-  "description": "",
-  "author": "",
-  "license": "MIT",
-  "keywords": [
-    "trigger"
+  "main": "./dist/index.js",
+  "files": [
+    "dist"
   ],
-  "main": "index.js",
   "scripts": {
     "build": "vite build",
-    "test": "vitest"
+    "test": "vitest",
+    "prepublish": "pnpm build"
   },
   "peerDependencies": {
     "vue": "^3.0.0"
