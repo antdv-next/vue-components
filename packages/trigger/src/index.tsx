@@ -134,12 +134,17 @@ export function generateTrigger(PortalComponent: any = Portal) {
       // =========================== Mobile ===========================
       const isMobile = computed(() => !!props.mobile)
       // ========================== Context ===========================
-      const subPopupElements = ref<Record<string, HTMLElement>>({})
+      const subPopupElements = ref<Record<string, HTMLElement | null>>({})
       const parentContext = useTriggerContext()
       const context = computed<TriggerContextProps>(() => {
         return {
           registerSubPopup(id, subPopupEle) {
-            subPopupElements.value[id] = subPopupEle
+            if (subPopupEle) {
+              subPopupElements.value[id] = subPopupEle
+            }
+            else {
+              delete subPopupElements.value[id]
+            }
             parentContext?.value.registerSubPopup(id, subPopupEle)
           },
         }
@@ -148,26 +153,58 @@ export function generateTrigger(PortalComponent: any = Portal) {
       const uniqueContext = useUniqueContext()
       // =========================== Popup ============================
       const id = useId()
-      const popupEle = shallowRef<HTMLDivElement>()
+      const popupEle = shallowRef<HTMLDivElement | null>(null)
       // Used for forwardRef popup. Not use internal
-      const externalPopupRef = shallowRef<HTMLDivElement>()
-      const setPopupRef = (node: any) => {
-        externalPopupRef.value = node
-        if (isDOM(node) && popupEle.value !== node) {
-          popupEle.value = node as HTMLDivElement
+      const externalPopupRef = shallowRef<HTMLDivElement | null>(null)
+      const resolveToElement = (node: any) => {
+        if (!node) {
+          return null
         }
-        parentContext?.value?.registerSubPopup(id, node)
+        if (isDOM(node)) {
+          return node as HTMLElement
+        }
+        const exposed = node as any
+        if (isDOM(exposed?.$el)) {
+          return exposed.$el
+        }
+        const nativeEl = exposed?.nativeElement
+        if (isDOM(nativeEl?.value)) {
+          return nativeEl.value
+        }
+        if (isDOM(nativeEl)) {
+          return nativeEl
+        }
+        if (typeof exposed?.getElement === 'function') {
+          const el = exposed.getElement()
+          if (isDOM(el)) {
+            return el as HTMLElement
+          }
+        }
+        return null
+      }
+      const setPopupRef = (node: any) => {
+        const element = resolveToElement(node) as HTMLDivElement | null
+        externalPopupRef.value = element
+        if (popupEle.value !== element) {
+          popupEle.value = element
+        }
+        parentContext?.value?.registerSubPopup(id, element ?? null)
       }
 
       // =========================== Target ===========================
       // Use state to control here since `useRef` update not trigger render
-      const targetEle = shallowRef<HTMLElement>()
+      const targetEle = shallowRef<HTMLElement | null>(null)
       // Used for forwardRef target. Not use internal
-      const externalForwardRef = shallowRef<HTMLElement>()
+      const externalForwardRef = shallowRef<HTMLElement | null>(null)
       const setTargetRef = (node: any) => {
-        if (isDOM(node) && targetEle.value !== node) {
-          targetEle.value = node as HTMLElement
-          externalForwardRef.value = node as HTMLElement
+        const element = resolveToElement(node)
+        if (element && targetEle.value !== element) {
+          targetEle.value = element as HTMLElement
+          externalForwardRef.value = element as HTMLElement
+        }
+        else if (!element) {
+          targetEle.value = null
+          externalForwardRef.value = null
         }
       }
 
@@ -179,16 +216,21 @@ export function generateTrigger(PortalComponent: any = Portal) {
       const originChildProps = computed(() => {
         return child?.value?.props || {}
       })
-      const cloneProps = shallowRef({})
+      const baseActionProps = shallowRef<Record<string, any>>({})
+      const hoverActionProps = shallowRef<Record<string, any>>({})
+      const cloneProps = computed<Record<string, any>>(() => ({
+        ...baseActionProps.value,
+        ...hoverActionProps.value,
+      }))
 
       const inPopupOrChild = (ele: EventTarget) => {
         const childDOM = targetEle.value
         return (
           childDOM?.contains(ele as HTMLElement)
-          || getShadowRoot(childDOM!)?.host === ele
+          || (childDOM && getShadowRoot(childDOM)?.host === ele)
           || ele === childDOM
           || popupEle.value?.contains(ele as HTMLElement)
-          || getShadowRoot(popupEle.value!)?.host === ele
+          || (popupEle.value && getShadowRoot(popupEle.value)?.host === ele)
           || ele === popupEle.value
           || Object.values(subPopupElements.value)
             .some(
@@ -207,7 +249,11 @@ export function generateTrigger(PortalComponent: any = Portal) {
       })
 
       // ============================ Open ============================
-      const internalOpen = shallowRef(props?.defaultPopupVisible || false)
+      const internalOpen = shallowRef(props?.defaultPopupVisible ?? false)
+
+      if (props.popupVisible !== undefined) {
+        internalOpen.value = props.popupVisible
+      }
 
       // Render still use props as first priority
       const mergedOpen = computed(() => {
@@ -221,10 +267,15 @@ export function generateTrigger(PortalComponent: any = Portal) {
       }
       const isOpen = () => mergedOpen.value
 
-      watchEffect(async () => {
-        await nextTick()
-        internalOpen.value = props?.popupVisible || false
-      })
+      watch(
+        () => props.popupVisible,
+        async (nextVisible) => {
+          if (nextVisible !== undefined) {
+            await nextTick()
+            internalOpen.value = nextVisible
+          }
+        },
+      )
       // Extract common options for UniqueProvider
       const getUniqueOptions = (delay: number = 0) => {
         return {
@@ -258,7 +309,8 @@ export function generateTrigger(PortalComponent: any = Portal) {
       watch([mergedOpen, targetEle], () => {
         if (uniqueContext && props.unique && targetEle.value && !openUncontrolled.value && !parentContext?.value) {
           if (mergedOpen.value) {
-            uniqueContext?.show(getUniqueOptions(props.mouseLeaveDelay) as any, isOpen)
+            const enterDelay = props.mouseEnterDelay ?? 0
+            uniqueContext?.show(getUniqueOptions(enterDelay) as any, isOpen)
           }
           else {
             uniqueContext?.hide(props.mouseLeaveDelay || 0)
@@ -301,13 +353,14 @@ export function generateTrigger(PortalComponent: any = Portal) {
 
         // If UniqueContext exists and not controlled, pass delay to Provider instead of handling it internally
         // If there is a parentContext, don't call uniqueContext methods
-        if (uniqueContext && props.unique && openUncontrolled.value && !parentContext) {
+        if (uniqueContext && props.unique && openUncontrolled.value && !parentContext?.value) {
           if (nextOpen) {
             uniqueContext?.show(getUniqueOptions(delay) as any, isOpen)
           }
           else {
             uniqueContext.hide(delay)
           }
+          return
         }
 
         delayInvoke(() => {
@@ -460,13 +513,14 @@ export function generateTrigger(PortalComponent: any = Portal) {
        * @param ignoreCheck  Ignore current event if check return true
        */
       function wrapperAction(
+        target: Record<string, any>,
         eventName: string,
         nextOpen: boolean,
         delay?: number,
         callback?: (event: Event) => void,
         ignoreCheck?: () => boolean,
       ) {
-        ;(cloneProps.value as any)[eventName] = (event: any, ...args: any[]) => {
+        target[eventName] = (event: any, ...args: any[]) => {
           if (!ignoreCheck || !ignoreCheck()) {
             callback?.(event)
             triggerOpen(nextOpen, delay)
@@ -483,9 +537,9 @@ export function generateTrigger(PortalComponent: any = Portal) {
       /** Used for prevent `hover` event conflict with mobile env */
       const touchedRef = shallowRef(false)
       watchEffect(() => {
-        const _cloneProps = cloneProps.value as any
+        const nextCloneProps: Record<string, any> = {}
         if (touchToShow.value || touchToHide.value) {
-          _cloneProps.onTouchStart = (...args: any[]) => {
+          nextCloneProps.onTouchStart = (...args: any[]) => {
             touchedRef.value = true
 
             if (openRef.value && touchToHide.value) {
@@ -502,7 +556,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
 
         // ======================= Action: Click ========================
         if (clickToShow.value || clickToHide.value) {
-          _cloneProps.onClick = (
+          nextCloneProps.onClick = (
             event: MouseEvent,
             ...args: any[]
           ) => {
@@ -520,6 +574,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
             touchedRef.value = false
           }
         }
+        baseActionProps.value = nextCloneProps
       })
 
       // Click to hide is special action since click popup element should not hide
@@ -547,6 +602,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
 
       watchEffect(() => {
         const { mouseEnterDelay, mouseLeaveDelay, alignPoint, focusDelay, blurDelay } = props
+        const nextHoverProps: Record<string, any> = {}
         if (hoverToShow.value) {
           const onMouseEnterCallback = (event: any) => {
             setMousePosByEvent(event)
@@ -554,6 +610,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
 
           // Compatible with old browser which not support pointer event
           wrapperAction(
+            nextHoverProps,
             'onMouseenter',
             true,
             mouseEnterDelay,
@@ -561,6 +618,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
             ignoreMouseTrigger,
           )
           wrapperAction(
+            nextHoverProps,
             'onPointerenter',
             true,
             mouseEnterDelay,
@@ -580,14 +638,18 @@ export function generateTrigger(PortalComponent: any = Portal) {
 
           // Align Point
           if (alignPoint) {
-            ;(cloneProps.value as any).onMouseMove = (event: any) => {
+            nextHoverProps.onMouseMove = (event: any) => {
               originChildProps.value.onMouseMove?.(event)
             }
           }
         }
+        else {
+          onPopupMouseEnter = undefined
+        }
 
         if (hoverToHide.value) {
           wrapperAction(
+            nextHoverProps,
             'onMouseleave',
             false,
             mouseLeaveDelay,
@@ -595,6 +657,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
             ignoreMouseTrigger,
           )
           wrapperAction(
+            nextHoverProps,
             'onPointerleave',
             false,
             mouseLeaveDelay,
@@ -606,19 +669,22 @@ export function generateTrigger(PortalComponent: any = Portal) {
             triggerOpen(false, mouseLeaveDelay)
           }
         }
+        else {
+          onPopupMouseLeave = undefined
+        }
 
         // ======================= Action: Focus ========================
         if (showActions.value.has('focus')) {
-          wrapperAction('onFocus', true, focusDelay)
+          wrapperAction(nextHoverProps, 'onFocus', true, focusDelay)
         }
 
         if (hideActions.value.has('focus')) {
-          wrapperAction('onBlur', false, blurDelay)
+          wrapperAction(nextHoverProps, 'onBlur', false, blurDelay)
         }
 
         // ==================== Action: ContextMenu =====================
         if (showActions.value.has('contextmenu')) {
-          ;(cloneProps.value as any).onContextmenu = (event: any, ...args: any[]) => {
+          nextHoverProps.onContextmenu = (event: any, ...args: any[]) => {
             if (openRef.value && hideActions.value.has('contextmenu')) {
               triggerOpen(false)
             }
@@ -633,6 +699,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
             originChildProps.value.onContextMenu?.(event, ...args)
           }
         }
+        hoverActionProps.value = nextHoverProps
       })
 
       // ============================ Perf ============================
@@ -703,7 +770,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
             >
               {triggerNode}
             </ResizeObserver>
-            {rendedRef.value && (!uniqueContext || !unique) && (
+            {rendedRef.value && targetEle.value && (!uniqueContext || !unique) && (
               <TriggerContextProvider {...context.value}>
                 <Popup
                   portal={PortalComponent}
@@ -763,4 +830,10 @@ export function generateTrigger(PortalComponent: any = Portal) {
   )
 }
 
-export default generateTrigger(Portal)
+const Trigger = generateTrigger(Portal)
+
+export { Trigger }
+export default Trigger
+export type { TriggerProps, TriggerRef }
+export { default as UniqueProvider } from './UniqueProvider'
+export type { UniqueProviderProps } from './UniqueProvider'

@@ -17,13 +17,15 @@ export default function useTargetState() {
   const pendingOptionsRef = ref<UniqueShowOptions | null>()
 
   const trigger = (nextOptions: UniqueShowOptions | false) => {
+    const wasOpen = open.value
     if (nextOptions === false) {
       // Clear pending options when hiding
       pendingOptionsRef.value = null
       open.value = false
+      isAnimating.value = false
     }
     else {
-      if (isAnimating.value && open.value) {
+      if (isAnimating.value && wasOpen) {
         // If animating (appear or enter), cache new options
         pendingOptionsRef.value = nextOptions
       }
@@ -32,7 +34,7 @@ export default function useTargetState() {
         options.value = nextOptions
         pendingOptionsRef.value = null
         // Only mark as animating when transitioning from closed to open
-        if (!open.value) {
+        if (!wasOpen) {
           isAnimating.value = true
         }
       }

@@ -1,4 +1,4 @@
-import { defineComponent } from 'vue'
+import { defineComponent, shallowRef } from 'vue'
 
 export interface PopupContextProps {
   cache?: boolean
@@ -6,11 +6,19 @@ export interface PopupContextProps {
 
 const PopupContent = defineComponent<PopupContextProps>(
   (props, { slots }) => {
+    const cachedChildren = shallowRef<ReturnType<NonNullable<typeof slots.default>> | undefined>()
     return () => {
-      if (props.cache) {
-        return slots?.default?.()
+      const children = slots?.default?.()
+
+      if (!props.cache) {
+        cachedChildren.value = children
+        return children
       }
-      return slots?.default?.()
+
+      if (!cachedChildren.value) {
+        cachedChildren.value = children
+      }
+      return cachedChildren.value
     }
   },
   {

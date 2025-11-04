@@ -1,18 +1,21 @@
 <script setup>
 import BodyOverflow from './body-overflow.tsx'
-import Case from './case.vue'
-import ClickNested from './clickNested.vue'
-import Clip from './clip.vue'
-import Container from './container.vue'
-import Inside from './inside.vue'
-import LargePopup from './largePopup.vue'
-import Nested from './nested.vue'
-import Point from './point.vue'
-import Portal from './portal.vue'
-import Shadow from './shadow.vue'
-import Simple from './simple.vue'
-import StaticScroll from './staticScroll.vue'
-import VisibleFallback from './visibleFallback.vue'
+import Case from './case.tsx'
+import ClickNested from './click-nested.tsx'
+import Clip from './clip.tsx'
+import Container from './container.tsx'
+import Inside from './inside.tsx'
+import LargePopup from './large-popup.tsx'
+import Mobile from './mobile.tsx'
+import Nested from './nested.tsx'
+import Point from './point.tsx'
+import Portal from './portal.tsx'
+import ShadowChild from './shadow-child.tsx'
+import Shadow from './shadow.tsx'
+import Simple from './simple.tsx'
+import StaticScroll from './static-scroll.tsx'
+import TwoButtons from './two-buttons.tsx'
+import VisibleFallback from './visible-fallback.tsx'
 </script>
 
 <template>
@@ -38,6 +41,9 @@ import VisibleFallback from './visibleFallback.vue'
     <Variant title="Large Popup">
       <LargePopup />
     </Variant>
+    <Variant title="Mobile">
+      <Mobile />
+    </Variant>
     <Variant title="Nested">
       <Nested />
     </Variant>
@@ -50,11 +56,17 @@ import VisibleFallback from './visibleFallback.vue'
     <Variant title="Shadow">
       <Shadow />
     </Variant>
+    <Variant title="Shadow Child">
+      <ShadowChild />
+    </Variant>
     <Variant title="Simple">
       <Simple />
     </Variant>
     <Variant title="Static Scroll">
       <StaticScroll />
+    </Variant>
+    <Variant title="Two Buttons Unique">
+      <TwoButtons />
     </Variant>
     <Variant title="Visible Fallback">
       <VisibleFallback />

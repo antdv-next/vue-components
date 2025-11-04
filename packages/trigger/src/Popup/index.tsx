@@ -88,7 +88,7 @@ const defaults = {
 } as any
 
 const Popup = defineComponent<PopupProps>(
-  (props = defaults, { attrs }) => {
+  (props = defaults, { attrs, expose }) => {
     const popupContent = computed(
       () => typeof props.popup === 'function' ? (props as any).popup() : props.popup,
     )
@@ -158,6 +158,11 @@ const Popup = defineComponent<PopupProps>(
       offsetX,
       offsetY,
     )
+    const popupElementRef = shallowRef<HTMLDivElement>()
+    expose({
+      getElement: () => popupElementRef.value,
+      nativeElement: popupElementRef,
+    })
     return () => {
       // ========================= Render =========================
       if (!show.value) {
@@ -211,7 +216,31 @@ const Popup = defineComponent<PopupProps>(
         miscStyle.pointerEvents = 'none'
       }
       const [mergedMask, mergedMaskMotion, mergedPopupMotion] = mergedProps.value
-      const transitionProps = getTransitionProps(mergedMaskMotion?.name, mergedPopupMotion)
+      const popupMotionName = (mergedPopupMotion as any)?.name ?? (mergedPopupMotion as any)?.motionName
+      const baseTransitionProps: any = getTransitionProps(popupMotionName, mergedPopupMotion)
+      const mergedTransitionProps = {
+        ...baseTransitionProps,
+        onBeforeAppear: (element: Element) => {
+          onPrepare?.()
+          baseTransitionProps?.onBeforeAppear?.(element)
+        },
+        onBeforeEnter: (element: Element) => {
+          onPrepare?.()
+          baseTransitionProps?.onBeforeEnter?.(element)
+        },
+        onAfterAppear: (element: Element) => {
+          baseTransitionProps?.onAfterAppear?.(element)
+          onVisibleChanged?.(true)
+        },
+        onAfterEnter: (element: Element) => {
+          baseTransitionProps?.onAfterEnter?.(element)
+          onVisibleChanged?.(true)
+        },
+        onAfterLeave: (element: Element) => {
+          baseTransitionProps.onAfterLeave?.(element)
+          onVisibleChanged?.(false)
+        },
+      }
       const cls = classNames(
         prefixCls,
         (attrs as any).class,
@@ -238,15 +267,11 @@ const Popup = defineComponent<PopupProps>(
             disabled={!open.value}
           >
             <Transition
-              {...transitionProps}
-              onBeforeAppear={onPrepare}
-              onBeforeEnter={onPrepare}
-              onAfterLeave={() => {
-                onVisibleChanged?.(false)
-              }}
+              {...mergedTransitionProps}
             >
               { (isNodeVisible.value || open.value) && (
                 <div
+                  ref={popupElementRef}
                   v-show={open.value}
                   class={cls}
                   style={[
@@ -260,7 +285,7 @@ const Popup = defineComponent<PopupProps>(
                       boxSizing: 'border-box',
                       zIndex,
                     },
-                    (attrs as any).style,
+                    props.style,
                   ]}
                   onMouseenter={onMouseEnter}
                   onMouseleave={onMouseLeave}

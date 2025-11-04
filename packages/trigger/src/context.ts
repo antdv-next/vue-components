@@ -9,7 +9,7 @@ import type {
 import { computed, defineComponent, inject, provide } from 'vue'
 // ===================== Nest =====================
 export interface TriggerContextProps {
-  registerSubPopup: (id: string, node: HTMLElement) => void
+  registerSubPopup: (id: string, node: HTMLElement | null) => void
 }
 
 const TriggerContextKey: InjectionKey<Ref<TriggerContextProps>> = Symbol('TriggerContextKey')

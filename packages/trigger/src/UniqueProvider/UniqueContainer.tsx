@@ -3,7 +3,7 @@ import type { CSSProperties } from 'vue'
 import type { AlignType, ArrowPos } from '../interface.ts'
 import { toPropsRefs } from '@v-c/util/dist/props-util'
 import { getTransitionProps } from '@v-c/util/dist/utils/transition'
-import { defineComponent, shallowRef, Transition, watchEffect } from 'vue'
+import { defineComponent, shallowRef, Transition, watch, watchEffect } from 'vue'
 import useOffsetStyle from '../hooks/useOffsetStyle'
 
 export interface UniqueContainerProps {
@@ -65,6 +65,17 @@ const UniqueContainer = defineComponent<UniqueContainerProps>(
         cachedOffsetStyleRef.value = offsetStyle.value
       }
     })
+    watch(
+      open,
+      (nextVisible) => {
+        if (nextVisible) {
+          motionVisible.value = true
+        }
+      },
+      {
+        immediate: true,
+      },
+    )
     return () => {
       const { popupSize, motion, prefixCls, uniqueContainerClassName, arrowPos, uniqueContainerStyle } = props
       // Apply popup size if available
@@ -73,17 +84,35 @@ const UniqueContainer = defineComponent<UniqueContainerProps>(
         sizeStyle.width = `${popupSize.width}px`
         sizeStyle.height = `${popupSize.height}px`
       }
-      const transitionProps = getTransitionProps(motion?.name, motion)
+      const baseTransitionProps = getTransitionProps(motion?.name, motion)
+      const mergedTransitionProps = {
+        ...baseTransitionProps,
+        onBeforeAppear: (element: Element) => {
+          motionVisible.value = true
+          baseTransitionProps.onBeforeAppear?.(element)
+        },
+        onBeforeEnter: (element: Element) => {
+          motionVisible.value = true
+          baseTransitionProps.onBeforeEnter?.(element)
+        },
+        onAfterAppear: (element: Element) => {
+          motionVisible.value = true
+          baseTransitionProps.onAfterAppear?.(element)
+        },
+        onAfterEnter: (element: Element) => {
+          motionVisible.value = true
+          baseTransitionProps.onAfterEnter?.(element)
+        },
+        onAfterLeave: (element: Element) => {
+          motionVisible.value = false
+          baseTransitionProps.onAfterLeave?.(element)
+        },
+      }
       const containerCls = `${prefixCls}-unique-container`
 
       return (
         <Transition
-          onAfterLeave={
-            () => {
-              motionVisible.value = false
-            }
-          }
-          {...transitionProps}
+          {...mergedTransitionProps}
         >
           <div
             v-show={open.value}

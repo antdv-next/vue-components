@@ -29,18 +29,45 @@ const UniqueProvider = defineComponent<UniqueProviderProps>(
     })
 
     // =========================== Popup ============================
-    const popupEle = shallowRef<HTMLDivElement>()
+    const popupEle = shallowRef<HTMLDivElement | null>(null)
     const popupSize = ref<{
       width: number
       height: number
     } | null>(null)
     // Used for forwardRef popup. Not use internal
-    const externalPopupRef = shallowRef<HTMLDivElement>()
+    const externalPopupRef = shallowRef<HTMLDivElement | null>(null)
+    const resolveToElement = (node: any) => {
+      if (!node) {
+        return null
+      }
+      if (isDOM(node)) {
+        return node as HTMLElement
+      }
+      const exposed = node as any
+      if (isDOM(exposed?.$el)) {
+        return exposed.$el
+      }
+      const nativeEl = exposed?.nativeElement
+      if (isDOM(nativeEl?.value)) {
+        return nativeEl.value
+      }
+      if (isDOM(nativeEl)) {
+        return nativeEl
+      }
+      if (typeof exposed?.getElement === 'function') {
+        const el = exposed.getElement()
+        if (isDOM(el)) {
+          return el as HTMLElement
+        }
+      }
+      return null
+    }
     const setPopupRef = (node: any) => {
-      externalPopupRef.value = node
+      const element = resolveToElement(node) as HTMLDivElement | null
+      externalPopupRef.value = element
 
-      if (isDOM(node) && popupEle.value !== node) {
-        popupEle.value = node as HTMLDivElement
+      if (popupEle.value !== element) {
+        popupEle.value = element
       }
     }
 
@@ -140,12 +167,17 @@ const UniqueProvider = defineComponent<UniqueProviderProps>(
     }
 
     // ======================== Trigger Context =====================
-    const subPopupElements = ref<Record<string, HTMLElement>>({})
+    const subPopupElements = ref<Record<string, HTMLElement | null>>({})
     const parentContext = useTriggerContext()
     const triggerContextValue = computed<TriggerContextProps>(() => {
       return {
         registerSubPopup: (id, subPopupEle) => {
-          subPopupElements.value[id] = subPopupEle
+          if (subPopupEle) {
+            subPopupElements.value[id] = subPopupEle
+          }
+          else {
+            delete subPopupElements.value[id]
+          }
           parentContext?.value?.registerSubPopup(id, subPopupEle)
         },
       }

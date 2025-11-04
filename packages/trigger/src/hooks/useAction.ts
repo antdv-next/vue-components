@@ -2,12 +2,21 @@ import type { Ref } from 'vue'
 import type { ActionType } from '../interface'
 import { shallowRef, watchEffect } from 'vue'
 
-type InternalActionType = ActionType | 'touch'
+type InternalActionType = 'hover' | 'focus' | 'click' | 'contextmenu' | 'touch'
 
-type ActionTypes = InternalActionType | InternalActionType[]
+type ExternalActionType = InternalActionType | Uppercase<InternalActionType> | 'contextMenu'
+
+type ActionTypes = ExternalActionType | ExternalActionType[]
 
 function toArray<T>(val?: T | T[]) {
   return val ? (Array.isArray(val) ? val : [val]) : []
+}
+
+function normalizeAction(action: ExternalActionType): InternalActionType {
+  if (typeof action === 'string') {
+    return action.toLowerCase() as InternalActionType
+  }
+  return action
 }
 export default function useAction(
   action: Ref<ActionTypes>,
@@ -17,8 +26,8 @@ export default function useAction(
   const _showAction = shallowRef<Set<InternalActionType>>(new Set())
   const _hideAction = shallowRef<Set<InternalActionType>>(new Set())
   watchEffect(() => {
-    const mergedShowAction = toArray(showAction?.value ?? action.value)
-    const mergedHideAction = toArray(hideAction?.value ?? action.value)
+    const mergedShowAction = toArray(showAction?.value ?? action.value).map(normalizeAction)
+    const mergedHideAction = toArray(hideAction?.value ?? action.value).map(normalizeAction)
 
     const showActionSet = new Set(mergedShowAction)
     const hideActionSet = new Set(mergedHideAction)
