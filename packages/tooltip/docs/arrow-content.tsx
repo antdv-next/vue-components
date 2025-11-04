@@ -26,7 +26,6 @@ export default defineComponent(() => {
         <Tooltip
           placement="left"
           overlay={text}
-          visible={true}
           arrowContent={<div class="vc-tooltip-arrow-inner"></div>}
         >
           <a href="#" style={cellStyle}>
