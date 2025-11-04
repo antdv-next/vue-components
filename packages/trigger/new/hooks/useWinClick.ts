@@ -86,4 +86,8 @@ export default function useWinClick(
       }
     },
   )
+  function onPopupPointerDown() {
+    popupPointerDownRef.value = true
+  }
+  return onPopupPointerDown
 }

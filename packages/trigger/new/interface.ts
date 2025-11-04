@@ -1,3 +1,6 @@
+import type { VueNode } from '@v-c/util/dist/type'
+import type { CSSProperties } from 'vue'
+
 export type Placement =
   | 'top'
   | 'left'
@@ -90,9 +93,9 @@ export interface AlignType {
 }
 
 export interface ArrowTypeOuter {
-  style?: React.CSSProperties
+  style?: CSSProperties
   className?: string
-  content?: React.ReactNode
+  content?: VueNode
 }
 
 export interface ArrowPos {
@@ -104,7 +107,7 @@ export type BuildInPlacements = Record<string, AlignType>
 
 export type StretchType = string
 
-export type ActionType = 'hover' | 'focus' | 'click' | 'contextMenu'
+export type ActionType = 'hover' | 'focus' | 'click' | 'contextmenu'
 
 export type AnimationType = string
 
