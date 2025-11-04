@@ -381,9 +381,11 @@ export function generateTrigger(PortalComponent: any = Portal) {
 
       // ========================== Motion ============================
       const inMotion = shallowRef(false)
+      console.log('inMotion')
       watch(mergedOpen, async () => {
         await nextTick()
         if (mergedOpen.value) {
+          console.log('inMotion opened')
           inMotion.value = true
         }
       })
@@ -771,6 +773,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
           stretch,
           mobile,
         } = props
+        console.log(inMotion.value)
         return (
           <>
             <ResizeObserver

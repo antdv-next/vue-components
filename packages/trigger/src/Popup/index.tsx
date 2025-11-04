@@ -249,6 +249,7 @@ const Popup = defineComponent<PopupProps>(
           [`${prefixCls}-mobile`]: isMobile.value,
         },
       )
+      console.log(isNodeVisible.value, open.value)
       return (
         <Portal
           open={forceRender || isNodeVisible.value}
@@ -270,48 +271,46 @@ const Popup = defineComponent<PopupProps>(
             <Transition
               {...mergedTransitionProps}
             >
-              { (isNodeVisible.value || open.value) && (
-                <div
-                  ref={popupElementRef}
-                  v-show={open.value}
-                  class={cls}
-                  style={[
-                    {
-                      '--arrow-x': `${arrowPos.x || 0}px`,
-                      '--arrow-y': `${arrowPos.y || 0}px`,
-                    },
-                    offsetStyle.value,
-                    miscStyle,
-                    {
-                      boxSizing: 'border-box',
-                      zIndex,
-                    },
-                    props.style,
-                  ]}
-                  onMouseenter={onMouseEnter}
-                  onMouseleave={onMouseLeave}
-                  onPointerenter={onPointerEnter}
-                  onClick={onClick}
+              <div
+                ref={popupElementRef}
+                v-show={open.value}
+                class={cls}
+                style={[
                   {
-                    ...{
-                      onPointerdownCapture: onPointerDownCapture,
-                    }
+                    '--arrow-x': `${arrowPos.x || 0}px`,
+                    '--arrow-y': `${arrowPos.y || 0}px`,
+                  },
+                  offsetStyle.value,
+                  miscStyle,
+                  {
+                    boxSizing: 'border-box',
+                    zIndex,
+                  },
+                  props.style,
+                ]}
+                onMouseenter={onMouseEnter}
+                onMouseleave={onMouseLeave}
+                onPointerenter={onPointerEnter}
+                onClick={onClick}
+                {
+                  ...{
+                    onPointerdownCapture: onPointerDownCapture,
                   }
-                >
-                  {arrow && (
-                    <Arrow
-                      prefixCls={prefixCls}
-                      arrow={arrow}
-                      arrowPos={arrowPos}
-                      align={align!}
-                    />
-                  )}
+                }
+              >
+                {arrow && (
+                  <Arrow
+                    prefixCls={prefixCls}
+                    arrow={arrow}
+                    arrowPos={arrowPos}
+                    align={align!}
+                  />
+                )}
 
-                  <PopupContent cache={!open.value && !fresh}>
-                    {popupContent.value}
-                  </PopupContent>
-                </div>
-              )}
+                <PopupContent cache={!open.value && !fresh}>
+                  {popupContent.value}
+                </PopupContent>
+              </div>
             </Transition>
           </ResizeObserver>
         </Portal>
