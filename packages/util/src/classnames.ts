@@ -51,3 +51,5 @@ export default function classNames(...args: ClassValue[]): string {
   }
   return str
 }
+
+export const clsx = classNames

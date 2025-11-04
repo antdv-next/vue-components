@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import ArrowContent from './arrowContent.vue'
-import FormError from './formError.vue'
-import OnVisibleChange from './onVisibleChange.vue'
-import Placement from './placement.vue'
-import Point from './point.vue'
-import ShowArrow from './showArrow.vue'
-import Simple from './simple.vue'
+import ArrowContent from './arrow-content'
+import FormError from './form-error'
+import OnVisibleChange from './on-visible-change'
+import Placement from './placement'
+import Point from './point'
+import ShowArrow from './show-arrow'
+import Simple from './simple'
+import TwoButtons from './two-buttons'
 </script>
 
 <template>
@@ -31,9 +32,8 @@ import Simple from './simple.vue'
     <Variant title="simple">
       <Simple />
     </Variant>
+    <Variant title="twoButtons">
+      <TwoButtons />
+    </Variant>
   </Story>
 </template>
-
-<style scoped>
-
-</style>

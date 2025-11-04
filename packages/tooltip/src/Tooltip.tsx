@@ -1,132 +1,182 @@
-import type { ActionType, AlignType, ArrowType, TriggerProps } from '@v-c/trigger'
-import type { CSSProperties, ExtractPropTypes, PropType, SlotsType } from 'vue'
+import type { ActionType, AlignType, ArrowType, TriggerProps, TriggerRef } from '@v-c/trigger'
+import type { VueNode } from '@v-c/util/dist/type'
+import type { CSSProperties } from 'vue'
 import { Trigger } from '@v-c/trigger'
-import { classNames } from '@v-c/util'
+import { clsx } from '@v-c/util'
 import useId from '@v-c/util/dist/hooks/useId'
-import { cloneElement } from '@v-c/util/dist/vnode'
-import { defineComponent, ref } from 'vue'
-import { placements } from './placements'
+import { filterEmpty } from '@v-c/util/dist/props-util'
+import { computed, createVNode, defineComponent, ref } from 'vue'
+import placements from './placements'
 import Popup from './Popup'
 
-function tooltipProps() {
-  return {
-    trigger: { type: [String, Array] as PropType<ActionType | ActionType[]> },
-    defaultVisible: { type: Boolean },
-    visible: { type: Boolean },
-    placement: { type: String as PropType<'top' | 'left' | 'right' | 'bottom' | 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight' | 'leftTop' | 'leftBottom' | 'rightTop' | 'rightBottom'>, default: 'right' },
-    motion: { type: Object as PropType<TriggerProps['popupMotion']> },
-    onVisibleChange: { type: Function as PropType<(visible: boolean) => void> },
-    afterVisibleChange: { type: Function as PropType<(visible: boolean) => void> },
-    overlay: { type: String },
-    overlayStyle: { type: Object },
-    overlayClassName: { type: String },
-    getTooltipContainer: { type: Function as PropType<(node?: HTMLElement) => HTMLElement> },
-    destroyTooltipOnHide: { type: Boolean, default: false },
-    align: { type: Object as PropType<AlignType>, default: () => ({}) },
-    showArrow: { type: [Boolean, Object] as PropType<boolean | ArrowType>, default: true as boolean | ArrowType },
-    id: String,
-    overlayInnerStyle: Object,
-    zIndex: Number,
-    mouseEnterDelay: { type: Number, default: 0 },
-    mouseLeaveDelay: { type: Number, default: 0.1 },
-    prefixCls: { type: String, default: 'vc-tooltip' },
-  }
+export type SemanticName = 'root' | 'arrow' | 'container' | 'uniqueContainer'
+
+export interface TooltipProps
+  extends Pick<
+    TriggerProps,
+    | 'onPopupAlign'
+    | 'builtinPlacements'
+    | 'fresh'
+    | 'mouseLeaveDelay'
+    | 'mouseEnterDelay'
+    | 'prefixCls'
+    | 'forceRender'
+    | 'popupVisible'
+  > {
+  // Style
+  classNames?: Partial<Record<SemanticName, string>>
+  styles?: Partial<Record<SemanticName, CSSProperties>>
+
+  /** Config popup motion */
+  motion?: TriggerProps['popupMotion']
+
+  // Rest
+  trigger?: ActionType | ActionType[]
+  defaultVisible?: boolean
+  visible?: boolean
+  placement?: string
+
+  onVisibleChange?: (visible: boolean) => void
+  afterVisibleChange?: (visible: boolean) => void
+  overlay: (() => VueNode) | VueNode
+
+  getTooltipContainer?: (node: HTMLElement) => HTMLElement
+  destroyOnHidden?: boolean
+  align?: AlignType
+  showArrow?: boolean | ArrowType
+  arrowContent?: VueNode
+  id?: string
+
+  zIndex?: number
+
+  /**
+   * Configures Tooltip to reuse the background for transition usage.
+   * This is an experimental API and may not be stable.
+   */
+  unique?: TriggerProps['unique']
 }
 
-export type TooltipProps = Partial<ExtractPropTypes<ReturnType<typeof tooltipProps>>>
+export interface TooltipRef extends TriggerRef {}
 
-export default defineComponent({
-  name: 'Tooltip',
-  props: tooltipProps(),
-  slots: Object as SlotsType<{
-    overlay: () => any
-    default: () => any
-  }>,
-  setup(props, { attrs, slots, expose }) {
-    const triggerRef = ref<any>(null)
+const defaults = {
+  mouseEnterDelay: 0,
+  mouseLeaveDelay: 0.1,
+  prefixCls: 'vc-tooltip',
+  trigger: ['hover'],
+  placement: 'right',
+  align: {},
+  showArrow: true,
+} as any
+const Tooltip = defineComponent<TooltipProps>(
+  (props = defaults, { slots, expose }) => {
     const mergedId = useId(props.id)
+    const triggerRef = ref<TriggerRef>()
 
-    expose({
-      getPopupDomNode: () => triggerRef.value?.getPopupDomNode?.(),
-      forcePopupAlign: () => triggerRef.value?.forcePopupAlign?.(),
+    // ========================= Arrow ==========================
+    // Process arrow configuration
+    const mergedArrow = computed(() => {
+      const showArrow = props.showArrow
+      const classNames = props.classNames
+      const styles = props.styles || {}
+      const arrowContent = props.arrowContent
+      if (!showArrow) {
+        return false
+      }
+      // Convert true to object for unified processing
+      const arrowConfig = showArrow === true ? {} : showArrow
+      // Apply semantic styles with unified logic
+      return {
+        ...arrowConfig,
+        className: clsx(arrowConfig.className, classNames?.arrow),
+        style: { ...arrowConfig.style, ...styles?.arrow },
+        content: arrowConfig.content ?? arrowContent,
+      }
     })
-
+    expose({
+      nativeElement: computed(() => triggerRef.value?.nativeElement),
+      popupElement: computed(() => triggerRef.value?.popupElement),
+      forceAlign: () => {
+        triggerRef.value?.forceAlign()
+      },
+    })
     return () => {
       const {
-        overlayClassName,
         trigger = ['hover'],
         mouseEnterDelay = 0,
         mouseLeaveDelay = 0.1,
-        overlayStyle,
-        prefixCls = 'vc-tooltip',
+        prefixCls = 'rc-tooltip',
         onVisibleChange,
         afterVisibleChange,
         motion,
         placement = 'right',
         align = {},
-        destroyTooltipOnHide = false,
+        destroyOnHidden = false,
         defaultVisible,
         getTooltipContainer,
-        overlayInnerStyle,
+        arrowContent,
         overlay,
         id,
         showArrow = true,
+        classNames,
+        styles,
         ...restProps
       } = props
+      const children = filterEmpty(slots?.default?.())
 
-      // 合并额外的属性
-      const extraProps: Partial<TooltipProps & Omit<TriggerProps, 'onPopupClick'>> = { ...restProps }
+      const getChildren = () => {
+        const child = children?.[0]
+        const originalProps = child?.props || {}
+        const childProps = {
+          ...originalProps,
+          'aria-describedby': overlay ? mergedId : null,
+        }
+        return createVNode(child, childProps)
+      }
+      const extraProps: Partial<TooltipProps & TriggerProps> = { ...restProps }
       if ('visible' in props) {
         extraProps.popupVisible = props.visible
       }
 
-      const getPopupElement = () => (
-        <Popup
-          key="content"
-          prefixCls={prefixCls}
-          id={mergedId}
-          bodyClassName={attrs?.class as string}
-          overlayInnerStyle={{ ...overlayInnerStyle, ...attrs?.style as CSSProperties }}
-        >
-          {overlay ?? slots.overlay?.()}
-        </Popup>
-      )
-      const getChildren = () => {
-        const child = slots.default?.()[0]
-        const childProps = child?.props || {}
-
-        const mergedChildProps = {
-          ...childProps,
-          'aria-describedby': overlay ? mergedId : null,
-        }
-        return child
-          ? cloneElement(child, mergedChildProps)
-          : null
-      }
-
+      // ========================= Render =========================
       return (
         <Trigger
-          ref={triggerRef.value}
-          popupClassName={classNames(overlayClassName, [attrs.class])}
+          popupClassName={classNames?.root}
           prefixCls={prefixCls}
+          popup={(
+            <Popup
+              key="content"
+              prefixCls={prefixCls}
+              id={mergedId}
+              classNames={classNames}
+              styles={styles}
+            >
+              {typeof overlay === 'function' ? (overlay as any)?.() : overlay}
+            </Popup>
+          )}
           action={trigger}
           builtinPlacements={placements}
           popupPlacement={placement}
+          ref={triggerRef}
           popupAlign={align}
           getPopupContainer={getTooltipContainer}
           onOpenChange={onVisibleChange}
-          onAfterOpenChange={afterVisibleChange}
+          afterOpenChange={afterVisibleChange}
           popupMotion={motion}
           defaultPopupVisible={defaultVisible}
-          autoDestroy={destroyTooltipOnHide}
+          autoDestroy={destroyOnHidden}
           mouseLeaveDelay={mouseLeaveDelay}
-          popupStyle={{ ...overlayStyle, ...attrs.style as CSSProperties }}
+          popupStyle={styles?.root}
           mouseEnterDelay={mouseEnterDelay}
-          arrow={showArrow}
+          arrow={mergedArrow.value!}
+          uniqueContainerClassName={classNames?.uniqueContainer}
+          uniqueContainerStyle={styles?.uniqueContainer}
           {...extraProps}
-          v-slots={{ default: getChildren, popup: getPopupElement }}
-        />
+        >
+          {getChildren()}
+        </Trigger>
       )
     }
   },
-})
+)
+
+export default Tooltip

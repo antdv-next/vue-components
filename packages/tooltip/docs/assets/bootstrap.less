@@ -1,6 +1,6 @@
-@import './anim.less';
+@import "./anim.less";
 
-@tooltip-prefix-cls: vc-tooltip;
+@tooltip-prefix-cls: rc-tooltip;
 
 //
 // Tooltips
@@ -39,18 +39,18 @@
     display: none;
   }
 
-  //&-placement-top, &-placement-topLeft, &-placement-topRight {
-  //  padding: @tooltip-arrow-width 0 @tooltip-distance 0;
-  //}
-  //&-placement-right, &-placement-rightTop, &-placement-rightBottom {
-  //  padding: 0 @tooltip-arrow-width 0 @tooltip-distance;
-  //}
-  //&-placement-bottom, &-placement-bottomLeft, &-placement-bottomRight {
-  //  padding: @tooltip-distance 0 @tooltip-arrow-width 0;
-  //}
-  //&-placement-left, &-placement-leftTop, &-placement-leftBottom {
-  //  padding: 0 @tooltip-distance 0 @tooltip-arrow-width;
-  //}
+  &-placement-top, &-placement-topLeft, &-placement-topRight {
+    padding: @tooltip-arrow-width 0 @tooltip-distance 0;
+  }
+  &-placement-right, &-placement-rightTop, &-placement-rightBottom {
+    padding: 0 @tooltip-arrow-width 0 @tooltip-distance;
+  }
+  &-placement-bottom, &-placement-bottomLeft, &-placement-bottomRight {
+    padding: @tooltip-distance 0 @tooltip-arrow-width 0;
+  }
+  &-placement-left, &-placement-leftTop, &-placement-leftBottom {
+    padding: 0 @tooltip-distance 0 @tooltip-arrow-width;
+  }
 }
 
 // Wrapper for the tooltip content
@@ -161,3 +161,4 @@
     right: 15%;
   }
 }
+

@@ -11,6 +11,10 @@
     "./dist/*": "./dist/*",
     "./package.json": "./package.json"
   },
+  "files": [
+    "dist",
+    "package.json"
+  ],
   "description": "tooltip",
   "main": "index.js",
   "scripts": {
