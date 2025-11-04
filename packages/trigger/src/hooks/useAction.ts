@@ -1,5 +1,4 @@
 import type { Ref } from 'vue'
-import type { ActionType } from '../interface'
 import { shallowRef, watchEffect } from 'vue'
 
 type InternalActionType = 'hover' | 'focus' | 'click' | 'contextmenu' | 'touch'

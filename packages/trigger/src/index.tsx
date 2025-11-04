@@ -20,6 +20,13 @@ import useWinClick from './hooks/useWinClick.ts'
 import Popup from './Popup'
 import { getAlignPopupClassName } from './util.ts'
 
+export type {
+  ActionType,
+  AlignType,
+  ArrowTypeOuter as ArrowType,
+  BuildInPlacements,
+}
+
 export interface TriggerRef {
   nativeElement: HTMLElement
   popupElement: HTMLDivElement

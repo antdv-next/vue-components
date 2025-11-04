@@ -84,7 +84,7 @@ const UniqueContainer = defineComponent<UniqueContainerProps>(
         sizeStyle.width = `${popupSize.width}px`
         sizeStyle.height = `${popupSize.height}px`
       }
-      const baseTransitionProps = getTransitionProps(motion?.name, motion)
+      const baseTransitionProps = getTransitionProps(motion?.name, motion) as any
       const mergedTransitionProps = {
         ...baseTransitionProps,
         onBeforeAppear: (element: Element) => {
