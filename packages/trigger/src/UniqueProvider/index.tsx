@@ -120,10 +120,10 @@ const UniqueProvider = defineComponent<UniqueProviderProps>(
     ] = useAlign(
       open,
       popupEle as any,
-      computed(() => mergedOptions.value!.target!),
-      computed(() => mergedOptions.value!.popupPlacement!),
-      computed(() => mergedOptions.value!.builtinPlacements || {}),
-      computed(() => mergedOptions.value!.popupAlign),
+      computed(() => mergedOptions.value?.target),
+      computed(() => mergedOptions.value?.popupPlacement) as any,
+      computed(() => mergedOptions.value?.builtinPlacements || {}) as any,
+      computed(() => mergedOptions.value?.popupAlign) as any,
       undefined, // onPopupAlign
       ref(false), // isMobile
     )

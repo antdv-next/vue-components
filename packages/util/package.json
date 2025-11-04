@@ -6,10 +6,6 @@
   "publishConfig": {
     "access": "public"
   },
-  "files": [
-    "dist",
-    "package.json"
-  ],
   "author": {
     "name": "aibayanyu20",
     "email": "aibayanyu@qq.com",
@@ -17,6 +13,10 @@
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "package.json"
+  ],
   "scripts": {
     "build": "vite build",
     "prepublish": "pnpm build"

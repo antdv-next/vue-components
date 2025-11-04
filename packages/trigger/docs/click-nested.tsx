@@ -63,7 +63,6 @@ export default defineComponent(() => {
           >
             <div style={popupBorderStyle}>
               i am a click popup
-              {' '}
               <button
                 type="button"
                 onClick={(event) => {

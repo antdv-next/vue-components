@@ -53,3 +53,13 @@ if (process.env.NODE_ENV !== 'production')
   wrapperRaf.ids = () => rafIds
 
 export default wrapperRaf
+
+export function rafDebounce(fn: () => void) {
+  let id: number | null = null
+  return () => {
+    if (id !== null) {
+      wrapperRaf.cancel(id)
+    }
+    id = wrapperRaf(fn)
+  }
+}

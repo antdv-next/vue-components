@@ -48,76 +48,78 @@ export default defineComponent(() => {
   const button1Visible = visibleFor('button1')
   const button2Visible = visibleFor('button2')
 
-  const Wrapper = computed(() => (useUniqueProvider.value ? UniqueProvider : 'div'))
+  return () => {
+    const Wrapper = useUniqueProvider.value ? UniqueProvider : 'div'
 
-  return () => (
-    <Wrapper.value>
-      <div style={{ margin: '100px' }}>
-        <div style={{ display: 'flex', gap: '20px', marginBottom: '24px' }}>
-          <Trigger
-            mouseLeaveDelay={LEAVE_DELAY}
-            action={['hover']}
-            popupPlacement="top"
-            builtinPlacements={builtinPlacements as any}
-            popupVisible={button1Visible.value as any}
-            popupMotion={popupMotion as any}
-            popupStyle={popupStyle}
-            unique
-            popup={() => <div>这是左侧按钮的提示信息</div>}
-          >
-            <button type="button">左侧按钮</button>
-          </Trigger>
+    return (
+      <Wrapper>
+        <div style={{ margin: '100px' }}>
+          <div style={{ display: 'flex', gap: '20px', marginBottom: '24px' }}>
+            <Trigger
+              mouseLeaveDelay={LEAVE_DELAY}
+              action={['hover']}
+              popupPlacement="top"
+              builtinPlacements={builtinPlacements as any}
+              popupVisible={button1Visible.value as any}
+              popupMotion={popupMotion as any}
+              popupStyle={popupStyle}
+              unique
+              popup={() => <div>这是左侧按钮的提示信息</div>}
+            >
+              <button type="button">左侧按钮</button>
+            </Trigger>
 
-          <Trigger
-            mouseLeaveDelay={LEAVE_DELAY}
-            action={['hover']}
-            popupPlacement="top"
-            builtinPlacements={builtinPlacements as any}
-            popupVisible={button2Visible.value as any}
-            popupMotion={popupMotion as any}
-            popupStyle={popupStyle}
-            unique
-            popup={() => <div>This is the tooltip for the right button</div>}
-          >
-            <button type="button">Right Button</button>
-          </Trigger>
-        </div>
+            <Trigger
+              mouseLeaveDelay={LEAVE_DELAY}
+              action={['hover']}
+              popupPlacement="top"
+              builtinPlacements={builtinPlacements as any}
+              popupVisible={button2Visible.value as any}
+              popupMotion={popupMotion as any}
+              popupStyle={popupStyle}
+              unique
+              popup={() => <div>This is the tooltip for the right button</div>}
+            >
+              <button type="button">Right Button</button>
+            </Trigger>
+          </div>
 
-        <div style={{ marginBottom: '16px' }}>
-          <label style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-            <input
-              type="checkbox"
-              checked={useUniqueProvider.value}
-              onChange={(event) => {
-                useUniqueProvider.value = (event.target as HTMLInputElement).checked
-              }}
-            />
-            使用 UniqueProvider
-          </label>
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <span>Trigger 控制:</span>
-          {[
-            { value: 'button1', label: 'Button 1 显示 Trigger' },
-            { value: 'button2', label: 'Button 2 显示 Trigger' },
-            { value: 'none', label: '都不受控 (Hover 控制)' },
-          ].map(option => (
-            <label key={option.value} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
               <input
-                type="radio"
-                name="triggerControl"
-                value={option.value}
-                checked={triggerControl.value === option.value}
+                type="checkbox"
+                checked={useUniqueProvider.value}
                 onChange={(event) => {
-                  triggerControl.value = (event.target as HTMLInputElement).value as typeof triggerControl.value
+                  useUniqueProvider.value = (event.target as HTMLInputElement).checked
                 }}
               />
-              {option.label}
+              使用 UniqueProvider
             </label>
-          ))}
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <span>Trigger 控制:</span>
+            {[
+              { value: 'button1', label: 'Button 1 显示 Trigger' },
+              { value: 'button2', label: 'Button 2 显示 Trigger' },
+              { value: 'none', label: '都不受控 (Hover 控制)' },
+            ].map(option => (
+              <label key={option.value} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <input
+                  type="radio"
+                  name="triggerControl"
+                  value={option.value}
+                  checked={triggerControl.value === option.value}
+                  onChange={(event) => {
+                    triggerControl.value = (event.target as HTMLInputElement).value as typeof triggerControl.value
+                  }}
+                />
+                {option.label}
+              </label>
+            ))}
+          </div>
         </div>
-      </div>
-    </Wrapper.value>
-  )
+      </Wrapper>
+    )
+  }
 })

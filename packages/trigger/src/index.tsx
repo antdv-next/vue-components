@@ -319,12 +319,15 @@ export function generateTrigger(PortalComponent: any = Portal) {
       })
 
       const openRef = shallowRef(mergedOpen.value)
-      watchEffect(() => {
-        openRef.value = mergedOpen.value
-      })
 
       const lastTriggerRef = shallowRef<boolean[]>([])
       lastTriggerRef.value = []
+      watchEffect(() => {
+        openRef.value = mergedOpen.value
+        if (!mergedOpen.value) {
+          lastTriggerRef.value = []
+        }
+      })
 
       const internalTriggerOpen = (nextOpen: boolean) => {
         setMergedOpen(nextOpen)
@@ -432,9 +435,6 @@ export function generateTrigger(PortalComponent: any = Portal) {
         async () => {
           await nextTick()
           triggerAlign()
-        },
-        {
-          immediate: true,
         },
       )
       watch(
@@ -594,7 +594,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
       const hoverToHide = computed(() => hideActions.value?.has('hover'))
 
       let onPopupMouseEnter: any
-      let onPopupMouseLeave: VoidFunction
+      let onPopupMouseLeave: undefined | any
 
       const ignoreMouseTrigger = () => {
         return touchedRef.value
@@ -834,6 +834,5 @@ const Trigger = generateTrigger(Portal)
 
 export { Trigger }
 export default Trigger
-export type { TriggerProps, TriggerRef }
 export { default as UniqueProvider } from './UniqueProvider'
 export type { UniqueProviderProps } from './UniqueProvider'

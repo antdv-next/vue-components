@@ -8,6 +8,7 @@ import type {
 } from '../interface'
 import { isDOM } from '@v-c/util/dist/Dom/findDOMNode'
 import isVisible from '@v-c/util/dist/Dom/isVisible'
+import { rafDebounce } from '@v-c/util/dist/raf.ts'
 import { computed, nextTick, reactive, ref, shallowRef, toRefs, watch, watchEffect } from 'vue'
 import { collectScroller, getVisibleArea, getWin, toNum } from '../util'
 
@@ -136,7 +137,7 @@ export default function useAlign(
   }
 
   // ========================= Align =========================
-  const onAlign = () => {
+  const _onAlign = () => {
     if (popupEle.value && target.value && open.value && !mobile?.value) {
       const popupElement = popupEle.value
 
@@ -647,7 +648,6 @@ export default function useAlign(
 
       const yCenter = (maxTop + minBottom) / 2
       const nextArrowY = yCenter - popupTop
-
       onPopupAlign?.(popupEle.value, nextAlignInfo)
 
       // Additional calculate right & bottom position
@@ -679,6 +679,8 @@ export default function useAlign(
       Object.assign(offsetInfo, nextOffsetInfo)
     }
   }
+  // 给onAlign添加一个requestAnimationFrame的效果，合并多次调用
+  const onAlign = rafDebounce(_onAlign)
 
   const triggerAlign = () => {
     alignCountRef.value += 1

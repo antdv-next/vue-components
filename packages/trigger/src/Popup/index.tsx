@@ -251,7 +251,7 @@ const Popup = defineComponent<PopupProps>(
       return (
         <Portal
           open={forceRender || isNodeVisible.value}
-          getContainer={!!getPopupContainer && (() => getPopupContainer!(target))}
+          getContainer={getPopupContainer && (() => getPopupContainer!(target))}
           autoDestroy={autoDestroy}
         >
           <Mask

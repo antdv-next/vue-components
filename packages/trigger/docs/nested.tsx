@@ -1,4 +1,4 @@
-import { Teleport, defineComponent, h, ref } from 'vue'
+import { defineComponent, ref, Teleport } from 'vue'
 import Trigger from '../src'
 import './assets/index.less'
 
@@ -31,7 +31,7 @@ const builtinPlacements = {
 
 const popupBorderStyle: Record<string, string | number> = {
   border: '1px solid red',
-  padding: 10,
+  padding: '10px',
 }
 
 const OuterContent = defineComponent<{ getContainer: () => HTMLElement | null }>((props) => {
@@ -66,7 +66,7 @@ export default defineComponent(() => {
         getPopupContainer={() => containerRef.value as HTMLElement}
         popup={() => <div style={popupBorderStyle}>I am inner Trigger Popup</div>}
       >
-        <span style={{ margin: 20 }}>clickToShowInnerTrigger</span>
+        <span style={{ margin: '20px' }}>clickToShowInnerTrigger</span>
       </Trigger>
     </div>
   )
@@ -92,7 +92,7 @@ export default defineComponent(() => {
               builtinPlacements={builtinPlacements}
               popup={() => <div style={popupBorderStyle}>i am a hover popup</div>}
             >
-              <span style={{ margin: 20 }}>trigger</span>
+              <span style={{ margin: '20px' }}>trigger</span>
             </Trigger>
           </span>
         </Trigger>
@@ -104,7 +104,7 @@ export default defineComponent(() => {
           builtinPlacements={builtinPlacements}
           popup={innerTrigger}
         >
-          <span style={{ margin: 20 }}>trigger</span>
+          <span style={{ margin: '20px' }}>trigger</span>
         </Trigger>
       </div>
 

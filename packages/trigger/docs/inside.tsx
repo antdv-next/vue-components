@@ -115,7 +115,8 @@ export default defineComponent(() => {
             popupHeight.value = popupHeight.value === 60 ? 200 : 60
           }}
         >
-          Popup Height: {popupHeight.value}
+          Popup Height:
+          {popupHeight.value}
         </button>
       </div>
       <div
@@ -144,8 +145,8 @@ export default defineComponent(() => {
                 style={{
                   background: 'yellow',
                   border: '1px solid blue',
-                  width: 200,
-                  height: popupHeight.value,
+                  width: '200px',
+                  height: `${popupHeight.value}px`,
                   opacity: 0.9,
                 }}
               >

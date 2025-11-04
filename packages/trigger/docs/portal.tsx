@@ -1,4 +1,4 @@
-import { Teleport, defineComponent, onMounted, ref } from 'vue'
+import { defineComponent, onMounted, ref, Teleport } from 'vue'
 import Trigger from '../src'
 import './assets/index.less'
 
@@ -31,7 +31,7 @@ const builtinPlacements = {
 
 const popupBorderStyle: Record<string, string | number> = {
   border: '1px solid red',
-  padding: 10,
+  padding: '10px',
   background: 'rgba(255, 0, 0, 0.1)',
 }
 
