@@ -132,6 +132,7 @@ const defaults = {
   maskClosable: true,
   builtinPlacements: {},
   popupVisible: undefined,
+  defaultPopupVisible: undefined,
 } as any
 export function generateTrigger(PortalComponent: any = Portal) {
   return defineComponent<TriggerProps>(
@@ -513,6 +514,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
       // =========================== Action ===========================
       /**
        * Util wrapper for trigger action
+       * @param target
        * @param eventName  Listen event name
        * @param nextOpen  Next open state after trigger
        * @param delay Delay to trigger open change

@@ -32,7 +32,7 @@ export default defineComponent(() => {
             overlay={text}
             styles={{ container: { width: '300px', height: '50px' } }}
             popupVisible
-            arrowContent={<div class="rc-tooltip-arrow-inner"></div>}
+            arrowContent={<div class="vc-tooltip-arrow-inner"></div>}
           >
             <div
               style={{

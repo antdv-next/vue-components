@@ -1,5 +1,5 @@
-import type { CSSProperties } from 'vue'
 import type { ActionType } from '@v-c/trigger'
+import type { CSSProperties } from 'vue'
 import { computed, defineComponent, reactive } from 'vue'
 import Tooltip from '../src'
 import placements from '../src/placements'
@@ -12,7 +12,7 @@ interface DestroyOption {
 
 const destroyTooltipOptions: DestroyOption[] = [
   {
-    name: "don't destroy",
+    name: 'don\'t destroy',
     value: 0,
   },
   {
@@ -35,7 +35,7 @@ export default defineComponent(() => {
   const state = reactive({
     destroyOnHidden: destroyOnHiddenPresets[0] as boolean | { keepParent: boolean },
     placement: 'right',
-    transitionName: 'rc-tooltip-zoom',
+    transitionName: 'vc-tooltip-zoom',
     trigger: {
       hover: 1,
       click: 0,
@@ -84,7 +84,6 @@ export default defineComponent(() => {
   }
 
   const onVisibleChange = (visible: boolean) => {
-    // eslint-disable-next-line no-console
     console.log('tooltip', visible)
   }
 
@@ -121,10 +120,10 @@ export default defineComponent(() => {
         </label>
         <label style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
           <input
-            value="rc-tooltip-zoom"
+            value="vc-tooltip-zoom"
             type="checkbox"
             onChange={onTransitionChange}
-            checked={state.transitionName === 'rc-tooltip-zoom'}
+            checked={state.transitionName === 'vc-tooltip-zoom'}
           />
           <span>transitionName</span>
         </label>

@@ -66,6 +66,10 @@ const defaults = {
   placement: 'right',
   align: {},
   showArrow: true,
+  visible: undefined,
+  defaultVisible: undefined,
+  forceRender: undefined,
+  fresh: undefined,
 } as any
 const Tooltip = defineComponent<TooltipProps>(
   (props = defaults, { slots, expose }) => {
@@ -104,7 +108,7 @@ const Tooltip = defineComponent<TooltipProps>(
         trigger = ['hover'],
         mouseEnterDelay = 0,
         mouseLeaveDelay = 0.1,
-        prefixCls = 'rc-tooltip',
+        prefixCls = 'vc-tooltip',
         onVisibleChange,
         afterVisibleChange,
         motion,
@@ -122,7 +126,6 @@ const Tooltip = defineComponent<TooltipProps>(
         ...restProps
       } = props
       const children = filterEmpty(slots?.default?.())
-
       const getChildren = () => {
         const child = children?.[0]
         const originalProps = child?.props || {}

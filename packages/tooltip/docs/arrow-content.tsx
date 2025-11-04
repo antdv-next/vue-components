@@ -26,7 +26,8 @@ export default defineComponent(() => {
         <Tooltip
           placement="left"
           overlay={text}
-          arrowContent={<div class="rc-tooltip-arrow-inner"></div>}
+          visible={true}
+          arrowContent={<div class="vc-tooltip-arrow-inner"></div>}
         >
           <a href="#" style={cellStyle}>
             Left
@@ -35,7 +36,7 @@ export default defineComponent(() => {
         <Tooltip
           placement="top"
           overlay={text}
-          arrowContent={<div class="rc-tooltip-arrow-inner"></div>}
+          arrowContent={<div class="vc-tooltip-arrow-inner"></div>}
         >
           <a href="#" style={cellStyle}>
             Top
@@ -44,7 +45,7 @@ export default defineComponent(() => {
         <Tooltip
           placement="bottom"
           overlay={text}
-          arrowContent={<div class="rc-tooltip-arrow-inner"></div>}
+          arrowContent={<div class="vc-tooltip-arrow-inner"></div>}
         >
           <a href="#" style={cellStyle}>
             Bottom
@@ -53,7 +54,7 @@ export default defineComponent(() => {
         <Tooltip
           placement="right"
           overlay={text}
-          arrowContent={<div class="rc-tooltip-arrow-inner"></div>}
+          arrowContent={<div class="vc-tooltip-arrow-inner"></div>}
         >
           <a href="#" style={cellStyle}>
             Right
@@ -64,7 +65,7 @@ export default defineComponent(() => {
         <Tooltip
           placement="leftTop"
           overlay={text}
-          arrowContent={<div class="rc-tooltip-arrow-inner"></div>}
+          arrowContent={<div class="vc-tooltip-arrow-inner"></div>}
         >
           <a href="#" style={cellStyle}>
             Left Top
@@ -73,7 +74,7 @@ export default defineComponent(() => {
         <Tooltip
           placement="leftBottom"
           overlay={text}
-          arrowContent={<div class="rc-tooltip-arrow-inner"></div>}
+          arrowContent={<div class="vc-tooltip-arrow-inner"></div>}
         >
           <a href="#" style={cellStyle}>
             Left Bottom
@@ -82,7 +83,7 @@ export default defineComponent(() => {
         <Tooltip
           placement="rightTop"
           overlay={text}
-          arrowContent={<div class="rc-tooltip-arrow-inner"></div>}
+          arrowContent={<div class="vc-tooltip-arrow-inner"></div>}
         >
           <a href="#" style={cellStyle}>
             Right Top
@@ -91,7 +92,7 @@ export default defineComponent(() => {
         <Tooltip
           placement="rightBottom"
           overlay={text}
-          arrowContent={<div class="rc-tooltip-arrow-inner"></div>}
+          arrowContent={<div class="vc-tooltip-arrow-inner"></div>}
         >
           <a href="#" style={cellStyle}>
             Right Bottom
@@ -102,7 +103,7 @@ export default defineComponent(() => {
         <Tooltip
           placement="topLeft"
           overlay={text}
-          arrowContent={<div class="rc-tooltip-arrow-inner"></div>}
+          arrowContent={<div class="vc-tooltip-arrow-inner"></div>}
         >
           <a href="#" style={cellStyle}>
             Top Left
@@ -111,7 +112,7 @@ export default defineComponent(() => {
         <Tooltip
           placement="topRight"
           overlay={text}
-          arrowContent={<div class="rc-tooltip-arrow-inner"></div>}
+          arrowContent={<div class="vc-tooltip-arrow-inner"></div>}
         >
           <a href="#" style={cellStyle}>
             Top Right
@@ -120,7 +121,7 @@ export default defineComponent(() => {
         <Tooltip
           placement="bottomLeft"
           overlay={text}
-          arrowContent={<div class="rc-tooltip-arrow-inner"></div>}
+          arrowContent={<div class="vc-tooltip-arrow-inner"></div>}
         >
           <a href="#" style={cellStyle}>
             Bottom Left
@@ -129,7 +130,7 @@ export default defineComponent(() => {
         <Tooltip
           placement="bottomRight"
           overlay={text}
-          arrowContent={<div class="rc-tooltip-arrow-inner"></div>}
+          arrowContent={<div class="vc-tooltip-arrow-inner"></div>}
         >
           <a href="#" style={cellStyle}>
             Bottom Right

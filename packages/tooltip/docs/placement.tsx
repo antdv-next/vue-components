@@ -94,8 +94,8 @@ export default defineComponent(() => {
       <div>
         <h5>Debug Usage</h5>
         <Popup
-          prefixCls="rc-tooltip"
-          classNames={{ container: 'rc-tooltip-placement-top' }}
+          prefixCls="vc-tooltip"
+          classNames={{ container: 'vc-tooltip-placement-top' }}
           styles={{ container: { display: 'inline-block', position: 'relative' } }}
         >
           Test

@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'vue'
-import type { TooltipProps } from './Tooltip.tsx'
+import type { TooltipProps } from './Tooltip'
 import { clsx } from '@v-c/util'
 import { defineComponent } from 'vue'
 

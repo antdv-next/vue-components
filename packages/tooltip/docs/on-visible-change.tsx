@@ -24,7 +24,7 @@ export default defineComponent(() => {
         <div style={{ marginTop: '300px', marginLeft: '100px', marginBottom: '100px' }}>
           <Tooltip
             visible={visible.value}
-            motion={{ motionName: 'rc-tooltip-zoom' }}
+            motion={{ name: 'vc-tooltip-zoom' }}
             onVisibleChange={onVisibleChange}
             trigger="click"
             overlay={<span>I am a tooltip</span>}

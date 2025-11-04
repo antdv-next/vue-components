@@ -248,6 +248,7 @@ const Popup = defineComponent<PopupProps>(
           [`${prefixCls}-mobile`]: isMobile.value,
         },
       )
+      console.log(offsetStyle.value)
       return (
         <Portal
           open={forceRender || isNodeVisible.value}

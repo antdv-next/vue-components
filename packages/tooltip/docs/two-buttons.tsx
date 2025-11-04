@@ -3,7 +3,7 @@ import { defineComponent } from 'vue'
 import Tooltip from '../src'
 import './assets/bootstrap.less'
 
-const motion = { motionName: 'rc-tooltip-zoom' }
+const motion = { motionName: 'vc-tooltip-zoom' }
 
 export default defineComponent(() => {
   return () => (

@@ -139,6 +139,7 @@ export default function useAlign(
   // ========================= Align =========================
   const _onAlign = () => {
     if (popupEle.value && target.value && open.value && !mobile?.value) {
+      console.log(target.value)
       const popupElement = popupEle.value
 
       const doc = popupElement.ownerDocument
