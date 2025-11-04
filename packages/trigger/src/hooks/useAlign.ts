@@ -139,7 +139,6 @@ export default function useAlign(
   // ========================= Align =========================
   const _onAlign = () => {
     if (popupEle.value && target.value && open.value && !mobile?.value) {
-      console.log(target.value)
       const popupElement = popupEle.value
 
       const doc = popupElement.ownerDocument
@@ -152,7 +151,6 @@ export default function useAlign(
       const originRight = popupElement.style.right
       const originBottom = popupElement.style.bottom
       const originOverflow = popupElement.style.overflow
-
       // Placement
       const placementInfo: AlignType = {
         ...builtinPlacements.value[placement.value],
@@ -301,7 +299,6 @@ export default function useAlign(
 
       const targetAlignPoint = getAlignPoint(targetRect, targetPoints)
       const popupAlignPoint = getAlignPoint(popupRect, popupPoints)
-
       // Real align info may not same as origin one
       const nextAlignInfo = {
         ...placementInfo,

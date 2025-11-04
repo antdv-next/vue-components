@@ -23,7 +23,6 @@ export const Arrow = defineComponent<ArrowProps>({
 
       const { className, content, style } = arrow || {}
       const { x = 0, y = 0 } = arrowPos
-
       // Skip if no align
       if (!align || !align.points) {
         return null

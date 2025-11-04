@@ -139,10 +139,10 @@ const Tooltip = defineComponent<TooltipProps>(
       if ('visible' in props) {
         extraProps.popupVisible = props.visible
       }
-
       // ========================= Render =========================
       return (
         <Trigger
+          {...extraProps}
           popupClassName={classNames?.root}
           prefixCls={prefixCls}
           popup={(
@@ -173,7 +173,6 @@ const Tooltip = defineComponent<TooltipProps>(
           arrow={mergedArrow.value!}
           uniqueContainerClassName={classNames?.uniqueContainer}
           uniqueContainerStyle={styles?.uniqueContainer}
-          {...extraProps}
         >
           {getChildren()}
         </Trigger>

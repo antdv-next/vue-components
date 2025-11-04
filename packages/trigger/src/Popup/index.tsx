@@ -244,11 +244,11 @@ const Popup = defineComponent<PopupProps>(
       const cls = classNames(
         prefixCls,
         (attrs as any).class,
+        props.className,
         {
           [`${prefixCls}-mobile`]: isMobile.value,
         },
       )
-      console.log(offsetStyle.value)
       return (
         <Portal
           open={forceRender || isNodeVisible.value}
