@@ -1,5 +1,5 @@
 import type { Ref } from 'vue'
-import { nextTick, watchEffect } from 'vue'
+import { nextTick, watch } from 'vue'
 import { collectScroller, getWin } from '../util.ts'
 
 export default function useWatch(
@@ -9,7 +9,7 @@ export default function useWatch(
   onAlign: VoidFunction,
   onScroll: VoidFunction,
 ) {
-  watchEffect(async (onCleanup) => {
+  watch([open, target, popup], async (_n, _o, onCleanup) => {
     await nextTick()
     if (open.value && target.value && popup.value) {
       const targetElement = target.value

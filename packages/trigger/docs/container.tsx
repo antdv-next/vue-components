@@ -101,7 +101,10 @@ export default defineComponent(() => {
             targetVisible.value = !targetVisible.value
           }}
         >
-          Target Visible: ({String(targetVisible.value)})
+
+          Target Visible: (
+          {String(targetVisible.value)}
+          )
         </button>
         <button
           type="button"

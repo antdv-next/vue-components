@@ -21,8 +21,8 @@ export const Arrow = defineComponent<ArrowProps>({
     return () => {
       const { prefixCls, align, arrow, arrowPos } = props
 
-      const { className, content } = arrow || {}
-      const { x, y } = arrowPos
+      const { className, content, style } = arrow || {}
+      const { x = 0, y = 0 } = arrowPos
 
       // Skip if no align
       if (!align || !align.points) {
@@ -68,7 +68,10 @@ export const Arrow = defineComponent<ArrowProps>({
         <div
           ref={arrowRef}
           class={classNames(`${prefixCls}-arrow`, className)}
-          style={alignStyle}
+          style={{
+            ...alignStyle,
+            ...style,
+          }}
         >
           {content}
         </div>
