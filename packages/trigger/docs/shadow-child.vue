@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Trigger } from '../src'
+import { Trigger } from '../_src'
 import './assets/index.less'
 </script>
 

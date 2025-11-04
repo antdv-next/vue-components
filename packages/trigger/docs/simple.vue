@@ -1,6 +1,6 @@
 <script setup>
 import { computed, reactive } from 'vue'
-import { Trigger } from '../src'
+import { Trigger } from '../_src'
 import './assets/index.less'
 
 const state = reactive({
@@ -249,7 +249,7 @@ function autoDestroy(e) {
           :checked="state.mobile"
           type="checkbox"
           @hange="() => state.mobile = !state.mobile"
-        />
+        >
         mobile
       </label>
 

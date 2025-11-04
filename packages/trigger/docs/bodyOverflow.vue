@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Portal from '@v-c/portal'
 import { defineComponent, h, ref } from 'vue'
-import { Trigger } from '../src'
+import { Trigger } from '../_src'
 import './assets/index.less'
 
 const open = ref(false)

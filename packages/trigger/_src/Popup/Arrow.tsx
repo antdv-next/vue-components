@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'vue'
 import type { AlignType, ArrowPos, ArrowTypeOuter } from '../interface'
 import { classNames } from '@v-c/util'
-import { defineComponent, shallowRef } from 'vue'
+import { defineComponent, ref } from 'vue'
 
 export interface ArrowProps {
   prefixCls: string
@@ -13,7 +13,7 @@ export interface ArrowProps {
 export const Arrow = defineComponent<ArrowProps>({
   name: 'Arrow',
   setup(props, { expose }) {
-    const arrowRef = shallowRef<HTMLDivElement>()
+    const arrowRef = ref<HTMLDivElement>()
 
     expose({
       arrowRef,

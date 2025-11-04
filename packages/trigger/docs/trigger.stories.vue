@@ -1,5 +1,5 @@
 <script setup>
-import BodyOverflow from './bodyOverflow.vue'
+import BodyOverflow from './body-overflow.tsx'
 import Case from './case.vue'
 import ClickNested from './clickNested.vue'
 import Clip from './clip.vue'

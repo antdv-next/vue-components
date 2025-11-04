@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, useTemplateRef } from 'vue'
-import { Trigger } from '../src'
+import { Trigger } from '../_src'
 import './assets/index.less'
 
 const builtinPlacements = {
