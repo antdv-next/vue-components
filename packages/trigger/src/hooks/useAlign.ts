@@ -8,7 +8,7 @@ import type {
 } from '../interface'
 import { isDOM } from '@v-c/util/dist/Dom/findDOMNode'
 import isVisible from '@v-c/util/dist/Dom/isVisible'
-import { rafDebounce } from '@v-c/util/dist/raf.ts'
+import { rafDebounce } from '@v-c/util/dist/raf'
 import { computed, nextTick, reactive, ref, shallowRef, toRefs, watch, watchEffect } from 'vue'
 import { collectScroller, getVisibleArea, getWin, toNum } from '../util'
 

@@ -1,6 +1,6 @@
 import type { Ref } from 'vue'
 import { warning } from '@v-c/util'
-import { getShadowRoot } from '@v-c/util/dist/Dom/shadow.ts'
+import { getShadowRoot } from '@v-c/util/dist/Dom/shadow'
 import { shallowRef, watch, watchEffect } from 'vue'
 import { getWin } from '../util.ts'
 
