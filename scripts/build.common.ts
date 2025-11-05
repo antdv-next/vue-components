@@ -15,7 +15,9 @@ export function buildCommon(opt: BuildCommonOptions) {
   const plugins = [
     vue(),
     vueJsx(),
-    tsxResolveTypes(),
+    tsxResolveTypes({
+      defaultPropsToUndefined: true,
+    }),
     ...(opt.plugins ?? []),
   ]
   if (dtsOpen) {

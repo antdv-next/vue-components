@@ -1,41 +1,38 @@
-import type { Key } from '@v-c/util/dist/type'
-import type { CSSProperties, HTMLAttributes, PropType, SlotsType, VNode } from 'vue'
+import type { Key, VueNode } from '@v-c/util/dist/type'
+import type { CSSProperties, HTMLAttributes, PropType } from 'vue'
 import ResizeObserver from '@v-c/resize-observer'
 import { classNames } from '@v-c/util'
-import { computed, defineComponent, onUnmounted, ref } from 'vue'
+import { computed, defineComponent, onUnmounted } from 'vue'
 
-// Use shared variable to save bundle size
 const UNDEFINED = undefined
 
 export default defineComponent({
-  name: 'Item',
+  name: 'OverflowItem',
   inheritAttrs: false,
   props: {
-    prefixCls: String,
-    item: Object,
-    renderItem: Function as PropType<(item: any) => VNode>,
-    responsive: [Boolean, Number],
-    itemKey: { type: [String, Number] as PropType<string | number> },
-    registerSize: Function as PropType<(key: Key, width: number | null) => void>,
-    display: Boolean,
-    order: Number,
-    component: { type: String as PropType<any>, default: 'div' },
-    invalidate: Boolean,
+    prefixCls: { type: String, required: true },
+    item: Object as PropType<any>,
+    class: { type: [String, Object, Array] as PropType<any>, default: undefined },
+    style: Object as PropType<CSSProperties>,
+    renderItem: Function as PropType<(item: any, info: { index: number }) => VueNode>,
+    responsive: Boolean,
     responsiveDisabled: Boolean,
+    itemKey: [String, Number] as PropType<Key>,
+    registerSize: {
+      type: Function as PropType<(key: Key, width: number | null) => void>,
+      required: true,
+    },
+    display: Boolean,
+    order: { type: Number, required: true },
+    component: { type: [String, Object, Function] as PropType<any>, default: 'div' },
+    invalidate: Boolean,
   },
-  slots: Object as SlotsType<{
-    default: any
-  }>,
-  emits: ['mouseenter', 'mouseleave', 'keydown', 'click', 'focus'],
-  setup(props, { attrs, slots, expose }) {
+  setup(props, { slots, attrs }) {
     const mergedHidden = computed(() => props.responsive && !props.display)
-    const itemNodeRef = ref()
 
-    expose({ itemNodeRef })
-
-    // ================================ Effect ================================
     function internalRegisterSize(width: number | null) {
-      props.registerSize?.(props.itemKey!, width)
+      const key = (props.itemKey ?? props.order) as Key
+      props.registerSize(key, width)
     }
 
     onUnmounted(() => {
@@ -49,16 +46,15 @@ export default defineComponent({
         item,
         renderItem,
         responsive,
-        registerSize,
-        itemKey,
-        display,
+        responsiveDisabled,
         order,
         component: Component = 'div',
-        ...restProps
+        style,
       } = props
+
       const children = slots.default?.()
-      // ================================ Render ================================
-      const childNode = renderItem && item !== UNDEFINED ? renderItem(item) : children
+      const childNode
+        = renderItem && item !== UNDEFINED ? renderItem(item, { index: order }) : children
 
       let overflowStyle: CSSProperties | undefined
       if (!invalidate) {
@@ -77,28 +73,35 @@ export default defineComponent({
         overflowProps['aria-hidden'] = true
       }
 
-      // 使用 disabled  避免结构不一致 导致子组件 rerender
+      const { class: classAttr, style: styleAttr, ...restAttrs } = attrs as HTMLAttributes
+
+      const itemNode = (
+        <Component
+          class={classNames(!invalidate && prefixCls, classAttr, props.class)}
+          style={{
+            ...overflowStyle,
+            ...(style as CSSProperties),
+            ...(styleAttr as CSSProperties),
+          }}
+          {...overflowProps}
+          {...restAttrs}
+        >
+          {childNode}
+        </Component>
+      )
+
+      if (!responsive) {
+        return itemNode
+      }
+
       return (
         <ResizeObserver
-          disabled={!responsive}
+          disabled={responsiveDisabled}
           onResize={({ offsetWidth }) => {
             internalRegisterSize(offsetWidth)
           }}
-          v-slots={{
-            default: () => (
-              <Component
-                class={classNames(!invalidate && prefixCls, [attrs.class])}
-                style={overflowStyle}
-                {...overflowProps}
-                {...restProps}
-                ref={itemNodeRef}
-              >
-                {childNode}
-              </Component>
-            ),
-          }}
-        >
-        </ResizeObserver>
+          v-slots={{ default: () => itemNode }}
+        />
       )
     }
   },

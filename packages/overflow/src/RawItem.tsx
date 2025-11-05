@@ -1,51 +1,37 @@
 import type { PropType } from 'vue'
 import { classNames } from '@v-c/util'
 import { defineComponent } from 'vue'
-import { useInjectOverflowContext } from './context.tsx'
+import { OverflowContextProvider, useInjectOverflowContext } from './context'
 import Item from './Item'
 
 export default defineComponent({
-  name: 'RawItem',
+  name: 'OverflowRawItem',
   inheritAttrs: false,
   props: {
-    component: String as PropType<any>,
-    title: String,
-    id: String,
-    onMouseenter: { type: Function },
-    onMouseleave: { type: Function },
-    onClick: { type: Function },
-    onKeydown: { type: Function },
-    onFocus: { type: Function },
-    role: String,
-    tabindex: Number,
+    component: { type: [String, Object, Function] as PropType<any>, default: 'div' },
   },
-  emits: ['mouseenter', 'mouseleave', 'keydown', 'click', 'focus'],
   setup(props, { slots, attrs }) {
     const context = useInjectOverflowContext()
 
     return () => {
-      // Render directly when context not provided
       if (!context?.value) {
-        const { component: Component = 'div', ...restProps } = props
-
-        return (
-          <Component {...restProps} {...attrs}>
-            {slots.default?.()}
-          </Component>
-        )
+        const Component = (props.component ?? 'div') as any
+        return <Component {...attrs}>{slots.default?.()}</Component>
       }
 
       const { className: contextClassName, ...restContext } = context.value
-      // Do not pass context to sub item to avoid multiple measure
+      const { class: classAttr, ...restAttrs } = attrs
+
       return (
-        <Item
-          class={classNames(contextClassName, [attrs.class])}
-          {...restContext}
-          {...props}
-          {...attrs}
-          v-slots={slots}
-        >
-        </Item>
+        <OverflowContextProvider value={null}>
+          <Item
+            {...restContext}
+            {...restAttrs}
+            class={classNames(contextClassName, classAttr as any)}
+            component={props.component}
+            v-slots={slots}
+          />
+        </OverflowContextProvider>
       )
     }
   },

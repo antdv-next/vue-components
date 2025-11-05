@@ -38,7 +38,7 @@ export function useBatcher(): NotifyEffectUpdate {
 /**
  * Trigger state update by ref to save perf.
  */
-export default function useEffectState<T extends string | number | object>(
+export default function useEffectState<T>(
   notifyEffectUpdate: NotifyEffectUpdate,
   defaultValue?: T | null | undefined,
 ): [Ref<T | null | undefined>, (nextValue: Updater<T>) => void] {
@@ -48,7 +48,13 @@ export default function useEffectState<T extends string | number | object>(
   // Set State
   const setEffectVal = useEvent((nextValue: Updater<T>) => {
     notifyEffectUpdate(() => {
-      stateValue.value = nextValue as any
+      if (typeof nextValue === 'function') {
+        const updater = nextValue as (origin: T | null | undefined) => T
+        stateValue.value = updater(stateValue.value as T)
+      }
+      else {
+        stateValue.value = nextValue as any
+      }
     })
   })
 

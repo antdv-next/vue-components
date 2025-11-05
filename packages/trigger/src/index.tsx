@@ -2,7 +2,7 @@ import type { VueNode } from '@v-c/util/dist/type'
 import type { CSSMotionProps } from '@v-c/util/dist/utils/transition'
 import type { CSSProperties } from 'vue'
 import type { TriggerContextProps } from './context.ts'
-import type { ActionType, AlignType, ArrowPos, ArrowTypeOuter, BuildInPlacements } from './interface'
+import type { ActionType, AlignType, AnimationType, ArrowPos, ArrowTypeOuter, BuildInPlacements } from './interface'
 import type { MobileConfig } from './Popup'
 import Portal from '@v-c/portal'
 import ResizeObserver from '@v-c/resize-observer'
@@ -23,6 +23,7 @@ import { getAlignPopupClassName } from './util.ts'
 export type {
   ActionType,
   AlignType,
+  AnimationType,
   ArrowTypeOuter as ArrowType,
   BuildInPlacements,
 }

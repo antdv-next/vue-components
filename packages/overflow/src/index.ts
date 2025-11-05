@@ -1,6 +1,6 @@
-// import type { OverflowProps } from './Overflow'
 import Overflow from './Overflow'
 
-// export type { OverflowProps }
+export { OverflowContextProvider } from './context'
+export type { OverflowProps } from './Overflow'
 
 export default Overflow

@@ -54,7 +54,6 @@ const Portal = defineComponent<PortalProps>(
   (props = defaults, { slots }) => {
     const shouldRender = shallowRef(props.open)
     const mergedRender = computed(() => shouldRender.value || props.open)
-
     // ========================= Warning =========================
     if (process.env.NODE_ENV !== 'production') {
       warning(

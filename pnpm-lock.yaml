@@ -72,8 +72,8 @@ importers:
         specifier: ^5.0.0-beta.6
         version: 5.0.0-beta.6(@microsoft/api-extractor@7.50.0(@types/node@20.19.24))(esbuild@0.25.9)(rollup@4.50.0)(typescript@5.9.3)(vite@7.1.12(@types/node@20.19.24)(jiti@2.6.1)(less@4.4.2)(yaml@2.8.1))
       vite-plugin-tsx-resolve-types:
-        specifier: ^0.0.5
-        version: 0.0.5(typescript@5.9.3)(vite@7.1.12(@types/node@20.19.24)(jiti@2.6.1)(less@4.4.2)(yaml@2.8.1))
+        specifier: ^0.0.6
+        version: 0.0.6(typescript@5.9.3)(vite@7.1.12(@types/node@20.19.24)(jiti@2.6.1)(less@4.4.2)(yaml@2.8.1))
       vitest:
         specifier: ^3.2.4
         version: 3.2.4(@types/debug@4.1.12)(@types/node@20.19.24)(jiti@2.6.1)(jsdom@22.1.0)(less@4.4.2)(yaml@2.8.1)
@@ -3762,8 +3762,8 @@ packages:
       vite:
         optional: true
 
-  vite-plugin-tsx-resolve-types@0.0.5:
-    resolution: {integrity: sha512-Jgara5uU9Vd7q5kKEO8cGKH/a1DFqracuKcW38pZr+NoITnDmZ7FiGQ8qngq5Ah4K65EzDPURblTE8HiZ8FL7g==}
+  vite-plugin-tsx-resolve-types@0.0.6:
+    resolution: {integrity: sha512-TnPunBeIDEu+KJnOPg987HjFTaiUTj2nAFt4Np5Cm2UZUK5PMzUqXWhkWPw5c4XvfiIBzowoN3NTNTy0bW4RRg==}
     peerDependencies:
       typescript: '>=5'
       vite: '>=4'
@@ -7833,13 +7833,13 @@ snapshots:
       - typescript
       - webpack
 
-  vite-plugin-tsx-resolve-types@0.0.5(typescript@5.9.3)(vite@7.1.12(@types/node@20.19.24)(jiti@2.6.1)(less@4.4.2)(yaml@2.8.1)):
+  vite-plugin-tsx-resolve-types@0.0.6(typescript@5.9.3)(vite@7.1.12(@types/node@20.19.24)(jiti@2.6.1)(less@4.4.2)(yaml@2.8.1)):
     dependencies:
       '@babel/generator': 7.28.3
       '@babel/parser': 7.28.4
       '@babel/traverse': 7.28.4
       '@babel/types': 7.28.4
-      '@vue/compiler-sfc': 3.5.21
+      '@vue/compiler-sfc': 3.5.22
       typescript: 5.9.3
       vite: 7.1.12(@types/node@20.19.24)(jiti@2.6.1)(less@4.4.2)(yaml@2.8.1)
     transitivePeerDependencies:

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import Basic from './basic.vue'
-import Blink from './blink.vue'
-import FillWidth from './fill-width.vue'
-import RawRender from './raw-render.vue'
+import Basic from './basic'
+import Blink from './blink'
+import FillWidth from './fill-width'
+import RawRender from './raw-render'
 
 import './assets/index.less'
 import './assets/common.less'

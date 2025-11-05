@@ -1,111 +1,146 @@
-import type { Key } from '@v-c/util/dist/type'
-import type { CSSProperties, PropType, SlotsType, VNode } from 'vue'
+import type { Key, VueNode } from '@v-c/util/dist/type'
+import type { CSSProperties, HTMLAttributes, PropType } from 'vue'
 import ResizeObserver from '@v-c/resize-observer'
-// import { useLayoutEffect } from '@v-c/util/dist/hooks/useLayoutEffect'
 import { classNames } from '@v-c/util'
-import { computed, defineComponent, ref, shallowRef, watch } from 'vue'
-import { OverflowContextProvider } from './context.tsx'
+import { computed, defineComponent, ref, watchEffect } from 'vue'
+import { OverflowContextProvider } from './context'
+import useEffectState, { useBatcher } from './hooks/useEffectState'
 import Item from './Item'
 import RawItem from './RawItem'
+
+export { OverflowContextProvider } from './context'
 
 const RESPONSIVE = 'responsive' as const
 const INVALIDATE = 'invalidate' as const
 
-export { OverflowContextProvider } from './context.tsx'
+export interface OverflowProps<ItemType = any> {
+  prefixCls?: string
+  class?: any
+  style?: CSSProperties
+  data?: ItemType[]
+  itemKey?: Key | ((item: ItemType) => Key)
+  /** Used for `responsive`. It will limit render node to avoid perf issue */
+  itemWidth?: number
+  renderItem?: (item: ItemType, info: { index: number }) => VueNode
+  /** @private Do not use in your production. Render raw node that need wrap Item by developer self */
+  renderRawItem?: (item: ItemType, index: number) => VueNode
+  maxCount?: number | typeof RESPONSIVE | typeof INVALIDATE
+  renderRest?: VueNode | ((omittedItems: ItemType[]) => VueNode)
+  /** @private Do not use in your production. Render raw node that need wrap Item by developer self */
+  renderRawRest?: (omittedItems: ItemType[]) => VueNode
+  prefix?: any
+  suffix?: any
+  component?: any
+  itemComponent?: any
+
+  /** @private This API may be refactor since not well design */
+  onVisibleChange?: (visibleCount: number) => void
+
+  /** When set to `full`, ssr will render full items by default and remove at client side */
+  ssr?: 'full'
+}
 
 function defaultRenderRest<ItemType>(omittedItems: ItemType[]) {
   return `+ ${omittedItems.length} ...`
 }
 
-const Overflow = defineComponent({
+const overflowProps = {
+  prefixCls: { type: String, default: 'vc-overflow' },
+  data: { type: Array as PropType<any[]>, default: () => [] },
+  renderItem: Function as PropType<(item: any, info: { index: number }) => VueNode>,
+  renderRawItem: Function as PropType<(item: any, index: number) => VueNode>,
+  itemKey: [String, Number, Function] as PropType<Key | ((item: any) => Key)>,
+  itemWidth: { type: Number, default: 10 },
+  maxCount: [Number, String] as PropType<number | typeof RESPONSIVE | typeof INVALIDATE>,
+  renderRest: [Function, Object] as PropType<VueNode | ((omittedItems: any[]) => VueNode)>,
+  renderRawRest: Function as PropType<(omittedItems: any[]) => VueNode>,
+  prefix: {},
+  suffix: {},
+  component: [String, Object, Function] as PropType<any>,
+  itemComponent: [String, Object, Function] as PropType<any>,
+  onVisibleChange: Function as PropType<(visibleCount: number) => void>,
+  ssr: String as PropType<'full'>,
+} as const
+
+const OverflowImpl = defineComponent({
   name: 'Overflow',
   inheritAttrs: false,
-  props: {
-    prefixCls: { type: String, default: 'vc-overflow' },
-    data: { type: Array, default: () => [] },
-    renderItem: Function as PropType<(item: any, info: { index: number }) => VNode | string>,
-    renderRawItem: Function as PropType<(item: any, index: number) => VNode>,
-    itemKey: [String, Function] as PropType<string | ((item: any) => string | number)>,
-    itemWidth: { type: Number, default: 10 },
-    ssr: String as PropType<'full'>,
-    maxCount: [Number, String] as PropType<number | typeof RESPONSIVE | typeof INVALIDATE>,
-    renderRest: [Function, Object] as PropType<VNode | ((omittedItems: any[]) => VNode | string)>,
-    renderRawRest: Function as PropType<(omittedItems: any[]) => VNode>,
-    suffix: [Object, String] as PropType<VNode | string>,
-    component: { type: String as PropType<any>, default: 'div' },
-    itemComponent: [String, Object],
-    onVisibleChange: Function as PropType<(visibleCount: number) => void>,
-  },
-  slots: Object as SlotsType<{
-    renderItem: any
-    renderRawItem: any
-    renderRest: any
-    renderRawRest: any
-    suffix: any
-    default: any
-  }>,
-  emits: ['visibleChange', 'mouseenter', 'mouseleave', 'keydown', 'click', 'focus'],
-  setup(props, { attrs, slots }) {
-    const fullySSR = computed(() => props.ssr === 'full')
-    // const notifyEffectUpdate = useBatcher()
+  props: overflowProps,
+  emits: ['visibleChange'],
+  setup(props, { attrs, slots, emit }) {
+    const notifyEffectUpdate = useBatcher()
 
-    const containerWidth = shallowRef<number | null>(null)
+    const [containerWidth, setContainerWidth] = useEffectState<number | null>(
+      notifyEffectUpdate,
+      null,
+    )
     const mergedContainerWidth = computed(() => containerWidth.value || 0)
 
-    const itemWidths = shallowRef<Map<Key, number>>(new Map<Key, number>())
-    const prevRestWidth = shallowRef<number>(0)
-    const restWidth = shallowRef<number>(0)
-    const suffixWidth = shallowRef<number>(0)
-    const suffixFixedStart = shallowRef<number | null>(null)
-    const displayCount = shallowRef<number | null>(null)
+    const [itemWidths, setItemWidths] = useEffectState<Map<Key, number>>(
+      notifyEffectUpdate,
+      new Map<Key, number>(),
+    )
 
+    const [prevRestWidth, setPrevRestWidth] = useEffectState<number>(
+      notifyEffectUpdate,
+      0,
+    )
+    const [restWidth, setRestWidth] = useEffectState<number>(notifyEffectUpdate, 0)
+
+    const [prefixWidth, setPrefixWidth] = useEffectState<number>(notifyEffectUpdate, 0)
+    const [suffixWidth, setSuffixWidth] = useEffectState<number>(notifyEffectUpdate, 0)
+
+    const suffixFixedStart = ref<number | null>(null)
+
+    const displayCount = ref<number | null>(null)
     const mergedDisplayCount = computed(() => {
-      if (displayCount.value === null && fullySSR.value) {
+      if (displayCount.value === null && props.ssr === 'full') {
         return Number.MAX_SAFE_INTEGER
       }
+
       return displayCount.value || 0
     })
 
     const restReady = ref(false)
+
     const itemPrefixCls = computed(() => `${props.prefixCls}-item`)
 
     // Always use the max width to avoid blink
-    const mergedRestWidth = computed(() => Math.max(prevRestWidth.value, restWidth.value))
+    const mergedRestWidth = computed(() => Math.max(prevRestWidth.value!, restWidth.value!))
 
     // ================================= Data =================================
+    const data = computed(() => props.data ?? [])
     const isResponsive = computed(() => props.maxCount === RESPONSIVE)
-    const shouldResponsive = computed(() => props.data.length && isResponsive.value)
+    const shouldResponsive = computed(() => data.value.length && isResponsive.value)
     const invalidate = computed(() => props.maxCount === INVALIDATE)
 
     /**
      * When is `responsive`, we will always render rest node to get the real width of it for calculation
      */
-    const showRest = computed(() =>
-      shouldResponsive.value
-      || (typeof props.maxCount === 'number' && props.data.length > props.maxCount),
+    const showRest = computed(
+      () =>
+        shouldResponsive.value
+        || (typeof props.maxCount === 'number' && data.value.length > props.maxCount),
     )
 
     const mergedData = computed(() => {
-      let items = props.data
-
-      // 当 invalidate 为 true 时，直接返回所有数据，不进行任何过滤
-      if (invalidate.value) {
-        return props.data
-      }
+      let items = data.value
 
       if (shouldResponsive.value) {
-        if (containerWidth.value === null && fullySSR.value) {
-          items = props.data
+        if (containerWidth.value === null && props.ssr === 'full') {
+          items = data.value
         }
         else {
-          items = props.data.slice(
-            0,
-            Math.min(props.data.length, mergedContainerWidth.value / props.itemWidth),
+          const mergedItemWidth = props.itemWidth ?? 10
+          const maxLen = Math.min(
+            data.value.length,
+            mergedContainerWidth.value / mergedItemWidth,
           )
+          items = data.value.slice(0, Math.floor(maxLen))
         }
       }
       else if (typeof props.maxCount === 'number') {
-        items = props.data.slice(0, props.maxCount)
+        items = data.value.slice(0, props.maxCount)
       }
 
       return items
@@ -113,26 +148,64 @@ const Overflow = defineComponent({
 
     const omittedItems = computed(() => {
       if (shouldResponsive.value) {
-        return props.data.slice(mergedDisplayCount.value + 1)
+        return data.value.slice(mergedDisplayCount.value + 1)
       }
-      return props.data.slice(mergedData.value.length)
+      return data.value.slice(mergedData.value.length)
     })
 
     // ================================= Item =================================
-    const getKey = (item: any, index: number) => {
-      if (typeof props.itemKey === 'function') {
-        return props.itemKey(item)
+    const getKey = (item: any, index: number): Key => {
+      const { itemKey } = props
+      if (typeof itemKey === 'function') {
+        return itemKey(item)
       }
-      return (props.itemKey && item[props.itemKey]) ?? index
+      if (itemKey != null) {
+        return (item as any)?.[itemKey] ?? index
+      }
+      return index
     }
+
+    const mergedRenderItem = computed(
+      () =>
+        props.renderItem
+        ?? (slots.renderItem
+          ? (item: any, info: { index: number }) =>
+              slots.renderItem?.({ item, index: info.index })
+          : (item: any) => item),
+    )
+    const mergedRenderRawItem = computed(
+      () =>
+        props.renderRawItem
+        ?? (slots.renderRawItem
+          ? (item: any, index: number) => slots.renderRawItem?.({ item, index })
+          : undefined),
+    )
+    const mergedRenderRest = computed(
+      () =>
+        props.renderRest
+        ?? (slots.renderRest
+          ? (omitted: any[]) => slots.renderRest?.({ items: omitted })
+          : undefined),
+    )
+    const mergedRenderRawRest = computed(
+      () =>
+        props.renderRawRest
+        ?? (slots.renderRawRest
+          ? (omitted: any[]) => slots.renderRawRest?.({ items: omitted })
+          : undefined),
+    )
+    const mergedPrefix = computed<VueNode | undefined>(
+      () => props.prefix ?? slots.prefix?.(),
+    )
+    const mergedSuffix = computed<VueNode | undefined>(
+      () => props.suffix ?? slots.suffix?.(),
+    )
 
     function updateDisplayCount(
       count: number,
       suffixFixedStartVal: number | null | undefined,
       notReady?: boolean,
     ) {
-      // Vue 3 will sync render even when the value is same in some case.
-      // We take `mergedData` as deps which may cause dead loop if it's dynamic generate.
       if (
         displayCount.value === count
         && (suffixFixedStartVal === undefined || suffixFixedStartVal === suffixFixedStart.value)
@@ -142,9 +215,9 @@ const Overflow = defineComponent({
 
       displayCount.value = count
       if (!notReady) {
-        restReady.value = count < props.data.length - 1
-
+        restReady.value = count < data.value.length - 1
         props.onVisibleChange?.(count)
+        emit('visibleChange', count)
       }
 
       if (suffixFixedStartVal !== undefined) {
@@ -153,121 +226,116 @@ const Overflow = defineComponent({
     }
 
     // ================================= Size =================================
-    function onOverflowResize(_: any, element: HTMLElement) {
-      containerWidth.value = element.clientWidth
+    function onOverflowResize(_: object, element: HTMLElement) {
+      setContainerWidth(element.clientWidth)
     }
 
-    function registerSize(key: string | number, width: number | null) {
-      const clone = new Map(itemWidths.value)
+    function registerSize(key: Key, width: number | null) {
+      setItemWidths((origin) => {
+        const clone = new Map(origin || [])
 
-      if (width === null) {
-        clone.delete(key)
-      }
-      else {
-        clone.set(key, width)
-      }
-      itemWidths.value = clone
+        if (width === null) {
+          clone.delete(key)
+        }
+        else {
+          clone.set(key, width)
+        }
+        return clone
+      })
     }
 
-    function registerOverflowSize(_: string | number, width: number | null) {
-      restWidth.value = width!
-      prevRestWidth.value = restWidth.value
+    function registerOverflowSize(_: Key, width: number | null) {
+      setRestWidth(width ?? 0)
+      setPrevRestWidth(restWidth.value!)
     }
 
-    function registerSuffixSize(_: string | number, width: number | null) {
-      suffixWidth.value = width!
+    function registerPrefixSize(_: Key, width: number | null) {
+      setPrefixWidth(width ?? 0)
+    }
+
+    function registerSuffixSize(_: Key, width: number | null) {
+      setSuffixWidth(width ?? 0)
     }
 
     // ================================ Effect ================================
     function getItemWidth(index: number) {
-      return itemWidths.value.get(getKey(mergedData.value[index], index))
+      const key = getKey(mergedData.value[index], index)
+      return itemWidths.value?.get(key)
     }
 
-    watch([mergedContainerWidth, itemWidths, restWidth, suffixWidth, () => props.itemKey, mergedData], () => {
-      if (
-        mergedContainerWidth.value
-        && typeof mergedRestWidth.value === 'number'
-        && mergedData.value
-      ) {
-        let totalWidth = suffixWidth.value
+    watchEffect(
+      () => {
+        const container = mergedContainerWidth.value
+        const rest = mergedRestWidth.value
+        const list = mergedData.value
 
-        const len = mergedData.value.length
-        const lastIndex = len - 1
+        if (container && typeof rest === 'number' && list) {
+          let totalWidth = prefixWidth.value! + suffixWidth.value!
 
-        // When data count change to 0, reset this since not loop will reach
-        if (!len) {
-          updateDisplayCount(0, null)
-          return
-        }
+          const len = list.length
+          const lastIndex = len - 1
 
-        for (let i = 0; i < len; i += 1) {
-          let currentItemWidth = getItemWidth(i)
-
-          // Fully will always render
-          if (fullySSR.value) {
-            currentItemWidth = currentItemWidth || 0
+          if (!len) {
+            updateDisplayCount(0, null)
+            return
           }
 
-          // Break since data not ready
-          if (currentItemWidth === undefined) {
-            updateDisplayCount(i - 1, undefined, true)
-            break
+          for (let i = 0; i < len; i += 1) {
+            let currentItemWidth = getItemWidth(i)
+
+            if (props.ssr === 'full') {
+              currentItemWidth = currentItemWidth || 0
+            }
+
+            if (currentItemWidth === undefined) {
+              updateDisplayCount(i - 1, undefined, true)
+              return
+            }
+
+            totalWidth += currentItemWidth
+
+            if (
+              (lastIndex === 0 && totalWidth <= container)
+              || (i === lastIndex - 1 && totalWidth + (getItemWidth(lastIndex) || 0) <= container)
+            ) {
+              updateDisplayCount(lastIndex, null)
+              return
+            }
+            if (totalWidth + rest > container) {
+              updateDisplayCount(
+                i - 1,
+                totalWidth - currentItemWidth - suffixWidth.value! + restWidth.value!,
+              )
+              return
+            }
           }
 
-          // Find best match
-          totalWidth += currentItemWidth
-
-          if (
-            // Only one means `totalWidth` is the final width
-            (lastIndex === 0 && totalWidth <= mergedContainerWidth.value)
-            // Last two width will be the final width
-            || (i === lastIndex - 1
-              && totalWidth + getItemWidth(lastIndex)! <= mergedContainerWidth.value)
-          ) {
-            // Additional check if match the end
-            updateDisplayCount(lastIndex, null)
-            break
-          }
-          else if (totalWidth + mergedRestWidth.value > mergedContainerWidth.value) {
-            // Can not hold all the content to show rest
-            updateDisplayCount(
-              i - 1,
-              totalWidth - currentItemWidth - suffixWidth.value + restWidth.value,
-            )
-            break
+          const firstItemWidth = getItemWidth(0) || 0
+          if ((props.suffix ?? slots.suffix?.()) && firstItemWidth + suffixWidth.value! > container) {
+            suffixFixedStart.value = null
           }
         }
-
-        if (props.suffix && getItemWidth(0)! + suffixWidth.value > mergedContainerWidth.value) {
-          suffixFixedStart.value = null
-        }
-      }
-    })
+      },
+      { flush: 'post' },
+    )
 
     return () => {
       const {
         prefixCls = 'vc-overflow',
-        data = [],
-        renderItem = slots?.renderItem,
-        renderRawItem = slots?.renderRawItem,
-        itemKey,
-        itemWidth = 10,
-        ssr,
-        maxCount,
-        renderRest = slots?.renderRest,
-        renderRawRest = slots?.renderRawRest,
-        suffix = slots?.suffix?.(),
         component: Component = 'div',
         itemComponent,
-        onVisibleChange,
-        ...restProps
       } = props
-      const mergedRenderItem = renderItem || ((item: any) => item)
 
-      // ================================ Render ================================
+      const renderRawItem = mergedRenderRawItem.value
+      const renderRest = mergedRenderRest.value
+      const renderRawRest = mergedRenderRawRest.value
+      const prefix = mergedPrefix.value
+      const suffix = mergedSuffix.value
+
       const displayRest = restReady.value && !!omittedItems.value.length
 
       let suffixStyle: CSSProperties = {}
+      console.log(suffixFixedStart.value, shouldResponsive.value)
       if (suffixFixedStart.value !== null && shouldResponsive.value) {
         suffixStyle = {
           position: 'absolute',
@@ -283,7 +351,6 @@ const Overflow = defineComponent({
         invalidate: invalidate.value,
       }
 
-      // >>>>> Choice render fun by `renderRawItem`
       const internalRenderItemNode = (item: any, index: number) => {
         const key = getKey(item, index)
 
@@ -304,23 +371,21 @@ const Overflow = defineComponent({
             </OverflowContextProvider>
           )
         }
-        else {
-          return (
-            <Item
-              {...itemSharedProps}
-              order={index}
-              key={key}
-              item={item}
-              renderItem={mergedRenderItem}
-              itemKey={key}
-              registerSize={registerSize}
-              display={index <= mergedDisplayCount.value}
-            />
-          )
-        }
+
+        return (
+          <Item
+            {...itemSharedProps as any}
+            order={index}
+            key={key}
+            item={item}
+            renderItem={mergedRenderItem.value}
+            itemKey={key}
+            registerSize={registerSize}
+            display={index <= mergedDisplayCount.value}
+          />
+        )
       }
 
-      // >>>>> Rest node
       const restContextProps = {
         order: displayRest ? mergedDisplayCount.value : Number.MAX_SAFE_INTEGER,
         class: `${itemPrefixCls.value}-rest`,
@@ -328,52 +393,59 @@ const Overflow = defineComponent({
         display: displayRest,
       }
 
-      const mergedRenderRest = renderRest || defaultRenderRest
+      const mergedRenderRestFn = renderRest ?? defaultRenderRest
 
       const restNode = () => {
         if (renderRawRest) {
           return (
-            <OverflowContextProvider value={{
-              ...itemSharedProps,
-              ...restContextProps,
-            }}
-            >
+            <OverflowContextProvider value={{ ...itemSharedProps, ...restContextProps }}>
               {renderRawRest(omittedItems.value)}
             </OverflowContextProvider>
           )
         }
-        else {
-          return (
-            <Item
-              {...itemSharedProps}
-              // When not show, order should be the last
-              {...restContextProps}
-              v-slots={{
-                default: () =>
-                  typeof mergedRenderRest === 'function'
-                    ? mergedRenderRest(omittedItems.value)
-                    : mergedRenderRest,
-              }}
-            />
-          )
-        }
+
+        return (
+          <Item
+            {...itemSharedProps as any}
+            {...restContextProps as any}
+            v-slots={{
+              default: () =>
+                typeof mergedRenderRestFn === 'function'
+                  ? (mergedRenderRestFn as any)(omittedItems.value)
+                  : mergedRenderRestFn,
+            }}
+          />
+        )
       }
+
+      const { class: classAttr, style: styleAttr, ...restAttrs } = attrs as HTMLAttributes
+
       const overflowNode = (
         <Component
-          class={classNames(!invalidate.value && prefixCls, [attrs.class])}
-          style={{ ...attrs.style as CSSProperties }}
-          {...restProps}
+          class={classNames(!invalidate.value && prefixCls, classAttr)}
+          style={styleAttr as CSSProperties}
+          {...restAttrs}
         >
-          {mergedData.value!.map((item, index) => internalRenderItemNode(item, index))}
+          {prefix && (
+            <Item
+              {...itemSharedProps}
+              responsive={isResponsive.value}
+              responsiveDisabled={!shouldResponsive.value}
+              order={-1}
+              class={`${itemPrefixCls.value}-prefix`}
+              registerSize={registerPrefixSize}
+              display
+              v-slots={{ default: () => prefix }}
+            />
+          )}
 
-          {/* Rest Count Item */}
+          {mergedData.value.map(internalRenderItemNode)}
+
           {showRest.value ? restNode() : null}
 
-          {/* Suffix Node */}
           {suffix && (
             <Item
               {...itemSharedProps}
-              {...attrs}
               responsive={isResponsive.value}
               responsiveDisabled={!shouldResponsive.value}
               order={mergedDisplayCount.value}
@@ -381,32 +453,34 @@ const Overflow = defineComponent({
               registerSize={registerSuffixSize}
               display
               style={suffixStyle}
-              v-slots={{
-                default: () => suffix,
-              }}
-            >
-            </Item>
+              v-slots={{ default: () => suffix }}
+            />
           )}
+
           {slots.default?.()}
         </Component>
       )
 
-      return (
-        <>
-          {isResponsive.value
-            ? (
-                <ResizeObserver
-                  onResize={onOverflowResize}
-                  disabled={!isResponsive.value}
-                  v-slots={{ default: () => overflowNode }}
-                />
-              )
-            : overflowNode}
-        </>
-      )
+      return isResponsive.value
+        ? (
+            <ResizeObserver onResize={onOverflowResize} disabled={!shouldResponsive.value}>
+              {overflowNode}
+            </ResizeObserver>
+          )
+        : (
+            overflowNode
+          )
     }
   },
 })
+
+type OverflowComponent = typeof OverflowImpl & {
+  Item: typeof RawItem
+  RESPONSIVE: typeof RESPONSIVE
+  INVALIDATE: typeof INVALIDATE
+}
+
+const Overflow = OverflowImpl as OverflowComponent
 
 Overflow.Item = RawItem
 Overflow.RESPONSIVE = RESPONSIVE
