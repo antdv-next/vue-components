@@ -2,6 +2,15 @@
   "name": "@v-c/tooltip",
   "type": "module",
   "version": "1.0.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "description": "tooltip",
+  "author": "",
+  "license": "MIT",
+  "keywords": [
+    "tooltip"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -11,12 +20,11 @@
     "./dist/*": "./dist/*",
     "./package.json": "./package.json"
   },
+  "main": "index.js",
   "files": [
     "dist",
     "package.json"
   ],
-  "description": "tooltip",
-  "main": "index.js",
   "scripts": {
     "build": "vite build",
     "test": "vitest"
@@ -27,10 +35,5 @@
   "dependencies": {
     "@v-c/trigger": "workspace:*",
     "@v-c/util": "workspace:*"
-  },
-  "keywords": [
-    "tooltip"
-  ],
-  "author": "",
-  "license": "MIT"
+  }
 }
