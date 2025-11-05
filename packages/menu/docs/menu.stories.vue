@@ -1,52 +1,37 @@
 <script setup lang="ts">
-import Single from './single.vue'
-import Antd from './antd.vue'
-import CustomIcon from "./custom-icon.vue";
-import KeyPath from "./keyPath.vue";
-import Multiple from "./multiple.vue";
-import OpenKeys from "./openKeys.vue";
-import RtlAntd from "./rtlAntd.vue";
-import Scrollable from "./scrollable.vue";
-import SelectedKeys from "./selectedKeys.vue";
-import MenuItemGroup from './menuItemGroup.vue'
-import './assets/index.less'
 </script>
 
 <template>
   <Story title="Menu">
     <Variant title="antd">
-      <Antd />
+      <!--      <Antd /> -->
     </Variant>
     <Variant title="customIcon">
-      <CustomIcon />
+      <!--      <CustomIcon /> -->
     </Variant>
     <Variant title="keyPath">
-      <KeyPath />
+      <!--      <KeyPath /> -->
     </Variant>
     <Variant title="menuItemGroup">
-      <MenuItemGroup />
+      <!--      <MenuItemGroup /> -->
     </Variant>
     <Variant title="multiple">
-      <Multiple />
+      <!--      <Multiple /> -->
     </Variant>
     <Variant title="openKeys">
-      <OpenKeys />
+      <!--      <OpenKeys /> -->
     </Variant>
     <Variant title="rtl-antd">
-      <RtlAntd />
+      <!--      <RtlAntd /> -->
     </Variant>
     <Variant title="scrollable">
-      <Scrollable />
+      <!--      <Scrollable /> -->
     </Variant>
     <Variant title="selectedKeys">
-      <SelectedKeys />
+      <!--      <SelectedKeys /> -->
     </Variant>
     <Variant title="single">
-      <Single />
+      <!--      <Single /> -->
     </Variant>
   </Story>
 </template>
-
-<style scoped>
-
-</style>

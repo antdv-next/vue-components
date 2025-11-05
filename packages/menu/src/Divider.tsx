@@ -1,29 +1,39 @@
 import type { CSSProperties } from 'vue'
-import type { MenuDividerType } from './interface'
 import { classNames } from '@v-c/util'
 import { defineComponent } from 'vue'
-import { useInjectMenu } from './context/MenuContext'
-import { useMeasure } from './context/PathContext.tsx'
+import { useMenuContext } from './context/MenuContext'
+import { useMeasure } from './context/PathContext'
+import type { MenuDividerProps } from './interface'
 
-export type DividerProps = Omit<MenuDividerType, 'type'>
-
-export default defineComponent({
-  name: 'Divider',
-  inheritAttrs: false,
-  setup(_props, { attrs }) {
-    const { prefixCls } = useInjectMenu()
+const Divider = defineComponent<MenuDividerProps>(
+  (props, { attrs }) => {
+    const context = useMenuContext()
     const measure = useMeasure()
 
-    if (measure) {
-      return null
-    }
+    return () => {
+      if (measure) {
+        return null
+      }
 
-    return () => (
-      <li
-        role="separator"
-        class={classNames(`${prefixCls}-item-divider`, [attrs.class])}
-        style={{ ...attrs.style as CSSProperties }}
-      />
-    )
+      const prefixCls = context?.value?.prefixCls ?? 'vc-menu'
+      const mergedClass = classNames(
+        `${prefixCls}-item-divider`,
+        props.className,
+        (attrs as any)?.class,
+      )
+
+      return (
+        <li
+          role="separator"
+          class={mergedClass}
+          style={{
+            ...(props.style as CSSProperties),
+            ...((attrs as any)?.style as CSSProperties),
+          }}
+        />
+      )
+    }
   },
-})
+)
+
+export default Divider

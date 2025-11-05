@@ -1,16 +1,16 @@
-import type { VNode } from 'vue'
-import type { Components, ItemType } from '../interface'
+import type { VueNode } from '@v-c/util/dist/type'
 import Divider from '../Divider'
+import type { Components, ItemType } from '../interface'
 import MenuItem from '../MenuItem'
 import MenuItemGroup from '../MenuItemGroup'
 import SubMenu from '../SubMenu'
 import { parseChildren } from './commonUtil'
 
 function convertItemsToNodes(
-  list: ItemType[],
+  list: ItemType[] | undefined,
   components: Required<Components>,
   prefixCls?: string,
-) {
+): VueNode[] {
   const {
     item: MergedMenuItem,
     group: MergedMenuItemGroup,
@@ -24,11 +24,8 @@ function convertItemsToNodes(
         const { label, children, key, type, extra, ...restProps } = opt as any
         const mergedKey = key ?? `tmp-${index}`
 
-        // MenuItemGroup & SubMenuItem
         if (children || type === 'group') {
-          console.log('children', children)
           if (type === 'group') {
-            // Group
             return (
               <MergedMenuItemGroup key={mergedKey} {...restProps} title={label}>
                 {convertItemsToNodes(children, components, prefixCls)}
@@ -36,7 +33,6 @@ function convertItemsToNodes(
             )
           }
 
-          // Sub Menu
           return (
             <MergedSubMenu key={mergedKey} {...restProps} title={label}>
               {convertItemsToNodes(children, components, prefixCls)}
@@ -44,7 +40,6 @@ function convertItemsToNodes(
           )
         }
 
-        // MenuItem & Divider
         if (type === 'divider') {
           return <MergedDivider key={mergedKey} {...restProps} />
         }
@@ -52,7 +47,7 @@ function convertItemsToNodes(
         return (
           <MergedMenuItem key={mergedKey} {...restProps} extra={extra}>
             {label}
-            {(!!extra || extra === 0) && (
+            {(extra !== undefined && extra !== null) && (
               <span class={`${prefixCls}-item-extra`}>{extra}</span>
             )}
           </MergedMenuItem>
@@ -61,11 +56,11 @@ function convertItemsToNodes(
 
       return null
     })
-    .filter(opt => opt)
+    .filter(Boolean) as VueNode[]
 }
 
 export function parseItems(
-  children: VNode | undefined,
+  children: VueNode | undefined,
   items: ItemType[] | undefined,
   keyPath: string[],
   components: Components,
@@ -79,7 +74,7 @@ export function parseItems(
     group: MenuItemGroup,
     submenu: SubMenu,
     ...components,
-  }
+  } as Required<Components>
 
   if (items) {
     childNodes = convertItemsToNodes(items, mergedComponents, prefixCls)

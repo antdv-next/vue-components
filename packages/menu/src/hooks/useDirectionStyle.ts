@@ -1,15 +1,23 @@
 import type { CSSProperties } from 'vue'
-import { useInjectMenu } from '../context/MenuContext'
+import { computed } from 'vue'
+import { useMenuContext } from '../context/MenuContext'
 
-export default function useDirectionStyle(level: number): CSSProperties | null {
-  const { mode, rtl, inlineIndent } = useInjectMenu()
+export default function useDirectionStyle(level: number) {
+  const context = useMenuContext()
 
-  if (mode !== 'inline') {
-    return null
-  }
+  return computed<CSSProperties | null>(() => {
+    const menu = context?.value
+    if (!menu || menu.mode !== 'inline') {
+      return null
+    }
 
-  const len = level
-  return rtl
-    ? { paddingRight: `${len * inlineIndent}px` }
-    : { paddingLeft: `${len * inlineIndent}px` }
+    const indent = menu.inlineIndent ?? 0
+    const size = `${level * indent}px`
+
+    if (menu.rtl) {
+      return { paddingRight: size }
+    }
+
+    return { paddingLeft: size }
+  })
 }

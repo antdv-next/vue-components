@@ -1,34 +1,30 @@
-import type { KeyboardEventHandler } from '@v-c/util/dist/EventInterface.ts'
-import type { Ref } from 'vue'
-import type { MenuMode } from '../interface'
 import { getFocusNodeList } from '@v-c/util/dist/Dom/focus'
 import KeyCode from '@v-c/util/dist/KeyCode'
 import raf from '@v-c/util/dist/raf'
-import { ref, watchEffect } from 'vue'
-import { getMenuId } from '../context/IdContext.tsx'
+import type { Ref } from 'vue'
+import type { MenuMode } from '../interface'
+import { getMenuId } from '../context/IdContext'
 
-// destruct to reduce minify size
 const { LEFT, RIGHT, UP, DOWN, ENTER, ESC, HOME, END } = KeyCode
 
 const ArrowKeys = [UP, DOWN, LEFT, RIGHT]
-
-type OffsetMap = Record<number, 'prev' | 'next' | 'children' | 'parent'>
 
 function getOffset(
   mode: MenuMode,
   isRootLevel: boolean,
   isRtl: boolean,
   which: number,
-): { offset?: number, sibling?: boolean, inlineTrigger?: boolean } | null {
+): { offset?: number; sibling?: boolean; inlineTrigger?: boolean } | null {
   const prev = 'prev' as const
   const next = 'next' as const
   const children = 'children' as const
   const parent = 'parent' as const
 
-  // Inline enter is special that we use unique operation
   if (mode === 'inline' && which === ENTER) {
     return { inlineTrigger: true }
   }
+
+  type OffsetMap = Record<number, typeof prev | typeof next | typeof children | typeof parent>
   const inline: OffsetMap = { [UP]: prev, [DOWN]: next }
   const horizontal: OffsetMap = {
     [LEFT]: isRtl ? next : prev,
@@ -45,7 +41,7 @@ function getOffset(
     [RIGHT]: isRtl ? parent : children,
   }
 
-  const offsets: Record<string, Record<number, 'prev' | 'next' | 'children' | 'parent'>> = {
+  const offsets: Record<string, OffsetMap> = {
     inline,
     horizontal,
     vertical,
@@ -54,21 +50,18 @@ function getOffset(
     verticalSub: vertical,
   }
 
-  const type = offsets[`${mode}${isRootLevel ? '' : 'Sub'}`]?.[which]
+  const key = `${mode}${isRootLevel ? '' : 'Sub'}`
+  const type = offsets[key]?.[which]
 
   switch (type) {
     case prev:
       return { offset: -1, sibling: true }
-
     case next:
       return { offset: 1, sibling: true }
-
     case parent:
       return { offset: -1, sibling: false }
-
     case children:
       return { offset: 1, sibling: false }
-
     default:
       return null
   }
@@ -80,84 +73,20 @@ function findContainerUL(element: HTMLElement): HTMLUListElement | null {
     if (current.getAttribute('data-menu-list')) {
       return current as HTMLUListElement
     }
-
     current = current.parentElement
   }
-
-  // Normally should not reach this line
-  /* istanbul ignore next */
   return null
 }
 
-/**
- * Find focused element within element set provided
- */
-function getFocusElement(activeElement: HTMLElement, elements: Set<HTMLElement>): HTMLElement | null {
-  let current: HTMLElement | null = activeElement || document.activeElement
-
-  while (current) {
-    if (elements.has(current as any)) {
-      return current as HTMLElement
-    }
-
-    current = current.parentElement
-  }
-
-  return null
-}
-
-/**
- * Get focusable elements from the element set under provided container
- */
-export function getFocusableElements(container: HTMLElement, elements: Set<HTMLElement>) {
-  const list = getFocusNodeList(container, true)
-  return list.filter(ele => elements.has(ele))
-}
-
-function getNextFocusElement(
-  parentQueryContainer: HTMLElement,
-  elements: Set<HTMLElement>,
-  focusMenuElement?: HTMLElement,
-  offset: number = 1,
-) {
-  // Key on the menu item will not get validate parent container
-  if (!parentQueryContainer) {
-    return null
-  }
-
-  // List current level menu item elements
-  const sameLevelFocusableMenuElementList = getFocusableElements(parentQueryContainer, elements)
-
-  // Find next focus index
-  const count = sameLevelFocusableMenuElementList.length
-  let focusIndex = sameLevelFocusableMenuElementList.findIndex(ele => focusMenuElement === ele)
-
-  if (offset < 0) {
-    if (focusIndex === -1) {
-      focusIndex = count - 1
-    }
-    else {
-      focusIndex -= 1
-    }
-  }
-  else if (offset > 0) {
-    focusIndex += 1
-  }
-
-  focusIndex = (focusIndex + count) % count
-
-  // Focus menu item
-  return sameLevelFocusableMenuElementList[focusIndex]
-}
-
-export function refreshElements(keys: string[], id: string) {
+export const refreshElements = (keys: string[], id: string) => {
   const elements = new Set<HTMLElement>()
   const key2element = new Map<string, HTMLElement>()
   const element2key = new Map<HTMLElement, string>()
 
   keys.forEach((key) => {
-    const element = document.querySelector(`[data-menu-id='${getMenuId(id, key)}']`) as HTMLElement
-
+    const element = document.querySelector(
+      `[data-menu-id='${getMenuId(id, key)}']`,
+    ) as HTMLElement | null
     if (element) {
       elements.add(element)
       element2key.set(element, key)
@@ -168,155 +97,187 @@ export function refreshElements(keys: string[], id: string) {
   return { elements, key2element, element2key }
 }
 
-export function useAccessibility(
-  mode: Ref<MenuMode>,
-  activeKey: Ref<string>,
-  isRtl: Ref<boolean>,
-  id: Ref<string>,
+function getFocusElement(activeElement: HTMLElement, elements: Set<HTMLElement>) {
+  let current: HTMLElement | null = activeElement
+  while (current) {
+    if (elements.has(current)) {
+      return current
+    }
+    current = current.parentElement
+  }
+  return null
+}
 
-  containerRef: Ref<HTMLUListElement>,
-  getKeys: () => string[],
-  getKeyPath: (key: string, includeOverflow?: boolean) => string[],
-  triggerAccessibilityOpen: (key: string, open?: boolean) => void,
+export function getFocusableElements(container: HTMLElement | null, elements: Set<HTMLElement>) {
+  if (!container) {
+    return []
+  }
+  const list = getFocusNodeList(container, true)
+  return list.filter(ele => elements.has(ele))
+}
 
-  originOnKeyDown?: KeyboardEventHandler,
-): KeyboardEventHandler {
-  const rafRef = ref<number>()
-
-  const activeRef = ref<string>()
-  activeRef.value = activeKey.value
-
-  const cleanRaf = () => {
-    raf.cancel(rafRef.value!)
+function getNextFocusElement(
+  parentQueryContainer: HTMLElement | null,
+  elements: Set<HTMLElement>,
+  focusMenuElement?: HTMLElement,
+  offset: number = 1,
+) {
+  if (!parentQueryContainer) {
+    return null
   }
 
-  watchEffect((onCleanup) => {
-    onCleanup(cleanRaf)
-  },
-  )
+  const sameLevelFocusableMenuElementList = getFocusableElements(parentQueryContainer, elements)
+  const count = sameLevelFocusableMenuElementList.length
 
-  return (e) => {
-    const { which } = e
+  if (!count) {
+    return null
+  }
 
-    if ([...ArrowKeys, ENTER, ESC, HOME, END].includes(which)) {
-      const keys = getKeys()
+  let focusIndex = sameLevelFocusableMenuElementList.indexOf(focusMenuElement as HTMLElement)
+  if (focusIndex === -1) {
+    focusIndex = offset > 0 ? 0 : count - 1
+  }
+  else {
+    focusIndex = (focusIndex + offset + count) % count
+  }
 
-      let refreshedElements = refreshElements(keys, id.value)
-      const { elements, key2element, element2key } = refreshedElements
+  return sameLevelFocusableMenuElementList[focusIndex]
+}
 
-      // First we should find current focused MenuItem/SubMenu element
-      const activeElement = key2element.get(activeKey.value)
-      const focusMenuElement = getFocusElement(activeElement!, elements)
-      const focusMenuKey = element2key.get(focusMenuElement!)
+export default function useAccessibility(
+  mode: MenuMode,
+  activeKey: { value: string | undefined },
+  isRtl: boolean,
+  id: string,
+  containerRef: Ref<HTMLUListElement | null>,
+  getKeys: () => string[],
+  getKeyPath: (key: string, includeOverflow?: boolean) => string[],
+  triggerActiveKey: (key: string | undefined) => void,
+  triggerAccessibilityOpen: (key: string, open?: boolean) => void,
+  originOnKeyDown?: (event: KeyboardEvent) => void,
+) {
+  const rafRef = { value: 0 }
+  const activeRef = { value: activeKey.value }
 
-      const offsetObj = getOffset(mode.value, getKeyPath(focusMenuKey!, true).length === 1, isRtl.value, which)
+  return (event: KeyboardEvent) => {
+    activeRef.value = activeKey.value
 
-      // Some mode do not have fully arrow operation like inline
-      if (!offsetObj && which !== HOME && which !== END) {
+    const { which } = event
+    if (![...ArrowKeys, ENTER, ESC, HOME, END].includes(which)) {
+      originOnKeyDown?.(event)
+      return
+    }
+
+    const keys = getKeys()
+    let refreshedElements = refreshElements(keys, id)
+    const { elements, key2element, element2key } = refreshedElements
+
+    const activeElement = activeRef.value ? key2element.get(activeRef.value) : null
+    const container = containerRef.value
+    const focusMenuElement = activeElement
+      ? getFocusElement(activeElement, elements)
+      : null
+    const focusMenuKey = focusMenuElement ? element2key.get(focusMenuElement) : undefined
+
+    const offsetObj = getOffset(
+      mode,
+      focusMenuKey ? getKeyPath(focusMenuKey, true).length === 1 : true,
+      isRtl,
+      which,
+    )
+
+    if (!offsetObj && which !== HOME && which !== END) {
+      originOnKeyDown?.(event)
+      return
+    }
+
+    if (ArrowKeys.includes(which) || [HOME, END].includes(which)) {
+      event.preventDefault()
+    }
+
+    const tryFocus = (menuElement: HTMLElement | null) => {
+      if (!menuElement) {
         return
       }
 
-      // Arrow prevent default to avoid page scroll
-      if (ArrowKeys.includes(which) || [HOME, END].includes(which)) {
-        e.preventDefault()
+      const targetKey = element2key.get(menuElement)
+      if (targetKey) {
+        triggerActiveKey(targetKey)
       }
 
-      const tryFocus = (menuElement: HTMLElement) => {
-        if (menuElement) {
-          let focusTargetElement = menuElement
+      raf.cancel(rafRef.value)
+      rafRef.value = raf(() => {
+        const link = menuElement.querySelector<HTMLAnchorElement>('a')
+        const focusTargetElement = link?.getAttribute('href') ? link : menuElement
+        focusTargetElement.focus()
+      })
+    }
 
-          // Focus to link instead of menu item if possible
-          const link = menuElement.querySelector('a')
-          if (link?.getAttribute('href')) {
-            focusTargetElement = link
-          }
-
-          const targetKey = element2key.get(menuElement)
-          activeKey.value = targetKey!
-
-          /**
-           * Do not `useEffect` here since `tryFocus` may trigger async
-           * which makes React sync update the `activeKey`
-           * that force render before `useRef` set the next activeKey
-           */
-          cleanRaf()
-          rafRef.value = raf(() => {
-            if (activeRef.value === targetKey) {
-              focusTargetElement.focus()
-            }
-          })
-        }
+    if ([HOME, END].includes(which) || offsetObj?.sibling || !focusMenuElement) {
+      let parentQueryContainer: HTMLElement | null = container
+      if (focusMenuElement && mode !== 'inline') {
+        parentQueryContainer = findContainerUL(focusMenuElement)
       }
 
-      if ([HOME, END].includes(which) || offsetObj?.sibling || !focusMenuElement) {
-        // ========================== Sibling ==========================
-        // Find walkable focus menu element container
-        let parentQueryContainer: HTMLElement
-        if (!focusMenuElement || mode.value === 'inline') {
-          parentQueryContainer = containerRef.value
-        }
-        else {
-          parentQueryContainer = findContainerUL(focusMenuElement)!
-        }
+      let targetElement: HTMLElement | null = null
+      const focusableElements = parentQueryContainer
+        ? getFocusableElements(parentQueryContainer, elements)
+        : []
 
-        // Get next focus element
-        let targetElement
-        const focusableElements = getFocusableElements(parentQueryContainer, elements)
-        if (which === HOME) {
-          targetElement = focusableElements[0]
-        }
-        else if (which === END) {
-          targetElement = focusableElements[focusableElements.length - 1]
-        }
-        else {
-          targetElement = getNextFocusElement(
-            parentQueryContainer,
-            elements,
-            focusMenuElement!,
-            offsetObj?.offset,
-          )
-        }
-        // Focus menu item
-        tryFocus(targetElement!)
-
-        // ======================= InlineTrigger =======================
+      if (which === HOME) {
+        targetElement = focusableElements[0] ?? null
       }
-      else if (offsetObj?.inlineTrigger) {
-        // Inline trigger no need switch to sub menu item
-        triggerAccessibilityOpen(focusMenuKey!)
-        // =========================== Level ===========================
+      else if (which === END) {
+        targetElement = focusableElements[focusableElements.length - 1] ?? null
       }
-      else if (offsetObj!.offset! > 0) {
-        triggerAccessibilityOpen(focusMenuKey!, true)
-
-        cleanRaf()
-        rafRef.value = raf(() => {
-          // Async should resync elements
-          refreshedElements = refreshElements(keys, id.value)
-
-          const controlId = focusMenuElement.getAttribute('aria-controls')
-          const subQueryContainer = document.getElementById(controlId!)
-
-          // Get sub focusable menu item
-          const targetElement = getNextFocusElement(subQueryContainer!, refreshedElements.elements)
-
-          // Focus menu item
-          tryFocus(targetElement!)
-        }, 5)
+      else {
+        targetElement = getNextFocusElement(
+          parentQueryContainer,
+          elements,
+          focusMenuElement ?? undefined,
+          offsetObj?.offset,
+        )
       }
-      else if (offsetObj!.offset! < 0) {
-        const keyPath = getKeyPath(focusMenuKey!, true)
+
+      tryFocus(targetElement)
+    }
+    else if (offsetObj?.inlineTrigger) {
+      if (focusMenuKey) {
+        triggerAccessibilityOpen(focusMenuKey)
+      }
+    }
+    else if ((offsetObj?.offset ?? 0) > 0) {
+      if (focusMenuKey) {
+        triggerAccessibilityOpen(focusMenuKey, true)
+      }
+
+      raf.cancel(rafRef.value)
+      rafRef.value = raf(() => {
+        refreshedElements = refreshElements(keys, id)
+        const controlId = focusMenuElement?.getAttribute('aria-controls')
+        const subQueryContainer = controlId
+          ? document.getElementById(controlId)
+          : null
+
+        const targetElement = getNextFocusElement(
+          subQueryContainer as HTMLElement,
+          refreshedElements.elements,
+        )
+        tryFocus(targetElement)
+      }, 5)
+    }
+    else if ((offsetObj?.offset ?? 0) < 0) {
+      if (focusMenuKey) {
+        const keyPath = getKeyPath(focusMenuKey, true)
         const parentKey = keyPath[keyPath.length - 2]
-
-        const parentMenuElement = key2element.get(parentKey)
-
-        // Focus menu item
-        triggerAccessibilityOpen(parentKey, false)
-        tryFocus(parentMenuElement!)
+        if (parentKey) {
+          const parentMenuElement = key2element.get(parentKey)
+          triggerAccessibilityOpen(parentKey, false)
+          tryFocus(parentMenuElement || null)
+        }
       }
     }
 
-    // Pass origin key down event
-    originOnKeyDown?.(e)
+    originOnKeyDown?.(event)
   }
 }

@@ -1,101 +1,27 @@
-import type { CSSProperties, Ref, VNode } from 'vue'
-import type { SubMenuProps } from './SubMenu'
+import type { CSSMotionProps } from '@v-c/util/dist/utils/transition'
+import type { VueNode } from '@v-c/util/dist/type'
 
-// ========================= Options =========================
-interface ItemSharedProps {
-  ref?: Ref<HTMLLIElement | null>
-  style?: CSSProperties
-  className?: string
-}
-
-export interface SubMenuType extends ItemSharedProps {
-  type?: 'submenu'
-
-  label?: VNode
-
-  children: ItemType[]
-
-  disabled?: boolean
-
-  key: string
-
-  rootClassName?: string
-
-  // >>>>> Icon
-  itemIcon?: RenderIconType
-  expandIcon?: RenderIconType
-
-  // >>>>> Active
-  onMouseEnter?: MenuHoverEventHandler
-  onMouseLeave?: MenuHoverEventHandler
-
-  // >>>>> Popup
-  popupClassName?: string
-  popupOffset?: number[]
-  popupStyle?: CSSProperties
-
-  // >>>>> Events
-  onClick?: MenuClickEventHandler
-  onTitleClick?: (info: MenuTitleInfo) => void
-  onTitleMouseEnter?: MenuHoverEventHandler
-  onTitleMouseLeave?: MenuHoverEventHandler
-}
-
-export interface MenuItemType extends ItemSharedProps {
-  type?: 'item'
-
-  label?: VNode
-
-  disabled?: boolean
-
-  itemIcon?: RenderIconType
-
-  extra?: VNode
-
-  key: string | number
-
-  // >>>>> Active
-  onMouseenter?: MenuHoverEventHandler
-  onMouseleave?: MenuHoverEventHandler
-
-  // >>>>> Events
-  onClick?: MenuClickEventHandler
-}
-
-export interface MenuItemGroupType extends ItemSharedProps {
-  type: 'group'
-
-  label?: VNode
-
-  children?: ItemType[]
-}
-
-export interface MenuDividerType extends Omit<ItemSharedProps, 'ref'> {
-  type: 'divider'
-}
-
-export type ItemType = SubMenuType | MenuItemType | MenuItemGroupType | MenuDividerType | null
-
-// ========================== Basic ==========================
 export type MenuMode = 'horizontal' | 'vertical' | 'inline'
-
-export type BuiltinPlacements = Record<string, any>
 
 export type TriggerSubMenuAction = 'click' | 'hover'
 
-export interface RenderIconInfo {
+export type BuiltinPlacements = Record<string, any>
+
+export type ComponentType = 'submenu' | 'item' | 'group' | 'divider'
+export type Components = Partial<Record<ComponentType, any>>
+
+export type RenderIconInfo = {
   isSelected?: boolean
   isOpen?: boolean
   isSubMenu?: boolean
   disabled?: boolean
 }
 
-export type RenderIconType = VNode | ((props: RenderIconInfo) => VNode)
+export type RenderIconType = VueNode | boolean | ((info: RenderIconInfo) => VueNode)
 
 export interface MenuInfo {
   key: string
   keyPath: string[]
-  /** @deprecated This will not support in future. You should avoid to use this */
   item: any
   domEvent: MouseEvent | KeyboardEvent
 }
@@ -105,38 +31,176 @@ export interface MenuTitleInfo {
   domEvent: MouseEvent | KeyboardEvent
 }
 
-// ========================== Hover ==========================
 export type MenuHoverEventHandler = (info: {
   key: string
   domEvent: MouseEvent
 }) => void
 
-// ======================== Selection ========================
 export interface SelectInfo extends MenuInfo {
   selectedKeys: string[]
 }
 
-export type SelectEventHandler = (info: SelectInfo) => void
-
-// ========================== Click ==========================
 export type MenuClickEventHandler = (info: MenuInfo) => void
 
-export interface MenuRef {
-  /**
-   * Focus active child if any, or the first child which is not disabled will be focused.
-   * @param options
-   */
-  focus: (options?: FocusOptions) => void
-  list: HTMLUListElement
-  findItem: (params: { key: string }) => HTMLElement | null
+export type SelectEventHandler = (info: SelectInfo) => void
+
+export interface MenuDividerType {
+  type: 'divider'
+  className?: string
+  style?: Record<string, any>
 }
 
-// ======================== Component ========================
-export type ComponentType = 'submenu' | 'item' | 'group' | 'divider'
+export interface MenuItemType {
+  type?: 'item'
+  label?: VueNode
+  disabled?: boolean
+  itemIcon?: RenderIconType
+  extra?: VueNode
+  key: string
+  className?: string
+  style?: Record<string, any>
+  onMouseEnter?: MenuHoverEventHandler
+  onMouseLeave?: MenuHoverEventHandler
+  onClick?: MenuClickEventHandler
+}
 
-export type Components = Partial<Record<ComponentType, any>>
+export interface MenuItemGroupType {
+  type: 'group'
+  label?: VueNode
+  children?: ItemType[]
+  className?: string
+  style?: Record<string, any>
+  key?: string
+}
 
-export type PopupRender = (
-  node: Element,
-  info: { item: SubMenuProps, keys: string[] },
-) => VNode
+export interface SubMenuType {
+  type?: 'submenu'
+  label?: VueNode
+  children: ItemType[]
+  disabled?: boolean
+  key: string
+  className?: string
+  style?: Record<string, any>
+  rootClassName?: string
+  itemIcon?: RenderIconType
+  expandIcon?: RenderIconType
+  onMouseEnter?: MenuHoverEventHandler
+  onMouseLeave?: MenuHoverEventHandler
+  popupClassName?: string
+  popupOffset?: number[]
+  popupStyle?: Record<string, any>
+  onClick?: MenuClickEventHandler
+  onTitleClick?: (info: MenuTitleInfo) => void
+  onTitleMouseEnter?: MenuHoverEventHandler
+  onTitleMouseLeave?: MenuHoverEventHandler
+}
+
+export type ItemType = MenuDividerType | MenuItemType | MenuItemGroupType | SubMenuType | null
+
+export interface MenuProps {
+  prefixCls?: string
+  rootClassName?: string
+  className?: string
+  classNames?: Partial<Record<'list' | 'listTitle', string>>
+  styles?: Partial<Record<'list' | 'listTitle', Record<string, any>>>
+  id?: string
+  tabIndex?: number
+  style?: Record<string, any>
+  items?: ItemType[]
+  children?: VueNode
+  direction?: 'ltr' | 'rtl'
+  disabled?: boolean
+  disabledOverflow?: boolean
+
+  mode?: MenuMode
+  inlineCollapsed?: boolean
+
+  defaultOpenKeys?: string[]
+  openKeys?: string[]
+
+  activeKey?: string
+  defaultActiveFirst?: boolean
+
+  selectable?: boolean
+  multiple?: boolean
+
+  defaultSelectedKeys?: string[]
+  selectedKeys?: string[]
+
+  inlineIndent?: number
+
+  motion?: CSSMotionProps
+  defaultMotions?: Partial<Record<MenuMode | 'other', CSSMotionProps>>
+
+  subMenuOpenDelay?: number
+  subMenuCloseDelay?: number
+  forceSubMenuRender?: boolean
+  triggerSubMenuAction?: TriggerSubMenuAction
+  builtinPlacements?: BuiltinPlacements
+
+  itemIcon?: RenderIconType
+  expandIcon?: RenderIconType
+  overflowedIndicator?: VueNode
+  overflowedIndicatorPopupClassName?: string
+
+  getPopupContainer?: (node: HTMLElement) => HTMLElement
+
+  onClick?: MenuClickEventHandler
+  onOpenChange?: (openKeys: string[]) => void
+  onKeyDown?: (event: KeyboardEvent) => void
+  onSelect?: SelectEventHandler
+  onDeselect?: SelectEventHandler
+
+  popupRender?: (node: VueNode, info: { item: SubMenuProps; keys: string[] }) => VueNode
+
+  _internalRenderMenuItem?: (
+    originNode: any,
+    menuItemProps: any,
+    stateProps: { selected: boolean },
+  ) => VueNode
+  _internalRenderSubMenuItem?: (
+    originNode: any,
+    subMenuItemProps: any,
+    stateProps: {
+      selected: boolean
+      open: boolean
+      active: boolean
+      disabled: boolean
+    },
+  ) => VueNode
+  _internalComponents?: Partial<Record<ComponentType, any>>
+}
+
+export interface MenuItemProps extends Omit<MenuItemType, 'label' | 'type'> {
+  children?: VueNode
+  eventKey?: string
+  warnKey?: boolean
+  attribute?: Record<string, string>
+}
+
+export interface MenuItemGroupProps
+  extends Omit<MenuItemGroupType, 'type' | 'children' | 'label'> {
+  title?: VueNode
+  children?: VueNode
+  eventKey?: string
+  warnKey?: boolean
+}
+
+export interface MenuDividerProps extends Omit<MenuDividerType, 'type'> {}
+
+export interface SubMenuProps extends Omit<SubMenuType, 'type' | 'children' | 'label'> {
+  classNames?: Partial<Record<'list' | 'listTitle', string>>
+  styles?: Partial<Record<'list' | 'listTitle', Record<string, any>>>
+  title?: VueNode
+  children?: VueNode
+  internalPopupClose?: boolean
+  eventKey?: string
+  warnKey?: boolean
+  popupRender?: MenuProps['popupRender']
+}
+
+export interface MenuRef {
+  focus: (options?: FocusOptions) => void
+  list: HTMLUListElement | null
+  findItem: (params: { key: string }) => HTMLElement | null
+}

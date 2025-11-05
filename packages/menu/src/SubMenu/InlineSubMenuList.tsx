@@ -1,8 +1,9 @@
-import type { VNode } from 'vue'
+import { classNames } from '@v-c/util'
+import { getTransitionProps } from '@v-c/util/dist/utils/transition'
+import { computed, defineComponent, ref, watch } from 'vue'
+import { Transition } from 'vue'
+import MenuContextProvider, { useMenuContext } from '../context/MenuContext'
 import type { MenuMode } from '../interface'
-
-import { defineComponent, ref, Transition, watch } from 'vue'
-import MenuContextProvider, { useInjectMenu } from '../context/MenuContext'
 import { getMotion } from '../utils/motionUtil'
 import SubMenuList from './SubMenuList'
 
@@ -10,74 +11,90 @@ export interface InlineSubMenuListProps {
   id?: string
   open: boolean
   keyPath: string[]
-  children: VNode
 }
 
-export default defineComponent({
-  name: 'InlineSubMenuList',
-  inheritAttrs: false,
-  props: {
-    id: String,
-    open: Boolean,
-    keyPath: Array,
-  },
-  emits: ['mouseEnter', 'mouseLeave', 'keyDown', 'click', 'focus'],
-  setup(props, { slots }) {
-    const fixedMode = ref<MenuMode>('inline')
+const InlineSubMenuList = defineComponent<InlineSubMenuListProps>(
+  (props, { slots }) => {
+    const fixedMode: MenuMode = 'inline'
+    const context = useMenuContext()
 
-    const { prefixCls, forceSubMenuRender, motion, defaultMotions, mode } = useInjectMenu()
+    const sameMode = ref(context?.value?.mode === fixedMode)
+    const destroy = ref(!sameMode.value)
 
-    // Always use latest mode check
-    const sameModeRef = ref(false)
-    sameModeRef.value = mode === fixedMode.value
+    watch(
+      () => context?.value?.mode,
+      (mode) => {
+        sameMode.value = mode === fixedMode
+        if (sameMode.value) {
+          destroy.value = false
+        }
+      },
+      { immediate: true },
+    )
 
-    // We record `destroy` mark here since when mode change from `inline` to others.
-    // The inline list should remove when motion end.
-    const destroy = ref(!sameModeRef.value)
+    const mergedOpen = computed(() => (sameMode.value ? props.open : false))
 
-    // ================================= Effect =================================
-    // Reset destroy state when mode change back
-    watch(mode, () => {
-      if (sameModeRef.value) {
-        destroy.value = false
-      }
-    }, { flush: 'post' })
-
-    return () => {
-      const mergedOpen = sameModeRef.value ? open : false
-
-      // ================================= Render =================================
-      const mergedMotion = { ...getMotion(fixedMode.value, motion, defaultMotions) }
-
-      // No need appear since nest inlineCollapse changed
-      if (props.keyPath!.length > 1) {
-        mergedMotion.motionAppear = false
-      }
-
-      // Hide inline list when mode changed and motion end
-      const originOnVisibleChanged = mergedMotion.onVisibleChanged
-      mergedMotion.onVisibleChanged = (newVisible: unknown) => {
-        if (!sameModeRef.value && !newVisible) {
+    watch(
+      () => mergedOpen.value,
+      (open) => {
+        if (!sameMode.value && !open) {
           destroy.value = true
         }
+      },
+      { immediate: true },
+    )
 
-        return originOnVisibleChanged?.(newVisible)
+    const menu = context?.value
+    const prefixCls = computed(() => menu?.prefixCls ?? 'vc-menu')
+
+    const transitionProps = computed(() => {
+      const motion = getMotion(fixedMode, menu?.motion, menu?.defaultMotions) || {}
+      const name = motion.name || `${prefixCls.value}-inline-collapse`
+      const baseProps = getTransitionProps(name, motion as any)
+      const originOnAfterLeave = baseProps.onAfterLeave
+      baseProps.onAfterLeave = (el) => {
+        if (Array.isArray(originOnAfterLeave)) {
+          originOnAfterLeave.forEach(fn => fn?.(el))
+        }
+        else {
+          originOnAfterLeave?.(el)
+        }
+        if (!sameMode.value) {
+          destroy.value = true
+        }
       }
+      return baseProps
+    })
 
-      if (destroy) {
+    return () => {
+      if (destroy.value) {
         return null
       }
+
+      const hiddenCls = !mergedOpen.value ? `${prefixCls.value}-hidden` : ''
+      const shouldRender = menu?.forceSubMenuRender || mergedOpen.value
+
       return (
-        <MenuContextProvider mode={fixedMode.value} locked={!sameModeRef.value}>
-          <Transition
-            {...mergedMotion}
-          >
-            <SubMenuList v-show={mergedOpen} id={props.id}>
-              {slots.default?.()}
-            </SubMenuList>
+        <MenuContextProvider mode={fixedMode} locked={!sameMode.value}>
+          <Transition {...transitionProps.value}>
+            {shouldRender
+              ? (
+                <SubMenuList
+                  id={props.id}
+                  class={classNames(hiddenCls)}
+                  style={{
+                    display: !mergedOpen.value && !menu?.forceSubMenuRender ? 'none' : undefined,
+                  }}
+                >
+                  {slots.default?.()}
+                </SubMenuList>
+                )
+              : null}
           </Transition>
         </MenuContextProvider>
       )
     }
   },
-})
+)
+
+export default InlineSubMenuList

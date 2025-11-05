@@ -7,7 +7,7 @@ import Menu, { Item as MenuItem, ItemGroup as MenuItemGroup } from '../src'
     <h2>menu item group</h2>
     <Menu
       style="margin: 20px; width: 300px"
-      class-names="{ listTitle: 'test-title', list: 'test-list' }"
+      :class-names="{ listTitle: 'test-title', list: 'test-list' }"
       @click="() => console.log('click')"
     >
       <MenuItemGroup key="2" title="group 1">

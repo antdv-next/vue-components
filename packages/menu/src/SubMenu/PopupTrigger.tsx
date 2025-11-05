@@ -1,17 +1,17 @@
-import type { CSSProperties, PropType, SlotsType, VNode } from 'vue'
-import type { MenuMode } from '../interface'
 import { Trigger } from '@v-c/trigger'
+import type { CSSMotionProps } from '@v-c/util/dist/utils/transition'
 import raf from '@v-c/util/dist/raf'
 import { classNames } from '@v-c/util'
-import { defineComponent, ref, watch } from 'vue'
-
-import { useInjectMenu } from '../context/MenuContext'
+import { computed, defineComponent, onBeforeUnmount, shallowRef, watch } from 'vue'
+import { useMenuContext } from '../context/MenuContext'
+import type { MenuMode } from '../interface'
 import { placements, placementsRtl } from '../placements'
 import { getMotion } from '../utils/motionUtil'
 
-const popupPlacementMap = {
-  'horizontal': 'bottomLeft',
-  'vertical': 'rightTop',
+const popupPlacementMap: Record<string, string> = {
+  horizontal: 'bottomLeft',
+  vertical: 'rightTop',
+  inline: 'rightTop',
   'vertical-left': 'rightTop',
   'vertical-right': 'leftTop',
 }
@@ -20,131 +20,93 @@ export interface PopupTriggerProps {
   prefixCls: string
   mode: MenuMode
   visible: boolean
-  popup: VNode
-  popupStyle?: CSSProperties
+  popup: any
+  popupStyle?: Record<string, any>
   popupClassName?: string
   popupOffset?: number[]
   disabled: boolean
   onVisibleChange: (visible: boolean) => void
 }
 
-export default defineComponent({
-  name: 'PopupTrigger',
-  props: {
-    prefixCls: String,
-    mode: String as PropType<MenuMode>,
-    visible: Boolean,
-    // popup: React.ReactNode;
-    popupClassName: String,
-    popupOffset: Array as PropType<number[]>,
-    disabled: Boolean,
-    onVisibleChange: Function as PropType<(visible: boolean) => void>,
-    popup: String,
-    popupStyle: Object as PropType<CSSProperties>,
-  },
-  slots: Object as SlotsType<{
-    popup: () => VNode
-    default: () => VNode
-  }>,
-  emits: ['visibleChange', 'mouseEnter', 'mouseLeave', 'keyDown', 'click', 'focus'],
-  setup(props, { slots }) {
-    const {
-      getPopupContainer,
-      rtl,
-      subMenuOpenDelay,
-      subMenuCloseDelay,
-      builtinPlacements,
-      triggerSubMenuAction,
-      forceSubMenuRender,
-      rootClassName,
+const PopupTrigger = defineComponent<PopupTriggerProps>(
+  (props, { slots }) => {
+    const menu = useMenuContext()
+    const innerVisible = shallowRef(false)
+    const rafRef = shallowRef<number | null>(null)
 
-      // Motion
-      motion,
-      defaultMotions,
-    } = useInjectMenu()
+    watch(
+      () => props.visible,
+      (visible) => {
+        if (rafRef.value !== null) {
+          raf.cancel(rafRef.value)
+        }
+        rafRef.value = raf(() => {
+          innerVisible.value = visible
+        })
+      },
+      { immediate: true },
+    )
 
-    const innerVisible = ref(false)
+    onBeforeUnmount(() => {
+      if (rafRef.value !== null) {
+        raf.cancel(rafRef.value)
+      }
+    })
 
-    const placement = rtl
-      ? { ...placementsRtl, ...builtinPlacements }
-      : { ...placements, ...builtinPlacements }
+    const builtinPlacements = computed(() => {
+      const context = menu?.value
+      if (!context) {
+        return props.mode === 'horizontal' ? placements : placementsRtl
+      }
+      const base = context.rtl ? placementsRtl : placements
+      return {
+        ...base,
+        ...context.builtinPlacements,
+      }
+    })
 
-    const popupPlacement = popupPlacementMap[props.mode]
+    const popupPlacement = computed(() => popupPlacementMap[props.mode] || 'rightTop')
 
-    const targetMotion = getMotion(props.mode, motion, defaultMotions)
-    const targetMotionRef = ref(targetMotion)
-
-    if (props.mode !== 'inline') {
-      /**
-       * PopupTrigger is only used for vertical and horizontal types.
-       * When collapsed is unfolded, the inline animation will destroy the vertical animation.
-       */
-      targetMotionRef.value = targetMotion
-    }
-
-    const mergedMotion = {
-      ...targetMotionRef.value,
-      leavedClassName: `${props.prefixCls}-hidden`,
-      removeOnLeave: false,
-      motionAppear: true,
-    }
-
-    // Delay to change visible
-    const visibleRef = ref<number>()
-    watch(() => props.visible, (newVisible, _o, onCleanup) => {
-      visibleRef.value = raf(() => {
-        innerVisible.value = newVisible
-      })
-
-      onCleanup(() => {
-        raf.cancel(visibleRef.value)
-      })
+    const mergedMotion = computed<CSSMotionProps | undefined>(() => {
+      const context = menu?.value
+      return getMotion(props.mode, context?.motion, context?.defaultMotions)
     })
 
     return () => {
-      const {
-        prefixCls,
-        popup = slots.popup?.(),
-        popupStyle,
-        popupClassName,
-        popupOffset,
-        disabled,
-        mode,
-        onVisibleChange,
-      } = props
+      const context = menu?.value
+      const child = slots.default?.()
+      const popupNode = typeof props.popup === 'function' ? props.popup() : props.popup
 
       return (
         <Trigger
-          prefixCls={prefixCls}
+          prefixCls={props.prefixCls}
           popupClassName={classNames(
-            `${prefixCls}-popup`,
-            {
-              [`${prefixCls}-rtl`]: rtl,
-            },
-            popupClassName,
-            rootClassName,
+            `${props.prefixCls}-popup`,
+            context?.rtl && `${props.prefixCls}-rtl`,
+            props.popupClassName,
+            context?.rootClassName,
           )}
-          stretch={mode === 'horizontal' ? 'minWidth' : null}
-          getPopupContainer={getPopupContainer}
-          builtinPlacements={placement}
-          popupPlacement={popupPlacement}
+          stretch={props.mode === 'horizontal' ? 'minWidth' : undefined}
+          getPopupContainer={context?.getPopupContainer}
+          builtinPlacements={builtinPlacements.value}
+          popupPlacement={popupPlacement.value}
           popupVisible={innerVisible.value}
-          popupStyle={popupStyle}
-          popupAlign={popupOffset && { offset: popupOffset }}
-          action={disabled ? [] : [triggerSubMenuAction]}
-          mouseEnterDelay={subMenuOpenDelay}
-          mouseLeaveDelay={subMenuCloseDelay}
-          onPopupVisibleChange={onVisibleChange}
-          forceRender={forceSubMenuRender}
-          popupMotion={mergedMotion}
+          popup={popupNode}
+          popupStyle={props.popupStyle}
+          popupAlign={props.popupOffset && { offset: props.popupOffset }}
+          action={props.disabled ? [] : [context?.triggerSubMenuAction ?? 'hover']}
+          mouseEnterDelay={context?.subMenuOpenDelay ?? 0.1}
+          mouseLeaveDelay={context?.subMenuCloseDelay ?? 0.1}
+          onOpenChange={props.onVisibleChange}
+          forceRender={context?.forceSubMenuRender}
+          popupMotion={mergedMotion.value}
           fresh
-          v-slots={{
-            default: () => slots.default?.(),
-            popup: () => popup,
-          }}
         >
+          {Array.isArray(child) ? child[0] : child}
         </Trigger>
       )
     }
   },
-})
+)
+
+export default PopupTrigger

@@ -1,44 +1,25 @@
+import type { VueNode } from '@v-c/util/dist/type'
 import type { RenderIconInfo, RenderIconType } from './interface'
-import { defineComponent } from 'vue'
 
-export interface IconProps extends RenderIconInfo {
+export interface IconProps {
   icon?: RenderIconType
+  props: RenderIconInfo
+  children?: VueNode
 }
 
-export default defineComponent({
-  name: 'Icon',
-  inheritAttrs: false,
-  props: {
-    icon: {
-      type: [Function, Object, Boolean],
-    },
-    isSelected: Boolean,
-    isOpen: Boolean,
-    isSubMenu: Boolean,
-    disabled: Boolean,
-  },
-  setup(props, { slots }) {
-    return () => {
-      const { icon, ...iconProps } = props
-      let iconNode
+export default function Icon({ icon, props, children }: IconProps) {
+  if (icon === null || icon === false) {
+    return null
+  }
 
-      if (icon === null || icon === false) {
-        return null
-      }
+  let iconNode: VueNode
 
-      if (typeof icon === 'function') {
-        iconNode = (
-          <>
-            <icon {...iconProps} />
-          </>
-        )
-      }
-      else if (typeof icon !== 'boolean') {
-        // Compatible for origin definition
-        iconNode = icon
-      }
+  if (typeof icon === 'function') {
+    iconNode = (icon as (info: RenderIconInfo) => VueNode)(props)
+  }
+  else if (icon !== undefined && icon !== true) {
+    iconNode = icon
+  }
 
-      return iconNode || slots.default?.() || null
-    }
-  },
-})
+  return iconNode ?? children ?? null
+}

@@ -1,149 +1,127 @@
-import type { InjectionKey } from 'vue'
-import type { SubMenuProps } from '..'
+import type { CSSMotionProps } from '@v-c/util/dist/utils/transition'
+import type { InjectionKey, ShallowRef } from 'vue'
+import { defineComponent, inject, provide, shallowRef, watch } from 'vue'
 import type {
   BuiltinPlacements,
   MenuClickEventHandler,
   MenuMode,
-  PopupRender,
   RenderIconType,
   TriggerSubMenuAction,
+  MenuProps,
 } from '../interface'
-import { defineComponent, inject, provide, ref } from 'vue'
-import { menuProps } from '../Menu'
 
 export interface MenuContextProps {
   prefixCls: string
-  classNames?: SubMenuProps['classNames']
-  styles?: SubMenuProps['styles']
+  classNames?: MenuProps['classNames']
+  styles?: MenuProps['styles']
   rootClassName?: string
   openKeys: string[]
   rtl?: boolean
-
-  // Mode
   mode: MenuMode
-
-  // Disabled
   disabled?: boolean
-  // Used for overflow only. Prevent hidden node trigger open
   overflowDisabled?: boolean
-
-  // Active
   activeKey: string
   onActive: (key: string) => void
   onInactive: (key: string) => void
-
-  // Selection
   selectedKeys: string[]
-
-  // Level
   inlineIndent: number
-
-  // Motion
-  motion?: object
-  defaultMotions?: Partial<{ [key in MenuMode | 'other']: any }>
-
-  // Popup
+  motion?: CSSMotionProps
+  defaultMotions?: Partial<Record<MenuMode | 'other', CSSMotionProps>>
   subMenuOpenDelay: number
   subMenuCloseDelay: number
   forceSubMenuRender?: boolean
   builtinPlacements?: BuiltinPlacements
   triggerSubMenuAction?: TriggerSubMenuAction
-
-  popupRender?: PopupRender
-
-  // Icon
+  popupRender?: MenuProps['popupRender']
   itemIcon?: RenderIconType
   expandIcon?: RenderIconType
-
-  // Function
   onItemClick: MenuClickEventHandler
   onOpenChange: (key: string, open: boolean) => void
   getPopupContainer: (node: HTMLElement) => HTMLElement
 }
 
-export const MenuContext: InjectionKey<MenuContextProps> = Symbol('MenuContext')
+const contextPropKeys: (keyof MenuContextProps)[] = [
+  'prefixCls',
+  'classNames',
+  'styles',
+  'rootClassName',
+  'openKeys',
+  'rtl',
+  'mode',
+  'disabled',
+  'overflowDisabled',
+  'activeKey',
+  'onActive',
+  'onInactive',
+  'selectedKeys',
+  'inlineIndent',
+  'motion',
+  'defaultMotions',
+  'subMenuOpenDelay',
+  'subMenuCloseDelay',
+  'forceSubMenuRender',
+  'builtinPlacements',
+  'triggerSubMenuAction',
+  'popupRender',
+  'itemIcon',
+  'expandIcon',
+  'onItemClick',
+  'onOpenChange',
+  'getPopupContainer',
+]
 
-export function useProvideMenu(props: MenuContextProps) {
-  provide(MenuContext, props)
+type InheritableContextProps = Partial<MenuContextProps> & { locked?: boolean }
+
+const MenuContextKey: InjectionKey<ShallowRef<MenuContextProps> | null> = Symbol('MenuContext')
+
+export function provideMenuContext(value: MenuContextProps) {
+  const context = shallowRef<MenuContextProps>({ ...value })
+  provide(MenuContextKey, context)
+  return context
 }
 
-export function useInjectMenu() {
-  return inject(MenuContext) || {
-    prefixCls: 'vc-menu',
-    onActive: () => {},
-    openKeys: ref([]),
-    // rtl: false,
-    //
-    // // Mode
-    // mode: 'horizontal',
-    //
-    // // Disabled
-    // disabled: false,
-    // // Used for overflow only. Prevent hidden node trigger open
-    // overflowDisabled: false,
-    //
-    // // Active
-    // activeKey: '',
-    // onActive: (key: string) => {},
-    // onInactive: (key: string) => {},
-    //
-    // // Selection
-    // selectedKeys: [],
-    //
-    // // Level
-    // inlineIndent: 0,
-    //
-    // // Motion
-    // motion: {},
-    // defaultMotions: {},
-    //
-    // // Popup
-    // subMenuOpenDelay: 0,
-    // subMenuCloseDelay: 0,
-    // forceSubMenuRender: false,
-    // builtinPlacements: {},
-    // triggerSubMenuAction: {},
-    //
-    // popupRender: () => {},
-    //
-    // // Icon
-    // itemIcon: () => {},
-    // expandIcon: () => {},
-    //
-    // // Function
-    // onItemClick: () => {},
-    // onOpenChange: () => {},
-    // getPopupContainer: (node: HTMLElement) => HTMLElement,
-  }
+export function useMenuContext() {
+  return inject(MenuContextKey, null)
 }
 
-function mergeProps(origin?: MenuContextProps, target: Partial<MenuContextProps>): MenuContextProps {
-  const clone = { ...origin }
+export default defineComponent({
+  name: 'MenuContextProvider',
+  props: contextPropKeys.reduce((acc, key) => {
+    acc[key] = { type: null as any }
+    return acc
+  }, { locked: Boolean } as Record<string, any>),
+  setup(props: InheritableContextProps, { slots }) {
+    const parent = inject(MenuContextKey, null)
 
-  Object.keys(target).forEach((key) => {
-    const value = target[key]
-    if (value !== undefined) {
-      clone[key] = value
+    const buildContext = () => {
+      const origin = parent?.value
+      const clone = origin ? { ...origin } : ({} as MenuContextProps)
+      contextPropKeys.forEach((key) => {
+        const val = (props as any)[key]
+        if (val !== undefined) {
+          (clone as any)[key] = val
+        }
+      })
+      return clone
     }
-  })
 
-  return clone
-}
+    const contextRef = shallowRef<MenuContextProps>(buildContext())
+    provide(MenuContextKey, contextRef)
 
-export interface InheritableContextProps extends Partial<MenuContextProps> {
-  locked?: boolean
-}
+    watch(
+      () => [
+        parent?.value,
+        ...contextPropKeys.map(key => (props as any)[key]),
+        props.locked,
+      ],
+      () => {
+        if (!props.locked) {
+          contextRef.value = buildContext()
+        }
+      },
+      { immediate: true, deep: true },
+    )
 
-const InheritableContextProvider = defineComponent({
-  name: 'InheritableContextProvider',
-  inheritAttrs: false,
-  setup(props, { slots, attrs }) {
-    const context = useInjectMenu() || {}
-
-    const inheritableContext = () => mergeProps(context, attrs)
-    useProvideMenu(inheritableContext())
     return () => slots.default?.()
   },
 })
-
-export default InheritableContextProvider

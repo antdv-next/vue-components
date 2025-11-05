@@ -1,90 +1,63 @@
-import type { ExtractPropTypes } from 'vue'
-import omit from '@v-c/util/dist/omit'
+import type { CSSProperties } from 'vue'
 import { classNames } from '@v-c/util'
-import { defineComponent } from 'vue'
-import { useInjectMenu } from './context/MenuContext'
-import { useFullPath, useMeasure } from './context/PathContext.tsx'
+import omit from '@v-c/util/dist/omit'
+import { computed, defineComponent } from 'vue'
+import { useMenuContext } from './context/MenuContext'
+import { useFullPath, useMeasure } from './context/PathContext'
+import type { MenuItemGroupProps } from './interface'
 import { parseChildren } from './utils/commonUtil'
 
-function menuItemGroupProps() {
-  return {
-    title: {
-      type: [String, Object],
-    },
-    eventKey: [String, Object],
-    warnKey: Boolean,
-  }
-}
+const MenuItemGroup = defineComponent<MenuItemGroupProps>(
+  (props, { slots, attrs }) => {
+    const connectedKeyPath = useFullPath(props.eventKey)
+    const measure = useMeasure()
+    const context = useMenuContext()
 
-export type MenuItemGroupProps = Partial<ExtractPropTypes<ReturnType<typeof menuItemGroupProps>>>
-
-const InternalMenuItemGroup = defineComponent({
-  name: 'InternalMenuItemGroup',
-  inheritAttrs: false,
-  props: menuItemGroupProps(),
-  emits: ['mouseEnter', 'mouseLeave', 'keyDown', 'click', 'focus'],
-  setup(props, { slots, attrs }) {
-    const { prefixCls, classNames: menuClassNames, styles } = useInjectMenu()
-
-    const groupPrefixCls = `${prefixCls}-item-group`
+    const childList = computed(() => {
+      const childrenNodes = props.children ?? slots.default?.()
+      return parseChildren(childrenNodes, connectedKeyPath.value)
+    })
 
     return () => {
-      const { title } = props
+      if (measure) {
+        return childList.value as any
+      }
+
+      const menu = context?.value
+      const prefixCls = menu?.prefixCls ?? 'vc-menu'
+      const { classNames: menuClassNames, styles } = menu || {}
+      const groupPrefixCls = `${prefixCls}-item-group`
+
+      const { className, title, ...restProps } = props
+      const { class: classAttr, style: styleAttr, ...restAttrs } = attrs as any
+
       return (
         <li
           role="presentation"
-          {...attrs}
-          onClick={e => e.stopPropagation()}
-          class={classNames(groupPrefixCls, [attrs.class])}
+          class={classNames(groupPrefixCls, className, classAttr)}
+          onClick={event => event.stopPropagation()}
+          {...omit(restProps, ['warnKey', 'children', 'eventKey'])}
+          {...restAttrs}
         >
           <div
             role="presentation"
             class={classNames(`${groupPrefixCls}-title`, menuClassNames?.listTitle)}
-            style={styles?.listTitle}
+            style={styles?.listTitle as CSSProperties}
             title={typeof title === 'string' ? title : undefined}
           >
-            {title}
+            {title ?? slots.title?.()}
           </div>
           <ul
             role="group"
             class={classNames(`${groupPrefixCls}-list`, menuClassNames?.list)}
-            style={styles?.list}
+            style={styles?.list as CSSProperties}
           >
-            {slots.default?.()}
+            {childList.value}
           </ul>
         </li>
       )
     }
   },
-})
+)
 
-export default defineComponent({
-  name: 'MenuItemGroup',
-  inheritAttrs: false,
-  props: {
-    eventKey: {
-      type: [String, Object],
-    },
-    warnKey: {
-      type: Boolean,
-    },
-  },
-  setup(props, { slots }) {
-    const connectedKeyPath = useFullPath(props.eventKey!)
-
-    const measure = useMeasure()
-
-    return () => {
-      const childList = parseChildren(slots.default?.(), connectedKeyPath)
-
-      if (measure) {
-        return childList
-      }
-      return (
-        <InternalMenuItemGroup {...omit(props, ['warnKey'])}>
-          {childList}
-        </InternalMenuItemGroup>
-      )
-    }
-  },
-})
+export default MenuItemGroup

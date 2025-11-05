@@ -1,32 +1,20 @@
-import type { MenuRef } from './interface'
-import type { MenuProps } from './Menu'
-import type { MenuItemProps } from './MenuItem'
-import type { MenuItemGroupProps } from './MenuItemGroup'
-import type { SubMenuProps } from './SubMenu'
-import { useFullPath } from './context/PathContext.tsx'
-import Divider from './Divider'
 import Menu from './Menu'
 import MenuItem from './MenuItem'
-import MenuItemGroup from './MenuItemGroup'
 import SubMenu from './SubMenu'
+import MenuItemGroup from './MenuItemGroup'
+import Divider from './Divider'
+import { useFullPath } from './context/PathContext'
+
+export type { MenuProps, MenuRef, MenuItemProps, SubMenuProps, MenuItemGroupProps } from './interface'
 
 export {
-  Divider,
+  SubMenu,
   MenuItem as Item,
-  MenuItemGroup as ItemGroup,
   MenuItem,
   MenuItemGroup,
-  SubMenu,
-  /** @private Only used for antd internal. Do not use in your production. */
+  MenuItemGroup as ItemGroup,
+  Divider,
   useFullPath,
-}
-
-export type {
-  MenuItemGroupProps,
-  MenuItemProps,
-  MenuProps,
-  MenuRef,
-  SubMenuProps,
 }
 
 type MenuType = typeof Menu & {
@@ -37,7 +25,6 @@ type MenuType = typeof Menu & {
 }
 
 const ExportMenu = Menu as MenuType
-
 ExportMenu.Item = MenuItem
 ExportMenu.SubMenu = SubMenu
 ExportMenu.ItemGroup = MenuItemGroup
