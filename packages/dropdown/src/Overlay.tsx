@@ -1,28 +1,35 @@
-import type { DropdownProps } from './Dropdown'
-import { defineComponent } from 'vue'
+import type { DropdownProps } from './Dropdown.tsx'
+import { createVNode, defineComponent, shallowRef } from 'vue'
 
 export type OverlayProps = Pick<
   DropdownProps,
-  'overlay' | 'arrow' | 'prefixCls'
+    'overlay' | 'arrow' | 'prefixCls'
 >
 
-export default defineComponent({
-  name: 'Overlay',
-  props: {
-    overlay: [Function, Object],
-    arrow: Boolean,
-    prefixCls: String,
-  },
-  setup(props) {
+const Overlay = defineComponent<OverlayProps>(
+  (props) => {
+    const overlayRef = shallowRef()
+    const setRef = (el: any) => {
+      overlayRef.value = el
+    }
     return () => {
       const { overlay, arrow, prefixCls } = props
-
+      const overlayNode = typeof overlay === 'function' ? (overlay as any)?.() : overlay
       return (
         <>
           {arrow && <div class={`${prefixCls}-arrow`} />}
-          {overlay}
+          {
+            createVNode(
+              overlayNode,
+              {
+                ref: setRef,
+              },
+            )
+          }
         </>
       )
     }
   },
-})
+)
+
+export default Overlay

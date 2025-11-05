@@ -1,15 +1,15 @@
 import type { Ref } from 'vue'
 import KeyCode from '@v-c/util/dist/KeyCode'
 import raf from '@v-c/util/dist/raf'
-import { onWatcherCleanup, ref, watch } from 'vue'
+import { shallowRef, watch } from 'vue'
 
 const { ESC, TAB } = KeyCode
 
 interface UseAccessibilityProps {
-  visible: boolean
+  visible: Ref<boolean>
   triggerRef: Ref<any>
   onVisibleChange?: (visible: boolean) => void
-  autoFocus?: boolean
+  autoFocus?: Ref<boolean>
   overlayRef?: Ref<any>
 }
 
@@ -20,10 +20,9 @@ export default function useAccessibility({
   autoFocus,
   overlayRef,
 }: UseAccessibilityProps) {
-  const focusMenuRef = ref<boolean>(false)
-
+  const focusMenuRef = shallowRef(false)
   const handleCloseMenuAndReturnFocus = () => {
-    if (visible) {
+    if (visible.value) {
       triggerRef.value?.focus?.()
       onVisibleChange?.(false)
     }
@@ -38,7 +37,7 @@ export default function useAccessibility({
     return false
   }
 
-  const handleKeyDown = (event: KeyboardEvent) => {
+  const handleKeyDown = (event: any) => {
     switch (event.keyCode) {
       case ESC:
         handleCloseMenuAndReturnFocus()
@@ -59,22 +58,22 @@ export default function useAccessibility({
       }
     }
   }
-
-  watch(() => visible, (newVisible) => {
-    if (newVisible) {
+  watch(visible, (_n, _o, onCleanup) => {
+    if (visible.value) {
       window.addEventListener('keydown', handleKeyDown)
       if (autoFocus) {
         // FIXME: hack with raf
         raf(focusMenu, 3)
       }
+      onCleanup(() => {
+        window.removeEventListener('keydown', handleKeyDown)
+        focusMenuRef.value = false
+      })
     }
     else {
-      window.removeEventListener('keydown', handleKeyDown)
-      focusMenuRef.value = false
+      onCleanup(() => {
+        focusMenuRef.value = false
+      })
     }
-    onWatcherCleanup(() => {
-      window.removeEventListener('keydown', handleKeyDown)
-      focusMenuRef.value = false
-    })
-  }, { immediate: true })
+  })
 }

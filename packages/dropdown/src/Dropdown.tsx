@@ -1,155 +1,159 @@
 import type {
   ActionType,
   AlignType,
+  AnimationType,
   BuildInPlacements,
+  TriggerProps,
 } from '@v-c/trigger'
-import type { ExtractPropTypes, PropType, SlotsType } from 'vue'
+import type { VueNode } from '@v-c/util/dist/type'
+import type { CSSProperties } from 'vue'
 import { Trigger } from '@v-c/trigger'
-import { cloneElement } from '@v-c/util/dist/vnode.ts'
-import { classNames } from '@v-c/util'
-import { defineComponent, ref, watch } from 'vue'
-import useAccessibility from './hooks/useAccessibility'
-import Overlay from './Overlay'
+import { clsx } from '@v-c/util'
+import { filterEmpty, toPropsRefs } from '@v-c/util/dist/props-util'
+import { computed, createVNode, defineComponent, shallowRef } from 'vue'
+import useAccessibility from './hooks/useAccessibility.ts'
+import Overlay from './Overlay.tsx'
 import Placements from './placements'
 
-function dropdownProps() {
-  return {
-    arrow: { type: Boolean, default: false },
-    prefixCls: { type: String, default: 'vc-dropdown' },
-    transitionName: String,
-    animation: String,
-    align: Object as PropType<AlignType>,
-    placement: { type: String as PropType<keyof typeof Placements>, default: 'bottomLeft' },
-    placements: { type: Object as PropType<BuildInPlacements>, default: () => Placements },
-    getPopupContainer: Function as PropType<(node?: HTMLElement) => HTMLElement>,
-    showAction: Array as PropType<ActionType[]>,
-    hideAction: Array as PropType<ActionType[]>,
-    overlayClassName: String,
-    overlayStyle: Object,
-    visible: Boolean,
-    trigger: { type: [String, Array] as PropType<ActionType | ActionType[]>, default: () => ['hover'] },
-    autoFocus: Boolean,
-    overlay: [Function, Object],
-    onVisibleChange: Function,
-    onOverlayClick: Function,
-    openClassName: String,
-    alignPoint: Boolean,
-  }
+export interface DropdownProps
+  extends Pick<
+    TriggerProps,
+    | 'getPopupContainer'
+    | 'mouseEnterDelay'
+    | 'mouseLeaveDelay'
+    | 'onPopupAlign'
+    | 'builtinPlacements'
+    | 'autoDestroy'
+  > {
+  minOverlayWidthMatchTrigger?: boolean
+  arrow?: boolean
+  onVisibleChange?: (visible: boolean) => void
+  onOverlayClick?: (e: Event) => void
+  prefixCls?: string
+  transitionName?: string
+  overlayClassName?: string
+  openClassName?: string
+  animation?: AnimationType
+  align?: AlignType
+  overlayStyle?: CSSProperties
+  placement?: keyof typeof Placements
+  placements?: BuildInPlacements
+  overlay?: (() => VueNode) | VueNode
+  trigger?: ActionType | ActionType[]
+  alignPoint?: boolean
+  showAction?: ActionType[]
+  hideAction?: ActionType[]
+  visible?: boolean
+  autoFocus?: boolean
 }
 
-export type DropdownProps = Partial<ExtractPropTypes<ReturnType<typeof dropdownProps>>>
+const defaults = {
+  prefixCls: 'vc-dropdown',
+  arrow: false,
+  placement: 'bottomLeft',
+  placements: Placements,
+  trigger: ['hover'],
+} as any
 
-export default defineComponent({
-  name: 'Dropdown',
-  props: dropdownProps(),
-  slots: Object as SlotsType<{
-    default: any
-    overlay: any
-  }>,
-  emits: ['visibleChange', 'overlayClick'],
-  setup(props, { slots, expose, emit }) {
-    const triggerVisible = ref()
-    const mergedVisible = ref()
-    watch(() => props.visible, (newVisible) => {
-      if (newVisible === undefined) {
-        mergedVisible.value = triggerVisible.value
-      }
-      else {
-        mergedVisible.value = newVisible
-      }
-    }, { immediate: true })
-
-    const triggerRef = ref(null)
-    const overlayRef = ref(null)
-    const childRef = ref(null)
-
+const Dropdown = defineComponent<DropdownProps>(
+  (props = defaults, { expose, slots }) => {
+    const { autoFocus } = toPropsRefs(props, 'autoFocus')
+    const triggerVisible = shallowRef<boolean >()
+    const mergedVisible = computed(() => {
+      return props?.visible ?? triggerVisible.value
+    })
+    const mergedMotionName = computed(() => {
+      const { prefixCls, transitionName, animation } = props
+      return animation ? `${prefixCls}-${animation}` : transitionName
+    })
+    const triggerRef = shallowRef()
+    const overlayRef = shallowRef()
+    const childRef = shallowRef()
     expose({
       triggerRef,
     })
-
-    const handleVisibleChange = (newVisible: boolean) => {
-      triggerVisible.value = newVisible
-      emit('visibleChange', newVisible)
+    const handleVisibleChange = (visible: boolean) => {
+      triggerVisible.value = visible
+      props.onVisibleChange?.(visible)
     }
 
     useAccessibility({
-      visible: mergedVisible.value,
+      visible: mergedVisible as any,
       triggerRef: childRef,
       onVisibleChange: handleVisibleChange,
-      autoFocus: props.autoFocus,
+      autoFocus: autoFocus as any,
       overlayRef,
     })
 
-    const onClick = (e: Event) => {
+    const onClick = (e: any) => {
+      const { onOverlayClick } = props
       triggerVisible.value = false
-      emit('overlayClick', e)
-    }
 
-    const getMenuElement = () => (
-      <Overlay
-        ref={overlayRef}
-        overlay={props.overlay || slots.overlay?.()}
-        prefixCls={props.prefixCls}
-        arrow={props.arrow}
-      />
-    )
-
-    const getMinOverlayWidthMatchTrigger = () => {
-      if ('minOverlayWidthMatchTrigger' in props) {
-        return props.minOverlayWidthMatchTrigger
+      if (onOverlayClick) {
+        onOverlayClick(e)
       }
-      return !props.alignPoint
     }
+    return () => {
+      const {
+        overlay,
+        prefixCls,
+        arrow,
+        hideAction,
+        trigger,
+        placement,
+        placements,
+        overlayClassName,
+        getPopupContainer,
+        showAction,
+        overlayStyle,
+        align,
+        ...otherProps
+      } = props
 
-    const getOpenClassName = () => {
-      if (props.openClassName !== undefined) {
-        return props.openClassName
+      const getMenuElement = () => (
+        <Overlay
+          ref={overlayRef}
+          overlay={overlay as any}
+          prefixCls={prefixCls}
+          arrow={arrow}
+        />
+      )
+
+      const getMenuElementOrLambda = () => {
+        if (typeof overlay === 'function') {
+          return getMenuElement
+        }
+        return getMenuElement()
       }
-      return `${props.prefixCls}-open`
-    }
 
-    const renderChildren = () => {
-      const children = slots.default?.()
-      if (!children)
-        return null
+      const getMinOverlayWidthMatchTrigger = () => {
+        const { minOverlayWidthMatchTrigger, alignPoint } = props
+        if (minOverlayWidthMatchTrigger !== undefined) {
+          return minOverlayWidthMatchTrigger
+        }
 
-      const child = children[0]
-      if (!child)
-        return null
+        return !alignPoint
+      }
 
-      return cloneElement(child, {
-        class: classNames(
-          child.props?.class,
+      const getOpenClassName = () => {
+        const { openClassName } = props
+        if (openClassName !== undefined) {
+          return openClassName
+        }
+        return `${prefixCls}-open`
+      }
+
+      const childArr = filterEmpty(slots?.default?.() ?? [])
+      const children = childArr?.[0]
+      const childrenNode = createVNode(children, {
+        class: clsx(
           mergedVisible.value && getOpenClassName(),
         ),
         ref: childRef,
       })
-    }
 
-    return () => {
-      const {
-        arrow = false,
-        prefixCls = 'vc-dropdown',
-        transitionName,
-        animation,
-        align,
-        placement = 'bottomLeft',
-        placements = Placements,
-        getPopupContainer,
-        showAction,
-        hideAction,
-        overlayClassName,
-        overlayStyle,
-        visible,
-        trigger = ['hover'],
-        autoFocus,
-        overlay,
-        onVisibleChange,
-        ...otherProps
-      } = props
-      const mergedMotionName = animation ? `${prefixCls}-${animation}` : transitionName
       let triggerHideAction = hideAction
-      if (!triggerHideAction && trigger.includes('contextMenu')) {
+      if (!triggerHideAction && trigger?.includes('contextMenu')) {
         triggerHideAction = ['click']
       }
       return (
@@ -158,7 +162,7 @@ export default defineComponent({
           {...otherProps}
           prefixCls={prefixCls}
           ref={triggerRef}
-          popupClassName={classNames(overlayClassName, {
+          popupClassName={clsx(overlayClassName, {
             [`${prefixCls}-show-arrow`]: arrow,
           })}
           popupStyle={overlayStyle}
@@ -167,15 +171,19 @@ export default defineComponent({
           hideAction={triggerHideAction}
           popupPlacement={placement}
           popupAlign={align}
-          popupMotion={{ name: mergedMotionName }}
+          popupMotion={{ name: mergedMotionName.value }}
           popupVisible={mergedVisible.value}
-          stretch={getMinOverlayWidthMatchTrigger() ? 'minWidth' : undefined}
+          stretch={getMinOverlayWidthMatchTrigger() ? 'minWidth' : ''}
+          popup={getMenuElementOrLambda()}
           onOpenChange={handleVisibleChange}
           onPopupClick={onClick}
           getPopupContainer={getPopupContainer}
-          v-slots={{ default: renderChildren, popup: getMenuElement }}
-        />
+        >
+          {childrenNode}
+        </Trigger>
       )
     }
   },
-})
+)
+
+export default Dropdown

@@ -1,0 +1,12 @@
+{
+  "extends": ["../../tsconfig.json"],
+  "compilerOptions": {
+
+  },
+  "include": [
+    "_src/**/*.ts",
+    "_src/**/*.tsx",
+    "_src/**/*.js",
+    "_src/**/*.jsx"
+  ]
+}
