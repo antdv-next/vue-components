@@ -2,6 +2,7 @@
 import Basic from './basic'
 import Blink from './blink'
 import FillWidth from './fill-width'
+import PrefixSuffix from './prefix-suffix'
 import RawRender from './raw-render'
 
 import './assets/index.less'
@@ -19,12 +20,11 @@ import './assets/common.less'
     <Variant title="fill-width">
       <FillWidth />
     </Variant>
+    <Variant title="prefix-suffix">
+      <PrefixSuffix />
+    </Variant>
     <Variant title="raw-render">
       <RawRender />
     </Variant>
   </Story>
 </template>
-
-<style scoped>
-
-</style>

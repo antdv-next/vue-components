@@ -275,6 +275,7 @@ const OverflowImpl = defineComponent({
           const len = list.length
           const lastIndex = len - 1
 
+          // When data count change to 0, reset this since not loop will reach
           if (!len) {
             updateDisplayCount(0, null)
             return
@@ -283,35 +284,41 @@ const OverflowImpl = defineComponent({
           for (let i = 0; i < len; i += 1) {
             let currentItemWidth = getItemWidth(i)
 
+            // Fully will always render
             if (props.ssr === 'full') {
               currentItemWidth = currentItemWidth || 0
             }
 
+            // Break since data not ready
             if (currentItemWidth === undefined) {
               updateDisplayCount(i - 1, undefined, true)
-              return
+              break
             }
 
+            // Find best match
             totalWidth += currentItemWidth
 
             if (
+              // Only one means `totalWidth` is the final width
               (lastIndex === 0 && totalWidth <= container)
+              // Last two width will be the final width
               || (i === lastIndex - 1 && totalWidth + (getItemWidth(lastIndex) || 0) <= container)
             ) {
+              // Additional check if match the end
               updateDisplayCount(lastIndex, null)
-              return
+              break
             }
-            if (totalWidth + rest > container) {
+            else if (totalWidth + rest > container) {
+              // Can not hold all the content to show rest
               updateDisplayCount(
                 i - 1,
                 totalWidth - currentItemWidth - suffixWidth.value! + restWidth.value!,
               )
-              return
+              break
             }
           }
 
-          const firstItemWidth = getItemWidth(0) || 0
-          if ((props.suffix ?? slots.suffix?.()) && firstItemWidth + suffixWidth.value! > container) {
+          if ((props.suffix ?? slots.suffix?.()) && getItemWidth(0)! + suffixWidth.value! > container) {
             suffixFixedStart.value = null
           }
         }
@@ -335,7 +342,6 @@ const OverflowImpl = defineComponent({
       const displayRest = restReady.value && !!omittedItems.value.length
 
       let suffixStyle: CSSProperties = {}
-      console.log(suffixFixedStart.value, shouldResponsive.value)
       if (suffixFixedStart.value !== null && shouldResponsive.value) {
         suffixStyle = {
           position: 'absolute',
