@@ -17,9 +17,9 @@ function focusable(node: HTMLElement, includePositive = false): boolean {
             // Focusable element
             = ['input', 'select', 'textarea', 'button'].includes(nodeName)
             // Editable element
-            || node.isContentEditable
+              || node.isContentEditable
             // Anchor with href element
-            || (nodeName === 'a' && !!node.getAttribute('href'))
+              || (nodeName === 'a' && !!node.getAttribute('href'))
 
     // Get tabIndex
     const tabIndexAttr = node.getAttribute('tabindex')

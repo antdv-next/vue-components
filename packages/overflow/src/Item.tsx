@@ -73,18 +73,15 @@ export default defineComponent({
         overflowProps['aria-hidden'] = true
       }
 
-      const { class: classAttr, style: styleAttr, ...restAttrs } = attrs as HTMLAttributes
-
       const itemNode = (
         <Component
-          class={classNames(!invalidate && prefixCls, classAttr, props.class)}
+          class={classNames(!invalidate && prefixCls, props.class)}
           style={{
             ...overflowStyle,
             ...(style as CSSProperties),
-            ...(styleAttr as CSSProperties),
           }}
           {...overflowProps}
-          {...restAttrs}
+          {...attrs}
         >
           {childNode}
         </Component>

@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import Antd from './antd'
+// import Antd from './antd'
 </script>
 
 <template>
   <Story title="Menu">
     <Variant title="antd">
-      <Antd />
+      <!--      <Antd /> -->
     </Variant>
   </Story>
 </template>

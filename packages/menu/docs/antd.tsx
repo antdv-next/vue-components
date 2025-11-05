@@ -159,24 +159,24 @@ export default defineComponent({
           <h3>horizontal and click</h3>
 
           <div style={{ margin: '20px' }}>
-            <CommonMenu
-              mode="horizontal"
-              defaultMotions={motionMap}
-              triggerSubMenuAction="click"
-              updateChildrenAndOverflowedIndicator
-            />
+            {/* <CommonMenu */}
+            {/*  mode="horizontal" */}
+            {/*  defaultMotions={motionMap} */}
+            {/*  triggerSubMenuAction="click" */}
+            {/*  updateChildrenAndOverflowedIndicator */}
+            {/* /> */}
           </div>
 
           <h3>vertical</h3>
 
           <div style={{ margin: '20px', width: '200px' }}>
-            <CommonMenu mode="vertical" defaultMotions={motionMap} />
+            {/* <CommonMenu mode="vertical" defaultMotions={motionMap} /> */}
           </div>
 
           <h3>inline</h3>
 
           <div style={{ margin: '20px', width: '400px' }}>
-            <CommonMenu mode="inline" defaultOpenKeys={['1']} motion={inlineMotion} />
+            {/* <CommonMenu mode="inline" defaultOpenKeys={['1']} motion={inlineMotion} /> */}
           </div>
         </div>
       </div>

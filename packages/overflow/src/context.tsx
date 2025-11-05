@@ -35,5 +35,5 @@ export const OverflowContextProvider = defineComponent({
 })
 
 export function useInjectOverflowContext() {
-  return inject(OverflowContextKey)
+  return inject(OverflowContextKey, null)
 }

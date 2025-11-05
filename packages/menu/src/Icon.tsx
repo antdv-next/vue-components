@@ -1,25 +1,30 @@
-import type { VueNode } from '@v-c/util/dist/type'
-import type { RenderIconInfo, RenderIconType } from './interface'
+import type { RenderIconInfo, RenderIconType } from './interface.ts'
+import { createVNode, defineComponent } from 'vue'
 
 export interface IconProps {
   icon?: RenderIconType
-  props: RenderIconInfo
-  children?: VueNode
+  props?: RenderIconInfo
 }
 
-export default function Icon({ icon, props, children }: IconProps) {
-  if (icon === null || icon === false) {
-    return null
-  }
+const Icon = defineComponent<IconProps>(
+  (props, { slots }) => {
+    return () => {
+      const { icon, props: iconProps } = props
+      let iconNode: any
+      if (icon === null || icon === false) {
+        return null
+      }
+      if (typeof icon === 'function') {
+        iconNode = createVNode((icon as any)(), {
+          ...iconProps,
+        })
+      }
+      else if (typeof icon !== 'boolean') {
+        iconNode = icon
+      }
+      return iconNode || slots.default?.() || null
+    }
+  },
+)
 
-  let iconNode: VueNode
-
-  if (typeof icon === 'function') {
-    iconNode = (icon as (info: RenderIconInfo) => VueNode)(props)
-  }
-  else if (icon !== undefined && icon !== true) {
-    iconNode = icon
-  }
-
-  return iconNode ?? children ?? null
-}
+export default Icon

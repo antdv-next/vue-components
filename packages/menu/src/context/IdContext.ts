@@ -1,24 +1,20 @@
-import type { InjectionKey } from 'vue'
-import { inject, provide } from 'vue'
+import type { InjectionKey, Ref } from 'vue'
+import { inject, provide, ref } from 'vue'
 
-const IdContextKey: InjectionKey<string> = Symbol('MenuIdContext')
+const IdContextKey: InjectionKey<Ref<string>> = Symbol('IdContext')
 
-export function provideIdContext(id: string) {
+export function useIdContextProvide(id: Ref<string>) {
   provide(IdContextKey, id)
-}
-
-export function useIdContext() {
-  return inject(IdContextKey, '')
 }
 
 export function getMenuId(uuid: string, eventKey: string) {
   return `${uuid}-${eventKey}`
 }
 
-export function useMenuId(eventKey?: string) {
-  const id = useIdContext()
-  if (!id || eventKey === undefined) {
-    return ''
-  }
-  return getMenuId(id, eventKey)
+/**
+ * Get `data-menu-id`
+ */
+export function useMenuId(eventKey: string) {
+  const id = inject(IdContextKey, ref(''))
+  return getMenuId(id.value, eventKey)
 }
