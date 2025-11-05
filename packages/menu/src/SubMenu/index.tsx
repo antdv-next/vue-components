@@ -1,6 +1,7 @@
 import type { VueNode } from '@v-c/util/dist/type'
 import type { CSSProperties } from 'vue'
 import type { PopupRender, SubMenuType } from '../interface'
+import { defineComponent } from 'vue'
 
 export type SemanticName = 'list' | 'listTitle'
 export interface SubMenuProps extends Omit<SubMenuType, 'key' | 'children' | 'label'> {
@@ -22,3 +23,15 @@ export interface SubMenuProps extends Omit<SubMenuType, 'key' | 'children' | 'la
   // >>>>>>>>>>>>>>>>>>>>> Next  Round <<<<<<<<<<<<<<<<<<<<<<<
   // onDestroy?: DestroyEventHandler;
 }
+
+const InternalSubMenu = defineComponent<SubMenuProps>(
+  (props, { slots, expose, attrs }) => {
+    return () => {
+      return null
+    }
+  },
+  {
+    name: 'InternalSubMenu',
+    inheritAttrs: false,
+  },
+)

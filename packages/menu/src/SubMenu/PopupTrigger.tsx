@@ -1,0 +1,144 @@
+import type { VueNode } from '@v-c/util/dist/type.ts'
+import type { CSSProperties } from 'vue'
+import type { MenuMode } from '../interface.ts'
+import Trigger from '@v-c/trigger'
+import { clsx } from '@v-c/util'
+import raf from '@v-c/util/dist/raf.ts'
+import { computed, defineComponent, shallowRef, watch } from 'vue'
+import { useMenuContext } from '../context/MenuContext.ts'
+import placements, { placementsRtl } from '../placements.ts'
+import { getMotion } from '../utils/motionUtil.ts'
+
+const popupPlacementMap = {
+  'horizontal': 'bottomLeft',
+  'vertical': 'rightTop',
+  'vertical-left': 'rightTop',
+  'vertical-right': 'leftTop',
+}
+
+export interface PopupTriggerProps {
+  prefixCls: string
+  mode: MenuMode
+  visible: boolean
+  popup: VueNode
+  popupStyle?: CSSProperties
+  popupClassName?: string
+  popupOffset?: number[]
+  disabled: boolean
+  onVisibleChange: (visible: boolean) => void
+}
+
+const PopupTrigger = defineComponent<PopupTriggerProps>(
+  (props, { slots }) => {
+    const menuContext = useMenuContext()
+    const innerVisible = shallowRef(false)
+    const placement = computed(() => {
+      const rtl = menuContext?.value?.rtl
+      const builtinPlacements = menuContext?.value?.builtinPlacements
+      return rtl ? { ...placementsRtl, ...builtinPlacements } : { ...placements, ...builtinPlacements }
+    })
+
+    const popupPlacement = computed(() => {
+      const mode = menuContext?.value?.mode
+      return (popupPlacementMap as any)[mode!]
+    })
+
+    const targetMotion = computed(() => {
+      const { motion, defaultMotions, mode } = menuContext?.value ?? {}
+      return { ...getMotion(mode!, motion, defaultMotions) }
+    })
+
+    const targetMotionRef = shallowRef(targetMotion.value)
+    watch(
+      () => menuContext?.value?.mode,
+      (mode) => {
+        if (mode !== 'inline') {
+        /**
+         * PopupTrigger is only used for vertical and horizontal types.
+         * When collapsed is unfolded, the inline animation will destroy the vertical animation.
+         */
+          targetMotionRef.value = targetMotion as any
+        }
+      },
+      {
+        immediate: true,
+      },
+    )
+
+    const mergedMotion = computed(() => {
+      return {
+        ...targetMotionRef.value,
+        appear: true,
+      }
+    })
+
+    // Delay to change visible
+    const visibleRef = shallowRef<number>()
+    watch(
+      () => props.visible,
+      (visible, _, onCleanup) => {
+        visibleRef.value = raf(() => {
+          innerVisible.value = visible
+        })
+        onCleanup(() => {
+          if (visibleRef.value !== undefined) {
+            raf.cancel(visibleRef.value)
+          }
+        })
+      },
+    )
+
+    return () => {
+      const {
+        popupClassName,
+        popup,
+        popupStyle,
+        popupOffset,
+        disabled,
+        onVisibleChange,
+      } = props
+      const {
+        prefixCls,
+        rtl,
+        rootClassName,
+        mode,
+        getPopupContainer,
+        triggerSubMenuAction,
+        subMenuCloseDelay,
+        subMenuOpenDelay,
+        forceSubMenuRender,
+
+      } = menuContext?.value ?? {}
+      return (
+        <Trigger
+          prefixCls={prefixCls}
+          popupClassName={clsx(
+            `${prefixCls}-popup`,
+            { [`${prefixCls}-rtl`]: rtl },
+            popupClassName,
+            rootClassName,
+          )}
+          stretch={mode === 'horizontal' ? 'minWidth' : undefined}
+          getPopupContainer={getPopupContainer}
+          builtinPlacements={placement.value}
+          popupPlacement={popupPlacement.value}
+          popupVisible={innerVisible.value}
+          popup={popup}
+          popupStyle={popupStyle}
+          popupAlign={popupOffset && { offset: popupOffset }}
+          action={disabled ? [] : [triggerSubMenuAction!]}
+          mouseEnterDelay={subMenuOpenDelay}
+          mouseLeaveDelay={subMenuCloseDelay}
+          onOpenChange={onVisibleChange}
+          forceRender={forceSubMenuRender}
+          popupMotion={mergedMotion.value}
+          fresh
+        >
+          {slots?.default?.()}
+        </Trigger>
+      )
+    }
+  },
+)
+
+export default PopupTrigger
