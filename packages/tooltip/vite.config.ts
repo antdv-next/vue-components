@@ -7,7 +7,11 @@ const entry = fg.sync(['src/**/*.ts', 'src/**/*.tsx', '!src/**/*.test.ts', '!src
 
 export default defineConfig({
   ...mergeConfig(buildCommon({
-    external: ['vue', 'resize-observer-polyfill'],
+    external: [
+      'vue',
+      'resize-observer-polyfill',
+      /^@v-c\//,
+    ],
   }), {
     build: {
       lib: {
