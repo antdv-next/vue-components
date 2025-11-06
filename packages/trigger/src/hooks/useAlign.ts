@@ -692,6 +692,16 @@ export default function useAlign(
     })
   }
 
+  watch(
+    popupEle,
+    async (ele) => {
+      if (ele && open.value && !mobile?.value) {
+        await nextTick()
+        triggerAlign()
+      }
+    },
+  )
+
   // Reset ready status when placement & open changed
   const resetReady = () => {
     offsetInfo.ready = false
