@@ -1,5 +1,5 @@
 import type { InjectionKey, Ref } from 'vue'
-import { computed, inject, provide, ref } from 'vue'
+import { computed, defineComponent, inject, provide, ref } from 'vue'
 
 const EmptyList: string[] = []
 
@@ -19,11 +19,20 @@ export function useMeasureProvider(context: PathRegisterContextProps) {
   provide(PathRegisterContextKey, context)
 }
 
+export const MeasureProvider = defineComponent<PathRegisterContextProps>(
+  (props, { slots }) => {
+    useMeasureProvider(props)
+    return () => {
+      return slots?.default?.()
+    }
+  },
+)
+
 // ========================= Path Tracker ==========================
 
 const PathTrackerContextKey: InjectionKey<Ref<string[]>> = Symbol('PathTrackerContext')
 
-export function useFullPath(eventKey?: Ref<string>) {
+export function useFullPath(eventKey?: Ref<string | undefined>) {
   const parentKeyPath = inject(PathTrackerContextKey, ref(EmptyList))
   return computed(() => {
     return eventKey !== undefined ? [...parentKeyPath.value, eventKey.value] : parentKeyPath.value
@@ -44,3 +53,12 @@ export function usePathUserContextProvider(context: PathUserContextProps) {
 export function usePathUser() {
   return inject(PathUserContextKey, null)
 }
+
+export const PathUserProvider = defineComponent<PathUserContextProps>(
+  (props, { slots }) => {
+    usePathUserContextProvider(props)
+    return () => {
+      return slots?.default?.()
+    }
+  },
+)

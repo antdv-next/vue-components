@@ -1,6 +1,6 @@
 import type { InjectionKey } from 'vue'
 import type { MenuProps } from '../Menu'
-import { inject, provide } from 'vue'
+import { defineComponent, inject, provide } from 'vue'
 
 export interface PrivateContextProps {
   _internalRenderMenuItem?: MenuProps['_internalRenderMenuItem']
@@ -16,3 +16,12 @@ export function usePrivateProvider(context: PrivateContextProps) {
 export function usePrivateContext() {
   return inject(PrivateContextKey, {})
 }
+
+export const PrivateContextProvider = defineComponent<PrivateContextProps>(
+  (props, { slots }) => {
+    usePrivateProvider(props)
+    return () => {
+      return slots?.default?.()
+    }
+  },
+)
