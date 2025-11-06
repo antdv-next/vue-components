@@ -38,21 +38,20 @@ const PopupTrigger = defineComponent<PopupTriggerProps>(
       return rtl ? { ...placementsRtl, ...builtinPlacements } : { ...placements, ...builtinPlacements }
     })
 
+    const triggerMode = computed<MenuMode>(() => props.mode as MenuMode)
     const popupPlacement = computed(() => {
-      const mode = menuContext?.value?.mode
-      return (popupPlacementMap as any)[mode!]
+      return (popupPlacementMap as any)[triggerMode.value]
     })
     const defaultMotions = computed(() => menuContext?.value?.defaultMotions)
     const motion = computed(() => menuContext?.value?.motion)
-    const mode = computed(() => menuContext?.value?.mode)
 
     const targetMotion = computed(() => {
-      return { ...getMotion(mode.value!, motion.value, defaultMotions.value) }
+      return { ...getMotion(triggerMode.value, motion.value, defaultMotions.value) }
     })
 
     const targetMotionRef = shallowRef(targetMotion.value)
     watch(
-      () => menuContext?.value?.mode,
+      triggerMode,
       (mode) => {
         if (mode !== 'inline') {
           /**
@@ -64,6 +63,14 @@ const PopupTrigger = defineComponent<PopupTriggerProps>(
       },
       {
         immediate: true,
+      },
+    )
+    watch(
+      [motion, defaultMotions],
+      () => {
+        if (triggerMode.value !== 'inline') {
+          targetMotionRef.value = targetMotion.value as any
+        }
       },
     )
 
