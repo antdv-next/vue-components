@@ -168,7 +168,6 @@ const defaults = {
 
 const Menu = defineComponent<MenuProps>(
   (props = defaults, { slots, expose, attrs: _attrs }) => {
-    const _mounted = shallowRef(false)
     const containerRef = shallowRef<HTMLUListElement>()
     const uuid = useId(props?.id ? `rc-menu-uuid-${props.id}` : 'rc-menu-uuid')
     const isRtl = computed(() => props?.direction === 'rtl')
@@ -260,7 +259,6 @@ const Menu = defineComponent<MenuProps>(
     })
     onMounted(() => {
       mountRef.value = true
-      _mounted.value = true
     })
     onUnmounted(() => {
       mountRef.value = false
@@ -458,42 +456,44 @@ const Menu = defineComponent<MenuProps>(
       _internalRenderSubMenuItem: props._internalRenderSubMenuItem,
     }))
 
-    const menuContext = computed(() => ({
-      prefixCls: props.prefixCls || defaults.prefixCls,
-      rootClassName: props.rootClassName,
-      classNames: props.classNames,
-      styles: props.styles,
-      mode: internalMode.value as MenuMode,
-      openKeys: mergedOpenKeys.value,
-      rtl: isRtl.value,
-      // Disabled
-      disabled: props.disabled,
-      // Motion
-      motion: _mounted.value ? props.motion : undefined,
-      defaultMotions: _mounted.value ? props.defaultMotions : undefined,
-      // Active
-      activeKey: mergedActiveKey.value!,
-      onActive,
-      onInactive,
-      // Selection
-      selectedKeys: mergedSelectKeys.value,
-      // Level
-      inlineIndent: props.inlineIndent || defaults.inlineIndent,
-      // Popup
-      subMenuOpenDelay: props.subMenuOpenDelay || defaults.subMenuOpenDelay,
-      subMenuCloseDelay: props.subMenuCloseDelay || defaults.subMenuCloseDelay,
-      forceSubMenuRender: props.forceSubMenuRender,
-      builtinPlacements: props.builtinPlacements,
-      triggerSubMenuAction: props.triggerSubMenuAction || defaults.triggerSubMenuAction,
-      getPopupContainer: props.getPopupContainer!,
-      // Icon
-      itemIcon: props.itemIcon,
-      expandIcon: props.expandIcon,
-      // Events
-      onItemClick: onInternalClick,
-      onOpenChange: onInternalOpenChange,
-      popupRender: props.popupRender,
-    }))
+    const menuContext = computed(() => {
+      return {
+        prefixCls: props.prefixCls || defaults.prefixCls,
+        rootClassName: props.rootClassName,
+        classNames: props.classNames,
+        styles: props.styles,
+        mode: internalMode.value as MenuMode,
+        openKeys: mergedOpenKeys.value,
+        rtl: isRtl.value,
+        // Disabled
+        disabled: props.disabled,
+        // Motion
+        motion: props.motion,
+        defaultMotions: props.defaultMotions,
+        // Active
+        activeKey: mergedActiveKey.value!,
+        onActive,
+        onInactive,
+        // Selection
+        selectedKeys: mergedSelectKeys.value,
+        // Level
+        inlineIndent: props.inlineIndent || defaults.inlineIndent,
+        // Popup
+        subMenuOpenDelay: props.subMenuOpenDelay || defaults.subMenuOpenDelay,
+        subMenuCloseDelay: props.subMenuCloseDelay || defaults.subMenuCloseDelay,
+        forceSubMenuRender: props.forceSubMenuRender,
+        builtinPlacements: props.builtinPlacements,
+        triggerSubMenuAction: props.triggerSubMenuAction || defaults.triggerSubMenuAction,
+        getPopupContainer: props.getPopupContainer!,
+        // Icon
+        itemIcon: props.itemIcon,
+        expandIcon: props.expandIcon,
+        // Events
+        onItemClick: onInternalClick,
+        onOpenChange: onInternalOpenChange,
+        popupRender: props.popupRender,
+      }
+    })
 
     useMenuContextProvider(menuContext)
 

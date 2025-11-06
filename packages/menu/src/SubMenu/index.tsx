@@ -235,7 +235,6 @@ const InternalSubMenu = defineComponent<SubMenuProps>(
       )
 
       const popupContentTriggerMode = triggerModeRef.value
-
       // >>>>> Popup Content
       const renderPopupContent = () => {
         const originNode = (

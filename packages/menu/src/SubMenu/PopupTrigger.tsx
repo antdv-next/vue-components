@@ -42,10 +42,12 @@ const PopupTrigger = defineComponent<PopupTriggerProps>(
       const mode = menuContext?.value?.mode
       return (popupPlacementMap as any)[mode!]
     })
+    const defaultMotions = computed(() => menuContext?.value?.defaultMotions)
+    const motion = computed(() => menuContext?.value?.motion)
+    const mode = computed(() => menuContext?.value?.mode)
 
     const targetMotion = computed(() => {
-      const { motion, defaultMotions, mode } = menuContext?.value ?? {}
-      return { ...getMotion(mode!, motion, defaultMotions) }
+      return { ...getMotion(mode.value!, motion.value, defaultMotions.value) }
     })
 
     const targetMotionRef = shallowRef(targetMotion.value)
@@ -53,11 +55,11 @@ const PopupTrigger = defineComponent<PopupTriggerProps>(
       () => menuContext?.value?.mode,
       (mode) => {
         if (mode !== 'inline') {
-        /**
-         * PopupTrigger is only used for vertical and horizontal types.
-         * When collapsed is unfolded, the inline animation will destroy the vertical animation.
-         */
-          targetMotionRef.value = targetMotion as any
+          /**
+           * PopupTrigger is only used for vertical and horizontal types.
+           * When collapsed is unfolded, the inline animation will destroy the vertical animation.
+           */
+          targetMotionRef.value = targetMotion.value as any
         }
       },
       {

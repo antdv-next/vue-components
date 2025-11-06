@@ -12,19 +12,19 @@ function handleClick(info: any) {
 }
 
 const horizontalMotion: CSSMotionProps = {
-  name: 'rc-menu-open-slide-up',
+  name: 'vc-menu-open-slide-up',
   appear: true,
   css: true,
 }
 
 const verticalMotion: CSSMotionProps = {
-  name: 'rc-menu-open-zoom',
+  name: 'vc-menu-open-zoom',
   appear: true,
   css: true,
 }
 
 export const inlineMotion: CSSMotionProps = {
-  name: 'rc-menu-collapse',
+  name: 'vc-menu-collapse',
   appear: true,
   css: true,
 }
