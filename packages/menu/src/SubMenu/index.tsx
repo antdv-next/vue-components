@@ -198,14 +198,17 @@ const InternalSubMenu = defineComponent<SubMenuProps>(
       const children = slots.default?.()
       const popupId = domDataId.value && `${domDataId.value}-popup`
       // >>>>> Expand Icon
+      const expandIconProps = {
+        isOpen: open.value,
+        isSelected: childrenSelected.value,
+        isSubMenu: true,
+        disabled: mergedDisabled.value,
+      }
+
       const expandIconNode = (
         <Icon
           icon={mode.value !== 'horizontal' ? mergedExpandIcon.value : undefined}
-          props={{
-            ...props,
-            isOpen: open.value,
-            isSubMenu: true,
-          }}
+          props={expandIconProps}
         >
           <i class={`${subMenuPrefixCls.value}-arrow`} />
         </Icon>

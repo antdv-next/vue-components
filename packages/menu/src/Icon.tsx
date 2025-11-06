@@ -15,14 +15,12 @@ const Icon = defineComponent<IconProps>(
         return null
       }
       if (typeof icon === 'function') {
-        iconNode = createVNode((icon as any)(), {
-          ...iconProps,
-        })
+        iconNode = createVNode((icon as any)(iconProps))
       }
       else if (typeof icon !== 'boolean') {
         iconNode = icon
       }
-      return iconNode || slots.default?.() || null
+      return iconNode || slots.default?.(iconProps) || null
     }
   },
 )
