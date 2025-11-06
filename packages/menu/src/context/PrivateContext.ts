@@ -24,4 +24,7 @@ export const PrivateContextProvider = defineComponent<PrivateContextProps>(
       return slots?.default?.()
     }
   },
+  {
+    props: ['_internalRenderMenuItem', '_internalRenderSubMenuItem'],
+  },
 )

@@ -1,7 +1,7 @@
 import type { Ref } from 'vue'
 import type { MenuHoverEventHandler } from '../interface.ts'
 import { computed, watchEffect } from 'vue'
-import { useMenuContext } from '../context/MenuContext.ts'
+import { useMenuContext } from '../context/MenuContext.tsx'
 
 interface ActiveObj {
   active: Ref<boolean>

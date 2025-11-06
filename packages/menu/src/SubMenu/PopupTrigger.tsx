@@ -5,7 +5,7 @@ import Trigger from '@v-c/trigger'
 import { clsx } from '@v-c/util'
 import raf from '@v-c/util/dist/raf.ts'
 import { computed, defineComponent, shallowRef, watch } from 'vue'
-import { useMenuContext } from '../context/MenuContext.ts'
+import { useMenuContext } from '../context/MenuContext.tsx'
 import placements, { placementsRtl } from '../placements.ts'
 import { getMotion } from '../utils/motionUtil.ts'
 

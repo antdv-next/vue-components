@@ -39,6 +39,17 @@ export function useFullPath(eventKey?: Ref<string | undefined>) {
   })
 }
 
+export const PathTrackerProvider = defineComponent<{
+  value: string[]
+}>(
+  (props, { slots }) => {
+    provide(PathTrackerContextKey, computed(() => props.value))
+    return () => {
+      return slots?.default?.()
+    }
+  },
+)
+
 // =========================== Path User ===========================
 export interface PathUserContextProps {
   isSubPathKey: (pathKeys: string[], eventKey: string) => boolean
@@ -50,8 +61,10 @@ export function usePathUserContextProvider(context: PathUserContextProps) {
   provide(PathUserContextKey, context)
 }
 
-export function usePathUser() {
-  return inject(PathUserContextKey, null)
+export function usePathUserContext() {
+  return inject(PathUserContextKey, {
+    isSubPathKey: () => false,
+  })
 }
 
 export const PathUserProvider = defineComponent<PathUserContextProps>(
@@ -62,3 +75,16 @@ export const PathUserProvider = defineComponent<PathUserContextProps>(
     }
   },
 )
+
+// Export for compatibility
+export const PathTrackerContext = {
+  Provider: PathTrackerProvider,
+}
+
+export const PathRegisterContext = {
+  Provider: MeasureProvider,
+}
+
+export const PathUserContext = {
+  Provider: PathUserProvider,
+}

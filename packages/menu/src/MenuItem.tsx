@@ -6,8 +6,8 @@ import KeyCode from '@v-c/util/dist/KeyCode'
 import omit from '@v-c/util/dist/omit'
 import { toPropsRefs } from '@v-c/util/dist/props-util'
 import { computed, defineComponent, shallowRef, watch } from 'vue'
-import { useMenuId } from './context/IdContext.ts'
-import { useMenuContext } from './context/MenuContext.ts'
+import { useMenuId } from './context/IdContext.tsx'
+import { useMenuContext } from './context/MenuContext.tsx'
 import { useFullPath, useMeasure } from './context/PathContext.tsx'
 import { usePrivateContext } from './context/PrivateContext.ts'
 import useActive from './hooks/useActive.ts'
@@ -233,9 +233,6 @@ const MenuItem = defineComponent<MenuItemProps>(
         onCleanup(() => {
           measure?.unregisterPath(eventKey.value!, connectedKeyPath.value as any)
         })
-      },
-      {
-        immediate: true,
       },
     )
     return () => {

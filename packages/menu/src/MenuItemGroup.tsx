@@ -4,7 +4,7 @@ import { clsx } from '@v-c/util'
 import omit from '@v-c/util/dist/omit.ts'
 import { filterEmpty } from '@v-c/util/dist/props-util'
 import { computed, defineComponent } from 'vue'
-import { useMenuContext } from './context/MenuContext.ts'
+import { useMenuContext } from './context/MenuContext.tsx'
 import { useFullPath, useMeasure } from './context/PathContext.tsx'
 import { parseChildren } from './utils/commonUtil.ts'
 
@@ -65,7 +65,7 @@ const MenuItemGroup = defineComponent<MenuItemGroupProps>(
     return () => {
       const slots = ctx.slots
       const children = filterEmpty(slots.default ? slots.default() : [])
-      const childList = parseChildren(children, connectedKeyPath.value)
+      const childList = parseChildren(children, connectedKeyPath.value as any)
       if (measure) {
         return childList
       }
@@ -78,6 +78,7 @@ const MenuItemGroup = defineComponent<MenuItemGroupProps>(
   },
   {
     name: 'MenuItemGroup',
+    inheritAttrs: false,
   },
 )
 

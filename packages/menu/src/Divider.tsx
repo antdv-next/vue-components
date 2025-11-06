@@ -1,7 +1,7 @@
 import type { MenuDividerType } from './interface'
 import { clsx } from '@v-c/util'
 import { defineComponent } from 'vue'
-import { useMenuContext } from './context/MenuContext.ts'
+import { useMenuContext } from './context/MenuContext.tsx'
 import { useMeasure } from './context/PathContext.tsx'
 
 export type DividerProps = Omit<MenuDividerType, 'type'>

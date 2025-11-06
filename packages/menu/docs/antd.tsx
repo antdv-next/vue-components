@@ -128,6 +128,7 @@ const CommonMenu = defineComponent({
           triggerSubMenuAction={props.triggerSubMenuAction}
           onOpenChange={onOpenChange}
           selectedKeys={['3']}
+          openKeys={['4']}
           overflowedIndicator={overflowedIndicator.value}
           mode={props.mode}
           defaultMotions={props.defaultMotions}

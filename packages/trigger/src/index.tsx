@@ -774,7 +774,6 @@ export function generateTrigger(PortalComponent: any = Portal) {
           stretch,
           mobile,
         } = props
-        console.log(inMotion.value)
         return (
           <>
             <ResizeObserver

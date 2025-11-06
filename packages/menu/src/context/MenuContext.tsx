@@ -100,6 +100,9 @@ const InheritableContextProvider = defineComponent<InheritableContextProps>(
       return slots?.default?.()
     }
   },
+  {
+    inheritAttrs: false,
+  },
 )
 
 export default InheritableContextProvider

@@ -1,6 +1,6 @@
 import { clsx } from '@v-c/util'
 import { defineComponent } from 'vue'
-import { useMenuContext } from '../context/MenuContext.ts'
+import { useMenuContext } from '../context/MenuContext.tsx'
 
 const InternalSubMenuList = defineComponent(
   (_, { attrs, slots }) => {

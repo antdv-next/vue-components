@@ -1,6 +1,6 @@
 import type { CSSProperties, Ref } from 'vue'
 import { computed } from 'vue'
-import { useMenuContext } from '../context/MenuContext.ts'
+import { useMenuContext } from '../context/MenuContext.tsx'
 
 export default function useDirectionStyle(level: Ref<number>): Ref<CSSProperties | null> {
   const menuContext = useMenuContext()

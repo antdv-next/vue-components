@@ -6,17 +6,32 @@ import type {
   Components,
   ItemType,
   MenuClickEventHandler,
+  MenuInfo,
   MenuMode,
   PopupRender,
   RenderIconType,
   SelectEventHandler,
+  SelectInfo,
   TriggerSubMenuAction,
 } from './interface.ts'
 import type { SemanticName } from './SubMenu'
+import Overflow from '@v-c/overflow'
+import { classNames } from '@v-c/util'
 import useId from '@v-c/util/dist/hooks/useId.ts'
+import isEqual from '@v-c/util/dist/isEqual.ts'
+import { filterEmpty } from '@v-c/util/dist/props-util'
 import { computed, defineComponent, nextTick, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
-import { getFocusableElements, refreshElements } from './hooks/useAccessibility.ts'
-import useKeyRecords from './hooks/useKeyRecords.ts'
+import { useIdContextProvide } from './context/IdContext'
+import InheritableContextProvider, { useMenuContextProvider } from './context/MenuContext'
+import { MeasureProvider, PathUserProvider } from './context/PathContext'
+import { PrivateContextProvider } from './context/PrivateContext'
+import useAccessibility, { getFocusableElements, refreshElements } from './hooks/useAccessibility.ts'
+import useKeyRecords, { OVERFLOW_KEY } from './hooks/useKeyRecords.ts'
+import useMemoCallback from './hooks/useMemoCallback.ts'
+import MenuItem from './MenuItem'
+import SubMenu from './SubMenu'
+import { parseItems } from './utils/nodeUtil'
+import { warnItemProp } from './utils/warnUtil'
 
 /**
  * Menu modify after refactor:
@@ -139,11 +154,6 @@ export interface MenuProps {
   id?: string
 }
 
-interface LegacyMenuProps extends MenuProps {
-  openTransitionName?: string
-  openAnimation?: string
-}
-
 const defaults = {
   prefixCls: 'vc-menu',
   mode: 'vertical',
@@ -157,12 +167,16 @@ const defaults = {
 } as any
 
 const Menu = defineComponent<MenuProps>(
-  (props = defaults, { slots, expose, attrs }) => {
-    const mounted = shallowRef(false)
+  (props = defaults, { slots, expose, attrs: _attrs }) => {
+    const _mounted = shallowRef(false)
     const containerRef = shallowRef<HTMLUListElement>()
     const uuid = useId(props?.id ? `rc-menu-uuid-${props.id}` : 'rc-menu-uuid')
     const isRtl = computed(() => props?.direction === 'rtl')
     const childList = shallowRef<any[]>([])
+
+    // Provide uuid context
+    useIdContextProvide(computed(() => uuid))
+
     // ========================= Open =========================
     const innerOpenKeys = ref(props?.openKeys ?? props?.defaultOpenKeys)
     watch(
@@ -171,14 +185,16 @@ const Menu = defineComponent<MenuProps>(
         innerOpenKeys.value = props?.openKeys
       },
     )
-    const _mergedOpenKeys = ref<string[]>()
 
     const mergedOpenKeys = computed({
       get() {
+        if (props.openKeys) {
+          return props.openKeys
+        }
         return innerOpenKeys.value ?? EMPTY_LIST
       },
       set(value) {
-        _mergedOpenKeys.value = value
+        innerOpenKeys.value = value
       },
     })
 
@@ -244,6 +260,7 @@ const Menu = defineComponent<MenuProps>(
     })
     onMounted(() => {
       mountRef.value = true
+      _mounted.value = true
     })
     onUnmounted(() => {
       mountRef.value = false
@@ -260,27 +277,225 @@ const Menu = defineComponent<MenuProps>(
       getKeys,
       getSubPathKeys,
     } = useKeyRecords()
-    const registerPathContext = computed(() => {
-      return {
-        registerPath,
-        unregisterPath,
-      }
-    })
 
-    const pathUserContext = computed(() => {
-      return {
-        isSubPathKey,
-      }
-    })
+    // ======================= Context Providers ==============
+    const registerPathContext = computed(() => ({
+      registerPath,
+      unregisterPath,
+    }))
+
+    const pathUserContext = computed(() => ({
+      isSubPathKey,
+    }))
 
     // ======================== Active ========================
     const mergedActiveKey = shallowRef(props?.activeKey)
-    const onActive = (key: string) => {
+    watch(
+      () => props.activeKey,
+      () => {
+        mergedActiveKey.value = props?.activeKey
+      },
+    )
+
+    const onActive = useMemoCallback((key: string) => {
+      mergedActiveKey.value = key
+    })
+    const onInactive = useMemoCallback(() => {
+      mergedActiveKey.value = undefined
+    })
+
+    // ======================== Select ========================
+    // >>>>> Select keys
+    const innerSelectKeys = ref(props?.selectedKeys ?? props?.defaultSelectedKeys ?? EMPTY_LIST)
+    watch(
+      () => props.selectedKeys,
+      () => {
+        if (props.selectedKeys) {
+          innerSelectKeys.value = props.selectedKeys
+        }
+      },
+    )
+
+    const mergedSelectKeys = computed(() => {
+      const keys = innerSelectKeys.value
+      if (Array.isArray(keys)) {
+        return keys
+      }
+      if (keys === null || keys === undefined) {
+        return EMPTY_LIST
+      }
+      return [keys]
+    })
+
+    // >>>>> Trigger select
+    const triggerSelection = (info: MenuInfo) => {
+      if (props.selectable) {
+        // Insert or Remove
+        const { key: targetKey } = info
+        const exist = mergedSelectKeys.value.includes(targetKey)
+        let newSelectKeys: string[]
+
+        if (props.multiple) {
+          if (exist) {
+            newSelectKeys = mergedSelectKeys.value.filter(key => key !== targetKey)
+          }
+          else {
+            newSelectKeys = [...mergedSelectKeys.value, targetKey]
+          }
+        }
+        else {
+          newSelectKeys = [targetKey]
+        }
+
+        innerSelectKeys.value = newSelectKeys
+
+        // Trigger event
+        const selectInfo: SelectInfo = {
+          ...info,
+          selectedKeys: newSelectKeys,
+        }
+
+        if (exist) {
+          props.onDeselect?.(selectInfo)
+        }
+        else {
+          props.onSelect?.(selectInfo)
+        }
+      }
+
+      // Whatever selectable, always close it
+      if (!props.multiple && mergedOpenKeys.value.length && internalMode.value !== 'inline') {
+        triggerOpenKeys(EMPTY_LIST)
+      }
+    }
+
+    // =========================  Open =========================
+    /**
+     * Click for item. SubMenu do not have selection status
+     */
+    const onInternalClick = useMemoCallback((info: MenuInfo) => {
+      props.onClick?.(warnItemProp(info))
+      triggerSelection(info)
+    })
+
+    const onInternalOpenChange = useMemoCallback((key: string, open: boolean) => {
+      let newOpenKeys = mergedOpenKeys.value.filter(k => k !== key)
+
+      if (open) {
+        newOpenKeys.push(key)
+      }
+      else if (internalMode.value !== 'inline') {
+        // We need find all related popup to close
+        const subPathKeys = getSubPathKeys(key)
+        newOpenKeys = newOpenKeys.filter(k => !subPathKeys.has(k))
+      }
+
+      if (!isEqual(mergedOpenKeys.value, newOpenKeys, true)) {
+        triggerOpenKeys(newOpenKeys, true)
+      }
+    })
+
+    // ==================== Accessibility =====================
+    const triggerAccessibilityOpen = (key: string, open?: boolean) => {
+      const nextOpen = open ?? !mergedOpenKeys.value.includes(key)
+      onInternalOpenChange(key, nextOpen)
+    }
+    const setMergedActiveKey = (key: string) => {
       mergedActiveKey.value = key
     }
-    const onInactive = () => {
-      mergedActiveKey.value = undefined
-    }
+    // TODO: Add keyboard accessibility support
+    // const onInternalKeyDown = useAccessibility(...)
+    const onInternalKeyDown = useAccessibility(
+      internalMode as any,
+      mergedActiveKey as any,
+      isRtl as any,
+      uuid,
+
+      containerRef as any,
+      getKeys,
+      getKeyPath,
+
+      setMergedActiveKey,
+      triggerAccessibilityOpen,
+
+      (...args) => {
+        (_attrs as any)?.onKeydown?.(...args)
+      },
+    )
+
+    // ======================== Effect ========================
+    watch(
+      () => [props.activeKey, () => props.defaultActiveFirst, childList.value],
+      () => {
+        if (props.activeKey !== undefined) {
+          mergedActiveKey.value = props.activeKey
+        }
+        else if (props.defaultActiveFirst && childList.value[0]) {
+          mergedActiveKey.value = (childList.value[0] as any)?.key
+        }
+      },
+      { immediate: true },
+    )
+
+    const allVisible = computed(
+      () =>
+        lastVisibleIndex.value >= childList.value.length - 1
+        || internalMode.value !== 'horizontal'
+        || props?.disabledOverflow,
+    )
+
+    watch(allVisible, () => {
+      refreshOverflowKeys(
+        allVisible.value
+          ? EMPTY_LIST
+          : childList.value.slice(lastVisibleIndex.value + 1).map(child => (child as any).key as string),
+      )
+    })
+
+    // ======================= Context ========================
+    const privateContext = computed(() => ({
+      _internalRenderMenuItem: props._internalRenderMenuItem,
+      _internalRenderSubMenuItem: props._internalRenderSubMenuItem,
+    }))
+
+    const menuContext = computed(() => ({
+      prefixCls: props.prefixCls || defaults.prefixCls,
+      rootClassName: props.rootClassName,
+      classNames: props.classNames,
+      styles: props.styles,
+      mode: internalMode.value as MenuMode,
+      openKeys: mergedOpenKeys.value,
+      rtl: isRtl.value,
+      // Disabled
+      disabled: props.disabled,
+      // Motion
+      motion: _mounted.value ? props.motion : undefined,
+      defaultMotions: _mounted.value ? props.defaultMotions : undefined,
+      // Active
+      activeKey: mergedActiveKey.value!,
+      onActive,
+      onInactive,
+      // Selection
+      selectedKeys: mergedSelectKeys.value,
+      // Level
+      inlineIndent: props.inlineIndent || defaults.inlineIndent,
+      // Popup
+      subMenuOpenDelay: props.subMenuOpenDelay || defaults.subMenuOpenDelay,
+      subMenuCloseDelay: props.subMenuCloseDelay || defaults.subMenuCloseDelay,
+      forceSubMenuRender: props.forceSubMenuRender,
+      builtinPlacements: props.builtinPlacements,
+      triggerSubMenuAction: props.triggerSubMenuAction || defaults.triggerSubMenuAction,
+      getPopupContainer: props.getPopupContainer!,
+      // Icon
+      itemIcon: props.itemIcon,
+      expandIcon: props.expandIcon,
+      // Events
+      onItemClick: onInternalClick,
+      onOpenChange: onInternalOpenChange,
+      popupRender: props.popupRender,
+    }))
+
+    useMenuContextProvider(menuContext)
 
     expose({
       list: containerRef,
@@ -308,9 +523,130 @@ const Menu = defineComponent<MenuProps>(
         return key2element.get(itemKey) || null
       },
     })
+
     return () => {
-      // const allVisible = lastVisibleIndex >= childList.length - 1 || internalMode !== 'horizontal' || disabledOverflow;
-      return null
+      // 在 render 函数中获取 slots
+      const children = filterEmpty(slots.default?.())
+
+      // 解析 items 或 children 为节点列表
+      const parsedChildList = parseItems(
+        children,
+        props?.items,
+        EMPTY_LIST,
+        props?._internalComponents || {},
+        props?.prefixCls || defaults.prefixCls,
+      )
+
+      // 只有在列表真正改变时才更新，避免不必要的响应式触发
+      const shouldUpdate = childList.value.length !== parsedChildList.length
+        || !isEqual(
+          childList.value.map(n => (n as any)?.key),
+          parsedChildList.map(n => (n as any)?.key),
+        )
+
+      if (shouldUpdate) {
+        childList.value = parsedChildList
+      }
+
+      // Measure child list for path registration
+      const measureChildList = parseItems(
+        children,
+        props?.items,
+        EMPTY_LIST,
+        {},
+        props?.prefixCls || defaults.prefixCls,
+      )
+
+      // >>>>> Children
+      const wrappedChildList
+        = internalMode.value !== 'horizontal' || props?.disabledOverflow
+          ? childList.value // Need wrap for overflow dropdown that do not response for open
+          : childList.value.map((child, index) => (
+            // Always wrap provider to avoid sub node re-mount
+              <InheritableContextProvider
+                key={(child as any).key}
+                overflowDisabled={index > lastVisibleIndex.value}
+                classNames={props.classNames}
+                styles={props.styles}
+              >
+                {child}
+              </InheritableContextProvider>
+            ))
+      // >>>>> Container
+      const container = (
+        <Overflow
+          ref={containerRef}
+          prefixCls={`${props.prefixCls || defaults.prefixCls}-overflow`}
+          component="ul"
+          itemComponent={MenuItem}
+          class={classNames(
+            props.prefixCls || defaults.prefixCls,
+            `${props.prefixCls || defaults.prefixCls}-root`,
+            `${props.prefixCls || defaults.prefixCls}-${internalMode.value}`,
+            (_attrs.class as any) || '',
+            {
+              [`${props.prefixCls || defaults.prefixCls}-inline-collapsed`]: internalInlineCollapsed.value,
+              [`${props.prefixCls || defaults.prefixCls}-rtl`]: isRtl.value,
+            },
+            props.rootClassName,
+          )}
+          style={_attrs.style as CSSProperties}
+          data={wrappedChildList}
+          renderRawItem={(node: any) => {
+            return node
+          }}
+          renderRawRest={(omitItems: any[]) => {
+            // We use origin list since wrapped list use context to prevent open
+            const len = omitItems.length
+            const originOmitItems = len ? childList.value.slice(-len) : null
+
+            return (
+              <SubMenu
+                eventKey={OVERFLOW_KEY}
+                title={props.overflowedIndicator || defaults.overflowedIndicator}
+                disabled={allVisible.value}
+                internalPopupClose={len === 0}
+                popupClassName={props.overflowedIndicatorPopupClassName}
+              >
+                {originOmitItems}
+              </SubMenu>
+            )
+          }}
+          maxCount={
+            internalMode.value !== 'horizontal' || props?.disabledOverflow
+              ? (Overflow as any).INVALIDATE
+              : (Overflow as any).RESPONSIVE
+          }
+          ssr="full"
+          data-menu-list
+          onVisibleChange={(newLastIndex: number) => {
+            lastVisibleIndex.value = newLastIndex
+          }}
+          {
+            ...{
+              onKeydown: onInternalKeyDown,
+            }
+          }
+        />
+      )
+
+      // >>>>> Render
+      return (
+        <PrivateContextProvider{...privateContext.value}>
+          <PathUserProvider {...pathUserContext.value}>
+            {container}
+          </PathUserProvider>
+
+          {/* Measure menu keys. Add `display: none` to avoid some developer miss use the Menu */}
+          <div style={{ display: 'none' }} aria-hidden>
+            <MeasureProvider
+              {...registerPathContext.value}
+            >
+              {/* {measureChildList} */}
+            </MeasureProvider>
+          </div>
+        </PrivateContextProvider>
+      )
     }
   },
   {
