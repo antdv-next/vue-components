@@ -102,9 +102,11 @@ const CommonMenu = defineComponent({
   setup(props) {
     const children = ref(children1)
     const overflowedIndicator = ref<any>(undefined)
+    let toggle = false
 
     const toggleChildren = () => {
-      children.value = children.value === children1 ? children2 : children1
+      toggle = !toggle
+      children.value = toggle ? children2 : children1
     }
 
     const toggleOverflowedIndicator = () => {
@@ -159,12 +161,12 @@ export default defineComponent({
           <h3>horizontal and click</h3>
 
           <div style={{ margin: '20px' }}>
-            {/* <CommonMenu */}
-            {/*  mode="horizontal" */}
-            {/*  defaultMotions={motionMap} */}
-            {/*  triggerSubMenuAction="click" */}
-            {/*  updateChildrenAndOverflowedIndicator */}
-            {/* /> */}
+            <CommonMenu
+              mode="horizontal"
+              defaultMotions={motionMap}
+              triggerSubMenuAction="click"
+              updateChildrenAndOverflowedIndicator
+            />
           </div>
 
           <h3>vertical</h3>

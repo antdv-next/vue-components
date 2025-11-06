@@ -170,16 +170,30 @@ const InternalSubMenu = defineComponent<SubMenuProps>(
       }
     }
 
+    // Cache mode
+    const triggerModeRef = ref(mode.value)
+    watch(
+      mode,
+      () => {
+        if (mode.value !== 'inline' && validConnectedPath.value.length > 1) {
+          triggerModeRef.value = 'vertical'
+        }
+        else {
+          triggerModeRef.value = mode.value
+        }
+      },
+      { immediate: true },
+    )
     return () => {
       const {
         style,
-        class: className,
         title,
+        class: className,
         popupClassName,
         popupOffset,
         popupStyle,
         ...restProps
-      } = attrs as any
+      } = props
 
       const children = slots.default?.()
       const popupId = domDataId.value && `${domDataId.value}-popup`
@@ -214,24 +228,9 @@ const InternalSubMenu = defineComponent<SubMenuProps>(
           onFocus={onInternalFocus}
           {...activeProps}
         >
-          {title || props?.title}
+          { title }
           {expandIconNode}
         </div>
-      )
-
-      // Cache mode
-      const triggerModeRef = ref(mode.value)
-      watch(
-        mode,
-        () => {
-          if (mode.value !== 'inline' && validConnectedPath.value.length > 1) {
-            triggerModeRef.value = 'vertical'
-          }
-          else {
-            triggerModeRef.value = mode.value
-          }
-        },
-        { immediate: true },
       )
 
       const popupContentTriggerMode = triggerModeRef.value
@@ -247,7 +246,6 @@ const InternalSubMenu = defineComponent<SubMenuProps>(
               {children}
             </SubMenuList>
           </MenuContextProvider>
-
         )
 
         const mergedPopupRender = props?.popupRender || contextPopupRender.value
@@ -283,6 +281,7 @@ const InternalSubMenu = defineComponent<SubMenuProps>(
       let listNode = (
         <Overflow.Item
           role="none"
+          {...attrs as any}
           {...restProps}
           component="li"
           style={style}

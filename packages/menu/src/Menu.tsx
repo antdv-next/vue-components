@@ -599,7 +599,6 @@ const Menu = defineComponent<MenuProps>(
             // We use origin list since wrapped list use context to prevent open
             const len = omitItems.length
             const originOmitItems = len ? childList.value.slice(-len) : null
-
             return (
               <SubMenu
                 eventKey={OVERFLOW_KEY}
