@@ -23,10 +23,34 @@ const verticalMotion: CSSMotionProps = {
   css: true,
 }
 
+function collapseNode(el: Element) {
+  const _el = el as HTMLElement
+  _el.style.height = '0px'
+}
+
+function expandNode(el: Element) {
+  const _el = el as HTMLElement
+  _el.style.height = `${_el.scrollHeight}px`
+}
+
+function clearNode(el: Element) {
+  const _el = el as HTMLElement
+  _el.style.height = ''
+}
+
 export const inlineMotion: CSSMotionProps = {
   name: 'vc-menu-collapse',
   appear: true,
   css: true,
+  onBeforeAppear: collapseNode,
+  onAppear: expandNode,
+  onAfterAppear: clearNode,
+  onAfterEnter: clearNode,
+  onBeforeEnter: collapseNode,
+  onEnter: expandNode,
+  onBeforeLeave: expandNode,
+  onLeave: collapseNode,
+  onAfterLeave: clearNode,
 }
 
 const motionMap: Partial<Record<MenuMode | 'other', CSSMotionProps>> = {
@@ -172,13 +196,13 @@ export default defineComponent({
           <h3>vertical</h3>
 
           <div style={{ margin: '20px', width: '200px' }}>
-            {/* <CommonMenu mode="vertical" defaultMotions={motionMap} /> */}
+            <CommonMenu mode="vertical" defaultMotions={motionMap} />
           </div>
 
           <h3>inline</h3>
 
           <div style={{ margin: '20px', width: '400px' }}>
-            {/* <CommonMenu mode="inline" defaultOpenKeys={['1']} motion={inlineMotion} /> */}
+            <CommonMenu mode="inline" defaultOpenKeys={['1']} motion={inlineMotion} />
           </div>
         </div>
       </div>

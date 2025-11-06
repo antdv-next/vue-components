@@ -20,7 +20,16 @@ import { classNames } from '@v-c/util'
 import useId from '@v-c/util/dist/hooks/useId.ts'
 import isEqual from '@v-c/util/dist/isEqual.ts'
 import { filterEmpty } from '@v-c/util/dist/props-util'
-import { computed, defineComponent, nextTick, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
+import {
+  computed,
+  defineComponent,
+  nextTick,
+  onMounted,
+  onUnmounted,
+  ref,
+  shallowRef,
+  watch,
+} from 'vue'
 import { useIdContextProvide } from './context/IdContext'
 import InheritableContextProvider, { useMenuContextProvider } from './context/MenuContext'
 import { MeasureProvider, PathUserProvider } from './context/PathContext'
@@ -172,6 +181,17 @@ const Menu = defineComponent<MenuProps>(
     const uuid = useId(props?.id ? `rc-menu-uuid-${props.id}` : 'rc-menu-uuid')
     const isRtl = computed(() => props?.direction === 'rtl')
     const childList = shallowRef<any[]>([])
+    const mergedOverflowIndicator = computed(
+      () => props.overflowedIndicator ?? defaults.overflowedIndicator,
+    )
+    const overflowIndicatorVersion = ref(0)
+    watch(
+      mergedOverflowIndicator,
+      () => {
+        overflowIndicatorVersion.value += 1
+      },
+      { immediate: true },
+    )
 
     // Provide uuid context
     useIdContextProvide(computed(() => uuid))
@@ -601,8 +621,9 @@ const Menu = defineComponent<MenuProps>(
             const originOmitItems = len ? childList.value.slice(-len) : null
             return (
               <SubMenu
+                key={`${OVERFLOW_KEY}-${overflowIndicatorVersion.value}`}
                 eventKey={OVERFLOW_KEY}
-                title={props.overflowedIndicator || defaults.overflowedIndicator}
+                title={mergedOverflowIndicator.value}
                 disabled={allVisible.value}
                 internalPopupClose={len === 0}
                 popupClassName={props.overflowedIndicatorPopupClassName}

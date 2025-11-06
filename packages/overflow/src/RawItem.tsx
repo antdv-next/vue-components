@@ -21,7 +21,6 @@ export default defineComponent({
 
       const { className: contextClassName, ...restContext } = context.value
       const { class: classAttr, ...restAttrs } = attrs
-
       return (
         <OverflowContextProvider value={null}>
           <Item
