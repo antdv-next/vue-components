@@ -38,7 +38,7 @@ const PopupTrigger = defineComponent<PopupTriggerProps>(
       return rtl ? { ...placementsRtl, ...builtinPlacements } : { ...placements, ...builtinPlacements }
     })
 
-    const triggerMode = computed<MenuMode>(() => props.mode as MenuMode)
+    const triggerMode = computed<MenuMode>(() => props.mode)
     const popupPlacement = computed(() => {
       return (popupPlacementMap as any)[triggerMode.value]
     })

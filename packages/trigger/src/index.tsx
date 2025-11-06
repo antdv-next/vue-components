@@ -604,7 +604,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
       const hoverToHide = computed(() => hideActions.value?.has('hover'))
 
       let onPopupMouseEnter: any
-      let onPopupMouseLeave: undefined | any
+      let onPopupMouseLeave: undefined | ((event: MouseEvent) => void)
 
       const ignoreMouseTrigger = () => {
         return touchedRef.value
@@ -675,7 +675,11 @@ export function generateTrigger(PortalComponent: any = Portal) {
             ignoreMouseTrigger,
           )
 
-          onPopupMouseLeave = () => {
+          onPopupMouseLeave = (event: MouseEvent) => {
+            const { relatedTarget } = event
+            if (relatedTarget && inPopupOrChild(relatedTarget)) {
+              return
+            }
             triggerOpen(false, mouseLeaveDelay)
           }
         }
