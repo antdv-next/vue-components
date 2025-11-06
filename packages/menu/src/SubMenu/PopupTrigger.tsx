@@ -31,7 +31,7 @@ export interface PopupTriggerProps {
 const PopupTrigger = defineComponent<PopupTriggerProps>(
   (props, { slots }) => {
     const menuContext = useMenuContext()
-    const innerVisible = shallowRef(false)
+    const innerVisible = shallowRef(props.visible ?? false)
     const placement = computed(() => {
       const rtl = menuContext?.value?.rtl
       const builtinPlacements = menuContext?.value?.builtinPlacements
@@ -96,9 +96,9 @@ const PopupTrigger = defineComponent<PopupTriggerProps>(
         popupOffset,
         disabled,
         onVisibleChange,
+        prefixCls,
       } = props
       const {
-        prefixCls,
         rtl,
         rootClassName,
         mode,

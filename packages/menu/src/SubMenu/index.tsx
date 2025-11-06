@@ -6,7 +6,7 @@ import { classNames } from '@v-c/util'
 import warning from '@v-c/util/dist/warning'
 import { computed, defineComponent, ref, watch } from 'vue'
 import { useMenuId } from '../context/IdContext'
-import { useMenuContext } from '../context/MenuContext'
+import MenuContextProvider, { useMenuContext } from '../context/MenuContext'
 import { PathTrackerContext, useFullPath, useMeasure, usePathUserContext } from '../context/PathContext'
 import { usePrivateContext } from '../context/PrivateContext'
 import useActive from '../hooks/useActive'
@@ -79,7 +79,6 @@ const InternalSubMenu = defineComponent<SubMenuProps>(
     // ================================ Open ================================
     const originOpen = computed(() => {
       const key = props?.eventKey
-      console.log(openKeys.value, menuContext?.value)
       return key ? openKeys.value.includes(key) : false
     })
     const open = computed(() => !overflowDisabled.value && originOpen.value)
@@ -184,7 +183,6 @@ const InternalSubMenu = defineComponent<SubMenuProps>(
 
       const children = slots.default?.()
       const popupId = domDataId.value && `${domDataId.value}-popup`
-      console.log(open.value, !overflowDisabled.value, originOpen.value)
       // >>>>> Expand Icon
       const expandIconNode = (
         <Icon
@@ -236,12 +234,21 @@ const InternalSubMenu = defineComponent<SubMenuProps>(
         { immediate: true },
       )
 
+      const popupContentTriggerMode = triggerModeRef.value
+
       // >>>>> Popup Content
       const renderPopupContent = () => {
         const originNode = (
-          <SubMenuList id={popupId}>
-            {children}
-          </SubMenuList>
+          <MenuContextProvider
+            classNames={props.classNames}
+            styles={props.styles}
+            mode={popupContentTriggerMode === 'horizontal' ? 'vertical' : popupContentTriggerMode}
+          >
+            <SubMenuList id={popupId}>
+              {children}
+            </SubMenuList>
+          </MenuContextProvider>
+
         )
 
         const mergedPopupRender = props?.popupRender || contextPopupRender.value
