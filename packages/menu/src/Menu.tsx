@@ -642,7 +642,7 @@ const Menu = defineComponent<MenuProps>(
             <MeasureProvider
               {...registerPathContext.value}
             >
-              {/* {measureChildList} */}
+              {measureChildList}
             </MeasureProvider>
           </div>
         </PrivateContextProvider>

@@ -249,7 +249,6 @@ const Popup = defineComponent<PopupProps>(
           [`${prefixCls}-mobile`]: isMobile.value,
         },
       )
-      console.log(isNodeVisible.value, open.value)
       return (
         <Portal
           open={forceRender || isNodeVisible.value}
