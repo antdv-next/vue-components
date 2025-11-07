@@ -27,7 +27,8 @@
   ],
   "scripts": {
     "build": "vite build",
-    "test": "vitest"
+    "test": "vitest",
+    "prepublish": "pnpm build"
   },
   "peerDependencies": {
     "vue": "^3.0.0"
