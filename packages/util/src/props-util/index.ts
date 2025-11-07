@@ -65,3 +65,14 @@ export function toPropsRefs<T extends Record<string, any>, K extends keyof T>(ob
   })
   return _res as { [key in K]-?: Ref<T[key]> }
 }
+
+export function removeUndefined<T>(obj: T): Partial<T> {
+  const res: Partial<T> = {}
+  Object.keys(obj).forEach((key) => {
+    const value = obj[key as keyof T]
+    if (value !== undefined) {
+      res[key as keyof T] = value
+    }
+  })
+  return res
+}

@@ -39,6 +39,7 @@ const comps = [
   'fast-color',
   'color-picker',
   'overflow',
+  'menu',
 ]
 
 export function genListAlias() {

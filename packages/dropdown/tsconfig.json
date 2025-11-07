@@ -4,9 +4,9 @@
 
   },
   "include": [
-    "_src/**/*.ts",
-    "_src/**/*.tsx",
-    "_src/**/*.js",
-    "_src/**/*.jsx"
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.js",
+    "src/**/*.jsx"
   ]
 }
