@@ -1,14 +1,14 @@
-import { describe, expect, it, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { describe, expect, it, vi } from 'vitest'
 import { h, nextTick } from 'vue'
 import Menu, { Item as MenuItem, SubMenu } from '../src'
 import Icon from '../src/Icon'
 
-describe('Icon', () => {
+describe('icon', () => {
   it('should re-render when render props change', async () => {
-    const renderIcon = vi.fn((info?: { isOpen?: boolean }) =>
-      h('span', { class: 'icon-content' }, info?.isOpen ? 'open' : 'close'),
-    )
+    const renderIcon = vi.fn((info?: { isOpen?: boolean }) => {
+      return h('span', { class: 'icon-content' }, info?.isOpen ? 'open' : 'close')
+    })
 
     const wrapper = mount(Icon, {
       props: {
@@ -35,11 +35,12 @@ describe('Icon', () => {
   })
 })
 
-describe('Menu expand icon reactivity', () => {
+describe('menu expand icon reactivity', () => {
   it('should update expandIcon render props when submenu toggles', async () => {
     const states: boolean[] = []
     const expandIcon = vi.fn((info?: { isOpen?: boolean }) => {
       states.push(!!info?.isOpen)
+      console.log(info?.isOpen)
       return h('span', { class: 'expand-icon' }, info?.isOpen ? 'open' : 'close')
     })
 

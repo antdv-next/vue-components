@@ -10,7 +10,7 @@ import { classNames } from '@v-c/util'
 import { isDOM } from '@v-c/util/dist/Dom/findDOMNode'
 import { getShadowRoot } from '@v-c/util/dist/Dom/shadow'
 import { filterEmpty } from '@v-c/util/dist/props-util'
-import { computed, createVNode, defineComponent, nextTick, ref, shallowRef, useId, watch, watchEffect } from 'vue'
+import { computed, createVNode, defineComponent, nextTick, reactive, ref, shallowRef, useId, watch, watchEffect } from 'vue'
 import { TriggerContextProvider, useTriggerContext, useUniqueContext } from './context.ts'
 import useAction from './hooks/useAction.ts'
 import useAlign from './hooks/useAlign.ts'
@@ -217,14 +217,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
         }
       }
 
-      // ========================== Children ==========================
-      const child = computed(() => {
-        const childs = filterEmpty(slots?.default?.() ?? [])
-        return childs?.[0]
-      })
-      const originChildProps = computed(() => {
-        return child?.value?.props || {}
-      })
+      const originChildProps = reactive<Record<string, any>>({})
       const baseActionProps = shallowRef<Record<string, any>>({})
       const hoverActionProps = shallowRef<Record<string, any>>({})
       const cloneProps = computed<Record<string, any>>(() => ({
@@ -537,7 +530,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
           }
 
           // Pass to origin
-          originChildProps.value[eventName]?.(event, ...args)
+          originChildProps[eventName]?.(event, ...args)
         }
       }
 
@@ -549,7 +542,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
       watchEffect(() => {
         const nextCloneProps: Record<string, any> = {}
         if (touchToShow.value || touchToHide.value) {
-          nextCloneProps.onTouchStart = (...args: any[]) => {
+          nextCloneProps.onTouchstart = (...args: any[]) => {
             touchedRef.value = true
 
             if (openRef.value && touchToHide.value) {
@@ -560,7 +553,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
             }
 
             // Pass to origin
-            originChildProps.value.onTouchStart?.(...args)
+            originChildProps.onTouchstart?.(...args)
           }
         }
 
@@ -580,7 +573,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
             }
 
             // Pass to origin
-            originChildProps.value?.onClick?.(event, ...args)
+            originChildProps?.onClick?.(event, ...args)
             touchedRef.value = false
           }
         }
@@ -649,7 +642,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
           // Align Point
           if (alignPoint) {
             nextHoverProps.onMouseMove = (event: any) => {
-              originChildProps.value.onMouseMove?.(event)
+              originChildProps.onMousemove?.(event)
             }
           }
         }
@@ -710,7 +703,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
             event.preventDefault()
 
             // Pass to origin
-            originChildProps.value.onContextMenu?.(event, ...args)
+            originChildProps.onContextmenu?.(event, ...args)
           }
         }
         hoverActionProps.value = nextHoverProps
@@ -722,9 +715,11 @@ export function generateTrigger(PortalComponent: any = Portal) {
         rendedRef.value ||= props.forceRender || mergedOpen.value || inMotion.value
       })
       return () => {
+        // ========================== Children ==========================
+        const child = filterEmpty(slots?.default?.() ?? [])?.[0]
         // =========================== Render ===========================
         const mergedChildrenProps = {
-          ...originChildProps.value,
+          ...originChildProps,
           ...cloneProps.value,
         }
         // Pass props into cloneProps for nest usage
@@ -754,7 +749,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
         }
 
         // Child Node
-        const triggerNode = createVNode(child.value, {
+        const triggerNode = createVNode(child, {
           ...mergedChildrenProps,
           ...passedProps,
           ref: setTargetRef,

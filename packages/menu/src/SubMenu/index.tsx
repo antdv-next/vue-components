@@ -208,7 +208,10 @@ const InternalSubMenu = defineComponent<SubMenuProps>(
       const expandIconNode = (
         <Icon
           icon={mode.value !== 'horizontal' ? mergedExpandIcon.value : undefined}
-          props={expandIconProps}
+          props={{
+            ...props,
+            ...expandIconProps,
+          }}
         >
           <i class={`${subMenuPrefixCls.value}-arrow`} />
         </Icon>

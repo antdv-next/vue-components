@@ -8,7 +8,9 @@ export default defineConfig({
   plugins: [
     vue(),
     vueJsx(),
-    VueJsxAutoProps(),
+    VueJsxAutoProps({
+      defaultPropsToUndefined: true,
+    }),
   ],
   resolve: {
     alias: [

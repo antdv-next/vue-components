@@ -621,7 +621,6 @@ const Menu = defineComponent<MenuProps>(
             const originOmitItems = len ? childList.value.slice(-len) : null
             return (
               <SubMenu
-                key={`${OVERFLOW_KEY}-${overflowIndicatorVersion.value}`}
                 eventKey={OVERFLOW_KEY}
                 title={mergedOverflowIndicator.value}
                 disabled={allVisible.value}
