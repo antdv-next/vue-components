@@ -2,7 +2,7 @@ import type { CSSProperties } from 'vue'
 import type { SegmentedValue } from './index.tsx'
 import { clsx } from '@v-c/util'
 import { getTransitionProps } from '@v-c/util/dist/utils/transition.ts'
-import { computed, defineComponent, nextTick, shallowRef, Transition, watch } from 'vue'
+import { computed, defineComponent, onBeforeUnmount, shallowRef, Transition, watch } from 'vue'
 
 type ThumbReact = {
   left: number
@@ -91,6 +91,13 @@ const MotionThumb = defineComponent<MotionThumbInterface>(
 
     const prevStyle = shallowRef<ThumbReact>(null)
     const nextStyle = shallowRef<ThumbReact>(null)
+    let asyncId: ReturnType<typeof setTimeout> | null = null
+    const clearAsync = () => {
+      if (asyncId) {
+        clearTimeout(asyncId)
+        asyncId = null
+      }
+    }
     watch(
       () => props.value,
       () => {
@@ -113,6 +120,7 @@ const MotionThumb = defineComponent<MotionThumbInterface>(
       },
       {
         immediate: true,
+        flush: 'post',
       },
     )
 
@@ -133,11 +141,12 @@ const MotionThumb = defineComponent<MotionThumbInterface>(
       if (props.direction === 'rtl') {
         return toPX(-(nextStyle.value?.right as number))
       }
-      return toPX(prevStyle.value?.left as number)
+      return toPX(nextStyle.value?.left as number)
     })
 
     // =========================== Motion ===========================
     const onAppearStart = (_el: Element) => {
+      clearAsync()
       const el = _el as HTMLElement
       if (props.vertical) {
         el.style.transform = 'translateY(var(--thumb-start-top))'
@@ -145,26 +154,32 @@ const MotionThumb = defineComponent<MotionThumbInterface>(
         return
       }
       el.style.transform = 'translateX(var(--thumb-start-left))'
-      el.style.width = 'var(--thumb-start-width))'
+      el.style.width = 'var(--thumb-start-width)'
     }
 
-    const onAppearActive = async (_el: Element) => {
-      await nextTick()
+    const onAppearActive = (_el: Element) => {
       const el = _el as HTMLElement
-      if (props.vertical) {
-        el.style.transform = 'translateY(var(--thumb-active-top))'
-        el.style.height = 'var(--thumb-start-height)'
-        return
-      }
-      el.style.transform = 'translateX(var(--thumb-active-left))'
-      el.style.width = 'var(--thumb-active-width))'
+      clearAsync()
+      asyncId = setTimeout(() => {
+        if (props.vertical) {
+          el.style.transform = 'translateY(var(--thumb-active-top))'
+          el.style.height = 'var(--thumb-active-height)'
+          return
+        }
+        el.style.transform = 'translateX(var(--thumb-active-left))'
+        el.style.width = 'var(--thumb-active-width)'
+      })
     }
 
     const onVisibleChanged = () => {
+      clearAsync()
       prevStyle.value = null
       nextStyle.value = null
       props?.onMotionEnd?.()
     }
+    onBeforeUnmount(() => {
+      clearAsync()
+    })
     return () => {
       const { prefixCls } = props
       // =========================== Render ===========================
@@ -179,7 +194,6 @@ const MotionThumb = defineComponent<MotionThumbInterface>(
         onEnter: onAppearActive,
         onAfterEnter: () => onVisibleChanged(),
         onAfterAppear: () => onVisibleChanged(),
-        // onAfterLeave: () => onVisibleChanged(),
       })
       const visible = true
       const mergedStyle = {
