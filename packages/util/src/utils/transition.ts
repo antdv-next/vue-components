@@ -17,6 +17,24 @@ function getTransitionDirection(placement: SelectCommonPlacement | undefined) {
   return `slide-up`
 }
 
+function getEnterFromClass(transitionName: string) {
+  const appearCls = `${transitionName}-appear ${transitionName}-appear-prepare ${transitionName}-appear-start`
+  const enterCls = `${transitionName}-enter ${transitionName}-enter-prepare ${transitionName}-enter-start`
+  return `${transitionName} ${appearCls} ${enterCls}`
+}
+
+function getEnterActiveClass(transitionName: string) {
+  const appearCls = `${transitionName}-appear ${transitionName}-appear-prepare`
+  const enterCls = `${transitionName}-enter ${transitionName}-enter-prepare`
+  return `${transitionName} ${appearCls} ${enterCls}`
+}
+
+function getEnterToClass(transitionName: string) {
+  const appearCls = `${transitionName}-appear ${transitionName}-appear-active`
+  const enterCls = `${transitionName}-enter ${transitionName}-enter-active`
+  return `${transitionName} ${appearCls} ${enterCls}`
+}
+
 export function getTransitionProps(transitionName?: string, opt: TransitionProps = {}) {
   if (!transitionName) {
     return {}
@@ -29,9 +47,9 @@ export function getTransitionProps(transitionName?: string, opt: TransitionProps
         // appearFromClass: `${transitionName}-appear ${transitionName}-appear-prepare`,
         // appearActiveClass: `antdv-base-transtion`,
         // appearToClass: `${transitionName}-appear ${transitionName}-appear-active`,
-        enterFromClass: `${transitionName} ${transitionName}-enter ${transitionName}-enter-prepare ${transitionName}-enter-start`,
-        enterActiveClass: `${transitionName} ${transitionName}-enter ${transitionName}-enter-prepare`,
-        enterToClass: `${transitionName} ${transitionName}-enter ${transitionName}-enter-active`,
+        enterFromClass: getEnterFromClass(transitionName),
+        enterActiveClass: getEnterActiveClass(transitionName),
+        enterToClass: getEnterToClass(transitionName),
         leaveFromClass: `${transitionName} ${transitionName}-leave`,
         leaveActiveClass: `${transitionName} ${transitionName}-leave ${transitionName}-leave-active`,
         leaveToClass: `${transitionName} ${transitionName}-leave ${transitionName}-leave-active`,
