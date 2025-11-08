@@ -24,8 +24,8 @@ function getEnterFromClass(transitionName: string) {
 }
 
 function getEnterActiveClass(transitionName: string) {
-  const appearCls = `${transitionName}-appear ${transitionName}-appear-prepare`
-  const enterCls = `${transitionName}-enter ${transitionName}-enter-prepare`
+  const appearCls = `${transitionName}-appear ${transitionName}-appear-prepare ${transitionName}-appear-active`
+  const enterCls = `${transitionName}-enter ${transitionName}-enter-prepare ${transitionName}-enter-active`
   return `${transitionName} ${appearCls} ${enterCls}`
 }
 
