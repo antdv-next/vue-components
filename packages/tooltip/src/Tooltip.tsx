@@ -123,8 +123,10 @@ const Tooltip = defineComponent<TooltipProps>(
         showArrow = true,
         classNames,
         styles,
+        builtinPlacements,
         ...restProps
       } = props
+      const mergedPlacements = builtinPlacements ?? placements
       const children = filterEmpty(slots?.default?.())
       const getChildren = () => {
         const child = children?.[0]
@@ -157,7 +159,7 @@ const Tooltip = defineComponent<TooltipProps>(
             </Popup>
           )}
           action={trigger}
-          builtinPlacements={placements}
+          builtinPlacements={mergedPlacements}
           popupPlacement={placement}
           ref={triggerRef}
           popupAlign={align}
