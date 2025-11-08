@@ -24,7 +24,7 @@ export interface SegmentedLabeledOption<ValueType = SegmentedRawOption> {
 
 type ItemRender = (
   node: VueNode,
-  info: { item: SegmentedLabeledOption }
+  info: { item: SegmentedLabeledOption },
 ) => VueNode
 
 type SegmentedOptions<T = SegmentedRawOption> = (
@@ -95,70 +95,70 @@ const InternalSegmentedOption = defineComponent<{
   onMouseDown: () => void
   itemRender?: ItemRender
 }>(
-    // @ts-expect-error this
-    (props, { attrs }) => {
-      const handleChange = (event: Event) => {
-        if (props.disabled) {
-          return
-        }
-        props?.onChange?.(event as any, props.value)
+  // @ts-expect-error this
+  (props, { attrs }) => {
+    const handleChange = (event: Event) => {
+      if (props.disabled) {
+        return
       }
-      return () => {
-        const {
-          prefixCls,
-          disabled,
-          onMouseDown,
-          onKeyDown,
-          onKeyUp,
-          onBlur,
-          onFocus,
-          name,
-          checked,
-          classNames: segmentedClassNames,
-          styles,
-          label,
-          title,
-          data,
-          itemRender,
-        } = props
-        const itemContent = (
-          <label
-            class={clsx(
-              (attrs as any).class,
-              {
-                [`${prefixCls}-item-disabled`]: disabled,
-              },
-            )}
-            style={(attrs as any).style}
-            onMousedown={onMouseDown}
+      props?.onChange?.(event as any, props.value)
+    }
+    return () => {
+      const {
+        prefixCls,
+        disabled,
+        onMouseDown,
+        onKeyDown,
+        onKeyUp,
+        onBlur,
+        onFocus,
+        name,
+        checked,
+        classNames: segmentedClassNames,
+        styles,
+        label,
+        title,
+        data,
+        itemRender,
+      } = props
+      const itemContent = (
+        <label
+          class={clsx(
+            (attrs as any).class,
+            {
+              [`${prefixCls}-item-disabled`]: disabled,
+            },
+          )}
+          style={(attrs as any).style}
+          onMousedown={onMouseDown}
+        >
+          <input
+            name={name}
+            class={`${prefixCls}-item-input`}
+            type="radio"
+            disabled={disabled}
+            checked={checked}
+            onChange={handleChange}
+            onFocus={onFocus}
+            onBlur={onBlur}
+            onKeydown={onKeyDown}
+            onKeyup={onKeyUp}
+          />
+          <div
+            class={clsx(`${prefixCls}-item-label`, segmentedClassNames?.label)}
+            title={title}
+            role="radio"
+            aria-checked={checked}
+            style={styles?.label}
           >
-            <input
-              name={name}
-              class={`${prefixCls}-item-input`}
-              type="radio"
-              disabled={disabled}
-              checked={checked}
-              onChange={handleChange}
-              onFocus={onFocus}
-              onBlur={onBlur}
-              onKeydown={onKeyDown}
-              onKeyup={onKeyUp}
-            />
-            <div
-              class={clsx(`${prefixCls}-item-label`, segmentedClassNames?.label)}
-              title={title}
-              role="radio"
-              aria-checked={checked}
-              style={styles?.label}
-            >
-              {typeof label === 'function' ? (label as any)?.() : label}
-            </div>
-          </label>
-        )
-        return itemRender?.(itemContent, { item: data })
-      }
-    },
-    )
+            {typeof label === 'function' ? (label as any)?.() : label}
+          </div>
+        </label>
+      )
+      return itemRender?.(itemContent, { item: data })
+    }
+  },
+)
 
 const defaults = {
   prefixCls: 'vc-segmented',

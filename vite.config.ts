@@ -76,6 +76,6 @@ export default defineConfig({
     ],
   },
   optimizeDeps: {
-    include: ['shiki'],
+    // include: ['shiki'],
   },
 })

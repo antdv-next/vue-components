@@ -75,7 +75,6 @@ const defaults = {
 } as any
 const MotionThumb = defineComponent<MotionThumbInterface>(
   (props = defaults) => {
-    const thumbRef = shallowRef<HTMLDivElement>()
     const preValue = shallowRef(props.value)
     // =========================== Effect ===========================
     const findValueElement = (val: SegmentedValue) => {
@@ -188,12 +187,9 @@ const MotionThumb = defineComponent<MotionThumbInterface>(
         return null
       }
       const transitionProps = getTransitionProps(props?.motionName, {
-        onBeforeAppear: onAppearStart,
-        onAppear: onAppearActive,
         onBeforeEnter: onAppearStart,
         onEnter: onAppearActive,
         onAfterEnter: () => onVisibleChanged(),
-        onAfterAppear: () => onVisibleChanged(),
       })
       const visible = true
       const mergedStyle = {
@@ -208,7 +204,7 @@ const MotionThumb = defineComponent<MotionThumbInterface>(
       } as CSSProperties
       return (
         <Transition {...transitionProps}>
-          {visible ? <div ref={thumbRef} style={mergedStyle} class={clsx(`${prefixCls}-thumb`)} /> : null}
+          {visible ? <div style={mergedStyle} class={clsx(`${prefixCls}-thumb`)} /> : null}
         </Transition>
       )
     }

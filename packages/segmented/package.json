@@ -16,6 +16,10 @@
     "./dist/*.d.ts": "./dist/*.d.ts",
     "./package.json": "./package.json"
   },
+  "files": [
+    "dist",
+    "package.json"
+  ],
   "main": "./dist/index.js",
   "scripts": {
     "build": "vite build",
