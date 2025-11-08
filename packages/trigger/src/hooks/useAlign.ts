@@ -9,7 +9,7 @@ import type {
 import { isDOM } from '@v-c/util/dist/Dom/findDOMNode'
 import isVisible from '@v-c/util/dist/Dom/isVisible'
 import { rafDebounce } from '@v-c/util/dist/raf'
-import { computed, nextTick, reactive, ref, shallowRef, toRefs, watch, watchEffect } from 'vue'
+import { computed, nextTick, ref, shallowRef, watch, watchEffect } from 'vue'
 import { collectScroller, getVisibleArea, getWin, toNum } from '../util'
 
 type Rect = Record<'x' | 'y' | 'width' | 'height', number>
@@ -93,15 +93,15 @@ function reversePoints(points: Points, index: number): string {
 
 export default function useAlign(
   open: Ref<boolean>,
-  popupEle: Ref< HTMLElement>,
+  popupEle: Ref<HTMLElement>,
   target: Ref<HTMLElement | [x: number, y: number]>,
   placement: Ref<string>,
   builtinPlacements: Ref<any>,
   popupAlign?: Ref<AlignType | undefined>,
   onPopupAlign?: TriggerProps['onPopupAlign'],
-  mobile?: Ref< boolean | undefined>,
+  mobile?: Ref<boolean | undefined>,
 ) {
-  const offsetInfo = reactive({
+  const offsetInfo = ref({
     ready: false,
     offsetX: 0,
     offsetY: 0,
@@ -674,7 +674,7 @@ export default function useAlign(
         scaleY,
         align: nextAlignInfo,
       }
-      Object.assign(offsetInfo, nextOffsetInfo)
+      offsetInfo.value = nextOffsetInfo
     }
   }
   // 给onAlign添加一个requestAnimationFrame的效果，合并多次调用
@@ -704,7 +704,7 @@ export default function useAlign(
 
   // Reset ready status when placement & open changed
   const resetReady = () => {
-    offsetInfo.ready = false
+    offsetInfo.value.ready = false
   }
   watch(placement, async () => {
     await nextTick()
@@ -719,18 +719,17 @@ export default function useAlign(
     }
   })
 
-  const { ready, offsetX, offsetR, offsetY, offsetB, align, arrowY, arrowX, scaleY, scaleX } = toRefs(offsetInfo)
   return [
-    ready,
-    offsetX,
-    offsetY,
-    offsetR,
-    offsetB,
-    arrowX,
-    arrowY,
-    scaleX,
-    scaleY,
-    align,
+    computed(() => offsetInfo.value?.ready),
+    computed(() => offsetInfo.value?.offsetX),
+    computed(() => offsetInfo.value?.offsetY),
+    computed(() => offsetInfo.value?.offsetR),
+    computed(() => offsetInfo.value?.offsetB),
+    computed(() => offsetInfo.value?.arrowX),
+    computed(() => offsetInfo.value?.arrowY),
+    computed(() => offsetInfo.value?.scaleX),
+    computed(() => offsetInfo.value?.scaleY),
+    computed(() => offsetInfo.value?.align),
     triggerAlign,
   ] as const
 }
