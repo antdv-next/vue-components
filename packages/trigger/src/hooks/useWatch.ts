@@ -33,6 +33,7 @@ export default function useWatch(
       mergedList.forEach((scroller) => {
         scroller!.addEventListener('scroll', notifyScroll, { passive: true })
       })
+
       win!.addEventListener('resize', notifyScroll, { passive: true })
 
       // First time always do align

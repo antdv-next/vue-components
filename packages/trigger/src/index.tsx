@@ -118,7 +118,7 @@ export interface TriggerProps {
 
   // // ========================== Mobile ==========================
   /**
-   * @private
+   * @private Bump fixed position at bottom in mobile.
    * Will replace the config of root props.
    * This will directly trade as mobile view which will not check what real is.
    * This is internal usage currently, do not use in your prod.
@@ -771,7 +771,6 @@ export function generateTrigger(PortalComponent: any = Portal) {
           stretch,
           mobile,
         } = props
-        console.log(offsetB.value, offsetX.value, offsetY.value, offsetR.value)
         return (
           <>
             <ResizeObserver
