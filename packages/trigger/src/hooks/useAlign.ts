@@ -706,13 +706,15 @@ export default function useAlign(
   const resetReady = () => {
     offsetInfo.value.ready = false
   }
-  watch(placement, () => {
+  watch(placement, async () => {
+    await nextTick()
     resetReady()
   })
 
-  watchEffect(() => {
+  watchEffect(async () => {
+    resetFlipCache()
+    await nextTick()
     if (!open.value) {
-      resetFlipCache()
       resetReady()
     }
   })

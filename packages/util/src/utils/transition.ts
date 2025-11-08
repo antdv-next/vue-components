@@ -30,8 +30,8 @@ function getEnterActiveClass(transitionName: string) {
 }
 
 function getEnterToClass(transitionName: string) {
-  const appearCls = `${transitionName}-appear ${transitionName}-appear-active`
-  const enterCls = `${transitionName}-enter ${transitionName}-enter-active`
+  const appearCls = `${transitionName}-appear-active ${transitionName}-appear-active`
+  const enterCls = `${transitionName}-enter-active ${transitionName}-enter-active`
   return `${transitionName} ${appearCls} ${enterCls}`
 }
 
@@ -56,6 +56,7 @@ export function getTransitionProps(transitionName?: string, opt: TransitionProps
         ...opt,
       }
     : { css: false, ...opt }
+  console.log(transitionProps)
   return transitionProps
 }
 

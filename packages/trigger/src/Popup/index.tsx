@@ -220,17 +220,9 @@ const Popup = defineComponent<PopupProps>(
       const baseTransitionProps: any = getTransitionProps(popupMotionName, mergedPopupMotion)
       const mergedTransitionProps = {
         ...baseTransitionProps,
-        onBeforeAppear: (element: Element) => {
-          onPrepare?.()
-          baseTransitionProps?.onBeforeAppear?.(element)
-        },
         onBeforeEnter: (element: Element) => {
           onPrepare?.()
           baseTransitionProps?.onBeforeEnter?.(element)
-        },
-        onAfterAppear: (element: Element) => {
-          baseTransitionProps?.onAfterAppear?.(element)
-          onVisibleChanged?.(true)
         },
         onAfterEnter: (element: Element) => {
           baseTransitionProps?.onAfterEnter?.(element)
