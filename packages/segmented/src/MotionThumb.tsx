@@ -1,11 +1,10 @@
-import type { CSSProperties, PropType, Ref, TransitionProps } from 'vue'
-import type { SegmentedValue } from '.'
-import { addClass, removeClass } from '@v-c/util/dist/Dom/class.ts'
-import { anyType } from '@v-c/util/dist/type'
-import { classNames } from '@v-c/util'
-import { computed, defineComponent, onBeforeUnmount, ref, shallowRef, Transition, watch } from 'vue'
+import type { CSSProperties } from 'vue'
+import type { SegmentedValue } from './index.tsx'
+import { clsx } from '@v-c/util'
+import { getTransitionProps } from '@v-c/util/dist/utils/transition.ts'
+import { computed, defineComponent, nextTick, shallowRef, Transition, watch } from 'vue'
 
-type ThumbRect = {
+type ThumbReact = {
   left: number
   right: number
   width: number
@@ -15,7 +14,7 @@ type ThumbRect = {
 } | null
 
 export interface MotionThumbInterface {
-  containerRef: Ref<HTMLDivElement>
+  containerRef: HTMLDivElement
   value: SegmentedValue
   getValueIndex: (value: SegmentedValue) => number
   prefixCls: string
@@ -26,16 +25,22 @@ export interface MotionThumbInterface {
   vertical?: boolean
 }
 
-function calcThumbStyle(targetElement: HTMLElement | null | undefined, vertical?: boolean): ThumbRect {
+function calcThumbStyle(targetElement: HTMLElement | null | undefined, vertical?: boolean): ThumbReact {
   if (!targetElement)
     return null
 
-  const style: ThumbRect = {
+  const style: ThumbReact = {
     left: targetElement.offsetLeft,
-    right: (targetElement.parentElement!.clientWidth as number) - targetElement.clientWidth - targetElement.offsetLeft,
+    right:
+            (targetElement.parentElement!.clientWidth as number)
+            - targetElement.clientWidth
+            - targetElement.offsetLeft,
     width: targetElement.clientWidth,
     top: targetElement.offsetTop,
-    bottom: (targetElement.parentElement!.clientHeight as number) - targetElement.clientHeight - targetElement.offsetTop,
+    bottom:
+            (targetElement.parentElement!.clientHeight as number)
+            - targetElement.clientHeight
+            - targetElement.offsetTop,
     height: targetElement.clientHeight,
   }
 
@@ -65,152 +70,118 @@ function toPX(value: number | undefined): string | undefined {
   return value !== undefined ? `${value}px` : undefined
 }
 
-const MotionThumb = defineComponent({
-  props: {
-    value: anyType<SegmentedValue>(),
-    getValueIndex: anyType<(value: SegmentedValue) => number>(),
-    prefixCls: anyType<string>(),
-    motionName: anyType<string>(),
-    onMotionStart: anyType<VoidFunction>(),
-    onMotionEnd: anyType<VoidFunction>(),
-    direction: anyType<'ltr' | 'rtl'>(),
-    containerRef: Object as PropType<Ref>,
-    vertical: Boolean,
-  },
-  emits: ['motionStart', 'motionEnd'],
-  setup(props, { emit }) {
+const defaults = {
+  vertical: false,
+} as any
+const MotionThumb = defineComponent<MotionThumbInterface>(
+  (props = defaults) => {
     const thumbRef = shallowRef<HTMLDivElement>()
-
+    const preValue = shallowRef(props.value)
     // =========================== Effect ===========================
     const findValueElement = (val: SegmentedValue) => {
-      const index = props.getValueIndex(val)
-      const ele = props.containerRef!.value?.querySelectorAll(
-        `.${props.prefixCls}-item`,
+      const getValueIndex = props.getValueIndex
+      const containerRef = props.containerRef
+      const prefixCls = props.prefixCls
+      const index = getValueIndex(val)
+      const ele = containerRef?.querySelectorAll<HTMLDivElement>(
+        `.${prefixCls}-item`,
       )[index]
-
       return ele?.offsetParent && ele
     }
 
-    const prevStyle = ref<ThumbRect>(null)
-    const nextStyle = ref<ThumbRect>(null)
-
+    const prevStyle = shallowRef<ThumbReact>(null)
+    const nextStyle = shallowRef<ThumbReact>(null)
     watch(
       () => props.value,
-      (value, prevValue) => {
-        const { vertical = false } = props
-        const prev = findValueElement(prevValue)
-        const next = findValueElement(value)
+      () => {
+        if (preValue.value !== props.value) {
+          const prev = findValueElement(preValue.value)
+          const next = findValueElement(props.value)
 
-        const calcPrevStyle = calcThumbStyle(prev, vertical)
-        const calcNextStyle = calcThumbStyle(next, vertical)
-
-        prevStyle.value = calcPrevStyle
-        nextStyle.value = calcNextStyle
-
-        if (prev && next) {
-          emit('motionStart')
-        }
-        else {
-          emit('motionEnd')
+          const calcPrevStyle = calcThumbStyle(prev, props.vertical)
+          const calcNextStyle = calcThumbStyle(next, props.vertical)
+          preValue.value = props.value
+          prevStyle.value = calcPrevStyle
+          nextStyle.value = calcNextStyle
+          if (prev && next) {
+            props.onMotionStart?.()
+          }
+          else {
+            props?.onMotionEnd?.()
+          }
         }
       },
-      { flush: 'post' },
+      {
+        immediate: true,
+      },
     )
 
     const thumbStart = computed(() => {
-      const { vertical = false, direction } = props
-      if (vertical) {
+      if (props.vertical) {
         return toPX(prevStyle.value?.top ?? 0)
       }
-
-      if (direction === 'rtl') {
+      if (props.direction === 'rtl') {
         return toPX(-(prevStyle.value?.right as number))
       }
-
       return toPX(prevStyle.value?.left as number)
     })
 
     const thumbActive = computed(() => {
-      const { vertical = false, direction } = props
-      if (vertical) {
+      if (props.vertical) {
         return toPX(nextStyle.value?.top ?? 0)
       }
-
-      if (direction === 'rtl') {
+      if (props.direction === 'rtl') {
         return toPX(-(nextStyle.value?.right as number))
       }
-
-      return toPX(nextStyle.value?.left as number)
+      return toPX(prevStyle.value?.left as number)
     })
 
     // =========================== Motion ===========================
-    let timeId: any
-    const onAppearStart: TransitionProps['onBeforeEnter'] = (el: HTMLDivElement) => {
-      const { vertical = false } = props
-      clearTimeout(timeId)
-      // // 使用nextTick会使反方向选择的动画表现错误，但是ant-design-vue中表现却正常，不确定原因先注释保留
-      // nextTick(() => {
-      //
-      // })
-      if (el) {
-        if (vertical) {
-          el.style.transform = `translateY(var(--thumb-start-top))`
-          el.style.height = `var(--thumb-start-height)`
-        }
-        else {
-          el.style.transform = `translateX(var(--thumb-start-left))`
-          el.style.width = `var(--thumb-start-width)`
-        }
+    const onAppearStart = (_el: Element) => {
+      const el = _el as HTMLElement
+      if (props.vertical) {
+        el.style.transform = 'translateY(var(--thumb-start-top))'
+        el.style.height = 'var(--thumb-start-height)'
+        return
       }
+      el.style.transform = 'translateX(var(--thumb-start-left))'
+      el.style.width = 'var(--thumb-start-width))'
     }
 
-    const onAppearActive: TransitionProps['onEnter'] = (el: HTMLDivElement) => {
-      const { vertical = false, motionName } = props
-      timeId = setTimeout(() => {
-        if (el) {
-          if (vertical) {
-            el.style.transform = `translateY(var(--thumb-active-top))`
-            el.style.height = `var(--thumb-active-height)`
-          }
-          else {
-            addClass(el, `${motionName}-appear-active`)
-            el.style.transform = `translateX(var(--thumb-active-left))`
-            el.style.width = `var(--thumb-active-width)`
-          }
-        }
-      })
+    const onAppearActive = async (_el: Element) => {
+      await nextTick()
+      const el = _el as HTMLElement
+      if (props.vertical) {
+        el.style.transform = 'translateY(var(--thumb-active-top))'
+        el.style.height = 'var(--thumb-start-height)'
+        return
+      }
+      el.style.transform = 'translateX(var(--thumb-active-left))'
+      el.style.width = 'var(--thumb-active-width))'
     }
 
-    const onAppearEnd: TransitionProps['onAfterEnter'] = (el: HTMLDivElement) => {
+    const onVisibleChanged = () => {
       prevStyle.value = null
       nextStyle.value = null
-      if (el) {
-        el.style.transform = ''
-        el.style.width = ''
-        el.style.transition = 'none'
-        el.style.height = ''
-        el.style.left = ''
-        el.style.top = ''
-        el.style.right = ''
-        removeClass(el, `${props.motionName}-appear-active`)
-      }
-      emit('motionEnd')
+      props?.onMotionEnd?.()
     }
-
-    onBeforeUnmount(() => {
-      clearTimeout(timeId)
-    })
     return () => {
+      const { prefixCls } = props
       // =========================== Render ===========================
       // No need motion when nothing exist in queue
       if (!prevStyle.value || !nextStyle.value) {
         return null
       }
-
-      const {
-        prefixCls,
-      } = props
-
+      const transitionProps = getTransitionProps(props?.motionName, {
+        onBeforeAppear: onAppearStart,
+        onAppear: onAppearActive,
+        onBeforeEnter: onAppearStart,
+        onEnter: onAppearActive,
+        onAfterEnter: () => onVisibleChanged(),
+        onAfterAppear: () => onVisibleChanged(),
+        // onAfterLeave: () => onVisibleChanged(),
+      })
+      const visible = true
       const mergedStyle = {
         '--thumb-start-left': thumbStart.value,
         '--thumb-start-width': toPX(prevStyle.value?.width),
@@ -221,26 +192,13 @@ const MotionThumb = defineComponent({
         '--thumb-active-top': thumbActive.value,
         '--thumb-active-height': toPX(nextStyle.value?.height),
       } as CSSProperties
-
-      // It's little ugly which should be refactor when @umi/test update to latest jsdom
-      const motionProps = {
-        ref: thumbRef,
-        style: mergedStyle,
-        class: classNames(`${prefixCls}-thumb`),
-      }
-
       return (
-        <Transition
-          appear
-          onBeforeEnter={onAppearStart}
-          onEnter={onAppearActive}
-          onAfterEnter={onAppearEnd}
-        >
-          <div {...motionProps}></div>
+        <Transition {...transitionProps}>
+          {visible ? <div ref={thumbRef} style={mergedStyle} class={clsx(`${prefixCls}-thumb`)} /> : null}
         </Transition>
       )
     }
   },
-})
+)
 
 export default MotionThumb

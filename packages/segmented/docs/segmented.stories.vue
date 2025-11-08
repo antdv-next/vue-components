@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import Basic from './basic.vue'
-import Rtl from './rtl.vue'
+import Basic from './basic'
+// import Rtl from './rtl.vue'
 import './assets/style.less'
 </script>
 
@@ -10,7 +10,7 @@ import './assets/style.less'
       <Basic />
     </Variant>
     <Variant title="rtl">
-      <Rtl />
+      <!--      <Rtl /> -->
     </Variant>
   </Story>
 </template>
