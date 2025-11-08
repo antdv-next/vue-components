@@ -92,8 +92,54 @@ async function runAlign(triggerAlign: VoidFunction) {
   await nextTick()
 }
 
+let scope: ReturnType<typeof effectScope> | null = null
+
+async function setupAlignCase(placements: BuildInPlacements) {
+  const { element: target } = createRectElement({
+    x: 160,
+    y: 0,
+    width: 30,
+    height: 30,
+  })
+  const { element: popup } = createRectElement({
+    x: 0,
+    y: 0,
+    width: 80,
+    height: 30,
+  })
+  document.body.appendChild(target)
+  document.body.appendChild(popup)
+
+  const open = ref(true)
+  const targetRef = shallowRef(target)
+  const popupRef = shallowRef(popup)
+  const placement = ref('right')
+  const builtinPlacements = ref(placements)
+
+  scope = effectScope()
+  let alignInfo: ReturnType<typeof useAlign>[9]
+  let triggerAlign: VoidFunction
+
+  scope.run(() => {
+    ;[, , , , , , , , , alignInfo, triggerAlign] = useAlign(
+      open,
+      popupRef,
+      targetRef,
+      placement,
+      builtinPlacements,
+      ref(),
+      undefined,
+      ref(false),
+    )
+  })
+
+  await nextTick()
+  await runAlign(triggerAlign)
+
+  return { alignInfo, triggerAlign }
+}
+
 describe('useAlign auto flip recovery', () => {
-  let scope: ReturnType<typeof effectScope> | null = null
   let getComputedStyleSpy: ReturnType<typeof vi.spyOn>
   let rafSpy: ReturnType<typeof vi.spyOn>
   let cafSpy: ReturnType<typeof vi.spyOn>
@@ -141,7 +187,7 @@ describe('useAlign auto flip recovery', () => {
     vi.useRealTimers()
   })
 
-  it('restores preferred placement once space becomes available again', async () => {
+  it('restores preferred placement once space becomes available again (visibleFirst)', async () => {
     const placements: BuildInPlacements = {
       right: {
         points: ['cl', 'cr'],
@@ -159,46 +205,33 @@ describe('useAlign auto flip recovery', () => {
       },
     }
 
-    const { element: target } = createRectElement({
-      x: 160,
-      y: 0,
-      width: 30,
-      height: 30,
-    })
-    const { element: popup } = createRectElement({
-      x: 0,
-      y: 0,
-      width: 80,
-      height: 30,
-    })
-    document.body.appendChild(target)
-    document.body.appendChild(popup)
+    const { alignInfo, triggerAlign } = await setupAlignCase(placements)
 
-    const open = ref(true)
-    const targetRef = shallowRef(target)
-    const popupRef = shallowRef(popup)
-    const placement = ref('right')
-    const builtinPlacements = ref(placements)
+    expect(alignInfo.value.points?.[0]).toBe('cr')
 
-    scope = effectScope()
-    let alignInfo: ReturnType<typeof useAlign>[9]
-    let triggerAlign: VoidFunction
-
-    scope.run(() => {
-      ;[, , , , , , , , , alignInfo, triggerAlign] = useAlign(
-        open,
-        popupRef,
-        targetRef,
-        placement,
-        builtinPlacements,
-        ref(),
-        undefined,
-        ref(false),
-      )
-    })
-
-    await nextTick()
+    viewport.width = 600
     await runAlign(triggerAlign)
+
+    expect(alignInfo.value.points?.[0]).toBe('cl')
+  })
+
+  it('restores preferred placement for default visible region', async () => {
+    const placements: BuildInPlacements = {
+      right: {
+        points: ['cl', 'cr'],
+        offset: [4, 0],
+        targetOffset: [0, 0],
+        overflow: { adjustX: 1, shiftY: true },
+      },
+      left: {
+        points: ['cr', 'cl'],
+        offset: [-4, 0],
+        targetOffset: [0, 0],
+        overflow: { adjustX: 1, shiftY: true },
+      },
+    }
+
+    const { alignInfo, triggerAlign } = await setupAlignCase(placements)
 
     expect(alignInfo.value.points?.[0]).toBe('cr')
 

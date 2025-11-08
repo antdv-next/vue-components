@@ -341,6 +341,25 @@ export default function useAlign(
         visibleRegionArea,
       )
 
+      const shouldUseNewPosition = (
+        newArea: number,
+        newRecommendArea: number,
+      ) => {
+        if (newArea > originIntersectionVisibleArea) {
+          return true
+        }
+
+        if (
+          isVisibleFirst
+          && newArea === originIntersectionVisibleArea
+          && newRecommendArea >= originIntersectionRecommendArea
+        ) {
+          return true
+        }
+
+        return false
+      }
+
       // ========================== Overflow ===========================
       const targetAlignPointTL = getAlignPoint(targetRect, ['t', 'l'])
       const popupAlignPointTL = getAlignPoint(popupRect, ['t', 'l'])
@@ -402,14 +421,7 @@ export default function useAlign(
           visibleRegionArea,
         )
 
-        if (
-        // Of course use larger one
-          newVisibleArea > originIntersectionVisibleArea
-          || (newVisibleArea === originIntersectionVisibleArea
-            && (!isVisibleFirst
-            // Choose recommend one
-              || newVisibleRecommendArea >= originIntersectionRecommendArea))
-        ) {
+        if (shouldUseNewPosition(newVisibleArea, newVisibleRecommendArea)) {
           prevFlipRef.value.bt = true
           nextOffsetY = tmpNextOffsetY
           popupOffsetY = -popupOffsetY
@@ -449,14 +461,7 @@ export default function useAlign(
           visibleRegionArea,
         )
 
-        if (
-        // Of course use larger one
-          newVisibleArea > originIntersectionVisibleArea
-          || (newVisibleArea === originIntersectionVisibleArea
-            && (!isVisibleFirst
-            // Choose recommend one
-              || newVisibleRecommendArea >= originIntersectionRecommendArea))
-        ) {
+        if (shouldUseNewPosition(newVisibleArea, newVisibleRecommendArea)) {
           prevFlipRef.value.tb = true
           nextOffsetY = tmpNextOffsetY
           popupOffsetY = -popupOffsetY
@@ -503,14 +508,7 @@ export default function useAlign(
           visibleRegionArea,
         )
 
-        if (
-        // Of course use larger one
-          newVisibleArea > originIntersectionVisibleArea
-          || (newVisibleArea === originIntersectionVisibleArea
-            && (!isVisibleFirst
-            // Choose recommend one
-              || newVisibleRecommendArea >= originIntersectionRecommendArea))
-        ) {
+        if (shouldUseNewPosition(newVisibleArea, newVisibleRecommendArea)) {
           prevFlipRef.value.rl = true
           nextOffsetX = tmpNextOffsetX
           popupOffsetX = -popupOffsetX
@@ -550,14 +548,7 @@ export default function useAlign(
           visibleRegionArea,
         )
 
-        if (
-        // Of course use larger one
-          newVisibleArea > originIntersectionVisibleArea
-          || (newVisibleArea === originIntersectionVisibleArea
-            && (!isVisibleFirst
-            // Choose recommend one
-              || newVisibleRecommendArea >= originIntersectionRecommendArea))
-        ) {
+        if (shouldUseNewPosition(newVisibleArea, newVisibleRecommendArea)) {
           prevFlipRef.value.lr = true
           nextOffsetX = tmpNextOffsetX
           popupOffsetX = -popupOffsetX
