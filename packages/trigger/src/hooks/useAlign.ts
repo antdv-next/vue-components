@@ -674,6 +674,7 @@ export default function useAlign(
         scaleY,
         align: nextAlignInfo,
       }
+      console.log(nextAlignInfo)
       offsetInfo.value = nextOffsetInfo
     }
   }
@@ -707,13 +708,11 @@ export default function useAlign(
     offsetInfo.value.ready = false
   }
   watch(placement, async () => {
-    await nextTick()
     resetReady()
   })
 
   watchEffect(async () => {
     resetFlipCache()
-    await nextTick()
     if (!open.value) {
       resetReady()
     }

@@ -1,4 +1,5 @@
 import type {
+  BaseTransitionProps,
   CSSProperties,
   Ref,
   TransitionGroupProps,
@@ -17,24 +18,6 @@ function getTransitionDirection(placement: SelectCommonPlacement | undefined) {
   return `slide-up`
 }
 
-function getEnterFromClass(transitionName: string) {
-  const appearCls = `${transitionName}-appear ${transitionName}-appear-prepare ${transitionName}-appear-start`
-  const enterCls = `${transitionName}-enter ${transitionName}-enter-prepare ${transitionName}-enter-start`
-  return `${transitionName} ${appearCls} ${enterCls}`
-}
-
-function getEnterActiveClass(transitionName: string) {
-  const appearCls = `${transitionName}-appear ${transitionName}-appear-prepare ${transitionName}-appear-active`
-  const enterCls = `${transitionName}-enter ${transitionName}-enter-prepare ${transitionName}-enter-active`
-  return `${transitionName} ${appearCls} ${enterCls}`
-}
-
-function getEnterToClass(transitionName: string) {
-  const appearCls = `${transitionName}-appear-active ${transitionName}-appear-active`
-  const enterCls = `${transitionName}-enter-active ${transitionName}-enter-active`
-  return `${transitionName} ${appearCls} ${enterCls}`
-}
-
 export function getTransitionProps(transitionName?: string, opt: TransitionProps = {}) {
   if (!transitionName) {
     return {}
@@ -47,16 +30,15 @@ export function getTransitionProps(transitionName?: string, opt: TransitionProps
         // appearFromClass: `${transitionName}-appear ${transitionName}-appear-prepare`,
         // appearActiveClass: `antdv-base-transtion`,
         // appearToClass: `${transitionName}-appear ${transitionName}-appear-active`,
-        enterFromClass: getEnterFromClass(transitionName),
-        enterActiveClass: getEnterActiveClass(transitionName),
-        enterToClass: getEnterToClass(transitionName),
-        leaveFromClass: `${transitionName} ${transitionName}-leave`,
-        leaveActiveClass: `${transitionName} ${transitionName}-leave ${transitionName}-leave-active`,
-        leaveToClass: `${transitionName} ${transitionName}-leave ${transitionName}-leave-active`,
+        enterFromClass: `${transitionName}-enter ${transitionName}-enter-prepare ${transitionName}-enter-start`,
+        enterActiveClass: `${transitionName}-enter ${transitionName}-enter-prepare`,
+        enterToClass: `${transitionName}-enter ${transitionName}-enter-active`,
+        leaveFromClass: ` ${transitionName}-leave`,
+        leaveActiveClass: `${transitionName}-leave ${transitionName}-leave-active`,
+        leaveToClass: `${transitionName}-leave ${transitionName}-leave-active`,
         ...opt,
       }
     : { css: false, ...opt }
-  console.log(transitionProps)
   return transitionProps
 }
 
@@ -97,7 +79,7 @@ const getCurrentHeight: MotionEventHandler = (node: any) => ({ height: `${node.o
 // const skipOpacityTransition: MotionEndEventHandler = (_, event) =>
 //   (event as TransitionEvent).propertyName === 'height';
 
-export interface CSSMotionProps extends Partial<TransitionProps> {
+export interface CSSMotionProps extends Partial<BaseTransitionProps<Element>> {
   name?: string
   css?: boolean
 }
