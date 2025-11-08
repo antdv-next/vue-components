@@ -24,7 +24,7 @@
   "scripts": {
     "build": "vite build",
     "test": "vitest",
-    "prepublish": "build",
+    "prepublish": "pnpm build",
     "bump": "bumpp --release patch"
   },
   "peerDependencies": {
