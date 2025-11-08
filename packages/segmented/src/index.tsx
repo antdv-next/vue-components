@@ -1,10 +1,10 @@
-import type { ChangeEvent } from '@v-c/util/dist/EventInterface.ts'
+import type { ChangeEvent } from '@v-c/util/dist/EventInterface'
 import type { VueNode } from '@v-c/util/dist/type'
 import type { CSSProperties } from 'vue'
 import { clsx } from '@v-c/util'
-import omit from '@v-c/util/dist/omit.ts'
+import omit from '@v-c/util/dist/omit'
 import { computed, defineComponent, ref, shallowRef, watch } from 'vue'
-import MotionThumb from './MotionThumb.tsx'
+import MotionThumb from './MotionThumb'
 
 export type SemanticName = 'item' | 'label'
 export type SegmentedValue = string | number

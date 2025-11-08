@@ -1,21 +1,23 @@
 {
   "name": "@v-c/segmented",
   "type": "module",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.0.1",
+  "description": "segmented",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
-    "./dist/*": "./dist/*",
+    "./dist/*.js": "./dist/*.js",
+    "./dist/*.d.ts": "./dist/*.d.ts",
     "./package.json": "./package.json"
   },
-  "main": "index.js",
+  "main": "./dist/index.js",
   "scripts": {
     "build": "vite build",
-    "test": "vitest"
+    "test": "vitest",
+    "prepublish": "pnpm build"
   },
   "peerDependencies": {
     "vue": "^3.0.0"

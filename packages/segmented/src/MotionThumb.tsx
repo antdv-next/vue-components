@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'vue'
-import type { SegmentedValue } from './index.tsx'
+import type { SegmentedValue } from './'
 import { clsx } from '@v-c/util'
 import { getTransitionProps } from '@v-c/util/dist/utils/transition.ts'
 import { computed, defineComponent, onBeforeUnmount, shallowRef, Transition, watch } from 'vue'
