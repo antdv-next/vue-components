@@ -3,6 +3,9 @@
   "type": "module",
   "version": "0.0.1",
   "description": "segmented",
+  "publishConfig": {
+    "access": "public"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
