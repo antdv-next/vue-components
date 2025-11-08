@@ -1,10 +1,10 @@
-import type { CSSMotionProps } from '@v-c/util/dist/utils/transition.ts'
-import type { MenuMode } from '../interface.ts'
-import { getTransitionProps } from '@v-c/util/dist/utils/transition.ts'
+import type { CSSMotionProps } from '@v-c/util/dist/utils/transition'
+import type { MenuMode } from '../interface'
+import { getTransitionProps } from '@v-c/util/dist/utils/transition'
 import { computed, defineComponent, shallowRef, Transition, watch, watchEffect } from 'vue'
-import InheritableContextProvider, { useMenuContext } from '../context/MenuContext.tsx'
-import { getMotion } from '../utils/motionUtil.ts'
-import SubMenuList from './SubMenuList.tsx'
+import InheritableContextProvider, { useMenuContext } from '../context/MenuContext'
+import { getMotion } from '../utils/motionUtil'
+import SubMenuList from './SubMenuList'
 
 export interface InlineSubMenuListProps {
   id?: string

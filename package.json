@@ -16,7 +16,7 @@
     "lint": "eslint . --fix"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^3.16.0",
+    "@antfu/eslint-config": "^6.2.0",
     "@histoire/plugin-vue": "1.0.0-alpha.4",
     "@types/node": "^20.19.24",
     "@vitejs/plugin-vue": "^6.0.1",

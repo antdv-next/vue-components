@@ -3,7 +3,6 @@ import antfu from '@antfu/eslint-config'
 export default antfu(
   {
     regexp: false,
-    jsdoc: false,
   },
   {
     files: [
@@ -19,7 +18,6 @@ export default antfu(
       'no-console': 0,
       'ts/no-unsafe-function-type': 0,
       'unused-imports/no-unused-vars': 0,
-      'jsdoc/empty-tags': 0,
     },
   },
 )
