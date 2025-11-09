@@ -9,7 +9,7 @@ import type {
 import { isDOM } from '@v-c/util/dist/Dom/findDOMNode'
 import isVisible from '@v-c/util/dist/Dom/isVisible'
 import { rafDebounce } from '@v-c/util/dist/raf'
-import { computed, nextTick, reactive, ref, shallowRef, toRefs, watch, watchEffect } from 'vue'
+import { computed, nextTick, reactive, ref, shallowRef, toRefs, watch } from 'vue'
 import { collectScroller, getVisibleArea, getWin, toNum } from '../util'
 
 type Rect = Record<'x' | 'y' | 'width' | 'height', number>
@@ -706,18 +706,22 @@ export default function useAlign(
   const resetReady = () => {
     offsetInfo.ready = false
   }
-  watch(placement, async () => {
-    await nextTick()
+  watch(placement, () => {
     resetReady()
   })
 
-  watchEffect(async () => {
-    if (!open.value) {
-      resetFlipCache()
-      await nextTick()
-      resetReady()
-    }
-  })
+  watch(
+    open,
+    () => {
+      if (!open.value) {
+        resetFlipCache()
+        resetReady()
+      }
+    },
+    {
+      immediate: true,
+    },
+  )
 
   const { ready, offsetX, offsetR, offsetY, offsetB, align, arrowY, arrowX, scaleY, scaleX } = toRefs(offsetInfo)
   return [

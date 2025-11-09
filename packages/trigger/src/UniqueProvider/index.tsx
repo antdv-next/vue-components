@@ -64,6 +64,9 @@ const UniqueProvider = defineComponent<UniqueProviderProps>(
     }
     const setPopupRef = (node: any) => {
       const element = resolveToElement(node) as HTMLDivElement | null
+      if (!element) {
+        return
+      }
       externalPopupRef.value = element
 
       if (popupEle.value !== element) {
@@ -183,7 +186,6 @@ const UniqueProvider = defineComponent<UniqueProviderProps>(
     return () => {
       // =========================== Render ===========================
       const prefixCls = mergedOptions?.value?.prefixCls
-
       return (
         <UniqueContextProvider {...contextValue}>
           {slots?.default?.()}
