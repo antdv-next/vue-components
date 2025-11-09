@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils'
 import { describe, expect, it, vi } from 'vitest'
-import { h, nextTick } from 'vue'
+import { defineComponent, h, nextTick } from 'vue'
 import Menu, { Item as MenuItem, SubMenu } from '../src'
 import Icon from '../src/Icon'
 
@@ -68,5 +68,23 @@ describe('menu expand icon reactivity', () => {
 
     expect(states.length).toBeGreaterThan(0)
     expect(states.at(-1)).toBe(true)
+  })
+})
+
+describe('check span vnode', () => {
+  it('should render span when icon is span vnode', async () => {
+    const Proivder = defineComponent((_, { slots }) => {
+      return () => slots?.default?.()
+    })
+    const A = defineComponent((_, { slots }) => {
+      return () => {
+        return h(Proivder, {}, slots)
+      }
+    })
+
+    const wrapper = mount(h(A, { }, {
+      default: () => h('span'),
+    }), {})
+    console.log(wrapper.html())
   })
 })

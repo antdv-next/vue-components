@@ -15,7 +15,7 @@ import useDirectionStyle from './hooks/useDirectionStyle.ts'
 import Icon from './Icon.tsx'
 import { warnItemProp } from './utils/warnUtil.ts'
 
-export interface MenuItemProps extends Omit<MenuItemType, 'label' | 'key' > {
+export interface MenuItemProps extends Omit<MenuItemType, 'label' | 'key'> {
   /** @private Internal filled key. Do not set it directly */
   eventKey?: string
 

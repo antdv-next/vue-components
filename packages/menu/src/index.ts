@@ -1,4 +1,4 @@
-import type { MenuRef } from './interface'
+import type { MenuDividerType, MenuItemGroupType, MenuItemType, MenuRef, SubMenuType } from './interface'
 import type { MenuProps } from './Menu'
 import type { MenuItemProps } from './MenuItem'
 import type { MenuItemGroupProps } from './MenuItemGroup'
@@ -22,11 +22,15 @@ export {
 }
 
 export type {
+  MenuDividerType,
   MenuItemGroupProps,
+  MenuItemGroupType,
   MenuItemProps,
+  MenuItemType,
   MenuProps,
   MenuRef,
   SubMenuProps,
+  SubMenuType,
 }
 
 type MenuType = typeof Menu & {
