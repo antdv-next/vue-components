@@ -1,8 +1,11 @@
 {
   "name": "@v-c/overflow",
   "type": "module",
-  "version": "0.0.1",
-  "description": "",
+  "version": "0.0.0",
+  "description": "overflow",
+  "publishConfig": {
+    "access": "public"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -12,9 +15,16 @@
     "./dist/*": "./dist/*",
     "./package.json": "./package.json"
   },
-  "main": "index.ts",
+  "main": "./dist/index.js",
+  "files": [
+    "dist",
+    "package.json"
+  ],
   "scripts": {
-    "build": "vite build"
+    "build": "vite build",
+    "prepublish": "pnpm build",
+    "test": "vitest run",
+    "bump": "bumpp --release patch"
   },
   "peerDependencies": {
     "vue": "^3.0.0"
