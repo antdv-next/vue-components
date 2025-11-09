@@ -8,6 +8,12 @@ interface RectOptions {
   y?: number
   width: number
   height: number
+  rectWidth?: number
+  rectHeight?: number
+  rectX?: number
+  rectY?: number
+  offsetWidthValue?: number
+  offsetHeightValue?: number
 }
 
 const viewport = {
@@ -53,8 +59,39 @@ function cleanupViewportAccessors() {
   delete docEl.scrollTop
 }
 
+function createComputedStyle(overrides: Partial<CSSStyleDeclaration> = {}) {
+  return {
+    position: 'absolute',
+    height: '30px',
+    width: '80px',
+    transformOrigin: '50% 50% 0px',
+    overflow: 'visible',
+    overflowX: 'visible',
+    overflowY: 'visible',
+    overflowClipMargin: '0px',
+    borderTopWidth: '0px',
+    borderBottomWidth: '0px',
+    borderLeftWidth: '0px',
+    borderRightWidth: '0px',
+    ...overrides,
+  } as CSSStyleDeclaration
+}
+
+function setMockComputedStyle(element: Element, overrides?: Partial<CSSStyleDeclaration>) {
+  ;(element as any).__vcComputedStyle = createComputedStyle(overrides || {})
+}
+
 function createRectElement(opts: RectOptions) {
-  const { width, height } = opts
+  const {
+    width,
+    height,
+    rectWidth,
+    rectHeight,
+    rectX,
+    rectY,
+    offsetWidthValue,
+    offsetHeightValue,
+  } = opts
   let { x = 0, y = 0 } = opts
   const element = document.createElement('div')
   element.style.position = 'absolute'
@@ -63,15 +100,20 @@ function createRectElement(opts: RectOptions) {
 
   Object.defineProperty(element, 'getBoundingClientRect', {
     configurable: true,
-    value: () => new DOMRect(x, y, width, height),
+    value: () => new DOMRect(
+      rectX ?? x,
+      rectY ?? y,
+      rectWidth ?? width,
+      rectHeight ?? height,
+    ),
   })
   Object.defineProperty(element, 'offsetWidth', {
     configurable: true,
-    get: () => width,
+    get: () => offsetWidthValue ?? width,
   })
   Object.defineProperty(element, 'offsetHeight', {
     configurable: true,
-    get: () => height,
+    get: () => offsetHeightValue ?? height,
   })
   Object.defineProperty(element, 'offsetLeft', {
     configurable: true,
@@ -92,7 +134,7 @@ async function runAlign(triggerAlign: VoidFunction) {
   await nextTick()
 }
 
-describe('useAlign auto flip recovery', () => {
+describe('useAlign', () => {
   let scope: ReturnType<typeof effectScope> | null = null
   let getComputedStyleSpy: ReturnType<typeof vi.spyOn>
   let rafSpy: ReturnType<typeof vi.spyOn>
@@ -106,20 +148,11 @@ describe('useAlign auto flip recovery', () => {
 
     getComputedStyleSpy = vi
       .spyOn(window, 'getComputedStyle')
-      .mockImplementation(() => {
-        return {
-          position: 'absolute',
-          height: '30px',
-          width: '80px',
-          overflow: 'visible',
-          overflowX: 'visible',
-          overflowY: 'visible',
-          overflowClipMargin: '0px',
-          borderTopWidth: '0px',
-          borderBottomWidth: '0px',
-          borderLeftWidth: '0px',
-          borderRightWidth: '0px',
-        } as CSSStyleDeclaration
+      .mockImplementation((node: Element) => {
+        return (
+          ((node as any).__vcComputedStyle as CSSStyleDeclaration)
+          || createComputedStyle()
+        )
       })
 
     rafSpy = vi
@@ -165,7 +198,7 @@ describe('useAlign auto flip recovery', () => {
       width: 30,
       height: 30,
     })
-    const { element: popup } = createRectElement({
+    const { element: popup, updateX: updatePopupX } = createRectElement({
       x: 0,
       y: 0,
       width: 80,
@@ -182,10 +215,11 @@ describe('useAlign auto flip recovery', () => {
 
     scope = effectScope()
     let alignInfo: ReturnType<typeof useAlign>[9]
+    let offsetXRef!: ReturnType<typeof useAlign>[1]
     let triggerAlign: VoidFunction
 
     scope.run(() => {
-      ;[, , , , , , , , , alignInfo, triggerAlign] = useAlign(
+      const result = useAlign(
         open,
         popupRef,
         targetRef,
@@ -195,6 +229,9 @@ describe('useAlign auto flip recovery', () => {
         undefined,
         ref(false),
       )
+      alignInfo = result[9]
+      offsetXRef = result[1]
+      triggerAlign = result[10]
     })
 
     await nextTick()
@@ -202,9 +239,87 @@ describe('useAlign auto flip recovery', () => {
 
     expect(alignInfo.value.points?.[0]).toBe('cr')
 
+    updatePopupX(offsetXRef.value)
+
     viewport.width = 600
     await runAlign(triggerAlign)
 
     expect(alignInfo.value.points?.[0]).toBe('cl')
+  })
+
+  it('ignores popup scale transforms when computing offsets', async () => {
+    const placements: BuildInPlacements = {
+      right: {
+        points: ['tl', 'tr'],
+        offset: [0, 0],
+        targetOffset: [0, 0],
+        overflow: {},
+      },
+    }
+
+    const { element: target } = createRectElement({
+      x: 100,
+      y: 0,
+      width: 20,
+      height: 20,
+    })
+    setMockComputedStyle(target, { width: '20px', height: '20px' })
+
+    const popupWidth = 80
+    const popupHeight = 40
+    const scale = 0.8
+    const deltaX = (1 - scale) * (popupWidth / 2)
+    const deltaY = (1 - scale) * (popupHeight / 2)
+    const { element: popup } = createRectElement({
+      x: 0,
+      y: 0,
+      width: popupWidth,
+      height: popupHeight,
+      rectWidth: popupWidth * scale,
+      rectHeight: popupHeight * scale,
+      rectX: deltaX,
+      rectY: deltaY,
+    })
+    setMockComputedStyle(popup, {
+      width: `${popupWidth}px`,
+      height: `${popupHeight}px`,
+      transformOrigin: '50% 50%',
+    })
+
+    document.body.appendChild(target)
+    document.body.appendChild(popup)
+
+    const open = ref(true)
+    const targetRef = shallowRef(target)
+    const popupRef = shallowRef(popup)
+    const placement = ref('right')
+    const builtinPlacements = ref(placements)
+
+    scope = effectScope()
+    let offsetXRef!: ReturnType<typeof useAlign>[1]
+    let scaleXRef!: ReturnType<typeof useAlign>[7]
+    let triggerAlign!: VoidFunction
+
+    scope.run(() => {
+      const result = useAlign(
+        open,
+        popupRef,
+        targetRef,
+        placement,
+        builtinPlacements,
+        ref(),
+        undefined,
+        ref(false),
+      )
+      offsetXRef = result[1]
+      scaleXRef = result[7]
+      triggerAlign = result[10]
+    })
+
+    await nextTick()
+    await runAlign(triggerAlign)
+
+    expect(scaleXRef.value).toBeCloseTo(scale, 3)
+    expect(offsetXRef.value).toBeCloseTo(target.getBoundingClientRect().right, 3)
   })
 })

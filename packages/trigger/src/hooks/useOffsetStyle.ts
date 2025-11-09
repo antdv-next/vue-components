@@ -24,11 +24,15 @@ export default function useOffsetStyle(
           bottom: AUTO,
         }
 
+    const offsetShow = offsetX.value > 0 || offsetY.value > 0 || offsetR.value > 0 || offsetB.value > 0
+    if (!offsetShow) {
+      return {
+      }
+    }
     // Set align style
     if (!isMobile.value && (ready.value || !open.value)) {
       const { points } = align.value ?? {}
-      const dynamicInset
-              = align.value?.dynamicInset || (align.value as any)?._experimental?.dynamicInset
+      const dynamicInset = align.value?.dynamicInset || (align.value as any)?._experimental?.dynamicInset
       const alignRight = dynamicInset && points?.[0]?.[1] === 'r'
       const alignBottom = dynamicInset && points?.[0]?.[0] === 'b'
 

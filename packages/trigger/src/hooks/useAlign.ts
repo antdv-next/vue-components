@@ -14,6 +14,15 @@ import { collectScroller, getVisibleArea, getWin, toNum } from '../util'
 
 type Rect = Record<'x' | 'y' | 'width' | 'height', number>
 
+type Axis = 'x' | 'y'
+
+interface RectWithEdge extends Rect {
+  left: number
+  top: number
+  right: number
+  bottom: number
+}
+
 type Points = [topBottom: AlignPointTopBottom, leftRight: AlignPointLeftRight]
 
 function getUnitOffset(size: number, offset: OffsetType = 0) {
@@ -91,6 +100,115 @@ function reversePoints(points: Points, index: number): string {
     .join('')
 }
 
+function parseOriginValue(value: string | undefined, size: number, axis: Axis) {
+  const fallback = size / 2
+  if (!value) {
+    return fallback
+  }
+
+  const val = value.trim()
+
+  if (!val) {
+    return fallback
+  }
+
+  if (val.endsWith('%')) {
+    return size * (parseFloat(val) / 100)
+  }
+
+  if (val.endsWith('px')) {
+    return parseFloat(val)
+  }
+
+  if (val === 'center') {
+    return fallback
+  }
+
+  if (axis === 'x') {
+    if (val === 'left') {
+      return 0
+    }
+    if (val === 'right') {
+      return size
+    }
+  }
+  else if (axis === 'y') {
+    if (val === 'top') {
+      return 0
+    }
+    if (val === 'bottom') {
+      return size
+    }
+  }
+
+  const num = parseFloat(val)
+  return Number.isNaN(num) ? fallback : num
+}
+
+function getTransformOriginPoint(origin: string | null, width: number, height: number) {
+  const [originX = '50%', originY = '50%']
+    = origin?.split(/\s+/).filter(Boolean) ?? []
+
+  return [
+    parseOriginValue(originX, width, 'x'),
+    parseOriginValue(originY, height, 'y'),
+  ]
+}
+
+function normalizeRect(
+  rect: DOMRect,
+  scaleX: number,
+  scaleY: number,
+  originX: number,
+  originY: number,
+): RectWithEdge {
+  const rawX = rect.x ?? rect.left
+  const rawY = rect.y ?? rect.top
+
+  const width = rect.width / scaleX
+  const height = rect.height / scaleY
+
+  const x = rawX - (1 - scaleX) * originX
+  const y = rawY - (1 - scaleY) * originY
+  const right = x + width
+  const bottom = y + height
+
+  return {
+    x,
+    y,
+    width,
+    height,
+    left: x,
+    top: y,
+    right,
+    bottom,
+  }
+}
+
+function shouldSwitchPlacement(
+  isOverflow: boolean,
+  isVisibleFirst: boolean,
+  newVisibleArea: number,
+  originVisibleArea: number,
+  newRecommendArea: number,
+  originRecommendArea: number,
+) {
+  if (isOverflow) {
+    return (
+      newVisibleArea > originVisibleArea
+      || (newVisibleArea === originVisibleArea
+        && (!isVisibleFirst || newRecommendArea >= originRecommendArea))
+    )
+  }
+
+  return (
+    newVisibleArea > originVisibleArea
+    || (isVisibleFirst
+      && newVisibleArea === originVisibleArea
+      && newRecommendArea > originRecommendArea)
+  )
+}
+
 export default function useAlign(
   open: Ref<boolean>,
   popupEle: Ref<HTMLElement>,
@@ -140,11 +258,11 @@ export default function useAlign(
   const _onAlign = () => {
     if (popupEle.value && target.value && open.value && !mobile?.value) {
       const popupElement = popupEle.value
-
       const doc = popupElement.ownerDocument
       const win = getWin(popupElement)
 
-      const { position: popupPosition } = win!.getComputedStyle(popupElement)
+      const popupComputedStyle = win!.getComputedStyle(popupElement)
+      const { position: popupPosition } = popupComputedStyle
 
       const originLeft = popupElement.style.left
       const originTop = popupElement.style.top
@@ -194,10 +312,7 @@ export default function useAlign(
           height: rect.height,
         }
       }
-      const popupRect = popupElement.getBoundingClientRect()
-      const { height, width } = win!.getComputedStyle(popupElement)
-      popupRect.x = popupRect.x ?? popupRect.left
-      popupRect.y = popupRect.y ?? popupRect.top
+      const rawPopupRect = popupElement.getBoundingClientRect()
       const {
         clientWidth,
         clientHeight,
@@ -206,9 +321,6 @@ export default function useAlign(
         scrollTop,
         scrollLeft,
       } = doc.documentElement
-
-      const popupHeight = popupRect.height
-      const popupWidth = popupRect.width
 
       const targetHeight = targetRect.height
       const targetWidth = targetRect.width
@@ -253,7 +365,7 @@ export default function useAlign(
       popupElement.style.right = '0'
       popupElement.style.bottom = '0'
 
-      const popupMirrorRect = popupElement.getBoundingClientRect()
+      const rawPopupMirrorRect = popupElement.getBoundingClientRect()
 
       // Reset back
       popupElement.style.left = originLeft
@@ -264,12 +376,19 @@ export default function useAlign(
 
       popupElement.parentElement?.removeChild(placeholderElement)
 
+      const widthValue = parseFloat(popupComputedStyle.width)
+      const heightValue = parseFloat(popupComputedStyle.height)
+      const baseWidth = !Number.isNaN(widthValue) && widthValue > 0 ? widthValue : popupElement.offsetWidth
+      const baseHeight = !Number.isNaN(heightValue) && heightValue > 0 ? heightValue : popupElement.offsetHeight
+      const safeBaseWidth = baseWidth || rawPopupRect.width || 1
+      const safeBaseHeight = baseHeight || rawPopupRect.height || 1
+
       // Calculate scale
       const scaleX = toNum(
-        Math.round((popupWidth / parseFloat(width)) * 1000) / 1000,
+        Math.round((rawPopupRect.width / safeBaseWidth) * 1000) / 1000,
       )
       const scaleY = toNum(
-        Math.round((popupHeight / parseFloat(height)) * 1000) / 1000,
+        Math.round((rawPopupRect.height / safeBaseHeight) * 1000) / 1000,
       )
 
       // No need to align since it's not visible in view
@@ -280,6 +399,24 @@ export default function useAlign(
       ) {
         return
       }
+
+      const [originX, originY] = getTransformOriginPoint(
+        popupComputedStyle.transformOrigin,
+        safeBaseWidth,
+        safeBaseHeight,
+      )
+
+      const popupRect = normalizeRect(rawPopupRect, scaleX, scaleY, originX, originY)
+      const popupMirrorRect = normalizeRect(
+        rawPopupMirrorRect,
+        scaleX,
+        scaleY,
+        originX,
+        originY,
+      )
+
+      const popupHeight = popupRect.height
+      const popupWidth = popupRect.width
 
       // Offset
       const { offset, targetOffset } = placementInfo
@@ -377,11 +514,11 @@ export default function useAlign(
       const sameTB = popupPoints[0] === targetPoints[0]
 
       // Bottom to Top
+      const overflowBottom = nextPopupBottom! > adjustCheckVisibleArea.bottom
       if (
         needAdjustY
         && popupPoints[0] === 't'
-        && (nextPopupBottom! > adjustCheckVisibleArea.bottom
-          || prevFlipRef.value.bt)
+        && (overflowBottom || prevFlipRef.value.bt)
       ) {
         let tmpNextOffsetY: number = nextOffsetY
 
@@ -402,14 +539,16 @@ export default function useAlign(
           visibleRegionArea,
         )
 
-        if (
-        // Of course use larger one
-          newVisibleArea > originIntersectionVisibleArea
-          || (newVisibleArea === originIntersectionVisibleArea
-            && (!isVisibleFirst
-            // Choose recommend one
-              || newVisibleRecommendArea >= originIntersectionRecommendArea))
-        ) {
+        const shouldFlip = shouldSwitchPlacement(
+          overflowBottom,
+          isVisibleFirst,
+          newVisibleArea,
+          originIntersectionVisibleArea,
+          newVisibleRecommendArea,
+          originIntersectionRecommendArea,
+        )
+
+        if (shouldFlip) {
           prevFlipRef.value.bt = true
           nextOffsetY = tmpNextOffsetY
           popupOffsetY = -popupOffsetY
@@ -425,10 +564,11 @@ export default function useAlign(
       }
 
       // Top to Bottom
+      const overflowTop = nextPopupY! < adjustCheckVisibleArea.top
       if (
         needAdjustY
         && popupPoints[0] === 'b'
-        && (nextPopupY! < adjustCheckVisibleArea.top || prevFlipRef.value.tb)
+        && (overflowTop || prevFlipRef.value.tb)
       ) {
         let tmpNextOffsetY: number = nextOffsetY
 
@@ -449,14 +589,16 @@ export default function useAlign(
           visibleRegionArea,
         )
 
-        if (
-        // Of course use larger one
-          newVisibleArea > originIntersectionVisibleArea
-          || (newVisibleArea === originIntersectionVisibleArea
-            && (!isVisibleFirst
-            // Choose recommend one
-              || newVisibleRecommendArea >= originIntersectionRecommendArea))
-        ) {
+        const shouldFlip = shouldSwitchPlacement(
+          overflowTop,
+          isVisibleFirst,
+          newVisibleArea,
+          originIntersectionVisibleArea,
+          newVisibleRecommendArea,
+          originIntersectionRecommendArea,
+        )
+
+        if (shouldFlip) {
           prevFlipRef.value.tb = true
           nextOffsetY = tmpNextOffsetY
           popupOffsetY = -popupOffsetY
@@ -478,11 +620,11 @@ export default function useAlign(
       const sameLR = popupPoints[1] === targetPoints[1]
 
       // Right to Left
+      const overflowRight = nextPopupRight! > adjustCheckVisibleArea.right
       if (
         needAdjustX
         && popupPoints[1] === 'l'
-        && (nextPopupRight! > adjustCheckVisibleArea.right
-          || prevFlipRef.value.rl)
+        && (overflowRight || prevFlipRef.value.rl)
       ) {
         let tmpNextOffsetX: number = nextOffsetX
 
@@ -503,14 +645,16 @@ export default function useAlign(
           visibleRegionArea,
         )
 
-        if (
-        // Of course use larger one
-          newVisibleArea > originIntersectionVisibleArea
-          || (newVisibleArea === originIntersectionVisibleArea
-            && (!isVisibleFirst
-            // Choose recommend one
-              || newVisibleRecommendArea >= originIntersectionRecommendArea))
-        ) {
+        const shouldFlip = shouldSwitchPlacement(
+          overflowRight,
+          isVisibleFirst,
+          newVisibleArea,
+          originIntersectionVisibleArea,
+          newVisibleRecommendArea,
+          originIntersectionRecommendArea,
+        )
+
+        if (shouldFlip) {
           prevFlipRef.value.rl = true
           nextOffsetX = tmpNextOffsetX
           popupOffsetX = -popupOffsetX
@@ -526,10 +670,11 @@ export default function useAlign(
       }
 
       // Left to Right
+      const overflowLeft = nextPopupX! < adjustCheckVisibleArea.left
       if (
         needAdjustX
         && popupPoints[1] === 'r'
-        && (nextPopupX! < adjustCheckVisibleArea.left || prevFlipRef.value.lr)
+        && (overflowLeft || prevFlipRef.value.lr)
       ) {
         let tmpNextOffsetX: number = nextOffsetX
 
@@ -550,14 +695,16 @@ export default function useAlign(
           visibleRegionArea,
         )
 
-        if (
-        // Of course use larger one
-          newVisibleArea > originIntersectionVisibleArea
-          || (newVisibleArea === originIntersectionVisibleArea
-            && (!isVisibleFirst
-            // Choose recommend one
-              || newVisibleRecommendArea >= originIntersectionRecommendArea))
-        ) {
+        const shouldFlip = shouldSwitchPlacement(
+          overflowLeft,
+          isVisibleFirst,
+          newVisibleArea,
+          originIntersectionVisibleArea,
+          newVisibleRecommendArea,
+          originIntersectionRecommendArea,
+        )
+
+        if (shouldFlip) {
           prevFlipRef.value.lr = true
           nextOffsetX = tmpNextOffsetX
           popupOffsetX = -popupOffsetX
@@ -661,15 +808,14 @@ export default function useAlign(
         nextOffsetY = Math.round(nextOffsetY)
         offsetY4Bottom = Math.round(offsetY4Bottom)
       }
-
       const nextOffsetInfo = {
         ready: true,
-        offsetX: nextOffsetX / scaleX,
-        offsetY: nextOffsetY / scaleY,
-        offsetR: offsetX4Right / scaleX,
-        offsetB: offsetY4Bottom / scaleY,
-        arrowX: nextArrowX / scaleX,
-        arrowY: nextArrowY / scaleY,
+        offsetX: nextOffsetX,
+        offsetY: nextOffsetY,
+        offsetR: offsetX4Right,
+        offsetB: offsetY4Bottom,
+        arrowX: nextArrowX,
+        arrowY: nextArrowY,
         scaleX,
         scaleY,
         align: nextAlignInfo,
