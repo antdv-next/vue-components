@@ -38,7 +38,7 @@ export interface PopupProps {
 
   // Arrow
   align?: AlignType
-  arrow?: ArrowTypeOuter
+  arrow?: ArrowTypeOuter | boolean
   arrowPos: ArrowPos
 
   // Open
@@ -289,10 +289,10 @@ const Popup = defineComponent<PopupProps>(
                   }
                 }
               >
-                {arrow && (
+                {!!arrow && (
                   <Arrow
                     prefixCls={prefixCls}
-                    arrow={arrow}
+                    arrow={arrow === true ? {} : arrow}
                     arrowPos={arrowPos}
                     align={align!}
                   />

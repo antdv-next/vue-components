@@ -181,6 +181,9 @@ const Tooltip = defineComponent<TooltipProps>(
       )
     }
   },
+  {
+    name: 'VcTooltip',
+  },
 )
 
 export default Tooltip

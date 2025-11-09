@@ -29,6 +29,7 @@ const Popup = defineComponent<ContentProps>(
       )
     }
   },
+  { name: 'VCPopup' },
 )
 
 export default Popup
