@@ -3,7 +3,7 @@ import type { CSSProperties } from 'vue'
 import type { AlignType, ArrowPos } from '../interface.ts'
 import { toPropsRefs } from '@v-c/util/dist/props-util'
 import { getTransitionProps } from '@v-c/util/dist/utils/transition'
-import { defineComponent, shallowRef, Transition, watch, watchEffect } from 'vue'
+import { defineComponent, nextTick, shallowRef, Transition, watch, watchEffect } from 'vue'
 import useOffsetStyle from '../hooks/useOffsetStyle'
 
 export interface UniqueContainerProps {
@@ -67,13 +67,11 @@ const UniqueContainer = defineComponent<UniqueContainerProps>(
     })
     watch(
       open,
-      (nextVisible) => {
+      async (nextVisible) => {
+        await nextTick()
         if (nextVisible) {
           motionVisible.value = true
         }
-      },
-      {
-        immediate: true,
       },
     )
     return () => {
@@ -87,17 +85,9 @@ const UniqueContainer = defineComponent<UniqueContainerProps>(
       const baseTransitionProps = getTransitionProps(motion?.name, motion) as any
       const mergedTransitionProps = {
         ...baseTransitionProps,
-        onBeforeAppear: (element: Element) => {
-          motionVisible.value = true
-          baseTransitionProps.onBeforeAppear?.(element)
-        },
         onBeforeEnter: (element: Element) => {
           motionVisible.value = true
           baseTransitionProps.onBeforeEnter?.(element)
-        },
-        onAfterAppear: (element: Element) => {
-          motionVisible.value = true
-          baseTransitionProps.onAfterAppear?.(element)
         },
         onAfterEnter: (element: Element) => {
           motionVisible.value = true
@@ -121,7 +111,7 @@ const UniqueContainer = defineComponent<UniqueContainerProps>(
               uniqueContainerClassName,
               {
                 [`${containerCls}-visible`]: motionVisible.value,
-                [`${containerCls}-hidden`]: !motionVisible.value,
+                // [`${containerCls}-hidden`]: !motionVisible.value,
               },
             ]}
             style={[

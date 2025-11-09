@@ -111,9 +111,7 @@ const UniqueProvider = defineComponent<UniqueProviderProps>(
       offsetR,
       offsetB,
       arrowX,
-      arrowY, // scaleX - not used in UniqueProvider
-      ,
-      ,
+      arrowY,,, // scaleX - not used in UniqueProvider
       // scaleY - not used in UniqueProvider
       alignInfo,
       onAlign,

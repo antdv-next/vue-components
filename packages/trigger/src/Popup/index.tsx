@@ -88,7 +88,7 @@ const defaults = {
 } as any
 
 const Popup = defineComponent<PopupProps>(
-  (props = defaults, { attrs, expose }) => {
+  (props = defaults, { attrs, slots, expose }) => {
     const popupContent = computed(
       () => typeof props.popup === 'function' ? (props as any).popup() : props.popup,
     )
@@ -304,6 +304,7 @@ const Popup = defineComponent<PopupProps>(
               </div>
             </Transition>
           </ResizeObserver>
+          {slots?.default?.()}
         </Portal>
       )
     }
