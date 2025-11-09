@@ -1,5 +1,4 @@
 import type {
-  BaseTransitionProps,
   CSSProperties,
   Ref,
   TransitionGroupProps,
@@ -79,7 +78,7 @@ const getCurrentHeight: MotionEventHandler = (node: any) => ({ height: `${node.o
 // const skipOpacityTransition: MotionEndEventHandler = (_, event) =>
 //   (event as TransitionEvent).propertyName === 'height';
 
-export interface CSSMotionProps extends Partial<BaseTransitionProps<Element>> {
+export interface CSSMotionProps extends Partial<TransitionProps> {
   name?: string
   css?: boolean
 }
