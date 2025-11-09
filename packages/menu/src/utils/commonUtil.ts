@@ -1,7 +1,7 @@
 import { toArray } from '@v-c/util/dist/Children/toArray'
 import { isVNode } from 'vue'
 
-export function parseChildren(children: any | undefined, keyPath: string[]) {
+export function parseChildren(children: any | undefined, keyPath: string[]): any[] {
   return toArray(children).map((child, index) => {
     if (isVNode(child)) {
       const key = child.key

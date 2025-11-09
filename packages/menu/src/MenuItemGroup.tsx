@@ -12,11 +12,15 @@ export interface MenuItemGroupProps extends Omit<MenuItemGroupType, 'type' | 'ch
   title?: VueNode
 
   // children?: React.ReactNode;
-
-  /** @private Internal filled key. Do not set it directly */
+  /**
+   *
+   * @private
+   */
   eventKey?: string
 
-  /** @private Do not use. Private warning empty usage */
+  /**
+   *  @private
+   */
   warnKey?: boolean
 }
 
@@ -57,7 +61,6 @@ const InternalMenuItemGroup = defineComponent<MenuItemGroupProps>(
 )
 
 const MenuItemGroup = defineComponent<MenuItemGroupProps>(
-  // @ts-expect-error this is not working as expected
   (props, ctx) => {
     const connectedKeyPath = useFullPath(computed(() => props.eventKey!))
     const measure = useMeasure()
