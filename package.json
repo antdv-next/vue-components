@@ -37,7 +37,7 @@
     "shiki-es": "^0.14.0",
     "tsup": "^8.5.0",
     "typescript": "^5.9.3",
-    "vite": "^7.1.12",
+    "vite": "npm:rolldown-vite@7.2.2",
     "vite-plugin-dts": "^5.0.0-beta.6",
     "vite-plugin-tsx-resolve-types": "^0.0.6",
     "vitest": "^3.2.4",
@@ -46,6 +46,9 @@
     "vue": "^3.5.22"
   },
   "pnpm": {
+    "overrides": {
+      "vite": "npm:rolldown-vite@7.2.2"
+    },
     "ignoredBuiltDependencies": [
       "esbuild"
     ],
