@@ -109,7 +109,7 @@ const PopupTrigger = defineComponent<PopupTriggerProps>(
       } = props
       const {
         rtl,
-        rootClassName,
+        rootClass,
         mode,
         getPopupContainer,
         triggerSubMenuAction,
@@ -125,7 +125,7 @@ const PopupTrigger = defineComponent<PopupTriggerProps>(
             `${prefixCls}-popup`,
             { [`${prefixCls}-rtl`]: rtl },
             popupClassName,
-            rootClassName,
+            rootClass,
           )}
           stretch={mode === 'horizontal' ? 'minWidth' : undefined}
           getPopupContainer={getPopupContainer}

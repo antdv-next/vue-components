@@ -19,7 +19,7 @@ import SubMenuList from './SubMenuList'
 
 export type SemanticName = 'list' | 'listTitle'
 export interface SubMenuProps extends Omit<SubMenuType, 'key' | 'children' | 'label'> {
-  classNames?: Partial<Record<SemanticName, string>>
+  classes?: Partial<Record<SemanticName, string>>
   styles?: Partial<Record<SemanticName, CSSProperties>>
   title?: VueNode
 
@@ -192,6 +192,8 @@ const InternalSubMenu = defineComponent<SubMenuProps>(
         popupClassName,
         popupOffset,
         popupStyle,
+        classes,
+        styles,
         ...restProps
       } = props
 
@@ -244,8 +246,8 @@ const InternalSubMenu = defineComponent<SubMenuProps>(
       const renderPopupContent = () => {
         const originNode = (
           <MenuContextProvider
-            classNames={props.classNames}
-            styles={props.styles}
+            classes={classes}
+            styles={styles}
             mode={popupContentTriggerMode === 'horizontal' ? 'vertical' : popupContentTriggerMode}
           >
             <SubMenuList id={popupId}>

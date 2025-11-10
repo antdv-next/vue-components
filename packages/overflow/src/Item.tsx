@@ -72,7 +72,7 @@ export default defineComponent({
       if (mergedHidden.value) {
         overflowProps['aria-hidden'] = true
       }
-
+      console.log(childNode)
       const itemNode = (
         <Component
           class={classNames(!invalidate && prefixCls, props.class)}

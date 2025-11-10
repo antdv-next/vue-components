@@ -1,4 +1,15 @@
-import type { MenuDividerType, MenuItemGroupType, MenuItemType, MenuRef, RenderIconInfo, SubMenuType } from './interface'
+import type {
+  MenuClickEventHandler,
+  MenuDividerType,
+  MenuInfo,
+  MenuItemGroupType,
+  MenuItemType,
+  MenuRef,
+  RenderIconInfo,
+  SelectEventHandler,
+  SelectInfo,
+  SubMenuType,
+} from './interface'
 import type { MenuProps } from './Menu'
 import type { MenuItemProps } from './MenuItem'
 import type { MenuItemGroupProps } from './MenuItemGroup'
@@ -22,7 +33,9 @@ export {
 }
 
 export type {
+  MenuClickEventHandler,
   MenuDividerType,
+  MenuInfo,
   MenuItemGroupProps,
   MenuItemGroupType,
   MenuItemProps,
@@ -30,6 +43,8 @@ export type {
   MenuProps,
   MenuRef,
   RenderIconInfo,
+  SelectEventHandler,
+  SelectInfo,
   SubMenuProps,
   SubMenuType,
 }

@@ -14,9 +14,9 @@ import { computed, defineComponent, inject, provide } from 'vue'
 
 export interface MenuContextProps {
   prefixCls: string
-  classNames?: SubMenuProps['classNames']
+  classes?: SubMenuProps['classes']
   styles?: SubMenuProps['styles']
-  rootClassName?: string
+  rootClass?: string
   openKeys: string[]
   rtl?: boolean
 

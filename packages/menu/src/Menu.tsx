@@ -59,8 +59,8 @@ import { warnItemProp } from './utils/warnUtil'
 const EMPTY_LIST: string[] = []
 export interface MenuProps {
   prefixCls?: string
-  rootClassName?: string
-  classNames?: Partial<Record<SemanticName, string>>
+  rootClass?: string
+  classes?: Partial<Record<SemanticName, string>>
   styles?: Partial<Record<SemanticName, CSSProperties>>
   items?: ItemType[]
 
@@ -482,8 +482,8 @@ const Menu = defineComponent<MenuProps>(
     const menuContext = computed(() => {
       return {
         prefixCls: props.prefixCls || defaults.prefixCls,
-        rootClassName: props.rootClassName,
-        classNames: props.classNames,
+        rootClass: props.rootClass,
+        classes: props.classes,
         styles: props.styles,
         mode: internalMode.value as MenuMode,
         openKeys: mergedOpenKeys.value,
@@ -593,7 +593,7 @@ const Menu = defineComponent<MenuProps>(
               <InheritableContextProvider
                 key={(child as any).key}
                 overflowDisabled={index > lastVisibleIndex.value}
-                classNames={props.classNames}
+                classes={props.classes}
                 styles={props.styles}
               >
                 {child}
@@ -615,7 +615,7 @@ const Menu = defineComponent<MenuProps>(
               [`${props.prefixCls || defaults.prefixCls}-inline-collapsed`]: internalInlineCollapsed.value,
               [`${props.prefixCls || defaults.prefixCls}-rtl`]: isRtl.value,
             },
-            props.rootClassName,
+            props.rootClass,
           )}
           style={_attrs.style as CSSProperties}
           data={wrappedChildList}
@@ -677,6 +677,7 @@ const Menu = defineComponent<MenuProps>(
   },
   {
     name: 'VcMenu',
+    inheritAttrs: false,
   },
 )
 

@@ -29,7 +29,7 @@ const InternalMenuItemGroup = defineComponent<MenuItemGroupProps>(
     const context = useMenuContext()
     return () => {
       const { class: className, title, eventKey, ...restProps } = props
-      const { prefixCls, classNames: menuClassNames, styles } = context?.value ?? {}
+      const { prefixCls, classes: menuClassNames, styles } = context?.value ?? {}
       const groupPrefixCls = `${prefixCls}-item-group`
 
       return (

@@ -20,7 +20,7 @@ export interface SubMenuType extends ItemSharedProps {
 
   key: string
 
-  rootClassName?: string
+  rootClass?: string
 
   // >>>>> Icon
   itemIcon?: RenderIconType
