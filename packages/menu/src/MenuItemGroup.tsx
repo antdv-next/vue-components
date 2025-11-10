@@ -58,6 +58,9 @@ const InternalMenuItemGroup = defineComponent<MenuItemGroupProps>(
       )
     }
   },
+  {
+    name: 'InternalMenuItemGroup',
+  },
 )
 
 const MenuItemGroup = defineComponent<MenuItemGroupProps>(
