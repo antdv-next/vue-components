@@ -1,6 +1,6 @@
 import type { VueNode } from '@v-c/util/dist/type'
 import type { Components, ItemType } from '../interface'
-import { filterEmpty } from '@v-c/util/src/props-util'
+import { filterEmpty } from '@v-c/util/dist/props-util'
 import Divider from '../Divider'
 import MenuItem from '../MenuItem'
 import MenuItemGroup from '../MenuItemGroup'

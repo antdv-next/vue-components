@@ -1,5 +1,5 @@
 import type { RenderIconInfo, RenderIconType } from './interface.ts'
-import { filterEmpty } from '@v-c/util/src/props-util'
+import { filterEmpty } from '@v-c/util/dist/props-util'
 import { createVNode, defineComponent, isVNode } from 'vue'
 
 export interface IconProps {
