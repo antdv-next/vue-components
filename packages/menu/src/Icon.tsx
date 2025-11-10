@@ -1,6 +1,6 @@
 import type { RenderIconInfo, RenderIconType } from './interface.ts'
 import { filterEmpty } from '@v-c/util/dist/props-util'
-import { createVNode, defineComponent, isVNode } from 'vue'
+import { defineComponent } from 'vue'
 
 export interface IconProps {
   icon?: RenderIconType
@@ -23,13 +23,7 @@ const Icon = defineComponent<IconProps>(
           return children
         }
         const childArray = childIcons ? (Array.isArray(childIcons) ? childIcons : [childIcons]) : []
-        const iconChild = filterEmpty(childArray)?.[0]
-        if (isVNode(iconChild)) {
-          iconNode = createVNode(iconChild)
-        }
-        else {
-          iconNode = iconChild
-        }
+        iconNode = filterEmpty(childArray)
       }
       else if (typeof icon !== 'boolean') {
         iconNode = icon
