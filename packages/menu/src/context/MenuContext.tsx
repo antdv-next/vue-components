@@ -9,7 +9,7 @@ import type {
   TriggerSubMenuAction,
 } from '../interface.ts'
 import type { SubMenuProps } from '../SubMenu'
-import omit from '@v-c/util/dist/omit.ts'
+import omit from '@v-c/util/dist/omit'
 import { computed, defineComponent, inject, provide } from 'vue'
 
 export interface MenuContextProps {

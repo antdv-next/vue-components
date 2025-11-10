@@ -17,8 +17,8 @@ import type {
 import type { SemanticName } from './SubMenu'
 import Overflow from '@v-c/overflow'
 import { classNames } from '@v-c/util'
-import useId from '@v-c/util/dist/hooks/useId.ts'
-import isEqual from '@v-c/util/dist/isEqual.ts'
+import useId from '@v-c/util/dist/hooks/useId'
+import isEqual from '@v-c/util/dist/isEqual'
 import { filterEmpty } from '@v-c/util/dist/props-util'
 import {
   computed,
@@ -161,6 +161,9 @@ export interface MenuProps {
 
   popupRender?: PopupRender
   id?: string
+
+  labelRender?: (item: ItemType) => any
+  extraRender?: (item: ItemType) => any
 }
 
 const defaults = {
@@ -555,6 +558,10 @@ const Menu = defineComponent<MenuProps>(
         EMPTY_LIST,
         props?._internalComponents || {},
         props?.prefixCls || defaults.prefixCls,
+        {
+          labelRender: props?.labelRender,
+          extraRender: props?.extraRender,
+        },
       )
 
       // 只有在列表真正改变时才更新，避免不必要的响应式触发

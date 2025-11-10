@@ -1,7 +1,7 @@
 import type { VueNode } from '@v-c/util/dist/type'
 import type { MenuItemGroupType } from './interface'
 import { clsx } from '@v-c/util'
-import omit from '@v-c/util/dist/omit.ts'
+import omit from '@v-c/util/dist/omit'
 import { filterEmpty } from '@v-c/util/dist/props-util'
 import { computed, defineComponent } from 'vue'
 import { useMenuContext } from './context/MenuContext.tsx'

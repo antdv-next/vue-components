@@ -1,4 +1,4 @@
-import type { MenuDividerType, MenuItemGroupType, MenuItemType, MenuRef, SubMenuType } from './interface'
+import type { MenuDividerType, MenuItemGroupType, MenuItemType, MenuRef, RenderIconInfo, SubMenuType } from './interface'
 import type { MenuProps } from './Menu'
 import type { MenuItemProps } from './MenuItem'
 import type { MenuItemGroupProps } from './MenuItemGroup'
@@ -29,6 +29,7 @@ export type {
   MenuItemType,
   MenuProps,
   MenuRef,
+  RenderIconInfo,
   SubMenuProps,
   SubMenuType,
 }

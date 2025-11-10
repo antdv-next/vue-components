@@ -1,13 +1,13 @@
-import type { VueNode } from '@v-c/util/dist/type.ts'
+import type { VueNode } from '@v-c/util/dist/type'
 import type { CSSProperties } from 'vue'
-import type { MenuMode } from '../interface.ts'
+import type { MenuMode } from '../interface'
 import Trigger from '@v-c/trigger'
 import { clsx } from '@v-c/util'
-import raf from '@v-c/util/dist/raf.ts'
+import raf from '@v-c/util/dist/raf'
 import { computed, defineComponent, shallowRef, watch } from 'vue'
-import { useMenuContext } from '../context/MenuContext.tsx'
-import placements, { placementsRtl } from '../placements.ts'
-import { getMotion } from '../utils/motionUtil.ts'
+import { useMenuContext } from '../context/MenuContext'
+import placements, { placementsRtl } from '../placements'
+import { getMotion } from '../utils/motionUtil'
 
 const popupPlacementMap = {
   'horizontal': 'bottomLeft',
