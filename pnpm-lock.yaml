@@ -377,6 +377,21 @@ importers:
         specifier: ^3.0.0
         version: 3.5.13(typescript@5.9.3)
 
+  packages/tour:
+    dependencies:
+      '@v-c/portal':
+        specifier: workspace:*
+        version: link:../portal
+      '@v-c/trigger':
+        specifier: workspace:*
+        version: link:../trigger
+      '@v-c/util':
+        specifier: workspace:*
+        version: link:../util
+      vue:
+        specifier: ^3.0.0
+        version: 3.5.22(typescript@5.9.3)
+
   packages/trigger:
     dependencies:
       '@v-c/portal':
