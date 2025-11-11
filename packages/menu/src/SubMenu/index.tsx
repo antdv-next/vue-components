@@ -341,8 +341,10 @@ const InternalSubMenu = defineComponent<SubMenuProps>(
 
 const SubMenu = defineComponent<SubMenuProps>(
   (props, { slots }) => {
-    const eventKeyRef = computed(() => props?.eventKey)
-    const connectedKeyPath = useFullPath(eventKeyRef)
+    const eventKey = computed(() => props?.eventKey)
+    const connectedKeyPath = useFullPath(eventKey)
+
+    // ==================== Record KeyPath ====================
     const measure = useMeasure()
 
     // Filter out undefined values
@@ -351,13 +353,18 @@ const SubMenu = defineComponent<SubMenuProps>(
     )
 
     watch(
-      [validKeyPath, () => props.eventKey],
-      () => {
-        if (measure && props.eventKey) {
-          measure.registerPath(props.eventKey, validKeyPath.value)
+      [connectedKeyPath],
+      (_n, _o, onCleanup) => {
+        if (measure) {
+          measure.registerPath(eventKey.value!, connectedKeyPath.value as any)
         }
+        onCleanup(() => {
+          measure?.unregisterPath(eventKey.value!, connectedKeyPath.value as any)
+        })
       },
-      // { immediate: true, flush: 'post' },
+      {
+        immediate: true,
+      },
     )
     return () => {
       const children = slots.default?.()
@@ -373,7 +380,7 @@ const SubMenu = defineComponent<SubMenuProps>(
       }
 
       return (
-        <PathTrackerContext.Provider value={validKeyPath.value}>
+        <PathTrackerContext.Provider value={connectedKeyPath.value as any}>
           {renderNode}
         </PathTrackerContext.Provider>
       )

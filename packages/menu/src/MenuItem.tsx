@@ -234,6 +234,9 @@ const MenuItem = defineComponent<MenuItemProps>(
           measure?.unregisterPath(eventKey.value!, connectedKeyPath.value as any)
         })
       },
+      {
+        immediate: true,
+      },
     )
     return () => {
       if (measure) {
