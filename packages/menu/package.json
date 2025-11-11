@@ -16,11 +16,11 @@
   "publishConfig": {
     "access": "public"
   },
+  "main": "./dist/index.js",
   "files": [
     "dist",
     "package.json"
   ],
-  "main": "./dist/index.js",
   "scripts": {
     "build": "vite build",
     "prepublish": "pnpm build",
