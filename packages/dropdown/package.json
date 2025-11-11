@@ -5,6 +5,9 @@
   "description": "dropdown ui component for vue",
   "author": "",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "keywords": [
     "dropdown"
   ],
