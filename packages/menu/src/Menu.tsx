@@ -394,12 +394,12 @@ const Menu = defineComponent<MenuProps>(
     /**
      * Click for item. SubMenu do not have selection status
      */
-    const onInternalClick = useMemoCallback((info: MenuInfo) => {
+    const onInternalClick = (info: MenuInfo) => {
       props.onClick?.(warnItemProp(info))
       triggerSelection(info)
-    })
+    }
 
-    const onInternalOpenChange = useMemoCallback((key: string, open: boolean) => {
+    const onInternalOpenChange = (key: string, open: boolean) => {
       let newOpenKeys = mergedOpenKeys.value.filter(k => k !== key)
 
       if (open) {
@@ -414,7 +414,7 @@ const Menu = defineComponent<MenuProps>(
       if (!isEqual(mergedOpenKeys.value, newOpenKeys, true)) {
         triggerOpenKeys(newOpenKeys, true)
       }
-    })
+    }
 
     // ==================== Accessibility =====================
     const triggerAccessibilityOpen = (key: string, open?: boolean) => {
