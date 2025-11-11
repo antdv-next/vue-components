@@ -1,7 +1,7 @@
 {
   "name": "@v-c/dropdown",
   "type": "module",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "dropdown ui component for vue",
   "author": "",
   "license": "MIT",
@@ -24,7 +24,9 @@
   ],
   "scripts": {
     "build": "vite build",
-    "test": "vitest"
+    "prepublish": "pnpm build",
+    "test": "vitest run",
+    "bump": "bumpp --release patch"
   },
   "peerDependencies": {
     "vue": "^3.0.0"
