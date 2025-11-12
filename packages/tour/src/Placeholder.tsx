@@ -1,7 +1,7 @@
 import type { PortalProps } from '@v-c/portal'
 import type { Ref } from 'vue'
 import Portal from '@v-c/portal'
-import { defineComponent } from 'vue'
+import { computed, defineComponent } from 'vue'
 
 export interface PlaceholderProps
   extends Pick<PortalProps, 'open' | 'autoLock' | 'getContainer'> {
@@ -15,6 +15,7 @@ const Placeholder = defineComponent<PlaceholderProps>(
       getDom: () => {
         return props?.domRef.value ?? props?.fallbackDOM?.()
       },
+      __$el: computed(() => props?.domRef?.value ?? props?.fallbackDOM?.()),
     })
     return () => {
       const { open, autoLock, getContainer } = props

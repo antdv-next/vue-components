@@ -1,18 +1,18 @@
 import { warning } from '@v-c/util'
 import canUseDom from '@v-c/util/dist/Dom/canUseDom'
 import { filterEmpty } from '@v-c/util/dist/props-util'
-import { computed, defineComponent, onMounted, shallowRef, Teleport, watch } from 'vue'
+import { computed, createVNode, defineComponent, isVNode, onMounted, shallowRef, Teleport, watch } from 'vue'
 import { useContextProvider } from './Context.tsx'
 import useDom from './useDom.tsx'
 import useScrollLocker from './useScrollLocker.tsx'
 
 export type ContainerType = Element | DocumentFragment
 
-export type GetContainer =
-  | string
-  | ContainerType
-  | (() => ContainerType)
-  | false
+export type GetContainer
+  = | string
+    | ContainerType
+    | (() => ContainerType)
+    | false
 
 export interface PortalProps {
   /** Customize container element. Default will create a div in document.body when `open` */
@@ -51,7 +51,7 @@ const defaults = {
 }
 
 const Portal = defineComponent<PortalProps>(
-  (props = defaults, { slots }) => {
+  (props = defaults, { slots, expose }) => {
     const shouldRender = shallowRef(props.open)
     const mergedRender = computed(() => shouldRender.value || props.open)
     // ========================= Warning =========================
@@ -101,6 +101,14 @@ const Portal = defineComponent<PortalProps>(
         && (mergedContainer.value === defaultContainer
           || mergedContainer.value === document.body))),
     )
+    const elementEl = shallowRef()
+    const setRef = (el: any) => {
+      elementEl.value = el
+    }
+    expose({
+      elementEl,
+    })
+
     return () => {
     // ========================= Render ==========================
     // Do not render when nothing need render
@@ -115,9 +123,16 @@ const Portal = defineComponent<PortalProps>(
         return reffedChildren
       }
       else {
+        const child = reffedChildren.length === 1
+          ? (isVNode(reffedChildren[0])
+              ? createVNode(reffedChildren[0], {
+                  ref: setRef,
+                })
+              : reffedChildren[0])
+          : reffedChildren
         return (
           <Teleport to={mergedContainer.value}>
-            {reffedChildren}
+            {child}
           </Teleport>
         )
       }

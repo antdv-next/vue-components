@@ -1,6 +1,6 @@
 import type { Ref } from 'vue'
 import type { TourStepInfo } from '../interface.ts'
-import { computed, nextTick, onMounted, shallowRef, watch } from 'vue'
+import { computed, nextTick, shallowRef, watch } from 'vue'
 import { isInViewPort } from '../util.ts'
 
 export interface Gap {
@@ -35,10 +35,6 @@ export default function useTarget(
     const nextElement = typeof target.value === 'function' ? (target.value as any)() : target.value
     targetElement.value = nextElement || null
   }
-
-  onMounted(() => {
-    syncTargetElement()
-  })
 
   watch(
     target,

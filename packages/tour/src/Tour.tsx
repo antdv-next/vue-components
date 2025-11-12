@@ -227,6 +227,7 @@ const Tour = defineComponent<TourProps>(
       if (attrStyle && typeof attrStyle === 'object') {
         Object.assign(placeholderStyle, attrStyle as CSSProperties)
       }
+      console.log(stepInfo.value)
       const popupElement = (
         <TourStep
           styles={styles}

@@ -1,6 +1,7 @@
 import type { ResizeObserverProps, SizeInfo } from '../index.tsx'
 import findDOMNode from '@v-c/util/dist/Dom/findDOMNode'
-import { defineComponent, inject, onBeforeUnmount, onMounted, shallowRef } from 'vue'
+import { filterEmpty } from '@v-c/util/dist/props-util'
+import { createVNode, defineComponent, inject, isVNode, onBeforeUnmount, onMounted, shallowRef } from 'vue'
 import { CollectionContext } from '../Collection'
 import { observe, unobserve } from '../utils/observerUtil.ts'
 import DomWrapper from './DomWrapper'
@@ -11,6 +12,17 @@ const SingleObserver = defineComponent<ResizeObserverProps>({
   setup(props, { expose, slots }) {
     const elementRef = shallowRef<HTMLElement>()
     const wrapperRef = shallowRef()
+    const setWrapperRef = (el: any) => {
+      if (el?.elementEl && typeof el.elementEl === 'object') {
+        elementRef.value = el.elementEl
+      }
+      else if (el?.__$el && typeof el.__$el === 'object') {
+        elementRef.value = el.__$el
+      }
+      else {
+        wrapperRef.value = el
+      }
+    }
     const onCollectionResize = inject(CollectionContext, () => {})
     const sizeRef = shallowRef<SizeInfo>({ width: -1, height: -1, offsetWidth: -1, offsetHeight: -1 })
     const getDom = () => {
@@ -79,6 +91,12 @@ const SingleObserver = defineComponent<ResizeObserverProps>({
       getDom,
     })
     return () => {
+      const children = filterEmpty(slots?.default?.())
+      if (children.length === 1 && isVNode(children[0])) {
+        return createVNode(children[0], {
+          ref: setWrapperRef,
+        })
+      }
       return (
         <DomWrapper ref={wrapperRef}>
           {slots.default?.()}
