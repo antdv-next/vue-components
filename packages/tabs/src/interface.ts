@@ -1,3 +1,4 @@
+import type { DropdownProps } from '@v-c/dropdown'
 import type { VueNode } from '@v-c/util/dist/type'
 import type { CSSMotionProps } from '@v-c/util/dist/utils/transition'
 import type { CSSProperties } from 'vue'
@@ -43,4 +44,55 @@ export interface ExtraContentProps {
   position: TabBarExtraPosition
   prefixCls: string
   extra?: TabBarExtraContent
+}
+
+export interface TabPaneProps {
+  tab?: VueNode
+  className?: string
+  style?: CSSProperties
+  disabled?: boolean
+  children?: VueNode
+  forceRender?: boolean
+  closable?: boolean
+  closeIcon?: VueNode
+  icon?: VueNode
+
+  // Pass by TabPaneList
+  prefixCls?: string
+  tabKey?: string
+  id?: string
+  animated?: boolean
+  active?: boolean
+  destroyOnHidden?: boolean
+}
+
+export interface Tab extends Omit<TabPaneProps, 'tab'> {
+  key: string
+  label: VueNode
+}
+
+export type moreIcon = VueNode
+export type MoreProps = {
+  icon?: moreIcon
+} & Omit<DropdownProps, 'children'>
+
+export interface OperationNodeProps {
+  prefixCls: string
+  className?: string
+  style?: CSSProperties
+  id: string
+  tabs: Tab[]
+  rtl: boolean
+  tabBarGutter?: number
+  activeKey: string
+  mobile: boolean
+  more?: MoreProps
+  editable?: EditableConfig
+  locale?: TabsLocale
+  removeAriaLabel?: string
+  onTabClick: (key: string, e: MouseEvent | KeyboardEvent) => void
+  tabMoving?: boolean
+  getPopupContainer?: (node: HTMLElement) => HTMLElement
+  popupClassName?: string
+  popupStyle?: CSSProperties
 }

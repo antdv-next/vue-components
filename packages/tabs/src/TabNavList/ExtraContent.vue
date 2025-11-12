@@ -5,7 +5,7 @@ import RenderComponent from '@v-c/util/dist/RenderComponent.vue'
 import { ensureValidVNode } from '@v-c/util/dist/vnode'
 import { computed, isVNode, ref, toRefs } from 'vue'
 
-const props = withDefaults(defineProps<ExtraContentProps>(), {})
+const props = defineProps<ExtraContentProps>()
 
 const { position, prefixCls, extra } = toRefs(props)
 
