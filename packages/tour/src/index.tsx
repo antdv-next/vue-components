@@ -1,13 +1,5 @@
-export type SemanticName = 'section'
-  | 'footer'
-  | 'actions'
-  | 'header'
-  | 'title'
-  | 'description'
-  | 'mask'
+import Tour from './Tour'
 
-export interface TourStepInfo {
-}
+export type { TourProps, TourStepInfo, TourStepProps } from './interface'
 
-export interface TourStepProps extends TourStepInfo {
-}
+export default Tour

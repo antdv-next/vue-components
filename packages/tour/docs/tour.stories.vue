@@ -1,14 +1,11 @@
 <script setup lang="ts">
-
+import Basic from './baisc'
 </script>
 
 <template>
   <Story title="Tour">
     <Variant title="basic">
-      <div>
-        test
-      </div>
-      <!--      <ArrowContent /> -->
+      <Basic />
     </Variant>
   </Story>
 </template>

@@ -20,7 +20,6 @@ const SingleObserver = defineComponent<ResizeObserverProps>({
       // 判断当前的dom是不是一个text元素
       if (dom && dom.nodeType === 3 && dom.nextElementSibling)
         return dom.nextElementSibling as HTMLElement
-
       return dom
     }
 

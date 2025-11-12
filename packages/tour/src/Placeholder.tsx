@@ -5,7 +5,7 @@ import { defineComponent } from 'vue'
 
 export interface PlaceholderProps
   extends Pick<PortalProps, 'open' | 'autoLock' | 'getContainer'> {
-  domRef: Ref<HTMLDivElement>
+  domRef: Ref<HTMLDivElement | null>
   fallbackDOM: () => HTMLElement | null
 }
 
