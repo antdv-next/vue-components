@@ -1,6 +1,6 @@
 import type { Ref } from 'vue'
 import type { TourStepInfo } from '../interface.ts'
-import { computed, nextTick, shallowRef, watch } from 'vue'
+import { computed, nextTick, onMounted, shallowRef, watch } from 'vue'
 import { isInViewPort } from '../util.ts'
 
 export interface Gap {
@@ -82,7 +82,10 @@ export default function useTarget(
       posInfo.value = null
     }
   }
-
+  onMounted(() => {
+    syncTargetElement()
+    updatePos()
+  })
   const getGapOffset = (index: number) =>
     (Array.isArray(gap?.value?.offset) ? gap?.value?.offset[index] : gap?.value?.offset) ?? 6
 
