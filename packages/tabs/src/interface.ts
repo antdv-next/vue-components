@@ -30,3 +30,17 @@ export interface AddButtonProps {
   locale?: TabsLocale
   style?: CSSProperties
 }
+
+export type OnTabScroll = (info: { direction: 'left' | 'right' | 'top' | 'bottom' }) => void
+
+export type TabBarExtraPosition = 'left' | 'right'
+
+export type TabBarExtraMap = Partial<Record<TabBarExtraPosition, VueNode>>
+
+export type TabBarExtraContent = VueNode | TabBarExtraMap
+
+export interface ExtraContentProps {
+  position: TabBarExtraPosition
+  prefixCls: string
+  extra?: TabBarExtraContent
+}
