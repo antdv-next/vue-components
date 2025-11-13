@@ -19,170 +19,171 @@ export interface NoticeListProps {
   onNoticeClose?: (key: Key) => void
 }
 
-const NoticeList = defineComponent<NoticeListProps>(
-  (props, { attrs }) => {
-    const ctx = useNotificationContext()
-    const dictRef = reactive<Record<string, HTMLDivElement>>({})
-    const lastestNotice = computed(() => {
-      // 获取最后一个通知
-      const keys = Object.keys(dictRef)
-      if (keys.length === 0)
-        return null
-      return dictRef[keys[keys.length - 1]]
-    })
-    const hoverKeys = ref<string[]>([])
-    const keys = computed(() => {
-      return props.configList?.map(config => ({
-        config,
-        key: String(config.key),
-      }))
-    })
+const NoticeList = defineComponent<NoticeListProps>((props, { attrs }) => {
+  const ctx = useNotificationContext()
+  const dictRef = reactive<Record<string, HTMLDivElement | undefined>>({})
+  const keys = computed(() =>
+    (props.configList ?? []).map(config => ({
+      config,
+      key: String(config.key),
+    })),
+  )
+  const latestNotice = computed(() => {
+    const lastKey = keys.value[keys.value.length - 1]?.key
+    return lastKey ? dictRef[lastKey] ?? null : null
+  })
+  const hoverKeys = ref<string[]>([])
 
-    const stackConfig = toRef(props, 'stack')
-    const [stack, { offset, threshold, gap }] = useStack(stackConfig)
-    const expanded = computed(
-      () => stack.value && (hoverKeys.value.length > 0 || keys.value!.length <= (threshold as any).value),
-    )
-    const placementMotion = computed(() => typeof props.motion === 'function' ? props?.motion(props.placement!) : props.motion)
-
-    // Clean hover key
-    watch(
-      [hoverKeys, keys, stack],
-      () => {
-        if (stack.value && hoverKeys.value.length > 1) {
-          hoverKeys.value = hoverKeys.value.filter(key => keys.value?.some(({ key: dataKey }) => key === dataKey))
-        }
-      },
-    )
-
-    const checkAllClosed = () => {
-      const len = keys.value?.length ?? 0
-      if (len === 0) {
-        props.onAllNoticeRemoved?.(props.placement!)
-      }
+  const stackConfig = toRef(props, 'stack')
+  const [stackEnabled, stackOptions] = useStack(stackConfig)
+  const expanded = computed(
+    () =>
+      stackEnabled.value
+      && (hoverKeys.value.length > 0 || keys.value.length <= stackOptions.threshold!.value!),
+  )
+  const placementMotion = computed(() => {
+    if (typeof props.motion === 'function') {
+      return props.placement ? props.motion(props.placement) : undefined
     }
+    return props.motion
+  })
 
-    return () => {
-      const { prefixCls, placement, onNoticeClose } = props
-
-      const renderNotify = () => {
-        // 渲染notify
-        return keys.value?.map(({ config }, motionIndex) => {
-          const { key, times } = config as InnerOpenConfig
-          const strKey = String(key)
-          const {
-            className: configClassName,
-            style: configStyle,
-            classNames: configClassNames,
-            styles: configStyles,
-            ...restConfig
-          } = config as NoticeConfig
-          const dataIndex = keys.value?.findIndex(item => item.key === strKey) ?? -1
-          // If dataIndex is -1, that means this notice has been removed in data, but still in dom
-          // Should minus (motionIndex - 1) to get the correct index because keys.length is not the same as dom length
-          const stackStyle: CSSProperties = {}
-          if (stack.value) {
-            const index = keys.value!.length - 1 - (dataIndex > -1 ? dataIndex : motionIndex - 1)
-            const transformX = placement === 'top' || placement === 'bottom' ? '-50%' : '0'
-            if (index > 0) {
-              stackStyle.height = expanded.value
-                ? dictRef[strKey]?.offsetHeight
-                : lastestNotice.value?.offsetHeight
-
-              if (!Number.isNaN(stackStyle.height) && typeof stackStyle.height === 'number') {
-                stackStyle.height = `${stackStyle.height}px`
-              }
-              // Transform
-              let verticalOffset = 0
-              for (let i = 0; i < index; i++) {
-                verticalOffset += (dictRef as any)[(keys as any).value[keys.value!.length - 1 - i]?.key]?.offsetHeight + gap?.value
-              }
-
-              const transformY = (expanded.value ? verticalOffset : index * (offset as any).value) * (placement?.startsWith('top') ? 1 : -1)
-              const scaleX = !expanded.value && lastestNotice.value?.offsetWidth && (dictRef as any)[strKey]?.offetWidth
-                ? (lastestNotice.value?.offsetWidth - (offset as any)?.value * 2 * (index < 3 ? index : 3))
-                / dictRef[strKey]?.offsetWidth
-                : 1
-
-              stackStyle.transform = `translate3d(${transformX}px, ${transformY}px, 0px) scaleX(${scaleX})`
-            }
-            else {
-              stackStyle.transform = `translate3d(${transformX}px, 0px, 0px)`
-            }
-          }
-          return (
-            <div
-              key={strKey}
-              class={clsx(
-                `${prefixCls}-notice-wrapper`,
-                configClassNames?.wrapper,
-              )}
-              style={{
-                ...stackStyle,
-                ...configStyles?.wrapper,
-              }}
-              onMouseenter={() => {
-                hoverKeys.value = hoverKeys.value?.includes(strKey) ? hoverKeys.value : [...hoverKeys.value, strKey]
-              }}
-              onMouseleave={() => {
-                hoverKeys.value = hoverKeys.value?.filter(k => k !== strKey)
-              }}
-            >
-              <Notice
-                {...restConfig as any}
-                ref={(el) => {
-                  const _el = unrefElement<HTMLDivElement>(el as any)
-                  if (dataIndex > -1) {
-                    dictRef[strKey] = _el
-                  }
-                  else {
-                    delete dictRef[strKey]
-                  }
-                }}
-                prefixCls={prefixCls ?? ''}
-                classNames={configClassNames}
-                styles={configStyles}
-                class={clsx(configClassName, ctx.classNames?.notice)}
-                style={configStyle}
-                times={times}
-                eventKey={key}
-                onNoticeClose={onNoticeClose}
-                hovering={stack.value && hoverKeys.value.length > 0}
-              />
-            </div>
-          )
-        })
-      }
-      return (
-        <TransitionGroup
-          key={placement}
-          tag="div"
-          appear
-          {
-            ...{
-              class: clsx(
-                prefixCls,
-                `${prefixCls}-${placement}`,
-                ctx.classNames?.list,
-                (attrs as any).class,
-                {
-                  [`${prefixCls}-stack-expanded`]: expanded.value,
-                  [`${prefixCls}-stack`]: stack.value,
-                },
-              ),
-              ...placementMotion.value,
-            }
-          }
-          onAfterLeave={checkAllClosed}
-        >
-          {renderNotify()}
-        </TransitionGroup>
+  // Clean hover key
+  watch([hoverKeys, keys, stackEnabled], () => {
+    if (stackEnabled.value && hoverKeys.value.length > 1) {
+      hoverKeys.value = hoverKeys.value.filter(key =>
+        keys.value.some(({ key: dataKey }) => key === dataKey),
       )
     }
-  },
-  {
-    name: 'NoticeList',
-  },
-)
+  })
+
+  const checkAllClosed = () => {
+    if (!props.placement) {
+      return
+    }
+    if (keys.value.length === 0) {
+      props.onAllNoticeRemoved?.(props.placement)
+    }
+  }
+
+  return () => {
+    const { prefixCls = '', placement = 'topRight', onNoticeClose } = props
+
+    const renderNotify = () =>
+      keys.value.map(({ config }, motionIndex) => {
+        const { key, times } = config as InnerOpenConfig
+        const strKey = String(key)
+        const {
+          className: configClassName,
+          style: configStyle,
+          classNames: configClassNames,
+          styles: configStyles,
+          ...restConfig
+        } = config as NoticeConfig
+        const dataIndex = keys.value.findIndex(item => item.key === strKey)
+        const stackStyle: CSSProperties = {}
+
+        if (stackEnabled.value) {
+          const index = keys.value.length - 1 - (dataIndex > -1 ? dataIndex : motionIndex - 1)
+          const transformX = placement === 'top' || placement === 'bottom' ? '-50%' : '0'
+
+          if (index > 0) {
+            stackStyle.height = expanded.value
+              ? dictRef[strKey]?.offsetHeight
+              : latestNotice.value?.offsetHeight
+
+            let verticalOffset = 0
+            for (let i = 0; i < index; i += 1) {
+              const targetKey = keys.value[keys.value.length - 1 - i]?.key
+              const node = targetKey ? dictRef[targetKey] : null
+              verticalOffset += (node?.offsetHeight ?? 0) + stackOptions.gap!.value!
+            }
+
+            const transformY
+              = (expanded.value ? verticalOffset : index * stackOptions.offset!.value!)
+                * (placement.startsWith('top') ? 1 : -1)
+            const currentWidth = dictRef[strKey]?.offsetWidth
+            const latestWidth = latestNotice.value?.offsetWidth
+            const scaleX
+              = !expanded.value && latestWidth && currentWidth
+                ? (latestWidth - stackOptions.offset!.value! * 2 * (index < 3 ? index : 3))
+                / currentWidth
+                : 1
+
+            stackStyle.transform = `translate3d(${transformX}, ${transformY}px, 0) scaleX(${scaleX})`
+          }
+          else {
+            stackStyle.transform = `translate3d(${transformX}, 0, 0)`
+          }
+        }
+
+        return (
+          <div
+            key={strKey}
+            class={clsx(`${prefixCls}-notice-wrapper`, configClassNames?.wrapper)}
+            style={{
+              ...stackStyle,
+              ...configStyles?.wrapper,
+            }}
+            onMouseenter={() => {
+              hoverKeys.value = hoverKeys.value.includes(strKey)
+                ? hoverKeys.value
+                : [...hoverKeys.value, strKey]
+            }}
+            onMouseleave={() => {
+              hoverKeys.value = hoverKeys.value.filter(k => k !== strKey)
+            }}
+          >
+            <Notice
+              {...restConfig as any}
+              ref={(el) => {
+                const element = unrefElement<HTMLDivElement>(el as any) ?? undefined
+                if (dataIndex > -1) {
+                  dictRef[strKey] = element
+                }
+                else {
+                  delete dictRef[strKey]
+                }
+              }}
+              prefixCls={prefixCls}
+              classNames={configClassNames}
+              styles={configStyles}
+              class={clsx(configClassName, ctx.classNames?.notice)}
+              style={configStyle}
+              times={times}
+              eventKey={key}
+              onNoticeClose={onNoticeClose}
+              hovering={stackEnabled.value && hoverKeys.value.length > 0}
+            />
+          </div>
+        )
+      })
+
+    return (
+      <TransitionGroup
+        key={placement}
+        tag="div"
+        appear
+        {...{
+          class: clsx(
+            prefixCls,
+            `${prefixCls}-${placement}`,
+            ctx.classNames?.list,
+            (attrs as any).class,
+            {
+              [`${prefixCls}-stack-expanded`]: expanded.value,
+              [`${prefixCls}-stack`]: stackEnabled.value,
+            },
+          ),
+          style: (attrs as any).style,
+        }}
+        {...(placementMotion.value ?? {})}
+        onAfterLeave={checkAllClosed}
+      >
+        {renderNotify()}
+      </TransitionGroup>
+    )
+  }
+})
 
 export default NoticeList

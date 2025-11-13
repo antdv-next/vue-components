@@ -8,11 +8,13 @@ type NoticeSemanticProps = 'wrapper'
 export type Key = string | number
 export interface NoticeConfig {
   content?: VueNode
-  duration?: number | null
+  duration?: number | false | null
   showProgress?: boolean
   pauseOnHover?: boolean
   closeIcon?: VueNode
-  closable?: boolean | ({ closeIcon?: VueNode } & Record<string, any>)
+  closable?:
+    | boolean
+    | ({ closeIcon?: VueNode; onClose?: VoidFunction } & Record<string, any>)
   className?: string
   style?: CSSProperties
   classNames?: {
@@ -32,7 +34,7 @@ export interface OpenConfig extends NoticeConfig {
   key: Key
   placement?: Placement
   content?: VueNode
-  duration?: number | null
+  duration?: number | false | null
 }
 
 export type InnerOpenConfig = OpenConfig & { times?: number }

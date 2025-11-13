@@ -15,9 +15,11 @@ export interface NotificationConfig {
   getContainer?: () => HTMLElement | ShadowRoot
   motion?: TransitionGroupProps | ((placement: Placement) => TransitionGroupProps)
   closeIcon?: VueNode
-  closable?: boolean | ({ closeIcon?: VueNode } & Record<string, any>)
+  closable?:
+    | boolean
+    | ({ closeIcon?: VueNode; onClose?: VoidFunction } & Record<string, any>)
   maxCount?: number
-  duration?: number
+  duration?: number | false | null
   showProgress?: boolean
   pauseOnHover?: boolean
   /** @private. Config for notification holder style. Safe to remove if refactor */
