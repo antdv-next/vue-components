@@ -3,7 +3,7 @@ import type { CSSProperties } from 'vue'
 import type { TourProps, TourStepInfo } from './interface'
 import { Trigger } from '@v-c/trigger'
 import { clsx } from '@v-c/util'
-import { computed, defineComponent, nextTick, shallowRef, watch } from 'vue'
+import { computed, defineComponent, nextTick, shallowRef, unref, watch } from 'vue'
 import { useClosable } from './hooks/useClosable'
 import useTarget from './hooks/useTarget'
 import Mask from './Mask'
@@ -15,8 +15,8 @@ import { getPlacement } from './util'
 const CENTER_PLACEHOLDER: CSSProperties = {
   left: '50%',
   top: '50%',
-  width: 1,
-  height: 1,
+  width: `1px`,
+  height: `1px`,
 }
 const defaultScrollIntoViewOptions: ScrollIntoViewOptions = {
   block: 'center',
@@ -118,7 +118,7 @@ const Tour = defineComponent<TourProps>(
 
     // ====================== Align Target ======================
     const [posInfo, targetElement] = useTarget(
-      computed(() => stepInfo?.value?.target),
+      computed(() => unref(stepInfo?.value?.target)),
       mergedOpen,
       computed(() => props?.gap),
       mergedScrollIntoViewOptions,
@@ -212,10 +212,10 @@ const Tour = defineComponent<TourProps>(
       )
       const basePosition: CSSProperties = posInfo.value
         ? {
-            left: posInfo.value.left,
-            top: posInfo.value.top,
-            width: posInfo.value.width,
-            height: posInfo.value.height,
+            left: `${posInfo.value.left}px`,
+            top: `${posInfo.value.top}px`,
+            width: `${posInfo.value.width}px`,
+            height: `${posInfo.value.height}px`,
           }
         : CENTER_PLACEHOLDER
       const placeholderStyle: CSSProperties = {
@@ -227,7 +227,6 @@ const Tour = defineComponent<TourProps>(
       if (attrStyle && typeof attrStyle === 'object') {
         Object.assign(placeholderStyle, attrStyle as CSSProperties)
       }
-      console.log(stepInfo.value)
       const popupElement = (
         <TourStep
           styles={styles}

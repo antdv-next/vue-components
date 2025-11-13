@@ -169,6 +169,9 @@ export function generateTrigger(PortalComponent: any = Portal) {
         if (!node) {
           return null
         }
+        if (isDOM(node?.__$el)) {
+          return node.__$el
+        }
         if (isDOM(node)) {
           return node as HTMLElement
         }
@@ -747,7 +750,6 @@ export function generateTrigger(PortalComponent: any = Portal) {
           x: arrowX.value,
           y: arrowY.value,
         }
-
         // Child Node
         const triggerNode = createVNode(child, {
           ...mergedChildrenProps,

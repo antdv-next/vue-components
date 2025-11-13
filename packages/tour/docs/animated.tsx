@@ -23,13 +23,14 @@ const App = defineComponent(() => {
         </div>
         <div style={{ height: '200px' }}></div>
         <Tour
-          defaultCurrent={2}
+          defaultCurrent={0}
+          animated={true}
           steps={[
             {
               title: '创建',
               description: '创建一条数据',
-              target: () => createBtnRef.value!,
-              mask: true,
+              target: createBtnRef,
+              // mask: true,
             },
             {
               title: '更新',
@@ -39,18 +40,7 @@ const App = defineComponent(() => {
                   <button>帮助文档</button>
                 </div>
               ),
-              target: () => updateBtnRef.value!,
-            },
-            {
-              title: '更新（无阴影）',
-              description: (
-                <div>
-                  <span>更新一条数据</span>
-                  <button>帮助文档</button>
-                </div>
-              ),
-              mask: false,
-              target: () => updateBtnRef.value!,
+              target: updateBtnRef,
             },
             {
               title: '删除',
@@ -60,14 +50,12 @@ const App = defineComponent(() => {
                   <button>帮助文档</button>
                 </div>
               ),
-              target: () => deleteBtnRef.value!,
-              mask: true,
-              style: { color: 'red' },
+              target: deleteBtnRef,
+              // mask: true,
+              // style: { color: 'red' },
             },
           ]}
-        >
-          {/*    */}
-        </Tour>
+        />
       </div>
     )
   }

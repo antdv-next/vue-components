@@ -1,6 +1,6 @@
 import type { TriggerProps } from '@v-c/trigger'
 import type { VueNode } from '@v-c/util/dist/type'
-import type { AriaAttributes, CSSProperties } from 'vue'
+import type { AriaAttributes, CSSProperties, Ref } from 'vue'
 import type { Gap } from './hooks/useTarget.ts'
 import type { PlacementType } from './placements'
 import type { DefaultPanelProps } from './TourStep/DefaultPanel.tsx'
@@ -19,7 +19,7 @@ export type HTMLAriaDataAttributes = AriaAttributes & {
 }
 export interface TourStepInfo {
   arrow?: boolean | { pointAtCenter: boolean }
-  target?: HTMLElement | (() => HTMLElement) | null | (() => null)
+  target?: Ref<HTMLElement | null | undefined> | HTMLElement | null | (() => HTMLElement | null | undefined)
   title: VueNode
   description?: VueNode
   placement?: PlacementType
