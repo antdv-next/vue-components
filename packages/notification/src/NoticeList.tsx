@@ -1,7 +1,7 @@
 import type { CSSProperties, TransitionGroupProps } from 'vue'
 import type { InnerOpenConfig, Key, NoticeConfig, OpenConfig, Placement, StackConfig } from './interface.ts'
-import { unrefElement } from '@v-c/util/dist/vueuse/unref-element'
 import { classNames as clsx } from '@v-c/util'
+import { unrefElement } from '@v-c/util/dist/vueuse/unref-element'
 import { computed, defineComponent, reactive, ref, toRef, TransitionGroup, watch } from 'vue'
 import useStack from './hooks/useStack.ts'
 import Notice from './Notice.tsx'
@@ -98,8 +98,7 @@ const NoticeList = defineComponent<NoticeListProps>(
                 verticalOffset += (dictRef as any)[(keys as any).value[keys.value!.length - 1 - i]?.key]?.offsetHeight + gap?.value
               }
 
-              const transformY
-                  = (expanded.value ? verticalOffset : index * (offset as any).value) * (placement?.startsWith('top') ? 1 : -1)
+              const transformY = (expanded.value ? verticalOffset : index * (offset as any).value) * (placement?.startsWith('top') ? 1 : -1)
               const scaleX = !expanded.value && lastestNotice.value?.offsetWidth && (dictRef as any)[strKey]?.offetWidth
                 ? (lastestNotice.value?.offsetWidth - (offset as any)?.value * 2 * (index < 3 ? index : 3))
                 / dictRef[strKey]?.offsetWidth

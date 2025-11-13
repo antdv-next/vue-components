@@ -1,4 +1,4 @@
-import type { VueNode } from '@v-c/util/dist/type.ts'
+import type { VueNode } from '@v-c/util/dist/type'
 import type { CSSProperties, TransitionGroupProps } from 'vue'
 import type { Key, OpenConfig, Placement, StackConfig } from '../interface'
 import type { NotificationsProps, NotificationsRef } from '../Notifications'
