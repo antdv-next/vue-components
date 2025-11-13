@@ -1,7 +1,7 @@
 {
   "name": "@v-c/overflow",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "overflow",
   "publishConfig": {
     "access": "public"
