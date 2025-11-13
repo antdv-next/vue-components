@@ -1,7 +1,7 @@
 {
   "name": "@v-c/tooltip",
   "type": "module",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "publishConfig": {
     "access": "public"
   },
