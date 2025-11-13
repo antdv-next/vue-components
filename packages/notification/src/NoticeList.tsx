@@ -86,12 +86,13 @@ const NoticeList = defineComponent<NoticeListProps>((props, { attrs }) => {
         if (stackEnabled.value) {
           const index = keys.value.length - 1 - (dataIndex > -1 ? dataIndex : motionIndex - 1)
           const transformX = placement === 'top' || placement === 'bottom' ? '-50%' : '0'
-
           if (index > 0) {
             stackStyle.height = expanded.value
               ? dictRef[strKey]?.offsetHeight
               : latestNotice.value?.offsetHeight
-
+            if (stackStyle.height && typeof stackStyle.height === 'number') {
+              stackStyle.height = `${stackStyle.height}px`
+            }
             let verticalOffset = 0
             for (let i = 0; i < index; i += 1) {
               const targetKey = keys.value[keys.value.length - 1 - i]?.key
@@ -109,14 +110,13 @@ const NoticeList = defineComponent<NoticeListProps>((props, { attrs }) => {
                 ? (latestWidth - stackOptions.offset!.value! * 2 * (index < 3 ? index : 3))
                 / currentWidth
                 : 1
-
             stackStyle.transform = `translate3d(${transformX}, ${transformY}px, 0) scaleX(${scaleX})`
           }
           else {
             stackStyle.transform = `translate3d(${transformX}, 0, 0)`
           }
         }
-
+        console.log(stackStyle)
         return (
           <div
             key={strKey}
