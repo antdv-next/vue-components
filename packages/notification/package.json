@@ -25,7 +25,6 @@
     "vue": "^3.0.0"
   },
   "dependencies": {
-    "@v-c/portal": "workspace:*",
     "@v-c/util": "workspace:*"
   }
 }

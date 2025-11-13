@@ -7,9 +7,9 @@ import type { MobileConfig } from './Popup'
 import Portal from '@v-c/portal'
 import ResizeObserver from '@v-c/resize-observer'
 import { classNames } from '@v-c/util'
-import { isDOM } from '@v-c/util/dist/Dom/findDOMNode'
 import { getShadowRoot } from '@v-c/util/dist/Dom/shadow'
 import { filterEmpty } from '@v-c/util/dist/props-util'
+import { resolveToElement } from '@v-c/util/dist/vnode'
 import { computed, createVNode, defineComponent, nextTick, reactive, ref, shallowRef, useId, watch, watchEffect } from 'vue'
 import { TriggerContextProvider, useTriggerContext, useUniqueContext } from './context.ts'
 import useAction from './hooks/useAction.ts'
@@ -165,35 +165,6 @@ export function generateTrigger(PortalComponent: any = Portal) {
       const popupEle = shallowRef<HTMLDivElement | null>(null)
       // Used for forwardRef popup. Not use internal
       const externalPopupRef = shallowRef<HTMLDivElement | null>(null)
-      const resolveToElement = (node: any) => {
-        if (!node) {
-          return null
-        }
-        if (isDOM(node?.__$el)) {
-          return node.__$el
-        }
-        if (isDOM(node)) {
-          return node as HTMLElement
-        }
-        const exposed = node as any
-        if (isDOM(exposed?.$el)) {
-          return exposed.$el
-        }
-        const nativeEl = exposed?.nativeElement
-        if (isDOM(nativeEl?.value)) {
-          return nativeEl.value
-        }
-        if (isDOM(nativeEl)) {
-          return nativeEl
-        }
-        if (typeof exposed?.getElement === 'function') {
-          const el = exposed.getElement()
-          if (isDOM(el)) {
-            return el as HTMLElement
-          }
-        }
-        return null
-      }
       const setPopupRef = (node: any) => {
         const element = resolveToElement(node) as HTMLDivElement | null
         externalPopupRef.value = element

@@ -1,5 +1,6 @@
 import type { Ref } from 'vue'
 import type { TourStepInfo } from '../interface.ts'
+import { resolveToElement } from '@v-c/util/dist/vnode'
 import { computed, nextTick, onMounted, shallowRef, watch } from 'vue'
 import { isInViewPort } from '../util.ts'
 
@@ -33,7 +34,7 @@ export default function useTarget(
   const targetElement = shallowRef<HTMLElement | null>(null)
   const syncTargetElement = () => {
     const nextElement = typeof target.value === 'function' ? (target.value as any)() : target.value
-    targetElement.value = nextElement || null
+    targetElement.value = resolveToElement(nextElement || null)
   }
 
   watch(
