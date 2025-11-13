@@ -2,7 +2,7 @@ import type { CSSProperties, TransitionGroupProps } from 'vue'
 import type { InnerOpenConfig, Key, NoticeConfig, OpenConfig, Placement, StackConfig } from './interface.ts'
 import { classNames as clsx } from '@v-c/util'
 import { unrefElement } from '@v-c/util/dist/vueuse/unref-element'
-import { computed, defineComponent, reactive, ref, toRef, TransitionGroup, watch } from 'vue'
+import { computed, defineComponent, reactive, ref, shallowRef, toRef, TransitionGroup, watch, watchEffect } from 'vue'
 import useStack from './hooks/useStack.ts'
 import Notice from './Notice.tsx'
 import { useNotificationContext } from './NotificationProvider.tsx'
@@ -28,10 +28,7 @@ const NoticeList = defineComponent<NoticeListProps>((props, { attrs }) => {
       key: String(config.key),
     })),
   )
-  const latestNotice = computed(() => {
-    const lastKey = keys.value[keys.value.length - 1]?.key
-    return lastKey ? dictRef[lastKey] ?? null : null
-  })
+  const latestNotice = shallowRef<HTMLDivElement | null>(null)
   const hoverKeys = ref<string[]>([])
 
   const stackConfig = toRef(props, 'stack')
@@ -56,6 +53,20 @@ const NoticeList = defineComponent<NoticeListProps>((props, { attrs }) => {
       )
     }
   })
+
+  // Sync latest notice after DOM updates so collapsed stack uses accurate height
+  watchEffect(
+    () => {
+      if (!stackEnabled.value) {
+        latestNotice.value = null
+        return
+      }
+
+      const lastKey = keys.value[keys.value.length - 1]?.key
+      latestNotice.value = lastKey ? dictRef[lastKey] ?? null : null
+    },
+    { flush: 'post' },
+  )
 
   const checkAllClosed = () => {
     if (!props.placement) {
@@ -116,7 +127,6 @@ const NoticeList = defineComponent<NoticeListProps>((props, { attrs }) => {
             stackStyle.transform = `translate3d(${transformX}, 0, 0)`
           }
         }
-        console.log(stackStyle)
         return (
           <div
             key={strKey}
