@@ -3,14 +3,14 @@ import { defineComponent } from 'vue'
 import DefaultPanel from './DefaultPanel.tsx'
 
 const TourStep = defineComponent<DefaultPanelProps>(
-  (props) => {
+  (props, { attrs }) => {
     return () => {
       const { current, renderPanel } = props
       return (
         <>
           {
             typeof renderPanel === 'function'
-              ? (renderPanel(props, current!))
+              ? (renderPanel({ ...props, ...attrs }, current!))
               : (<DefaultPanel {...props} />)
           }
         </>
