@@ -41,22 +41,25 @@ export function getTransitionProps(transitionName?: string, opt: TransitionProps
   return transitionProps
 }
 
-export function getTransitionGroupProps(transitionName: string, opt: TransitionProps = {}) {
-  const transitionProps: TransitionGroupProps = transitionName
-    ? {
-        name: transitionName,
-        appear: true,
-        // appearFromClass: `${transitionName}-appear ${transitionName}-appear-prepare`,
-        appearActiveClass: `${transitionName}`,
-        appearToClass: `${transitionName}-appear ${transitionName}-appear-active`,
-        enterFromClass: `${transitionName}-appear ${transitionName}-enter ${transitionName}-appear-prepare ${transitionName}-enter-prepare`,
-        enterActiveClass: `${transitionName}`,
-        enterToClass: `${transitionName}-enter ${transitionName}-appear ${transitionName}-appear-active ${transitionName}-enter-active`,
-        leaveActiveClass: `${transitionName} ${transitionName}-leave`,
-        leaveToClass: `${transitionName}-leave-active`,
-        ...opt,
-      }
-    : { css: false, ...opt }
+export function getTransitionGroupProps(transitionName?: string, opt: TransitionProps = {}) {
+  if (!transitionName) {
+    return { css: false, ...opt }
+  }
+  const transitionProps: TransitionGroupProps = {
+    name: transitionName,
+    appear: true,
+    // Enter 阶段（包含首次渲染的 appear）
+    enterFromClass: `${transitionName} ${transitionName}-enter ${transitionName}-appear ${transitionName}-appear-prepare ${transitionName}-appear-start ${transitionName}-enter-prepare ${transitionName}-enter-start`,
+    enterActiveClass: `${transitionName} ${transitionName}-enter ${transitionName}-appear ${transitionName}-appear-prepare ${transitionName}-enter-prepare`,
+    enterToClass: `${transitionName} ${transitionName}-enter ${transitionName}-appear ${transitionName}-appear-active ${transitionName}-enter-active`,
+    // Leave 阶段（元素离开）
+    leaveFromClass: `${transitionName} ${transitionName}-leave`,
+    leaveActiveClass: `${transitionName} ${transitionName}-leave ${transitionName}-leave-active`,
+    leaveToClass: `${transitionName} ${transitionName}-leave ${transitionName}-leave-active`,
+    // Move 阶段（元素位置移动，TransitionGroup 特有）
+    moveClass: `${transitionName} ${transitionName}-move`,
+    ...opt,
+  }
   return transitionProps
 }
 
