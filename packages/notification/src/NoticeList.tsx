@@ -1,6 +1,7 @@
 import type { CSSProperties, TransitionGroupProps } from 'vue'
 import type { InnerOpenConfig, Key, NoticeConfig, OpenConfig, Placement, StackConfig } from './interface.ts'
 import { classNames as clsx } from '@v-c/util'
+import { getTransitionGroupProps } from '@v-c/util/dist/utils/transition'
 import { unrefElement } from '@v-c/util/dist/vueuse/unref-element'
 import { computed, defineComponent, reactive, ref, shallowRef, toRef, TransitionGroup, watch, watchEffect } from 'vue'
 import useStack from './hooks/useStack.ts'
@@ -168,7 +169,10 @@ const NoticeList = defineComponent<NoticeListProps>((props, { attrs }) => {
           </div>
         )
       })
-
+    let motionGroupProps: TransitionGroupProps = {}
+    if (placementMotion.value) {
+      motionGroupProps = getTransitionGroupProps(placementMotion.value.name!, placementMotion.value)
+    }
     return (
       <TransitionGroup
         key={placement}
@@ -187,7 +191,7 @@ const NoticeList = defineComponent<NoticeListProps>((props, { attrs }) => {
           ),
           style: (attrs as any).style,
         }}
-        {...(placementMotion.value ?? {})}
+        {...motionGroupProps}
         onAfterLeave={checkAllClosed}
       >
         {renderNotify()}
