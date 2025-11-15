@@ -17,7 +17,7 @@ export interface NotificationConfig {
   closeIcon?: VueNode
   closable?:
     | boolean
-    | ({ closeIcon?: VueNode; onClose?: VoidFunction } & Record<string, any>)
+    | ({ closeIcon?: VueNode, onClose?: VoidFunction } & Record<string, any>)
   maxCount?: number
   duration?: number | false | null
   showProgress?: boolean
