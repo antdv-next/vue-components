@@ -158,7 +158,7 @@ const NoticeList = defineComponent<NoticeListProps>((props, { attrs }) => {
               prefixCls={prefixCls}
               classNames={configClassNames}
               styles={configStyles}
-              class={clsx(configClassName, ctx.classNames?.notice)}
+              class={clsx(configClassName, (ctx.value as any)?.classNames?.notice)}
               style={configStyle}
               times={times}
               eventKey={key}
@@ -178,7 +178,7 @@ const NoticeList = defineComponent<NoticeListProps>((props, { attrs }) => {
           class: clsx(
             prefixCls,
             `${prefixCls}-${placement}`,
-            ctx.classNames?.list,
+            (ctx.value as any)?.classNames?.list,
             (attrs as any).class,
             {
               [`${prefixCls}-stack-expanded`]: expanded.value,
