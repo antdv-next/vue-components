@@ -3,7 +3,7 @@ import type { Key, NoticeConfig } from './interface.ts'
 import { classNames } from '@v-c/util'
 import KeyCode from '@v-c/util/dist/KeyCode'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
-import { computed, defineComponent, shallowRef, watchEffect } from 'vue'
+import { computed, defineComponent, shallowRef, watch } from 'vue'
 
 export interface NoticeProps extends Omit<NoticeConfig, 'onClose'> {
   prefixCls: string
@@ -53,14 +53,14 @@ const Notify = defineComponent<NoticeProps & { times?: number }>((props, { attrs
   }
 
   // ======================== Timing ========================
-  watchEffect((onCleanup) => {
+  watch([
+    () => props.times,
+    mergedDuration,
+    mergedHovering,
+  ], (_n, _, onCleanup) => {
     const duration = mergedDuration.value
     const hoveringValue = mergedHovering.value
     const pauseOnHover = mergedPauseOnHover.value
-    // Track re-open attempts and restart countdown just like React version
-    // eslint-disable-next-line ts/no-unused-expressions
-    props.times
-
     if (!hoveringValue && duration > 0) {
       const start = Date.now() - spentTime.value
       const timeoutId = window.setTimeout(() => {
@@ -74,17 +74,23 @@ const Notify = defineComponent<NoticeProps & { times?: number }>((props, { attrs
         spentTime.value = Date.now() - start
       })
     }
+  }, {
+    immediate: true,
   })
 
   // ===================== Progress Bar =====================
-  watchEffect((onCleanup) => {
+  watch([
+    () => props.times,
+    mergedDuration,
+    spentTime,
+    mergedHovering,
+    mergedShowProgress,
+  ], (_n, _, onCleanup) => {
     const hoveringValue = mergedHovering.value
     const showProgress = mergedShowProgress.value
     const pauseOnHover = mergedPauseOnHover.value
     const duration = mergedDuration.value
     const baseSpentTime = spentTime.value
-    // eslint-disable-next-line ts/no-unused-expressions
-    props.times
 
     if (!hoveringValue && showProgress && (pauseOnHover || baseSpentTime === 0)) {
       const start = performance.now()
@@ -110,6 +116,8 @@ const Notify = defineComponent<NoticeProps & { times?: number }>((props, { attrs
         }
       })
     }
+  }, {
+    immediate: true,
   })
 
   return () => {
