@@ -19,6 +19,7 @@ export default antfu(
       'ts/no-unsafe-function-type': 0,
       'unused-imports/no-unused-vars': 0,
       'jsdoc/empty-tags': 0,
+      'no-template-curly-in-string': 0,
     },
   },
 )
