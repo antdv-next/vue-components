@@ -28,11 +28,11 @@ export * from './interface'
  */
 class Schema {
   // ========================= Static =========================
-  static register = function register(type: string, validator) {
+  static register = function register(type: string, validator: any) {
     if (typeof validator !== 'function') {
       throw new TypeError('Cannot register a validator by type, validator is not a function')
     }
-    validators[type] = validator
+    ;(validators as any)[type] = validator
   }
 
   static warning = warning
@@ -42,7 +42,7 @@ class Schema {
   static validators = validators
 
   // ======================== Instance ========================
-  rules: Record<string, RuleItem[]> = null
+  rules: Record<string, RuleItem[]> = {}
   _messages: InternalValidateMessages = defaultMessages
 
   constructor(descriptor: Rules) {
