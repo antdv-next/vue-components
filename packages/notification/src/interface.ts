@@ -14,7 +14,7 @@ export interface NoticeConfig {
   closeIcon?: VueNode
   closable?:
     | boolean
-    | ({ closeIcon?: VueNode; onClose?: VoidFunction } & Record<string, any>)
+    | ({ closeIcon?: VueNode, onClose?: VoidFunction } & Record<string, any>)
   className?: string
   style?: CSSProperties
   classNames?: {

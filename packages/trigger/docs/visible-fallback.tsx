@@ -1,5 +1,6 @@
+import type { TriggerRef } from '../src'
 import { computed, defineComponent, ref } from 'vue'
-import Trigger, { type TriggerRef } from '../src'
+import Trigger from '../src'
 import './assets/index.less'
 
 const builtinPlacements = {

@@ -29,7 +29,7 @@ const colorPresets = [
 <template>
   <div style="display: flex; flex-wrap: nowrap">
     <span v-for="color in colorPresets" :key="color">
-      <ColorBlock :color="color" prefixCls="vc-color-picker" />
+      <ColorBlock :color="color" prefix-cls="vc-color-picker" />
     </span>
   </div>
 </template>

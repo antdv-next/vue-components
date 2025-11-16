@@ -1,7 +1,7 @@
 import type { CSSProperties, ExtractPropTypes, PropType, SlotsType, TransitionProps } from 'vue'
 import type { DrawerContextProps } from './context'
-import pickAttrs from '@v-c/util/dist/pickAttrs'
 import { classNames } from '@v-c/util'
+import pickAttrs from '@v-c/util/dist/pickAttrs'
 import { computed, defineComponent, onBeforeUnmount, ref, Transition, watch } from 'vue'
 import { useDrawerContext, useDrawerInject } from './context'
 import DrawerPanel from './DrawerPanel'

@@ -1,8 +1,8 @@
 import type { VueNode } from '@v-c/util/dist/type'
 import type { PropType } from 'vue'
 import type { Icons, ProgressDotRender, Status, StepIconRender } from './interface'
-import omit from '@v-c/util/dist/omit'
 import { classNames } from '@v-c/util'
+import omit from '@v-c/util/dist/omit'
 import { computed, defineComponent } from 'vue'
 import Step from './Step'
 

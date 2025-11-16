@@ -6,6 +6,13 @@
   "publishConfig": {
     "access": "public"
   },
+  "author": "",
+  "license": "MIT",
+  "keywords": [
+    "segmented controls",
+    "vue-segemented",
+    "vue-segemented-controls"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -16,11 +23,11 @@
     "./dist/*.d.ts": "./dist/*.d.ts",
     "./package.json": "./package.json"
   },
+  "main": "./dist/index.js",
   "files": [
     "dist",
     "package.json"
   ],
-  "main": "./dist/index.js",
   "scripts": {
     "build": "vite build",
     "test": "vitest",
@@ -32,12 +39,5 @@
   },
   "dependencies": {
     "@v-c/util": "workspace:*"
-  },
-  "keywords": [
-    "segmented controls",
-    "vue-segemented",
-    "vue-segemented-controls"
-  ],
-  "author": "",
-  "license": "MIT"
+  }
 }

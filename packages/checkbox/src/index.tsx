@@ -1,6 +1,6 @@
 import type { Ref } from 'vue'
-import useMergedState from '@v-c/util/dist/hooks/useMergedState'
 import { classNames } from '@v-c/util'
+import useMergedState from '@v-c/util/dist/hooks/useMergedState'
 import { computed, defineComponent, shallowRef } from 'vue'
 
 export interface InputHTMLAttributesType {

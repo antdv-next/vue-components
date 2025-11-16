@@ -1,5 +1,6 @@
+import type { FakeXMLHttpRequest, FakeXMLHttpRequestStatic } from 'nise'
 import type { UploadRequestOption } from '../src/interface'
-import { fakeXhr, type FakeXMLHttpRequest, type FakeXMLHttpRequestStatic } from 'nise'
+import { fakeXhr } from 'nise'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import request from '../src/request'
 

@@ -7,15 +7,15 @@ import { computed, defineComponent } from 'vue'
 
 export type FooterSemanticName = 'footer' | 'actions'
 
-type OperationType =
-  | 'prev'
-  | 'next'
-  | 'flipY'
-  | 'flipX'
-  | 'rotateLeft'
-  | 'rotateRight'
-  | 'zoomOut'
-  | 'zoomIn'
+type OperationType
+  = | 'prev'
+    | 'next'
+    | 'flipY'
+    | 'flipX'
+    | 'rotateLeft'
+    | 'rotateRight'
+    | 'zoomOut'
+    | 'zoomIn'
 
 interface RenderOperationParams {
   icon?: VNode

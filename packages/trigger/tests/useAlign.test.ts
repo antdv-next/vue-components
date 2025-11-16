@@ -1,7 +1,7 @@
-import { effectScope, nextTick, ref, shallowRef } from 'vue'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import useAlign from '../src/hooks/useAlign.ts'
 import type { BuildInPlacements } from '../src/interface.ts'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { effectScope, nextTick, ref, shallowRef } from 'vue'
+import useAlign from '../src/hooks/useAlign.ts'
 
 interface RectOptions {
   x?: number

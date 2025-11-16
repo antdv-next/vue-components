@@ -58,7 +58,7 @@ const defaults = {
 const Dropdown = defineComponent<DropdownProps>(
   (props = defaults, { expose, slots }) => {
     const { autoFocus } = toPropsRefs(props, 'autoFocus')
-    const triggerVisible = shallowRef<boolean >()
+    const triggerVisible = shallowRef<boolean>()
     const mergedVisible = computed(() => {
       return props?.visible ?? triggerVisible.value
     })

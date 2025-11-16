@@ -1,5 +1,6 @@
+import type { CSSProperties, PropType, VNode } from 'vue'
 import ResizeObserver from '@v-c/resize-observer'
-import { type CSSProperties, defineComponent, type PropType, type VNode } from 'vue'
+import { defineComponent } from 'vue'
 
 export interface InnerProps {
   role?: string

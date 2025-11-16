@@ -2,22 +2,24 @@ import Menu, { Divider, Item as MenuItem } from '@v-c/menu'
 import { defineComponent } from 'vue'
 import Dropdown from '../src'
 
-const onSelect = ({ key }: { key: string }) => {
+function onSelect({ key }: { key: string }) {
   console.log(`${key} selected`)
 }
 
-const onVisibleChange = (visible: boolean) => {
+function onVisibleChange(visible: boolean) {
   console.log(visible)
 }
 
-const menuCallback = () => (
-  <Menu onSelect={onSelect}>
-    <MenuItem disabled>disabled</MenuItem>
-    <MenuItem key="1">one</MenuItem>
-    <Divider />
-    <MenuItem key="2">two</MenuItem>
-  </Menu>
-)
+function menuCallback() {
+  return (
+    <Menu onSelect={onSelect}>
+      <MenuItem disabled>disabled</MenuItem>
+      <MenuItem key="1">one</MenuItem>
+      <Divider />
+      <MenuItem key="2">two</MenuItem>
+    </Menu>
+  )
+}
 
 export default defineComponent(() => {
   return () => (

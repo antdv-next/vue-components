@@ -1,7 +1,7 @@
 import type { CountConfig, InputProps, ShowCountFormatter } from '../interface'
 
-type ForcedCountConfig = Omit<CountConfig, 'show'> &
-  Pick<Required<CountConfig>, 'strategy'> & {
+type ForcedCountConfig = Omit<CountConfig, 'show'>
+  & Pick<Required<CountConfig>, 'strategy'> & {
     show: boolean
     showFormatter?: ShowCountFormatter
   }
@@ -26,7 +26,7 @@ export default function useCount(
 
   if (showCount) {
     mergedConfig.show
-            = (typeof showCount === 'object' && showCount.formatter
+      = (typeof showCount === 'object' && showCount.formatter
         ? showCount.formatter
         : !!showCount) as boolean | ShowCountFormatter
   }

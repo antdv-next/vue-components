@@ -111,7 +111,7 @@ export function generatorUploadProps() {
     beforeUpload: Function as PropType<
       (
         file: VcFile,
-        FileList: VcFile[]
+        FileList: VcFile[],
       ) => BeforeUploadFileType | Promise<void | BeforeUploadFileType> | void
     >,
     customRequest: Function as PropType<(option: UploadRequestOption) => void | { abort: () => void }>,

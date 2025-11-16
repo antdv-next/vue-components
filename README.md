@@ -1,6 +1,5 @@
 # vue components Headless UI
 
-
 ## Installation
 
 ```bash

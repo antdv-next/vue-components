@@ -1,4 +1,4 @@
-import type { ExecuteRule, Value } from '../interface'
+import type { ExecuteRule, RuleType, Value } from '../interface'
 import { format } from '../util'
 import required from './required'
 import getUrlRegex from './url'
@@ -7,7 +7,7 @@ import getUrlRegex from './url'
 const pattern = {
   // http://emailregex.com/
   email:
-		/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+\.)+[a-zA-Z\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]{2,}))$/,
+    /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+\.)+[a-zA-Z\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]{2,}))$/,
   // url: new RegExp(
   //   '^(?!mailto:)(?:(?:http|https|ftp)://|//)(?:\\S+(?::\\S*)?@)?(?:(?:(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}(?:\\.(?:[0-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))|(?:(?:[a-z\\u00a1-\\uffff0-9]+-*)*[a-z\\u00a1-\\uffff0-9]+)(?:\\.(?:[a-z\\u00a1-\\uffff0-9]+-*)*[a-z\\u00a1-\\uffff0-9]+)*(?:\\.(?:[a-z\\u00a1-\\uffff]{2,})))|localhost)(?::\\d{2,5})?(?:(/|\\?|#)[^\\s]*)?$',
   //   'i',
@@ -92,8 +92,43 @@ const type: ExecuteRule = (rule, value, source, errors, options) => {
     }
     // straight typeof check
   }
-  else if (ruleType && typeof value !== rule.type!) {
-    errors.push(format((options as any).messages.types[ruleType], rule.fullField, rule.type))
+  else {
+    const comparableType = getComparableType(ruleType)
+    if (comparableType && !matchesTypeof(comparableType, value)) {
+      errors.push(format((options as any).messages.types[ruleType], rule.fullField, rule.type))
+    }
+  }
+}
+
+const TYPEOF_TYPES = ['undefined', 'object', 'boolean', 'number', 'string', 'function', 'symbol', 'bigint'] as const
+type TypeofType = typeof TYPEOF_TYPES[number]
+
+function getComparableType(type: RuleType): TypeofType | null {
+  return (TYPEOF_TYPES as readonly string[]).includes(type as string)
+    ? (type as TypeofType)
+    : null
+}
+
+function matchesTypeof(type: TypeofType, value: Value): boolean {
+  switch (type) {
+    case 'undefined':
+      return typeof value === 'undefined'
+    case 'object':
+      return typeof value === 'object'
+    case 'boolean':
+      return typeof value === 'boolean'
+    case 'number':
+      return typeof value === 'number'
+    case 'string':
+      return typeof value === 'string'
+    case 'function':
+      return typeof value === 'function'
+    case 'symbol':
+      return typeof value === 'symbol'
+    case 'bigint':
+      return typeof value === 'bigint'
+    default:
+      return false
   }
 }
 

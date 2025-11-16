@@ -24,8 +24,8 @@ type Props = Pick<
   | 'expandIcon'
   | 'classNames'
   | 'styles'
-> &
-Pick<CollapseProps, 'accordion' | 'collapsible' | 'destroyOnHidden'> & {
+>
+& Pick<CollapseProps, 'accordion' | 'collapsible' | 'destroyOnHidden'> & {
   activeKey: Key[]
 }
 

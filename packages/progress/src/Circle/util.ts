@@ -7,14 +7,14 @@ export const VIEW_BOX_SIZE = 100
 export function getCircleStyle(perimeter: number, perimeterWithoutGap: number, offset: number, percent: number, rotateDeg: number, gapDegree: number, gapPosition: ProgressProps['gapPosition'] | undefined, strokeColor: StrokeColorType, strokeLinecap: ProgressProps['strokeLinecap'], strokeWidth: number, stepSpace = 0): CSSProperties {
   const offsetDeg = (offset / 100) * 360 * ((360 - gapDegree) / 360)
   const positionDeg
-        = gapDegree === 0
-          ? 0
-          : {
-              bottom: 0,
-              top: 180,
-              left: 90,
-              right: -90,
-            }[gapPosition!]
+    = gapDegree === 0
+      ? 0
+      : {
+          bottom: 0,
+          top: 180,
+          left: 90,
+          right: -90,
+        }[gapPosition!]
 
   let strokeDashoffset = ((100 - percent) / 100) * perimeterWithoutGap
   // Fix percent accuracy when strokeLinecap is round

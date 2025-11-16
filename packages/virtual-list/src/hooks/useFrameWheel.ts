@@ -1,4 +1,5 @@
-import { onUnmounted, ref, type Ref } from 'vue'
+import type { Ref } from 'vue'
+import { onUnmounted, ref } from 'vue'
 import isFF from '../utils/isFirefox'
 import useOriginScroll from './useOriginScroll'
 

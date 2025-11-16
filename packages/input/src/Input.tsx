@@ -3,8 +3,8 @@ import type { ChangeEvent, FocusEventHandler } from '@v-c/util/dist/EventInterfa
 import type { ComponentPublicInstance, Directive, SlotsType, VNode } from 'vue'
 import type { InputProps } from './interface'
 import type { InputFocusOptions } from './utils/commonUtils'
-import omit from '@v-c/util/dist/omit'
 import { classNames as classnames } from '@v-c/util'
+import omit from '@v-c/util/dist/omit'
 import { defineComponent, nextTick, onMounted, ref, shallowRef, watch, withDirectives } from 'vue'
 // import antInputDirective from '@v-c/util/dist/antInputDirective';
 import BaseInput from './BaseInput'

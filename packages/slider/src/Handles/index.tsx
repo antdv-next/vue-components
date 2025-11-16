@@ -5,12 +5,12 @@ import { getIndex } from '../util'
 import Handle from './Handle'
 
 export interface RenderProps {
-	index: number
-	prefixCls: string
-	value: number
-	dragging: boolean
-	draggingDelete: boolean
-	node: any
+  index: number
+  prefixCls: string
+  value: number
+  dragging: boolean
+  draggingDelete: boolean
+  node: any
 }
 export interface HandlesRef {
   focus: (index: number) => void

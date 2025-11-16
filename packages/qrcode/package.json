@@ -5,6 +5,12 @@
   "publishConfig": {
     "access": "public"
   },
+  "description": "",
+  "author": "",
+  "license": "MIT",
+  "keywords": [
+    "qrcode"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -14,12 +20,6 @@
     "./dist/*": "./dist/*",
     "./package.json": "./package.json"
   },
-  "description": "",
-  "author": "",
-  "license": "MIT",
-  "keywords": [
-    "qrcode"
-  ],
   "main": "index.js",
   "scripts": {
     "build": "vite build",

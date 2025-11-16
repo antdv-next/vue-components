@@ -1,4 +1,5 @@
-import { onUnmounted, ref, type Ref, watch } from 'vue'
+import type { Ref } from 'vue'
+import { onUnmounted, ref, watch } from 'vue'
 
 const SMOOTH_PTG = 14 / 15
 

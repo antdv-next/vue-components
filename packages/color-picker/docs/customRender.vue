@@ -1,6 +1,7 @@
 <script setup lang="ts">
+import type { Color } from '../src'
 import { computed, h, ref } from 'vue'
-import ColorPicker, { type Color } from '../src'
+import ColorPicker from '../src'
 
 function toHexFormat(value?: string) {
   return value?.replace(/[^0-9a-fA-F#]/g, '').slice(0, 9) || ''

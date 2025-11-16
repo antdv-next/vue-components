@@ -1,6 +1,6 @@
 import type { CSSProperties, HTMLAttributes } from 'vue'
-import { getTransitionProps } from '@v-c/util/dist/utils/transition.ts'
 import { classNames } from '@v-c/util'
+import { getTransitionProps } from '@v-c/util/dist/utils/transition.ts'
 import { defineComponent, Transition } from 'vue'
 
 export interface MaskProps {

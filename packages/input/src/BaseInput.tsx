@@ -1,7 +1,7 @@
 import type { MouseEventHandler } from '@v-c/util/dist/EventInterface'
 import type { CSSProperties, SlotsType } from 'vue'
-import { cloneElement } from '@v-c/util/dist/vnode'
 import { classNames as classnames } from '@v-c/util'
+import { cloneElement } from '@v-c/util/dist/vnode'
 import { defineComponent, ref } from 'vue'
 import { baseInputProps } from './interface'
 import { hasAddon, hasPrefixSuffix } from './utils/commonUtils'

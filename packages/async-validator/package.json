@@ -1,23 +1,30 @@
 {
   "name": "@v-c/async-validator",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.0.0",
+  "publishConfig": {
+    "access": "public"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
-    "./dist/*": "./dist/*",
+    "./dist/*": [
+      "./dist/*.js",
+      "./dist/*.d.ts"
+    ],
     "./package.json": "./package.json"
   },
+  "main": "./dist/index.js",
   "files": [
     "dist"
   ],
-  "main": "dist/index.js",
   "scripts": {
-    "build": "vite build"
-  },
-  "dependencies": {
+    "build": "vite build",
+    "test": "vitest run",
+    "prepublish": "pnpm build",
+    "bump": "bumpp --release patch"
   }
 }

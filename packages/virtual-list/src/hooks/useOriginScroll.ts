@@ -1,4 +1,5 @@
-import { ref, type Ref } from 'vue'
+import type { Ref } from 'vue'
+import { ref } from 'vue'
 
 export default function useOriginScroll(
   isScrollAtTop: Ref<boolean>,
