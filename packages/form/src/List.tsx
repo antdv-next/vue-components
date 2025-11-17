@@ -1,5 +1,3 @@
-import warning from '@v-c/util/dist/warning'
-import { defineComponent, reactive } from 'vue'
 import type {
   InternalFormInstance,
   InternalNamePath,
@@ -8,12 +6,13 @@ import type {
   StoreValue,
   ValidatorRule,
 } from './interface'
-import { useFieldContext } from './FieldContext'
-import Field from './Field'
-import { getNamePath, move } from './utils/valueUtil'
 import type { ListContextProps } from './ListContext'
+import warning from '@v-c/util/dist/warning'
+import { defineComponent, reactive } from 'vue'
+import Field from './Field'
+import { useFieldContext, useFieldContextProvider } from './FieldContext'
 import { useListContext, useListContextProvider } from './ListContext'
-import { useFieldContextProvider } from './FieldContext'
+import { getNamePath, move } from './utils/valueUtil'
 
 export interface ListField {
   name: number
@@ -54,7 +53,7 @@ export default defineComponent<ListProps>(
       getKey: (namePath: InternalNamePath) => {
         const len = mergedPrefixName.length
         const pathName = namePath[len]
-        return [keyManager.keys[pathName], namePath.slice(len + 1)]
+        return [keyManager.keys[pathName as any], namePath.slice(len + 1)]
       },
     }
 
@@ -64,7 +63,7 @@ export default defineComponent<ListProps>(
       return () => null
     }
 
-    const shouldUpdate = (prevValue: StoreValue, nextValue: StoreValue, { source }) => {
+    const shouldUpdate = (prevValue: StoreValue, nextValue: StoreValue, { source }: any) => {
       if (source === 'internal') {
         return false
       }
@@ -84,7 +83,7 @@ export default defineComponent<ListProps>(
         isList
         isListField={props.isListField ?? !!wrapperListContext}
         v-slots={{
-          default: ({ value = [], onChange }, meta: Meta) => {
+          default: ({ value = [], onChange }: any, meta: Meta) => {
             const listValue = Array.isArray(value) ? value : []
 
             if (!Array.isArray(value) && process.env.NODE_ENV !== 'production') {

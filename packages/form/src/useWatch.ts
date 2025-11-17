@@ -1,6 +1,3 @@
-import warning from '@v-c/util/dist/warning'
-import { onBeforeUnmount, ref, shallowRef, unref, watch } from 'vue'
-import { HOOK_MARK, useFieldContext } from './FieldContext'
 import type {
   FormInstance,
   InternalFormInstance,
@@ -8,6 +5,9 @@ import type {
   Store,
   WatchOptions,
 } from './interface'
+import warning from '@v-c/util/dist/warning'
+import { onBeforeUnmount, ref, shallowRef, unref, watch } from 'vue'
+import { HOOK_MARK, useFieldContext } from './FieldContext'
 import { isFormInstance } from './utils/typeUtil'
 import { getNamePath, getValue } from './utils/valueUtil'
 
@@ -34,6 +34,7 @@ export default function useWatch(
 
   if (process.env.NODE_ENV !== 'production') {
     warning(
+      // @ts-expect-error this is fine
       !form || isValidForm,
       'useWatch requires a form instance since it can not auto detect from context.',
     )
@@ -68,7 +69,7 @@ export default function useWatch(
   }
 
   if (isValidForm) {
-    const { registerWatch } = formInstance.getInternalHooks(HOOK_MARK)
+    const { registerWatch } = formInstance.getInternalHooks(HOOK_MARK)!
     const cancelRegister = registerWatch((values, allValues) => {
       triggerUpdate(values, allValues)
     })

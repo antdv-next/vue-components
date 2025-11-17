@@ -1,15 +1,15 @@
-import Field from './Field'
-import List from './List'
-import useForm from './useForm'
 import type { FormProps } from './Form'
+import type { FormInstance, FormRef } from './interface'
+import Field from './Field'
+import { useFieldContext, useFieldContextProvider } from './FieldContext'
 import Form from './Form'
 import { FormProvider } from './FormContext'
-import { useFieldContext, useFieldContextProvider } from './FieldContext'
+import List from './List'
 import { useListContext, useListContextProvider } from './ListContext'
+import useForm from './useForm'
 import useWatch from './useWatch'
-import type { FormInstance, FormRef } from './interface'
 
-interface FormType extends typeof Form {
+const InternalForm = Form as typeof Form & {
   FormProvider: typeof FormProvider
   Field: typeof Field
   List: typeof List
@@ -17,15 +17,14 @@ interface FormType extends typeof Form {
   useWatch: typeof useWatch
 }
 
-const InternalForm = Form as FormType
 InternalForm.FormProvider = FormProvider
 InternalForm.Field = Field
 InternalForm.List = List
 InternalForm.useForm = useForm
 InternalForm.useWatch = useWatch
 
-export { Field, List, useForm, FormProvider, useFieldContext, useFieldContextProvider, useListContext, useListContextProvider, useWatch }
+export { Field, FormProvider, List, useFieldContext, useFieldContextProvider, useForm, useListContext, useListContextProvider, useWatch }
 
-export type { FormProps, FormInstance, FormRef }
+export type { FormInstance, FormProps, FormRef }
 
 export default InternalForm

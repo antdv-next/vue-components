@@ -35,7 +35,7 @@ class NameMap<T> {
 
   public update(key: InternalNamePath, updater: (origin: T) => T | null) {
     const origin = this.get(key)
-    const next = updater(origin)
+    const next = updater(origin!)
 
     if (!next) {
       this.delete(key)
@@ -56,6 +56,7 @@ class NameMap<T> {
 
       return callback({
         key: cells.map((cell) => {
+          // @ts-expect-error THIS
           const [, type, unit] = cell.match(/^([^:]*):(.*)$/)
           return type === 'number' ? Number(unit) : unit
         }),

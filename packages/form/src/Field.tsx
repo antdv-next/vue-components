@@ -1,16 +1,3 @@
-import warning from '@v-c/util/dist/warning'
-import isEqual from '@v-c/util/dist/isEqual'
-import {
-  cloneVNode,
-  defineComponent,
-  Fragment,
-  isVNode,
-  onBeforeUnmount,
-  onMounted,
-  reactive,
-  ref,
-  shallowRef,
-} from 'vue'
 import type { VNode } from 'vue'
 import type {
   EventArgs,
@@ -28,6 +15,19 @@ import type {
   Store,
   StoreValue,
 } from './interface'
+import isEqual from '@v-c/util/dist/isEqual'
+import warning from '@v-c/util/dist/warning'
+import {
+  cloneVNode,
+  defineComponent,
+  Fragment,
+  isVNode,
+  onBeforeUnmount,
+  onMounted,
+  reactive,
+  ref,
+  shallowRef,
+} from 'vue'
 import { HOOK_MARK, useFieldContext } from './FieldContext'
 import { useListContext } from './ListContext'
 import { toArray } from './utils/typeUtil'
@@ -106,8 +106,9 @@ const InternalField = defineComponent<InternalFieldProps>(
     const validatePromise = shallowRef<Promise<RuleError[]> | null>(null)
     const errors = shallowRef<string[]>(EMPTY_ERRORS)
     const warnings = shallowRef<string[]>(EMPTY_WARNINGS)
+    // @ts-expect-error this
     let prevValidating = false
-    let metaCache: MetaEvent = null
+    let metaCache: MetaEvent | null = null
 
     const triggerMetaEvent = (destroy?: boolean) => {
       const { onMetaChange } = props
@@ -166,15 +167,15 @@ const InternalField = defineComponent<InternalFieldProps>(
       }
 
       const { fieldContext } = props
-      const { getInitialValue } = fieldContext.getInternalHooks(HOOK_MARK)
-      if (getInitialValue(getNamePath()) !== undefined) {
+      const { getInitialValue } = fieldContext?.getInternalHooks(HOOK_MARK) ?? {}
+      if (getInitialValue?.(getNamePath()) !== undefined) {
         return true
       }
 
       return false
     }
 
-    const getMeta = (): Meta => {
+    function getMeta(): Meta {
       const validating = isFieldValidating()
       prevValidating = validating
       return {
@@ -203,7 +204,7 @@ const InternalField = defineComponent<InternalFieldProps>(
 
       const namePath = getNamePath()
       const { getInternalHooks, getFieldsValue } = mergedFieldContext
-      const { dispatch } = getInternalHooks(HOOK_MARK)
+      const { dispatch } = getInternalHooks(HOOK_MARK) ?? {}
       const value = getValueFromStore()
       const mergedGetValueProps
         = getValueProps || ((val: StoreValue) => ({ [valuePropName]: val }))
@@ -242,7 +243,7 @@ const InternalField = defineComponent<InternalFieldProps>(
           newValue = normalize(newValue, value, getFieldsValue(true))
         }
         if (newValue !== value) {
-          dispatch({
+          dispatch?.({
             type: 'updateValue',
             namePath,
             value: newValue,
@@ -264,7 +265,7 @@ const InternalField = defineComponent<InternalFieldProps>(
 
           const { rules } = props
           if (rules && rules.length) {
-            dispatch({
+            dispatch?.({
               type: 'validateField',
               namePath,
               triggerName,
@@ -325,7 +326,7 @@ const InternalField = defineComponent<InternalFieldProps>(
           const { data } = info
           if (namePathMatch) {
             if ('touched' in data) {
-              touched.value = data.touched
+              touched.value = data.touched as any
             }
             if ('validating' in data && !('originRCField' in data)) {
               validatePromise.value = data.validating ? Promise.resolve([]) : null
@@ -342,7 +343,7 @@ const InternalField = defineComponent<InternalFieldProps>(
             reRender()
             return
           }
-          else if ('value' in data && containsNamePath(namePathList, namePath, true)) {
+          else if ('value' in data && containsNamePath(namePathList!, namePath, true)) {
             reRender()
             return
           }
@@ -369,7 +370,7 @@ const InternalField = defineComponent<InternalFieldProps>(
           if (
             namePathMatch
             || ((!dependencies.length || namePath.length || shouldUpdate)
-              && requireUpdate(shouldUpdate, prevStore, store, prevValue, curValue, info))
+              && requireUpdate(shouldUpdate!, prevStore, store, prevValue, curValue, info))
           ) {
             reRender()
             return
@@ -419,7 +420,7 @@ const InternalField = defineComponent<InternalFieldProps>(
           namePath,
           currentValue,
           filteredRules,
-          options,
+          options!,
           validateFirst,
           messageVariables,
         )
@@ -472,7 +473,7 @@ const InternalField = defineComponent<InternalFieldProps>(
       isFieldValidating,
       isListField: () => !!props.isListField,
       isList: () => !!props.isList,
-      isPreserve: () => props.preserve,
+      isPreserve: () => props.preserve!,
       validateRules: validateFieldRules,
       getMeta,
       getNamePath,
@@ -483,8 +484,8 @@ const InternalField = defineComponent<InternalFieldProps>(
 
     if (mergedFieldContext) {
       const { getInternalHooks } = mergedFieldContext
-      const { initEntityValue } = getInternalHooks(HOOK_MARK)
-      initEntityValue(fieldEntity)
+      const { initEntityValue } = getInternalHooks(HOOK_MARK) ?? {}
+      initEntityValue?.(fieldEntity)
     }
 
     let cancelRegisterFunc: ((
@@ -504,8 +505,8 @@ const InternalField = defineComponent<InternalFieldProps>(
     onMounted(() => {
       mounted.value = true
       if (mergedFieldContext) {
-        const { registerField } = mergedFieldContext.getInternalHooks(HOOK_MARK)
-        cancelRegisterFunc = registerField(fieldEntity)
+        const { registerField } = mergedFieldContext.getInternalHooks(HOOK_MARK) ?? {}
+        cancelRegisterFunc = registerField?.(fieldEntity) as any
       }
 
       if (props.shouldUpdate === true) {
@@ -589,7 +590,7 @@ const Field = defineComponent<FieldProps>(
         fieldContext={fieldContext}
         v-slots={slots}
       />
-    )
+    ) as any
   },
   {
     name: 'Field',

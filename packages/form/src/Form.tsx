@@ -1,36 +1,24 @@
 import type { Component, FormHTMLAttributes } from 'vue'
-import {
-  defineComponent,
-  Fragment,
-  h,
-  onBeforeUnmount,
-  onMounted,
-  reactive,
-  ref,
-  shallowRef,
-  watch,
-  watchEffect,
-} from 'vue'
+import type { BatchTask, BatchUpdateRef } from './BatchUpdate'
 import type {
   Callbacks,
   FieldData,
   FormInstance,
-  FormRef,
   InternalFormInstance,
   Store,
   ValidateMessages,
 } from './interface'
-import useForm from './useForm'
+import { computed, defineComponent, Fragment, h, onBeforeUnmount, reactive, ref, shallowRef, watch, watchEffect } from 'vue'
+import BatchUpdate from './BatchUpdate'
 import { HOOK_MARK, useFieldContextProvider } from './FieldContext'
 import { useFormContext } from './FormContext'
-import { isSimilar } from './utils/valueUtil'
 import { useListContextProvider } from './ListContext'
-import BatchUpdate from './BatchUpdate'
-import type { BatchTask, BatchUpdateRef } from './BatchUpdate'
+import useForm from './useForm'
+import { isSimilar } from './utils/valueUtil'
 
-type BaseFormProps = Omit<FormHTMLAttributes, 'onSubmit' | 'onReset'>
+export type BaseFormProps = Omit<FormHTMLAttributes, 'onSubmit' | 'onReset'>
 
-export interface FormProps<Values = any> extends BaseFormProps {
+export interface FormProps<Values = any> {
   initialValues?: Store
   form?: FormInstance<Values>
   component?: false | string | Component
@@ -53,7 +41,7 @@ export default defineComponent<FormProps>(
     setup(props, { slots, attrs, expose }) {
       const nativeElementRef = ref<HTMLFormElement | null>(null)
       const formContext = useFormContext()
-      const [formInstance] = useForm(props.form)
+      const [formInstance] = useForm(computed(() => props.form))
       const {
         useSubscribe,
         setInitialValues,
@@ -62,12 +50,16 @@ export default defineComponent<FormProps>(
         setPreserve,
         destroyForm,
         setBatchUpdate,
-      } = (formInstance as InternalFormInstance).getInternalHooks(HOOK_MARK)
-
-      expose({
-        ...(formInstance as FormRef),
+      } = (formInstance.value as InternalFormInstance).getInternalHooks(HOOK_MARK) ?? {}
+      const exposed = reactive({
         nativeElement: nativeElementRef,
       })
+
+      watchEffect(() => {
+        Object.assign(exposed, formInstance.value ?? {})
+      })
+
+      expose(exposed)
 
       watch(
         () => props.name,
@@ -83,21 +75,21 @@ export default defineComponent<FormProps>(
       )
 
       watchEffect(() => {
-        setValidateMessages({
+        setValidateMessages?.({
           ...formContext.validateMessages,
           ...props.validateMessages,
         })
       })
 
       watchEffect(() => {
-        setCallbacks({
+        setCallbacks?.({
           onValuesChange: props.onValuesChange,
           onFieldsChange: (changedFields: FieldData[], ...rest) => {
-            formContext.triggerFormChange(props.name, changedFields)
+            formContext.triggerFormChange(props.name!, changedFields)
             props.onFieldsChange?.(changedFields, ...rest)
           },
           onFinish: (values: Store) => {
-            formContext.triggerFormFinish(props.name, values)
+            formContext.triggerFormFinish(props.name!, values)
             props.onFinish?.(values)
           },
           onFinishFailed: props.onFinishFailed,
@@ -105,14 +97,14 @@ export default defineComponent<FormProps>(
       })
 
       watchEffect(() => {
-        setPreserve(props.preserve)
+        setPreserve?.(props.preserve)
       })
 
       const mountRef = ref(false)
       watch(
         () => props.initialValues,
         (val) => {
-          setInitialValues(val, !mountRef.value)
+          setInitialValues?.(val!, !mountRef.value)
           if (!mountRef.value) {
             mountRef.value = true
           }
@@ -142,13 +134,13 @@ export default defineComponent<FormProps>(
         tryFlushBatch()
       }
 
-      setBatchUpdate(batchUpdate)
+      setBatchUpdate?.(batchUpdate)
 
       onBeforeUnmount(() => {
         if (props.name) {
           formContext.unregisterForm(props.name)
         }
-        destroyForm(props.clearOnDestroy)
+        destroyForm?.(props.clearOnDestroy)
       })
 
       const prevFields = shallowRef<FieldData[] | undefined>()
@@ -156,7 +148,7 @@ export default defineComponent<FormProps>(
         () => props.fields,
         (fields) => {
           if (!isSimilar(prevFields.value || [], fields || [])) {
-            formInstance.setFields(fields || [])
+            formInstance.value?.setFields?.(fields || [])
           }
           prevFields.value = fields
         },
@@ -164,8 +156,12 @@ export default defineComponent<FormProps>(
       )
 
       const formContextValue = reactive<InternalFormInstance>({
-        ...(formInstance as InternalFormInstance),
+        ...(formInstance.value as InternalFormInstance),
         validateTrigger: props.validateTrigger ?? 'onChange',
+      })
+
+      watchEffect(() => {
+        Object.assign(formContextValue, formInstance.value ?? {})
       })
 
       watch(
@@ -182,12 +178,12 @@ export default defineComponent<FormProps>(
       const handleSubmit = (event: Event) => {
         event.preventDefault()
         event.stopPropagation()
-        formInstance.submit()
+        formInstance?.value?.submit?.()
       }
 
       const handleReset = (event: Event) => {
         event.preventDefault()
-        formInstance.resetFields()
+        formInstance?.value?.resetFields?.()
         const onReset = attrs.onReset as ((e: Event) => void) | undefined
         onReset?.(event)
       }
@@ -195,17 +191,17 @@ export default defineComponent<FormProps>(
       return () => {
         const slot = slots.default
         const isRenderProps = !!slot && slot.length > 0
-        useSubscribe(!isRenderProps)
+        useSubscribe?.(!isRenderProps)
         const childrenNode = slot
           ? (isRenderProps
-              ? slot({ values: formInstance.getFieldsValue(true), form: formInstance })
+              ? slot({ values: formInstance?.value?.getFieldsValue?.(true), form: formInstance })
               : slot())
           : null
 
         const content = (
           <Fragment>
             {childrenNode}
-            <BatchUpdate ref={setBatchUpdateRef} />
+            <BatchUpdate ref={(el: any) => setBatchUpdateRef(el)} />
           </Fragment>
         )
 

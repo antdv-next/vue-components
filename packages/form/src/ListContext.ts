@@ -1,6 +1,6 @@
 import type { InjectionKey } from 'vue'
-import { inject, provide } from 'vue'
 import type { InternalNamePath } from './interface'
+import { inject, provide } from 'vue'
 
 export interface ListContextProps {
   getKey: (namePath: InternalNamePath) => [InternalNamePath[number], InternalNamePath]
