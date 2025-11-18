@@ -1,6 +1,6 @@
 import type { InjectionKey, Ref } from 'vue'
 import type { FieldData, FormInstance, Store, ValidateMessages } from './interface'
-import { defineComponent, inject, provide, reactive, shallowRef, watchEffect } from 'vue'
+import { defineComponent, inject, provide, reactive, watchEffect } from 'vue'
 
 export type Forms = Record<string, FormInstance>
 
@@ -23,7 +23,7 @@ export interface FormProviderProps {
 export interface FormContextProps extends FormProviderProps {
   triggerFormChange: (name: string, changedFields: FieldData[]) => void
   triggerFormFinish: (name: string, values: Store) => void
-  registerForm: (name: string, form: Ref<FormInstance>) => void
+  registerForm: (name: string, form: Ref<FormInstance | undefined>) => void
   unregisterForm: (name: string) => void
   validateMessages?: ValidateMessages
 }
@@ -45,7 +45,7 @@ export function useFormContext(): FormContextProps {
 const FormProvider = defineComponent<FormProviderProps>(
   (props, { slots }) => {
     const parentContext = useFormContext()
-    const formsRef = shallowRef<Forms>({})
+    const formsRef = reactive<Forms>({})
 
     const context = reactive<FormContextProps>({
       ...parentContext,
@@ -56,31 +56,26 @@ const FormProvider = defineComponent<FormProviderProps>(
       triggerFormChange: (name, changedFields) => {
         props.onFormChange?.(name, {
           changedFields,
-          forms: formsRef.value,
+          forms: formsRef,
         })
         parentContext.triggerFormChange(name, changedFields)
       },
       triggerFormFinish: (name, values) => {
         props.onFormFinish?.(name, {
           values,
-          forms: formsRef.value,
+          forms: formsRef,
         })
         parentContext.triggerFormFinish(name, values)
       },
       registerForm: (name, form) => {
         if (name) {
-          formsRef.value = {
-            ...formsRef.value,
-            [name]: form,
-          }
+          formsRef[name] = form as any
         }
         parentContext.registerForm(name, form)
       },
       unregisterForm: (name) => {
         if (name) {
-          const nextForms = { ...formsRef.value }
-          delete nextForms[name]
-          formsRef.value = nextForms
+          delete formsRef[name]
         }
         parentContext.unregisterForm(name)
       },

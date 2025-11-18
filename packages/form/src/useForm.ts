@@ -1090,7 +1090,7 @@ export class FormStore {
   }
 }
 
-function useForm<Values = any>(form?: Ref<FormInstance<Values>>): [Ref<FormInstance<Values> | undefined>] {
+function useForm<Values = any>(form?: Ref<FormInstance<Values> | undefined>): [Ref<FormInstance<Values> | undefined>] {
   const formRef = shallowRef<FormInstance<Values>>()
   const instance = getCurrentInstance()
 
