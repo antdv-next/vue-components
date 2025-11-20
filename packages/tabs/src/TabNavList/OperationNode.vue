@@ -157,6 +157,11 @@ watch([() => selectedItemId.value,() => selectedKey.value],() => {
     }
   }
 })
+
+
+defineExpose({
+  operationNodeRef
+})
 </script>
 
 <template>
