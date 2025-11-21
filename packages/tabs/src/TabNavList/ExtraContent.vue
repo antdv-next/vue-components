@@ -30,7 +30,11 @@ const childrenNodes = computed(() => {
   return position.value === 'right' ? assertExtra.right : assertExtra.left
 })
 
-const isValidChildrenNodes = computed(() => ensureValidVNode(childrenNodes.value as VNodeArrayChildren))
+const isValidChildrenNodes = computed(() => ensureValidVNode(childrenNodes.value as unknown as VNodeArrayChildren))
+
+defineExpose({
+  extraContentRef,
+})
 </script>
 
 <template>

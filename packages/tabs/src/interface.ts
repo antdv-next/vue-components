@@ -4,6 +4,8 @@ import type { VueNode } from '@v-c/util/dist/type'
 import type { CSSMotionProps } from '@v-c/util/dist/utils/transition'
 import type { CSSProperties } from 'vue'
 
+export type SizeInfo = [width: number, height: number]
+
 export interface EditableConfig {
   onEdit: (
     type: 'add' | 'remove',
@@ -79,7 +81,7 @@ export type MoreProps = {
 
 export interface OperationNodeProps {
   prefixCls: string
-  className?: string
+  className?: unknown
   style?: CSSProperties
   id: string
   tabs: Tab[]
@@ -121,3 +123,70 @@ export interface TabNodeProps {
   style?: CSSProperties
   className?: string
 }
+
+export type TabPosition = 'left' | 'right' | 'top' | 'bottom'
+
+export type GetIndicatorSize = (activeKey: string, tabEl?: HTMLElement) => number
+
+export type SemanticName = string
+
+export type RenderTabBar = (props: Record<string, any>, TabNavListComponent: any) => VueNode
+
+export interface TabNavListProps {
+  id: string
+  tabPosition: TabPosition
+  activeKey: string
+  rtl: boolean
+  animated?: AnimatedConfig
+  extra?: TabBarExtraContent
+  editable?: EditableConfig
+  more?: MoreProps
+  mobile: boolean
+  tabBarGutter?: number
+  renderTabBar?: RenderTabBar
+  className?: string
+  style?: CSSProperties
+  locale?: TabsLocale
+  onTabClick: (activeKey: string, e: MouseEvent | KeyboardEvent) => void
+  onTabScroll?: OnTabScroll
+  children?: (node: VueNode) => VueNode
+  getPopupContainer?: (node: HTMLElement) => HTMLElement
+  popupClassName?: string
+  indicator?: {
+    size?: GetIndicatorSize
+    align?: 'start' | 'center' | 'end'
+  }
+  classNames?: Partial<Record<SemanticName, string>>
+  styles?: Partial<Record<SemanticName, CSSProperties>>
+}
+
+export interface TabNavListProps {
+  id: string
+  tabPosition: TabPosition
+  activeKey: string
+  rtl: boolean
+  animated?: AnimatedConfig
+  extra?: TabBarExtraContent
+  editable?: EditableConfig
+  more?: MoreProps
+  mobile: boolean
+  tabBarGutter?: number
+  renderTabBar?: RenderTabBar
+  className?: string
+  style?: CSSProperties
+  locale?: TabsLocale
+  onTabClick: (activeKey: string, e: MouseEvent | KeyboardEvent) => void
+  onTabScroll?: OnTabScroll
+  children?: (node: VueNode) => VueNode
+  getPopupContainer?: (node: HTMLElement) => HTMLElement
+  popupClassName?: string
+  indicator?: {
+    size?: GetIndicatorSize
+    align?: 'start' | 'center' | 'end'
+  }
+  classNames?: Partial<Record<SemanticName, string>>
+  styles?: Partial<Record<SemanticName, CSSProperties>>
+}
+
+export type TabNavListWrapperProps = Required<Omit<TabNavListProps, 'children' | 'className'>> &
+  TabNavListProps

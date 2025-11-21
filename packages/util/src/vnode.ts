@@ -58,7 +58,8 @@ export function triggerVNodeUpdate(vm: VNode, attrs: Record<string, any>, dom: a
   VueRender(cloneVNode(vm, { ...attrs }), dom)
 }
 
-export function ensureValidVNode(slot: VNodeArrayChildren | null) {
+export function ensureValidVNode<T extends Array<unknown>>(slot: T | null) {
+
   return (slot || []).some((child) => {
     if (!isVNode(child))
       return true

@@ -2,6 +2,26 @@ import type { Key, VueNode } from '@v-c/util/dist/type'
 import type { EditableConfig } from './interface'
 import { isEmptyElement } from '@v-c/util/dist/props-util'
 
+/**
+ * We trade Map as deps which may change with same value but different ref object.
+ * We should make it as hash for deps
+ */
+export function stringify<K extends PropertyKey, V>(obj: Record<K, V> | Map<K, V>) {
+  let tgt: Record<K, V>
+
+  if (obj instanceof Map) {
+    tgt = {} as any
+    obj.forEach((v, k) => {
+      tgt[k] = v
+    })
+  }
+  else {
+    tgt = obj
+  }
+
+  return JSON.stringify(tgt)
+}
+
 export function getRemovable(
   closable?: boolean,
   closeIcon?: VueNode,
