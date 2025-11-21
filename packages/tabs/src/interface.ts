@@ -1,4 +1,5 @@
 import type { DropdownProps } from '@v-c/dropdown'
+import type { FocusEventHandler, KeyboardEventHandler, MouseEventHandler } from '@v-c/util/dist/EventInterface'
 import type { VueNode } from '@v-c/util/dist/type'
 import type { CSSMotionProps } from '@v-c/util/dist/utils/transition'
 import type { CSSProperties } from 'vue'
@@ -95,4 +96,28 @@ export interface OperationNodeProps {
   getPopupContainer?: (node: HTMLElement) => HTMLElement
   popupClassName?: string
   popupStyle?: CSSProperties
+}
+
+export interface TabNodeProps {
+  id: string
+  prefixCls: string
+  tab: Tab
+  active: boolean
+  focus: boolean
+  closable?: boolean
+  editable?: EditableConfig
+  onClick?: (e: MouseEvent | KeyboardEvent) => void
+  onResize?: (width: number, height: number, left: number, top: number) => void
+  renderWrapper?: (node: VueNode) => VueNode
+  removeAriaLabel?: string
+  tabCount: number
+  currentPosition: number
+  removeIcon?: VueNode
+  onKeyDown: KeyboardEventHandler
+  onMouseDown: MouseEventHandler
+  onMouseUp: MouseEventHandler
+  onFocus: FocusEventHandler
+  onBlur: FocusEventHandler
+  style?: CSSProperties
+  className?: string
 }

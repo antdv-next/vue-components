@@ -1,4 +1,4 @@
-import type { VueNode } from '@v-c/util/dist/type'
+import type { Key, VueNode } from '@v-c/util/dist/type'
 import type { EditableConfig } from './interface'
 import { isEmptyElement } from '@v-c/util/dist/props-util'
 
@@ -21,4 +21,10 @@ export function getRemovable(
     return false
   }
   return true
+}
+
+const VC_TABS_DOUBLE_QUOTE = 'TABS_DQ'
+
+export function genDataNodeKey(key: Key): string {
+  return String(key).replace(/"/g, VC_TABS_DOUBLE_QUOTE)
 }
