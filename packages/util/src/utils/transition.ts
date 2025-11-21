@@ -29,12 +29,12 @@ export function getTransitionProps(transitionName?: string, opt: TransitionProps
         // appearFromClass: `${transitionName}-appear ${transitionName}-appear-prepare`,
         // appearActiveClass: `antdv-base-transtion`,
         // appearToClass: `${transitionName}-appear ${transitionName}-appear-active`,
-        enterFromClass: `${transitionName}-enter ${transitionName}-appear ${transitionName}-appear-prepare ${transitionName}-enter-prepare ${transitionName}-enter-start`,
-        enterActiveClass: `${transitionName}-enter ${transitionName}-appear ${transitionName}-appear-prepare ${transitionName}-enter-prepare `,
-        enterToClass: `${transitionName}-enter ${transitionName}-appear ${transitionName}-appear-active ${transitionName}-enter-active`,
-        leaveFromClass: ` ${transitionName}-leave`,
-        leaveActiveClass: `${transitionName}-leave ${transitionName}-leave-active`,
-        leaveToClass: `${transitionName}-leave ${transitionName}-leave-active`,
+        enterFromClass: `${transitionName} ${transitionName}-enter ${transitionName}-appear ${transitionName}-appear-prepare ${transitionName}-enter-prepare ${transitionName}-enter-start`,
+        enterActiveClass: `${transitionName} ${transitionName}-enter ${transitionName}-appear ${transitionName}-appear-prepare ${transitionName}-enter-prepare `,
+        enterToClass: `${transitionName} ${transitionName}-enter ${transitionName}-appear ${transitionName}-appear-active ${transitionName}-enter-active`,
+        leaveFromClass: `${transitionName} ${transitionName}-leave`,
+        leaveActiveClass: `${transitionName} ${transitionName}-leave ${transitionName}-leave-active`,
+        leaveToClass: `${transitionName} ${transitionName}-leave ${transitionName}-leave-active`,
         ...opt,
       }
     : { css: false, ...opt }
