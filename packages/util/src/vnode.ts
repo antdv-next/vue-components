@@ -59,7 +59,6 @@ export function triggerVNodeUpdate(vm: VNode, attrs: Record<string, any>, dom: a
 }
 
 export function ensureValidVNode<T extends Array<unknown>>(slot: T | null) {
-
   return (slot || []).some((child) => {
     if (!isVNode(child))
       return true
