@@ -2,7 +2,7 @@ import type { DropdownProps } from '@v-c/dropdown'
 import type { FocusEventHandler, KeyboardEventHandler, MouseEventHandler } from '@v-c/util/dist/EventInterface'
 import type { VueNode } from '@v-c/util/dist/type'
 import type { CSSMotionProps } from '@v-c/util/dist/utils/transition'
-import type { CSSProperties, HTMLAttributes } from 'vue'
+import type { CSSProperties } from 'vue'
 
 export type SizeInfo = [width: number, height: number]
 
@@ -144,7 +144,7 @@ export interface TabNavListProps {
   mobile: boolean
   tabBarGutter?: number
   renderTabBar?: RenderTabBar
-  className?: string
+  className?: unknown
   style?: CSSProperties
   locale?: TabsLocale
   onTabClick: (activeKey: string, e: MouseEvent | KeyboardEvent) => void
@@ -160,35 +160,7 @@ export interface TabNavListProps {
   styles?: Partial<Record<SemanticName, CSSProperties>>
 }
 
-export interface TabNavListProps {
-  id: string
-  tabPosition: TabPosition
-  activeKey: string
-  rtl: boolean
-  animated?: AnimatedConfig
-  extra?: TabBarExtraContent
-  editable?: EditableConfig
-  more?: MoreProps
-  mobile: boolean
-  tabBarGutter?: number
-  renderTabBar?: RenderTabBar
-  className?: string
-  style?: CSSProperties
-  locale?: TabsLocale
-  onTabClick: (activeKey: string, e: MouseEvent | KeyboardEvent) => void
-  onTabScroll?: OnTabScroll
-  children?: (node: VueNode) => VueNode
-  getPopupContainer?: (node: HTMLElement) => HTMLElement
-  popupClassName?: string
-  indicator?: {
-    size?: GetIndicatorSize
-    align?: 'start' | 'center' | 'end'
-  }
-  classNames?: Partial<Record<SemanticName, string>>
-  styles?: Partial<Record<SemanticName, CSSProperties>>
-}
-
-export type TabNavListWrapperProps = Required<Omit<TabNavListProps, 'children' | 'className'>> &
+export type TabNavListWrapperProps = Omit<TabNavListProps, 'children' | 'className'> &
   TabNavListProps
 
 export interface TabPaneProps {
@@ -211,8 +183,7 @@ export interface TabPaneProps {
   destroyOnHidden?: boolean
 }
 
-export interface TabsProps
-  extends Omit<HTMLAttributes, 'onChange' | 'children'> {
+export interface TabsProps {
   prefixCls?: string
   className?: string
   style?: CSSProperties

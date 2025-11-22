@@ -2,12 +2,15 @@
 import type { CSSProperties, VNodeChild } from 'vue'
 import type { MoreProps, OperationNodeProps } from '../interface'
 import DropDown from '@v-c/dropdown'
-import Menu, { MenuItem } from '@v-c/menu'
+import Menu from '@v-c/menu'
 import KeyCode from '@v-c/util/dist/KeyCode'
 import RenderComponent from '@v-c/util/dist/RenderComponent.vue'
 import { computed, h, ref, toRefs, useTemplateRef, watch } from 'vue'
 import { getRemovable } from '../utils'
 import AddButton from './AddButton.vue'
+
+console.log('Menu', Menu)
+const MenuItem = Menu.Item
 
 const props = withDefaults(defineProps<OperationNodeProps>(), {
   more: () => ({}) as MoreProps,

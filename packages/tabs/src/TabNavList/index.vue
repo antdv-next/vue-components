@@ -14,6 +14,12 @@ import ExtraContent from './ExtraContent.vue'
 import OperationNode from './OperationNode.vue'
 import TabNode from './TabNode.vue'
 
+
+defineOptions({
+  name: 'TabNavList',
+  inheritAttrs: false
+})
+
 const props = defineProps<TabNavListProps>()
 
 const {
@@ -422,7 +428,7 @@ function onTabFocus(key: string) {
 }
 
 function updateInkBar() {
-  const listEl = (tabListRef.value && (tabListRef.value as any).$el) as HTMLElement | null
+  const listEl = tabListRef.value
   if (!listEl)
     return
   const curEl = listEl.querySelector(`[data-node-key="${genDataNodeKey(activeKey.value)}"]`) as HTMLElement | null
@@ -484,9 +490,9 @@ function getSize(refObj: Ref<HTMLElement | null>) {
 function updateTabSizes() {
   tabSizes.value = (() => {
     const newSizes = new Map<string, { width: number, height: number, left: number, top: number }>()
-    const listRect = (tabListRef.value as any)?.$el?.getBoundingClientRect?.()
+    const listRect = tabListRef.value?.getBoundingClientRect?.()
     tabs.value.forEach(({ key }) => {
-      const listEl = (tabListRef.value as any)?.$el as HTMLElement
+      const listEl = tabListRef.value
       const btnNode = listEl?.querySelector?.(
         `[data-node-key="${genDataNodeKey(key)}"]`,
       ) as HTMLElement | null
@@ -513,7 +519,7 @@ function onListHolderResize() {
   const opEl = operationsRef.value?.operationNodeRef as HTMLElement | null
   operationSize.value = opEl ? getSize({ value: opEl } as any) as any : [0, 0]
 
-  const tabListEl = (tabListRef.value as any)?.$el as HTMLElement | null
+  const tabListEl = tabListRef.value
   const tabContentFullSize = tabListEl ? getSize({ value: tabListEl } as any) : [0, 0]
   const addEl = (innerAddButtonRef.value as any)?.buttonRef as HTMLElement | null
   addSize.value = addEl ? getSize({ value: addEl } as any) as any : [0, 0]
@@ -546,6 +552,8 @@ onMounted(async () => {
   await nextTick()
   updateInkBar()
 })
+
+console.log(props.animated)
 </script>
 
 <template>
@@ -606,6 +614,7 @@ onMounted(async () => {
                   visibility: hasDropdown ? 'hidden' : null,
                 } as CSSProperties"
               />
+
               <div
                 :class="[
                   `${prefixCls}-ink-bar`,

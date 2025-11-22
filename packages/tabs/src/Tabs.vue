@@ -2,11 +2,14 @@
 import type { TabsProps } from './interface'
 import useMergedState from '@v-c/util/dist/hooks/useMergedState'
 import isMobile from '@v-c/util/dist/isMobile'
+import omit from '@v-c/util/dist/omit'
+import { clsx } from '@v-c/util'
 import { computed, onMounted, ref, toRefs, watch } from 'vue'
 import useAnimateConfig from './hooks/useAnimateConfig'
-import { getUUid, setUUid } from './utils'
-import omit from '@v-c/util/dist/omit'
 import { provideTabContext } from './TabContext'
+import TabPanelList from './TabPanelList/index.vue'
+import TabNavListWrapper from './TabNavList/Wrapper.vue';
+import { getUUid, setUUid } from './utils'
 
 defineOptions({
   name: 'Tabs',
@@ -16,11 +19,13 @@ defineOptions({
 const props = withDefaults(defineProps<TabsProps>(), {
   prefixCls: 'vc-tabs',
   tabPosition: 'top',
+  animated: undefined,
+  destroyOnHidden: undefined
 })
 
 const { id, items, direction, defaultActiveKey, tabPosition, editable, locale, tabBarGutter, more, animated, styles, prefixCls, className, activeKey, tabBarStyle, tabBarExtraContent, destroyOnHidden, renderTabBar, onChange, onTabClick, onTabScroll, getPopupContainer, popupClassName, indicator, classNames: tabsClassNames } = toRefs(props)
 
-
+console.log(props, 'tabs')
 const restProps = computed(() => {
   return omit(props, [
     'id',
@@ -57,7 +62,6 @@ const rtl = computed(() => direction.value === 'rtl')
 
 // FIXME:
 const mergedAnimated = computed(() => useAnimateConfig(animated.value))
-
 // ======================== Mobile ========================
 const mobile = ref(false)
 onMounted(() => {
@@ -88,7 +92,7 @@ onMounted(() => {
 })
 
 // ===================== Accessibility ====================
-const [mergedId, setMergedId] = useMergedState<string | null>(null, {
+const [mergedId, setMergedId] = useMergedState(null as string | null, {
   // @ts-expect-error: `toRef`
   value: id.value,
 })
@@ -96,7 +100,7 @@ const [mergedId, setMergedId] = useMergedState<string | null>(null, {
 // Async generate id to avoid ssr mapping failed
 onMounted(() => {
   const uuid = getUUid()
-  setMergedId(`rc-tabs-${process.env.NODE_ENV === 'test' ? 'test' : uuid}`)
+  setMergedId(`vc-tabs-${process.env.NODE_ENV === 'test' ? 'test' : uuid}`)
   setUUid(uuid + 1)
 })
 
@@ -112,7 +116,7 @@ function onInternalTabClick(key: string, e: MouseEvent | KeyboardEvent) {
 
 // ======================== Render ========================
 const sharedProps = computed(() => ({
-  id: mergedId.value,
+  id: mergedId.value as string,
   activeKey: mergedActiveKey.value,
   animated: mergedAnimated.value,
   tabPosition: tabPosition.value,
@@ -130,9 +134,9 @@ const tabNavBarProps = computed(() => {
     onTabClick: onInternalTabClick,
     onTabScroll: onTabScroll.value,
     extra: tabBarExtraContent.value,
-    style: tabBarStyle.value,
+    style: tabBarStyle.value!,
     getPopupContainer: getPopupContainer.value,
-    popupClassName: [popupClassName.value, tabsClassNames.value?.popup],
+    popupClassName: clsx([popupClassName.value, tabsClassNames.value?.popup]),
     indicator: indicator.value,
     styles: styles.value,
     classNames: tabsClassNames.value,
@@ -149,17 +153,22 @@ provideTabContext(memoizedValue)
 </script>
 
 <template>
-  <div ref="tabRef" :id="id" :class="[prefixCls,
-    `${prefixCls}-${tabPosition}`,
-    {
-      [`${prefixCls}-mobile`]: mobile,
-      [`${prefixCls}-editable`]: editable,
-      [`${prefixCls}-rtl`]: rtl,
-    },
-    className]" v-bind="restProps">
-
-    <TabNavListWrapper v-bind="tabNavBarProps" :renderTabBar="renderTabBar" />
-    <TabPanelList :destroyOnHidden="destroyOnHidden" v-bind="sharedProps" :contentStyle="styles?.content"
-      :contentClassName="tabsClassNames?.content" :animated="mergedAnimated" />
+  <div
+    :id="id" ref="tabRef" :class="[prefixCls,
+                                   `${prefixCls}-${tabPosition}`,
+                                   {
+                                     [`${prefixCls}-mobile`]: mobile,
+                                     [`${prefixCls}-editable`]: editable,
+                                     [`${prefixCls}-rtl`]: rtl,
+                                   },
+                                   className]" v-bind="restProps"
+  >
+    <TabNavListWrapper
+    v-bind="tabNavBarProps"
+    :render-tab-bar="renderTabBar!" />
+    <TabPanelList
+      :destroy-on-hidden="destroyOnHidden" v-bind="sharedProps" :content-style="styles?.content"
+      :content-class-name="tabsClassNames?.content" :animated="mergedAnimated"
+    />
   </div>
 </template>

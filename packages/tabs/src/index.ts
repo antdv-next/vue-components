@@ -1,6 +1,6 @@
-import type { TabsProps } from './interface';
-import Tabs from './Tabs.vue';
+import type { TabsProps } from './interface'
+import Tabs from './Tabs.vue'
 
-export type { TabsProps };
+export type { TabsProps }
 
-export default Tabs;
+export default Tabs

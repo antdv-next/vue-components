@@ -1,0 +1,147 @@
+@import './dropdown.less';
+@import './panels.less';
+@import './position.less';
+@import './rtl.less';
+
+@tabs-prefix-cls: vc-tabs;
+
+@easing-in-out: cubic-bezier(0.35, 0, 0.25, 1);
+
+@effect-duration: 0.3s;
+
+.@{tabs-prefix-cls} {
+  overflow: hidden;
+  font-size: 14px;
+  border: 1px solid gray;
+
+  // ========================== Navigation ==========================
+  &-nav {
+    position: relative;
+    display: flex;
+    flex: none;
+
+    &-measure,
+    &-wrap {
+      position: relative;
+      display: inline-block;
+      display: flex;
+      flex: auto;
+      overflow: hidden;
+      white-space: nowrap;
+      transform: translate(0);
+
+      &-ping-left::before,
+      &-ping-right::after {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        content: '';
+      }
+      &-ping-left::before {
+        left: 0;
+        border-left: 1px solid red;
+      }
+      &-ping-right::after {
+        right: 0;
+        border-right: 1px solid red;
+      }
+
+      &-ping-top::before,
+      &-ping-bottom::after {
+        position: absolute;
+        right: 0;
+        left: 0;
+        content: '';
+      }
+      &-ping-top::before {
+        top: 0;
+        border-top: 1px solid red;
+      }
+      &-ping-bottom::after {
+        bottom: 0;
+        border-top: 1px solid red;
+      }
+    }
+
+    &-list {
+      position: relative;
+      display: flex;
+      transition: transform 0.3s;
+    }
+
+    // >>>>>>>> Operations
+    &-operations {
+      display: flex;
+
+      &-hidden {
+        position: absolute;
+        visibility: hidden;
+        pointer-events: none;
+      }
+    }
+
+    &-more {
+      background: rgba(255, 0, 0, 0.1);
+      border: 1px solid blue;
+    }
+    &-add {
+      background: rgba(0, 255, 0, 0.1);
+      border: 1px solid green;
+    }
+  }
+
+  &-tab {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin: 0;
+    font-weight: lighter;
+    font-size: 20px;
+    background: rgba(255, 255, 255, 0.5);
+    border: 0;
+    outline: none;
+    cursor: pointer;
+
+    &-btn,
+    &-remove {
+      background: transparent;
+      border: 0;
+    }
+
+    &-btn {
+      font-weight: inherit;
+      line-height: 32px;
+      &:focus {
+        outline: none;
+      }
+    }
+
+    &-remove {
+      &:hover {
+        color: red;
+      }
+    }
+
+    &-active {
+      font-weight: bolder;
+    }
+
+    &-focus {
+      outline: 1px auto #1677ff;
+    }
+  }
+
+  &-ink-bar {
+    position: absolute;
+    background: red;
+    pointer-events: none;
+
+    &-animated {
+      transition: all 0.3s;
+    }
+  }
+
+  &-extra-content {
+    flex: none;
+  }
+}

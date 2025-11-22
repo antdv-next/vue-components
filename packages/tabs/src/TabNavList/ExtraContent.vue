@@ -11,7 +11,16 @@ const { position, prefixCls, extra } = toRefs(props)
 
 const extraContentRef = ref<HTMLDivElement>()
 
-const isValidExtra = computed(() => ensureValidVNode(extra.value as VNodeArrayChildren))
+const isValidExtra = computed(() => {
+
+  if (typeof extra.value === 'object' && isVNode(extra.value) && ensureValidVNode(extra.value as unknown as VNodeArrayChildren))
+    return true
+
+  if (['string', 'number', 'boolean'].includes(typeof extra.value))
+    return true
+
+  return false
+})
 
 const childrenNodes = computed(() => {
   if (!extra.value)
@@ -20,17 +29,17 @@ const childrenNodes = computed(() => {
   let assertExtra: TabBarExtraMap = {}
   const internalExtra = Array.isArray(extra.value) ? extra.value : [extra.value]
   // React.isValidElement replace isVNode && ensureValidVNode
-  if (typeof extra.value === 'object' && isVNode(internalExtra) && ensureValidVNode(internalExtra as VNodeArrayChildren)) {
+  if (typeof extra.value === 'object' && !isVNode(internalExtra)
+) {
     assertExtra = extra.value as TabBarExtraMap
   }
   else {
-    assertExtra.right = extra
+    assertExtra.right = extra.value
   }
 
   return position.value === 'right' ? assertExtra.right : assertExtra.left
 })
 
-const isValidChildrenNodes = computed(() => ensureValidVNode(childrenNodes.value as unknown as VNodeArrayChildren))
 
 defineExpose({
   extraContentRef,
@@ -38,7 +47,7 @@ defineExpose({
 </script>
 
 <template>
-  <div v-if="isValidExtra && isValidChildrenNodes" ref="extraContentRef" :class="[`${prefixCls}-extra-content`]">
+  <div v-if="isValidExtra" ref="extraContentRef" :class="[`${prefixCls}-extra-content`]">
     <RenderComponent :render="childrenNodes" />
   </div>
 </template>
