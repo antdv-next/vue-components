@@ -1,0 +1,35 @@
+{
+  "name": "@v-c/tabs",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "tabs ui component for react",
+  "author": "",
+  "license": "MIT",
+  "keywords": [
+    "decimal"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./dist/*": "./dist/*",
+    "./package.json": "./package.json"
+  },
+  "main": "index.js",
+  "scripts": {
+    "build": "vite build",
+    "test": "vitest"
+  },
+  "peerDependencies": {
+    "vue": "^3.0.0"
+  },
+  "dependencies": {
+    "@v-c/dropdown": "workspace:*",
+    "@v-c/menu": "workspace:*",
+    "@v-c/overflow": "workspace:*",
+    "@v-c/resize-observer": "workspace:*",
+    "@v-c/util": "workspace:*"
+  }
+}

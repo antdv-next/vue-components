@@ -1,0 +1,29 @@
+@duration: 0.3s;
+
+/* 进入动画 */
+.switch-enter-from {
+  opacity: 0;
+}
+
+.switch-enter-active {
+  transition: all @duration;
+}
+
+.switch-enter-to {
+  opacity: 1;
+}
+
+/* 离开动画 */
+.switch-leave-from {
+  opacity: 1;
+  position: absolute;
+  inset: 0;
+}
+
+.switch-leave-active {
+  transition: all @duration;
+}
+
+.switch-leave-to {
+  opacity: 0;
+}
