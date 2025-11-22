@@ -126,11 +126,16 @@ export interface TabNodeProps {
 
 export type TabPosition = 'left' | 'right' | 'top' | 'bottom'
 
-export type GetIndicatorSize = (activeKey: string, tabEl?: HTMLElement) => number
+export type GetIndicatorSize = number | ((origin: number) => number)
 
 export type SemanticName = string
 
 export type RenderTabBar = (props: Record<string, any>, TabNavListComponent: any) => VueNode
+
+export interface IndicatorConfig {
+  size?: GetIndicatorSize
+  align?: 'start' | 'center' | 'end'
+}
 
 export interface TabNavListProps {
   id: string
@@ -152,10 +157,7 @@ export interface TabNavListProps {
   children?: (node: VueNode) => VueNode
   getPopupContainer?: (node: HTMLElement) => HTMLElement
   popupClassName?: string
-  indicator?: {
-    size?: GetIndicatorSize
-    align?: 'start' | 'center' | 'end'
-  }
+  indicator?: IndicatorConfig
   classNames?: Partial<Record<SemanticName, string>>
   styles?: Partial<Record<SemanticName, CSSProperties>>
 }

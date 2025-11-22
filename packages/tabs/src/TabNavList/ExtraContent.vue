@@ -12,11 +12,10 @@ const { position, prefixCls, extra } = toRefs(props)
 const extraContentRef = ref<HTMLDivElement>()
 
 const isValidExtra = computed(() => {
-
-  if (typeof extra.value === 'object' && isVNode(extra.value) && ensureValidVNode(extra.value as unknown as VNodeArrayChildren))
+  if (typeof extra.value === 'object' && isVNode(extra.value) && ensureValidVNode(Array.isArray(extra.value) ? extra.value : [extra.value] as unknown as VNodeArrayChildren))
     return true
 
-  if (['string', 'number', 'boolean'].includes(typeof extra.value))
+  if (['string', 'number', 'boolean', 'object'].includes(typeof extra.value))
     return true
 
   return false
@@ -27,9 +26,8 @@ const childrenNodes = computed(() => {
     return null
 
   let assertExtra: TabBarExtraMap = {}
-  const internalExtra = Array.isArray(extra.value) ? extra.value : [extra.value]
-  // React.isValidElement replace isVNode && ensureValidVNode
-  if (typeof extra.value === 'object' && !isVNode(internalExtra)
+  // React.isValidElement replace isVNode
+  if (typeof extra.value === 'object' && !isVNode(extra.value)
 ) {
     assertExtra = extra.value as TabBarExtraMap
   }

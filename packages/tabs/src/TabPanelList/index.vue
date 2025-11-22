@@ -29,6 +29,7 @@ const tabPanePrefixCls = computed(() => `${prefixCls.value}-tabpane`)
 const transitionProps = computed(() => {
   if (!tabPaneAnimated.value)
     return {}
+
   if (animated.value?.tabPaneMotion)
     return animated.value.tabPaneMotion
   return getTransitionProps(tabPanePrefixCls.value)

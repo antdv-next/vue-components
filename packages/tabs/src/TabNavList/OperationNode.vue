@@ -9,7 +9,6 @@ import { computed, h, ref, toRefs, useTemplateRef, watch } from 'vue'
 import { getRemovable } from '../utils'
 import AddButton from './AddButton.vue'
 
-console.log('Menu', Menu)
 const MenuItem = Menu.Item
 
 const props = withDefaults(defineProps<OperationNodeProps>(), {
@@ -161,6 +160,7 @@ watch([() => selectedItemId.value, () => selectedKey.value], () => {
 defineExpose({
   operationNodeRef,
 })
+
 </script>
 
 <template>
