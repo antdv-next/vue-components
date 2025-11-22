@@ -9,6 +9,7 @@ export interface InputHTMLAttributesType {
   type?: string
   title?: string
   onChange?: (e: Event) => void
+  value?: any
 }
 
 export interface CheckboxChangeEvent {
