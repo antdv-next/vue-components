@@ -1,117 +1,123 @@
-import type { MouseEventHandler } from '@v-c/util/dist/EventInterface'
-import type { CSSProperties, SlotsType } from 'vue'
-import { cloneElement } from '@v-c/util/dist/vnode'
-import { classNames as classnames } from '@v-c/util'
-import { defineComponent, ref } from 'vue'
-import { baseInputProps } from './interface'
+import type { BaseInputProps } from './interface'
+import { clsx } from '@v-c/util'
+import { filterEmpty } from '@v-c/util/dist/props-util'
+import { computed, createVNode, defineComponent, Fragment, shallowRef } from 'vue'
 import { hasAddon, hasPrefixSuffix } from './utils/commonUtils'
 
-export default defineComponent({
-  name: 'BaseInput',
-  inheritAttrs: false,
-  props: baseInputProps(),
-  slots: Object as SlotsType<{
-    prefix: any
-    suffix: any
-    clearIcon: any
-    addonAfter: any
-    addonBefore: any
-    default: any
-  }>,
-  emits: ['update:value', 'change', 'input', 'focus', 'blur', 'clear'],
-  setup(props, { slots, attrs, expose }) {
-    const containerRef = ref()
-    const onInputMouseDown: MouseEventHandler = (e) => {
+export interface HolderRef {
+  /** Provider holder ref. Will return `null` if not wrap anything */
+  nativeElement: HTMLElement | null
+}
+
+const BaseInput = defineComponent<
+  BaseInputProps
+>(
+  (props, { slots, expose, attrs }) => {
+    const containerRef = shallowRef<HTMLDivElement>()
+    const onInputClick = (e: MouseEvent) => {
       if (containerRef.value?.contains(e.target as Element)) {
-        const { triggerFocus } = props
-        triggerFocus?.()
+        props?.triggerFocus?.()
       }
     }
-    const getClearIcon = () => {
-      const {
-        allowClear,
-        value,
-        disabled,
-        readonly,
-        handleReset,
-        prefixCls,
-      } = props
-      if (!allowClear)
-        return null
+    const hasAffix = computed(() => hasPrefixSuffix(props))
 
-      const needClear = !disabled && !readonly && value
-      const className = `${prefixCls}-clear-icon`
-      const iconNode = slots.clearIcon?.() || '*'
-      return (
-        <span
-          onClick={handleReset}
-          // Do not trigger onBlur when clear input
-          onMousedown={e => e.preventDefault()}
-          class={classnames(
-            {
-              [`${className}-hidden`]: !needClear,
-              [`${className}-has-suffix`]: !!slots.suffix,
-            },
-            className,
-          )}
-          role="button"
-          tabindex={-1}
-        >
-          {iconNode}
-        </span>
-      )
-    }
-
+    // ======================== Ref ======================== //
+    const groupRef = shallowRef<HTMLDivElement>()
     expose({
-      nativeElement: () => containerRef.value,
+      nativeElement: computed(() => groupRef.value || containerRef.value),
     })
-
     return () => {
       const {
-        focused,
-        value,
-        prefix = slots.prefix?.(),
-        suffix = slots.suffix?.(),
-        addonAfter = slots.addonAfter,
-        addonBefore = slots.addonBefore,
-        disabled,
-        allowClear,
-        readonly,
-        hidden,
-        prefixCls,
-        inputElement: inputEl,
-        affixWrapperClassName,
-        wrapperClassName,
-        groupClassName,
         components,
+        allowClear,
+        readOnly,
+        disabled,
+        value,
+        prefixCls,
+        handleReset,
+        onClear,
+        suffix,
+        focused,
+        classNames,
+        styles,
+        dataAttrs,
+        prefix,
+        addonAfter,
+        addonBefore,
+        hidden,
       } = props
-      const inputElement = slots.default?.() || inputEl
+      let children: any = filterEmpty(slots?.default?.() ?? [])
+      if (children.length === 1) {
+        children = children[0]
+      }
+      else {
+        children = createVNode(Fragment, null, children)
+      }
+      const inputElement = children
       const AffixWrapperComponent = components?.affixWrapper || 'span'
       const GroupWrapperComponent = components?.groupWrapper || 'span'
       const WrapperComponent = components?.wrapper || 'span'
       const GroupAddonComponent = components?.groupAddon || 'span'
-      let element = cloneElement(inputElement, {
+
+      let element = createVNode(inputElement, {
         value,
-        hidden,
+        class: !hasAffix.value && classNames?.variant,
       })
       // ================== Prefix & Suffix ================== //
-      if (hasPrefixSuffix({ prefix, suffix, allowClear })) {
+      if (hasAffix.value) {
+        let clearIcon: any = null
+
+        // ================== Clear Icon ================== //
+        if (allowClear) {
+          const needClear = !disabled && !readOnly && value
+          const clearIconCls = `${prefixCls}-clear-icon`
+          const iconNode
+            = typeof allowClear === 'object' && allowClear?.clearIcon
+              ? allowClear.clearIcon
+              : '✖'
+
+          clearIcon = (
+            <button
+              type="button"
+              tabindex={-1}
+              onClick={(event) => {
+                handleReset?.(event)
+                onClear?.()
+              }}
+              // Do not trigger onBlur when clear input
+              // https://github.com/ant-design/ant-design/issues/31200
+              onMousedown={e => e.preventDefault()}
+              class={clsx(clearIconCls, {
+                [`${clearIconCls}-hidden`]: !needClear,
+                [`${clearIconCls}-has-suffix`]: !!suffix,
+              })}
+            >
+              {iconNode}
+            </button>
+          )
+        }
+
         const affixWrapperPrefixCls = `${prefixCls}-affix-wrapper`
-        const affixWrapperCls = classnames(
+        const affixWrapperCls = clsx(
           affixWrapperPrefixCls,
           {
-            [`${affixWrapperPrefixCls}-disabled`]: disabled,
-            [`${affixWrapperPrefixCls}-focused`]: focused,
-            [`${affixWrapperPrefixCls}-readonly`]: readonly,
-            [`${affixWrapperPrefixCls}-input-with-clear-btn`]: suffix && allowClear && value,
-          } as any,
-          !hasAddon({ addonAfter, addonBefore }) && attrs.class,
-          affixWrapperClassName,
+            [`${prefixCls}-disabled`]: disabled,
+            [`${affixWrapperPrefixCls}-disabled`]: disabled, // Not used, but keep it
+            [`${affixWrapperPrefixCls}-focused`]: focused, // Not used, but keep it
+            [`${affixWrapperPrefixCls}-readonly`]: readOnly,
+            [`${affixWrapperPrefixCls}-input-with-clear-btn`]:
+                      suffix && allowClear && value,
+          },
+          classNames?.affixWrapper,
+          classNames?.variant,
         )
 
         const suffixNode = (suffix || allowClear) && (
-          <span class={`${prefixCls}-suffix`}>
-            {getClearIcon()}
+          <span
+            class={clsx(`${prefixCls}-suffix`, classNames?.suffix)}
+            style={styles?.suffix}
+          >
+            {clearIcon}
             {suffix}
           </span>
         )
@@ -119,51 +125,75 @@ export default defineComponent({
         element = (
           <AffixWrapperComponent
             class={affixWrapperCls}
-            style={attrs.style as CSSProperties}
-            hidden={!hasAddon({ addonAfter, addonBefore }) && hidden}
-            onMousedown={onInputMouseDown}
+            style={styles?.affixWrapper}
+            onClick={onInputClick}
+            {...dataAttrs?.affixWrapper}
             ref={containerRef}
           >
-            {prefix && <span class={`${prefixCls}-prefix`}>{prefix}</span>}
-            {cloneElement(inputElement, {
-              style: null,
-              value,
-              hidden: null,
-            })}
+            {prefix && (
+              <span
+                class={clsx(`${prefixCls}-prefix`, classNames?.prefix)}
+                style={styles?.prefix}
+              >
+                {prefix}
+              </span>
+            )}
+            {element}
             {suffixNode}
           </AffixWrapperComponent>
         )
       }
+
       // ================== Addon ================== //
-      if (hasAddon({ addonAfter, addonBefore })) {
+      if (hasAddon(props)) {
         const wrapperCls = `${prefixCls}-group`
         const addonCls = `${wrapperCls}-addon`
+        const groupWrapperCls = `${wrapperCls}-wrapper`
 
-        const mergedWrapperClassName = classnames(
+        const mergedWrapperClassName = clsx(
           `${prefixCls}-wrapper`,
           wrapperCls,
-          wrapperClassName,
+          classNames?.wrapper,
         )
 
-        const mergedGroupClassName = classnames(
-          `${prefixCls}-group-wrapper` as any,
-          attrs.class,
-          groupClassName,
+        const mergedGroupClassName = clsx(
+          groupWrapperCls,
+          {
+            [`${groupWrapperCls}-disabled`]: disabled,
+          },
+          classNames?.groupWrapper,
         )
 
         // Need another wrapper for changing display:table to display:inline-block
         // and put style prop in wrapper
-        return (
-          <GroupWrapperComponent class={mergedGroupClassName} style={attrs.style as CSSProperties} hidden={hidden}>
+        element = (
+          <GroupWrapperComponent class={mergedGroupClassName} ref={groupRef}>
             <WrapperComponent class={mergedWrapperClassName}>
-              {addonBefore && <GroupAddonComponent class={addonCls}>{addonBefore()}</GroupAddonComponent>}
-              {cloneElement(element, { style: null, hidden: null })}
-              {addonAfter && <GroupAddonComponent class={addonCls}>{addonAfter()}</GroupAddonComponent>}
+              {addonBefore && (
+                <GroupAddonComponent class={addonCls}>
+                  {addonBefore}
+                </GroupAddonComponent>
+              )}
+              {element}
+              {addonAfter && (
+                <GroupAddonComponent class={addonCls}>
+                  {addonAfter}
+                </GroupAddonComponent>
+              )}
             </WrapperComponent>
           </GroupWrapperComponent>
         )
       }
-      return element
+      // `className` and `style` are always on the root element
+      return createVNode(element, {
+        ...attrs,
+        hidden,
+      })
     }
   },
-})
+  {
+    name: 'BaseInput',
+    inheritAttrs: false,
+  },
+)
+export default BaseInput

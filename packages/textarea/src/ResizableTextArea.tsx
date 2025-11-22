@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'vue'
 import ResizeObserver from '@v-c/resize-observer'
-import raf from '@v-c/util/dist/raf'
 import { classNames } from '@v-c/util'
+import raf from '@v-c/util/dist/raf'
 import { computed, defineComponent, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
 import calculateAutoSizeStyle from './calculateNodeHeight'
 

@@ -38,7 +38,7 @@ export interface PopupProps {
 
   // Arrow
   align?: AlignType
-  arrow?: ArrowTypeOuter
+  arrow?: ArrowTypeOuter | boolean
   arrowPos: ArrowPos
 
   // Open
@@ -88,7 +88,7 @@ const defaults = {
 } as any
 
 const Popup = defineComponent<PopupProps>(
-  (props = defaults, { attrs, expose }) => {
+  (props = defaults, { attrs, slots, expose }) => {
     const popupContent = computed(
       () => typeof props.popup === 'function' ? (props as any).popup() : props.popup,
     )
@@ -220,17 +220,9 @@ const Popup = defineComponent<PopupProps>(
       const baseTransitionProps: any = getTransitionProps(popupMotionName, mergedPopupMotion)
       const mergedTransitionProps = {
         ...baseTransitionProps,
-        onBeforeAppear: (element: Element) => {
-          onPrepare?.()
-          baseTransitionProps?.onBeforeAppear?.(element)
-        },
         onBeforeEnter: (element: Element) => {
           onPrepare?.()
           baseTransitionProps?.onBeforeEnter?.(element)
-        },
-        onAfterAppear: (element: Element) => {
-          baseTransitionProps?.onAfterAppear?.(element)
-          onVisibleChanged?.(true)
         },
         onAfterEnter: (element: Element) => {
           baseTransitionProps?.onAfterEnter?.(element)
@@ -249,7 +241,6 @@ const Popup = defineComponent<PopupProps>(
           [`${prefixCls}-mobile`]: isMobile.value,
         },
       )
-      console.log(isNodeVisible.value, open.value)
       return (
         <Portal
           open={forceRender || isNodeVisible.value}
@@ -298,10 +289,10 @@ const Popup = defineComponent<PopupProps>(
                   }
                 }
               >
-                {arrow && (
+                {!!arrow && (
                   <Arrow
                     prefixCls={prefixCls}
-                    arrow={arrow}
+                    arrow={arrow === true ? {} : arrow}
                     arrowPos={arrowPos}
                     align={align!}
                   />
@@ -313,6 +304,7 @@ const Popup = defineComponent<PopupProps>(
               </div>
             </Transition>
           </ResizeObserver>
+          {slots?.default?.()}
         </Portal>
       )
     }

@@ -1,25 +1,25 @@
 import isVisible from './isVisible'
 
-type DisabledElement =
-  | HTMLLinkElement
-  | HTMLInputElement
-  | HTMLFieldSetElement
-  | HTMLButtonElement
-  | HTMLOptGroupElement
-  | HTMLOptionElement
-  | HTMLSelectElement
-  | HTMLTextAreaElement
+type DisabledElement
+  = | HTMLLinkElement
+    | HTMLInputElement
+    | HTMLFieldSetElement
+    | HTMLButtonElement
+    | HTMLOptGroupElement
+    | HTMLOptionElement
+    | HTMLSelectElement
+    | HTMLTextAreaElement
 
 function focusable(node: HTMLElement, includePositive = false): boolean {
   if (isVisible(node)) {
     const nodeName = node.nodeName.toLowerCase()
     const isFocusableElement
-            // Focusable element
-            = ['input', 'select', 'textarea', 'button'].includes(nodeName)
-            // Editable element
-            || node.isContentEditable
-            // Anchor with href element
-            || (nodeName === 'a' && !!node.getAttribute('href'))
+    // Focusable element
+      = ['input', 'select', 'textarea', 'button'].includes(nodeName)
+      // Editable element
+        || node.isContentEditable
+      // Anchor with href element
+        || (nodeName === 'a' && !!node.getAttribute('href'))
 
     // Get tabIndex
     const tabIndexAttr = node.getAttribute('tabindex')
@@ -85,12 +85,45 @@ export function limitTabRange(node: HTMLElement, e: KeyboardEvent) {
     const tabNodeList = getFocusNodeList(node)
     const lastTabNode = tabNodeList[e.shiftKey ? 0 : tabNodeList.length - 1]
     const leavingTab
-            = lastTabNode === document.activeElement || node === document.activeElement
+      = lastTabNode === document.activeElement || node === document.activeElement
 
     if (leavingTab) {
       const target = tabNodeList[e.shiftKey ? tabNodeList.length - 1 : 0]
       target.focus()
       e.preventDefault()
+    }
+  }
+}
+
+export interface InputFocusOptions extends FocusOptions {
+  cursor?: 'start' | 'end' | 'all'
+}
+
+export function triggerFocus(
+  element?: HTMLInputElement | HTMLTextAreaElement,
+  option?: InputFocusOptions,
+) {
+  if (!element)
+    return
+
+  element.focus(option)
+
+  // Selection content
+  const { cursor } = option || {}
+  if (cursor) {
+    const len = element.value.length
+
+    switch (cursor) {
+      case 'start':
+        element.setSelectionRange(0, 0)
+        break
+
+      case 'end':
+        element.setSelectionRange(len, len)
+        break
+
+      default:
+        element.setSelectionRange(0, len)
     }
   }
 }

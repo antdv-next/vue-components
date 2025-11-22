@@ -34,6 +34,7 @@ export function buildCommon(opt: BuildCommonOptions) {
   return {
     plugins,
     build: {
+      minify: false,
       rollupOptions: {
         external: opt.external,
         output: [

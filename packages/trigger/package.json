@@ -1,7 +1,7 @@
 {
   "name": "@v-c/trigger",
   "type": "module",
-  "version": "0.0.2",
+  "version": "0.0.16",
   "description": "",
   "publishConfig": {
     "access": "public"
@@ -28,7 +28,8 @@
   "scripts": {
     "build": "vite build",
     "test": "vitest",
-    "prepublish": "pnpm build"
+    "prepublish": "pnpm build",
+    "bump": "bumpp --release patch"
   },
   "peerDependencies": {
     "vue": "^3.0.0"

@@ -2,6 +2,14 @@
   "name": "@v-c/virtual-list",
   "type": "module",
   "version": "0.0.1",
+  "description": "Vue Virtual List Component",
+  "author": "",
+  "license": "MIT",
+  "keywords": [
+    "vue",
+    "virtual-list",
+    "vue-component"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -11,14 +19,6 @@
     "./dist/*": "./dist/*",
     "./package.json": "./package.json"
   },
-  "description": "Vue Virtual List Component",
-  "author": "",
-  "license": "MIT",
-  "keywords": [
-    "vue",
-    "virtual-list",
-    "vue-component"
-  ],
   "main": "index.js",
   "scripts": {
     "build": "vite build",

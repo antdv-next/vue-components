@@ -1,4 +1,5 @@
-import { ref, type Ref, watch } from 'vue'
+import type { Ref } from 'vue'
+import { ref, watch } from 'vue'
 
 export default function useDiffItem<T>(data: Ref<T[]>, getKey: (item: T) => any): Ref<T | undefined> {
   const prevDataRef = ref<T[]>([])

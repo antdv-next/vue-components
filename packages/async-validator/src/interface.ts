@@ -1,22 +1,22 @@
 // >>>>> Rule
 // Modified from https://github.com/yiminghe/async-validator/blob/0d51d60086a127b21db76f44dff28ae18c165c47/src/index.d.ts
-export type RuleType =
-  | 'string'
-  | 'number'
-  | 'boolean'
-  | 'method'
-  | 'regexp'
-  | 'integer'
-  | 'float'
-  | 'array'
-  | 'object'
-  | 'enum'
-  | 'date'
-  | 'url'
-  | 'hex'
-  | 'email'
-  | 'pattern'
-  | 'any'
+export type RuleType
+  = | 'string'
+    | 'number'
+    | 'boolean'
+    | 'method'
+    | 'regexp'
+    | 'integer'
+    | 'float'
+    | 'array'
+    | 'object'
+    | 'enum'
+    | 'date'
+    | 'url'
+    | 'hex'
+    | 'email'
+    | 'pattern'
+    | 'any'
 
 export interface ValidateOption {
   // whether to suppress internal warning

@@ -9,7 +9,7 @@ import type { VueNode } from '@v-c/util/dist/type'
 import type { CSSProperties } from 'vue'
 import { Trigger } from '@v-c/trigger'
 import { clsx } from '@v-c/util'
-import { filterEmpty, toPropsRefs } from '@v-c/util/dist/props-util'
+import { filterEmpty, removeUndefined, toPropsRefs } from '@v-c/util/dist/props-util'
 import { computed, createVNode, defineComponent, shallowRef } from 'vue'
 import useAccessibility from './hooks/useAccessibility.ts'
 import Overlay from './Overlay.tsx'
@@ -58,7 +58,7 @@ const defaults = {
 const Dropdown = defineComponent<DropdownProps>(
   (props = defaults, { expose, slots }) => {
     const { autoFocus } = toPropsRefs(props, 'autoFocus')
-    const triggerVisible = shallowRef<boolean >()
+    const triggerVisible = shallowRef<boolean>()
     const mergedVisible = computed(() => {
       return props?.visible ?? triggerVisible.value
     })
@@ -159,7 +159,7 @@ const Dropdown = defineComponent<DropdownProps>(
       return (
         <Trigger
           builtinPlacements={placements}
-          {...otherProps}
+          {...removeUndefined(otherProps)}
           prefixCls={prefixCls}
           ref={triggerRef}
           popupClassName={clsx(overlayClassName, {

@@ -1,11 +1,11 @@
+import type { FakeXMLHttpRequest, FakeXMLHttpRequestStatic } from 'nise'
 import type { UploadProps, VcFile } from '../src/interface'
 import { format } from 'node:util'
 import { resetWarned } from '@v-c/util/dist/warning'
 import { mount } from '@vue/test-utils'
 import {
   fakeXhr,
-  type FakeXMLHttpRequest,
-  type FakeXMLHttpRequestStatic,
+
 } from 'nise'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { defineComponent, h, ref } from 'vue'
@@ -74,7 +74,7 @@ interface FileSystemEntryAsync {
   createReader: () => {
     readEntries: (
       handle: (entries: FileSystemEntryAsync[]) => void,
-      error?: (err: Error) => void
+      error?: (err: Error) => void,
     ) => Promise<void>
   }
 }

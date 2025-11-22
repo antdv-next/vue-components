@@ -123,13 +123,13 @@ export function getImageSettings(cells: Modules, size: number, margin: number, i
   const w = (imageSettings.width || defaultSize) * scale
   const h = (imageSettings.height || defaultSize) * scale
   const x
-        = imageSettings.x == null
-          ? cells.length / 2 - w / 2
-          : imageSettings.x * scale
+    = imageSettings.x == null
+      ? cells.length / 2 - w / 2
+      : imageSettings.x * scale
   const y
-        = imageSettings.y == null
-          ? cells.length / 2 - h / 2
-          : imageSettings.y * scale
+    = imageSettings.y == null
+      ? cells.length / 2 - h / 2
+      : imageSettings.y * scale
   const opacity = imageSettings.opacity == null ? 1 : imageSettings.opacity
 
   let excavation = null

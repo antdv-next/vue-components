@@ -1,7 +1,9 @@
+import type { Ref } from 'vue'
 import type { CountConfig, InputProps, ShowCountFormatter } from '../interface'
+import { computed } from 'vue'
 
-type ForcedCountConfig = Omit<CountConfig, 'show'> &
-  Pick<Required<CountConfig>, 'strategy'> & {
+type ForcedCountConfig = Omit<CountConfig, 'show'>
+  & Pick<Required<CountConfig>, 'strategy'> & {
     show: boolean
     showFormatter?: ShowCountFormatter
   }
@@ -19,29 +21,31 @@ export function inCountRange(value: string, countConfig: ForcedCountConfig) {
 }
 
 export default function useCount(
-  count?: CountConfig,
-  showCount?: InputProps['showCount'],
+  count?: Ref<CountConfig>,
+  showCount?: Ref<InputProps['showCount']>,
 ) {
-  let mergedConfig: CountConfig = {}
+  return computed(() => {
+    let mergedConfig: CountConfig = {}
 
-  if (showCount) {
-    mergedConfig.show
-            = (typeof showCount === 'object' && showCount.formatter
-        ? showCount.formatter
-        : !!showCount) as boolean | ShowCountFormatter
-  }
+    if (showCount?.value) {
+      mergedConfig.show
+        = typeof showCount.value === 'object' && showCount.value?.formatter
+          ? showCount.value?.formatter
+          : !!showCount.value
+    }
 
-  mergedConfig = {
-    ...mergedConfig,
-    ...count,
-  }
+    mergedConfig = {
+      ...mergedConfig,
+      ...count?.value,
+    }
 
-  const { show, ...rest } = mergedConfig!
+    const { show, ...rest } = mergedConfig!
 
-  return {
-    ...rest,
-    show: !!show,
-    showFormatter: typeof show === 'function' ? show : undefined,
-    strategy: rest.strategy || (value => value.length),
-  }
+    return {
+      ...rest,
+      show: !!show,
+      showFormatter: typeof show === 'function' ? show : undefined,
+      strategy: rest.strategy || (value => value.length),
+    } as const
+  })
 }

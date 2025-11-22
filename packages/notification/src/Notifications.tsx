@@ -36,6 +36,9 @@ const Notifications = defineComponent<NotificationsProps>(
     const onNoticeClose = (key: Key) => {
       // Trigger close event
       const config = configList.value.find(item => item.key === key)
+      const closable = config?.closable
+      const closableObj = closable && typeof closable === 'object' ? closable : {}
+      closableObj.onClose?.()
       config?.onClose?.()
       configList.value = configList.value.filter(item => item.key !== key)
     }
@@ -50,7 +53,7 @@ const Notifications = defineComponent<NotificationsProps>(
         const innerConfig: InnerOpenConfig = {
           ...config,
         }
-        if (index > 0) {
+        if (index >= 0) {
           innerConfig.times = ((list[index] as InnerOpenConfig)?.times || 0) + 1
           clone[index] = innerConfig
         }
@@ -58,8 +61,9 @@ const Notifications = defineComponent<NotificationsProps>(
           innerConfig.times = 0
           clone.push(innerConfig)
         }
-        if (props.maxCount && props.maxCount > 0 && clone.length > props.maxCount) {
-          clone = clone.slice(-props.maxCount)
+        const maxCount = props.maxCount ?? 0
+        if (maxCount > 0 && clone.length > maxCount) {
+          clone = clone.slice(-maxCount)
         }
         configList.value = clone
       },
@@ -121,7 +125,8 @@ const Notifications = defineComponent<NotificationsProps>(
     )
 
     return () => {
-      const { container, prefixCls = '' } = props
+      const { container } = props
+      const prefixCls = props.prefixCls ?? defaults.prefixCls ?? ''
       // ======================== Render ========================
       if (!container) {
         return null
@@ -136,7 +141,7 @@ const Notifications = defineComponent<NotificationsProps>(
                 key={placement}
                 configList={placementConfigList}
                 placement={placement as Placement}
-                prefixCls={props.prefixCls}
+                prefixCls={prefixCls}
                 class={props.className?.(placement as Placement)}
                 style={props.style?.(placement as Placement)}
                 motion={props.motion}

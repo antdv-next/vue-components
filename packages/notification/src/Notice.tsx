@@ -1,8 +1,9 @@
+import type { CSSProperties } from 'vue'
 import type { Key, NoticeConfig } from './interface.ts'
-import KeyCode from '@v-c/util/dist/KeyCode.ts'
-import pickAttrs from '@v-c/util/dist/pickAttrs.ts'
 import { classNames } from '@v-c/util'
-import { computed, defineComponent, onUnmounted, shallowRef, watch } from 'vue'
+import KeyCode from '@v-c/util/dist/KeyCode'
+import pickAttrs from '@v-c/util/dist/pickAttrs'
+import { computed, defineComponent, shallowRef, watch } from 'vue'
 
 export interface NoticeProps extends Omit<NoticeConfig, 'onClose'> {
   prefixCls: string
@@ -10,182 +11,202 @@ export interface NoticeProps extends Omit<NoticeConfig, 'onClose'> {
   onClick?: (event: Event) => void
   onNoticeClose?: (key: Key) => void
   hovering?: boolean
-  props?: any
+  props?: Record<string, any>
 }
 
 const defaults = {
   duration: 4.5,
   pauseOnHover: true,
   closeIcon: 'x',
-} as NoticeProps
-const Notify = defineComponent<NoticeProps & { times?: number }>(
-  (props = defaults, { attrs }) => {
-    const hovering = shallowRef(false)
-    const percent = shallowRef(0)
-    const spenTime = shallowRef(0)
-    const mergedHovering = computed(() => props.hovering || hovering.value)
-    const mergedShowProgress = computed(() => props.duration! > 0 && props.showProgress)
+} as const
 
-    // ======================== Close =========================
-    const onInternalClose = () => {
-      props.onNoticeClose?.(props.eventKey)
+const Notify = defineComponent<NoticeProps & { times?: number }>((props, { attrs }) => {
+  const hovering = shallowRef(false)
+  const percent = shallowRef(0)
+  const spentTime = shallowRef(0)
+
+  const mergedHovering = computed(() => props.hovering || hovering.value)
+  const mergedDuration = computed(() => {
+    if (typeof props.duration === 'number') {
+      return props.duration
     }
+    if (props.duration === undefined) {
+      return defaults.duration
+    }
+    return 0
+  })
+  const mergedPauseOnHover = computed(() =>
+    props.pauseOnHover === undefined ? defaults.pauseOnHover : props.pauseOnHover,
+  )
+  const mergedShowProgress = computed(() => mergedDuration.value > 0 && props.showProgress)
+  const mergedCloseIcon = computed(() => props.closeIcon ?? defaults.closeIcon)
 
-    const onCloseKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Enter' || e.code === 'Enter' || e.keyCode === KeyCode.ENTER) {
+  // ======================== Close =========================
+  const onInternalClose = () => {
+    props.onNoticeClose?.(props.eventKey)
+  }
+
+  const onCloseKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'Enter' || e.code === 'Enter' || e.keyCode === KeyCode.ENTER) {
+      onInternalClose()
+    }
+  }
+
+  // ======================== Timing ========================
+  watch([
+    () => props.times,
+    mergedDuration,
+    mergedHovering,
+  ], (_n, _, onCleanup) => {
+    const duration = mergedDuration.value
+    const hoveringValue = mergedHovering.value
+    const pauseOnHover = mergedPauseOnHover.value
+    if (!hoveringValue && duration > 0) {
+      const start = Date.now() - spentTime.value
+      const timeoutId = window.setTimeout(() => {
         onInternalClose()
-      }
-    }
+      }, duration * 1000 - spentTime.value)
 
-    // ======================== Effect ========================
-
-    let timeoutId: ReturnType<typeof setTimeout> | null = null
-    let startTime: number
-    watch(
-      [
-        () => props.duration,
-        () => props.times,
-        mergedHovering,
-      ],
-      () => {
-        if (!mergedHovering.value && props.duration! > 0) {
-          startTime = Date.now() - spenTime.value
-          timeoutId = setTimeout(() => {
-            onInternalClose()
-          }, props.duration! * 1000 - spenTime.value)
-        }
-      },
-      {
-        immediate: true,
-      },
-    )
-    let animationFrame: number
-
-    watch(
-      [
-        () => props.duration,
-        spenTime,
-        mergedHovering,
-        mergedShowProgress,
-        () => props.times,
-      ],
-      () => {
-        if (!mergedHovering.value && mergedShowProgress.value && (props.pauseOnHover || spenTime.value === 0)) {
-          const start = performance.now()
-          const calculate = () => {
-            cancelAnimationFrame(animationFrame)
-            animationFrame = requestAnimationFrame((timestamp) => {
-              const runtime = timestamp + spenTime.value - start
-              const progress = Math.min(runtime / (props.duration! * 1000), 1)
-              percent.value = progress * 100
-              if (progress < 1) {
-                calculate()
-              }
-            })
-          }
-          calculate()
-        }
-      },
-      { immediate: true },
-    )
-
-    onUnmounted(() => {
-      if (props.pauseOnHover) {
-        if (timeoutId) {
+      onCleanup(() => {
+        if (pauseOnHover) {
           clearTimeout(timeoutId)
         }
-        cancelAnimationFrame(animationFrame)
-      }
-      spenTime.value = Date.now() - startTime
-    })
-
-    return () => {
-      const {
-        closable,
-        closeIcon,
-        prefixCls,
-        props: divProps,
-        onClick,
-        content,
-      } = props
-      // ======================== Closable ========================
-      const closableObj = () => {
-        if (typeof closable === 'object' && closable !== null) {
-          return closable
-        }
-        if (closable) {
-          return {
-            closeIcon,
-          }
-        }
-        return {}
-      }
-      const ariaProps = pickAttrs(closableObj, true)
-      // ======================== Progress ========================
-      const validPercent = 100 - (!percent.value || percent.value < 0 ? 0 : percent.value > 100 ? 100 : percent.value)
-
-      // ======================== Render ========================
-      const noticePrefixCls = `${prefixCls}-notice`
-      return (
-        <div
-          {...divProps}
-          class={
-            classNames(
-              noticePrefixCls,
-              (attrs as any).class,
-              {
-                [`${noticePrefixCls}-closable`]: closable,
-              },
-            )
-          }
-          onMouseEnter={(e: MouseEvent) => {
-            hovering.value = true
-            divProps?.onMouseEnter?.(e)
-          }}
-          onMouseLeave={(e: MouseEvent) => {
-            hovering.value = false
-            divProps?.onMouseLeave?.(e)
-          }}
-          onClick={onClick}
-        >
-          {/* Content */}
-          <div class={`${noticePrefixCls}-content`}>{content}</div>
-
-          {/* Close Icon */}
-          {closable && (
-            <a
-              {
-                ...{
-                  tabIndex: 0,
-                }
-              }
-              class={`${noticePrefixCls}-close`}
-              onKeydown={onCloseKeyDown}
-              aria-label="Close"
-              {...ariaProps}
-              onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                onInternalClose()
-              }}
-            >
-              {closableObj().closeIcon}
-            </a>
-          )}
-
-          {/* Progress Bar */}
-          {mergedShowProgress.value && (
-            <progress class={`${noticePrefixCls}-progress`} max="100" value={validPercent}>
-              {`${validPercent}%`}
-            </progress>
-          )}
-        </div>
-      )
+        spentTime.value = Date.now() - start
+      })
     }
-  },
-  {
-    name: 'Notify',
-  },
-)
+  }, {
+    immediate: true,
+  })
+
+  // ===================== Progress Bar =====================
+  watch([
+    () => props.times,
+    mergedDuration,
+    spentTime,
+    mergedHovering,
+    mergedShowProgress,
+  ], (_n, _, onCleanup) => {
+    const hoveringValue = mergedHovering.value
+    const showProgress = mergedShowProgress.value
+    const pauseOnHover = mergedPauseOnHover.value
+    const duration = mergedDuration.value
+    const baseSpentTime = spentTime.value
+
+    if (!hoveringValue && showProgress && (pauseOnHover || baseSpentTime === 0)) {
+      const start = performance.now()
+      let animationFrame = 0
+
+      const calculate = () => {
+        cancelAnimationFrame(animationFrame)
+        animationFrame = requestAnimationFrame((timestamp) => {
+          const runtime = timestamp + baseSpentTime - start
+          const progress = Math.min(runtime / (duration * 1000), 1)
+          percent.value = progress * 100
+          if (progress < 1) {
+            calculate()
+          }
+        })
+      }
+
+      calculate()
+
+      onCleanup(() => {
+        if (pauseOnHover) {
+          cancelAnimationFrame(animationFrame)
+        }
+      })
+    }
+  }, {
+    immediate: true,
+  })
+
+  return () => {
+    const {
+      closable,
+      prefixCls,
+      props: divProps,
+      onClick,
+      content,
+      className,
+      style,
+    } = props
+
+    // ======================== Closable ========================
+    const closableConfig
+      = typeof closable === 'object' && closable !== null
+        ? closable
+        : closable
+          ? { closeIcon: mergedCloseIcon.value }
+          : {}
+    const ariaProps = pickAttrs(closableConfig, true)
+
+    // ======================== Progress ========================
+    const safePercent = percent.value <= 0 ? 0 : percent.value > 100 ? 100 : percent.value
+    const validPercent = 100 - safePercent
+
+    // ======================== Render ========================
+    const noticePrefixCls = `${prefixCls}-notice`
+
+    const mergedStyle: CSSProperties = {
+      ...(typeof divProps?.style === 'object' && divProps?.style ? divProps.style : {}),
+      ...(typeof (attrs as any).style === 'object' && (attrs as any).style ? (attrs as any).style : {}),
+      ...(typeof style === 'object' && style ? style : {}),
+    }
+
+    return (
+      <div
+        {...divProps}
+        class={
+          classNames(
+            noticePrefixCls,
+            className,
+            (attrs as any).class,
+            {
+              [`${noticePrefixCls}-closable`]: !!closable,
+            },
+          )
+        }
+        style={mergedStyle}
+        onMouseenter={(e: MouseEvent) => {
+          hovering.value = true
+          divProps?.onMouseEnter?.(e)
+        }}
+        onMouseleave={(e: MouseEvent) => {
+          hovering.value = false
+          divProps?.onMouseLeave?.(e)
+        }}
+        onClick={onClick}
+      >
+        {/* Content */}
+        <div class={`${noticePrefixCls}-content`}>{content}</div>
+
+        {/* Close Icon */}
+        {closable && (
+          <button
+            type="button"
+            class={`${noticePrefixCls}-close`}
+            onKeydown={onCloseKeyDown}
+            aria-label="Close"
+            {...ariaProps}
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              onInternalClose()
+            }}
+          >
+            {closableConfig.closeIcon ?? mergedCloseIcon.value}
+          </button>
+        )}
+
+        {/* Progress Bar */}
+        {mergedShowProgress.value && (
+          <progress class={`${noticePrefixCls}-progress`} max="100" value={validPercent}>
+            {`${validPercent}%`}
+          </progress>
+        )}
+      </div>
+    )
+  }
+})
 
 export default Notify

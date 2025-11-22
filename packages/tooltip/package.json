@@ -1,7 +1,7 @@
 {
   "name": "@v-c/tooltip",
   "type": "module",
-  "version": "1.0.0",
+  "version": "0.0.16",
   "publishConfig": {
     "access": "public"
   },
@@ -20,14 +20,16 @@
     "./dist/*": "./dist/*",
     "./package.json": "./package.json"
   },
-  "main": "index.js",
+  "main": "./dist/index.js",
   "files": [
     "dist",
     "package.json"
   ],
   "scripts": {
     "build": "vite build",
-    "test": "vitest"
+    "test": "vitest",
+    "prepublish": "pnpm build",
+    "bump": "bumpp --release patch"
   },
   "peerDependencies": {
     "vue": "^3.0.0"

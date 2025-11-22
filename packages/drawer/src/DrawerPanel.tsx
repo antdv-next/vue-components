@@ -1,6 +1,6 @@
 import type { HTMLAttributes } from 'vue'
-import pickAttrs from '@v-c/util/dist/pickAttrs'
 import { classNames } from '@v-c/util'
+import pickAttrs from '@v-c/util/dist/pickAttrs'
 import { defineComponent } from 'vue'
 
 export type DrawerPanelAccessibility = Pick<

@@ -9,7 +9,7 @@ export default function useRange(
     rangeDraggableTrack: boolean,
     minCount: number,
     maxCount?: number,
-  ] {
+] {
   if (range === true || !range) {
     return [!!range, false, false, 0]
   }

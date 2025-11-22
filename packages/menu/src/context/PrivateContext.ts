@@ -1,20 +1,30 @@
-import type { InjectionKey, ShallowRef } from 'vue'
-import { inject, provide, shallowRef } from 'vue'
-import type { MenuProps } from '../interface'
+import type { InjectionKey } from 'vue'
+import type { MenuProps } from '../Menu'
+import { defineComponent, inject, provide } from 'vue'
 
 export interface PrivateContextProps {
   _internalRenderMenuItem?: MenuProps['_internalRenderMenuItem']
   _internalRenderSubMenuItem?: MenuProps['_internalRenderSubMenuItem']
 }
 
-const PrivateContextKey: InjectionKey<ShallowRef<PrivateContextProps>> = Symbol('MenuPrivateContext')
+const PrivateContextKey: InjectionKey<PrivateContextProps> = Symbol('PrivateContext')
 
-export function providePrivateContext(value: PrivateContextProps) {
-  const context = shallowRef(value)
+export function usePrivateProvider(context: PrivateContextProps) {
   provide(PrivateContextKey, context)
-  return context
 }
 
 export function usePrivateContext() {
-  return inject(PrivateContextKey, shallowRef<PrivateContextProps>({}))
+  return inject(PrivateContextKey, {})
 }
+
+export const PrivateContextProvider = defineComponent<PrivateContextProps>(
+  (props, { slots }) => {
+    usePrivateProvider(props)
+    return () => {
+      return slots?.default?.()
+    }
+  },
+  {
+    props: ['_internalRenderMenuItem', '_internalRenderSubMenuItem'],
+  },
+)

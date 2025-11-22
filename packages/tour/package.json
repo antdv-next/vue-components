@@ -1,0 +1,42 @@
+{
+  "name": "@v-c/tour",
+  "type": "module",
+  "version": "0.0.4",
+  "publishConfig": {
+    "access": "public"
+  },
+  "description": "tour",
+  "author": "",
+  "license": "MIT",
+  "keywords": [
+    "tour"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./dist/*": "./dist/*",
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.js",
+  "files": [
+    "dist",
+    "package.json"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "test": "vitest",
+    "prepublish": "pnpm build",
+    "bump": "bumpp --release patch"
+  },
+  "peerDependencies": {
+    "vue": "^3.0.0"
+  },
+  "dependencies": {
+    "@v-c/portal": "workspace:*",
+    "@v-c/trigger": "workspace:*",
+    "@v-c/util": "workspace:*"
+  }
+}

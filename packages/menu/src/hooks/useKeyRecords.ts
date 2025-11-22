@@ -1,47 +1,56 @@
-import { onBeforeUnmount, ref } from 'vue'
-import warning from '@v-c/util/dist/warning'
+import { onBeforeUnmount, ref, shallowRef } from 'vue'
 import { nextSlice } from '../utils/timeUtil'
 
-const PATH_SPLIT = '__RC_UTIL_PATH_SPLIT__'
+const PATH_SPLIT = '__VC_UTIL_PATH_SPLIT__'
 
 const getPathStr = (keyPath: string[]) => keyPath.join(PATH_SPLIT)
-const getPathKeys = (keyPathStr: string) => (keyPathStr ? keyPathStr.split(PATH_SPLIT) : [])
+const getPathKeys = (keyPathStr: string) => keyPathStr.split(PATH_SPLIT)
 
-export const OVERFLOW_KEY = 'rc-menu-more'
+export const OVERFLOW_KEY = 'vc-menu-more'
 
 export default function useKeyRecords() {
-  const key2pathRef = new Map<string, string>()
-  const path2keyRef = new Map<string, string>()
+  const forceUpdateCount = ref(0)
+  const key2pathRef = shallowRef(new Map<string, string>())
+  const path2keyRef = shallowRef(new Map<string, string>())
   const overflowKeys = ref<string[]>([])
   const updateRef = ref(0)
   const destroyRef = ref(false)
 
+  const forceUpdate = () => {
+    if (!destroyRef.value) {
+      forceUpdateCount.value += 1
+    }
+  }
+
   const registerPath = (key: string, keyPath: string[]) => {
+    // Warning for invalidate or duplicated `key`
     if (process.env.NODE_ENV !== 'production') {
-      warning(
-        !key2pathRef.has(key),
-        `Duplicated key '${key}' used in Menu by path [${keyPath.join(' > ')}]`,
-      )
+      if (key2pathRef.value.has(key)) {
+        console.warn(
+          `Duplicated key '${key}' used in Menu by path [${keyPath.join(' > ')}]`,
+        )
+      }
     }
 
+    // Fill map
     const connectedPath = getPathStr(keyPath)
-    path2keyRef.set(connectedPath, key)
-    key2pathRef.set(key, connectedPath)
+    path2keyRef.value.set(connectedPath, key)
+    key2pathRef.value.set(key, connectedPath)
 
     updateRef.value += 1
-    const currentId = updateRef.value
+    const id = updateRef.value
 
     nextSlice(() => {
-      if (destroyRef.value || currentId !== updateRef.value) {
-        return
+      if (id === updateRef.value) {
+        forceUpdate()
       }
     })
   }
 
   const unregisterPath = (key: string, keyPath: string[]) => {
     const connectedPath = getPathStr(keyPath)
-    path2keyRef.delete(connectedPath)
-    key2pathRef.delete(key)
+    path2keyRef.value.delete(connectedPath)
+    key2pathRef.value.delete(key)
   }
 
   const refreshOverflowKeys = (keys: string[]) => {
@@ -49,10 +58,10 @@ export default function useKeyRecords() {
   }
 
   const getKeyPath = (eventKey: string, includeOverflow?: boolean) => {
-    const fullPath = key2pathRef.get(eventKey) || ''
+    const fullPath = key2pathRef.value.get(eventKey) || ''
     const keys = getPathKeys(fullPath)
 
-    if (includeOverflow && keys.length && overflowKeys.value.includes(keys[0])) {
+    if (includeOverflow && overflowKeys.value.includes(keys[0])) {
       keys.unshift(OVERFLOW_KEY)
     }
 
@@ -68,20 +77,25 @@ export default function useKeyRecords() {
       })
 
   const getKeys = () => {
-    const keys = [...key2pathRef.keys()]
+    const keys = [...key2pathRef.value.keys()]
+
     if (overflowKeys.value.length) {
       keys.push(OVERFLOW_KEY)
     }
+
     return keys
   }
 
+  /**
+   * Find current key related child path keys
+   */
   const getSubPathKeys = (key: string): Set<string> => {
-    const connectedPath = `${key2pathRef.get(key)}${PATH_SPLIT}`
-    const pathKeys = new Set<string>()
+    const connectedPath = `${key2pathRef.value.get(key)}${PATH_SPLIT}`
+    const pathKeys = new Set<string>();
 
-    path2keyRef.forEach((targetKey, pathKey) => {
+    [...path2keyRef.value.keys()].forEach((pathKey) => {
       if (pathKey.startsWith(connectedPath)) {
-        pathKeys.add(targetKey)
+        pathKeys.add(path2keyRef.value.get(pathKey)!)
       }
     })
     return pathKeys
@@ -92,9 +106,12 @@ export default function useKeyRecords() {
   })
 
   return {
+    // Register
     registerPath,
     unregisterPath,
     refreshOverflowKeys,
+
+    // Util
     isSubPathKey,
     getKeyPath,
     getKeys,

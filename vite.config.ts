@@ -39,6 +39,7 @@ const comps = [
   'fast-color',
   'color-picker',
   'overflow',
+  'menu',
 ]
 
 export function genListAlias() {
@@ -75,6 +76,6 @@ export default defineConfig({
     ],
   },
   optimizeDeps: {
-    include: ['shiki'],
+    // include: ['shiki'],
   },
 })

@@ -32,7 +32,7 @@ function useDrag(
     draggingDelete: Ref<boolean>,
     returnValues: Ref<number[]>,
     onStartMove: OnStartMove,
-  ] {
+] {
   const draggingValue = ref<number | null>(null)
   const draggingIndex = ref<number>(-1)
   const draggingDelete = ref<boolean>(false)

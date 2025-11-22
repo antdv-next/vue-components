@@ -1,6 +1,7 @@
+import type { ComputedRef, Ref } from 'vue'
 import type { GetKey } from '../interface'
 import type CacheMap from '../utils/CacheMap'
-import { computed, type ComputedRef, type Ref } from 'vue'
+import { computed } from 'vue'
 
 export function useGetSize<T>(
   mergedData: Ref<T[]>,

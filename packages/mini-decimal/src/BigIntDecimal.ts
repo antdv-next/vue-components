@@ -39,7 +39,7 @@ export default class BigIntDecimal implements DecimalClass {
     }
 
     mergedValue
-            = typeof mergedValue === 'string' ? mergedValue : num2str(mergedValue)
+      = typeof mergedValue === 'string' ? mergedValue : num2str(mergedValue)
 
     if (validateNumber(mergedValue)) {
       const trimRet = trimNumber(mergedValue)

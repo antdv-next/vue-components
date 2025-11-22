@@ -165,42 +165,6 @@ const OverflowImpl = defineComponent({
       return index
     }
 
-    const mergedRenderItem = computed(
-      () =>
-        props.renderItem
-        ?? (slots.renderItem
-          ? (item: any, info: { index: number }) =>
-              slots.renderItem?.({ item, index: info.index })
-          : (item: any) => item),
-    )
-    const mergedRenderRawItem = computed(
-      () =>
-        props.renderRawItem
-        ?? (slots.renderRawItem
-          ? (item: any, index: number) => slots.renderRawItem?.({ item, index })
-          : undefined),
-    )
-    const mergedRenderRest = computed(
-      () =>
-        props.renderRest
-        ?? (slots.renderRest
-          ? (omitted: any[]) => slots.renderRest?.({ items: omitted })
-          : undefined),
-    )
-    const mergedRenderRawRest = computed(
-      () =>
-        props.renderRawRest
-        ?? (slots.renderRawRest
-          ? (omitted: any[]) => slots.renderRawRest?.({ items: omitted })
-          : undefined),
-    )
-    const mergedPrefix = computed<VueNode | undefined>(
-      () => props.prefix ?? slots.prefix?.(),
-    )
-    const mergedSuffix = computed<VueNode | undefined>(
-      () => props.suffix ?? slots.suffix?.(),
-    )
-
     function updateDisplayCount(
       count: number,
       suffixFixedStartVal: number | null | undefined,
@@ -333,11 +297,18 @@ const OverflowImpl = defineComponent({
         itemComponent,
       } = props
 
-      const renderRawItem = mergedRenderRawItem.value
-      const renderRest = mergedRenderRest.value
-      const renderRawRest = mergedRenderRawRest.value
-      const prefix = mergedPrefix.value
-      const suffix = mergedSuffix.value
+      const renderItem = slots?.renderItem ?? props?.renderItem
+      const renderRawItem: any = slots?.renderRawItem ?? props?.renderRawItem
+      const renderRest = slots?.renderRest ?? props?.renderRest
+      const renderRawRest = slots?.renderRawRest ?? props?.renderRawRest
+      let prefix = slots?.prefix ?? props?.prefix
+      let suffix = slots?.suffix ?? props?.suffix
+      if (typeof prefix === 'function') {
+        prefix = prefix()
+      }
+      if (typeof suffix === 'function') {
+        suffix = suffix()
+      }
 
       const displayRest = restReady.value && !!omittedItems.value.length
 
@@ -384,7 +355,7 @@ const OverflowImpl = defineComponent({
             order={index}
             key={key}
             item={item}
-            renderItem={mergedRenderItem.value}
+            renderItem={renderItem}
             itemKey={key}
             registerSize={registerSize}
             display={index <= mergedDisplayCount.value}

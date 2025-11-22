@@ -20,14 +20,14 @@ export interface RGBA extends RGB {
   a: number
 }
 
-export type ColorGenInput<T = Color> =
-  | string
-  | number
-  | RGB
-  | RGBA
-  | HSB
-  | HSBA
-  | T
+export type ColorGenInput<T = Color>
+  = | string
+    | number
+    | RGB
+    | RGBA
+    | HSB
+    | HSBA
+    | T
 
 export type HsbaColorType = 'hue' | 'alpha'
 

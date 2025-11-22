@@ -1,39 +1,44 @@
-import type { ComputedRef } from 'vue'
-import { computed } from 'vue'
-import { useMenuContext } from '../context/MenuContext'
-import type { MenuHoverEventHandler } from '../interface'
+import type { Ref } from 'vue'
+import type { MenuHoverEventHandler } from '../interface.ts'
+import { computed, watchEffect } from 'vue'
+import { useMenuContext } from '../context/MenuContext.tsx'
 
 interface ActiveObj {
-  active: ComputedRef<boolean>
+  active: Ref<boolean>
   onMouseEnter?: (event: MouseEvent) => void
   onMouseLeave?: (event: MouseEvent) => void
 }
-
 export default function useActive(
-  eventKey: string,
-  disabled: boolean,
+  eventKey: Ref<string>,
+  disabled: Ref<boolean>,
   onMouseEnter?: MenuHoverEventHandler,
   onMouseLeave?: MenuHoverEventHandler,
-): ActiveObj {
-  const context = useMenuContext()
+) {
+  const menuContext = useMenuContext()
 
-  const active = computed(() => context?.value?.activeKey === eventKey)
+  const active = computed(() => menuContext?.value?.activeKey === eventKey.value)
 
-  if (disabled) {
-    return {
-      active,
-    }
-  }
-
-  return {
+  const ret: ActiveObj = {
     active,
-    onMouseEnter: (domEvent: MouseEvent) => {
-      onMouseEnter?.({ key: eventKey, domEvent })
-      context?.value?.onActive(eventKey)
-    },
-    onMouseLeave: (domEvent: MouseEvent) => {
-      onMouseLeave?.({ key: eventKey, domEvent })
-      context?.value?.onInactive(eventKey)
-    },
   }
+
+  watchEffect(() => {
+    if (!disabled.value) {
+      ret.onMouseEnter = (domEvent: MouseEvent) => {
+        onMouseEnter?.({
+          key: eventKey.value,
+          domEvent,
+        })
+        menuContext?.value?.onActive?.(eventKey.value)
+      }
+      ret.onMouseLeave = (domEvent: MouseEvent) => {
+        onMouseLeave?.({
+          key: eventKey.value,
+          domEvent,
+        })
+        menuContext?.value?.onInactive?.(eventKey.value)
+      }
+    }
+  })
+  return ret
 }

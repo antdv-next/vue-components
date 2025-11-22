@@ -1,23 +1,22 @@
-import type { CSSProperties } from 'vue'
+import type { CSSProperties, Ref } from 'vue'
 import { computed } from 'vue'
-import { useMenuContext } from '../context/MenuContext'
+import { useMenuContext } from '../context/MenuContext.tsx'
 
-export default function useDirectionStyle(level: number) {
-  const context = useMenuContext()
+export default function useDirectionStyle(level: Ref<number>): Ref<CSSProperties | null> {
+  const menuContext = useMenuContext()
 
   return computed<CSSProperties | null>(() => {
-    const menu = context?.value
-    if (!menu || menu.mode !== 'inline') {
+    const { mode, rtl, inlineIndent } = menuContext?.value ?? {}
+    if (mode !== 'inline') {
       return null
     }
-
-    const indent = menu.inlineIndent ?? 0
-    const size = `${level * indent}px`
-
-    if (menu.rtl) {
-      return { paddingRight: size }
-    }
-
-    return { paddingLeft: size }
+    const len = level.value
+    return rtl
+      ? {
+          paddingRight: `${len * inlineIndent!}px`,
+        }
+      : {
+          paddingLeft: `${len * inlineIndent!}px`,
+        }
   })
 }

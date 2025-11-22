@@ -1,20 +1,52 @@
+import type {
+  MenuClickEventHandler,
+  MenuDividerType,
+  MenuInfo,
+  MenuItemGroupType,
+  MenuItemType,
+  MenuRef,
+  RenderIconInfo,
+  SelectEventHandler,
+  SelectInfo,
+  SubMenuType,
+} from './interface'
+import type { MenuProps } from './Menu'
+import type { MenuItemProps } from './MenuItem'
+import type { MenuItemGroupProps } from './MenuItemGroup'
+import type { SubMenuProps } from './SubMenu'
+import { useFullPath } from './context/PathContext'
+import Divider from './Divider'
 import Menu from './Menu'
 import MenuItem from './MenuItem'
-import SubMenu from './SubMenu'
 import MenuItemGroup from './MenuItemGroup'
-import Divider from './Divider'
-import { useFullPath } from './context/PathContext'
-
-export type { MenuProps, MenuRef, MenuItemProps, SubMenuProps, MenuItemGroupProps } from './interface'
+import SubMenu from './SubMenu'
 
 export {
-  SubMenu,
+  Divider,
   MenuItem as Item,
+  MenuItemGroup as ItemGroup,
   MenuItem,
   MenuItemGroup,
-  MenuItemGroup as ItemGroup,
-  Divider,
+  SubMenu,
+  /** @private Only used for antd internal. Do not use in your production. */
   useFullPath,
+}
+
+export type {
+  MenuClickEventHandler,
+  MenuDividerType,
+  MenuInfo,
+  MenuItemGroupProps,
+  MenuItemGroupType,
+  MenuItemProps,
+  MenuItemType,
+  MenuProps,
+  MenuRef,
+  RenderIconInfo,
+  SelectEventHandler,
+  SelectInfo,
+  SubMenuProps,
+  SubMenuType,
 }
 
 type MenuType = typeof Menu & {
@@ -25,6 +57,7 @@ type MenuType = typeof Menu & {
 }
 
 const ExportMenu = Menu as MenuType
+
 ExportMenu.Item = MenuItem
 ExportMenu.SubMenu = SubMenu
 ExportMenu.ItemGroup = MenuItemGroup

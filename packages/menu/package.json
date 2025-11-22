@@ -1,7 +1,7 @@
 {
   "name": "@v-c/menu",
   "type": "module",
-  "version": "1.0.0",
+  "version": "0.0.7",
   "description": "menu ui component for vue",
   "exports": {
     ".": {
@@ -9,13 +9,23 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
-    "./dist/*": "./dist/*",
+    "./dist/*.js": "./dist/*.js",
+    "./dist/*.d.ts": "./dist/*.d.ts",
     "./package.json": "./package.json"
   },
-  "main": "dist/index.js",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/index.js",
+  "files": [
+    "dist",
+    "package.json"
+  ],
   "scripts": {
     "build": "vite build",
-    "prepublish": "pnpm build"
+    "prepublish": "pnpm build",
+    "test": "vitest run",
+    "bump": "bumpp --release patch"
   },
   "peerDependencies": {
     "vue": "^3.0.0"

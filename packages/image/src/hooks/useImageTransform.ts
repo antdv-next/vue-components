@@ -13,22 +13,22 @@ export interface TransformType {
   flipY: boolean
 }
 
-export type TransformAction =
-  | 'flipY'
-  | 'flipX'
-  | 'rotateLeft'
-  | 'rotateRight'
-  | 'zoomIn'
-  | 'zoomOut'
-  | 'close'
-  | 'prev'
-  | 'next'
-  | 'wheel'
-  | 'doubleClick'
-  | 'move'
-  | 'dragRebound'
-  | 'touchZoom'
-  | 'reset'
+export type TransformAction
+  = | 'flipY'
+    | 'flipX'
+    | 'rotateLeft'
+    | 'rotateRight'
+    | 'zoomIn'
+    | 'zoomOut'
+    | 'close'
+    | 'prev'
+    | 'next'
+    | 'wheel'
+    | 'doubleClick'
+    | 'move'
+    | 'dragRebound'
+    | 'touchZoom'
+    | 'reset'
 
 export type UpdateTransformFunc = (
   newTransform: Partial<TransformType>,

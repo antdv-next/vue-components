@@ -1,4 +1,5 @@
-import { computed, type CSSProperties, defineComponent, onMounted, onUnmounted, type PropType, ref, shallowRef, watch } from 'vue'
+import type { CSSProperties, PropType } from 'vue'
+import { computed, defineComponent, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
 
 export interface ScrollBarProps {
   prefixCls: string

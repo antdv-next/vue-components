@@ -2,6 +2,14 @@
   "name": "@v-c/image",
   "type": "module",
   "version": "1.0.0",
+  "description": "image component",
+  "author": "",
+  "license": "MIT",
+  "keywords": [
+    "image",
+    "vue-image",
+    "img"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -11,19 +19,11 @@
     "./dist/*": "./dist/*",
     "./package.json": "./package.json"
   },
-  "description": "image component",
   "main": "index.js",
   "scripts": {
     "build": "vite build",
     "test": "vitest"
   },
-  "keywords": [
-    "image",
-    "vue-image",
-    "img"
-  ],
-  "author": "",
-  "license": "MIT",
   "peerDependencies": {
     "vue": "^3.0.0"
   },

@@ -1,5 +1,8 @@
 import BaseInput from './BaseInput'
-import Input from './Input'
+import Input from './input'
 
 export { BaseInput }
-export default Input as typeof Input
+
+export type { InputProps, InputRef } from './interface'
+
+export default Input

@@ -53,7 +53,7 @@ export function collectScroller(ele: HTMLElement) {
 
   while (current) {
     const { overflowX, overflowY, overflow }
-            = getWin(current)!.getComputedStyle(current)
+      = getWin(current)!.getComputedStyle(current)
     if ([overflowX, overflowY, overflow].some(o => scrollStyle.includes(o))) {
       scrollerList.push(current)
     }
@@ -144,9 +144,9 @@ export function getVisibleArea(
 
     // Original visible area
     const eleScrollWidth
-            = (eleOutWidth - eleInnerWidth - borderLeftNum - borderRightNum) * scaleX
+      = (eleOutWidth - eleInnerWidth - borderLeftNum - borderRightNum) * scaleX
     const eleScrollHeight
-            = (eleOutHeight - eleInnerHeight - borderTopNum - borderBottomNum) * scaleY
+      = (eleOutHeight - eleInnerHeight - borderTopNum - borderBottomNum) * scaleY
 
     // Cut border size
     const scaledBorderTopWidth = borderTopNum * scaleY
@@ -168,20 +168,20 @@ export function getVisibleArea(
     const eleTop = eleRect.y + scaledBorderTopWidth - clipMarginHeight
 
     const eleRight
-            = eleLeft
-              + eleRect.width
-              + 2 * clipMarginWidth
-              - scaledBorderLeftWidth
-              - scaledBorderRightWidth
-              - eleScrollWidth
+      = eleLeft
+        + eleRect.width
+        + 2 * clipMarginWidth
+        - scaledBorderLeftWidth
+        - scaledBorderRightWidth
+        - eleScrollWidth
 
     const eleBottom
-            = eleTop
-              + eleRect.height
-              + 2 * clipMarginHeight
-              - scaledBorderTopWidth
-              - scaledBorderBottomWidth
-              - eleScrollHeight
+      = eleTop
+        + eleRect.height
+        + 2 * clipMarginHeight
+        - scaledBorderTopWidth
+        - scaledBorderBottomWidth
+        - eleScrollHeight
 
     visibleArea.left = Math.max(visibleArea.left, eleLeft)
     visibleArea.top = Math.max(visibleArea.top, eleTop)

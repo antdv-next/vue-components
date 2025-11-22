@@ -1,10 +1,16 @@
 {
   "name": "@v-c/qrcode",
   "type": "module",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "publishConfig": {
     "access": "public"
   },
+  "description": "",
+  "author": "",
+  "license": "MIT",
+  "keywords": [
+    "qrcode"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -14,17 +20,12 @@
     "./dist/*": "./dist/*",
     "./package.json": "./package.json"
   },
-  "description": "",
-  "author": "",
-  "license": "MIT",
-  "keywords": [
-    "qrcode"
-  ],
   "main": "index.js",
   "scripts": {
     "build": "vite build",
     "prepublish": "pnpm build",
-    "test": "vitest"
+    "test": "vitest",
+    "bump": "bumpp --release patch"
   },
   "peerDependencies": {
     "vue": "^3.0.0"

@@ -1,6 +1,7 @@
 <script setup lang="ts">
+import type { ListRef } from '../src'
 import { ref } from 'vue'
-import VirtualList, { type ListRef } from '../src'
+import VirtualList from '../src'
 
 interface Item {
   id: number

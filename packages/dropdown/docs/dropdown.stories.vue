@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// import Arrow from './arrow'
+import Arrow from './arrow'
 // import ContextMenu from './context-menu'
 // import DropdownMenuWidth from './dropdown-menu-width'
 // import Multiple from './multiple'
@@ -11,7 +11,7 @@ import './assets/index.less'
 <template>
   <Story title="Dropdown">
     <Variant title="arrow">
-      <!--      <Arrow /> -->
+      <Arrow />
     </Variant>
     <Variant title="contextMenu">
       <!--      <ContextMenu /> -->

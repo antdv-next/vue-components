@@ -79,7 +79,7 @@ const PortalWrapper = defineComponent<PortalWrapperProps, PortalWrapperEmits, st
 
   const updateOpenCount = (prevProps?: Partial<PortalWrapperProps>) => {
     const { visible: prevVisible, getContainer: prevGetContainer }
-        = prevProps || {}
+      = prevProps || {}
     const { visible, getContainer } = props
 
     // Update count
@@ -96,8 +96,8 @@ const PortalWrapper = defineComponent<PortalWrapperProps, PortalWrapperEmits, st
 
     // Clean up container if needed
     const getContainerIsFunc
-            = typeof getContainer === 'function'
-              && typeof prevGetContainer === 'function'
+      = typeof getContainer === 'function'
+        && typeof prevGetContainer === 'function'
     if (
       getContainerIsFunc
         ? getContainer.toString() !== prevGetContainer.toString()

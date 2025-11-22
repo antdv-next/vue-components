@@ -1,18 +1,21 @@
 import type { Key } from '@v-c/util/dist/type'
 
+import type { CSSProperties, PropType, VNode } from 'vue'
+import type { InnerProps } from './Filler'
 import type { ExtraRenderInfo } from './interface'
+import type { ScrollBarRef } from './ScrollBar'
 import ResizeObserver from '@v-c/resize-observer'
 import {
   computed,
-  type CSSProperties,
+
   defineComponent,
-  type PropType,
+
   ref,
   shallowRef,
-  type VNode,
+
   watch,
 } from 'vue'
-import Filler, { type InnerProps } from './Filler'
+import Filler from './Filler'
 import useDiffItem from './hooks/useDiffItem'
 import useFrameWheel from './hooks/useFrameWheel'
 import { useGetSize } from './hooks/useGetSize'
@@ -20,7 +23,7 @@ import useHeights from './hooks/useHeights'
 import useMobileTouchMove from './hooks/useMobileTouchMove'
 import useScrollDrag from './hooks/useScrollDrag'
 import Item from './Item'
-import ScrollBar, { type ScrollBarRef } from './ScrollBar'
+import ScrollBar from './ScrollBar'
 import { getSpinSize } from './utils/scrollbarUtil'
 
 const EMPTY_DATA: any[] = []

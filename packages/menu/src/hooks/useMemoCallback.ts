@@ -1,14 +1,15 @@
-import { shallowRef } from 'vue'
+import { ref } from 'vue'
 
-export default function useMemoCallback<T extends (...args: any[]) => any>(func?: T): T | undefined {
-  if (!func) {
-    return undefined
-  }
+/**
+ * Memoize a callback function to keep reference stable
+ */
+export default function useMemoCallback<T extends (...args: any[]) => any>(callback: T): T {
+  const fnRef = ref(callback)
+  fnRef.value = callback
 
-  const ref = shallowRef(func)
-  ref.value = func
+  const memoFn = ((...args: any[]) => {
+    return fnRef.value(...args)
+  }) as T
 
-  const callback = ((...args: any[]) => ref.value?.(...args)) as T
-
-  return callback
+  return memoFn
 }

@@ -1,11 +1,12 @@
 import type { Slots, VNode, VNodeArrayChildren, VNodeProps } from 'vue'
 import type { RefObject } from './createRef'
 import { cloneVNode, Comment, Fragment, isVNode, render as VueRender } from 'vue'
+import { isDOM } from './Dom/findDOMNode'
 import { filterEmpty } from './props-util'
 import warning from './warning'
 
-type NodeProps = Record<string, any> &
-  Omit<VNodeProps, 'ref'> & { ref?: VNodeProps['ref'] | RefObject }
+type NodeProps = Record<string, any>
+  & Omit<VNodeProps, 'ref'> & { ref?: VNodeProps['ref'] | RefObject }
 
 export function cloneElement<T, U>(
   vnode: VNode<T, U> | VNode<T, U>[],
@@ -83,4 +84,34 @@ export function customRenderSlot(
     return slot
 
   return fallback?.()
+}
+
+export function resolveToElement(node: any) {
+  if (!node) {
+    return null
+  }
+  if (isDOM(node?.__$el)) {
+    return node.__$el
+  }
+  if (isDOM(node)) {
+    return node as HTMLElement
+  }
+  const exposed = node as any
+  if (isDOM(exposed?.$el)) {
+    return exposed.$el
+  }
+  const nativeEl = exposed?.nativeElement
+  if (isDOM(nativeEl?.value)) {
+    return nativeEl.value
+  }
+  if (isDOM(nativeEl)) {
+    return nativeEl
+  }
+  if (typeof exposed?.getElement === 'function') {
+    const el = exposed.getElement()
+    if (isDOM(el)) {
+      return el as HTMLElement
+    }
+  }
+  return null
 }

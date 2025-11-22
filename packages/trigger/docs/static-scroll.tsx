@@ -52,7 +52,9 @@ export default defineComponent(() => {
       </Trigger>
       {Array.from({ length: 20 }).map((_, index) => (
         <h1 key={index} style={{ width: '200vw' }}>
-          Placeholder Line {index}
+          Placeholder Line
+          {' '}
+          {index}
         </h1>
       ))}
     </div>

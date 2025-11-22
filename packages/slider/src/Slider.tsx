@@ -8,9 +8,9 @@ import type {
   SliderStyles,
 } from './interface'
 import type { InternalMarkObj, MarkObj } from './Marks'
+import { classNames as cls } from '@v-c/util'
 import isEqual from '@v-c/util/dist/isEqual'
 import warning from '@v-c/util/dist/warning'
-import { classNames as cls } from '@v-c/util'
 import { computed, defineComponent, isVNode, ref, shallowRef, watch, watchEffect } from 'vue'
 import { useProviderSliderContext } from './context'
 import Handles from './Handles'
@@ -212,11 +212,11 @@ export default defineComponent({
 
       const getRawValues = computed(() => {
         const valueList
-            = mergedValue.value === null || mergedValue.value === undefined
-              ? []
-              : Array.isArray(mergedValue.value)
-                ? mergedValue.value
-                : [mergedValue.value]
+          = mergedValue.value === null || mergedValue.value === undefined
+            ? []
+            : Array.isArray(mergedValue.value)
+              ? mergedValue.value
+              : [mergedValue.value]
 
         const [val0 = mergedMin.value] = valueList
         let returnValues: number[] = mergedValue.value === null ? [] : [val0]
@@ -379,7 +379,7 @@ export default defineComponent({
     const onSliderMouseDown = (e: MouseEvent) => {
       e.preventDefault()
       const { width, height, left, top, bottom, right }
-          = containerRef.value!.getBoundingClientRect()
+        = containerRef.value!.getBoundingClientRect()
       const { clientX, clientY } = e
 
       let percent: number

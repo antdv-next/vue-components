@@ -3,9 +3,9 @@ import type { Color } from '../color'
 import type { TransformOffset } from '../interface'
 import { onWatcherCleanup, ref, shallowRef, watch } from 'vue'
 
-type EventType =
-  | MouseEvent
-  | TouchEvent
+type EventType
+  = | MouseEvent
+    | TouchEvent
 
 type EventHandle = (e: EventType) => void
 

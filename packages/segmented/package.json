@@ -1,33 +1,43 @@
 {
   "name": "@v-c/segmented",
   "type": "module",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.0.8",
+  "description": "segmented",
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": "",
+  "license": "MIT",
+  "keywords": [
+    "segmented controls",
+    "vue-segemented",
+    "vue-segemented-controls"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
-    "./dist/*": "./dist/*",
+    "./dist/*.js": "./dist/*.js",
+    "./dist/*.d.ts": "./dist/*.d.ts",
     "./package.json": "./package.json"
   },
-  "main": "index.js",
+  "main": "./dist/index.js",
+  "files": [
+    "dist",
+    "package.json"
+  ],
   "scripts": {
     "build": "vite build",
-    "test": "vitest"
+    "test": "vitest",
+    "prepublish": "pnpm build",
+    "bump": "bumpp --release patch"
   },
   "peerDependencies": {
     "vue": "^3.0.0"
   },
   "dependencies": {
     "@v-c/util": "workspace:*"
-  },
-  "keywords": [
-    "segmented controls",
-    "vue-segemented",
-    "vue-segemented-controls"
-  ],
-  "author": "",
-  "license": "MIT"
+  }
 }

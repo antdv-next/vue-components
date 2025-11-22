@@ -148,7 +148,7 @@ export class QrSegment {
     for (i = 0; i + 2 <= text.length; i += 2) {
       // Process groups of 2
       let temp: number
-                = QrSegment.ALPHANUMERIC_CHARSET.indexOf(text.charAt(i)) * 45
+        = QrSegment.ALPHANUMERIC_CHARSET.indexOf(text.charAt(i)) * 45
       temp += QrSegment.ALPHANUMERIC_CHARSET.indexOf(text.charAt(i + 1))
       appendBits(temp, 11, bb)
     }
@@ -345,10 +345,10 @@ export class QrCode {
   public static encodeSegments(
     segs: Readonly<QrSegment[]>,
     oriEcl: Ecc,
-        minVersion: number = 1,
-        maxVersion: number = 40,
-        mask: number = -1,
-        boostEcl: boolean = true,
+    minVersion: number = 1,
+    maxVersion: number = 40,
+    mask: number = -1,
+    boostEcl: boolean = true,
   ): QrCode {
     if (
       !(
@@ -819,15 +819,15 @@ export class QrCode {
           this.finderPenaltyAddHistory(runX, runHistory)
           if (!runColor) {
             result
-                            += this.finderPenaltyCountPatterns(runHistory) * QrCode.PENALTY_N3
+              += this.finderPenaltyCountPatterns(runHistory) * QrCode.PENALTY_N3
           }
           runColor = this.modules[y][x]
           runX = 1
         }
       }
       result
-                += this.finderPenaltyTerminateAndCount(runColor, runX, runHistory)
-                  * QrCode.PENALTY_N3
+        += this.finderPenaltyTerminateAndCount(runColor, runX, runHistory)
+          * QrCode.PENALTY_N3
     }
     // Adjacent modules in column having same color, and finder-like patterns
     for (let x = 0; x < this.size; x++) {
@@ -848,15 +848,15 @@ export class QrCode {
           this.finderPenaltyAddHistory(runY, runHistory)
           if (!runColor) {
             result
-                            += this.finderPenaltyCountPatterns(runHistory) * QrCode.PENALTY_N3
+              += this.finderPenaltyCountPatterns(runHistory) * QrCode.PENALTY_N3
           }
           runColor = this.modules[y][x]
           runY = 1
         }
       }
       result
-                += this.finderPenaltyTerminateAndCount(runColor, runY, runHistory)
-                  * QrCode.PENALTY_N3
+        += this.finderPenaltyTerminateAndCount(runColor, runY, runHistory)
+          * QrCode.PENALTY_N3
     }
 
     // 2*2 blocks of modules having same color
@@ -899,9 +899,9 @@ export class QrCode {
     else {
       const numAlign = Math.floor(this.version / 7) + 2
       const step
-                = this.version == 32
-                  ? 26
-                  : Math.ceil((this.version * 4 + 4) / (numAlign * 2 - 2)) * 2
+        = this.version == 32
+          ? 26
+          : Math.ceil((this.version * 4 + 4) / (numAlign * 2 - 2)) * 2
       const result: number[] = [6]
       for (let pos = this.size - 7; result.length < numAlign; pos -= step) {
         result.splice(1, 0, pos)
@@ -1010,11 +1010,11 @@ export class QrCode {
     const n: number = runHistory[1]
     assert(n <= this.size * 3)
     const core: boolean
-            = n > 0
-              && runHistory[2] == n
-              && runHistory[3] == n * 3
-              && runHistory[4] == n
-              && runHistory[5] == n
+      = n > 0
+        && runHistory[2] == n
+        && runHistory[3] == n * 3
+        && runHistory[4] == n
+        && runHistory[5] == n
     return (
       (core && runHistory[0] >= n * 4 && runHistory[6] >= n ? 1 : 0)
       + (core && runHistory[6] >= n * 4 && runHistory[0] >= n ? 1 : 0)

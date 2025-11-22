@@ -1,8 +1,8 @@
 import type { VueNode } from '@v-c/util/dist/type'
 import type { CSSProperties, PropType } from 'vue'
 import type { Icons, ProgressDotRender, Status, StepIconRender } from './interface'
-import KeyCode from '@v-c/util/dist/KeyCode'
 import { classNames } from '@v-c/util'
+import KeyCode from '@v-c/util/dist/KeyCode'
 import { computed, defineComponent } from 'vue'
 
 function isString(str: any): str is string {

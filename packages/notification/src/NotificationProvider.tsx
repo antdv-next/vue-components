@@ -1,5 +1,5 @@
-import type { InjectionKey } from 'vue'
-import { inject, provide } from 'vue'
+import type { InjectionKey, Ref } from 'vue'
+import { inject, provide, ref } from 'vue'
 
 export interface NotificationContextProps {
   classNames?: {
@@ -7,13 +7,13 @@ export interface NotificationContextProps {
     list?: string
   }
 }
-export const NotificationContext: InjectionKey<NotificationContextProps> = Symbol('NotificationContext')
+export const NotificationContext: InjectionKey<Ref<NotificationContextProps>> = Symbol('NotificationContext')
 
-export function useNotificationProvider(props: NotificationContextProps) {
+export function useNotificationProvider(props: Ref<NotificationContextProps>) {
   provide(NotificationContext, props)
   return props
 }
 
 export function useNotificationContext() {
-  return inject(NotificationContext, {})
+  return inject(NotificationContext, ref({}))
 }

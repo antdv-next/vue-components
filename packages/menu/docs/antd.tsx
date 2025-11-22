@@ -12,21 +12,45 @@ function handleClick(info: any) {
 }
 
 const horizontalMotion: CSSMotionProps = {
-  name: 'rc-menu-open-slide-up',
+  name: 'vc-menu-open-slide-up',
   appear: true,
   css: true,
 }
 
 const verticalMotion: CSSMotionProps = {
-  name: 'rc-menu-open-zoom',
+  name: 'vc-menu-open-zoom',
   appear: true,
   css: true,
 }
 
+function collapseNode(el: Element) {
+  const _el = el as HTMLElement
+  _el.style.height = '0px'
+}
+
+function expandNode(el: Element) {
+  const _el = el as HTMLElement
+  _el.style.height = `${_el.scrollHeight}px`
+}
+
+function clearNode(el: Element) {
+  const _el = el as HTMLElement
+  _el.style.height = ''
+}
+
 export const inlineMotion: CSSMotionProps = {
-  name: 'rc-menu-collapse',
+  name: 'vc-menu-collapse',
   appear: true,
   css: true,
+  onBeforeAppear: collapseNode,
+  onAppear: expandNode,
+  onAfterAppear: clearNode,
+  onAfterEnter: clearNode,
+  onBeforeEnter: collapseNode,
+  onEnter: expandNode,
+  onBeforeLeave: expandNode,
+  onLeave: collapseNode,
+  onAfterLeave: clearNode,
 }
 
 const motionMap: Partial<Record<MenuMode | 'other', CSSMotionProps>> = {
@@ -102,9 +126,11 @@ const CommonMenu = defineComponent({
   setup(props) {
     const children = ref(children1)
     const overflowedIndicator = ref<any>(undefined)
+    let toggle = false
 
     const toggleChildren = () => {
-      children.value = children.value === children1 ? children2 : children1
+      toggle = !toggle
+      children.value = toggle ? children2 : children1
     }
 
     const toggleOverflowedIndicator = () => {

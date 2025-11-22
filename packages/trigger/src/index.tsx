@@ -7,10 +7,10 @@ import type { MobileConfig } from './Popup'
 import Portal from '@v-c/portal'
 import ResizeObserver from '@v-c/resize-observer'
 import { classNames } from '@v-c/util'
-import { isDOM } from '@v-c/util/dist/Dom/findDOMNode'
 import { getShadowRoot } from '@v-c/util/dist/Dom/shadow'
 import { filterEmpty } from '@v-c/util/dist/props-util'
-import { computed, createVNode, defineComponent, nextTick, ref, shallowRef, useId, watch, watchEffect } from 'vue'
+import { resolveToElement } from '@v-c/util/dist/vnode'
+import { computed, createVNode, defineComponent, nextTick, reactive, ref, shallowRef, useId, watch, watchEffect } from 'vue'
 import { TriggerContextProvider, useTriggerContext, useUniqueContext } from './context.ts'
 import useAction from './hooks/useAction.ts'
 import useAlign from './hooks/useAlign.ts'
@@ -118,7 +118,7 @@ export interface TriggerProps {
 
   // // ========================== Mobile ==========================
   /**
-   * @private Bump fixed position at bottom in mobile.
+   * @private
    * Will replace the config of root props.
    * This will directly trade as mobile view which will not check what real is.
    * This is internal usage currently, do not use in your prod.
@@ -165,32 +165,6 @@ export function generateTrigger(PortalComponent: any = Portal) {
       const popupEle = shallowRef<HTMLDivElement | null>(null)
       // Used for forwardRef popup. Not use internal
       const externalPopupRef = shallowRef<HTMLDivElement | null>(null)
-      const resolveToElement = (node: any) => {
-        if (!node) {
-          return null
-        }
-        if (isDOM(node)) {
-          return node as HTMLElement
-        }
-        const exposed = node as any
-        if (isDOM(exposed?.$el)) {
-          return exposed.$el
-        }
-        const nativeEl = exposed?.nativeElement
-        if (isDOM(nativeEl?.value)) {
-          return nativeEl.value
-        }
-        if (isDOM(nativeEl)) {
-          return nativeEl
-        }
-        if (typeof exposed?.getElement === 'function') {
-          const el = exposed.getElement()
-          if (isDOM(el)) {
-            return el as HTMLElement
-          }
-        }
-        return null
-      }
       const setPopupRef = (node: any) => {
         const element = resolveToElement(node) as HTMLDivElement | null
         externalPopupRef.value = element
@@ -217,14 +191,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
         }
       }
 
-      // ========================== Children ==========================
-      const child = computed(() => {
-        const childs = filterEmpty(slots?.default?.() ?? [])
-        return childs?.[0]
-      })
-      const originChildProps = computed(() => {
-        return child?.value?.props || {}
-      })
+      const originChildProps = reactive<Record<string, any>>({})
       const baseActionProps = shallowRef<Record<string, any>>({})
       const hoverActionProps = shallowRef<Record<string, any>>({})
       const cloneProps = computed<Record<string, any>>(() => ({
@@ -382,11 +349,9 @@ export function generateTrigger(PortalComponent: any = Portal) {
 
       // ========================== Motion ============================
       const inMotion = shallowRef(false)
-      console.log('inMotion')
       watch(mergedOpen, async () => {
         await nextTick()
         if (mergedOpen.value) {
-          console.log('inMotion opened')
           inMotion.value = true
         }
       })
@@ -539,7 +504,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
           }
 
           // Pass to origin
-          originChildProps.value[eventName]?.(event, ...args)
+          originChildProps[eventName]?.(event, ...args)
         }
       }
 
@@ -551,7 +516,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
       watchEffect(() => {
         const nextCloneProps: Record<string, any> = {}
         if (touchToShow.value || touchToHide.value) {
-          nextCloneProps.onTouchStart = (...args: any[]) => {
+          nextCloneProps.onTouchstart = (...args: any[]) => {
             touchedRef.value = true
 
             if (openRef.value && touchToHide.value) {
@@ -562,7 +527,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
             }
 
             // Pass to origin
-            originChildProps.value.onTouchStart?.(...args)
+            originChildProps.onTouchstart?.(...args)
           }
         }
 
@@ -582,7 +547,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
             }
 
             // Pass to origin
-            originChildProps.value?.onClick?.(event, ...args)
+            originChildProps?.onClick?.(event, ...args)
             touchedRef.value = false
           }
         }
@@ -606,7 +571,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
       const hoverToHide = computed(() => hideActions.value?.has('hover'))
 
       let onPopupMouseEnter: any
-      let onPopupMouseLeave: undefined | any
+      let onPopupMouseLeave: undefined | ((event: MouseEvent) => void)
 
       const ignoreMouseTrigger = () => {
         return touchedRef.value
@@ -651,7 +616,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
           // Align Point
           if (alignPoint) {
             nextHoverProps.onMouseMove = (event: any) => {
-              originChildProps.value.onMouseMove?.(event)
+              originChildProps.onMousemove?.(event)
             }
           }
         }
@@ -677,7 +642,11 @@ export function generateTrigger(PortalComponent: any = Portal) {
             ignoreMouseTrigger,
           )
 
-          onPopupMouseLeave = () => {
+          onPopupMouseLeave = (event: MouseEvent) => {
+            const { relatedTarget } = event
+            if (relatedTarget && inPopupOrChild(relatedTarget)) {
+              return
+            }
             triggerOpen(false, mouseLeaveDelay)
           }
         }
@@ -708,7 +677,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
             event.preventDefault()
 
             // Pass to origin
-            originChildProps.value.onContextMenu?.(event, ...args)
+            originChildProps.onContextmenu?.(event, ...args)
           }
         }
         hoverActionProps.value = nextHoverProps
@@ -720,9 +689,11 @@ export function generateTrigger(PortalComponent: any = Portal) {
         rendedRef.value ||= props.forceRender || mergedOpen.value || inMotion.value
       })
       return () => {
+        // ========================== Children ==========================
+        const child = filterEmpty(slots?.default?.() ?? [])?.[0]
         // =========================== Render ===========================
         const mergedChildrenProps = {
-          ...originChildProps.value,
+          ...originChildProps,
           ...cloneProps.value,
         }
         // Pass props into cloneProps for nest usage
@@ -750,9 +721,8 @@ export function generateTrigger(PortalComponent: any = Portal) {
           x: arrowX.value,
           y: arrowY.value,
         }
-
         // Child Node
-        const triggerNode = createVNode(child.value, {
+        const triggerNode = createVNode(child, {
           ...mergedChildrenProps,
           ...passedProps,
           ref: setTargetRef,
@@ -774,7 +744,6 @@ export function generateTrigger(PortalComponent: any = Portal) {
           stretch,
           mobile,
         } = props
-        console.log(inMotion.value)
         return (
           <>
             <ResizeObserver

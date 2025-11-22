@@ -1,5 +1,6 @@
+import type { PropType } from 'vue'
 import { filterEmpty } from '@v-c/util/dist/props-util'
-import { cloneVNode, defineComponent, type PropType, shallowRef } from 'vue'
+import { cloneVNode, defineComponent, shallowRef } from 'vue'
 
 export interface ItemProps {
   setRef: (element: HTMLElement | null) => void

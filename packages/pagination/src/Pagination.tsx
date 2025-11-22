@@ -1,10 +1,10 @@
 import type { Component, Ref, VNode } from 'vue'
 import type { ItemRender } from './interface'
+import { classNames } from '@v-c/util'
 import useMergedState from '@v-c/util/dist/hooks/useMergedState'
 import KeyCode from '@v-c/util/dist/KeyCode'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
 import { cloneElement } from '@v-c/util/dist/vnode'
-import { classNames } from '@v-c/util'
 import {
   computed,
   defineComponent,

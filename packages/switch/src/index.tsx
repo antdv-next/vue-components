@@ -6,7 +6,7 @@ import { computed, defineComponent, shallowRef } from 'vue'
 
 export type SwitchChangeEventHandler = (
   checked: boolean,
-  event: MouseEvent | KeyboardEvent
+  event: MouseEvent | KeyboardEvent,
 ) => void
 export type SwitchClickEventHandler = SwitchChangeEventHandler
 export interface SwitchProps {

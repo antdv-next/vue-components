@@ -8,10 +8,8 @@ export function getMotion(
   if (motion) {
     return motion
   }
-
   if (defaultMotions) {
-    return defaultMotions[mode] || defaultMotions.other
+    return defaultMotions?.[mode] || defaultMotions?.other
   }
-
   return undefined
 }

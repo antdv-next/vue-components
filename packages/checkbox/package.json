@@ -1,7 +1,14 @@
 {
   "name": "@v-c/checkbox",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.0.2",
+  "files": [
+    "dist",
+    "package.json"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -13,10 +20,15 @@
   },
   "main": "dist/index.js",
   "scripts": {
-    "build": "vite build"
+    "build": "vite build",
+    "prepublish": "pnpm build",
+    "test": "vitest run",
+    "bump": "bumpp --release patch"
   },
   "peerDependencies": {
     "vue": "^3.0.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@v-c/util": "workspace:^"
+  }
 }

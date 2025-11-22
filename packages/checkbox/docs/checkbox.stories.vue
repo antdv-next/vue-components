@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Basic from './index'
+import Basic from '../src'
 </script>
 
 <template>

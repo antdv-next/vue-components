@@ -2,7 +2,6 @@
 import { h } from 'vue'
 import { useNotification } from '../src'
 import motion from './motion'
-import './index.less'
 
 const [{ open }, holder] = useNotification({ motion })
 const NOTICE = {
@@ -30,6 +29,6 @@ function handleClick() {
   </div>
 </template>
 
-<style scoped>
-
+<style lang="less">
+@import "./index.less";
 </style>

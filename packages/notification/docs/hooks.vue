@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useNotification } from '../src'
-import motion from './motion.ts'
+import motion from './motion'
 
 const [notice, contextHolder] = useNotification({ motion, closable: true })
 </script>

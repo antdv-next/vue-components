@@ -7,14 +7,14 @@ import Steps from '../src'
 import '../assets/index.less'
 import '../assets/iconfont.less'
 
-type VNodeChildAtom =
-  | VNode
-  | string
-  | number
-  | boolean
-  | null
-  | undefined
-  | void
+type VNodeChildAtom
+  = | VNode
+    | string
+    | number
+    | boolean
+    | null
+    | undefined
+    | void
 type VueNode = VNodeChildAtom | VNodeChildAtom[] | VNode
 
 const description: string

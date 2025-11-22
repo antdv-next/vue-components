@@ -1,4 +1,4 @@
-import type { VueNode } from '@v-c/util/dist/type.ts'
+import type { VueNode } from '@v-c/util/dist/type'
 import type { CSSProperties } from 'vue'
 
 export type Placement = 'top' | 'topLeft' | 'topRight' | 'bottom' | 'bottomLeft' | 'bottomRight'
@@ -8,11 +8,13 @@ type NoticeSemanticProps = 'wrapper'
 export type Key = string | number
 export interface NoticeConfig {
   content?: VueNode
-  duration?: number | null
+  duration?: number | false | null
   showProgress?: boolean
   pauseOnHover?: boolean
   closeIcon?: VueNode
-  closable?: boolean | ({ closeIcon?: VueNode } & Record<string, any>)
+  closable?:
+    | boolean
+    | ({ closeIcon?: VueNode, onClose?: VoidFunction } & Record<string, any>)
   className?: string
   style?: CSSProperties
   classNames?: {
@@ -32,28 +34,28 @@ export interface OpenConfig extends NoticeConfig {
   key: Key
   placement?: Placement
   content?: VueNode
-  duration?: number | null
+  duration?: number | false | null
 }
 
 export type InnerOpenConfig = OpenConfig & { times?: number }
 
 export type Placements = Partial<Record<Placement, OpenConfig[]>>
 
-export type StackConfig =
-  | boolean
-  | {
+export type StackConfig
+  = | boolean
+    | {
     /**
      * When number is greater than threshold, notifications will be stacked together.
      * @default 3
      */
-    threshold?: number
-    /**
-     * Offset when notifications are stacked together.
-     * @default 8
-     */
-    offset?: number
-    /**
-     * Spacing between each notification when expanded.
-     */
-    gap?: number
-  }
+      threshold?: number
+      /**
+       * Offset when notifications are stacked together.
+       * @default 8
+       */
+      offset?: number
+      /**
+       * Spacing between each notification when expanded.
+       */
+      gap?: number
+    }

@@ -1,7 +1,7 @@
 {
   "name": "@v-c/util",
   "type": "module",
-  "version": "0.0.8",
+  "version": "0.0.17",
   "description": "Vue3 components utils",
   "publishConfig": {
     "access": "public"
@@ -19,7 +19,8 @@
   ],
   "scripts": {
     "build": "vite build",
-    "prepublish": "pnpm build"
+    "prepublish": "pnpm build",
+    "bump": "bumpp --release patch"
   },
   "peerDependencies": {
     "vue": "^3.0.0"

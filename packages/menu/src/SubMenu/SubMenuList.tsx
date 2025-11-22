@@ -1,49 +1,35 @@
-import type { HTMLAttributes } from 'vue'
-import { classNames } from '@v-c/util'
-import { defineComponent, shallowRef } from 'vue'
-import { useMenuContext } from '../context/MenuContext'
+import { clsx } from '@v-c/util'
+import { defineComponent } from 'vue'
+import { useMenuContext } from '../context/MenuContext.tsx'
 
-export interface SubMenuListProps {
-  id?: string
-}
-
-const SubMenuList = defineComponent<SubMenuListProps>(
-  (props, { slots, attrs, expose }) => {
-    const context = useMenuContext()
-    const listRef = shallowRef<HTMLUListElement | null>(null)
-    expose({
-      nativeElement: listRef,
-    })
-
+const InternalSubMenuList = defineComponent(
+  (_, { attrs, slots }) => {
+    const menuContext = useMenuContext()
     return () => {
-      const menu = context?.value
-      const prefixCls = menu?.prefixCls ?? 'vc-menu'
-      const mode = menu?.mode ?? 'vertical'
-      const rtl = menu?.rtl
-
-      const { class: classAttr, style: styleAttr, ...restAttrs } = attrs as HTMLAttributes
-
+      const { prefixCls, mode, rtl } = menuContext?.value ?? {}
       return (
         <ul
-          ref={listRef}
+          class={
+            clsx(
+              prefixCls,
+              !!rtl && `${prefixCls}-rtl`,
+              `${prefixCls}-sub`,
+              `${prefixCls}-${mode === 'inline' ? 'inline' : 'vertical'}`,
+            )
+          }
           role="menu"
+          {...attrs}
           data-menu-list
-          id={props.id}
-          class={classNames(
-            prefixCls,
-            rtl && `${prefixCls}-rtl`,
-            `${prefixCls}-sub`,
-            `${prefixCls}-${mode === 'inline' ? 'inline' : 'vertical'}`,
-            classAttr,
-          )}
-          style={styleAttr}
-          {...restAttrs}
         >
-          {slots.default?.()}
+          {slots?.default?.()}
         </ul>
       )
     }
   },
+  {
+    name: 'InlineSubMenuList',
+    inheritAttrs: false,
+  },
 )
 
-export default SubMenuList
+export default InternalSubMenuList

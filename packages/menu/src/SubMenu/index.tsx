@@ -1,290 +1,394 @@
+import type { VueNode } from '@v-c/util/dist/type'
 import type { CSSProperties } from 'vue'
+import type { PopupRender, SubMenuType } from '../interface'
+import Overflow from '@v-c/overflow'
 import { classNames } from '@v-c/util'
 import warning from '@v-c/util/dist/warning'
-import { computed, defineComponent, shallowRef, watch } from 'vue'
-import Icon from '../Icon'
-import MenuContextProvider, { useMenuContext } from '../context/MenuContext'
+import { computed, defineComponent, ref, watch } from 'vue'
 import { useMenuId } from '../context/IdContext'
-import {
-  useFullPath,
-  useMeasure,
-  usePathUserContext,
-  providePathTrackerContext,
-} from '../context/PathContext'
+import MenuContextProvider, { useMenuContext } from '../context/MenuContext'
+import { PathTrackerContext, useFullPath, useMeasure, usePathUserContext } from '../context/PathContext'
 import { usePrivateContext } from '../context/PrivateContext'
 import useActive from '../hooks/useActive'
 import useDirectionStyle from '../hooks/useDirectionStyle'
-import useMemoCallback from '../hooks/useMemoCallback'
-import type { MenuInfo, MenuMode, SubMenuProps } from '../interface'
+import Icon from '../Icon'
 import { parseChildren } from '../utils/commonUtil'
-import { warnItemProp } from '../utils/warnUtil'
 import InlineSubMenuList from './InlineSubMenuList'
 import PopupTrigger from './PopupTrigger'
 import SubMenuList from './SubMenuList'
 
 export type SemanticName = 'list' | 'listTitle'
+export interface SubMenuProps extends Omit<SubMenuType, 'key' | 'children' | 'label'> {
+  classes?: Partial<Record<SemanticName, string>>
+  styles?: Partial<Record<SemanticName, CSSProperties>>
+  title?: VueNode
 
-const SubMenu = defineComponent<SubMenuProps>(
+  /** @private Used for rest popup. Do not use in your prod */
+  internalPopupClose?: boolean
+
+  /** @private Internal filled key. Do not set it directly */
+  eventKey?: string
+
+  /** @private Do not use. Private warning empty usage */
+  warnKey?: boolean
+  popupRender?: PopupRender
+}
+
+const InternalSubMenu = defineComponent<SubMenuProps>(
   (props, { slots, attrs }) => {
-    const eventKey = props.eventKey!
+    const eventKeyRef = computed(() => props?.eventKey || '')
+    const domDataId = useMenuId(eventKeyRef)
 
-    const menu = useMenuContext()
-    const privateContext = usePrivateContext()
+    const menuContext = useMenuContext()
+    const { _internalRenderSubMenuItem } = usePrivateContext()
     const pathUserContext = usePathUserContext()
+    const connectedPath = useFullPath()
 
-    const connectedPath = useFullPath(eventKey)
-    providePathTrackerContext(connectedPath)
-    const measure = useMeasure()
+    // Filter out undefined values from path
+    const validConnectedPath = computed(() => connectedPath.value.filter((k): k is string => k !== undefined))
 
-    if (process.env.NODE_ENV !== 'production' && props.warnKey) {
+    // ================================ Context Values ================================
+    const prefixCls = computed(() => menuContext?.value?.prefixCls || 'vc-menu')
+    const mode = computed(() => menuContext?.value?.mode || 'vertical')
+    const openKeys = computed(() => menuContext?.value?.openKeys || [])
+    const contextDisabled = computed(() => menuContext?.value?.disabled)
+    const overflowDisabled = computed(() => menuContext?.value?.overflowDisabled)
+    const activeKey = computed(() => menuContext?.value?.activeKey)
+    const selectedKeys = computed(() => menuContext?.value?.selectedKeys || [])
+    const contextExpandIcon = computed(() => menuContext?.value?.expandIcon)
+    const contextPopupRender = computed(() => menuContext?.value?.popupRender)
+
+    const onOpenChange = (key: string, open: boolean) => {
+      menuContext?.value?.onOpenChange?.(key, open)
+    }
+    const onActive = (key: string) => {
+      menuContext?.value?.onActive?.(key)
+    }
+
+    const subMenuPrefixCls = computed(() => `${prefixCls.value}-submenu`)
+    const mergedDisabled = computed(() => !!(contextDisabled.value || props?.disabled))
+
+    // ================================ Warn ================================
+    if (process.env.NODE_ENV !== 'production' && props?.warnKey) {
       warning(false, 'SubMenu should not leave undefined `key`.')
     }
 
-    if (measure) {
-      watch(
-        () => connectedPath.value,
-        (path, _, onCleanup) => {
-          measure.registerPath(eventKey, path)
-          onCleanup(() => measure.unregisterPath(eventKey, path))
-        },
-        { immediate: true },
-      )
+    // ================================ Icon ================================
+    const mergedExpandIcon = computed(() => props?.expandIcon ?? contextExpandIcon.value)
+
+    // ================================ Open ================================
+    const originOpen = computed(() => {
+      const key = props?.eventKey
+      return key ? openKeys.value.includes(key) : false
+    })
+    const open = computed(() => !overflowDisabled.value && originOpen.value)
+
+    // =============================== Select ===============================
+    const childrenSelected = computed(() => {
+      const key = props?.eventKey
+      return key ? pathUserContext.isSubPathKey(selectedKeys.value, key) : false
+    })
+
+    // =============================== Active ===============================
+    const eventKeyForActive = computed(() => props?.eventKey || '')
+    const { active, ...activeProps } = useActive(
+      eventKeyForActive,
+      mergedDisabled,
+      (e: any) => props?.onTitleMouseEnter?.(e),
+      (e: any) => props?.onTitleMouseLeave?.(e),
+    )
+
+    const childrenActive = ref(false)
+
+    const triggerChildrenActive = (newActive: boolean) => {
+      if (!mergedDisabled.value) {
+        childrenActive.value = newActive
+      }
     }
 
-    const menuContext = computed(() => menu?.value)
+    const onInternalMouseEnter = (domEvent: MouseEvent) => {
+      triggerChildrenActive(true)
+      props?.onMouseEnter?.({
+        key: props.eventKey!,
+        domEvent,
+      })
+    }
 
-    const domDataId = useMenuId(eventKey)
+    const onInternalMouseLeave = (domEvent: MouseEvent) => {
+      triggerChildrenActive(false)
+      props?.onMouseLeave?.({
+        key: props.eventKey!,
+        domEvent,
+      })
+    }
 
-    const mergedDisabled = computed(
-      () => (menuContext.value?.disabled ?? false) || !!props.disabled,
-    )
-
-    const open = computed(() => menuContext.value?.openKeys.includes(eventKey) ?? false)
-
-    const childNodes = computed(() => {
-      const children = props.children ?? slots.default?.()
-      return parseChildren(children, connectedPath.value)
-    })
-
-    const directionStyle = useDirectionStyle(connectedPath.value.length)
-
-    const { active, onMouseEnter, onMouseLeave } = useActive(
-      eventKey,
-      mergedDisabled.value,
-      props.onTitleMouseEnter,
-      props.onTitleMouseLeave,
-    )
-
-    const selected = computed(() => {
-      const keys = menuContext.value?.selectedKeys ?? []
-      if (keys.includes(eventKey)) {
-        return true
+    const mergedActive = computed(() => {
+      if (active.value) {
+        return active.value
       }
-      return keys.some(key => pathUserContext?.isSubPathKey?.([key], eventKey))
+      if (mode.value !== 'inline') {
+        const key = props?.eventKey
+        const currentActiveKey = activeKey.value
+        return (
+          childrenActive.value
+          || (key && currentActiveKey ? pathUserContext.isSubPathKey([currentActiveKey], key) : false)
+        )
+      }
+      return false
     })
 
-    const triggerModeRef = shallowRef<MenuMode>(menuContext.value?.mode ?? 'vertical')
-    watch(
-      () => menuContext.value?.mode,
-      (mode) => {
-        if (!mode) {
-          return
-        }
-        if (mode !== 'inline' && connectedPath.value.length > 1) {
-          triggerModeRef.value = 'vertical'
-        }
-        else {
-          triggerModeRef.value = mode
-        }
-      },
-      { immediate: true },
-    )
+    // ========================== DirectionStyle ==========================
+    const pathLength = computed(() => connectedPath.value.length)
+    const directionStyle = useDirectionStyle(pathLength)
 
+    // =============================== Events ===============================
     const onInternalTitleClick = (e: MouseEvent) => {
       if (mergedDisabled.value) {
         return
       }
-
-      props.onTitleClick?.({
-        key: eventKey,
+      const key = props?.eventKey
+      props?.onTitleClick?.({
+        key: key!,
         domEvent: e,
       })
-
-      if (menuContext.value?.mode === 'inline') {
-        menuContext.value?.onOpenChange(eventKey, !open.value)
+      if (mode.value === 'inline' && key) {
+        onOpenChange(key, !originOpen.value)
       }
     }
 
-    const onMergedItemClick = useMemoCallback((info: MenuInfo) => {
-      props.onClick?.(warnItemProp(info))
-      menuContext.value?.onItemClick(info)
-    })
-
-    const onPopupVisibleChange = (visible: boolean) => {
-      if (menuContext.value?.mode !== 'inline') {
-        menuContext.value?.onOpenChange(eventKey, visible)
+    const onPopupVisibleChange = (newVisible: boolean) => {
+      const key = props?.eventKey
+      if (mode.value !== 'inline' && key) {
+        onOpenChange(key, newVisible)
       }
     }
 
     const onInternalFocus = () => {
-      menuContext.value?.onActive(eventKey)
+      const key = props?.eventKey
+      if (key) {
+        onActive(key)
+      }
     }
 
-    const prefixCls = computed(() => menuContext.value?.prefixCls ?? 'vc-menu')
-    const subMenuPrefixCls = computed(() => `${prefixCls.value}-submenu`)
+    // Cache mode
+    const triggerModeRef = ref(mode.value)
+    watch(
+      mode,
+      () => {
+        if (mode.value !== 'inline' && validConnectedPath.value.length > 1) {
+          triggerModeRef.value = 'vertical'
+        }
+        else {
+          triggerModeRef.value = mode.value
+        }
+      },
+      { immediate: true },
+    )
+    return () => {
+      const {
+        style,
+        title,
+        class: className,
+        popupClassName,
+        popupOffset,
+        popupStyle,
+        classes,
+        styles,
+        ...restProps
+      } = props
 
-    const expandIcon = computed(() => {
-      const icon = props.expandIcon ?? menuContext.value?.expandIcon
-      if (menuContext.value?.mode === 'horizontal') {
-        return null
+      const children = slots.default?.()
+      const popupId = domDataId.value && `${domDataId.value}-popup`
+      // >>>>> Expand Icon
+      const expandIconProps = {
+        isOpen: open.value,
+        isSelected: childrenSelected.value,
+        isSubMenu: true,
+        disabled: mergedDisabled.value,
       }
 
-      return Icon({
-        icon,
-        props: {
-          ...props,
-          isOpen: open.value,
-          isSubMenu: true,
-        },
-        children: <i class={`${subMenuPrefixCls.value}-arrow`} />,
-      })
-    })
-
-    const popupId = domDataId ? `${domDataId}-popup` : undefined
-
-    const renderPopupContent = () => {
-      const popupMode
-        = triggerModeRef.value === 'horizontal'
-          ? 'vertical'
-          : triggerModeRef.value
-
-      const contextPopupRender = menuContext.value?.popupRender
-      const mergedPopupRender = props.popupRender ?? contextPopupRender
-
-      const originNode = (
-        <MenuContextProvider
-          classNames={props.classNames}
-          styles={props.styles}
-          mode={popupMode}
-          onItemClick={onMergedItemClick as any}
+      const expandIconNode = (
+        <Icon
+          icon={mode.value !== 'horizontal' ? mergedExpandIcon.value : undefined}
+          props={{
+            ...props,
+            ...expandIconProps,
+          }}
         >
-          <SubMenuList id={popupId}>
-            {childNodes.value}
-          </SubMenuList>
-        </MenuContextProvider>
+          <i class={`${subMenuPrefixCls.value}-arrow`} />
+        </Icon>
       )
 
-      if (mergedPopupRender) {
-        return mergedPopupRender(originNode, {
-          item: props,
-          keys: connectedPath.value,
-        })
-      }
-      return originNode
-    }
-
-    const renderInlineContent = () => (
-      <InlineSubMenuList
-        id={popupId}
-        open={open.value}
-        keyPath={connectedPath.value}
-      >
-        {childNodes.value}
-      </InlineSubMenuList>
-    )
-
-    const content = () => {
-      const titleNode = (
+      // >>>>> Title
+      let titleNode = (
         <div
-          class={classNames(
-            `${subMenuPrefixCls.value}-title`,
-            props.className,
-            (attrs as any)?.class,
-            {
-              [`${subMenuPrefixCls.value}-title-active`]: active.value,
-              [`${subMenuPrefixCls.value}-title-selected`]: selected.value,
-              [`${subMenuPrefixCls.value}-title-disabled`]: mergedDisabled.value,
-            },
-          )}
-          style={{
-            ...(directionStyle.value as CSSProperties),
-            ...(props.style as CSSProperties),
-            ...((attrs as any)?.style as CSSProperties),
-          }}
-          tabindex={mergedDisabled.value ? undefined : -1}
           role="menuitem"
-          data-menu-id={
-            menuContext.value?.overflowDisabled && domDataId ? null : domDataId
-          }
+          style={directionStyle.value}
+          class={`${subMenuPrefixCls.value}-title`}
+          tabindex={mergedDisabled.value ? undefined : -1}
+          title={typeof title === 'string' ? title : undefined}
+          data-menu-id={overflowDisabled.value && domDataId.value ? undefined : domDataId.value}
           aria-expanded={open.value}
-          aria-haspopup="true"
+          aria-haspopup
           aria-controls={popupId}
           aria-disabled={mergedDisabled.value}
           onClick={onInternalTitleClick}
           onFocus={onInternalFocus}
-          onMouseenter={onMouseEnter}
-          onMouseleave={onMouseLeave}
+          {...activeProps}
         >
-          <span class={`${subMenuPrefixCls.value}-title-content`}>
-            {props.title ?? slots.title?.()}
-          </span>
-          {expandIcon.value}
+          { title }
+          {expandIconNode}
         </div>
       )
 
-      const wrappedTitle
-        = menuContext.value?.mode === 'inline'
-          ? titleNode
-          : (
-            <PopupTrigger
-              prefixCls={subMenuPrefixCls.value}
-              mode={triggerModeRef.value}
-              visible={open.value}
-              popup={renderPopupContent}
-              popupStyle={props.popupStyle}
-              popupClassName={props.popupClassName}
-              popupOffset={props.popupOffset}
-              disabled={mergedDisabled.value}
-              onVisibleChange={onPopupVisibleChange}
-            >
-              {titleNode}
-            </PopupTrigger>
-            )
+      const popupContentTriggerMode = triggerModeRef.value
+      // >>>>> Popup Content
+      const renderPopupContent = () => {
+        const originNode = (
+          <MenuContextProvider
+            classes={classes}
+            styles={styles}
+            mode={popupContentTriggerMode === 'horizontal' ? 'vertical' : popupContentTriggerMode}
+          >
+            <SubMenuList id={popupId}>
+              {children}
+            </SubMenuList>
+          </MenuContextProvider>
+        )
 
-      return (
-        <li
+        const mergedPopupRender = props?.popupRender || contextPopupRender.value
+        if (mergedPopupRender) {
+          return mergedPopupRender(originNode, {
+            item: props,
+            keys: validConnectedPath.value,
+          })
+        }
+        return originNode
+      }
+
+      if (!overflowDisabled.value) {
+        const triggerMode = triggerModeRef.value
+        titleNode = (
+          <PopupTrigger
+            mode={triggerMode}
+            prefixCls={subMenuPrefixCls.value}
+            visible={!props?.internalPopupClose && open.value && mode.value !== 'inline'}
+            popupClassName={popupClassName}
+            popupOffset={popupOffset}
+            popupStyle={popupStyle}
+            popup={renderPopupContent()}
+            disabled={mergedDisabled.value}
+            onVisibleChange={onPopupVisibleChange}
+          >
+            {titleNode}
+          </PopupTrigger>
+        )
+      }
+
+      // >>>>> List Node
+      let listNode = (
+        <Overflow.Item
+          role="none"
+          {...attrs as any}
+          {...restProps}
+          component="li"
+          style={style}
           class={classNames(
             subMenuPrefixCls.value,
+            `${subMenuPrefixCls.value}-${mode.value}`,
+            className,
             {
               [`${subMenuPrefixCls.value}-open`]: open.value,
-              [`${subMenuPrefixCls.value}-active`]: active.value,
-              [`${subMenuPrefixCls.value}-selected`]: selected.value,
+              [`${subMenuPrefixCls.value}-active`]: mergedActive.value,
+              [`${subMenuPrefixCls.value}-selected`]: childrenSelected.value,
               [`${subMenuPrefixCls.value}-disabled`]: mergedDisabled.value,
             },
-            props.className,
           )}
-          role="presentation"
-          onFocus={onInternalFocus}
+          onMouseenter={onInternalMouseEnter}
+          onMouseleave={onInternalMouseLeave}
         >
-          {wrappedTitle}
-          {menuContext.value?.mode === 'inline' ? renderInlineContent() : null}
-        </li>
+          {titleNode}
+
+          {!overflowDisabled.value && (
+            <InlineSubMenuList
+              id={popupId}
+              open={open.value}
+              keyPath={validConnectedPath.value}
+            >
+              {children}
+            </InlineSubMenuList>
+          )}
+        </Overflow.Item>
+      )
+
+      if (_internalRenderSubMenuItem) {
+        listNode = _internalRenderSubMenuItem(listNode, props, {
+          selected: childrenSelected.value,
+          active: mergedActive.value,
+          open: open.value,
+          disabled: mergedDisabled.value,
+        })
+      }
+
+      return listNode
+    }
+  },
+  {
+    name: 'InternalSubMenu',
+    inheritAttrs: false,
+  },
+)
+
+const SubMenu = defineComponent<SubMenuProps>(
+  (props, { slots }) => {
+    const eventKey = computed(() => props?.eventKey)
+    const connectedKeyPath = useFullPath(eventKey)
+
+    // ==================== Record KeyPath ====================
+    const measure = useMeasure()
+
+    // Filter out undefined values
+    const validKeyPath = computed(() =>
+      connectedKeyPath.value.filter((k): k is string => k !== undefined),
+    )
+
+    watch(
+      [connectedKeyPath],
+      (_n, _o, onCleanup) => {
+        if (measure) {
+          measure.registerPath(eventKey.value!, connectedKeyPath.value as any)
+        }
+        onCleanup(() => {
+          measure?.unregisterPath(eventKey.value!, connectedKeyPath.value as any)
+        })
+      },
+      {
+        immediate: true,
+      },
+    )
+    return () => {
+      const children = slots.default?.()
+      const childList = parseChildren(children, validKeyPath.value)
+
+      let renderNode: VueNode
+
+      if (measure) {
+        renderNode = childList
+      }
+      else {
+        renderNode = <InternalSubMenu {...props}>{childList}</InternalSubMenu>
+      }
+
+      return (
+        <PathTrackerContext.Provider value={connectedKeyPath.value as any}>
+          {renderNode}
+        </PathTrackerContext.Provider>
       )
     }
-
-    let node = content()
-
-    const internalRender = privateContext.value._internalRenderSubMenuItem
-    if (internalRender) {
-      node = internalRender(node, props, {
-        selected: selected.value,
-        open: open.value,
-        active: active.value,
-        disabled: mergedDisabled.value,
-      }) as any
-    }
-
-    return () => node
+  },
+  {
+    name: 'SubMenu',
+    inheritAttrs: false,
   },
 )
 
