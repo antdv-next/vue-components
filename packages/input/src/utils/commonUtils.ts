@@ -1,125 +1,70 @@
-import { Fragment } from 'vue'
+import type { BaseInputProps, InputProps } from '../interface'
+import { triggerFocus as rcTriggerFocus } from '@v-c/util/dist/Dom/focus'
 
-export function isEmptyElement(c: any) {
-  return (
-    c
-    && (c.type === Comment
-      || (c.type === Fragment && c.children.length === 0)
-      || (c.type === Text && c.children.trim() === ''))
-  )
-}
-export function filterEmpty(children = []) {
-  const res: any[] = []
-  children.forEach((child: any) => {
-    if (Array.isArray(child))
-      res.push(...child)
-    else if (child?.type === Fragment)
-      res.push(...filterEmpty(child.children))
-    else
-      res.push(child)
+// TODO: It's better to use `Proxy` replace the `element.value`. But we still need support old browsers.
+function cloneEvent<EventType extends Event, Element extends HTMLInputElement | HTMLTextAreaElement>(
+  event: EventType,
+  target: Element,
+  value: any,
+) {
+  const currentTarget = target.cloneNode(true) as Element
+
+  const newEvent = Object.create(event, {
+    target: { value: currentTarget },
+    currentTarget: { value: currentTarget },
   })
-  return res.filter(c => !isEmptyElement(c))
-}
-function isValid(value: any) {
-  return (
-    value !== undefined
-    && value !== null
-    && (Array.isArray(value) ? filterEmpty(value as any).length : true)
-  )
-}
 
-export function hasPrefixSuffix(propsAndSlots: any) {
-  return (
-    isValid(propsAndSlots.prefix)
-    || isValid(propsAndSlots.suffix)
-    || isValid(propsAndSlots.allowClear)
-  )
-}
+  currentTarget.value = value
 
-export function hasAddon(propsAndSlots: any) {
-  return isValid(propsAndSlots.addonBefore) || isValid(propsAndSlots.addonAfter)
+  if (typeof target.selectionStart === 'number' && typeof target.selectionEnd === 'number') {
+    currentTarget.selectionStart = target.selectionStart
+    currentTarget.selectionEnd = target.selectionEnd
+  }
+
+  currentTarget.setSelectionRange = (
+    start: number,
+    end: number,
+    direction?: 'forward' | 'backward' | 'none',
+  ) => {
+    target.setSelectionRange(start, end, direction)
+  }
+
+  return newEvent as EventType
 }
 
-export function fixControlledValue(value: string | number) {
-  if (typeof value === 'undefined' || value === null)
-    return ''
-
-  return String(value)
+export function hasAddon(props: BaseInputProps | InputProps) {
+  return !!(props.addonBefore || props.addonAfter)
 }
 
-export function resolveOnChange(
-  target: HTMLInputElement,
-  e: Event,
-  onChange: Function,
+export function hasPrefixSuffix(props: BaseInputProps | InputProps) {
+  return !!(props.prefix || props.suffix || props.allowClear)
+}
+
+export function resolveOnChange<E extends HTMLInputElement | HTMLTextAreaElement>(
+  target: E,
+  e: Event | MouseEvent | CompositionEvent,
+  onChange: undefined | ((event: Event) => void),
   targetValue?: string,
 ) {
-  if (!onChange)
+  if (!onChange) {
     return
-  const event: any = e
+  }
+
+  let event = e
 
   if (e.type === 'click') {
-    Object.defineProperty(event, 'target', {
-      writable: true,
-    })
-    Object.defineProperty(event, 'currentTarget', {
-      writable: true,
-    })
-    // click clear icon
-    // event = Object.create(e);
-    const currentTarget = target.cloneNode(true)
+    event = cloneEvent(e, target, '')
+    onChange(event)
+    return
+  }
 
-    event.target = currentTarget
-    event.currentTarget = currentTarget;
-    // change target ref value cause e.target.value should be '' when clear input
-    (currentTarget as any).value = ''
+  if (target.type !== 'file' && targetValue !== undefined) {
+    event = cloneEvent(e, target, targetValue)
     onChange(event)
     return
   }
-  // Trigger by composition event, this means we need force change the input value
-  if (targetValue !== undefined) {
-    Object.defineProperty(event, 'target', {
-      writable: true,
-    })
-    Object.defineProperty(event, 'currentTarget', {
-      writable: true,
-    })
-    event.target = target
-    event.currentTarget = target
-    target.value = targetValue
-    onChange(event)
-    return
-  }
+
   onChange(event)
 }
-export interface InputFocusOptions extends FocusOptions {
-  cursor?: 'start' | 'end' | 'all'
-}
 
-export function triggerFocus(
-  element?: HTMLInputElement | HTMLTextAreaElement,
-  option?: InputFocusOptions,
-) {
-  if (!element)
-    return
-
-  element.focus(option)
-
-  // Selection content
-  const { cursor } = option || {}
-  if (cursor) {
-    const len = element.value.length
-
-    switch (cursor) {
-      case 'start':
-        element.setSelectionRange(0, 0)
-        break
-
-      case 'end':
-        element.setSelectionRange(len, len)
-        break
-
-      default:
-        element.setSelectionRange(0, len)
-    }
-  }
-}
+export const triggerFocus = rcTriggerFocus
