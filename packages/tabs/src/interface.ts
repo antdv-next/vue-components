@@ -2,7 +2,7 @@ import type { DropdownProps } from '@v-c/dropdown'
 import type { FocusEventHandler, KeyboardEventHandler, MouseEventHandler } from '@v-c/util/dist/EventInterface'
 import type { VueNode } from '@v-c/util/dist/type'
 import type { CSSMotionProps } from '@v-c/util/dist/utils/transition'
-import type { CSSProperties } from 'vue'
+import type { CSSProperties, HTMLAttributes } from 'vue'
 
 export type SizeInfo = [width: number, height: number]
 
@@ -51,7 +51,7 @@ export interface ExtraContentProps {
 
 export interface TabPaneProps {
   tab?: VueNode
-  className?: string
+  className?: unknown
   style?: CSSProperties
   disabled?: boolean
   children?: VueNode
@@ -190,3 +190,65 @@ export interface TabNavListProps {
 
 export type TabNavListWrapperProps = Required<Omit<TabNavListProps, 'children' | 'className'>> &
   TabNavListProps
+
+export interface TabPaneProps {
+  tab?: VueNode
+  className?: unknown
+  style?: CSSProperties
+  disabled?: boolean
+  children?: VueNode
+  forceRender?: boolean
+  closable?: boolean
+  closeIcon?: VueNode
+  icon?: VueNode
+
+  // Pass by TabPaneList
+  prefixCls?: string
+  tabKey?: string
+  id?: string
+  animated?: boolean
+  active?: boolean
+  destroyOnHidden?: boolean
+}
+
+export interface TabsProps
+  extends Omit<HTMLAttributes, 'onChange' | 'children'> {
+  prefixCls?: string
+  className?: string
+  style?: CSSProperties
+  classNames?: Partial<Record<SemanticName, string>>
+  styles?: Partial<Record<SemanticName, CSSProperties>>
+  id?: string
+
+  items?: Tab[]
+
+  activeKey?: string
+  defaultActiveKey?: string
+  direction?: 'ltr' | 'rtl'
+  animated?: boolean | AnimatedConfig
+  renderTabBar?: RenderTabBar
+  tabBarExtraContent?: TabBarExtraContent
+  tabBarGutter?: number
+  tabBarStyle?: CSSProperties
+  tabPosition?: TabPosition
+  destroyOnHidden?: boolean
+
+  onChange?: (activeKey: string) => void
+  onTabClick?: (activeKey: string, e: KeyboardEvent | MouseEvent) => void
+  onTabScroll?: OnTabScroll
+
+  editable?: EditableConfig
+  getPopupContainer?: (node: HTMLElement) => HTMLElement
+
+  // Accessibility
+  locale?: TabsLocale
+
+  // Icons
+  more?: MoreProps
+  /** @private Internal usage. Not promise will rename in future */
+  popupClassName?: string
+  indicator?: {
+    size?: GetIndicatorSize
+    align?: 'start' | 'center' | 'end'
+  }
+}

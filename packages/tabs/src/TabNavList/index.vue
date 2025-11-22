@@ -393,9 +393,7 @@ const navStyle = computed(() => ({
 }))
 const navListClass = computed(() => `${prefixCls.value}-nav-list`)
 
-
 const inkStyle = ref<Record<string, any>>({})
-
 
 function onItemClick(key: string, e: MouseEvent | KeyboardEvent) {
   onTabClick.value?.(key, e as any)
@@ -404,7 +402,6 @@ function onItemClick(key: string, e: MouseEvent | KeyboardEvent) {
 function getEnabledKeys(list: Tab[]) {
   return list.filter(t => !t.disabled).map(t => t.key)
 }
-
 
 function onItemBlur() {
   focusKey.value = undefined

@@ -2,6 +2,16 @@ import type { Key, VueNode } from '@v-c/util/dist/type'
 import type { EditableConfig } from './interface'
 import { isEmptyElement } from '@v-c/util/dist/props-util'
 
+export const tabsGlobal = {
+  uuid: 0,
+}
+
+export function setUUid(uuid: number) {
+  tabsGlobal.uuid = uuid
+}
+export function getUUid() {
+  return tabsGlobal.uuid
+}
 /**
  * We trade Map as deps which may change with same value but different ref object.
  * We should make it as hash for deps
