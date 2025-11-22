@@ -8,6 +8,7 @@ import RenderComponent from '@v-c/util/dist/RenderComponent.vue'
 import { computed, h, ref, toRefs, useTemplateRef, watch } from 'vue'
 import { getRemovable } from '../utils'
 import AddButton from './AddButton.vue'
+import { clsx } from '@v-c/util'
 
 const MenuItem = Menu.Item
 
@@ -74,10 +75,10 @@ const menuNode = computed(() => {
 })
 
 const overlayClassName = computed(() => {
-  return {
+  return clsx({
     [popupClassName.value!]: popupClassName.value,
     [`${dropdownPrefix.value}-rtl`]: rtl.value,
-  }
+  })
 })
 
 const moreIconNode = computed(() => moreProps.value?.icon || 'More')

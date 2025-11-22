@@ -31,7 +31,7 @@ export interface DropdownProps
   onOverlayClick?: (e: Event) => void
   prefixCls?: string
   transitionName?: string
-  overlayClassName?: string | Record<string, unknown>
+  overlayClassName?: string
   openClassName?: string
   animation?: AnimationType
   align?: AlignType
