@@ -67,6 +67,7 @@ export const Checkbox = defineComponent<
       props?.['onUpdate:checked']?.(e.target.checked)
       props?.onChange?.({
         target: {
+          ...attrs,
           ...props,
           checked: e.target.checked,
         },
