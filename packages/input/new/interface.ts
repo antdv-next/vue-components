@@ -1,4 +1,4 @@
-import type { InputFocusOptions } from '@v-c/util/dist/Dom/foucs'
+import type { InputFocusOptions } from '@v-c/util/dist/Dom/focus'
 import type { MouseEventHandler } from '@v-c/util/dist/EventInterface'
 import type { VueNode } from '@v-c/util/dist/type'
 import type { CSSProperties, InputHTMLAttributes } from 'vue'
@@ -71,6 +71,8 @@ export interface CountConfig {
 
 export interface InputProps extends Omit<CommonInputProps, 'classNames' | 'styles'> {
   value?: ValueType
+  defaultValue?: any
+  disabled?: boolean
   prefixCls?: string
   // ref: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#%3Cinput%3E_types
   type?: LiteralUnion<'button'
@@ -114,6 +116,7 @@ export interface InputProps extends Omit<CommonInputProps, 'classNames' | 'style
   }
   count?: CountConfig
   onClear?: () => void
+  maxLength?: number
 }
 
 export interface InputRef {

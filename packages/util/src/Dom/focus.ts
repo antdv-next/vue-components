@@ -94,3 +94,36 @@ export function limitTabRange(node: HTMLElement, e: KeyboardEvent) {
     }
   }
 }
+
+export interface InputFocusOptions extends FocusOptions {
+  cursor?: 'start' | 'end' | 'all'
+}
+
+export function triggerFocus(
+  element?: HTMLInputElement | HTMLTextAreaElement,
+  option?: InputFocusOptions,
+) {
+  if (!element)
+    return
+
+  element.focus(option)
+
+  // Selection content
+  const { cursor } = option || {}
+  if (cursor) {
+    const len = element.value.length
+
+    switch (cursor) {
+      case 'start':
+        element.setSelectionRange(0, 0)
+        break
+
+      case 'end':
+        element.setSelectionRange(len, len)
+        break
+
+      default:
+        element.setSelectionRange(0, len)
+    }
+  }
+}
