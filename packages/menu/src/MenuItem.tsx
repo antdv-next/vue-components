@@ -209,7 +209,6 @@ const InternalMenuItem = defineComponent<MenuItemProps>(
       if (privateContext._internalRenderMenuItem) {
         renderNode = privateContext._internalRenderMenuItem(renderNode, props, { selected: selected.value })
       }
-
       return renderNode
     }
   },
