@@ -210,63 +210,6 @@ const InternalMenuItem = defineComponent<MenuItemProps>(
         renderNode = privateContext._internalRenderMenuItem(renderNode, props, { selected: selected.value })
       }
 
-      const className = classNames(
-        itemCls,
-        {
-          [`${itemCls}-active`]: active.value,
-          [`${itemCls}-selected`]: selected.value,
-          [`${itemCls}-disabled`]: mergedDisabled.value,
-        },
-        props.className,
-        (attrs as any)?.class,
-      )
-
-      const restProps = omit(props, [
-        'eventKey',
-        'warnKey',
-        'itemIcon',
-        'children',
-        'extra',
-        'attribute',
-        'onMouseEnter',
-        'onMouseLeave',
-      ])
-      const restAttrs = omit(attrs, ['class', 'style'])
-      debugger
-
-      const itemProps: any = {
-        ...restProps,
-        ...restAttrs,
-        ref: elementRef,
-        component: 'li',
-        class: className,
-        role: (props as any).role === null ? 'none' : (props as any).role || 'menuitem',
-        tabindex: mergedDisabled.value ? undefined : -1,
-        'data-menu-id': overflowDisabled && domDataId ? null : domDataId,
-        'aria-disabled': mergedDisabled.value,
-        style: mergedStyle,
-        onClick: onInternalClick,
-        onKeydown: onInternalKeyDown,
-        onFocus: onInternalFocus,
-        onMouseenter: onMouseEnter,
-        onMouseleave: onMouseLeave,
-        ...optionRoleProps,
-        'v-slots': {
-          default: () => contentNodes,
-        },
-      }
-
-      let renderNode = <Overflow.Item {...itemProps} />
-
-      const internalRenderMenuItem = privateContext.value._internalRenderMenuItem
-      if (internalRenderMenuItem) {
-        renderNode = internalRenderMenuItem(
-          renderNode,
-          props,
-          { selected: selected.value },
-        ) as any
-      }
-
       return renderNode
     }
   },
