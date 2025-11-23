@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'vue'
+import type { TextAreaProps } from './interface'
 import { BaseInput } from '@v-c/input'
 import useCount from '@v-c/input/hooks/useCount'
 import { resolveOnChange } from '@v-c/input/utils/commonUtils'
@@ -6,7 +7,6 @@ import { classNames as clsx } from '@v-c/util'
 import omit from '@v-c/util/dist/omit'
 import { computed, defineComponent, nextTick, shallowRef, watch } from 'vue'
 import ResizableTextArea from './ResizableTextArea'
-import type { TextAreaProps, TextAreaRef } from './interface'
 
 const defaults: TextAreaProps = {
   prefixCls: 'vc-textarea',
@@ -53,7 +53,7 @@ export default defineComponent<TextAreaProps>(
       getTextArea()?.focus()
     }
 
-    expose<TextAreaRef>({
+    expose({
       resizableTextArea: computed(() => resizableTextAreaRef.value),
       focus,
       blur: () => {
@@ -78,7 +78,7 @@ export default defineComponent<TextAreaProps>(
     })
 
     // ============================== Count ===============================
-    const countConfig = useCount(computed(() => props.count), computed(() => props.showCount))
+    const countConfig = useCount(computed(() => props.count as any), computed(() => props.showCount as any))
     const mergedMax = computed(() => countConfig.value.max ?? props.maxLength)
 
     const hasMaxLength = computed(() => Number(mergedMax.value) > 0)

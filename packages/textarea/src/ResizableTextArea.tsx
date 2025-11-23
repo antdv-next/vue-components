@@ -184,7 +184,7 @@ export default defineComponent({
           disabled={!(autoSize || onResize)}
         >
           <textarea
-            {...attrs}
+            {...attrs as any}
             {...resetProps}
             ref={textareaRef}
             style={mergedStyle}
