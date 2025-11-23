@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { VNodeArrayChildren } from 'vue'
 import type { ExtraContentProps, TabBarExtraMap } from '../interface'
-import RenderComponent from '@v-c/util/dist/RenderComponent.vue'
+import RenderComponent from '@v-c/util/dist/RenderComponent'
 import { ensureValidVNode } from '@v-c/util/dist/vnode'
 import { computed, isVNode, ref, toRefs } from 'vue'
 
@@ -28,7 +28,7 @@ const childrenNodes = computed(() => {
   let assertExtra: TabBarExtraMap = {}
   // React.isValidElement replace isVNode
   if (typeof extra.value === 'object' && !isVNode(extra.value)
-) {
+  ) {
     assertExtra = extra.value as TabBarExtraMap
   }
   else {
@@ -37,7 +37,6 @@ const childrenNodes = computed(() => {
 
   return position.value === 'right' ? assertExtra.right : assertExtra.left
 })
-
 
 defineExpose({
   extraContentRef,

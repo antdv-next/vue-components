@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { CSSProperties } from 'vue'
 import type { AnimatedConfig, Tab, TabPosition } from '../interface'
-import RenderComponent from '@v-c/util/dist/RenderComponent.vue'
+import RenderComponent from '@v-c/util/dist/RenderComponent'
 import { getTransitionProps } from '@v-c/util/dist/utils/transition'
 import { computed, toRefs } from 'vue'
 import { useTabContext } from '../TabContext'
@@ -9,7 +9,7 @@ import TabPane from './TabPane.vue'
 
 interface TabPanelListProps {
   activeKey: string
-  id: string
+  id: string | null
   animated?: AnimatedConfig
   tabPosition?: TabPosition
   destroyOnHidden?: boolean
@@ -43,14 +43,17 @@ function shouldDestroyOnHidden(item: Tab) {
 <template>
   <div :class="[`${prefixCls}-content-holder`]">
     <div
-      :class="[`${prefixCls}-content`, `${prefixCls}-content-${tabPosition}`, { [`${prefixCls}-content-animated`]: tabPaneAnimated }]"
+      :class="[
+        `${prefixCls}-content`,
+        `${prefixCls}-content-${tabPosition}`,
+        { [`${prefixCls}-content-animated`]: tabPaneAnimated }]
+      "
     >
       <template v-for="item in tabs" :key="item.key">
         <Transition v-if="tabPaneAnimated" v-bind="transitionProps">
           <TabPane
             v-if="shouldDestroyOnHidden(item) ? (item.key === activeKey) : true"
-            v-show="shouldDestroyOnHidden(item) ? true : (item.key === activeKey || item.forceRender)
-            "
+            v-show="shouldDestroyOnHidden(item) ? true : (item.key === activeKey || item.forceRender)"
             :id="id"
             :prefix-cls="tabPanePrefixCls"
             :tab-key="item.key"
@@ -79,6 +82,3 @@ function shouldDestroyOnHidden(item: Tab) {
     </div>
   </div>
 </template>
-
-<style scoped>
-</style>

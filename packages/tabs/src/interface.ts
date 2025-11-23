@@ -63,7 +63,7 @@ export interface TabPaneProps {
   // Pass by TabPaneList
   prefixCls?: string
   tabKey?: string
-  id?: string
+  id?: string | null
   animated?: boolean
   active?: boolean
   destroyOnHidden?: boolean
@@ -83,7 +83,7 @@ export interface OperationNodeProps {
   prefixCls: string
   className?: unknown
   style?: CSSProperties
-  id: string
+  id: string | null
   tabs: Tab[]
   rtl: boolean
   tabBarGutter?: number
@@ -101,7 +101,7 @@ export interface OperationNodeProps {
 }
 
 export interface TabNodeProps {
-  id: string
+  id: string | null
   prefixCls: string
   tab: Tab
   active: boolean
@@ -138,7 +138,7 @@ export interface IndicatorConfig {
 }
 
 export interface TabNavListProps {
-  id: string
+  id: string | null
   tabPosition: TabPosition
   activeKey: string
   rtl: boolean
@@ -162,8 +162,7 @@ export interface TabNavListProps {
   styles?: Partial<Record<SemanticName, CSSProperties>>
 }
 
-export type TabNavListWrapperProps = Omit<TabNavListProps, 'children' | 'className'> &
-  TabNavListProps
+export type TabNavListWrapperProps = Omit<TabNavListProps, 'children' | 'className'> & TabNavListProps
 
 export interface TabPaneProps {
   tab?: VueNode
@@ -179,7 +178,7 @@ export interface TabPaneProps {
   // Pass by TabPaneList
   prefixCls?: string
   tabKey?: string
-  id?: string
+  id?: string | null
   animated?: boolean
   active?: boolean
   destroyOnHidden?: boolean
@@ -191,7 +190,7 @@ export interface TabsProps {
   style?: CSSProperties
   classNames?: Partial<Record<SemanticName, string>>
   styles?: Partial<Record<SemanticName, CSSProperties>>
-  id?: string
+  id?: string | null
 
   items?: Tab[]
 

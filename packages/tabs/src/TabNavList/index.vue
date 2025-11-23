@@ -2,8 +2,9 @@
 import type { CSSProperties, Ref } from 'vue'
 import type { SizeInfo, Tab, TabNavListProps } from '../interface'
 import ResizeObserver from '@v-c/resize-observer'
-import RenderComponent from '@v-c/util/dist/RenderComponent.vue'
-import { computed, h, nextTick, onMounted, ref, shallowRef, toRefs, watch } from 'vue'
+import RenderComponent from '@v-c/util/dist/RenderComponent'
+import { computed, h, onMounted, ref, shallowRef, toRefs, watch } from 'vue'
+import useIndicator from '../hooks/useIndicator'
 import useOffsets from '../hooks/useOffsets'
 import useTouchMove from '../hooks/useTouchMove'
 import useVisibleRange from '../hooks/useVisibleRange'
@@ -13,12 +14,10 @@ import AddButton from './AddButton.vue'
 import ExtraContent from './ExtraContent.vue'
 import OperationNode from './OperationNode.vue'
 import TabNode from './TabNode.vue'
-import useIndicator from '../hooks/useIndicator'
-
 
 defineOptions({
   name: 'TabNavList',
-  inheritAttrs: false
+  inheritAttrs: false,
 })
 
 const props = defineProps<TabNavListProps>()
@@ -400,7 +399,6 @@ const navStyle = computed(() => ({
 }))
 const navListClass = computed(() => `${prefixCls.value}-nav-list`)
 
-
 function onItemClick(key: string, e: MouseEvent | KeyboardEvent) {
   onTabClick.value?.(key, e as any)
 }
@@ -430,16 +428,15 @@ function onTabFocus(key: string) {
 const activeTabOffset = computed(() => tabOffsets.value.get(activeKey.value)!)
 
 const inkStyle = useIndicator({
-    activeTabOffset: activeTabOffset,
-    horizontal: isHorizontal,
-    indicator: indicator,
-    rtl: rtl,
-  })
+  activeTabOffset,
+  horizontal: isHorizontal,
+  indicator,
+  rtl,
+})
 
-  watch(() => inkStyle.value, (newStyle) => {
-    console.log('newValue styles',newStyle, inkStyle.value)
-
-  })
+watch(() => inkStyle.value, (newStyle) => {
+  console.log('newValue styles', newStyle, inkStyle.value)
+})
 // ========================== Measure ==========================
 function getTabSize(tab: HTMLElement, containerRect: { left: number, top: number }) {
   const { offsetWidth, offsetHeight, offsetTop, offsetLeft } = tab
@@ -519,68 +516,82 @@ watch(rtl, () => {
 
 <template>
   <ResizeObserver @resize="onListHolderResize">
-    <div ref="containerRef" :class="navClass" :style="navStyle" role="tablist"
+    <div
+      ref="containerRef" :class="navClass" :style="navStyle" role="tablist"
       :aria-orientation="isHorizontal ? 'horizontal' : 'vertical'" @keydown="() => {
         doLockAnimation()
-      }">
+      }"
+    >
       <ExtraContent ref="extraLeftRef" position="left" :prefix-cls="prefixCls" :extra="extra" />
       <ResizeObserver @resize="onListHolderResize">
-        <div ref="tabsWrapperRef" :class="[
-          wrapPrefix,
-          {
-            [`${wrapPrefix}-ping-left`]: pingLeft,
-            [`${wrapPrefix}-ping-right`]: pingRight,
-            [`${wrapPrefix}-ping-top`]: pingTop,
-            [`${wrapPrefix}-ping-bottom`]: pingBottom,
-          },
-        ]">
+        <div
+          ref="tabsWrapperRef" :class="[
+            wrapPrefix,
+            {
+              [`${wrapPrefix}-ping-left`]: pingLeft,
+              [`${wrapPrefix}-ping-right`]: pingRight,
+              [`${wrapPrefix}-ping-top`]: pingTop,
+              [`${wrapPrefix}-ping-bottom`]: pingBottom,
+            },
+          ]"
+        >
           <ResizeObserver @resize="onListHolderResize">
-            <div ref="tabListRef" :class="navListClass" :style="{
-              transform: `translate(${transformLeft}px, ${transformTop}px)`,
-              transition: lockAnimation ? 'none' : undefined,
-            }">
-              <RenderComponent :render="tabs.map((tab, i) => h(TabNode, {
-                id,
-                prefixCls,
-                key: tab.key,
-                tab,
-                className: tabsClassNames?.item,
-                style: i === 0 ? styles?.item : { ...(isHorizontal ? { marginInlineStart: tabBarGutter } : { marginTop: tabBarGutter }), ...(styles?.item || {}) },
-                closable: tab.closable,
-                editable,
-                active: tab.key === activeKey,
-                focus: tab.key === focusKey,
-                renderWrapper: children,
-                removeAriaLabel: locale?.removeAriaLabel,
-                tabCount: tabs.filter(t => !t.disabled).length,
-                currentPosition: i + 1,
-                onClick: (e: MouseEvent | KeyboardEvent) => onItemClick(tab.key, e),
-                onKeyDown: handleKeyDown,
-                onFocus: () => onTabFocus(tab.key),
-                onBlur: () => onItemBlur(),
-                onMouseDown: (e: MouseEvent) => handleMouseDown(tab.key, e),
-                onMouseUp: () => { isMouse = false },
-              }))" />
-              <AddButton ref="innerAddButtonRef" :prefix-cls="prefixCls" :locale="locale" :editable="editable" :style="{
-                ...(tabs.length === 0 ? {} : (isHorizontal ? { marginInlineStart: tabBarGutter } : { marginTop: tabBarGutter })),
-                visibility: hasDropdown ? 'hidden' : null,
-              } as CSSProperties" />
+            <div
+              ref="tabListRef" :class="navListClass" :style="{
+                transform: `translate(${transformLeft}px, ${transformTop}px)`,
+                transition: lockAnimation ? 'none' : undefined,
+              }"
+            >
+              <RenderComponent
+                :render="tabs.map((tab, i) => h(TabNode, {
+                  id,
+                  prefixCls,
+                  key: tab.key,
+                  tab,
+                  className: tabsClassNames?.item,
+                  style: i === 0 ? styles?.item : { ...(isHorizontal ? { marginInlineStart: tabBarGutter } : { marginTop: tabBarGutter }), ...(styles?.item || {}) },
+                  closable: tab.closable,
+                  editable,
+                  active: tab.key === activeKey,
+                  focus: tab.key === focusKey,
+                  renderWrapper: children,
+                  removeAriaLabel: locale?.removeAriaLabel,
+                  tabCount: tabs.filter(t => !t.disabled).length,
+                  currentPosition: i + 1,
+                  onClick: (e: MouseEvent | KeyboardEvent) => onItemClick(tab.key, e),
+                  onKeyDown: handleKeyDown,
+                  onFocus: () => onTabFocus(tab.key),
+                  onBlur: () => onItemBlur(),
+                  onMouseDown: (e: MouseEvent) => handleMouseDown(tab.key, e),
+                  onMouseUp: () => { isMouse = false },
+                }))"
+              />
+              <AddButton
+                ref="innerAddButtonRef" :prefix-cls="prefixCls" :locale="locale" :editable="editable" :style="{
+                  ...(tabs.length === 0 ? {} : (isHorizontal ? { marginInlineStart: tabBarGutter } : { marginTop: tabBarGutter })),
+                  visibility: hasDropdown ? 'hidden' : null,
+                } as CSSProperties"
+              />
 
-              <div :class="[
-                `${prefixCls}-ink-bar`,
-                tabsClassNames?.indicator,
-                { [`${prefixCls}-ink-bar-animated`]: animated?.inkBar },
-              ]" :style="{ ...(styles?.indicator || {}), ...inkStyle }" />
+              <div
+                :class="[
+                  `${prefixCls}-ink-bar`,
+                  tabsClassNames?.indicator,
+                  { [`${prefixCls}-ink-bar-animated`]: animated?.inkBar },
+                ]" :style="{ ...(styles?.indicator || {}), ...inkStyle }"
+              />
             </div>
           </ResizeObserver>
         </div>
       </ResizeObserver>
 
-      <OperationNode ref="operationsRef" :remove-aria-label="locale?.removeAriaLabel" :prefix-cls="prefixCls"
+      <OperationNode
+        ref="operationsRef" :remove-aria-label="locale?.removeAriaLabel" :prefix-cls="prefixCls"
         :tabs="hiddenTabs"
         :class-name="[tabsClassNames?.operations, !hasDropdown ? operationsHiddenClassName : undefined]"
         :popup-style="styles?.popup" :tab-moving="!!lockAnimation"
-        v-bind="{ id, rtl, tabBarGutter, activeKey, mobile, more, editable, locale, onTabClick, getPopupContainer, popupClassName }" />
+        v-bind="{ id, rtl, tabBarGutter, activeKey, mobile, more, editable, locale, onTabClick, getPopupContainer, popupClassName }"
+      />
 
       <ExtraContent ref="extraRightRef" position="right" :prefix-cls="prefixCls" :extra="extra" />
       <RenderComponent :render="children" />

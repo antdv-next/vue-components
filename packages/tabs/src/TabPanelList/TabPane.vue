@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { TabPaneProps } from '../interface'
-import RenderComponent from '@v-c/util/dist/RenderComponent.vue'
+import RenderComponent from '@v-c/util/dist/RenderComponent'
 import { ensureValidVNode } from '@v-c/util/dist/vnode'
 import { computed, ref, useSlots } from 'vue'
 

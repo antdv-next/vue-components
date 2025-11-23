@@ -16,8 +16,3 @@ export function provideTabContext(value: ShallowRef<TabContextProps>) {
 export function useTabContext() {
   return inject(TabContextKey, {} as ShallowRef<TabContextProps>)
 }
-
-export default {
-  provideTabContext,
-  useTabContext,
-}

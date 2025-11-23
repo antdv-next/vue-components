@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { TabNodeProps } from '../interface'
 import { isEmptyElement } from '@v-c/util/dist/props-util'
-import RenderComponent from '@v-c/util/dist/RenderComponent.vue'
+import RenderComponent from '@v-c/util/dist/RenderComponent'
 import { computed, h, onMounted, ref, toRefs, watch } from 'vue'
 import { genDataNodeKey, getRemovable } from '../utils'
 
