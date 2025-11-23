@@ -10,7 +10,7 @@ export default defineComponent(() => {
   }
 
   return () => (
-    <div>
+    <div style={{ height: '100vh' }}>
       <Input prefixCls="vc-input" allowClear placeholder="uncontrolled" />
       <br />
       <br />
