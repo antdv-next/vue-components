@@ -1,6 +1,5 @@
 import type { SlotsType } from 'vue'
-import { classNames as cls } from '@v-c/util'
-import useMobile from '@v-c/util/dist/hooks/useMobile'
+import { classNames as clsx } from '@v-c/util'
 import raf from '@v-c/util/dist/raf'
 import { defineComponent, onUnmounted, ref } from 'vue'
 
@@ -16,28 +15,24 @@ const STEP_DELAY = 600
 
 export interface StepHandlerProps {
   prefixCls: string
-  upNode?: any
-  downNode?: any
-  upDisabled?: boolean
-  downDisabled?: boolean
+  action: 'up' | 'down'
+  disabled?: boolean
+  className?: string
+  style?: any
   onStep: (up: boolean, emitter: 'handler' | 'keyboard' | 'wheel') => void
-  classNames?: { actions?: string }
-  styles?: { actions?: any }
 }
 
 export default defineComponent({
   name: 'StepHandler',
   props: {
     prefixCls: { type: String, required: true },
-    upDisabled: { type: Boolean, default: false },
-    downDisabled: { type: Boolean, default: false },
+    action: { type: String as () => 'up' | 'down', required: true },
+    disabled: { type: Boolean, default: false },
+    className: String,
+    style: Object,
     onStep: { type: Function, required: true },
-    classNames: { type: Object, default: () => ({}) },
-    styles: { type: Object, default: () => ({}) },
   },
   slots: Object as SlotsType<{
-    upNode?: any
-    downNode?: any
     default?: any
   }>,
   emits: ['step'],
@@ -72,59 +67,43 @@ export default defineComponent({
       frameIds.value.forEach(id => raf.cancel(id))
     })
 
-    // ======================= Render =======================
-    const isMobile = useMobile()
-
-    // fix: https://github.com/ant-design/ant-design/issues/43088
-    // In Safari, When we fire onmousedown and onmouseup events in quick succession,
-    // there may be a problem that the onmouseup events are executed first,
-    // resulting in a disordered program execution.
-    // So, we need to use requestAnimationFrame to ensure that the onmouseup event is executed after the onmousedown event.
-    const safeOnStopStep = () => frameIds.value.push(raf(onStopStep))
     return () => {
-      if (isMobile.value) {
-        return null
-      }
+      const { prefixCls, action, disabled, className, style } = props
+      const isUpAction = action === 'up'
 
-      const { prefixCls, upDisabled, downDisabled } = props
+      const actionClassName = `${prefixCls}-action`
+      const mergedClassName = clsx(
+        actionClassName,
+        `${actionClassName}-${action}`,
+        {
+          [`${actionClassName}-${action}-disabled`]: disabled,
+        },
+        className,
+      )
 
-      const handlerClassName = `${prefixCls}-handler`
+      // fix: https://github.com/ant-design/ant-design/issues/43088
+      // In Safari, When we fire onmousedown and onmouseup events in quick succession,
+      // there may be a problem that the onmouseup events are executed first,
+      // resulting in a disordered program execution.
+      // So, we need to use requestAnimationFrame to ensure that the onmouseup event is executed after the onmousedown event.
+      const safeOnStopStep = () => frameIds.value.push(raf(onStopStep))
 
-      const upClassName = cls(handlerClassName, `${handlerClassName}-up`, {
-        [`${handlerClassName}-up-disabled`]: upDisabled,
-      })
-
-      const downClassName = cls(handlerClassName, `${handlerClassName}-down`, {
-        [`${handlerClassName}-down-disabled`]: downDisabled,
-      })
-
-      const sharedHandlerProps = {
-        unselectable: 'on' as const,
-        role: 'button',
-        onMouseup: safeOnStopStep,
-        onMouseleave: safeOnStopStep,
-      }
       return (
-        <div class={cls(`${handlerClassName}-wrap`)}>
-          <span
-            {...sharedHandlerProps}
-            onMousedown={(e: MouseEvent) => onStepMouseDown(e, true)}
-            aria-label="Increase Value"
-            aria-disabled={upDisabled}
-            class={upClassName}
-          >
-            {slots.upNode?.() || <span unselectable="on" class={`${prefixCls}-handler-up-inner`} />}
-          </span>
-          <span
-            {...sharedHandlerProps}
-            onMousedown={(e: MouseEvent) => onStepMouseDown(e, false)}
-            aria-label="Decrease Value"
-            aria-disabled={downDisabled}
-            class={downClassName}
-          >
-            {slots.downNode?.() || <span unselectable="on" class={`${prefixCls}-handler-down-inner`} />}
-          </span>
-        </div>
+        <span
+          unselectable="on"
+          role="button"
+          onMouseup={safeOnStopStep}
+          onMouseleave={safeOnStopStep}
+          onMousedown={(e: MouseEvent) => onStepMouseDown(e, isUpAction)}
+          aria-label={isUpAction ? 'Increase Value' : 'Decrease Value'}
+          aria-disabled={disabled}
+          class={mergedClassName}
+          style={style}
+        >
+          {slots.default?.() || (
+            <span unselectable="on" class={`${prefixCls}-action-${action}-inner`} />
+          )}
+        </span>
       )
     }
   },

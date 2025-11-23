@@ -1,5 +1,6 @@
 import { defineComponent } from 'vue'
 import Input from '../src'
+import './assets/index.less'
 
 export default defineComponent(() => {
   return () => (

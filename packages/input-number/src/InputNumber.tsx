@@ -536,22 +536,29 @@ const InputNumber = defineComponent<InputNumberProps>(
       const upNode = slots.upHandler?.() ?? props.upHandler
       const downNode = slots.downHandler?.() ?? props.downHandler
 
-      const sharedHandlerProps = {
-        prefixCls: mergedPrefixCls,
-        onStep: onInternalStep,
-        classNames: { actions: classNames?.action },
-        styles: { actions: styles?.action },
-      }
-
       const upHandlerNode = (
-        <StepHandler {...sharedHandlerProps as any} upDisabled={upDisabled.value}>
-          {{ upNode: () => upNode }}
+        <StepHandler
+          prefixCls={mergedPrefixCls}
+          action="up"
+          disabled={upDisabled.value}
+          onStep={onInternalStep}
+          className={classNames?.action}
+          style={styles?.action}
+        >
+          {upNode}
         </StepHandler>
       )
 
       const downHandlerNode = (
-        <StepHandler {...sharedHandlerProps as any} downDisabled={downDisabled.value}>
-          {{ downNode: () => downNode }}
+        <StepHandler
+          prefixCls={mergedPrefixCls}
+          action="down"
+          disabled={downDisabled.value}
+          onStep={onInternalStep}
+          className={classNames?.action}
+          style={styles?.action}
+        >
+          {downNode}
         </StepHandler>
       )
 

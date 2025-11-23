@@ -1,5 +1,6 @@
 import { defineComponent, ref } from 'vue'
 import Input from '../src'
+import './assets/index.less'
 
 export default defineComponent(() => {
   const value = ref('')
