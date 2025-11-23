@@ -27,5 +27,8 @@
   },
   "dependencies": {
     "@v-c/util": "workspace:^"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
