@@ -1,4 +1,4 @@
-import type { CountConfig, ShowCountFormatter } from '@v-c/input/interface'
+import type { CountConfig, ShowCountFormatter } from '@v-c/input'
 import type { VueNode } from '@v-c/util/dist/type'
 import type { CSSProperties } from 'vue'
 

@@ -1,8 +1,14 @@
 import BaseInput from './BaseInput'
+import useCount from './hooks/useCount'
 import Input from './input'
 
-export { BaseInput }
+export type { CountConfig, InputProps, InputRef, ShowCountFormatter } from './interface'
 
-export type { InputProps, InputRef } from './interface'
+export { BaseInput }
+export {
+  useCount,
+}
+
+export { resolveOnChange } from './utils/commonUtils'
 
 export default Input

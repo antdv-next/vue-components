@@ -1,8 +1,6 @@
 import type { CSSProperties } from 'vue'
 import type { TextAreaProps } from './interface'
-import { BaseInput } from '@v-c/input'
-import useCount from '@v-c/input/hooks/useCount'
-import { resolveOnChange } from '@v-c/input/utils/commonUtils'
+import { BaseInput, resolveOnChange, useCount } from '@v-c/input'
 import { classNames as clsx } from '@v-c/util'
 import omit from '@v-c/util/dist/omit'
 import { computed, defineComponent, nextTick, shallowRef, watch } from 'vue'
@@ -287,7 +285,7 @@ export default defineComponent<TextAreaProps>(
           dataAttrs={{
             affixWrapper: {
               'data-count': typeof dataCount === 'string' ? dataCount : undefined,
-            },
+            } as any,
           }}
           hidden={hidden}
           readOnly={readOnly}
