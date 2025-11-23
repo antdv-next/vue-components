@@ -108,6 +108,7 @@ const BaseInput = defineComponent<
             [`${affixWrapperPrefixCls}-input-with-clear-btn`]:
                       suffix && allowClear && value,
           },
+          classes?.affixWrapper,
           classNames?.affixWrapper,
           classNames?.variant,
         )
@@ -153,6 +154,7 @@ const BaseInput = defineComponent<
         const mergedWrapperClassName = clsx(
           `${prefixCls}-wrapper`,
           wrapperCls,
+          classes?.wrapper,
           classNames?.wrapper,
         )
 
@@ -161,6 +163,7 @@ const BaseInput = defineComponent<
           {
             [`${groupWrapperCls}-disabled`]: disabled,
           },
+          classes?.group,
           classNames?.groupWrapper,
         )
 
