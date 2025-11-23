@@ -1,5 +1,6 @@
 import type { SlotsType } from 'vue'
 import { classNames as clsx } from '@v-c/util'
+import { filterEmpty } from '@v-c/util/dist/props-util'
 import raf from '@v-c/util/dist/raf'
 import { defineComponent, onUnmounted, ref } from 'vue'
 
@@ -87,7 +88,7 @@ export default defineComponent({
       // resulting in a disordered program execution.
       // So, we need to use requestAnimationFrame to ensure that the onmouseup event is executed after the onmousedown event.
       const safeOnStopStep = () => frameIds.value.push(raf(onStopStep))
-
+      const children = filterEmpty(slots?.default?.())
       return (
         <span
           unselectable="on"
@@ -100,9 +101,11 @@ export default defineComponent({
           class={mergedClassName}
           style={style}
         >
-          {slots.default?.() || (
-            <span unselectable="on" class={`${prefixCls}-action-${action}-inner`} />
-          )}
+          {children.length > 0
+            ? children
+            : (
+                <span unselectable="on" class={`${prefixCls}-action-${action}-inner`} />
+              )}
         </span>
       )
     }
