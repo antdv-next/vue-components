@@ -19,6 +19,7 @@ const renderNode = computed(() => {
     return props.renderTabBar(restProps, TabNavList)
   }
 
+  console.log(restProps)
   return h(TabNavList, restProps)
 })
 </script>

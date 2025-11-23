@@ -10,7 +10,7 @@ const items = Array.from({ length: 50 }).map((_, i) => ({
 
 const key = ref('0')
 
-const extra = computed(() => (key.value === '0' ? h('div',{}, ['额外内容']) : null))
+const extra = computed(() => (key.value === '0' ? h('div', {}, ['额外内容']) : null))
 </script>
 
 <template>
@@ -23,7 +23,6 @@ const extra = computed(() => (key.value === '0' ? h('div',{}, ['额外内容']) 
       :items="items"
     />
   </div>
-
 </template>
 
 <style src="../assets/index.less" lang="less"></style>

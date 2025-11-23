@@ -72,7 +72,7 @@ const defaultKey = computed(() => defaultActiveKey.value ?? tabs.value[0]?.key)
 const [mergedActiveKey, setMergedActiveKey] = useMergedState('', {
   defaultValue: activeKey.value ?? defaultKey.value,
   // @ts-expect-error: `toRef`
-  value: activeKey.value,
+  value: activeKey,
 })
 
 const activeIndex = ref(tabs.value.findIndex(item => item.key === mergedActiveKey.value))
