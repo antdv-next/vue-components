@@ -7,7 +7,7 @@ const entry = fg.sync(['src/**/*.vue', 'src/**/*.ts', 'src/**/*.tsx', '!src/**/*
 
 export default defineConfig({
   ...mergeConfig(buildCommon({
-    external: ['vue', /^@v-c\/util/],
+    external: ['vue', /^@v-c\//],
   }), {
     build: {
       lib: {

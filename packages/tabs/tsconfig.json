@@ -3,6 +3,9 @@
     "../../tsconfig.base.json"
   ],
   "compilerOptions": {},
+  "files": [
+    "./types.d.ts"
+  ],
   "include": [
     "src/**/*.vue",
     "src/**/*.ts",
