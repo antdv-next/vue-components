@@ -1,6 +1,6 @@
-import type { KeyboardEventHandler } from '@v-c/util/dist/EventInterface.ts'
-import type { VNodeChild } from 'vue'
-import useMergedState from '@v-c/util/dist/hooks/useMergedState.ts'
+import type { KeyboardEventHandler } from '@v-c/util/dist/EventInterface'
+import type { CSSProperties, VNodeChild } from 'vue'
+import useMergedState from '@v-c/util/dist/hooks/useMergedState'
 import KeyCode from '@v-c/util/dist/KeyCode'
 import { computed, defineComponent, shallowRef } from 'vue'
 
@@ -24,6 +24,8 @@ export interface SwitchProps {
   'defaultChecked'?: boolean
   'loadingIcon'?: VNodeChild | (() => VNodeChild)
   'title'?: string
+  'styles'?: { content?: CSSProperties }
+  'classNames'?: { content?: string }
 }
 
 const defaults = {
@@ -83,6 +85,8 @@ const Switch = defineComponent<SwitchProps>(
         loadingIcon,
         checkedChildren,
         unCheckedChildren,
+        classNames,
+        styles,
         ...restProps
       } = props
       const switchClassName = [prefixCls, className, {
@@ -102,10 +106,20 @@ const Switch = defineComponent<SwitchProps>(
           onKeydown={onInternalKeyDown as any}
           onClick={onInternalClick}
         >
-          {loadingIcon}
+          {typeof loadingIcon === 'function' ? loadingIcon() : loadingIcon}
           <span class={`${prefixCls}-inner`}>
-            <span class={`${prefixCls}-inner-checked`}>{checkedChildren}</span>
-            <span class={`${prefixCls}-inner-unchecked`}>{unCheckedChildren}</span>
+            <span
+              class={[`${prefixCls}-inner-checked`, classNames?.content]}
+              style={styles?.content}
+            >
+              {checkedChildren}
+            </span>
+            <span
+              class={[`${prefixCls}-inner-unchecked`, classNames?.content]}
+              style={styles?.content}
+            >
+              {unCheckedChildren}
+            </span>
           </span>
         </button>
       )
@@ -113,6 +127,7 @@ const Switch = defineComponent<SwitchProps>(
   },
   {
     name: 'Switch',
+    inheritAttrs: false,
   },
 )
 

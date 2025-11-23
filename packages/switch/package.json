@@ -1,7 +1,11 @@
 {
   "name": "@v-c/switch",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.0.0",
+  "files": [
+    "dist",
+    "package.json"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -13,9 +17,15 @@
   },
   "main": "dist/index.js",
   "scripts": {
-    "build": "vite build"
+    "build": "vite build",
+    "prepublish": "pnpm build",
+    "test": "vitest run",
+    "bump": "bumpp --release patch"
   },
   "peerDependencies": {
     "vue": "^3.0.0"
+  },
+  "dependencies": {
+    "@v-c/util": "workspace:^"
   }
 }

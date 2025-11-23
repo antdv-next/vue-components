@@ -20,7 +20,9 @@
   "main": "index.js",
   "scripts": {
     "build": "vite build",
-    "test": "vitest"
+    "prepublish": "pnpm build",
+    "test": "vitest run",
+    "bump": "bumpp --release patch"
   },
   "peerDependencies": {
     "vue": "^3.0.0"
