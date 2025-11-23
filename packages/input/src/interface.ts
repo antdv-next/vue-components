@@ -118,6 +118,7 @@ export interface InputProps extends Omit<CommonInputProps, 'classNames' | 'style
   onPressEnter?: KeyboardEventHandler
   autoComplete?: string
   htmlSize?: number
+  placeholder?: string
   classNames?: CommonInputProps['classNames'] & {
     input?: string
     count?: string

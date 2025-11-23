@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import AllowClear from './allowClear.vue'
-import AutoSize from './autoSize.vue'
-import ShowCount from './showCount.vue'
-import Simple from './simple.vue'
+import AllowClear from './allow-clear'
+import AutoSize from './auto-size'
+import ShowCount from './show-count'
+import Simple from './simple'
 
 import './assets/index.less'
 </script>

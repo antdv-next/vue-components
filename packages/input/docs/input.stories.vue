@@ -1,9 +1,9 @@
 <script setup lang="ts">
-// import Addon from './addon.vue'
-// import AllowClear from './allowclear.vue'
-// import Basic from './basic.vue'
-// import PrefixSuffix from './prefixSuffix.vue'
-// import ShowCount from './showCount.vue'
+import Addon from './addon'
+import AllowClear from './allow-clear'
+import Basic from './basic'
+import PrefixSuffix from './prefix-suffix'
+import ShowCount from './show-count'
 
 import './assets/index.less'
 </script>
@@ -11,19 +11,19 @@ import './assets/index.less'
 <template>
   <Story title="Input">
     <Variant title="addon">
-      <!--      <Addon /> -->
+      <Addon />
     </Variant>
     <Variant title="allow-clear">
-      <!--      <AllowClear /> -->
+      <AllowClear />
     </Variant>
     <Variant title="basic">
-      <!--      <Basic /> -->
+      <Basic />
     </Variant>
     <Variant title="prefix-suffix">
-      <!--      <PrefixSuffix /> -->
+      <PrefixSuffix />
     </Variant>
     <Variant title="show-count">
-      <!--      <ShowCount /> -->
+      <ShowCount />
     </Variant>
   </Story>
 </template>
