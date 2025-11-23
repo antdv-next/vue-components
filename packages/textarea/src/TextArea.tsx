@@ -2,23 +2,18 @@ import type { CSSProperties } from 'vue'
 import { BaseInput } from '@v-c/input'
 import useCount from '@v-c/input/hooks/useCount'
 import { resolveOnChange } from '@v-c/input/utils/commonUtils'
-import { classNames as cls } from '@v-c/util'
-import { computed, defineComponent, nextTick, ref, shallowRef, watch } from 'vue'
-import { textareaProps } from './interface'
+import { classNames as clsx } from '@v-c/util'
+import omit from '@v-c/util/dist/omit'
+import { computed, defineComponent, nextTick, shallowRef, watch } from 'vue'
 import ResizableTextArea from './ResizableTextArea'
+import type { TextAreaProps, TextAreaRef } from './interface'
 
-export default defineComponent({
-  name: 'TextArea',
-  inheritAttrs: false,
-  props: {
-    ...textareaProps(),
-  },
-  emits: ['update:value', 'change', 'compositionStart', 'compositionEnd', 'pressEnter', 'keydown', 'focus', 'blur', 'resize'],
-  setup(props, { attrs, expose, slots, emit }) {
-    function onChange(e: Event) {
-      emit('change', e)
-    }
+const defaults: TextAreaProps = {
+  prefixCls: 'vc-textarea',
+}
 
+export default defineComponent<TextAreaProps>(
+  (props = defaults, { attrs, expose, slots, emit }) => {
     const stateValue = shallowRef(props.value ?? props.defaultValue)
     watch(
       () => props.value,
@@ -28,42 +23,43 @@ export default defineComponent({
         }
       },
     )
-    const setValue = (value: string | number, callback?: Function) => {
-      if (stateValue.value === value) {
+
+    const setValue = (val: string | number, callback?: () => void) => {
+      if (stateValue.value === val) {
         return
       }
       if (props.value === undefined) {
-        stateValue.value = value
+        stateValue.value = val
       }
       nextTick(() => {
-        callback && callback()
+        callback?.()
       })
     }
+
     const formatValue = computed(() =>
       stateValue.value === undefined || stateValue.value === null ? '' : String(stateValue.value),
     )
 
-    const focused = ref(false)
-
-    const compositionRef = ref(false)
-
-    const textareaResized = ref<boolean>(false)
+    const focused = shallowRef(false)
+    const compositionRef = shallowRef(false)
+    const textareaResized = shallowRef<boolean>(false)
 
     // =============================== Ref ================================
-    const holderRef = ref<InstanceType<typeof BaseInput>>()
-    const resizableTextAreaRef = ref<InstanceType<typeof ResizableTextArea>>()
+    const holderRef = shallowRef<any>()
+    const resizableTextAreaRef = shallowRef<any>()
     const getTextArea = () => resizableTextAreaRef.value?.textArea()
 
     const focus = () => {
-      getTextArea().focus()
+      getTextArea()?.focus()
     }
-    expose({
-      resizableTextArea: resizableTextAreaRef.value,
+
+    expose<TextAreaRef>({
+      resizableTextArea: computed(() => resizableTextAreaRef.value),
       focus,
       blur: () => {
-        getTextArea().blur()
+        getTextArea()?.blur()
       },
-      nativeElement: holderRef.value?.nativeElement || getTextArea(),
+      nativeElement: computed(() => holderRef.value?.nativeElement || getTextArea() || null),
     })
 
     watch(
@@ -74,48 +70,47 @@ export default defineComponent({
     )
 
     // =========================== Select Range ===========================
-    const selection = ref<[start: number, end: number] | null>(null)
-
-    watch(
-      () => selection.value,
-      (newSelection) => {
-        if (newSelection) {
-          getTextArea().setSelectionRange(...newSelection)
-        }
-      },
-    )
+    const selection = shallowRef<[start: number, end: number] | null>(null)
+    watch(selection, (newSelection) => {
+      if (newSelection) {
+        getTextArea()?.setSelectionRange(...newSelection)
+      }
+    })
 
     // ============================== Count ===============================
-    const countConfig = useCount(props.count, props.showCount)
-    const mergedMax = countConfig.max ?? props.maxLength
+    const countConfig = useCount(computed(() => props.count), computed(() => props.showCount))
+    const mergedMax = computed(() => countConfig.value.max ?? props.maxLength)
 
-    // Max length value
-    const hasMaxLength = Number(mergedMax) > 0
-
-    const valueLength = computed(() => countConfig.strategy(formatValue.value))
-
-    const isOutOfRange = !!mergedMax && valueLength.value > mergedMax
+    const hasMaxLength = computed(() => Number(mergedMax.value) > 0)
+    const valueLength = computed(() => countConfig.value.strategy(formatValue.value))
+    const isOutOfRange = computed(() => !!mergedMax.value && valueLength.value > mergedMax.value)
 
     // ============================== Change ==============================
+    const onChange = (e: Event) => {
+      emit('change', e)
+      props.onChange?.(e)
+    }
+
     const triggerChange = (
       e: Event | CompositionEvent,
       currentValue: string,
     ) => {
       let cutValue = currentValue
+      const cfg = countConfig.value
       if (
         !compositionRef.value
-        && countConfig.exceedFormatter
-        && countConfig.max
-        && countConfig.strategy(currentValue) > countConfig.max
+        && cfg.exceedFormatter
+        && cfg.max
+        && cfg.strategy(currentValue) > cfg.max
       ) {
-        cutValue = countConfig.exceedFormatter(currentValue, {
-          max: countConfig.max,
+        cutValue = cfg.exceedFormatter(currentValue, {
+          max: cfg.max,
         })
 
         if (currentValue !== cutValue) {
           selection.value = [
-            getTextArea().selectionStart || 0,
-            getTextArea().selectionEnd || 0,
+            getTextArea()?.selectionStart || 0,
+            getTextArea()?.selectionEnd || 0,
           ]
         }
       }
@@ -132,12 +127,14 @@ export default defineComponent({
     const onInternalCompositionStart = (e: CompositionEvent) => {
       compositionRef.value = true
       emit('compositionStart', e)
+      props.onCompositionStart?.(e)
     }
 
     const onInternalCompositionEnd = (e: CompositionEvent) => {
       compositionRef.value = false
       triggerChange(e, (e.target as HTMLTextAreaElement).value)
       emit('compositionEnd', e)
+      props.onCompositionEnd?.(e)
     }
 
     const onInternalChange = (e: Event) => {
@@ -145,41 +142,63 @@ export default defineComponent({
     }
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Enter' && props.onPressEnter) {
+      if (e.key === 'Enter' && props.onPressEnter && !e.isComposing) {
         emit('pressEnter', e)
+        props.onPressEnter?.(e)
       }
       emit('keydown', e)
+      props.onKeyDown?.(e)
     }
 
     const handleFocus = (e: FocusEvent) => {
       focused.value = true
       emit('focus', e)
+      props.onFocus?.(e)
     }
 
     const handleBlur = (e: FocusEvent) => {
       focused.value = false
       emit('blur', e)
+      props.onBlur?.(e)
     }
 
     // ============================== Reset ===============================
     const handleReset = (e: MouseEvent) => {
-      resolveOnChange(getTextArea(), e, triggerChange)
+      resolveOnChange(getTextArea() as HTMLInputElement, e, onChange)
       setValue('', () => focus())
       emit('update:value', '')
     }
 
     const handleResize = (size: { width: number, height: number }) => {
       emit('resize', size)
+      props.onResize?.(size)
       if (getTextArea()?.style.height) {
         textareaResized.value = true
       }
     }
 
+    const mergedAllowClear = computed(() => {
+      if (!props.allowClear) {
+        return props.allowClear
+      }
+
+      const clearIcon = slots.clearIcon?.()
+
+      if (clearIcon) {
+        return {
+          ...(typeof props.allowClear === 'object' ? props.allowClear : {}),
+          clearIcon,
+        }
+      }
+
+      return props.allowClear
+    })
+
     return () => {
       const {
         allowClear,
         maxLength,
-        prefixCls = 'vc-textarea',
+        prefixCls = defaults.prefixCls!,
         showCount,
         disabled,
         hidden,
@@ -188,26 +207,36 @@ export default defineComponent({
         onClear,
         readOnly,
         autoSize,
+        suffix,
       } = props
-      let suffixNode = slots.suffix?.()
+
+      const { class: attrClass, style: attrStyle, ...restAttrs } = attrs
+      const mergedClassName = props.className || (attrClass as any)
+      const mergedStyle: CSSProperties = {
+        ...(props.style as CSSProperties),
+        ...(attrStyle as CSSProperties),
+      }
+
+      const suffixSlot = slots.suffix?.()
+      let suffixNode = suffixSlot ?? suffix
       let dataCount: unknown
-      if (countConfig.show) {
-        if (countConfig.showFormatter) {
-          dataCount = countConfig.showFormatter({
+      if (countConfig.value.show) {
+        if (countConfig.value.showFormatter) {
+          dataCount = countConfig.value.showFormatter({
             value: formatValue.value,
             count: valueLength.value,
-            maxLength: mergedMax,
+            maxLength: mergedMax.value,
           })
         }
         else {
-          dataCount = `${valueLength.value}${hasMaxLength ? ` / ${mergedMax}` : ''}`
+          dataCount = `${valueLength.value}${hasMaxLength.value ? ` / ${mergedMax.value}` : ''}`
         }
 
         suffixNode = (
           <>
             {suffixNode}
             <span
-              class={cls(`${prefixCls}-data-count`, classNames?.count)}
+              class={clsx(`${prefixCls}-data-count`, classNames?.count)}
               style={styles?.count}
             >
               {dataCount}
@@ -217,26 +246,42 @@ export default defineComponent({
       }
 
       const isPureTextArea = !autoSize && !showCount && !allowClear
+
+      const baseInputClassNames = {
+        ...classNames,
+        affixWrapper: clsx(classNames?.affixWrapper, {
+          [`${prefixCls}-show-count`]: showCount,
+          [`${prefixCls}-textarea-allow-clear`]: allowClear,
+        }),
+      }
+
+      const inputAttrs = omit(restAttrs, [
+        'class',
+        'style',
+        'onFocus',
+        'onBlur',
+        'onChange',
+        'onCompositionstart',
+        'onCompositionend',
+        'onKeydown',
+        'onKeyup',
+        'onInput',
+      ])
+
       return (
         <BaseInput
           ref={holderRef}
-          v-model:value={formatValue.value}
-          allowClear={allowClear}
+          value={formatValue.value}
+          allowClear={mergedAllowClear.value as any}
           handleReset={handleReset}
           suffix={suffixNode}
           prefixCls={prefixCls}
-          classNames={{
-            ...classNames,
-            affixWrapper: cls(classNames?.affixWrapper, {
-              [`${prefixCls}-show-count`]: showCount,
-              [`${prefixCls}-textarea-allow-clear`]: allowClear,
-            }),
-          }}
+          classNames={baseInputClassNames as any}
           disabled={disabled}
           focused={focused.value}
-          class={cls([attrs.class], isOutOfRange && `${prefixCls}-out-of-range`)}
+          class={clsx([mergedClassName], isOutOfRange.value && `${prefixCls}-out-of-range`)}
           style={{
-            ...attrs.style as CSSProperties,
+            ...mergedStyle,
             ...(textareaResized.value && !isPureTextArea ? { height: 'auto' } : {}),
           }}
           dataAttrs={{
@@ -249,17 +294,18 @@ export default defineComponent({
           onClear={onClear}
         >
           <ResizableTextArea
-            value={stateValue.value}
-            autoSize={autoSize}
+            {...inputAttrs}
+            value={stateValue.value as any}
+            autoSize={autoSize as any}
             maxLength={maxLength}
-            onKeydown={handleKeyDown}
+            onKeydown={handleKeyDown as any}
             onChange={onInternalChange}
             onFocus={handleFocus}
             onBlur={handleBlur}
             onCompositionstart={onInternalCompositionStart}
             onCompositionend={onInternalCompositionEnd}
-            class={cls(classNames?.textarea)}
-            style={{ ...styles?.textarea, resize: attrs.style?.resize }}
+            class={clsx(classNames?.textarea)}
+            style={{ ...styles?.textarea, resize: (attrStyle as any)?.resize }}
             disabled={disabled}
             prefixCls={prefixCls}
             onResize={handleResize}
@@ -270,4 +316,19 @@ export default defineComponent({
       )
     }
   },
-})
+  {
+    name: 'TextArea',
+    inheritAttrs: false,
+    emits: [
+      'update:value',
+      'change',
+      'compositionStart',
+      'compositionEnd',
+      'pressEnter',
+      'keydown',
+      'focus',
+      'blur',
+      'resize',
+    ],
+  },
+)

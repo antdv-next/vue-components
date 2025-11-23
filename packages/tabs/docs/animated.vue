@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import Tabs from '../src/index'
 import type { CSSMotionProps } from '@v-c/util/dist/utils/transition'
+import Tabs from '../src/index'
 
 const motion: CSSMotionProps = {
   name: 'switch',
@@ -34,4 +34,5 @@ const items = [
 </template>
 
 <style src="../assets/index.less" lang="less"></style>
+
 <style src="./animated.less" lang="less"></style>
