@@ -5,7 +5,3 @@ import Input from '../src'
 <template>
   <Input prefix-cls="vc-input" style="margin-left: 200px" />
 </template>
-
-<style scoped>
-
-</style>

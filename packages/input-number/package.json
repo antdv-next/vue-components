@@ -1,8 +1,15 @@
 {
   "name": "@v-c/input-number",
   "type": "module",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist",
+    "package.json"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -14,7 +21,10 @@
   },
   "main": "dist/index.js",
   "scripts": {
-    "build": "vite build"
+    "build": "vite build",
+    "prepublish": "pnpm build",
+    "test": "vitest run",
+    "bump": "bumpp --release patch"
   },
   "peerDependencies": {
     "vue": "^3.0.0"

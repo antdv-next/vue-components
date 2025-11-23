@@ -1,7 +1,14 @@
 {
   "name": "@v-c/mini-decimal",
   "type": "module",
-  "version": "1.0.0",
+  "version": "0.0.0",
+  "files": [
+    "dist",
+    "package.json"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "description": "Lite lib to only support decimal add calculation",
   "author": "",
   "license": "MIT",
@@ -17,9 +24,11 @@
     "./dist/*": "./dist/*",
     "./package.json": "./package.json"
   },
-  "main": "index.js",
+  "main": "./dist/index.js",
   "scripts": {
     "build": "vite build",
-    "test": "vitest"
+    "prepublish": "pnpm build",
+    "test": "vitest run",
+    "bump": "bumpp --release patch"
   }
 }

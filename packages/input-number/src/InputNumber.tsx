@@ -1,44 +1,90 @@
-import type {
-  DecimalClass,
-  ValueType,
-} from '@v-c/mini-decimal'
-import type { CSSProperties, ExtractPropTypes, PropType, SlotsType, VNode } from 'vue'
-import { BaseInput } from '@v-c/input'
-import { triggerFocus } from '@v-c/input/utils/commonUtils'
+import type { DecimalClass, ValueType } from '@v-c/mini-decimal'
+import type { InputFocusOptions } from '@v-c/util/dist/Dom/focus'
 import getMiniDecimal, {
   getNumberPrecision,
   num2str,
   toFixed,
   validateNumber,
 } from '@v-c/mini-decimal'
-import { classNames as clsx } from '@v-c/util'
-import { computed, defineComponent, ref, watch, watchEffect } from 'vue'
+import { clsx } from '@v-c/util'
+import { triggerFocus } from '@v-c/util/dist/Dom/focus'
+import omit from '@v-c/util/dist/omit'
+import { computed, defineComponent, shallowRef, watch, watchEffect } from 'vue'
 import useCursor from './hooks/useCursor'
 import useFrame from './hooks/useFrame'
-import { useInjectSemanticContext, useProvideSemanticContext } from './SemanticContext'
 import StepHandler from './StepHandler'
 import { getDecupleSteps } from './utils/numberUtil'
 
 export type { ValueType }
-type InputFocusOptions = Parameters<HTMLInputElement['focus']>[0]
+
+type SemanticName = 'root' | 'actions' | 'input' | 'action' | 'prefix' | 'suffix'
+
+export interface InputNumberProps<T extends ValueType = ValueType> {
+  mode?: 'input' | 'spinner'
+  prefixCls?: string
+  class?: any
+  className?: string
+  style?: any
+  classNames?: Partial<Record<SemanticName, string>>
+  styles?: Partial<Record<SemanticName, any>>
+  min?: T
+  max?: T
+  step?: ValueType
+  defaultValue?: T
+  value?: T | null
+  disabled?: boolean
+  readOnly?: boolean
+  prefix?: any
+  suffix?: any
+  upHandler?: any
+  downHandler?: any
+  keyboard?: boolean
+  changeOnWheel?: boolean
+  controls?: boolean
+  parser?: (displayValue: string | undefined) => T
+  formatter?: (value: T | undefined, info: { userTyping: boolean, input: string }) => string
+  precision?: number
+  decimalSeparator?: string
+  onInput?: (text: string) => void
+  onChange?: (value: T | null) => void
+  onPressEnter?: (e: KeyboardEvent) => void
+  onStep?: (value: T, info: { offset: ValueType, type: 'up' | 'down', emitter: 'handler' | 'keyboard' | 'wheel' }) => void
+  changeOnBlur?: boolean
+  tabIndex?: number
+  onMouseDown?: (event: MouseEvent) => void
+  onClick?: (event: MouseEvent) => void
+  onMouseUp?: (event: MouseEvent) => void
+  onMouseLeave?: (event: MouseEvent) => void
+  onMouseMove?: (event: MouseEvent) => void
+  onMouseEnter?: (event: MouseEvent) => void
+  onMouseOut?: (event: MouseEvent) => void
+  onFocus?: (event: FocusEvent) => void
+  onBlur?: (event: FocusEvent) => void
+  onKeyDown?: (event: KeyboardEvent) => void
+  onKeyUp?: (event: KeyboardEvent) => void
+  onCompositionStart?: (event: CompositionEvent) => void
+  onCompositionEnd?: (event: CompositionEvent) => void
+  onBeforeInput?: (event: InputEvent) => void
+  stringMode?: boolean
+}
+
 export interface InputNumberRef extends HTMLInputElement {
   focus: (options?: InputFocusOptions) => void
   blur: () => void
-  nativeElement: HTMLElement
+  nativeElement: HTMLElement | null
+  input: HTMLInputElement | null
 }
 
-/**
- * We support `stringMode` which need handle correct type when user call in onChange
- * format max or min value
- * 1. if isInvalid return null
- * 2. if precision is undefined, return decimal
- * 3. format with precision
- *    I. if max > 0, round down with precision. Example: max= 3.5, precision=0  afterFormat: 3
- *    II. if max < 0, round up with precision. Example: max= -3.5, precision=0  afterFormat: -4
- *    III. if min > 0, round up with precision. Example: min= 3.5, precision=0  afterFormat: 4
- *    IV. if min < 0, round down with precision. Example: max= -3.5, precision=0  afterFormat: -3
- */
-function getDecimalValue(stringMode: boolean, decimalValue: DecimalClass) {
+const defaults: InputNumberProps = {
+  prefixCls: 'vc-input-number',
+  step: 1,
+  controls: true,
+  changeOnWheel: false,
+  mode: 'input',
+  stringMode: false,
+}
+
+function getDecimalValue(stringMode: boolean | undefined, decimalValue: DecimalClass) {
   if (stringMode || decimalValue.isEmpty()) {
     return decimalValue.toString()
   }
@@ -51,95 +97,51 @@ function getDecimalIfValidate(value: ValueType) {
   return decimal.isInvalidate() ? null : decimal
 }
 
-function inputNumberProps() {
-  return {
-    prefixCls: { type: String, default: 'vc-input-number' },
-    min: [Number, String],
-    max: [Number, String],
-    step: { type: [Number, String], default: 1 },
-    defaultValue: [Number, String],
-    value: {
-      type: [Number, String],
-    },
-    disabled: Boolean,
-    readOnly: Boolean,
-    upHandler: Object as PropType<VNode>,
-    downHandler: Object as PropType<VNode>,
-    keyboard: Boolean,
-    changeOnWheel: { type: Boolean, default: false },
-    controls: { type: Boolean, default: true },
-    stringMode: Boolean,
-    parser: Function as PropType<(displayValue: string | undefined) => ValueType>,
-    formatter: Function as PropType<(value: ValueType | undefined, info: { userTyping: boolean, input: string }) => string>,
-    precision: Number,
-    decimalSeparator: String,
-    onChange: Function as PropType<(value: ValueType | null) => void>,
-    onInput: Function as PropType<(text: string) => void>,
-    onPressEnter: Function as PropType<(e: KeyboardEvent) => void>,
-    onStep: Function as PropType<(value: ValueType, info: { offset: ValueType, type: 'up' | 'down', emitter: 'handler' | 'keyboard' | 'wheel' }) => void>,
-    changeOnBlur: { type: Boolean, default: true },
-    classNames: Object,
-    styles: Object,
-  }
-}
+const InputNumber = defineComponent<InputNumberProps>(
+  (props = defaults, { attrs, slots, expose, emit }) => {
+    const focus = shallowRef(false)
+    const userTypingRef = shallowRef(false)
+    const compositionRef = shallowRef(false)
+    const shiftKeyRef = shallowRef(false)
 
-export type InputNumberProps = Partial<ExtractPropTypes<ReturnType<typeof inputNumberProps>>>
+    const rootRef = shallowRef<HTMLDivElement>()
+    const inputRef = shallowRef<HTMLInputElement>()
 
-type InternalInputNumberProps = Omit<InputNumberProps, 'prefix' | 'suffix'>
-
-const InternalInputNumber = defineComponent<InternalInputNumberProps>({
-  name: 'InternalInputNumber',
-  props: {
-    ...inputNumberProps(),
-  },
-  slots: Object as SlotsType<{
-    upHandler: any
-    downHandler: any
-  }>,
-  emits: ['step', 'change', 'input', 'pressEnter'],
-  setup(props, { attrs, slots, expose, emit }) {
-    const { classNames, styles } = useInjectSemanticContext() || {}
-
-    const inputRef = ref<HTMLInputElement>()
-    const focus = ref(false)
-    const userTypingRef = ref(false)
-    const compositionRef = ref(false)
-    const shiftKeyRef = ref(false)
+    expose({
+      focus: (option?: InputFocusOptions) => {
+        if (inputRef.value) {
+          triggerFocus(inputRef.value, option)
+        }
+      },
+      blur: () => {
+        inputRef.value?.blur?.()
+      },
+      nativeElement: computed(() => rootRef.value || inputRef.value || null),
+      input: inputRef,
+    })
 
     // ============================ Value =============================
-    // Real value control
-    const decimalValue = ref<DecimalClass>(getMiniDecimal(props.value ?? props.defaultValue))
+    const decimalValue = shallowRef<DecimalClass>(getMiniDecimal((props.value ?? props.defaultValue ?? '') as any))
 
-    function setUncontrolledDecimalValue(newDecimal: DecimalClass) {
+    const setUncontrolledDecimalValue = (newDecimal: DecimalClass) => {
       if (props.value === undefined) {
         decimalValue.value = newDecimal
       }
     }
 
     // ====================== Parser & Formatter ======================
-    /**
-     * `precision` is used for formatter & onChange.
-     * It will auto generate by `value` & `step`.
-     * But it will not block user typing.
-     *
-     * Note: Auto generate `precision` is used for legacy logic.
-     * We should remove this since we already support high precision with BigInt.
-     *
-     * @param numStr  Provide which number should calculate precision
-     * @param userTyping  Change by user typing
-     */
     const getPrecision = (numStr: string, userTyping: boolean) => {
-      const { precision, step = 1 } = props
       if (userTyping) {
         return undefined
       }
-      if (precision && precision >= 0) {
-        return precision
+
+      if (props.precision !== undefined && props.precision >= 0) {
+        return props.precision
       }
-      return Math.max(getNumberPrecision(numStr), getNumberPrecision(step))
+
+      return Math.max(getNumberPrecision(numStr), getNumberPrecision(props.step ?? 1))
     }
 
-    // >>> Parser
     const mergedParser = (num: string | number) => {
       const numStr = String(num)
 
@@ -152,12 +154,12 @@ const InternalInputNumber = defineComponent<InternalInputNumberProps>({
         parsedStr = parsedStr.replace(props.decimalSeparator, '.')
       }
 
-      // [Legacy] We still support auto convert `$ 123,456` to `123456`
       return parsedStr.replace(/[^\w.-]+/g, '')
     }
 
-    // >>> Formatter
-    const inputValueRef = ref<string | number>('')
+    const inputValue = shallowRef<string | number>('')
+    const inputValueRef = shallowRef<string | number>('')
+
     const mergedFormatter = (number: string, userTyping: boolean) => {
       if (props.formatter) {
         return props.formatter(number, { userTyping, input: String(inputValueRef.value) })
@@ -165,12 +167,10 @@ const InternalInputNumber = defineComponent<InternalInputNumberProps>({
 
       let str = typeof number === 'number' ? num2str(number) : number
 
-      // User typing will not auto format with precision directly
       if (!userTyping) {
         const mergedPrecision = getPrecision(str, userTyping)
 
-        if (validateNumber(str) && (props.decimalSeparator || mergedPrecision! >= 0)) {
-          // Separator
+        if (validateNumber(str) && (props.decimalSeparator || (mergedPrecision !== undefined && mergedPrecision >= 0))) {
           const separatorStr = props.decimalSeparator || '.'
 
           str = toFixed(str, separatorStr, mergedPrecision)
@@ -180,50 +180,35 @@ const InternalInputNumber = defineComponent<InternalInputNumberProps>({
       return str
     }
 
-    // ========================== InputValue ==========================
-    /**
-     * Input text value control
-     *
-     * User can not update input content directly. It updates with follow rules by priority:
-     *  1. controlled `value` changed
-     *    [SPECIAL] Typing like `1.` should not immediately convert to `1`
-     *  2. User typing with format (not precision)
-     *  3. Blur or Enter trigger revalidate
-     */
-    const formatValue = () => {
+    const syncInputValue = () => {
       const initValue = props.defaultValue ?? props.value
-      if (!initValue) {
-        return ''
+      if (decimalValue.value.isInvalidate() && ['string', 'number'].includes(typeof initValue as any)) {
+        inputValue.value = Number.isNaN(initValue as any) ? '' : (initValue as any)
       }
-      if (decimalValue.value.isInvalidate() && ['string', 'number'].includes(typeof initValue)) {
-        return Number.isNaN(initValue) ? '' : initValue
+      else {
+        inputValue.value = mergedFormatter(decimalValue.value.toString(), false)
       }
-      return mergedFormatter(decimalValue.value.toString(), false)
+      inputValueRef.value = inputValue.value
     }
-    const inputValue = ref<string | number>(formatValue())
-    inputValueRef.value = inputValue.value
 
-    // Should always be string
-    function setInputValue(newValue: DecimalClass, userTyping: boolean) {
-      inputValue.value
-        = mergedFormatter(
-          // Invalidate number is sometime passed by external control, we should let it go
-          // Otherwise is controlled by internal interactive logic which check by userTyping
-          // You can ref 'show limited value when input is not focused' test for more info.
-          newValue.isInvalidate() ? newValue.toString(false) : newValue.toString(!userTyping),
-          userTyping,
-        )
+    syncInputValue()
+
+    watch(inputValue, (val) => {
+      inputValueRef.value = val
+    })
+
+    const setInputValue = (newValue: DecimalClass, userTyping: boolean) => {
+      inputValue.value = mergedFormatter(
+        newValue.isInvalidate()
+          ? newValue.toString(false)
+          : newValue.toString(!userTyping),
+        userTyping,
+      )
     }
 
     // >>> Max & Min limit
-    const maxDecimal = ref()
-    const minDecimal = ref()
-    watch([() => props.max, () => props.precision], ([newMax]) => {
-      maxDecimal.value = getDecimalIfValidate(newMax!)
-    }, { immediate: true })
-    watch([() => props.min, () => props.precision], ([newMin]) => {
-      minDecimal.value = getDecimalIfValidate(newMin!)
-    }, { immediate: true })
+    const maxDecimal = computed(() => props.max !== undefined ? getDecimalIfValidate(props.max as any) : null)
+    const minDecimal = computed(() => props.min !== undefined ? getDecimalIfValidate(props.min as any) : null)
 
     const upDisabled = computed(() => {
       if (!maxDecimal.value || !decimalValue.value || decimalValue.value.isInvalidate()) {
@@ -242,23 +227,24 @@ const InternalInputNumber = defineComponent<InternalInputNumberProps>({
     })
 
     // Cursor controller
-    const [recordCursor, restoreCursor] = useCursor(inputRef.value!, focus.value)
+    const recordCursorRef = shallowRef<() => void>(() => {})
+    const restoreCursorRef = shallowRef<() => void>(() => {})
+    watchEffect(() => {
+      if (inputRef.value) {
+        const [record, restore] = useCursor(inputRef.value, focus.value)
+        recordCursorRef.value = record
+        restoreCursorRef.value = restore
+      }
+    })
+    const recordCursor = () => recordCursorRef.value?.()
+    const restoreCursor = () => restoreCursorRef.value?.()
 
     // ============================= Data =============================
-    /**
-     * Find target value closet within range.
-     * e.g. [11, 28]:
-     *    3  => 11
-     *    23 => 23
-     *    99 => 28
-     */
     const getRangeValue = (target: DecimalClass) => {
-      // target > max
       if (maxDecimal.value && !target.lessEquals(maxDecimal.value)) {
         return maxDecimal.value
       }
 
-      // target < min
       if (minDecimal.value && !minDecimal.value.lessEquals(target)) {
         return minDecimal.value
       }
@@ -266,52 +252,40 @@ const InternalInputNumber = defineComponent<InternalInputNumberProps>({
       return null
     }
 
-    /**
-     * Check value is in [min, max] range
-     */
     const isInRange = (target: DecimalClass) => !getRangeValue(target)
 
-    /**
-     * Trigger `onChange` if value validated and not equals of origin.
-     * Return the value that re-align in range.
-     */
     const triggerValueUpdate = (newValue: DecimalClass, userTyping: boolean): DecimalClass => {
-      const { readOnly, disabled, stringMode = false } = props
       let updateValue = newValue
 
       let isRangeValidate = isInRange(updateValue) || updateValue.isEmpty()
 
-      // Skip align value when trigger value is empty.
-      // We just trigger onChange(null)
-      // This should not block user typing
       if (!updateValue.isEmpty() && !userTyping) {
-        // Revert value in range if needed
         updateValue = getRangeValue(updateValue) || updateValue
         isRangeValidate = true
       }
 
-      if (!readOnly && !disabled && isRangeValidate) {
+      if (!props.readOnly && !props.disabled && isRangeValidate) {
         const numStr = updateValue.toString()
         const mergedPrecision = getPrecision(numStr, userTyping)
-        if (mergedPrecision! >= 0) {
+        if (mergedPrecision !== undefined && mergedPrecision >= 0) {
           updateValue = getMiniDecimal(toFixed(numStr, '.', mergedPrecision))
 
-          // When to fixed. The value may out of min & max range.
-          // 4 in [0, 3.8] => 3.8 => 4 (toFixed)
           if (!isInRange(updateValue)) {
             updateValue = getMiniDecimal(toFixed(numStr, '.', mergedPrecision, true))
           }
         }
 
-        // Trigger event
         if (!updateValue.equals(decimalValue.value)) {
           setUncontrolledDecimalValue(updateValue)
-          emit('change', updateValue.isEmpty() ? null : getDecimalValue(stringMode, updateValue))
+          const outValue = updateValue.isEmpty() ? null : getDecimalValue(props.stringMode, updateValue)
+          props.onChange?.(outValue as any)
+          emit('change', outValue as any)
 
-          // Reformat input if value is not controlled
           if (props.value === undefined) {
             setInputValue(updateValue, userTyping)
           }
+
+          emit('update:value', outValue as any)
         }
 
         return updateValue
@@ -323,29 +297,23 @@ const InternalInputNumber = defineComponent<InternalInputNumberProps>({
     // ========================== User Input ==========================
     const onNextPromise = useFrame()
 
-    // >>> Collect input value
     const collectInputValue = (inputStr: string) => {
       recordCursor()
 
-      // Update inputValue in case input can not parse as number
-      // Refresh ref value immediately since it may used by formatter
       inputValueRef.value = inputStr
       inputValue.value = inputStr
 
-      // Parse number
       if (!compositionRef.value) {
         const finalValue = mergedParser(inputStr)
-        const finalDecimal = getMiniDecimal(finalValue)
+        const finalDecimal = getMiniDecimal(finalValue as any)
         if (!finalDecimal.isNaN()) {
           triggerValueUpdate(finalDecimal, true)
         }
       }
 
-      // Trigger onInput later to let user customize value if they want to handle something after onChange
+      props.onInput?.(inputStr)
       emit('input', inputStr)
 
-      // optimize for chinese input experience
-      // https://github.com/ant-design/ant-design/issues/8196
       onNextPromise(() => {
         let nextInputStr = inputStr
         if (!props.parser) {
@@ -359,14 +327,20 @@ const InternalInputNumber = defineComponent<InternalInputNumberProps>({
     }
 
     // >>> Composition
-    const onCompositionStart = () => {
+    const onCompositionStart = (e: CompositionEvent) => {
       compositionRef.value = true
+      emit('compositionstart', e)
+      props.onCompositionStart?.(e)
     }
 
-    const onCompositionEnd = () => {
+    const onCompositionEnd = (e: CompositionEvent) => {
       compositionRef.value = false
+      emit('compositionend', e)
+      props.onCompositionEnd?.(e)
 
-      collectInputValue(inputRef.value!.value)
+      if (inputRef.value) {
+        collectInputValue(inputRef.value.value)
+      }
     }
 
     // >>> Input
@@ -376,17 +350,13 @@ const InternalInputNumber = defineComponent<InternalInputNumberProps>({
 
     // ============================= Step =============================
     const onInternalStep = (up: boolean, emitter: 'handler' | 'keyboard' | 'wheel') => {
-      const { step = 1, stringMode = false } = props
-      // Ignore step since out of range
       if ((up && upDisabled.value) || (!up && downDisabled.value)) {
         return
       }
 
-      // Clear typing status since it may be caused by up & down key.
-      // We should sync with input value.
       userTypingRef.value = false
 
-      let stepDecimal = getMiniDecimal(shiftKeyRef.value ? getDecupleSteps(step) : step)
+      let stepDecimal = getMiniDecimal(shiftKeyRef.value ? getDecupleSteps(props.step ?? 1) : props.step ?? 1)
       if (!up) {
         stepDecimal = stepDecimal.negate()
       }
@@ -395,27 +365,27 @@ const InternalInputNumber = defineComponent<InternalInputNumberProps>({
 
       const updatedValue = triggerValueUpdate(target, false)
 
-      emit('step', getDecimalValue(stringMode, updatedValue), {
-        offset: shiftKeyRef.value ? getDecupleSteps(step) : step,
+      const outValue = getDecimalValue(props.stringMode, updatedValue)
+      props.onStep?.(outValue as any, {
+        offset: shiftKeyRef.value ? getDecupleSteps(props.step ?? 1) : props.step ?? 1,
         type: up ? 'up' : 'down',
         emitter,
       })
+      emit('step', outValue as any, {
+        offset: shiftKeyRef.value ? getDecupleSteps(props.step ?? 1) : props.step ?? 1,
+        type: up ? 'up' : 'down',
+        emitter,
+      })
+
       inputRef.value?.focus()
     }
 
     // ============================ Flush =============================
-    /**
-     * Flush current input content to trigger value change & re-formatter input if needed.
-     * This will always flush input value for update.
-     * If it's invalidate, will fallback to last validate value.
-     */
     const flushInputValue = (userTyping: boolean) => {
       const parsedValue = getMiniDecimal(mergedParser(inputValue.value))
       let formatValue: DecimalClass
 
       if (!parsedValue.isNaN()) {
-        // Only validate value or empty value can be re-fill to inputValue
-        // Reassign the formatValue within ranged of trigger control
         formatValue = triggerValueUpdate(parsedValue, userTyping)
       }
       else {
@@ -423,18 +393,17 @@ const InternalInputNumber = defineComponent<InternalInputNumberProps>({
       }
 
       if (props.value !== undefined) {
-        // Reset back with controlled value first
         setInputValue(decimalValue.value, false)
       }
       else if (!formatValue.isNaN()) {
-        // Reset input back since no validate value
         setInputValue(formatValue, false)
       }
     }
 
-    // Solve the issue of the event triggering sequence when entering numbers in chinese input (Safari)
-    const onBeforeInput = () => {
+    const onBeforeInput = (e: InputEvent) => {
       userTypingRef.value = true
+      emit('beforeinput', e)
+      props.onBeforeInput?.(e)
     }
 
     const onKeyDown = (event: KeyboardEvent) => {
@@ -449,55 +418,86 @@ const InternalInputNumber = defineComponent<InternalInputNumberProps>({
         }
         flushInputValue(false)
         emit('pressEnter', event)
+        props.onPressEnter?.(event)
       }
 
-      if (!props.keyboard) {
+      if (props.keyboard === false) {
+        props.onKeyDown?.(event)
+        emit('keydown', event)
         return
       }
 
-      // Do step
       if (!compositionRef.value && ['Up', 'ArrowUp', 'Down', 'ArrowDown'].includes(key)) {
         onInternalStep(key === 'Up' || key === 'ArrowUp', 'keyboard')
         event.preventDefault()
       }
+
+      props.onKeyDown?.(event)
+      emit('keydown', event)
     }
 
-    const onKeyUp = () => {
+    const onKeyUp = (event: KeyboardEvent) => {
       userTypingRef.value = false
       shiftKeyRef.value = false
+      emit('keyup', event)
+      props.onKeyUp?.(event)
     }
 
+    // ============================ Wheel ============================
+    watchEffect((onCleanup) => {
+      if (props.changeOnWheel && focus.value && inputRef.value) {
+        const onWheel = (event: WheelEvent) => {
+          onInternalStep(event.deltaY < 0, 'wheel')
+          event.preventDefault()
+        }
+        inputRef.value.addEventListener('wheel', onWheel, { passive: false })
+        onCleanup(() => inputRef.value?.removeEventListener('wheel', onWheel))
+      }
+    })
+
     // >>> Focus & Blur
-    const onBlur = () => {
-      const { changeOnBlur = true } = props
-      if (changeOnBlur) {
+    const onBlur = (e: FocusEvent) => {
+      if (props.changeOnBlur ?? true) {
         flushInputValue(false)
       }
 
       focus.value = false
-
       userTypingRef.value = false
+      emit('blur', e)
+      props.onBlur?.(e)
+    }
+
+    const onFocus = (e: FocusEvent) => {
+      focus.value = true
+      emit('focus', e)
+      props.onFocus?.(e)
+    }
+
+    // >>> Mouse events
+    const onInternalMouseDown = (event: MouseEvent) => {
+      if (inputRef.value && event.target !== inputRef.value) {
+        inputRef.value.focus()
+        event.preventDefault()
+      }
+
+      emit('mousedown', event)
+      props.onMouseDown?.(event)
     }
 
     // ========================== Controlled ==========================
-    // Input by precision & formatter
-    watch([() => props.precision, () => props.formatter], () => {
+    watch([() => props.precision, () => props.formatter, () => props.decimalSeparator], () => {
       if (!decimalValue.value.isInvalidate()) {
         setInputValue(decimalValue.value, false)
       }
     })
 
-    // Input by value
     watch(() => props.value, (newVal) => {
-      const newValue = getMiniDecimal(newVal!)
+      const newValue = getMiniDecimal((newVal ?? '') as any)
       decimalValue.value = newValue
 
       const currentParsedValue = getMiniDecimal(mergedParser(inputValue.value))
 
-      // When user typing from `1.2` to `1.`, we should not convert to `1` immediately.
-      // But let it go if user set `formatter`
       if (!newValue.equals(currentParsedValue) || !userTypingRef.value || props.formatter) {
-        // Update value as effect
         setInputValue(newValue, userTypingRef.value)
       }
     })
@@ -509,202 +509,216 @@ const InternalInputNumber = defineComponent<InternalInputNumberProps>({
       }
     })
 
-    // ============================ Wheel ============================
-    watchEffect((onCleanup) => {
-      if (props.changeOnWheel && focus.value) {
-        const onWheel = (event: WheelEvent) => {
-          // moving mouse wheel rises wheel event with deltaY < 0
-          // scroll value grows from top to bottom, as screen Y coordinate
-          onInternalStep(event.deltaY < 0, 'wheel')
-          event.preventDefault()
-        }
-        const input = inputRef.value
-        if (input) {
-          input.addEventListener('wheel', onWheel, { passive: false })
-          onCleanup(() => input.removeEventListener('wheel', onWheel))
-        }
-      }
-    })
-
-    expose({
-      focus: (option?: InputFocusOptions) => {
-        if (inputRef.value)
-          triggerFocus(inputRef.value, option)
-      },
-      blur: () => {
-        inputRef.value?.blur()
-      },
-    })
     return () => {
       const {
-        prefixCls = 'vc-input-number',
-        min,
-        max,
-        step = 1,
-        defaultValue,
-        value,
+        prefixCls = defaults.prefixCls,
+        classNames,
+        styles,
+        step = defaults.step,
         disabled,
         readOnly,
-        upHandler = slots.upHandler,
-        downHandler = slots.downHandler,
-        keyboard,
-        changeOnWheel = false,
-        controls = true,
-
-        stringMode,
-
-        parser,
-        formatter,
-        precision,
-        decimalSeparator,
-
-        onChange,
-        onInput,
-        onPressEnter,
-        onStep,
-
-        changeOnBlur = true,
-
-        ...inputProps
+        controls = defaults.controls,
+        mode = defaults.mode,
       } = props
-      const inputClassName = `${prefixCls}-input`
+
+      const mergedPrefixCls = prefixCls || defaults.prefixCls!
+
+      const { class: className, style, ...restAttrs } = attrs
+      const mergedClassName = props.className || (className as any)
+      const mergedStyle = {
+        ...styles?.root,
+        ...(props.style as any),
+        ...(style as any),
+      }
+
+      const prefixNode = slots.prefix?.() ?? props.prefix
+      const suffixNode = slots.suffix?.() ?? props.suffix
+      const upNode = slots.upHandler?.() ?? props.upHandler
+      const downNode = slots.downHandler?.() ?? props.downHandler
+
+      const sharedHandlerProps = {
+        prefixCls: mergedPrefixCls,
+        onStep: onInternalStep,
+        classNames: { actions: classNames?.action },
+        styles: { actions: styles?.action },
+      }
+
+      const upHandlerNode = (
+        <StepHandler {...sharedHandlerProps as any} upDisabled={upDisabled.value}>
+          {{ upNode: () => upNode }}
+        </StepHandler>
+      )
+
+      const downHandlerNode = (
+        <StepHandler {...sharedHandlerProps as any} downDisabled={downDisabled.value}>
+          {{ downNode: () => downNode }}
+        </StepHandler>
+      )
+
+      const inputAttrs = omit(
+        {
+          ...restAttrs,
+        },
+        [
+          'prefixCls',
+          'classNames',
+          'styles',
+          'defaultValue',
+          'value',
+          'prefix',
+          'suffix',
+          'upHandler',
+          'downHandler',
+          'keyboard',
+          'changeOnWheel',
+          'controls',
+          'mode',
+          'parser',
+          'formatter',
+          'precision',
+          'decimalSeparator',
+          'onChange',
+          'onInput',
+          'onPressEnter',
+          'onStep',
+          'changeOnBlur',
+          'class',
+          'style',
+          'onMouseDown',
+          'onClick',
+          'onMouseUp',
+          'onMouseLeave',
+          'onMouseMove',
+          'onMouseEnter',
+          'onMouseOut',
+          'onFocus',
+          'onBlur',
+          'onKeyDown',
+          'onKeyUp',
+          'onCompositionStart',
+          'onCompositionEnd',
+          'onBeforeInput',
+        ],
+      )
+
       return (
         <div
-          class={clsx(prefixCls, [attrs.class], {
-            [`${prefixCls}-focused`]: focus.value,
-            [`${prefixCls}-disabled`]: disabled,
-            [`${prefixCls}-readonly`]: readOnly,
-            [`${prefixCls}-not-a-number`]: decimalValue.value.isNaN(),
-            [`${prefixCls}-out-of-range`]: !decimalValue.value.isInvalidate() && !isInRange(decimalValue.value),
-          })}
-          style={{ ...attrs.style as CSSProperties }}
-          onKeydown={onKeyDown}
-          onKeyup={onKeyUp}
-        >
-          {controls && (
-            <StepHandler
-              prefixCls={prefixCls}
-              upDisabled={upDisabled.value}
-              downDisabled={downDisabled.value}
-              onStep={onInternalStep}
-              v-slots={{ upNode: upHandler, downNode: downHandler }}
-            />
+          ref={rootRef}
+          class={clsx(
+            mergedPrefixCls,
+            `${mergedPrefixCls}-mode-${mode}`,
+            mergedClassName,
+            classNames?.root,
+            {
+              [`${mergedPrefixCls}-focused`]: focus.value,
+              [`${mergedPrefixCls}-disabled`]: disabled,
+              [`${mergedPrefixCls}-readonly`]: readOnly,
+              [`${mergedPrefixCls}-not-a-number`]: decimalValue.value.isNaN(),
+              [`${mergedPrefixCls}-out-of-range`]: !decimalValue.value.isInvalidate() && !isInRange(decimalValue.value),
+            },
           )}
-          <div
-            class={clsx(`${inputClassName}-wrap`, classNames?.actions)}
-            style={styles?.actions}
-          >
-            <input
-              autocomplete="off"
-              role="spinbutton"
-              aria-valuemin={min as any}
-              aria-valuemax={max as any}
-              aria-valuenow={decimalValue.value.isInvalidate() ? null : (decimalValue.value.toString() as any)}
-              step={step}
-              {...inputProps}
-              ref={inputRef}
-              class={inputClassName}
-              value={inputValue.value}
-              onChange={onInternalInput}
-              disabled={disabled}
-              readonly={readOnly}
-              onFocus={() => focus.value = true}
-              onBlur={onBlur}
-              onCompositionstart={onCompositionStart}
-              onCompositionend={onCompositionEnd}
-              onBeforeinput={onBeforeInput}
-            />
-          </div>
+          style={mergedStyle}
+          onMousedown={onInternalMouseDown}
+          onMouseup={(e: MouseEvent) => {
+            emit('mouseup', e)
+            props.onMouseUp?.(e)
+          }}
+          onMouseleave={(e: MouseEvent) => {
+            emit('mouseleave', e)
+            props.onMouseLeave?.(e)
+          }}
+          onMousemove={(e: MouseEvent) => {
+            emit('mousemove', e)
+            props.onMouseMove?.(e)
+          }}
+          onMouseenter={(e: MouseEvent) => {
+            emit('mouseenter', e)
+            props.onMouseEnter?.(e)
+          }}
+          onMouseout={(e: MouseEvent) => {
+            emit('mouseout', e)
+            props.onMouseOut?.(e)
+          }}
+          onClick={(e: MouseEvent) => {
+            emit('click', e)
+            props.onClick?.(e)
+          }}
+        >
+          {mode === 'spinner' && controls && downHandlerNode}
+
+          {prefixNode !== undefined && (
+            <div class={clsx(`${mergedPrefixCls}-prefix`, classNames?.prefix)} style={styles?.prefix}>
+              {prefixNode}
+            </div>
+          )}
+
+          <input
+            autocomplete="off"
+            role="spinbutton"
+            aria-valuemin={props.min as any}
+            aria-valuemax={props.max as any}
+            aria-valuenow={decimalValue.value.isInvalidate() ? null : (decimalValue.value.toString() as any)}
+            step={step as any}
+            ref={inputRef}
+            class={clsx(`${mergedPrefixCls}-input`, classNames?.input)}
+            style={styles?.input}
+            value={inputValue.value}
+            onChange={onInternalInput}
+            disabled={disabled}
+            readonly={readOnly}
+            onFocus={onFocus}
+            onBlur={onBlur}
+            onKeydown={onKeyDown}
+            onKeyup={onKeyUp}
+            onCompositionstart={onCompositionStart}
+            onCompositionend={onCompositionEnd}
+            onBeforeinput={onBeforeInput}
+            {...inputAttrs as any}
+          />
+
+          {suffixNode !== undefined && (
+            <div class={clsx(`${mergedPrefixCls}-suffix`, classNames?.suffix)} style={styles?.suffix}>
+              {suffixNode}
+            </div>
+          )}
+
+          {mode === 'spinner' && controls && upHandlerNode}
+
+          {mode === 'input' && controls && (
+            <div class={clsx(`${mergedPrefixCls}-actions`, classNames?.actions)} style={styles?.actions}>
+              {upHandlerNode}
+              {downHandlerNode}
+            </div>
+          )}
         </div>
       )
     }
   },
-})
-
-export default defineComponent({
-  name: 'InputNumber',
-  props: {
-    ...inputNumberProps(),
-    prefix: Object,
-    suffix: Object,
-    addonBefore: Object,
-    addonAfter: Object,
+  {
+    name: 'InputNumber',
+    inheritAttrs: false,
+    emits: [
+      'change',
+      'update:value',
+      'input',
+      'pressEnter',
+      'step',
+      'mousedown',
+      'click',
+      'mouseup',
+      'mouseleave',
+      'mousemove',
+      'mouseenter',
+      'mouseout',
+      'focus',
+      'blur',
+      'keydown',
+      'keyup',
+      'compositionstart',
+      'compositionend',
+      'beforeinput',
+    ],
   },
-  emits: ['change', 'update:value', 'step'],
-  slots: Object as SlotsType<{
-    upHandler: any
-    downHandler: any
-    prefix: any
-    suffix: any
-    addonBefore: any
-    addonAfter: any
-  }>,
-  setup(props, { attrs, expose, slots }) {
-    const { classNames, styles } = props
-    useProvideSemanticContext({
-      classNames,
-      styles,
-    })
-    const holderRef = ref<InstanceType<typeof BaseInput> | null>(null)
-    const inputFocusRef = ref()
+)
 
-    const focus = (option?: InputFocusOptions) => {
-      if (inputFocusRef.value) {
-        inputFocusRef.value.focus(option)
-      }
-    }
-
-    expose({
-      focus,
-      blur: () => inputFocusRef.value?.blur(),
-      nativeElement: computed(() => holderRef.value?.nativeElement || inputFocusRef.value),
-    })
-    return () => {
-      const {
-        disabled,
-        prefixCls = 'vc-input-number',
-        value,
-        prefix = slots.prefix?.(),
-        suffix = slots.suffix?.(),
-        addonBefore = slots.addonBefore,
-        addonAfter = slots.addonAfter,
-        classNames,
-        styles,
-        ...rest
-      } = props
-      return (
-        <BaseInput
-          class={attrs.class}
-          triggerFocus={focus}
-          prefixCls={prefixCls}
-          value={value}
-          disabled={disabled}
-          style={attrs.style}
-          prefix={prefix}
-          suffix={suffix}
-          addonAfter={addonAfter}
-          addonBefore={addonBefore}
-          classNames={classNames}
-          styles={styles}
-          components={{
-            affixWrapper: 'div',
-            groupWrapper: 'div',
-            wrapper: 'div',
-            groupAddon: 'div',
-          }}
-          ref={holderRef}
-        >
-          <InternalInputNumber
-            prefixCls={prefixCls}
-            disabled={disabled}
-            ref={inputFocusRef}
-            class={classNames?.input}
-            style={styles?.input}
-            v-slots={slots}
-            {...rest}
-          />
-        </BaseInput>
-      )
-    }
-  },
-})
+export default InputNumber
