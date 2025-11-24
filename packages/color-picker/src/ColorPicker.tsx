@@ -3,7 +3,7 @@ import type { Components } from './hooks/useComponent'
 import type { BaseColorPickerProps, ColorGenInput } from './interface'
 import { classNames } from '@v-c/util'
 
-import { toPropsRefs } from '@v-c/util/src/props-util'
+import { toPropsRefs } from '@v-c/util/dist/props-util'
 import { computed, defineComponent } from 'vue'
 import { Color } from './color'
 import ColorBlock from './components/ColorBlock'
