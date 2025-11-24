@@ -5,6 +5,9 @@
   "description": "vue color picker",
   "author": "",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "keywords": [
     "vue-color-picker",
     "color-picker"
@@ -18,16 +21,17 @@
     "./dist/*": "./dist/*",
     "./package.json": "./package.json"
   },
-  "main": "index.js",
+  "main": "./dist/index.js",
   "scripts": {
     "build": "vite build",
-    "test": "vitest"
+    "test": "vitest run",
+    "bump": "bumpp --release patch"
   },
   "peerDependencies": {
     "vue": "^3.0.0"
   },
   "dependencies": {
-    "@v-c/fast-color": "workspace:*",
-    "@v-c/util": "workspace:*"
+    "@ant-design/fast-color": "^3.0.0",
+    "@v-c/util": "workspace:^"
   }
 }

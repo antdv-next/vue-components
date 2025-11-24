@@ -1,6 +1,6 @@
-import type { ColorInput, HSV } from '@v-c/fast-color'
+import type { ColorInput, HSV } from '@ant-design/fast-color'
 import type { ColorGenInput, HSB } from './interface'
-import { FastColor } from '@v-c/fast-color'
+import { FastColor } from '@ant-design/fast-color'
 
 export const getRoundNumber = (value: number) => Math.round(Number(value || 0))
 

@@ -1,16 +1,16 @@
 import type { CSSProperties, PropType, VNode } from 'vue'
 import type { Components } from './hooks/useComponent'
 import type { BaseColorPickerProps, ColorGenInput } from './interface'
-
 import { classNames } from '@v-c/util'
+
+import { toPropsRefs } from '@v-c/util/src/props-util'
 import { computed, defineComponent } from 'vue'
 import { Color } from './color'
 import ColorBlock from './components/ColorBlock'
 
 import Picker from './components/Picker'
-import Slider from './components/Slider'
 import useColorState from './hooks/useColorState'
-// import useComponent from './hooks/useComponent'
+import useComponent from './hooks/useComponent'
 import { ColorPickerPrefixCls, defaultColor } from './util'
 
 const HUE_COLORS = [
@@ -88,18 +88,21 @@ const ColorPicker = defineComponent({
   setup(props, { attrs, emit }) {
     // ========================== Components ==========================
     // const [Slider] = useComponent(props.components)
+    const { value } = toPropsRefs(props, 'value')
 
     // ============================ Color =============================
     const [colorValue, setColorValue] = useColorState(
-      defaultColor,
-      { value: props.value, defaultValue: props.defaultValue },
+      props.defaultValue || defaultColor,
+      value,
     )
 
     const alphaColor = computed(() => colorValue.value.setA(1).toRgbString())
 
     // ============================ Events ============================
     const handleChange: BaseColorPickerProps['onChange'] = (data, type) => {
-      setColorValue(data)
+      if (!value.value) {
+        setColorValue(data)
+      }
       emit('change', data, type)
       emit('update:value', data)
     }
@@ -135,6 +138,7 @@ const ColorPicker = defineComponent({
         disabledAlpha = false,
         disabled = false,
       } = props
+      const [Slider] = useComponent(props.components)
 
       // ============================ Render ============================
       const mergeCls = classNames(`${prefixCls}-panel`, [attrs.class], {
@@ -198,6 +202,7 @@ const ColorPicker = defineComponent({
       )
     }
   },
+  name: 'ColorPicker',
 })
 
 export default ColorPicker

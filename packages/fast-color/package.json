@@ -17,7 +17,7 @@
     "./dist/*": "./dist/*",
     "./package.json": "./package.json"
   },
-  "main": "index.js",
+  "main": "./dist/index.js",
   "scripts": {
     "build": "vite build",
     "test": "vitest"
