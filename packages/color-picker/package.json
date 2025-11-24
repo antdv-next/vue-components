@@ -12,6 +12,10 @@
     "vue-color-picker",
     "color-picker"
   ],
+  "files": [
+    "dist",
+    "package.json"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
