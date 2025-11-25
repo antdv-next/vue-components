@@ -130,7 +130,7 @@ const sliderDefaults: SliderProps = {
   track: true,
 }
 
-const Slider = defineComponent<SliderProps<ValueType>>((props = sliderDefaults, {
+const Slider = defineComponent<SliderProps>((props = sliderDefaults, {
   attrs,
   slots,
   emit,
@@ -643,11 +643,9 @@ const Slider = defineComponent<SliderProps<ValueType>>((props = sliderDefaults, 
           onStartMove={onStartMove}
           onOffsetChange={onHandleOffsetChange}
           onFocus={(e: FocusEvent) => {
-            emit('focus', e)
             props.onFocus?.(e)
           }}
           onBlur={(e: FocusEvent) => {
-            emit('blur', e)
             props.onBlur?.(e)
           }}
           handleRender={handleRender}
