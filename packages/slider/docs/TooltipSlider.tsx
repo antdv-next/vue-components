@@ -37,18 +37,20 @@ export const HandleTooltip = defineComponent({
 
       onCleanup(cancelKeepAlign)
     })
-    return () => (
-      <Tooltip
-        placement="top"
-        overlayInnerStyle={{ minHeight: 'auto' }}
-        ref={tooltipRef.value}
-        visible={props.visible}
-        overlay={props.tipFormatter(props.value)}
-        v-slots={{
-          default: slots.default,
-        }}
-      />
-    )
+    return () => {
+      return (
+        <Tooltip
+          placement="top"
+          overlayInnerStyle={{ minHeight: 'auto' }}
+          ref={tooltipRef.value}
+          visible={props.visible}
+          overlay={props.tipFormatter(props.value)}
+          v-slots={{
+            default: slots.default,
+          }}
+        />
+      )
+    }
   },
 })
 

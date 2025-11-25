@@ -230,8 +230,7 @@ export default defineComponent({
           node: handleNode,
         }
 
-        const RenderNode = () => render(renderProps)
-        return <RenderNode />
+        return render(renderProps)
       }
       return handleNode
     }
