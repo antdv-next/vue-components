@@ -7,7 +7,7 @@ import { useInjectSlider } from '../context'
 import { getDirectionStyle, getIndex } from '../util'
 
 export interface RenderProps {
-  index: number
+  index: number | null
   prefixCls: string
   value: number
   dragging: boolean
@@ -20,7 +20,7 @@ export default defineComponent({
   props: {
     prefixCls: { type: String, required: true },
     value: { type: Number, required: true },
-    valueIndex: { type: Number, required: true },
+    valueIndex: { type: Number as PropType<number | null>, required: true },
     dragging: { type: Boolean, default: false },
     draggingDelete: { type: Boolean, default: false },
     onStartMove: { type: Function as PropType<OnStartMove>, required: true },
@@ -53,6 +53,7 @@ export default defineComponent({
     const divProps = ref({})
     const handleClass = ref({})
     const handleStyle = ref({})
+    const handleNodeRef = ref<HTMLDivElement>()
 
     // ============================ Events ============================
     const onInternalStartMove = (e: MouseEvent | TouchEvent) => {
@@ -138,7 +139,9 @@ export default defineComponent({
       }
     }
     expose({
-      focus: () => props.valueIndex,
+      focus: () => {
+        handleNodeRef.value?.focus()
+      },
     })
 
     return () => {
@@ -207,6 +210,7 @@ export default defineComponent({
       }
       const handleNode = (
         <div
+          ref={handleNodeRef}
           class={handleClass.value}
           style={handleStyle.value}
           {...divProps.value}

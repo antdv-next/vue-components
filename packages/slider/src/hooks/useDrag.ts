@@ -1,8 +1,8 @@
-import type { Ref, ShallowRef } from 'vue'
+import type { ComputedRef, Ref, ShallowRef } from 'vue'
 import type { Direction, OnStartMove } from '../interface'
 import type { OffsetValues } from './useOffset'
 import useEvent from '@v-c/util/dist/hooks/useEvent'
-import { computed, inject, onUnmounted, ref } from 'vue'
+import { computed, inject, onUnmounted, ref, watch } from 'vue'
 import { defaultUnstableContextValue, UnstableContextKey } from '../context'
 
 /** Drag to delete offset. It's a user experience number for dragging out */
@@ -16,16 +16,16 @@ function getPosition(e: MouseEvent | TouchEvent) {
 
 function useDrag(
   containerRef: Ref<HTMLDivElement>,
-  direction: ShallowRef<Direction>,
+  direction: ShallowRef<Direction> | ComputedRef<Direction>,
   rawValues: Ref<number[]>,
-  min: ShallowRef<number>,
-  max: ShallowRef<number>,
-  formatValue: (value: number) => number,
+  min: ShallowRef<number> | ComputedRef<number>,
+  max: ShallowRef<number> | ComputedRef<number>,
+  formatValue: Ref<(value: number) => number> | ComputedRef<(value: number) => number>,
   triggerChange: (values: number[]) => void,
   finishChange: (draggingDelete: boolean) => void,
-  offsetValues: OffsetValues,
-  editable: boolean,
-  minCount: number,
+  offsetValues: Ref<OffsetValues> | ComputedRef<OffsetValues>,
+  editable: ShallowRef<boolean> | ComputedRef<boolean>,
+  minCount: ShallowRef<number> | ComputedRef<number>,
 ): [
     draggingIndex: Ref<number>,
     draggingValue: Ref<number>,
@@ -46,9 +46,16 @@ function useDrag(
   const unstableContext = inject(UnstableContextKey, defaultUnstableContextValue)
   const { onDragStart, onDragChange } = unstableContext
 
-  if (draggingIndex.value === -1) {
-    cacheValues.value = rawValues.value
-  }
+  watch(
+    rawValues,
+    (val) => {
+      if (draggingIndex.value === -1) {
+        cacheValues.value = [...val]
+        originValues.value = [...val]
+      }
+    },
+    { immediate: true },
+  )
 
   // Clean up event
   onUnmounted(() => {
@@ -98,7 +105,7 @@ function useDrag(
         offset = Math.min(offset, maxEndOffset)
 
         // Use first value to revert back of valid offset (like steps marks)
-        const formatStartValue = formatValue(startValue + offset)
+        const formatStartValue = formatValue.value(startValue + offset)
         offset = formatStartValue - startValue
         const cloneCacheValues = originValues.value.map<number>(val => val + offset)
         flushValues(cloneCacheValues)
@@ -111,7 +118,7 @@ function useDrag(
         const cloneValues = [...cacheValues.value]
         cloneValues[valueIndex] = originValues.value[valueIndex]
 
-        const next = offsetValues(cloneValues, offsetDist, valueIndex, 'dist')
+        const next = offsetValues.value(cloneValues, offsetDist, valueIndex, 'dist')
 
         flushValues(next.values, next.value, deleteMark)
       }
@@ -178,8 +185,8 @@ function useDrag(
       }
 
       // Check if need mark remove
-      deleteMark = editable
-        ? Math.abs(removeDist) > REMOVE_DIST && minCount < cacheValues.value.length
+      deleteMark = editable.value
+        ? Math.abs(removeDist) > REMOVE_DIST && minCount.value < cacheValues.value.length
         : false
       draggingDelete.value = deleteMark
 
@@ -228,7 +235,7 @@ function useDrag(
       counts[val] = (counts[val] || 0) - 1
     })
 
-    const maxDiffCount = editable ? 1 : 0
+    const maxDiffCount = editable.value ? 1 : 0
     const diffCount: number = Object.values(counts).reduce(
       (prev, next) => prev + Math.abs(next),
       0,

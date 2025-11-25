@@ -1,4 +1,4 @@
-import type { ComputedRef, CSSProperties, ExtractPropTypes, PropType, Ref, SlotsType } from 'vue'
+import type { CSSProperties, Ref } from 'vue'
 import type { HandlesRef } from './Handles'
 import type {
   AriaValueFormat,
@@ -11,7 +11,7 @@ import type { InternalMarkObj, MarkObj } from './Marks'
 import { classNames as cls } from '@v-c/util'
 import isEqual from '@v-c/util/dist/isEqual'
 import warning from '@v-c/util/dist/warning'
-import { computed, defineComponent, isVNode, ref, shallowRef, watch, watchEffect } from 'vue'
+import { computed, defineComponent, isVNode, ref, shallowRef, watch } from 'vue'
 import { useProviderSliderContext } from './context'
 import Handles from './Handles'
 import useDrag from './hooks/useDrag'
@@ -31,7 +31,7 @@ export interface RangeConfig {
 }
 
 export interface RenderProps {
-  index: number
+  index: number | null
   prefixCls: string
   value: number
   dragging: boolean
@@ -41,562 +41,630 @@ export interface RenderProps {
 
 type ValueType = number | number[]
 
-function sliderProps() {
-  return {
-    prefixCls: { type: String, default: 'vc-slider' },
-    className: String,
-    classNames: Object as PropType<SliderClassNames>,
-    styles: Object as PropType<SliderStyles>,
-    id: String,
-    disabled: { type: Boolean, default: false },
-    keyboard: { type: Boolean, default: true },
-    autoFocus: Boolean,
-    min: { type: Number, default: 0 },
-    max: { type: Number, default: 100 },
-    step: { type: [Number, null], default: 1 },
-    value: [Number, Array, null] as PropType<ValueType | null>,
-    defaultValue: [Number, Array] as PropType<ValueType>,
-    range: [Boolean, Object] as PropType<boolean | RangeConfig>,
-    count: Number,
-    allowCross: { type: Boolean, default: true },
-    pushable: { type: [Boolean, Number], default: false },
-    reverse: Boolean,
-    vertical: Boolean,
-    included: { type: Boolean, default: true },
-    startPoint: Number,
-    trackStyle: [Object, Array] as PropType<Record<string, any> | Record<string, any>[]>,
-    handleStyle: [Object, Array] as PropType<Record<string, any> | Record<string, any>[]>,
-    railStyle: Object as PropType<Record<string, any>>,
-    dotStyle: [Object, Function] as PropType<Record<string, any> | ((dotValue: number) => Record<string, any>)>,
-    activeDotStyle: [Object, Function] as PropType<Record<string, any> | ((dotValue: number) => Record<string, any>)>,
-    marks: Object as PropType<Record<string | number, any | MarkObj>>,
-    dots: Boolean,
-    handleRender: Function as PropType<(props: RenderProps) => any>,
-    activeHandleRender: Function as PropType<(props: RenderProps) => any>,
-    track: { type: Boolean, default: true },
-    tabIndex: { type: [Number, Array] as PropType<ValueType>, default: 0 },
-    ariaLabelForHandle: [String, Array] as PropType<string | string[]>,
-    ariaLabelledByForHandle: [String, Array] as PropType<string | string[]>,
-    ariaRequired: Boolean,
-    ariaValueTextFormatterForHandle: [Function, Array] as PropType<AriaValueFormat | AriaValueFormat[]>,
-    onFocus: Function as PropType<(e: FocusEvent) => void>,
-    onBlur: Function as PropType<(e: FocusEvent) => void>,
-    onChange: Function as PropType<(value: ValueType) => void>,
-    /** @deprecated It's always better to use `onChange` instead */
-    onBeforeChange: Function as PropType<(value: ValueType) => void>,
-    /** @deprecated Use `onChangeComplete` instead */
-    onAfterChange: Function as PropType<(value: ValueType) => void>,
-    onChangeComplete: Function as PropType<(value: ValueType) => void>,
-  }
+export interface SliderProps<Value extends ValueType = ValueType> {
+  prefixCls?: string
+  className?: string
+  style?: CSSProperties
+
+  classNames?: SliderClassNames
+  styles?: SliderStyles
+
+  id?: string
+
+  // Status
+  disabled?: boolean
+  keyboard?: boolean
+  autoFocus?: boolean
+  onFocus?: (e: FocusEvent) => void
+  onBlur?: (e: FocusEvent) => void
+
+  // Value
+  range?: boolean | RangeConfig
+  /** @deprecated Use `range.minCount` or `range.maxCount` to handle this */
+  count?: number
+  min?: number
+  max?: number
+  step?: number | null
+  value?: Value | null
+  defaultValue?: Value | null
+  onChange?: (value: Value) => void
+  /** @deprecated It's always better to use `onChange` instead */
+  onBeforeChange?: (value: Value) => void
+  /** @deprecated Use `onChangeComplete` instead */
+  onAfterChange?: (value: Value) => void
+  onChangeComplete?: (value: Value) => void
+
+  // Cross
+  allowCross?: boolean
+  pushable?: boolean | number
+
+  // Direction
+  reverse?: boolean
+  vertical?: boolean
+
+  // Style
+  included?: boolean
+  startPoint?: number
+  /** @deprecated Please use `styles.track` instead */
+  trackStyle?: CSSProperties | CSSProperties[]
+  /** @deprecated Please use `styles.handle` instead */
+  handleStyle?: CSSProperties | CSSProperties[]
+  /** @deprecated Please use `styles.rail` instead */
+  railStyle?: CSSProperties
+  dotStyle?: CSSProperties | ((dotValue: number) => CSSProperties)
+  activeDotStyle?: CSSProperties | ((dotValue: number) => CSSProperties)
+
+  // Decorations
+  marks?: Record<string | number, any | MarkObj>
+  dots?: boolean
+
+  // Components
+  handleRender?: (props: RenderProps) => any
+  activeHandleRender?: (props: RenderProps) => any
+  track?: boolean
+
+  // Accessibility
+  tabIndex?: number | number[]
+  ariaLabelForHandle?: string | string[]
+  ariaLabelledByForHandle?: string | string[]
+  ariaRequired?: boolean
+  ariaValueTextFormatterForHandle?: AriaValueFormat | AriaValueFormat[]
 }
-export type SliderProps = Partial<ExtractPropTypes<ReturnType<typeof sliderProps>>>
 
 export interface SliderRef {
   focus: () => void
   blur: () => void
 }
 
-export default defineComponent({
-  name: 'Slider',
-  props: {
-    ...sliderProps(),
-  },
-  emits: ['focus', 'blur', 'change', 'beforeChange', 'afterChange', 'changeComplete'],
-  slots: Object as SlotsType<{
-    mark: ({ point, label }: { point: number, label: unknown }) => any
-  }>,
-  setup(props, { attrs, emit, expose, slots }) {
-    const handlesRef = ref<HandlesRef>()
-    const containerRef = ref<HTMLDivElement>()
+const sliderDefaults: SliderProps = {
+  prefixCls: 'vc-slider',
+  keyboard: true,
+  disabled: false,
+  min: 0,
+  max: 100,
+  step: 1,
+  allowCross: true,
+  pushable: false,
+  included: true,
+  tabIndex: 0,
+  track: true,
+}
 
-    const direction = shallowRef<Direction>('ltr')
-    watch([() => props.reverse, () => props.vertical], ([newReverse, newVertical]) => {
-      if (newVertical) {
-        direction.value = newReverse ? 'ttb' : 'btt'
+const Slider = defineComponent<SliderProps<ValueType>>((props = sliderDefaults, {
+  attrs,
+  slots,
+  emit,
+  expose,
+}) => {
+  const prefixCls = computed(() => props.prefixCls ?? sliderDefaults.prefixCls!)
+  const disabled = computed(() => props.disabled ?? sliderDefaults.disabled!)
+  const keyboard = computed(() => props.keyboard ?? sliderDefaults.keyboard!)
+  const included = computed(() => props.included ?? sliderDefaults.included!)
+  const tabIndex = computed(() => props.tabIndex ?? sliderDefaults.tabIndex!)
+  const allowCross = computed(() => props.allowCross ?? sliderDefaults.allowCross!)
+
+  const direction = computed<Direction>(() => {
+    if (props.vertical) {
+      return props.reverse ? 'ttb' : 'btt'
+    }
+    return props.reverse ? 'rtl' : 'ltr'
+  })
+
+  // ============================ Range =============================
+  const rangeConfig = computed(() => {
+    const [
+      rangeEnabled,
+      rangeEditable,
+      rangeDraggableTrack,
+      minCount,
+      maxCount,
+    ] = useRange(props.range)
+    return {
+      rangeEnabled,
+      rangeEditable,
+      rangeDraggableTrack,
+      minCount,
+      maxCount,
+    }
+  })
+  const rangeEnabled = computed(() => rangeConfig.value.rangeEnabled)
+  const rangeEditable = computed(() => rangeConfig.value.rangeEditable)
+  const rangeDraggableTrack = computed(() => rangeConfig.value.rangeDraggableTrack)
+  const minCount = computed(() => rangeConfig.value.minCount ?? 0)
+  const maxCount = computed(() => rangeConfig.value.maxCount)
+
+  const mergedMin = computed(() => (Number.isFinite(props.min ?? 0) ? props.min ?? 0 : 0))
+  const mergedMax = computed(() => (Number.isFinite(props.max ?? 100) ? props.max ?? 100 : 100))
+
+  // ============================= Step =============================
+  const mergedStep = computed<number | null>(() => {
+    const step = props.step ?? sliderDefaults.step!
+    if (step !== null && step <= 0) {
+      return 1
+    }
+    return step
+  })
+
+  // ============================= Push =============================
+  const mergedPush = computed<false | number | null>(() => {
+    const pushable = props.pushable ?? sliderDefaults.pushable!
+    if (typeof pushable === 'boolean') {
+      return pushable ? mergedStep.value : false
+    }
+    return pushable >= 0 ? pushable : false
+  })
+
+  // ============================ Marks =============================
+  const markList = computed<InternalMarkObj[]>(() => {
+    return Object.keys(props.marks || {})
+      .map<InternalMarkObj>((key) => {
+        const mark = props.marks?.[key]
+        const markObj: InternalMarkObj = {
+          value: Number(key),
+        }
+
+        if (
+          mark
+          && typeof mark === 'object'
+          && !isVNode(mark)
+          && ('label' in mark || 'style' in mark)
+        ) {
+          markObj.style = mark.style
+          markObj.label = mark.label
+        }
+        else {
+          markObj.label = mark
+        }
+
+        return markObj
+      })
+      .filter(({ label }) => label || typeof label === 'number')
+      .sort((a, b) => a.value - b.value)
+  })
+
+  // ============================ Format ============================
+  const [formatValue, offsetValues] = useOffset(
+    mergedMin,
+    mergedMax,
+    mergedStep,
+    markList,
+    allowCross,
+    mergedPush,
+  )
+  const formatValueRef = computed(() => formatValue)
+  const offsetValuesRef = computed(() => offsetValues)
+
+  // ============================ Values ============================
+  const mergedValue = shallowRef<ValueType | null | undefined>(
+    props.value !== undefined ? props.value : props.defaultValue,
+  )
+
+  watch(
+    () => props.value,
+    (val) => {
+      if (val !== undefined) {
+        mergedValue.value = val
+      }
+    },
+  )
+
+  const rawValues = computed<number[]>(() => {
+    const valueList
+      = mergedValue.value === null || mergedValue.value === undefined
+        ? []
+        : Array.isArray(mergedValue.value)
+          ? mergedValue.value
+          : [mergedValue.value]
+
+    const [val0 = mergedMin.value] = valueList
+    let returnValues: number[] = mergedValue.value === null ? [] : [val0]
+
+    // Format as range
+    if (rangeEnabled.value) {
+      returnValues = [...valueList]
+
+      // When count provided or value is `undefined`, we fill values
+      if (typeof props.count === 'number' || mergedValue.value === undefined) {
+        const pointCount
+          = typeof props.count === 'number' && props.count >= 0 ? props.count + 1 : 2
+        returnValues = returnValues.slice(0, pointCount)
+
+        // Fill with count
+        while (returnValues.length < pointCount) {
+          returnValues.push(returnValues[returnValues.length - 1] ?? mergedMin.value)
+        }
+      }
+      returnValues.sort((a, b) => a - b)
+    }
+
+    // Align in range
+    returnValues.forEach((val, index) => {
+      returnValues[index] = formatValue(val)
+    })
+
+    return returnValues
+  })
+
+  // =========================== onChange ===========================
+  const handlesRef = ref<HandlesRef>()
+  const containerRef = ref<HTMLDivElement>()
+
+  const getTriggerValue = (triggerValues: number[]): ValueType =>
+    (rangeEnabled.value ? triggerValues : triggerValues[0]) as ValueType
+
+  const triggerChange = (nextValues: number[]) => {
+    const cloneNextValues = [...nextValues].sort((a, b) => a - b)
+
+    if (!isEqual(cloneNextValues, rawValues.value, true)) {
+      const triggerValue = getTriggerValue(cloneNextValues)
+      emit('change', triggerValue)
+      props.onChange?.(triggerValue)
+    }
+
+    mergedValue.value = cloneNextValues as ValueType
+  }
+
+  const finishChange = (draggingDelete?: boolean) => {
+    if (draggingDelete) {
+      handlesRef.value?.hideHelp()
+    }
+
+    const finishValue = getTriggerValue(rawValues.value)
+    emit('afterChange', finishValue)
+    props.onAfterChange?.(finishValue)
+    warning(
+      !props.onAfterChange,
+      '[vc-slider] `onAfterChange` is deprecated. Please use `onChangeComplete` instead.',
+    )
+    emit('changeComplete', finishValue)
+    props.onChangeComplete?.(finishValue)
+  }
+
+  const onDelete = (index: number) => {
+    if (disabled.value || !rangeEditable.value || rawValues.value.length <= minCount.value) {
+      return
+    }
+
+    const cloneNextValues = [...rawValues.value]
+    cloneNextValues.splice(index, 1)
+
+    const triggerValue = getTriggerValue(cloneNextValues)
+    emit('beforeChange', triggerValue)
+    props.onBeforeChange?.(triggerValue)
+    triggerChange(cloneNextValues)
+
+    const nextFocusIndex = Math.max(0, index - 1)
+    handlesRef.value?.hideHelp()
+    handlesRef.value?.focus(nextFocusIndex)
+  }
+
+  const [
+    draggingIndex,
+    draggingValue,
+    draggingDelete,
+    cacheValues,
+    onStartDrag,
+  ] = useDrag(
+    containerRef as unknown as Ref<HTMLDivElement>,
+    direction,
+    rawValues,
+    mergedMin,
+    mergedMax,
+    formatValueRef,
+    triggerChange,
+    finishChange,
+    offsetValuesRef,
+    rangeEditable,
+    minCount,
+  )
+
+  /**
+   * When `rangeEditable` will insert a new value in the values array.
+   * Else it will replace the value in the values array.
+   */
+  const changeToCloseValue = (newValue: number, e?: MouseEvent) => {
+    if (!disabled.value) {
+      const cloneNextValues = [...rawValues.value]
+
+      let valueIndex = 0
+      let valueBeforeIndex = 0
+      let valueDist = mergedMax.value - mergedMin.value
+
+      rawValues.value.forEach((val, index) => {
+        const dist = Math.abs(newValue - val)
+        if (dist <= valueDist) {
+          valueDist = dist
+          valueIndex = index
+        }
+
+        if (val < newValue) {
+          valueBeforeIndex = index
+        }
+      })
+
+      let focusIndex = valueIndex
+
+      if (
+        rangeEditable.value
+        && valueDist !== 0
+        && (!maxCount.value || rawValues.value.length < maxCount.value)
+      ) {
+        cloneNextValues.splice(valueBeforeIndex + 1, 0, newValue)
+        focusIndex = valueBeforeIndex + 1
       }
       else {
-        direction.value = newReverse ? 'rtl' : 'ltr'
-      }
-    }, { immediate: true })
-
-    const mergedMin = shallowRef(0)
-    const mergedMax = shallowRef(100)
-    const mergedStep = shallowRef<number | null>(1)
-    const markList = ref<InternalMarkObj[]>([])
-
-    const mergedValue = ref<ValueType | null>(props.defaultValue! || props.value!)
-    const rawValues = ref<number[] | ComputedRef<number[]>>([])
-    const getRange = ref()
-    const getOffset = ref()
-
-    watchEffect(() => {
-      const {
-        range,
-        min,
-        max,
-        step,
-        pushable,
-        marks,
-        allowCross,
-        value,
-        count,
-      } = props
-      // ============================ Range =============================
-      const [rangeEnabled, rangeEditable, rangeDraggableTrack, minCount, maxCount] = useRange(range)
-      getRange.value = {
-        rangeEnabled,
-        rangeEditable,
-        rangeDraggableTrack,
-        minCount,
-        maxCount,
+        cloneNextValues[valueIndex] = newValue
       }
 
-      mergedMin.value = isFinite(min) ? min : 0
-      mergedMax.value = isFinite(max) ? max : 100
-
-      // ============================= Step =============================
-      mergedStep.value = step !== null && step <= 0 ? 1 : step
-
-      // ============================= Push =============================
-      const mergedPush = computed(() => {
-        if (typeof pushable === 'boolean') {
-          return pushable ? mergedStep.value : false
-        }
-        return pushable >= 0 ? pushable : false
-      })
-
-      // ============================ Marks =============================
-      markList.value = Object.keys(marks || {})
-        .map<InternalMarkObj>((key) => {
-          const mark = marks?.[key]
-          const markObj: InternalMarkObj = {
-            value: Number(key),
-          }
-
-          if (
-            mark
-            && typeof mark === 'object'
-            && !isVNode(mark)
-            && ('label' in mark || 'style' in mark)
-          ) {
-            markObj.style = mark.style
-            markObj.label = mark.label
-          }
-          else {
-            markObj.label = mark
-          }
-
-          return markObj
-        })
-        .filter(({ label }) => label || typeof label === 'number')
-        .sort((a, b) => a.value - b.value)
-
-      // ============================ Format ============================
-      const [formatValue, offsetValues] = useOffset(
-        mergedMin.value,
-        mergedMax.value,
-        mergedStep.value,
-        markList.value,
-        allowCross,
-        mergedPush.value,
-      )
-      getOffset.value = {
-        formatValue,
-        offsetValues,
+      if (rangeEnabled.value && !rawValues.value.length && props.count === undefined) {
+        cloneNextValues.push(newValue)
       }
 
-      // ============================ Values ============================
-      if (value !== undefined) {
-        mergedValue.value = value
-      }
-
-      const getRawValues = computed(() => {
-        const valueList
-          = mergedValue.value === null || mergedValue.value === undefined
-            ? []
-            : Array.isArray(mergedValue.value)
-              ? mergedValue.value
-              : [mergedValue.value]
-
-        const [val0 = mergedMin.value] = valueList
-        let returnValues: number[] = mergedValue.value === null ? [] : [val0]
-
-        // Format as range
-        if (rangeEnabled) {
-          returnValues = [...valueList]
-
-          // When count provided or value is `undefined`, we fill values
-          if (count || mergedValue.value === undefined) {
-            const pointCount = count! >= 0 ? count! + 1 : 2
-            returnValues = returnValues.slice(0, pointCount)
-
-            // Fill with count
-            while (returnValues.length < pointCount) {
-              returnValues.push(returnValues[returnValues.length - 1] ?? mergedMin.value)
-            }
-          }
-          returnValues.sort((a, b) => a - b)
-        }
-
-        // Align in range
-        returnValues.forEach((val, index) => {
-          returnValues[index] = formatValue(val)
-        })
-
-        return returnValues
-      })
-
-      rawValues.value = getRawValues.value
-    })
-
-    // =========================== onChange ===========================
-    const getTriggerValue = (triggerValues: number[]) => {
-      return getRange.value.rangeEnabled ? triggerValues : triggerValues[0]
-    }
-
-    const triggerChange = (nextValues: number[]) => {
-      // Order first
-      const cloneNextValues = [...nextValues].sort((a, b) => a - b)
-
-      // Trigger event if needed
-      if (!isEqual(cloneNextValues, rawValues.value, true)) {
-        emit('change', getTriggerValue(cloneNextValues))
-      }
-
-      // We set this later since it will re-render component immediately
-      mergedValue.value = cloneNextValues
-    }
-
-    const finishChange = (draggingDelete?: boolean) => {
-      // Trigger from `useDrag` will tell if it's a delete action
-      if (draggingDelete) {
-        handlesRef.value?.hideHelp()
-      }
-
-      const finishValue = getTriggerValue(rawValues.value)
-      if (props.onAfterChange) {
-        emit('afterChange', finishValue)
-        warning(
-          false,
-          '[vc-slider] `onAfterChange` is deprecated. Please use `onChangeComplete` instead.',
-        )
-      }
-      emit('changeComplete', finishValue)
-    }
-
-    const onDelete = (index: number) => {
-      if (props.disabled || !getRange.value.rangeEditable || rawValues.value.length <= getRange.value.minCount) {
-        return
-      }
-
-      const cloneNextValues = [...rawValues.value]
-      cloneNextValues.splice(index, 1)
-
-      emit('beforeChange', getTriggerValue(cloneNextValues))
+      const nextValue = getTriggerValue(cloneNextValues)
+      emit('beforeChange', nextValue)
+      props.onBeforeChange?.(nextValue)
       triggerChange(cloneNextValues)
 
-      const nextFocusIndex = Math.max(0, index - 1)
-      handlesRef.value?.hideHelp()
-      handlesRef.value?.focus(nextFocusIndex)
-    }
-    const [draggingIndex, draggingValue, draggingDelete, cacheValues, onStartDrag] = useDrag(
-      containerRef as Ref<HTMLDivElement>,
-      direction,
-      rawValues,
-      mergedMin,
-      mergedMax,
-      getOffset.value.formatValue,
-      triggerChange,
-      finishChange,
-      getOffset.value.offsetValues,
-      getRange.value.rangeEditable,
-      getRange.value.minCount,
-    )
-
-    /**
-     * When `rangeEditable` will insert a new value in the values array.
-     * Else it will replace the value in the values array.
-     */
-    const changeToCloseValue = (newValue: number, e?: MouseEvent) => {
-      if (!props.disabled) {
-        // Create new values
-        const cloneNextValues = [...rawValues.value]
-
-        let valueIndex = 0
-        let valueBeforeIndex = 0 // Record the index which value < newValue
-        let valueDist = mergedMax.value - mergedMin.value
-
-        rawValues.value.forEach((val, index) => {
-          const dist = Math.abs(newValue - val)
-          if (dist <= valueDist) {
-            valueDist = dist
-            valueIndex = index
-          }
-
-          if (val < newValue) {
-            valueBeforeIndex = index
-          }
-        })
-
-        let focusIndex = valueIndex
-
-        if (getRange.value.rangeEditable && valueDist !== 0 && (!getRange.value.maxCount || rawValues.value.length < getRange.value.maxCount)) {
-          cloneNextValues.splice(valueBeforeIndex + 1, 0, newValue)
-          focusIndex = valueBeforeIndex + 1
-        }
-        else {
-          cloneNextValues[valueIndex] = newValue
-        }
-        // Fill value to match default 2 (only when `rawValues` is empty)
-        if (getRange.value.rangeEnabled && !rawValues.value.length && props.count === undefined) {
-          cloneNextValues.push(newValue)
-        }
-
-        const nextValue = getTriggerValue(cloneNextValues)
-        emit('beforeChange', nextValue)
-        triggerChange(cloneNextValues)
-
-        if (e) {
-          (document.activeElement as HTMLElement)?.blur?.()
-          handlesRef.value?.focus(focusIndex)
-          onStartDrag(e, focusIndex, cloneNextValues)
-        }
-        else {
-          if (props.onAfterChange) {
-            // https://github.com/ant-design/ant-design/issues/49997
-            emit('afterChange', nextValue)
-            warning(
-              false,
-              '[vc-slider] `onAfterChange` is deprecated. Please use `onChangeComplete` instead.',
-            )
-          }
-          emit('changeComplete', nextValue)
-        }
+      if (e) {
+        (document.activeElement as HTMLElement)?.blur?.()
+        handlesRef.value?.focus(focusIndex)
+        onStartDrag(e, focusIndex, cloneNextValues)
+      }
+      else {
+        emit('afterChange', nextValue)
+        props.onAfterChange?.(nextValue)
+        warning(
+          !props.onAfterChange,
+          '[vc-slider] `onAfterChange` is deprecated. Please use `onChangeComplete` instead.',
+        )
+        emit('changeComplete', nextValue)
+        props.onChangeComplete?.(nextValue)
       }
     }
+  }
 
-    // ============================ Click =============================
-    const onSliderMouseDown = (e: MouseEvent) => {
-      e.preventDefault()
-      const { width, height, left, top, bottom, right }
-        = containerRef.value!.getBoundingClientRect()
-      const { clientX, clientY } = e
+  // ============================ Click =============================
+  const onSliderMouseDown = (e: MouseEvent) => {
+    e.preventDefault()
 
-      let percent: number
-      switch (direction.value) {
-        case 'btt':
-          percent = (bottom - clientY) / height
-          break
-
-        case 'ttb':
-          percent = (clientY - top) / height
-          break
-
-        case 'rtl':
-          percent = (right - clientX) / width
-          break
-
-        default:
-          percent = (clientX - left) / width
-      }
-
-      const nextValue = mergedMin.value + percent * (mergedMax.value - mergedMin.value)
-      changeToCloseValue(getOffset.value.formatValue(nextValue), e)
+    const rect = containerRef.value?.getBoundingClientRect()
+    if (!rect) {
+      return
     }
 
-    // =========================== Keyboard ===========================
-    const keyboardValue = ref<number | null>(null)
+    const { width, height, left, top, bottom, right } = rect
+    const { clientX, clientY } = e
 
-    const onHandleOffsetChange = (offset: number | 'min' | 'max', valueIndex: number) => {
-      if (!props.disabled) {
-        const next = getOffset.value.offsetValues(rawValues.value, offset, valueIndex)
+    let percent: number
+    switch (direction.value) {
+      case 'btt':
+        percent = (bottom - clientY) / height
+        break
 
-        emit('beforeChange', getTriggerValue(rawValues.value))
-        triggerChange(next.values)
+      case 'ttb':
+        percent = (clientY - top) / height
+        break
 
-        keyboardValue.value = next.value
-      }
+      case 'rtl':
+        percent = (right - clientX) / width
+        break
+
+      default:
+        percent = (clientX - left) / width
     }
 
-    watchEffect(() => {
-      if (keyboardValue.value !== null) {
-        const valueIndex = rawValues.value.indexOf(keyboardValue.value)
-        if (valueIndex >= 0) {
-          handlesRef.value?.focus(valueIndex)
-        }
-      }
+    const nextValue = mergedMin.value + percent * (mergedMax.value - mergedMin.value)
+    changeToCloseValue(formatValue(nextValue), e)
+  }
 
-      keyboardValue.value = null
-    })
+  // =========================== Keyboard ===========================
+  const keyboardValue = shallowRef<number | null>(null)
 
-    // ============================= Drag =============================
-    const mergedDraggableTrack = computed(() => {
-      if (getRange.value.rangeDraggableTrack && mergedStep.value === null) {
-        if (process.env.NODE_ENV !== 'production') {
-          warning(false, '`draggableTrack` is not supported when `step` is `null`.')
-        }
-        return false
-      }
-      return getRange.value.rangeDraggableTrack
-    })
+  const onHandleOffsetChange = (offset: number | 'min' | 'max', valueIndex: number) => {
+    if (!disabled.value) {
+      const next = offsetValues(rawValues.value, offset, valueIndex)
 
-    const onStartMove: OnStartMove = (e, valueIndex) => {
-      onStartDrag(e, valueIndex)
+      const currentValue = getTriggerValue(rawValues.value)
+      emit('beforeChange', currentValue)
+      props.onBeforeChange?.(currentValue)
+      triggerChange(next.values)
 
-      emit('beforeChange', getTriggerValue(rawValues.value))
+      keyboardValue.value = next.value
     }
+  }
 
-    // Auto focus for updated handle
-    const dragging = computed(() => draggingIndex.value !== -1)
-    watchEffect(() => {
-      if (!dragging.value) {
-        const valueIndex = rawValues.value.lastIndexOf(draggingValue.value)
+  watch(keyboardValue, (val) => {
+    if (val !== null) {
+      const valueIndex = rawValues.value.indexOf(val)
+      if (valueIndex >= 0) {
         handlesRef.value?.focus(valueIndex)
       }
-    })
-
-    // =========================== Included ===========================
-    const sortedCacheValues = computed(
-      () => [...cacheValues.value].sort((a, b) => a - b),
-    )
-
-    // Provide a range values with included [min, max]
-    // Used for Track, Mark & Dot
-    const [includedStart, includedEnd] = computed(() => {
-      if (!getRange.value.rangeEnabled) {
-        return [mergedMin.value, sortedCacheValues.value[0]]
-      }
-
-      return [sortedCacheValues.value[0], sortedCacheValues.value[sortedCacheValues.value.length - 1]]
-    }).value
-
-    // ============================= Refs =============================
-    expose({
-      focus: () => {
-        handlesRef.value?.focus(0)
-      },
-      blur: () => {
-        const { activeElement } = document
-        if (containerRef.value?.contains(activeElement)) {
-          (activeElement as HTMLElement)?.blur()
-        }
-      },
-    })
-
-    // ========================== Auto Focus ==========================
-    watchEffect(() => {
-      if (props.autoFocus) {
-        handlesRef.value?.focus(0)
-      }
-    })
-    // =========================== Context ============================
-    const context = computed(() => ({
-      min: mergedMin,
-      max: mergedMax,
-      direction,
-      disabled: props.disabled,
-      keyboard: props.keyboard,
-      step: mergedStep,
-      included: props.included,
-      includedStart,
-      includedEnd,
-      range: getRange.value.rangeEnabled,
-      tabIndex: props.tabIndex,
-      ariaLabelForHandle: props.ariaLabelForHandle,
-      ariaLabelledByForHandle: props.ariaLabelledByForHandle,
-      ariaRequired: props.ariaRequired,
-      ariaValueTextFormatterForHandle: props.ariaValueTextFormatterForHandle,
-      styles: props.styles || {},
-      classNames: props.classNames || {},
-    }))
-    useProviderSliderContext(context.value)
-
-    // ============================ Render ============================
-    return () => {
-      const {
-        prefixCls = 'vc-slider',
-        id,
-
-        // Status
-        disabled = false,
-        vertical,
-
-        // Style
-        startPoint,
-        trackStyle,
-        handleStyle,
-        railStyle,
-        dotStyle,
-        activeDotStyle,
-
-        // Decorations
-        dots,
-        handleRender,
-        activeHandleRender,
-
-        // Components
-        track,
-        classNames,
-        styles,
-      } = props
-      return (
-        <div
-          ref={containerRef}
-          class={cls(prefixCls, [attrs.class], {
-            [`${prefixCls}-disabled`]: disabled,
-            [`${prefixCls}-vertical`]: vertical,
-            [`${prefixCls}-horizontal`]: !vertical,
-            [`${prefixCls}-with-marks`]: markList.value.length,
-          })}
-          style={attrs.style as CSSProperties}
-          onMousedown={onSliderMouseDown}
-          id={id}
-        >
-          <div
-            class={cls(`${prefixCls}-rail`, classNames?.rail)}
-            style={{ ...railStyle, ...styles?.rail }}
-          />
-
-          {track && (
-            <Tracks
-              prefixCls={prefixCls}
-              // 将style换成trackStyle，因为vue通过attrs取style，数组会合并，相同的样式名如backgroundColor后一个会覆盖前面的
-              trackStyle={trackStyle}
-              values={rawValues.value}
-              startPoint={startPoint}
-              onStartMove={mergedDraggableTrack.value ? onStartMove : undefined}
-            />
-          )}
-
-          <Steps
-            prefixCls={prefixCls}
-            marks={markList.value}
-            dots={dots}
-            style={dotStyle}
-            activeStyle={activeDotStyle}
-          />
-
-          <Handles
-            ref={handlesRef}
-            prefixCls={prefixCls}
-            // 原因如⬆️trackStyle
-            handleStyle={handleStyle}
-            values={cacheValues.value}
-            draggingIndex={draggingIndex.value}
-            draggingDelete={draggingDelete.value}
-            onStartMove={onStartMove}
-            onOffsetChange={onHandleOffsetChange}
-            onFocus={(e: FocusEvent) => emit('focus', e)}
-            onBlur={(e: FocusEvent) => emit('blur', e)}
-            handleRender={handleRender}
-            activeHandleRender={activeHandleRender}
-            onChangeComplete={finishChange}
-            onDelete={getRange.value.rangeEditable ? onDelete : () => {}}
-          />
-
-          <Marks prefixCls={prefixCls} marks={markList.value} onClick={changeToCloseValue} v-slots={slots} />
-        </div>
-      )
     }
-  },
+
+    keyboardValue.value = null
+  })
+
+  // ============================= Drag =============================
+  const mergedDraggableTrack = computed(() => {
+    if (rangeDraggableTrack.value && mergedStep.value === null) {
+      if (process.env.NODE_ENV !== 'production') {
+        warning(false, '`draggableTrack` is not supported when `step` is `null`.')
+      }
+      return false
+    }
+    return rangeDraggableTrack.value
+  })
+
+  const onStartMove: OnStartMove = (e, valueIndex) => {
+    onStartDrag(e, valueIndex)
+    const triggerValue = getTriggerValue(rawValues.value)
+    emit('beforeChange', triggerValue)
+    props.onBeforeChange?.(triggerValue)
+  }
+
+  // Auto focus for updated handle
+  const dragging = computed(() => draggingIndex.value !== -1)
+  watch(dragging, (isDragging) => {
+    if (!isDragging && draggingValue.value !== null && draggingValue.value !== undefined) {
+      const valueIndex = rawValues.value.lastIndexOf(draggingValue.value)
+      if (valueIndex >= 0) {
+        handlesRef.value?.focus(valueIndex)
+      }
+    }
+  })
+
+  // =========================== Included ===========================
+  const sortedCacheValues = computed(() => [...cacheValues.value].sort((a, b) => a - b))
+  const includedRange = computed<[number, number]>(() => {
+    if (!rangeEnabled.value) {
+      return [mergedMin.value, sortedCacheValues.value[0] ?? mergedMin.value]
+    }
+    if (!sortedCacheValues.value.length) {
+      return [mergedMin.value, mergedMin.value]
+    }
+    return [
+      sortedCacheValues.value[0],
+      sortedCacheValues.value[sortedCacheValues.value.length - 1],
+    ]
+  })
+  const includedStart = computed(() => includedRange.value[0])
+  const includedEnd = computed(() => includedRange.value[1])
+
+  // ============================= Refs =============================
+  expose({
+    focus: () => {
+      handlesRef.value?.focus(0)
+    },
+    blur: () => {
+      const { activeElement } = document
+      if (containerRef.value?.contains(activeElement)) {
+        (activeElement as HTMLElement)?.blur()
+      }
+    },
+  })
+
+  // ========================== Auto Focus ==========================
+  watch(
+    () => props.autoFocus,
+    (autoFocus) => {
+      if (autoFocus) {
+        handlesRef.value?.focus(0)
+      }
+    },
+    { immediate: true },
+  )
+
+  // =========================== Context ============================
+  useProviderSliderContext({
+    min: mergedMin,
+    max: mergedMax,
+    direction,
+    disabled: disabled.value,
+    keyboard: keyboard.value,
+    step: mergedStep,
+    included: included.value,
+    includedStart,
+    includedEnd,
+    range: rangeEnabled.value,
+    tabIndex: tabIndex.value,
+    ariaLabelForHandle: props.ariaLabelForHandle,
+    ariaLabelledByForHandle: props.ariaLabelledByForHandle,
+    ariaRequired: props.ariaRequired,
+    ariaValueTextFormatterForHandle: props.ariaValueTextFormatterForHandle,
+    styles: props.styles || {},
+    classNames: props.classNames || {},
+  })
+
+  // ============================ Render ============================
+  return () => {
+    const {
+      id,
+      startPoint,
+      trackStyle,
+      handleStyle,
+      railStyle,
+      dotStyle,
+      activeDotStyle,
+      dots,
+      handleRender,
+      activeHandleRender,
+    } = props
+
+    const mergedClassName = cls(prefixCls.value, props.className, (attrs as any).class, {
+      [`${prefixCls.value}-disabled`]: disabled.value,
+      [`${prefixCls.value}-vertical`]: props.vertical,
+      [`${prefixCls.value}-horizontal`]: !props.vertical,
+      [`${prefixCls.value}-with-marks`]: markList.value.length,
+    })
+
+    const mergedStyle = {
+      ...(props.style as CSSProperties),
+      ...(attrs.style as CSSProperties),
+    }
+
+    return (
+      <div
+        ref={containerRef}
+        class={mergedClassName}
+        style={mergedStyle}
+        onMousedown={onSliderMouseDown}
+        id={id}
+      >
+        <div
+          class={cls(`${prefixCls.value}-rail`, props.classNames?.rail)}
+          style={{ ...railStyle, ...props.styles?.rail }}
+        />
+
+        {props.track !== false && (
+          <Tracks
+            prefixCls={prefixCls.value}
+            trackStyle={trackStyle}
+            values={rawValues.value}
+            startPoint={startPoint}
+            onStartMove={mergedDraggableTrack.value ? onStartMove : undefined}
+          />
+        )}
+
+        <Steps
+          prefixCls={prefixCls.value}
+          marks={markList.value}
+          dots={dots}
+          style={dotStyle}
+          activeStyle={activeDotStyle}
+        />
+
+        <Handles
+          ref={handlesRef}
+          prefixCls={prefixCls.value}
+          handleStyle={handleStyle}
+          values={cacheValues.value}
+          draggingIndex={draggingIndex.value}
+          draggingDelete={draggingDelete.value}
+          onStartMove={onStartMove}
+          onOffsetChange={onHandleOffsetChange}
+          onFocus={(e: FocusEvent) => {
+            emit('focus', e)
+            props.onFocus?.(e)
+          }}
+          onBlur={(e: FocusEvent) => {
+            emit('blur', e)
+            props.onBlur?.(e)
+          }}
+          handleRender={handleRender}
+          activeHandleRender={activeHandleRender}
+          onChangeComplete={finishChange}
+          onDelete={rangeEditable.value ? onDelete : () => {}}
+        />
+
+        <Marks
+          prefixCls={prefixCls.value}
+          marks={markList.value}
+          onClick={changeToCloseValue}
+          v-slots={slots}
+        />
+      </div>
+    )
+  }
 })
+
+export default Slider

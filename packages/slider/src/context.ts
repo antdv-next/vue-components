@@ -1,12 +1,12 @@
 import type { InjectionKey, ShallowRef } from 'vue'
 import type { AriaValueFormat, Direction, SliderClassNames, SliderStyles } from './interface'
-import { inject, provide } from 'vue'
+import { inject, provide, shallowRef } from 'vue'
 
 export interface SliderContextProps {
   min: ShallowRef<number>
   max: ShallowRef<number>
-  includedStart: number
-  includedEnd: number
+  includedStart: ShallowRef<number>
+  includedEnd: ShallowRef<number>
   direction: ShallowRef<Direction>
   disabled?: boolean
   keyboard?: boolean
@@ -25,12 +25,12 @@ export interface SliderContextProps {
 const SliderContextKey: InjectionKey<SliderContextProps> = Symbol('SliderContext')
 
 export const defaultSliderContextValue = {
-  min: 0,
-  max: 0,
-  direction: 'ltr',
-  step: 1,
-  includedStart: 0,
-  includedEnd: 0,
+  min: shallowRef(0),
+  max: shallowRef(0),
+  direction: shallowRef('ltr'),
+  step: shallowRef(1),
+  includedStart: shallowRef(0),
+  includedEnd: shallowRef(0),
   tabIndex: 0,
   keyboard: true,
   styles: {},

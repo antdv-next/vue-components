@@ -1,4 +1,5 @@
-import type { CSSProperties, FunctionalComponent } from 'vue'
+import type { CSSProperties } from 'vue'
+import { defineComponent } from 'vue'
 import Mark from './Mark'
 
 export interface MarkObj {
@@ -16,25 +17,29 @@ export interface MarksProps {
   onClick?: (value: number) => void
 }
 
-const Marks: FunctionalComponent<MarksProps> = (props, { emit, slots }) => {
-  const { prefixCls, marks = [] } = props
+const Marks = defineComponent<MarksProps>(
+  (props, { emit, slots }) => {
+    return () => {
+      const { prefixCls, marks = [] } = props
 
-  const markPrefixCls = `${prefixCls}-mark`
+      const markPrefixCls = `${prefixCls}-mark`
 
-  // Not render mark if empty
-  if (!marks.length) {
-    return null
-  }
+      // Not render mark if empty
+      if (!marks.length) {
+        return null
+      }
 
-  return (
-    <div class={markPrefixCls}>
-      {marks.map(({ value, style, label }) => (
-        <Mark key={value} prefixCls={markPrefixCls} style={style} value={value} onClick={() => emit('click', value)}>
-          {slots.mark?.({ point: value, label }) || label}
-        </Mark>
-      ))}
-    </div>
-  )
-}
+      return (
+        <div class={markPrefixCls}>
+          {marks.map(({ value, style, label }) => (
+            <Mark key={value} prefixCls={markPrefixCls} style={style} value={value} onClick={() => emit('click', value)}>
+              {slots.mark?.({ point: value, label }) || label}
+            </Mark>
+          ))}
+        </div>
+      )
+    }
+  },
+)
 
 export default Marks

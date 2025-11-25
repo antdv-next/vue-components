@@ -1,5 +1,5 @@
+import type { Ref } from 'vue'
 import type { InternalMarkObj } from '../Marks'
-import { computed } from 'vue'
 
 /** Format the value in the range of [min, max] */
 type FormatRangeValue = (value: number) => number
@@ -30,37 +30,40 @@ export type OffsetValues = (
 }
 
 export default function useOffset(
-  min: number,
-  max: number,
-  step: number | null,
-  markList: InternalMarkObj[],
-  allowCross: boolean,
-  pushable: false | number | null,
+  min: Ref<number>,
+  max: Ref<number>,
+  step: Ref<number | null>,
+  markList: Ref<InternalMarkObj[]>,
+  allowCross: Ref<boolean>,
+  pushable: Ref<false | number | null>,
 ): [FormatValue, OffsetValues] {
-  const formatRangeValue = computed<FormatRangeValue>(() => {
-    return (val: number) => Math.max(min, Math.min(max, val))
-  }).value
+  const formatRangeValue: FormatRangeValue = (val) => Math.max(min.value, Math.min(max.value, val))
 
-  const formatStepValue: FormatStepValue = (val: number) => {
-    if (step !== null) {
-      const stepValue = min + Math.round((formatRangeValue(val) - min) / step) * step
+  const formatStepValue: FormatStepValue = (val) => {
+    if (step.value !== null) {
+      const stepValue = min.value
+        + Math.round((formatRangeValue(val) - min.value) / step.value!) * step.value!
 
       // Cut number in case to be like 0.30000000000000004
       const getDecimal = (num: number) => (String(num).split('.')[1] || '').length
-      const maxDecimal = Math.max(getDecimal(step), getDecimal(max), getDecimal(min))
+      const maxDecimal = Math.max(
+        getDecimal(step.value!),
+        getDecimal(max.value),
+        getDecimal(min.value),
+      )
       const fixedValue = Number(stepValue.toFixed(maxDecimal))
 
-      return min <= fixedValue && fixedValue <= max ? fixedValue : null
+      return min.value <= fixedValue && fixedValue <= max.value ? fixedValue : null
     }
     return null
   }
 
-  const formatValue = (val: number) => {
+  const formatValue: FormatValue = (val) => {
     const formatNextValue = formatRangeValue(val)
 
     // List align values
-    const alignValues = markList.map<number>(mark => mark && mark.value)
-    if (step !== null) {
+    const alignValues = markList.value.map<number>(mark => mark && mark.value)
+    if (step.value !== null) {
       const stepValue = formatStepValue(val)
       if (stepValue !== null) {
         alignValues.push(stepValue)
@@ -68,11 +71,11 @@ export default function useOffset(
     }
 
     // min & max
-    alignValues.push(min, max)
+    alignValues.push(min.value, max.value)
 
     // Align with marks
     let closeValue = alignValues[0]
-    let closeDist = max - min
+    let closeDist = max.value - min.value
 
     alignValues.forEach((alignValue) => {
       const dist = Math.abs(formatNextValue - alignValue)
@@ -97,12 +100,12 @@ export default function useOffset(
 
       // Compare next step value & mark value which is best match
       let potentialValues: number[] = []
-      markList.forEach((mark) => {
+      markList.value.forEach((mark) => {
         potentialValues.push(mark.value)
       })
 
       // Min & Max
-      potentialValues.push(min, max)
+      potentialValues.push(min.value, max.value)
 
       // In case origin value is align with mark but not with step
       const originStepValue = formatStepValue(originValue)
@@ -114,12 +117,14 @@ export default function useOffset(
       const sign = offset > 0 ? 1 : -1
 
       if (mode === 'unit') {
-        const allStepValues = formatStepValue(originValue + sign * step)
-        if (allStepValues !== null) {
-          potentialValues.push(allStepValues)
+        if (step.value !== null) {
+          const allStepValues = formatStepValue(originValue + sign * step.value!)
+          if (allStepValues !== null) {
+            potentialValues.push(allStepValues)
+          }
         }
       }
-      else {
+      else if (step.value !== null) {
         const targetStepValue = formatStepValue(targetDistValue)
         if (targetStepValue !== null) {
           potentialValues.push(targetStepValue)
@@ -129,7 +134,7 @@ export default function useOffset(
       // Find close one
       potentialValues = potentialValues
         .filter(val => val !== null)
-      // Remove reverse value
+        // Remove reverse value
         .filter(val => (offset < 0 ? val <= originValue : val >= originValue))
 
       if (mode === 'unit') {
@@ -152,7 +157,7 @@ export default function useOffset(
 
       // Out of range will back to range
       if (nextValue === undefined) {
-        return offset < 0 ? min : max
+        return offset < 0 ? min.value : max.value
       }
 
       // `dist` mode
@@ -170,12 +175,14 @@ export default function useOffset(
 
       return nextValue
     }
-    else if (offset === 'min') {
-      return min
+    if (offset === 'min') {
+      return min.value
     }
-    else if (offset === 'max') {
-      return max
+    if (offset === 'max') {
+      return max.value
     }
+
+    return values[valueIndex]
   }
 
   /** Same as `offsetValue` but return `changed` mark to tell value changed */
@@ -194,7 +201,8 @@ export default function useOffset(
   }
 
   const needPush = (dist: number) => {
-    return (pushable === null && dist === 0) || (typeof pushable === 'number' && dist < pushable)
+    return (pushable.value === null && dist === 0)
+      || (typeof pushable.value === 'number' && dist < pushable.value)
   }
 
   // Values
@@ -204,9 +212,9 @@ export default function useOffset(
     const nextValue = offsetValue(nextValues, offset, valueIndex, mode)
     nextValues[valueIndex] = nextValue
 
-    if (!allowCross) {
+    if (!allowCross.value) {
       // >>>>> Allow Cross
-      const pushNum = pushable || 0
+      const pushNum = pushable.value || 0
 
       // ============ AllowCross ===============
       if (valueIndex > 0 && nextValues[valueIndex - 1] !== originValue) {
@@ -223,7 +231,7 @@ export default function useOffset(
         )
       }
     }
-    else if (typeof pushable === 'number' || pushable === null) {
+    else if (typeof pushable.value === 'number' || pushable.value === null) {
       // >>>>> Pushable
       // =============== Push ==================
 

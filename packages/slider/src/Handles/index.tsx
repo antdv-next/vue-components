@@ -1,11 +1,11 @@
 import type { CSSProperties, PropType, SlotsType } from 'vue'
 import type { OnStartMove } from '../interface'
-import { defineComponent, ref } from 'vue'
+import { defineComponent, ref, shallowRef } from 'vue'
 import { getIndex } from '../util'
 import Handle from './Handle'
 
 export interface RenderProps {
-  index: number
+  index: number | null
   prefixCls: string
   value: number
   dragging: boolean
@@ -40,7 +40,7 @@ export default defineComponent({
     handleRender: any
   }>,
   setup(props, { emit, expose }) {
-    const handlesRef = ref()
+    const handleRefs = shallowRef<Record<number, InstanceType<typeof Handle> | null>>({})
 
     // =========================== Active ===========================
     const activeVisible = ref(false)
@@ -60,8 +60,19 @@ export default defineComponent({
       onActive(index)
     }
 
+    const setHandleRef = (index: number, node: InstanceType<typeof Handle> | null) => {
+      if (!node) {
+        delete handleRefs.value[index]
+      }
+      else {
+        handleRefs.value[index] = node
+      }
+    }
+
     expose({
-      focus: () => handlesRef.value?.focus(),
+      focus: (index: number) => {
+        handleRefs.value[index]?.focus?.()
+      },
       hideHelp: () => {
         activeVisible.value = false
       },
@@ -78,6 +89,7 @@ export default defineComponent({
         draggingIndex,
         draggingDelete,
         onFocus,
+        onBlur,
         handleStyle,
         ...restProps
       } = props
@@ -91,6 +103,7 @@ export default defineComponent({
         render: handleRender,
         onFocus: onHandleFocus,
         onMouseenter: onHandleMouseEnter,
+        onBlur,
         ...restProps,
       }
       return (
@@ -99,7 +112,7 @@ export default defineComponent({
             const dragging = draggingIndex === index
             return (
               <Handle
-                ref={handlesRef.value}
+                ref={(node: InstanceType<typeof Handle> | null) => setHandleRef(index, node)}
                 dragging={dragging}
                 draggingDelete={dragging && draggingDelete}
                 style={getIndex(handleStyle, index)}
@@ -117,7 +130,7 @@ export default defineComponent({
               key="a11y"
               {...handleProps}
               value={values[activeIndex.value] as number}
-              valueIndex={1}
+              valueIndex={null}
               dragging={draggingIndex !== -1}
               draggingDelete={draggingDelete}
               render={activeHandleRender}

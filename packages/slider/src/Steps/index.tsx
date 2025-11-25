@@ -1,6 +1,6 @@
-import type { CSSProperties, FunctionalComponent } from 'vue'
+import type { CSSProperties } from 'vue'
 import type { InternalMarkObj } from '../Marks'
-import { computed } from 'vue'
+import { computed, defineComponent } from 'vue'
 import { useInjectSlider } from '../context'
 import Dot from './Dot'
 
@@ -12,43 +12,45 @@ export interface StepsProps {
   activeStyle?: CSSProperties | ((dotValue: number) => CSSProperties)
 }
 
-const Steps: FunctionalComponent<StepsProps> = (props, { attrs }) => {
-  const { prefixCls, marks, dots, activeStyle } = props
+const Steps = defineComponent<StepsProps>((props, { attrs }) => {
   const { min, max, step } = useInjectSlider()
 
-  const stepDots = computed<number[]>(() => {
-    const dotSet = new Set<number>()
+  return () => {
+    const { prefixCls, marks, dots, activeStyle } = props
 
-    // Add marks
-    marks.forEach((mark) => {
-      dotSet.add(mark.value)
+    const stepDots = computed<number[]>(() => {
+      const dotSet = new Set<number>()
+
+      // Add marks
+      marks.forEach((mark) => {
+        dotSet.add(mark.value)
+      })
+
+      // Fill dots
+      if (dots && step !== null) {
+        let current = min.value
+        while (current <= max.value) {
+          dotSet.add(current)
+          current += step.value!
+        }
+      }
+
+      return Array.from(dotSet)
     })
 
-    // Fill dots
-    if (dots && step !== null) {
-      let current = min.value
-      while (current <= max.value) {
-        dotSet.add(current)
-        current += step.value!
-      }
-    }
-
-    return Array.from(dotSet)
-  })
-
-  return (
-    <div class={`${prefixCls}-step`}>
-      {stepDots.value.map(dotValue => (
-        <Dot
-          prefixCls={prefixCls}
-          key={dotValue}
-          value={dotValue}
-          style={{ ...attrs.style as CSSProperties }}
-          activeStyle={activeStyle}
-        />
-      ))}
-    </div>
-  )
-}
-
+    return (
+      <div class={`${prefixCls}-step`}>
+        {stepDots.value.map(dotValue => (
+          <Dot
+            prefixCls={prefixCls}
+            key={dotValue}
+            value={dotValue}
+            style={{ ...attrs.style as CSSProperties }}
+            activeStyle={activeStyle}
+          />
+        ))}
+      </div>
+    )
+  }
+})
 export default Steps
