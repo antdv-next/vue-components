@@ -30,8 +30,8 @@
     "vue": "^3.0.0"
   },
   "dependencies": {
-    "@v-c/input": "workspace:*",
-    "@v-c/mini-decimal": "workspace:*",
-    "@v-c/util": "workspace:*"
+    "@v-c/input": "workspace:^",
+    "@v-c/mini-decimal": "workspace:^",
+    "@v-c/util": "workspace:^"
   }
 }
