@@ -33,7 +33,7 @@ const {
   editable,
   locale,
   tabPosition,
-  tabBarGutter,
+  tabBarGutter: tabBarGutterProp,
   children,
   onTabClick,
   onTabScroll,
@@ -45,6 +45,8 @@ const {
   getPopupContainer,
   popupClassName,
 } = toRefs(props)
+
+const tabBarGutter = computed(() => tabBarGutterProp.value ? `${tabBarGutterProp.value}px` : '0px')
 
 // const { tabs, prefixCls } = toRefs(useTabContext()?.value || {})
 const ctx = useTabContext()
@@ -590,7 +592,7 @@ watch(rtl, () => {
         :tabs="hiddenTabs"
         :class-name="[tabsClassNames?.operations, !hasDropdown ? operationsHiddenClassName : undefined]"
         :popup-style="styles?.popup" :tab-moving="!!lockAnimation"
-        v-bind="{ id, rtl, tabBarGutter, activeKey, mobile, more, editable, locale, onTabClick, getPopupContainer, popupClassName }"
+        v-bind="{ id, rtl, tabBarGutter: tabBarGutterProp, activeKey, mobile, more, editable, locale, onTabClick, getPopupContainer, popupClassName }"
       />
 
       <ExtraContent ref="extraRightRef" position="right" :prefix-cls="prefixCls" :extra="extra" />

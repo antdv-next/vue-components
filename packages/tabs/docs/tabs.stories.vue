@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import Animated from './animated.vue';
+import Animated from './animated.vue'
 import Basic from './basic.vue'
-import DynamicExtra from './dynamic-extra.vue';
-import Editable from './editable.vue';
-import Extra from './extra.vue';
-import Indicator from './indicator.vue';
+import DynamicExtra from './dynamic-extra.vue'
+import Editable from './editable.vue'
+import Extra from './extra.vue'
+import Indicator from './indicator.vue'
+import Position from './position.vue'
 </script>
 
 <template>
@@ -29,9 +30,12 @@ import Indicator from './indicator.vue';
       <Extra />
     </Variant>
 
+    <Variant title="Position">
+      <Position />
+    </Variant>
+
     <Variant title="Indicator">
       <Indicator />
     </Variant>
-
   </Story>
 </template>

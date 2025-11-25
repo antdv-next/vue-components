@@ -85,9 +85,9 @@ const moreIconNode = computed(() => moreProps.value?.icon || 'More')
 
 const moreStyle = computed(() => {
   const style: CSSProperties = {
-    marginInlineStart: tabBarGutter.value,
+    marginInlineStart: tabBarGutter.value ? `${tabBarGutter.value}px` : '0px',
   }
-  if (props.tabs.length) {
+  if (!props.tabs.length) {
     style.visibility = 'hidden'
     style.order = 1
   }
