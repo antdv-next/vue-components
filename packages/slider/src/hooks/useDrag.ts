@@ -52,11 +52,11 @@ function useDrag(
 
   // Clean up event
   onUnmounted(() => {
-    document.removeEventListener('mousemove', mouseMoveEventRef.value)
-    document.removeEventListener('mouseup', mouseUpEventRef.value)
+    document.removeEventListener('mousemove', mouseMoveEventRef.value!)
+    document.removeEventListener('mouseup', mouseUpEventRef.value!)
     if (touchEventTargetRef.value) {
-      touchEventTargetRef.value.removeEventListener('touchmove', mouseMoveEventRef.value)
-      touchEventTargetRef.value.removeEventListener('touchend', mouseUpEventRef.value)
+      touchEventTargetRef.value.removeEventListener('touchmove', mouseMoveEventRef.value!)
+      touchEventTargetRef.value.removeEventListener('touchend', mouseUpEventRef.value!)
     }
   })
 

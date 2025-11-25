@@ -5,6 +5,9 @@
   "description": "",
   "author": "",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "keywords": [
     "slider"
   ],
@@ -18,9 +21,15 @@
     "./package.json": "./package.json"
   },
   "main": "index.js",
+  "files": [
+    "dist",
+    "package.json"
+  ],
   "scripts": {
     "build": "vite build",
-    "test": "vitest"
+    "test": "vitest run",
+    "prepublish": "pnpm build",
+    "bump": "bumpp --release patch"
   },
   "peerDependencies": {
     "vue": "^3.0.0"
