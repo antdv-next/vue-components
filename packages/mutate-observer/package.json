@@ -23,7 +23,7 @@
     "vue": "^3.0.0"
   },
   "dependencies": {
-    "@v-c/resize-observer": "workspace:*",
-    "@v-c/util": "workspace:*"
+    "@v-c/resize-observer": "workspace:^",
+    "@v-c/util": "workspace:^"
   }
 }

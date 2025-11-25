@@ -28,10 +28,10 @@
     "vue": "^3.0.0"
   },
   "dependencies": {
-    "@v-c/dropdown": "workspace:*",
-    "@v-c/menu": "workspace:*",
-    "@v-c/overflow": "workspace:*",
-    "@v-c/resize-observer": "workspace:*",
-    "@v-c/util": "workspace:*"
+    "@v-c/dropdown": "workspace:^",
+    "@v-c/menu": "workspace:^",
+    "@v-c/overflow": "workspace:^",
+    "@v-c/resize-observer": "workspace:^",
+    "@v-c/util": "workspace:^"
   }
 }
