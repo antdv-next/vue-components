@@ -20,7 +20,7 @@ export default defineComponent({
   props: {
     prefixCls: { type: String, required: true },
     value: { type: Number, required: true },
-    valueIndex: { type: Number as PropType<number | null>, required: true },
+    valueIndex: { type: [Number, Object] as PropType<number | null>, required: true },
     dragging: { type: Boolean, default: false },
     draggingDelete: { type: Boolean, default: false },
     onStartMove: { type: Function as PropType<OnStartMove>, required: true },

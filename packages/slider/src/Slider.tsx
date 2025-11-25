@@ -401,7 +401,7 @@ const Slider = defineComponent<SliderProps>((props = sliderDefaults, {
       }
 
       const nextValue = getTriggerValue(cloneNextValues)
-      emit('beforeChange', nextValue)
+      // emit('beforeChange', nextValue)
       props.onBeforeChange?.(nextValue)
       triggerChange(cloneNextValues)
 
@@ -411,7 +411,7 @@ const Slider = defineComponent<SliderProps>((props = sliderDefaults, {
         onStartDrag(e, focusIndex, cloneNextValues)
       }
       else {
-        emit('afterChange', nextValue)
+        // emit('afterChange', nextValue)
         props.onAfterChange?.(nextValue)
         warning(
           !props.onAfterChange,
