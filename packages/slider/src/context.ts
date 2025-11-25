@@ -40,7 +40,7 @@ export const defaultSliderContextValue = {
 export function useProviderSliderContext(ctx: Ref<SliderContextProps>) {
   provide(SliderContextKey, ctx)
 }
-export function useInjectSlider() {
+export function useInjectSlider(): Ref<SliderContextProps> {
   return inject(SliderContextKey, ref({} as SliderContextProps))
 }
 
