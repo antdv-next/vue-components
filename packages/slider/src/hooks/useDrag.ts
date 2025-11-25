@@ -62,8 +62,8 @@ function useDrag(
     document.removeEventListener('mousemove', mouseMoveEventRef.value!)
     document.removeEventListener('mouseup', mouseUpEventRef.value!)
     if (touchEventTargetRef.value) {
-      touchEventTargetRef.value.removeEventListener('touchmove', mouseMoveEventRef.value!)
-      touchEventTargetRef.value.removeEventListener('touchend', mouseUpEventRef.value!)
+      touchEventTargetRef.value.removeEventListener('touchmove', mouseMoveEventRef.value as any)
+      touchEventTargetRef.value.removeEventListener('touchend', mouseUpEventRef.value as any)
     }
   })
 
@@ -200,8 +200,8 @@ function useDrag(
       document.removeEventListener('mouseup', onMouseUp)
       document.removeEventListener('mousemove', onMouseMove)
       if (touchEventTargetRef.value) {
-        touchEventTargetRef.value.removeEventListener('touchmove', mouseMoveEventRef.value)
-        touchEventTargetRef.value.removeEventListener('touchend', mouseUpEventRef.value)
+        touchEventTargetRef.value.removeEventListener('touchmove', mouseMoveEventRef.value as any)
+        touchEventTargetRef.value.removeEventListener('touchend', mouseUpEventRef.value as any)
       }
       mouseMoveEventRef.value = null
       mouseUpEventRef.value = null
@@ -215,8 +215,8 @@ function useDrag(
 
     document.addEventListener('mouseup', onMouseUp)
     document.addEventListener('mousemove', onMouseMove)
-    e.currentTarget.addEventListener('touchend', onMouseUp)
-    e.currentTarget.addEventListener('touchmove', onMouseMove)
+    ;(e as any).currentTarget.addEventListener('touchend', onMouseUp)
+    ;(e as any).currentTarget.addEventListener('touchmove', onMouseMove)
     mouseMoveEventRef.value = onMouseMove
     mouseUpEventRef.value = onMouseUp
     touchEventTargetRef.value = e.currentTarget
@@ -244,7 +244,7 @@ function useDrag(
     return diffCount <= maxDiffCount ? cacheValues.value : rawValues.value
   })
 
-  return [draggingIndex, draggingValue, draggingDelete, returnValues, onStartMove]
+  return [draggingIndex, draggingValue as any, draggingDelete, returnValues, onStartMove] as const
 }
 
 export default useDrag

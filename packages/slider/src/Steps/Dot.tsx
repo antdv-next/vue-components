@@ -13,16 +13,17 @@ export interface DotProps {
 
 const Dot = defineComponent<DotProps>(
   (props, { attrs }) => {
-    const { min, max, direction, included, includedStart, includedEnd } = useInjectSlider()
+    const sliderContext = useInjectSlider()
     return () => {
+      const { min, max, direction, included, includedStart, includedEnd } = sliderContext.value
       const { prefixCls, value, activeStyle } = props
 
       const dotClassName = `${prefixCls}-dot`
-      const active = included && includedStart.value <= value && value <= includedEnd.value
+      const active = included && includedStart <= value && value <= includedEnd
 
       // ============================ Offset ============================
       let mergedStyle: CSSProperties = {
-        ...getDirectionStyle(direction.value, value, min.value, max.value),
+        ...getDirectionStyle(direction, value, min, max),
       }
 
       if (active) {

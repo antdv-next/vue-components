@@ -13,30 +13,33 @@ export interface StepsProps {
 }
 
 const Steps = defineComponent<StepsProps>((props, { attrs }) => {
-  const { min, max, step } = useInjectSlider()
+  const sliderContext = useInjectSlider()
+
+  const stepDots = computed<number[]>(() => {
+    const { max, min, step } = sliderContext.value
+    const { marks, dots } = props
+
+    const dotSet = new Set<number>()
+
+    // Add marks
+    marks.forEach((mark) => {
+      dotSet.add(mark.value)
+    })
+
+    // Fill dots
+    if (dots && step !== null) {
+      let current = min
+      while (current <= max) {
+        dotSet.add(current)
+        current += step!
+      }
+    }
+
+    return Array.from(dotSet)
+  })
 
   return () => {
-    const { prefixCls, marks, dots, activeStyle } = props
-
-    const stepDots = computed<number[]>(() => {
-      const dotSet = new Set<number>()
-
-      // Add marks
-      marks.forEach((mark) => {
-        dotSet.add(mark.value)
-      })
-
-      // Fill dots
-      if (dots && step !== null) {
-        let current = min.value
-        while (current <= max.value) {
-          dotSet.add(current)
-          current += step.value!
-        }
-      }
-
-      return Array.from(dotSet)
-    })
+    const { prefixCls, activeStyle } = props
 
     return (
       <div class={`${prefixCls}-step`}>

@@ -24,17 +24,19 @@ const Tracks = defineComponent({
     startPoint: { type: Number },
   },
   setup(props) {
-    const { included, range, min, styles, classNames } = useInjectSlider()
+    const sliderContext = useInjectSlider()
 
     // =========================== List ===========================
     const trackList = computed(() => {
+      const range = sliderContext.value.range
+      const min = sliderContext.value.min
       if (!range) {
         // null value do not have track
         if (props.values.length === 0) {
           return []
         }
 
-        const startValue = props.startPoint ?? min.value
+        const startValue = props.startPoint ?? min
         const endValue = props.values[0]
 
         return [{ start: Math.min(startValue, endValue), end: Math.max(startValue, endValue) }]
@@ -51,9 +53,11 @@ const Tracks = defineComponent({
     })
 
     return () => {
+      const included = sliderContext.value.included
       if (!included) {
         return null
       }
+      const { classNames, styles } = sliderContext.value
 
       // ========================== Render ==========================
       const tracksNode

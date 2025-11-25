@@ -37,7 +37,7 @@ export default function useOffset(
   allowCross: Ref<boolean>,
   pushable: Ref<false | number | null>,
 ): [FormatValue, OffsetValues] {
-  const formatRangeValue: FormatRangeValue = (val) => Math.max(min.value, Math.min(max.value, val))
+  const formatRangeValue: FormatRangeValue = val => Math.max(min.value, Math.min(max.value, val))
 
   const formatStepValue: FormatStepValue = (val) => {
     if (step.value !== null) {

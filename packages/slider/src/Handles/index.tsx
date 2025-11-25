@@ -40,7 +40,7 @@ export default defineComponent({
     handleRender: any
   }>,
   setup(props, { emit, expose }) {
-    const handleRefs = shallowRef<Record<number, InstanceType<typeof Handle> | null>>({})
+    const handleRefs = shallowRef<Record<number, any>>({})
 
     // =========================== Active ===========================
     const activeVisible = ref(false)
@@ -112,7 +112,7 @@ export default defineComponent({
             const dragging = draggingIndex === index
             return (
               <Handle
-                ref={(node: InstanceType<typeof Handle> | null) => setHandleRef(index, node)}
+                ref={(node: any) => setHandleRef(index, node)}
                 dragging={dragging}
                 draggingDelete={dragging && draggingDelete}
                 style={getIndex(handleStyle, index)}

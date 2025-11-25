@@ -43,9 +43,9 @@ export const HandleTooltip = defineComponent({
         overlayInnerStyle={{ minHeight: 'auto' }}
         ref={tooltipRef.value}
         visible={props.visible}
+        overlay={props.tipFormatter(props.value)}
         v-slots={{
           default: slots.default,
-          overlay: () => props.tipFormatter(props.value),
         }}
       />
     )

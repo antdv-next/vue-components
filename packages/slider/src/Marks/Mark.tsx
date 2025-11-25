@@ -12,19 +12,20 @@ export interface MarkProps {
 }
 
 const Mark = defineComponent<MarkProps>((props, { attrs, slots }) => {
-  const { min, max, direction, includedStart, includedEnd, included } = useInjectSlider()
+  const sliderContext = useInjectSlider()
   return () => {
     const { prefixCls, value } = props
+    const { min, max, direction, includedStart, includedEnd, included } = sliderContext.value
 
     const textCls = `${prefixCls}-text`
 
     // ============================ Offset ============================
-    const positionStyle = getDirectionStyle(direction.value, value, min.value, max.value)
+    const positionStyle = getDirectionStyle(direction, value, min, max)
 
     return (
       <span
         class={classNames(textCls, {
-          [`${textCls}-active`]: included && includedStart.value <= value && value <= includedEnd.value,
+          [`${textCls}-active`]: included && includedStart <= value && value <= includedEnd,
         })}
         style={{ ...positionStyle, ...attrs.style as CSSProperties }}
         onMousedown={(e: MouseEvent) => {

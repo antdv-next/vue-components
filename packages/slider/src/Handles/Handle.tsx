@@ -36,19 +36,7 @@ export default defineComponent({
   },
   emits: ['focus', 'mouseenter', 'startMove', 'delete', 'offsetChange', 'changeComplete'],
   setup(props, { attrs, emit, expose }) {
-    const {
-      min,
-      max,
-      direction,
-      disabled,
-      keyboard,
-      range,
-      tabIndex,
-      ariaLabelForHandle,
-      ariaLabelledByForHandle,
-      ariaRequired,
-      ariaValueTextFormatterForHandle,
-    } = useInjectSlider()
+    const sliderContext = useInjectSlider()
 
     const divProps = ref({})
     const handleClass = ref({})
@@ -57,6 +45,7 @@ export default defineComponent({
 
     // ============================ Events ============================
     const onInternalStartMove = (e: MouseEvent | TouchEvent) => {
+      const disabled = sliderContext.value.disabled
       if (!disabled) {
         emit('startMove', e, props.valueIndex)
       }
@@ -72,27 +61,28 @@ export default defineComponent({
 
     // =========================== Keyboard ===========================
     const onKeyDown = (e: KeyboardEvent) => {
+      const { keyboard, direction, disabled } = sliderContext.value
       if (!disabled && keyboard) {
         let offset: number | 'min' | 'max' | null = null
 
         // Change the value
         switch (e.which || e.keyCode) {
           case KeyCode.LEFT:
-            offset = direction.value === 'ltr' || direction.value === 'btt' ? -1 : 1
+            offset = direction === 'ltr' || direction === 'btt' ? -1 : 1
             break
 
           case KeyCode.RIGHT:
-            offset = direction.value === 'ltr' || direction.value === 'btt' ? 1 : -1
+            offset = direction === 'ltr' || direction === 'btt' ? 1 : -1
             break
 
           // Up is plus
           case KeyCode.UP:
-            offset = direction.value !== 'ttb' ? 1 : -1
+            offset = direction !== 'ttb' ? 1 : -1
             break
 
           // Down is minus
           case KeyCode.DOWN:
-            offset = direction.value !== 'ttb' ? -1 : 1
+            offset = direction !== 'ttb' ? -1 : 1
             break
 
           case KeyCode.HOME:
@@ -162,23 +152,36 @@ export default defineComponent({
         classNames,
         ...restProps
       } = props
+
+      const {
+        min,
+        max,
+        direction,
+        disabled,
+        range,
+        tabIndex,
+        ariaLabelForHandle,
+        ariaLabelledByForHandle,
+        ariaRequired,
+        ariaValueTextFormatterForHandle,
+      } = sliderContext.value
       // ============================ Offset ============================
-      const positionStyle = getDirectionStyle(direction.value, value, min.value, max.value)
+      const positionStyle = getDirectionStyle(direction, value, min, max)
       // ============================ Render ============================
 
       if (valueIndex !== null) {
         divProps.value = {
           'tabindex': disabled ? null : getIndex(tabIndex, valueIndex),
           'role': 'slider',
-          'aria-valuemin': min.value,
-          'aria-valuemax': max.value,
+          'aria-valuemin': min,
+          'aria-valuemax': max,
           'aria-valuenow': value,
           'aria-disabled': disabled,
           'aria-label': getIndex(ariaLabelForHandle, valueIndex),
           'aria-labelledby': getIndex(ariaLabelledByForHandle, valueIndex),
           'aria-required': getIndex(ariaRequired, valueIndex),
           'aria-valuetext': getIndex(ariaValueTextFormatterForHandle, valueIndex)?.(value),
-          'aria-orientation': direction.value === 'ltr' || direction.value === 'rtl' ? 'horizontal' : 'vertical',
+          'aria-orientation': direction === 'ltr' || direction === 'rtl' ? 'horizontal' : 'vertical',
           'onMousedown': onInternalStartMove,
           'onTouchstart': onInternalStartMove,
           'onFocus': onInternalFocus,
@@ -197,7 +200,7 @@ export default defineComponent({
       handleClass.value = cls(
         handlePrefixCls,
         {
-          [`${handlePrefixCls}-${valueIndex + 1}`]: valueIndex !== null && range,
+          [`${handlePrefixCls}-${valueIndex! + 1}`]: valueIndex !== null && range,
           [`${handlePrefixCls}-dragging`]: dragging,
           [`${handlePrefixCls}-dragging-delete`]: draggingDelete,
         },

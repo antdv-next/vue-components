@@ -26,11 +26,11 @@ const Track = defineComponent({
     onStartMove: { type: Function as PropType<OnStartMove> },
   },
   setup(props, { attrs }) {
-    const { direction, min, max, disabled, range, classNames } = useInjectSlider()
+    const sliderContext = useInjectSlider()
 
     // ============================ Events ============================
     const onInternalStartMove = (e: MouseEvent | TouchEvent) => {
-      if (!disabled && props.onStartMove) {
+      if (!sliderContext.value.disabled && props.onStartMove) {
         props.onStartMove(e, -1)
       }
     }
@@ -38,9 +38,10 @@ const Track = defineComponent({
     // ============================ Render ============================
     return () => {
       const { prefixCls, index, onStartMove, replaceCls, start, end } = props
+      const { direction, min, max, range, classNames } = sliderContext.value
 
-      const offsetStart = getOffset(start, min.value, max.value)
-      const offsetEnd = getOffset(end, min.value, max.value)
+      const offsetStart = getOffset(start, min, max)
+      const offsetEnd = getOffset(end, min, max)
 
       const trackPrefixCls = `${prefixCls}-track`
       const className
@@ -55,7 +56,7 @@ const Track = defineComponent({
           )
 
       const positionStyle: CSSProperties = {}
-      switch (direction.value) {
+      switch (direction) {
         case 'rtl':
           positionStyle.right = `${offsetStart * 100}%`
           positionStyle.width = `${offsetEnd * 100 - offsetStart * 100}%`

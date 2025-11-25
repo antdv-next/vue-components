@@ -555,16 +555,16 @@ const Slider = defineComponent<SliderProps<ValueType>>((props = sliderDefaults, 
   )
 
   // =========================== Context ============================
-  useProviderSliderContext({
-    min: mergedMin,
-    max: mergedMax,
-    direction,
+  useProviderSliderContext(computed(() => ({
+    min: mergedMin.value,
+    max: mergedMax.value,
+    direction: direction.value,
     disabled: disabled.value,
     keyboard: keyboard.value,
-    step: mergedStep,
+    step: mergedStep.value,
     included: included.value,
-    includedStart,
-    includedEnd,
+    includedStart: includedStart.value,
+    includedEnd: includedEnd.value,
     range: rangeEnabled.value,
     tabIndex: tabIndex.value,
     ariaLabelForHandle: props.ariaLabelForHandle,
@@ -573,7 +573,7 @@ const Slider = defineComponent<SliderProps<ValueType>>((props = sliderDefaults, 
     ariaValueTextFormatterForHandle: props.ariaValueTextFormatterForHandle,
     styles: props.styles || {},
     classNames: props.classNames || {},
-  })
+  })))
 
   // ============================ Render ============================
   return () => {
