@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'vue'
 import ResizeObserver from '@v-c/resize-observer'
 import { classNames } from '@v-c/util'
+import omit from '@v-c/util/dist/omit'
 import raf from '@v-c/util/dist/raf'
 import { computed, defineComponent, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
 import calculateAutoSizeStyle from './calculateNodeHeight'
@@ -178,17 +179,18 @@ export default defineComponent({
             ? 'hidden'
             : undefined,
       }
+      const restAttrs = omit(attrs, ['class', 'style'])
       return (
         <ResizeObserver
           onResize={onInternalResize}
           disabled={!(autoSize || onResize)}
         >
           <textarea
-            {...attrs as any}
+            {...restAttrs as any}
             {...resetProps}
             ref={textareaRef}
             style={mergedStyle}
-            class={classNames(prefixCls, [attrs.className], {
+            class={classNames(prefixCls, [attrs.class], {
               [`${prefixCls}-disabled`]: disabled,
             })}
             disabled={disabled}

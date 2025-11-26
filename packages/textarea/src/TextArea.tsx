@@ -85,7 +85,7 @@ export default defineComponent<TextAreaProps>(
 
     // ============================== Change ==============================
     const onChange = (e: Event) => {
-      emit('change', e)
+      // emit('change', e)
       props.onChange?.(e)
     }
 
@@ -124,14 +124,14 @@ export default defineComponent<TextAreaProps>(
     // =========================== Value Update ===========================
     const onInternalCompositionStart = (e: CompositionEvent) => {
       compositionRef.value = true
-      emit('compositionStart', e)
+      // emit('compositionStart', e)
       props.onCompositionStart?.(e)
     }
 
     const onInternalCompositionEnd = (e: CompositionEvent) => {
       compositionRef.value = false
       triggerChange(e, (e.target as HTMLTextAreaElement).value)
-      emit('compositionEnd', e)
+      // emit('compositionEnd', e)
       props.onCompositionEnd?.(e)
     }
 
@@ -141,22 +141,22 @@ export default defineComponent<TextAreaProps>(
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Enter' && props.onPressEnter && !e.isComposing) {
-        emit('pressEnter', e)
+        // emit('pressEnter', e)
         props.onPressEnter?.(e)
       }
-      emit('keydown', e)
+      // emit('keydown', e)
       props.onKeyDown?.(e)
     }
 
     const handleFocus = (e: FocusEvent) => {
       focused.value = true
-      emit('focus', e)
+      // emit('focus', e)
       props.onFocus?.(e)
     }
 
     const handleBlur = (e: FocusEvent) => {
       focused.value = false
-      emit('blur', e)
+      // emit('blur', e)
       props.onBlur?.(e)
     }
 
@@ -168,7 +168,7 @@ export default defineComponent<TextAreaProps>(
     }
 
     const handleResize = (size: { width: number, height: number }) => {
-      emit('resize', size)
+      // emit('resize', size)
       props.onResize?.(size)
       if (getTextArea()?.style.height) {
         textareaResized.value = true
@@ -206,6 +206,7 @@ export default defineComponent<TextAreaProps>(
         readOnly,
         autoSize,
         suffix,
+        ...restProps
       } = props
 
       const { class: attrClass, style: attrStyle, ...restAttrs } = attrs
@@ -264,6 +265,19 @@ export default defineComponent<TextAreaProps>(
         'onKeydown',
         'onKeyup',
         'onInput',
+        'allowClear',
+        'maxLength',
+        'prefixCls',
+        'showCount',
+        'disabled',
+        'hidden',
+        'classNames',
+        'styles',
+        'onClear',
+        'readOnly',
+        'autoSize',
+        'suffix',
+        'onResize',
       ])
 
       return (
@@ -293,6 +307,7 @@ export default defineComponent<TextAreaProps>(
         >
           <ResizableTextArea
             {...inputAttrs}
+            {...restProps}
             value={stateValue.value as any}
             autoSize={autoSize as any}
             maxLength={maxLength}
