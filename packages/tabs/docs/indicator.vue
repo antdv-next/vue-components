@@ -7,7 +7,7 @@ const items = [
   { label: 'Cute', key: 'cute', children: 'Cute!' },
 ]
 
-const indicatorSize = (origin: number) => {
+function indicatorSize(origin: number) {
   return Math.max(origin - 20, 0)
 }
 </script>

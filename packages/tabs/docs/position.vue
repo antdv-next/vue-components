@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import Tabs from '../src'
 import { ref } from 'vue'
+import Tabs from '../src'
 import '../assets/index.less'
 
 const position = ref<'left' | 'right' | 'top' | 'bottom'>('left')
@@ -20,17 +20,25 @@ const items = [
 <template>
   <div>
     <select v-model="position">
-      <option value="left">left</option>
-      <option value="right">right</option>
-      <option value="top">top</option>
-      <option value="bottom">bottom</option>
+      <option value="left">
+        left
+      </option>
+      <option value="right">
+        right
+      </option>
+      <option value="top">
+        top
+      </option>
+      <option value="bottom">
+        bottom
+      </option>
     </select>
     <label>
-      <input type="checkbox" v-model="fixedHeight" />
+      <input v-model="fixedHeight" type="checkbox">
       Fixed Height
     </label>
     <label>
-      <input type="checkbox" v-model="gutter" />
+      <input v-model="gutter" type="checkbox">
       Set Gutter
     </label>
     <Tabs
@@ -41,7 +49,6 @@ const items = [
       :items="items"
     />
   </div>
-  
 </template>
 
 <style scoped>

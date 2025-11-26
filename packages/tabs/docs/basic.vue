@@ -51,7 +51,6 @@ function onTabChange(key: string) {
       {{ direction === 'ltr' ? 'rtl' : 'ltr' }}
     </button>
   </div>
-
 </template>
 
 <style src="../assets/index.less" lang="less"></style>

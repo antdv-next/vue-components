@@ -8,11 +8,11 @@ import Formatter from './formatter'
 import InputControl from './input-control'
 import OnStep from './on-step'
 import Precision from './precision'
+import PrefixSuffix from './prefix-suffix'
 import Simple from './simple'
 import SmallStep from './small-step'
-import Wheel from './wheel'
-import PrefixSuffix from './prefix-suffix'
 import Spinner from './spinner'
+import Wheel from './wheel'
 
 import './assets/index.less'
 </script>

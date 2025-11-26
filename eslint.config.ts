@@ -22,4 +22,9 @@ export default antfu(
       'no-template-curly-in-string': 0,
     },
   },
+  {
+    ignores: [
+      'packages/qrcode/src/libs',
+    ],
+  },
 )

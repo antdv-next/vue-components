@@ -2,10 +2,6 @@
   "name": "@v-c/switch",
   "type": "module",
   "version": "0.0.1",
-  "files": [
-    "dist",
-    "package.json"
-  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -16,6 +12,10 @@
     "./package.json": "./package.json"
   },
   "main": "dist/index.js",
+  "files": [
+    "dist",
+    "package.json"
+  ],
   "scripts": {
     "build": "vite build",
     "prepublish": "pnpm build",

@@ -2,7 +2,7 @@ import { defineComponent, reactive, ref } from 'vue'
 import InputNumber from '../src'
 import './assets/index.less'
 
-const getSum = (str: string) => {
+function getSum(str: string) {
   let total = 0
   str.split('').forEach((c) => {
     const num = Number(c)

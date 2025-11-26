@@ -1,5 +1,5 @@
-import { defineComponent, ref } from 'vue'
 import type { TextAreaProps } from '../src/interface'
+import { defineComponent, ref } from 'vue'
 import Textarea from '../src'
 import './assets/index.less'
 

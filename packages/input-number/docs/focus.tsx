@@ -1,6 +1,6 @@
+import type { InputNumberRef } from '../src/InputNumber'
 import { defineComponent, ref } from 'vue'
 import InputNumber from '../src'
-import type { InputNumberRef } from '../src/InputNumber'
 import './assets/index.less'
 
 export default defineComponent(() => {

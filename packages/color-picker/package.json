@@ -12,10 +12,6 @@
     "vue-color-picker",
     "color-picker"
   ],
-  "files": [
-    "dist",
-    "package.json"
-  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -26,6 +22,10 @@
     "./package.json": "./package.json"
   },
   "main": "./dist/index.js",
+  "files": [
+    "dist",
+    "package.json"
+  ],
   "scripts": {
     "build": "vite build",
     "test": "vitest run",

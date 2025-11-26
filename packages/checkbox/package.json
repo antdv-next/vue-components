@@ -2,10 +2,6 @@
   "name": "@v-c/checkbox",
   "type": "module",
   "version": "0.0.2",
-  "files": [
-    "dist",
-    "package.json"
-  ],
   "publishConfig": {
     "access": "public"
   },
@@ -19,6 +15,10 @@
     "./package.json": "./package.json"
   },
   "main": "dist/index.js",
+  "files": [
+    "dist",
+    "package.json"
+  ],
   "scripts": {
     "build": "vite build",
     "prepublish": "pnpm build",

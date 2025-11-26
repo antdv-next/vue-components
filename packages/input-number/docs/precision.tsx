@@ -23,11 +23,11 @@ export default defineComponent(() => {
       <div style={{ marginTop: '32px' }}>
         <label>
           precision:
-          <input type="number" onChange={(e) => precision.value = (e.target as HTMLInputElement).value} value={precision.value} />
+          <input type="number" onChange={e => precision.value = (e.target as HTMLInputElement).value} value={precision.value} />
         </label>
         <label>
           decimalSeparator:
-          <input value={decimalSeparator.value} onChange={(e) => decimalSeparator.value = (e.target as HTMLInputElement).value} />
+          <input value={decimalSeparator.value} onChange={e => decimalSeparator.value = (e.target as HTMLInputElement).value} />
         </label>
       </div>
     </div>

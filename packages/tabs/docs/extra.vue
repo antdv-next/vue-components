@@ -41,7 +41,7 @@ function setBothSide() {
 }
 
 function handleCheck(pos: P) {
-  const add = position.value.indexOf(pos) === -1
+  const add = !position.value.includes(pos)
   position.value = add ? [...position.value, pos] : position.value.filter(item => item !== pos)
 }
 
@@ -81,7 +81,7 @@ watch(position, (pos) => {
           type="radio"
           :checked="isDefault"
           @change="() => { isDefault = true }"
-        />
+        >
         <label for="default-position">default position(right)</label>
       </div>
       <div :style="{ marginInlineStart: '15px' }">
@@ -91,7 +91,7 @@ watch(position, (pos) => {
           :type="overall.indeterminate ? 'checkbox' : 'radio'"
           :checked="overall.checked"
           @change="setBothSide"
-        />
+        >
         <label for="coustom-position">coustom position</label>
         <ul>
           <li>
@@ -100,7 +100,7 @@ watch(position, (pos) => {
               type="checkbox"
               :checked="position.includes('left')"
               @change="() => { handleCheck('left') }"
-            />
+            >
             <label for="left">left</label>
           </li>
           <li>
@@ -109,14 +109,13 @@ watch(position, (pos) => {
               type="checkbox"
               :checked="position.includes('right')"
               @change="() => { handleCheck('right') }"
-            />
+            >
             <label for="right">right</label>
           </li>
         </ul>
       </div>
     </div>
   </div>
-
 </template>
 
 <style src="../assets/index.less" lang="less"></style>

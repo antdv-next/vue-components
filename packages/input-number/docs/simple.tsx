@@ -33,19 +33,29 @@ export default defineComponent(() => {
       />
       <p>
         <button type="button" onClick={() => disabled.value = !disabled.value}>
-          toggle Disabled ({String(disabled.value)})
+          toggle Disabled (
+          {String(disabled.value)}
+          )
         </button>
         <button type="button" onClick={() => readOnly.value = !readOnly.value}>
-          toggle readOnly ({String(readOnly.value)})
+          toggle readOnly (
+          {String(readOnly.value)}
+          )
         </button>
         <button type="button" onClick={() => keyboard.value = !keyboard.value}>
-          toggle keyboard ({String(keyboard.value)})
+          toggle keyboard (
+          {String(keyboard.value)}
+          )
         </button>
         <button type="button" onClick={() => stringMode.value = !stringMode.value}>
-          toggle stringMode ({String(stringMode.value)})
+          toggle stringMode (
+          {String(stringMode.value)}
+          )
         </button>
         <button type="button" onClick={() => wheel.value = !wheel.value}>
-          toggle wheel ({String(wheel.value)})
+          toggle wheel (
+          {String(wheel.value)}
+          )
         </button>
       </p>
 

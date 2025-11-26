@@ -1,6 +1,6 @@
+import type { ValueType } from '../src/InputNumber'
 import { defineComponent, ref } from 'vue'
 import InputNumber from '../src'
-import type { ValueType } from '../src/InputNumber'
 import './assets/index.less'
 
 export default defineComponent(() => {
@@ -23,7 +23,11 @@ export default defineComponent(() => {
         }}
       />
 
-      <button onClick={() => lock.value = !lock.value}>Lock Value ({String(lock.value)})</button>
+      <button onClick={() => lock.value = !lock.value}>
+        Lock Value (
+        {String(lock.value)}
+        )
+      </button>
       <button onClick={() => value.value = '93'}>Change Value</button>
     </div>
   )

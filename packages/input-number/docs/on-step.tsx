@@ -37,7 +37,10 @@ export default defineComponent(() => {
         onStep={onStep}
       />
 
-      <div style={{ marginTop: '10px' }}>Triggered by: {emitter.value}</div>
+      <div style={{ marginTop: '10px' }}>
+        Triggered by:
+        {emitter.value}
+      </div>
     </div>
   )
 })

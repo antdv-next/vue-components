@@ -140,6 +140,12 @@ export default defineComponent({
     const verticalScrollBarSpinSize = ref(0)
     const scrollWidth = ref(0)
 
+    // ========================== Visible Calculation =========================
+    const scrollHeight = ref(0)
+    const start = ref(0)
+    const end = ref(0)
+    const fillerOffset = ref<number | undefined>(undefined)
+
     // ================================ Scroll ================================
     function syncScrollTop(newTop: number | ((prev: number) => number)) {
       let value: number
@@ -161,12 +167,6 @@ export default defineComponent({
 
     // ================================ Range ================================
     useDiffItem(mergedData, getKey)
-
-    // ========================== Visible Calculation =========================
-    const scrollHeight = ref(0)
-    const start = ref(0)
-    const end = ref(0)
-    const fillerOffset = ref<number | undefined>(undefined)
 
     watch(
       [

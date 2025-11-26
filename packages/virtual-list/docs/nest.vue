@@ -42,7 +42,7 @@ function onScroll(e: Event) {
               background: 'white',
             }"
           >
-            <template #default="{ item: innerItem, index }">
+            <template #default="{ index }">
               <div
                 :style="{
                   height: '20px',
