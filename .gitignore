@@ -33,3 +33,4 @@ docs/.vitepress/cache
 .cache
 .output
 
+!.vscode/settings.json
