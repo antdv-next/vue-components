@@ -2,7 +2,7 @@ import type { PropType, VNode } from 'vue'
 import type { SliderProps } from '../src'
 import Tooltip from '@v-c/tooltip'
 import raf from '@v-c/util/dist/raf'
-import { defineComponent, ref, watchEffect } from 'vue'
+import { defineComponent, ref, watch } from 'vue'
 import Slider from '../src'
 import './assets/bootstrap.less'
 
@@ -18,31 +18,41 @@ export const HandleTooltip = defineComponent({
     const rafRef = ref<number | null>(null)
 
     function cancelKeepAlign() {
-      raf.cancel(rafRef.value!)
+      if (rafRef.value !== null) {
+        raf.cancel(rafRef.value)
+        rafRef.value = null
+      }
     }
 
     function keepAlign() {
+      cancelKeepAlign()
       rafRef.value = raf(() => {
         tooltipRef.value?.forceAlign()
       })
     }
 
-    watchEffect((onCleanup) => {
-      if (props.visible) {
-        keepAlign()
-      }
-      else {
-        cancelKeepAlign()
-      }
+    watch(
+      [() => props.visible, () => props.value],
+      ([visible], _prev, onCleanup) => {
+        if (visible) {
+          keepAlign()
+        }
+        else {
+          cancelKeepAlign()
+        }
 
-      onCleanup(cancelKeepAlign)
-    })
+        onCleanup(() => {
+          cancelKeepAlign()
+        })
+      },
+      { immediate: true },
+    )
     return () => {
       return (
         <Tooltip
           placement="top"
           overlayInnerStyle={{ minHeight: 'auto' }}
-          ref={tooltipRef.value}
+          ref={tooltipRef}
           visible={props.visible}
           overlay={props.tipFormatter(props.value)}
           v-slots={{

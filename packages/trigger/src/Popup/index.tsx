@@ -217,8 +217,14 @@ const Popup = defineComponent<PopupProps>(
       }
       const [mergedMask, mergedMaskMotion, mergedPopupMotion] = mergedProps.value
       const popupMotionName = (mergedPopupMotion as any)?.name ?? (mergedPopupMotion as any)?.motionName
-      const baseTransitionProps: any = getTransitionProps(popupMotionName, mergedPopupMotion)
+      const baseTransitionProps: any = popupMotionName
+        ? getTransitionProps(popupMotionName, mergedPopupMotion)
+        : {
+            appear: true,
+            ...(mergedPopupMotion || {}),
+          }
       const mergedTransitionProps = {
+        appear: true,
         ...baseTransitionProps,
         onBeforeEnter: (element: Element) => {
           onPrepare?.()
