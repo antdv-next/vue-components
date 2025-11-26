@@ -5,6 +5,7 @@ import DynamicExtra from './dynamic-extra.vue'
 import Editable from './editable.vue'
 import Extra from './extra.vue'
 import Indicator from './indicator.vue'
+import Mix from './mix.vue'
 import Position from './position.vue'
 </script>
 
@@ -36,6 +37,10 @@ import Position from './position.vue'
 
     <Variant title="Indicator">
       <Indicator />
+    </Variant>
+
+    <Variant title="Mix">
+      <Mix />
     </Variant>
   </Story>
 </template>
