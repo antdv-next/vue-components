@@ -206,7 +206,6 @@ export default defineComponent<TextAreaProps>(
         readOnly,
         autoSize,
         suffix,
-        ...restProps
       } = props
 
       const { class: attrClass, style: attrStyle, ...restAttrs } = attrs
@@ -265,6 +264,17 @@ export default defineComponent<TextAreaProps>(
         'onKeydown',
         'onKeyup',
         'onInput',
+      ])
+
+      const restProps = omit(props, [
+        'class',
+        'style',
+        'onFocus',
+        'onBlur',
+        'onChange',
+        'onCompositionEnd',
+        'onCompositionStart',
+        'onKeyDown',
         'allowClear',
         'maxLength',
         'prefixCls',
