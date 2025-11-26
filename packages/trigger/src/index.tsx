@@ -349,8 +349,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
 
       // ========================== Motion ============================
       const inMotion = shallowRef(false)
-      watch(mergedOpen, async () => {
-        await nextTick()
+      watch(mergedOpen, () => {
         if (mergedOpen.value) {
           inMotion.value = true
         }

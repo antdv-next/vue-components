@@ -229,10 +229,10 @@ const Popup = defineComponent<PopupProps>(
         onBeforeEnter: (element: Element) => {
           onPrepare?.()
           baseTransitionProps?.onBeforeEnter?.(element)
+          onVisibleChanged?.(true)
         },
         onAfterEnter: (element: Element) => {
           baseTransitionProps?.onAfterEnter?.(element)
-          onVisibleChanged?.(true)
         },
         onAfterLeave: (element: Element) => {
           baseTransitionProps.onAfterLeave?.(element)

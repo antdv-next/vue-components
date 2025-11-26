@@ -20,7 +20,7 @@ export default defineComponent({
   props: {
     prefixCls: { type: String, required: true },
     value: { type: Number, required: true },
-    valueIndex: { type: [Number, Object] as PropType<number | null>, required: true },
+    valueIndex: { type: [Number, Object] as PropType<number | null>, required: false },
     dragging: { type: Boolean, default: false },
     draggingDelete: { type: Boolean, default: false },
     onStartMove: { type: Function as PropType<OnStartMove>, required: true },
@@ -171,16 +171,16 @@ export default defineComponent({
 
       if (valueIndex !== null) {
         divProps.value = {
-          'tabindex': disabled ? null : getIndex(tabIndex, valueIndex),
+          'tabindex': disabled ? null : getIndex(tabIndex, valueIndex!),
           'role': 'slider',
           'aria-valuemin': min,
           'aria-valuemax': max,
           'aria-valuenow': value,
           'aria-disabled': disabled,
-          'aria-label': getIndex(ariaLabelForHandle, valueIndex),
-          'aria-labelledby': getIndex(ariaLabelledByForHandle, valueIndex),
-          'aria-required': getIndex(ariaRequired, valueIndex),
-          'aria-valuetext': getIndex(ariaValueTextFormatterForHandle, valueIndex)?.(value),
+          'aria-label': getIndex(ariaLabelForHandle, valueIndex!),
+          'aria-labelledby': getIndex(ariaLabelledByForHandle, valueIndex!),
+          'aria-required': getIndex(ariaRequired, valueIndex!),
+          'aria-valuetext': getIndex(ariaValueTextFormatterForHandle, valueIndex!)?.(value),
           'aria-orientation': direction === 'ltr' || direction === 'rtl' ? 'horizontal' : 'vertical',
           'onMousedown': onInternalStartMove,
           'onTouchstart': onInternalStartMove,
@@ -230,7 +230,7 @@ export default defineComponent({
           node: handleNode,
         }
 
-        return render(renderProps)
+        return render(renderProps as any)
       }
       return handleNode
     }
