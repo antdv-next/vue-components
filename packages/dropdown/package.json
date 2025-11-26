@@ -29,7 +29,8 @@
     "build": "vite build",
     "prepublish": "pnpm build",
     "test": "vitest run",
-    "bump": "bumpp --release patch"
+    "bump": "bumpp",
+    "bump:patch": "bumpp --release patch"
   },
   "peerDependencies": {
     "vue": "^3.0.0"
