@@ -3,7 +3,7 @@ import type { CSSProperties, Ref } from 'vue'
 import type { SizeInfo, Tab, TabNavListProps } from '../interface'
 import ResizeObserver from '@v-c/resize-observer'
 import RenderComponent from '@v-c/util/dist/RenderComponent'
-import { computed, h, onMounted, ref, shallowRef, toRefs, watch } from 'vue'
+import { computed, h, nextTick, onMounted, ref, shallowRef, toRefs, watch } from 'vue'
 import useIndicator from '../hooks/useIndicator'
 import useOffsets from '../hooks/useOffsets'
 import useTouchMove from '../hooks/useTouchMove'
@@ -504,7 +504,9 @@ function onListHolderResize() {
 }
 
 watch(() => tabs.value.map(t => t.key).join('_'), () => {
-  updateTabSizes()
+  nextTick(() => {
+    updateTabSizes()
+  })
 })
 
 watch([activeKey, () => transformComputed.value.transformMin, () => transformComputed.value.transformMax, visibleTabContentValue, tabOffsets], () => {
