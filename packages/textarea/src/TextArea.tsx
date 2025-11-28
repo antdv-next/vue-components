@@ -45,14 +45,14 @@ export default defineComponent<TextAreaProps>(
     // =============================== Ref ================================
     const holderRef = shallowRef<any>()
     const resizableTextAreaRef = shallowRef<any>()
-    const getTextArea = () => resizableTextAreaRef.value?.textArea()
+    const getTextArea = () => resizableTextAreaRef.value?.textArea
 
     const focus = () => {
       getTextArea()?.focus()
     }
 
     expose({
-      resizableTextArea: computed(() => resizableTextAreaRef.value),
+      resizableTextArea: resizableTextAreaRef,
       focus,
       blur: () => {
         getTextArea()?.blur()
