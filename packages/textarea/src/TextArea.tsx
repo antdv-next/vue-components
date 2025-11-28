@@ -85,7 +85,6 @@ export default defineComponent<TextAreaProps>(
 
     // ============================== Change ==============================
     const onChange = (e: Event) => {
-      // emit('change', e)
       props.onChange?.(e)
     }
 
@@ -124,7 +123,6 @@ export default defineComponent<TextAreaProps>(
     // =========================== Value Update ===========================
     const onInternalCompositionStart = (e: CompositionEvent) => {
       compositionRef.value = true
-      // emit('compositionStart', e)
       props.onCompositionStart?.(e)
     }
 
