@@ -87,17 +87,18 @@ const TextArea = defineComponent<TextAreaProps>(
           max: countConfig.value.max,
         })
 
+        // When we already reached max and new input is truncated to the same value,
+        // `value` may not change so Vue won't re-render. Force the native textarea
+        // value back to the truncated text to drop the extra characters (non-IME).
+        const textarea = getTextArea()
+
         if (currentValue !== cutValue) {
           selection.value = [
-            getTextArea().selectionStart || 0,
-            getTextArea().selectionEnd || 0,
+            textarea.selectionStart || 0,
+            textarea.selectionEnd || 0,
           ]
         }
       }
-
-      // When we already reached max and new input is truncated to the same value,
-      // `value` may not change so Vue won't re-render. Force the native textarea
-      // value back to the truncated text to drop the extra characters (non-IME).
       const textarea = getTextArea()
       if (!compositionRef.value && textarea && textarea.value !== cutValue) {
         textarea.value = cutValue
