@@ -2,6 +2,7 @@ import type { CSSProperties } from 'vue'
 import type { TextAreaProps } from './interface'
 import ResizeObserver from '@v-c/resize-observer'
 import { clsx } from '@v-c/util'
+import omit from '@v-c/util/dist/omit'
 import { getAttrStyleAndClass } from '@v-c/util/dist/props-util'
 import raf from '@v-c/util/dist/raf'
 import { computed, defineComponent, nextTick, onUnmounted, ref, shallowRef, watch } from 'vue'
@@ -170,6 +171,22 @@ const ResizableTextArea = defineComponent<
         >
           <textarea
             {...restAttrs}
+            {...omit(props, [
+              'suffix',
+              'classNames',
+              'styles',
+              'prefixCls',
+              'allowClear',
+              'autoSize',
+              'showCount',
+              'disabled',
+              'hidden',
+              'readOnly',
+              'onClear',
+              'maxLength',
+              'onResize',
+              'onChange',
+            ]) as any}
             ref={textareaRef}
             style={mergedStyle}
             class={clsx(

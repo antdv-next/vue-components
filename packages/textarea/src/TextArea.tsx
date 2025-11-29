@@ -2,6 +2,7 @@ import type { TextAreaProps } from './interface'
 import { BaseInput, resolveOnChange, useCount } from '@v-c/input'
 import { clsx } from '@v-c/util'
 import { KeyCodeStr } from '@v-c/util/dist/KeyCode'
+import omit from '@v-c/util/dist/omit'
 import { getAttrStyleAndClass, toPropsRefs } from '@v-c/util/dist/props-util'
 import { computed, defineComponent, shallowRef, watch } from 'vue'
 import ResizableTextArea from './ResizableTextArea.tsx'
@@ -235,6 +236,22 @@ const TextArea = defineComponent<TextAreaProps>(
         >
           <ResizableTextArea
             {...restAttrs}
+            {...omit(props, [
+              'suffix',
+              'classNames',
+              'styles',
+              'prefixCls',
+              'allowClear',
+              'autoSize',
+              'showCount',
+              'disabled',
+              'hidden',
+              'readOnly',
+              'onClear',
+              'maxLength',
+              'onResize',
+              'onChange',
+            ])}
             autoSize={autoSize}
             maxLength={maxLength}
             onChange={onInternalChange}

@@ -39,7 +39,7 @@ export interface TextAreaProps {
   hidden?: boolean
   readOnly?: boolean
   placeholder?: string
-  autofocus?: boolean
+  autoFocus?: boolean
 }
 
 export interface TextAreaRef {
