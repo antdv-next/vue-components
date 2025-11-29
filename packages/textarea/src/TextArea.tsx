@@ -130,6 +130,7 @@ const TextArea = defineComponent<TextAreaProps>(
       if (e.key === KeyCodeStr.Enter && onPressEnter && !e.isComposing) {
         onPressEnter(e)
       }
+      props?.onKeydown?.(e)
     }
     const handleFocus = () => {
       focused.value = true
@@ -251,6 +252,8 @@ const TextArea = defineComponent<TextAreaProps>(
               'maxLength',
               'onResize',
               'onChange',
+              'onKeydown',
+              'onPressEnter',
             ])}
             autoSize={autoSize}
             maxLength={maxLength}

@@ -28,8 +28,14 @@ export default defineComponent(() => {
         onResize={onResize}
         value={value.value}
         onChange={onChange}
-        autofocus
+        autoFocus
         onFocus={() => console.log('focus')}
+        onKeydown={() => {
+          console.log('onKeydown')
+        }}
+        onKeyup={() => {
+          console.log('onKeyup')
+        }}
       />
     </div>
   )

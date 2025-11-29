@@ -164,6 +164,7 @@ const ResizableTextArea = defineComponent<
         mergedStyle.overflowY = 'hidden'
         mergedStyle.overflowX = 'hidden'
       }
+      console.log(restAttrs)
       return (
         <ResizeObserver
           onResize={onInternalResize}
