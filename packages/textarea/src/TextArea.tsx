@@ -95,6 +95,14 @@ const TextArea = defineComponent<TextAreaProps>(
         }
       }
 
+      // When we already reached max and new input is truncated to the same value,
+      // `value` may not change so Vue won't re-render. Force the native textarea
+      // value back to the truncated text to drop the extra characters (non-IME).
+      const textarea = getTextArea()
+      if (!compositionRef.value && textarea && textarea.value !== cutValue) {
+        textarea.value = cutValue
+      }
+
       value.value = cutValue
 
       resolveOnChange(e.currentTarget, e, props.onChange as unknown as any, cutValue)

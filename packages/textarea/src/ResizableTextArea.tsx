@@ -35,9 +35,6 @@ const ResizableTextArea = defineComponent<
         internalValue.value = e.target.value
       }
       props?.onChange?.(e)
-      if (props.value) {
-        e.target.value = internalValue.value
-      }
     }
 
     // ================================ Ref =================================
