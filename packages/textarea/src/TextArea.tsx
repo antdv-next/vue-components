@@ -145,7 +145,6 @@ const TextArea = defineComponent<TextAreaProps>(
     return () => {
       const {
         suffix,
-        className,
         classNames,
         styles,
         prefixCls = 'vc-textarea',
@@ -158,7 +157,7 @@ const TextArea = defineComponent<TextAreaProps>(
         onClear,
         maxLength,
       } = props
-      const { style, restAttrs } = getAttrStyleAndClass(attrs)
+      const { style, restAttrs, className } = getAttrStyleAndClass(attrs)
       let suffixNode: any = suffix
       let dataCount: any
       if (countConfig.value.show) {
@@ -233,7 +232,7 @@ const TextArea = defineComponent<TextAreaProps>(
             {
               ...textareaProps
             }
-            className={clsx(classNames?.textarea)}
+            class={clsx(classNames?.textarea)}
             style={{ resize: style?.resize, ...styles?.textarea }}
             disabled={disabled}
             prefixCls={prefixCls}

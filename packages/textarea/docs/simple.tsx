@@ -1,6 +1,6 @@
 import type { TextAreaProps } from '../src_/interface'
 import { defineComponent, ref } from 'vue'
-import Textarea from '../src_'
+import Textarea from '../src'
 import './assets/index.less'
 
 export default defineComponent(() => {

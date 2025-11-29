@@ -17,7 +17,6 @@ export interface TextAreaProps {
   defaultValue?: any
   prefixCls?: string
   disabled?: boolean
-  className?: string
   autoSize?: boolean | AutoSizeType
   onPressEnter?: (e: any) => void
   onResize?: (size: { width: number, height: number }) => void
@@ -39,6 +38,8 @@ export interface TextAreaProps {
   minLength?: number
   hidden?: boolean
   readOnly?: boolean
+  placeholder?: string
+  autofocus?: boolean
 }
 
 export interface TextAreaRef {

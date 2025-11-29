@@ -84,8 +84,10 @@ const ResizableTextArea = defineComponent<
 
     watch(
       resizeState,
-      async () => {
-        await nextTick()
+      () => {
+        if (!textareaRef.value) {
+          return
+        }
         if (resizeState.value === RESIZE_START) {
           resizeState.value = RESIZE_MEASURING
         }
@@ -116,10 +118,6 @@ const ResizableTextArea = defineComponent<
           // Firefox has blink issue before but fixed in latest version.
         }
       },
-      {
-        immediate: true,
-      },
-
     )
     // We lock resize trigger by raf to avoid Safari warning
     const resizeRafRef = shallowRef<number>()
@@ -148,9 +146,8 @@ const ResizableTextArea = defineComponent<
         onResize,
         prefixCls,
         disabled,
-        className,
       } = props
-      const { style, restAttrs } = getAttrStyleAndClass(attrs, {
+      const { style, restAttrs, className } = getAttrStyleAndClass(attrs, {
         omits: ['onKeydown'],
       })
       // =============================== Render ===============================
@@ -183,7 +180,7 @@ const ResizableTextArea = defineComponent<
             )}
             disabled={disabled}
             value={mergedValue.value as string}
-            onChange={onInternalChange}
+            onInput={onInternalChange}
           />
         </ResizeObserver>
       )
