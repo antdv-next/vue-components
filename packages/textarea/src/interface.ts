@@ -1,5 +1,5 @@
-import type { CountConfig, ShowCountFormatter } from '@v-c/input'
-import type { VueNode } from '@v-c/util/dist/type'
+import type { BaseInputProps, CommonInputProps, InputProps } from '@v-c/input'
+import type { ChangeEventHandler } from '@v-c/util/dist/EventInterface'
 import type { CSSProperties } from 'vue'
 
 export interface AutoSizeType {
@@ -7,49 +7,43 @@ export interface AutoSizeType {
   maxRows?: number
 }
 
+// To compatible with origin usage. We have to wrap this
+export interface ResizableTextAreaRef {
+  textArea: HTMLTextAreaElement
+}
+
 export interface TextAreaProps {
-  value?: string | number
-  defaultValue?: string | number
+  value?: any
+  defaultValue?: any
   prefixCls?: string
+  disabled?: boolean
+  className?: string
   autoSize?: boolean | AutoSizeType
-  onPressEnter?: (e: KeyboardEvent) => void
+  onPressEnter?: (e: any) => void
   onResize?: (size: { width: number, height: number }) => void
-  onClear?: () => void
-  readOnly?: boolean
-  classNames?: {
-    affixWrapper?: string
+  classNames?: CommonInputProps['classNames'] & {
     textarea?: string
     count?: string
   }
   styles?: {
-    affixWrapper?: CSSProperties
     textarea?: CSSProperties
     count?: CSSProperties
   }
-  allowClear?: boolean | { clearIcon?: VueNode }
-  showCount?: boolean | { formatter: ShowCountFormatter }
-  count?: CountConfig
+  allowClear?: BaseInputProps['allowClear']
+  suffix?: BaseInputProps['suffix']
+  showCount?: InputProps['showCount']
+  count?: InputProps['count']
+  onClear?: InputProps['onClear']
+  onChange?: ChangeEventHandler
   maxLength?: number
-  suffix?: VueNode
-  disabled?: boolean
+  minLength?: number
   hidden?: boolean
-  onChange?: (e: Event) => void
-  onFocus?: (e: FocusEvent) => void
-  onBlur?: (e: FocusEvent) => void
-  onCompositionStart?: (e: CompositionEvent) => void
-  onCompositionEnd?: (e: CompositionEvent) => void
-  onKeyDown?: (e: KeyboardEvent) => void
-  className?: string
-  class?: any
-  style?: CSSProperties
-  placeholder?: string
+  readOnly?: boolean
 }
 
 export interface TextAreaRef {
-  resizableTextArea?: any
+  resizableTextArea: ResizableTextAreaRef
   focus: () => void
   blur: () => void
-  nativeElement: HTMLElement | null
+  nativeElement: HTMLElement
 }
-
-export type HTMLTextareaProps = HTMLTextAreaElement

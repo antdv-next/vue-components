@@ -1,4 +1,5 @@
 // Thanks to https://github.com/andreypopp/react-textarea-autosize/
+
 import type { CSSProperties } from 'vue'
 
 /**
@@ -51,7 +52,7 @@ let hiddenTextarea: HTMLTextAreaElement
 
 export function calculateNodeStyling(node: HTMLElement, useCache = false) {
   const nodeRef = (node.getAttribute('id')
-    || node.getAttribute('data-id')
+    || node.getAttribute('data-reactid')
     || node.getAttribute('name')) as string
 
   if (useCache && computedStyleCache[nodeRef]) {
@@ -60,11 +61,18 @@ export function calculateNodeStyling(node: HTMLElement, useCache = false) {
 
   const style = window.getComputedStyle(node)
 
-  const boxSizing = style.getPropertyValue('box-sizing') || style.getPropertyValue('-moz-box-sizing') || style.getPropertyValue('-webkit-box-sizing')
+  const boxSizing
+    = style.getPropertyValue('box-sizing')
+      || style.getPropertyValue('-moz-box-sizing')
+      || style.getPropertyValue('-webkit-box-sizing')
 
-  const paddingSize = parseFloat(style.getPropertyValue('padding-bottom')) + parseFloat(style.getPropertyValue('padding-top'))
+  const paddingSize
+    = parseFloat(style.getPropertyValue('padding-bottom'))
+      + parseFloat(style.getPropertyValue('padding-top'))
 
-  const borderSize = parseFloat(style.getPropertyValue('border-bottom-width')) + parseFloat(style.getPropertyValue('border-top-width'))
+  const borderSize
+    = parseFloat(style.getPropertyValue('border-bottom-width'))
+      + parseFloat(style.getPropertyValue('border-top-width'))
 
   const sizingStyle = SIZING_STYLE.map(
     name => `${name}:${style.getPropertyValue(name)}`,
@@ -115,7 +123,8 @@ export default function calculateAutoSizeStyle(
 
   // Copy all CSS properties that have an impact on the height of the content in
   // the textbox
-  const { paddingSize, borderSize, boxSizing, sizingStyle } = calculateNodeStyling(uiTextNode, useCache)
+  const { paddingSize, borderSize, boxSizing, sizingStyle }
+    = calculateNodeStyling(uiTextNode, useCache)
 
   // Need to have the overflow attribute to hide the scrollbar otherwise
   // text-lines will not calculated properly as the shadow will technically be

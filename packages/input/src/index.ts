@@ -2,7 +2,14 @@ import BaseInput from './BaseInput'
 import useCount from './hooks/useCount'
 import Input from './input'
 
-export type { CountConfig, InputProps, InputRef, ShowCountFormatter } from './interface'
+export type {
+  BaseInputProps,
+  CommonInputProps,
+  CountConfig,
+  InputProps,
+  InputRef,
+  ShowCountFormatter,
+} from './interface'
 
 export { BaseInput }
 export {

@@ -1,119 +1,91 @@
 import type { CSSProperties } from 'vue'
+import type { TextAreaProps } from './interface'
 import ResizeObserver from '@v-c/resize-observer'
-import { classNames } from '@v-c/util'
-import omit from '@v-c/util/dist/omit'
+import { clsx } from '@v-c/util'
+import { getAttrStyleAndClass } from '@v-c/util/dist/props-util'
 import raf from '@v-c/util/dist/raf'
-import { computed, defineComponent, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
+import { computed, defineComponent, nextTick, onUnmounted, ref, shallowRef, watch } from 'vue'
 import calculateAutoSizeStyle from './calculateNodeHeight'
 
-const RESIZE_START = 0
-const RESIZE_MEASURING = 1
-const RESIZE_STABLE = 2
+const RESIZE_START = 0 as const
+const RESIZE_MEASURING = 1 as const
+const RESIZE_STABLE = 2 as const
 
-export default defineComponent({
-  name: 'ResizableTextArea',
-  props: {
-    prefixCls: String,
-    defaultValue: [String, Number],
-    value: [String, Number],
-    autoSize: [Boolean, Object],
-    onResize: Function,
-    disabled: Boolean,
-    onChange: Function,
-    onInternalAutoSize: Function,
-    onKeydown: Function,
-    onFocus: Function,
-    onBlur: Function,
-    onCompositionstart: Function,
-    onCompositionend: Function,
-    readOnly: Boolean,
-    maxLength: Number,
-  },
-  emits: ['change', 'internalAutoSize', 'resize'],
-  setup(props, { expose, attrs, emit }) {
+type ResizeState
+  = | typeof RESIZE_START
+    | typeof RESIZE_MEASURING
+    | typeof RESIZE_STABLE
+
+const ResizableTextArea = defineComponent<
+  TextAreaProps
+>(
+  (props, { expose, attrs }) => {
     // =============================== Value ================================
-    const mergedValue = shallowRef(props.value || props.defaultValue)
-
+    const internalValue = ref(props?.value ?? props?.defaultValue ?? '')
     watch(
       () => props.value,
-      (val) => {
-        mergedValue.value = val
+      () => {
+        internalValue.value = props.value
       },
     )
+    const mergedValue = computed(() => internalValue.value ?? '')
 
-    const onInternalChange = (event: Event) => {
-      const target = event.target as HTMLTextAreaElement
-      mergedValue.value = target.value
-      emit('change', event)
+    const onInternalChange = (e: any) => {
+      internalValue.value = e.target.value
+      props?.onChange?.(e)
     }
 
     // ================================ Ref =================================
-    const textareaRef = ref<HTMLTextAreaElement>()
+    const textareaRef = shallowRef<HTMLTextAreaElement>()
 
     expose({
       textArea: textareaRef,
-      setValue: (val: string | number) => {
-        mergedValue.value = val
-      },
     })
 
     // ============================== AutoSize ==============================
-    const minRows = ref<number>()
-    const maxRows = ref<number>()
-    watch(() => props.autoSize, () => {
-      const { autoSize } = props
+    const autoSizeData = computed(() => {
+      const autoSize = props.autoSize
       if (autoSize && typeof autoSize === 'object') {
-        minRows.value = autoSize.minRows
-        maxRows.value = autoSize.maxRows
+        return [autoSize.minRows, autoSize.maxRows]
       }
-      else {
-        minRows.value = undefined
-        maxRows.value = undefined
-      }
-    }, { immediate: true })
+
+      return []
+    })
+    const minRows = computed(() => autoSizeData?.value?.[0])
+    const maxRows = computed(() => autoSizeData?.value?.[1])
+
+    // =============================== Resize ===============================
+    const resizeState = ref<ResizeState>(RESIZE_STABLE)
+    const autoSizeStyle = shallowRef<CSSProperties>({})
+    const startResize = () => {
+      resizeState.value = RESIZE_START
+    }
 
     const needAutoSize = computed(() => !!props.autoSize)
 
-    // =============================== Scroll ===============================
-    const fixFirefoxAutoScroll = () => {
-      try {
-        if (document.activeElement === textareaRef.value) {
-          const { selectionStart, selectionEnd, scrollTop } = textareaRef.value
-          textareaRef.value.setSelectionRange(selectionStart, selectionEnd)
-          textareaRef.value.scrollTop = scrollTop
-        }
-      }
-      catch (e) {
-        // Fix error in Chrome:
-        // Failed to read the 'selectionStart' property from 'HTMLInputElement'
-        // http://stackoverflow.com/q/21177489/3040605
-      }
-    }
-
-    // =============================== Resize ===============================
-    const resizeState = ref(RESIZE_STABLE)
-    const autoSizeStyle = ref<CSSProperties>()
-
-    const startResize = () => {
-      resizeState.value = RESIZE_START
-      if (process.env.NODE_ENV === 'test') {
-        emit('internalAutoSize')
-      }
-    }
-
     // Change to trigger resize measure
     watch(
-      [() => props.value, minRows, maxRows, needAutoSize],
-      () => {
+      [
+        () => props.value,
+        minRows,
+        maxRows,
+        needAutoSize,
+      ],
+      async () => {
+        await nextTick()
         if (needAutoSize.value) {
           startResize()
         }
+      },
+      {
+        immediate: true,
       },
     )
 
     watch(
       resizeState,
-      () => {
+      async () => {
+        await nextTick()
         if (resizeState.value === RESIZE_START) {
           resizeState.value = RESIZE_MEASURING
         }
@@ -124,25 +96,40 @@ export default defineComponent({
             minRows.value,
             maxRows.value,
           )
+
+          // Safari has bug that text will keep break line on text cut when it's prev is break line.
+          // ZombieJ: This not often happen. So we just skip it.
+          // const { selectionStart, selectionEnd, scrollTop } = textareaRef.current;
+          // const { value: tmpValue } = textareaRef.current;
+          // textareaRef.current.value = '';
+          // textareaRef.current.value = tmpValue;
+
+          // if (document.activeElement === textareaRef.current) {
+          //   textareaRef.current.scrollTop = scrollTop;
+          //   textareaRef.current.setSelectionRange(selectionStart, selectionEnd);
+          // }
           resizeState.value = RESIZE_STABLE
           autoSizeStyle.value = textareaStyles
         }
         else {
-          fixFirefoxAutoScroll()
+          // https://github.com/react-component/textarea/pull/23
+          // Firefox has blink issue before but fixed in latest version.
         }
       },
-    )
+      {
+        immediate: true,
+      },
 
+    )
     // We lock resize trigger by raf to avoid Safari warning
-    const resizeRafRef = ref<number>()
+    const resizeRafRef = shallowRef<number>()
     const cleanRaf = () => {
       raf.cancel(resizeRafRef.value!)
     }
 
     const onInternalResize = (size: { width: number, height: number }) => {
       if (resizeState.value === RESIZE_STABLE) {
-        emit('resize', size)
-
+        props?.onResize?.(size)
         if (props.autoSize) {
           cleanRaf()
           resizeRafRef.value = raf(() => {
@@ -151,55 +138,61 @@ export default defineComponent({
         }
       }
     }
-
-    onBeforeUnmount(() => cleanRaf())
+    onUnmounted(() => {
+      cleanRaf()
+    })
 
     return () => {
       const {
-        prefixCls,
         autoSize,
         onResize,
+        prefixCls,
         disabled,
-        ...restProps
+        className,
       } = props
+      const { style, restAttrs } = getAttrStyleAndClass(attrs, {
+        omits: ['onKeydown'],
+      })
       // =============================== Render ===============================
       const mergedAutoSizeStyle = needAutoSize.value ? autoSizeStyle.value : null
 
-      const mergedStyle = {
-        ...attrs.style as CSSProperties,
+      const mergedStyle: CSSProperties = {
+        ...style,
         ...mergedAutoSizeStyle,
-        overflowY:
-          resizeState.value === RESIZE_START
-          || resizeState.value === RESIZE_MEASURING
-            ? 'hidden'
-            : undefined,
-        overflowX:
-          resizeState.value === RESIZE_START
-          || resizeState.value === RESIZE_MEASURING
-            ? 'hidden'
-            : undefined,
       }
-      const restAttrs = omit(attrs, ['class', 'style'])
+
+      if (resizeState.value === RESIZE_START || resizeState.value === RESIZE_MEASURING) {
+        mergedStyle.overflowY = 'hidden'
+        mergedStyle.overflowX = 'hidden'
+      }
       return (
         <ResizeObserver
           onResize={onInternalResize}
           disabled={!(autoSize || onResize)}
         >
           <textarea
-            {...restAttrs as any}
-            {...restProps}
+            {...restAttrs}
             ref={textareaRef}
             style={mergedStyle}
-            class={classNames(prefixCls, [attrs.class], {
-              [`${prefixCls}-disabled`]: disabled,
-            })}
+            class={clsx(
+              prefixCls,
+              className,
+              {
+                [`${prefixCls}-disabled`]: disabled,
+              },
+            )}
             disabled={disabled}
-            value={mergedValue.value}
+            value={mergedValue.value as string}
             onChange={onInternalChange}
-            onInput={onInternalChange}
           />
         </ResizeObserver>
       )
     }
   },
-})
+  {
+    name: 'ResizableTextArea',
+    inheritAttrs: false,
+  },
+)
+
+export default ResizableTextArea

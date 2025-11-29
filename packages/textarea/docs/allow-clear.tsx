@@ -1,5 +1,5 @@
 import { defineComponent, ref } from 'vue'
-import Textarea from '../src'
+import Textarea from '../src_'
 import './assets/index.less'
 
 export default defineComponent(() => {

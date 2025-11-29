@@ -1,6 +1,7 @@
 import type { Ref, VNode, VNodeNormalizedChildren } from 'vue'
 import { Comment, Fragment, isVNode, Text, toRef } from 'vue'
 import isValid from '../isValid'
+import omit from '../omit'
 
 export function isEmptyElement(c: any) {
   return (
@@ -75,4 +76,44 @@ export function removeUndefined<T extends Record<string, any>>(obj: T): Partial<
     }
   })
   return res
+}
+
+interface RemoveBaseAttributesOptions {
+  class?: boolean
+  style?: boolean
+  omits?: string[]
+}
+const defaultOptions = {
+  class: true,
+  style: true,
+}
+
+export function pureAttrs(
+  attrs: Record<string, any>,
+  options: RemoveBaseAttributesOptions = defaultOptions,
+) {
+  const enableClass = options.class ?? defaultOptions.class
+  const enableStyle = options.style ?? defaultOptions.style
+  const newAttrs = { ...attrs }
+  if (enableClass) {
+    delete newAttrs.class
+  }
+  if (enableStyle) {
+    delete newAttrs.style
+  }
+  if (options.omits && options.omits.length > 0) {
+    return omit(newAttrs, options.omits)
+  }
+  return newAttrs
+}
+
+export function getAttrStyleAndClass(
+  attrs: Record<string, any>,
+  options?: RemoveBaseAttributesOptions,
+) {
+  return {
+    className: attrs.class,
+    style: attrs.style,
+    restAttrs: pureAttrs(attrs, options),
+  } as { className: any, style: any, restAttrs: Record<string, any> }
 }
