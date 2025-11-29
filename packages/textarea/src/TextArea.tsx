@@ -235,6 +235,7 @@ const TextArea = defineComponent<TextAreaProps>(
             class={clsx(classNames?.textarea)}
             style={{ resize: style?.resize, ...styles?.textarea }}
             disabled={disabled}
+            value={value.value}
             prefixCls={prefixCls}
             onResize={handleResize}
             ref={resizableTextAreaRef}

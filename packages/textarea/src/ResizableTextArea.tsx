@@ -31,13 +31,17 @@ const ResizableTextArea = defineComponent<
     const mergedValue = computed(() => internalValue.value ?? '')
 
     const onInternalChange = (e: any) => {
-      internalValue.value = e.target.value
+      if (props.value === undefined) {
+        internalValue.value = e.target.value
+      }
       props?.onChange?.(e)
+      if (props.value) {
+        e.target.value = internalValue.value
+      }
     }
 
     // ================================ Ref =================================
     const textareaRef = shallowRef<HTMLTextAreaElement>()
-
     expose({
       textArea: textareaRef,
     })
