@@ -260,7 +260,6 @@ export default defineComponent<TextAreaProps>(
         'onCompositionstart',
         'onCompositionend',
         'onKeydown',
-        'onKeyup',
         'onInput',
       ])
 

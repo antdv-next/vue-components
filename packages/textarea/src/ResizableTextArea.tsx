@@ -160,7 +160,7 @@ export default defineComponent({
         autoSize,
         onResize,
         disabled,
-        ...resetProps
+        ...restProps
       } = props
       // =============================== Render ===============================
       const mergedAutoSizeStyle = needAutoSize.value ? autoSizeStyle.value : null
@@ -187,7 +187,7 @@ export default defineComponent({
         >
           <textarea
             {...restAttrs as any}
-            {...resetProps}
+            {...restProps}
             ref={textareaRef}
             style={mergedStyle}
             class={classNames(prefixCls, [attrs.class], {
