@@ -5,7 +5,7 @@ import type { ImgInfo } from '../Image'
 import type { FooterSemanticName } from './Footer'
 import Portal from '@v-c/portal'
 import { classNames as classnames } from '@v-c/util'
-import useEvent from '@v-c/util/dist/hooks/useEvent.ts'
+import useEvent from '@v-c/util/dist/hooks/useEvent'
 import KeyCode from '@v-c/util/dist/KeyCode'
 
 import { computed, defineComponent, ref, Transition, watch } from 'vue'

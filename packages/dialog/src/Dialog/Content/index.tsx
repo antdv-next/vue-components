@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'vue'
 import type { PanelProps } from './Panel'
-import { getTransitionProps } from '@v-c/util/dist/utils/transition.ts'
+import { getTransitionProps } from '@v-c/util/dist/utils/transition'
 import { defineComponent, nextTick, shallowRef, Transition, vShow, withDirectives } from 'vue'
 
 import { offset } from '../../util.ts'

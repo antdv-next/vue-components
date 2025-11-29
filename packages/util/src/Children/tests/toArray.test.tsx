@@ -1,4 +1,4 @@
-import { toArray } from '@v-c/util/dist/Children/toArray.ts'
+import { toArray } from '@v-c/util/dist/Children/toArray'
 import { mount } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
 import { defineComponent, Fragment } from 'vue'

@@ -1,7 +1,7 @@
 import type { TextAreaProps } from './interface'
 import { BaseInput, resolveOnChange, useCount } from '@v-c/input'
 import { clsx } from '@v-c/util'
-import { KeyCodeStr } from '@v-c/util/dist/KeyCode.ts'
+import { KeyCodeStr } from '@v-c/util/dist/KeyCode'
 import { getAttrStyleAndClass, toPropsRefs } from '@v-c/util/dist/props-util'
 import { computed, defineComponent, shallowRef, watch } from 'vue'
 import ResizableTextArea from './ResizableTextArea.tsx'

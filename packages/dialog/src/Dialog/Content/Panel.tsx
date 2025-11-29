@@ -1,4 +1,4 @@
-import type { MouseEventHandler } from '@v-c/util/dist/EventInterface.ts'
+import type { MouseEventHandler } from '@v-c/util/dist/EventInterface'
 import type { CSSProperties } from 'vue'
 import type { IDialogPropTypes } from '../../IDialogPropTypes.ts'
 import { classNames } from '@v-c/util'
