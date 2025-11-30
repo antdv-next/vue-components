@@ -1,15 +1,15 @@
-import omit from '@v-c/util/dist/omit'
+import type { ComponentsConfig } from '../hooks/useComponents'
+import type { DisplayValueType, Mode, RenderNode } from '../interface'
+import { clsx } from '@v-c/util'
 import useEvent from '@v-c/util/dist/hooks/useEvent'
 import KeyCode from '@v-c/util/dist/KeyCode'
-import { clsx } from '@v-c/util'
+import omit from '@v-c/util/dist/omit'
 import { cloneVNode, computed, defineComponent, isVNode, shallowRef } from 'vue'
+import useBaseProps from '../hooks/useBaseProps'
+import { isValidateOpenKey } from '../utils/keyUtil'
 import Affix from './Affix'
 import SelectContent from './Content'
 import { useProvideSelectInputContext } from './context'
-import type { DisplayValueType, Mode, RenderNode } from '../interface'
-import useBaseProps from '../hooks/useBaseProps'
-import { isValidateOpenKey } from '../utils/keyUtil'
-import type { ComponentsConfig } from '../hooks/useComponents'
 
 export interface SelectInputRef {
   focus: (options?: FocusOptions) => void
@@ -69,8 +69,8 @@ const DEFAULT_OMIT_PROPS = [
 
 const SelectInput = defineComponent<SelectInputProps>((props, { expose, slots, attrs }) => {
   const baseProps = useBaseProps()
-  const { triggerOpen, toggleOpen, showSearch, disabled, loading, classNames, styles } =
-    baseProps.value || {}
+  const { triggerOpen, toggleOpen, showSearch, disabled, loading, classNames, styles }
+    = baseProps.value || {}
 
   const rootRef = shallowRef<HTMLDivElement>()
   const inputRef = shallowRef<HTMLInputElement>()
@@ -123,7 +123,8 @@ const SelectInput = defineComponent<SelectInputProps>((props, { expose, slots, a
         if (!shouldPreventClose) {
           toggleOpen?.()
         }
-      } else if (triggerOpen) {
+      }
+      else if (triggerOpen) {
         toggleOpen?.(false)
       }
     }
