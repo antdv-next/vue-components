@@ -324,6 +324,24 @@ importers:
         specifier: ^3.0.0
         version: 3.5.13(typescript@5.9.3)
 
+  packages/select:
+    dependencies:
+      '@v-c/overflow':
+        specifier: workspace:^
+        version: link:../overflow
+      '@v-c/trigger':
+        specifier: workspace:^
+        version: link:../trigger
+      '@v-c/util':
+        specifier: workspace:^
+        version: link:../util
+      '@v-c/virtual-list':
+        specifier: workspace:^
+        version: link:../virtual-list
+      vue:
+        specifier: ^3.0.0
+        version: 3.5.22(typescript@5.9.3)
+
   packages/slider:
     dependencies:
       '@v-c/util':
