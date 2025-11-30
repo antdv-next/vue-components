@@ -29,6 +29,7 @@
     "build": "vite build",
     "prepublish": "pnpm build",
     "test": "vitest run",
-    "bump": "bumpp --release patch"
+    "patch": "bumpp --release patch",
+    "bump": "bumpp"
   }
 }
