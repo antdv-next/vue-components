@@ -477,7 +477,6 @@ const InputNumber = defineComponent<InputNumberProps>(
     watch(() => props.value, (newVal) => {
       const newValue = getMiniDecimal((newVal ?? '') as any)
       decimalValue.value = newValue
-
       const currentParsedValue = getMiniDecimal(mergedParser(inputValue.value))
 
       if (!newValue.equals(currentParsedValue) || !userTypingRef.value || props.formatter) {
