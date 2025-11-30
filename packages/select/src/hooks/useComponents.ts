@@ -1,6 +1,6 @@
-import type { Component, VNode } from 'vue'
+import type { Component, MaybeRefOrGetter, VNode } from 'vue'
 import type { BaseSelectProps } from '../BaseSelect'
-import { computed } from 'vue'
+import { computed, toValue } from 'vue'
 
 export interface ComponentsConfig {
   root?: Component | VNode | string
@@ -13,19 +13,23 @@ export interface FilledComponentsConfig {
 }
 
 export default function useComponents(
-  components?: ComponentsConfig,
-  getInputElement?: BaseSelectProps['getInputElement'],
-  getRawInputElement?: BaseSelectProps['getRawInputElement'],
+  components?: MaybeRefOrGetter<ComponentsConfig | undefined>,
+  getInputElement?: MaybeRefOrGetter<BaseSelectProps['getInputElement']>,
+  getRawInputElement?: MaybeRefOrGetter<BaseSelectProps['getRawInputElement']>,
 ) {
   return computed<ComponentsConfig>(() => {
-    let { root, input } = components || {}
+    const componentsValue = toValue(components)
+    const getInputElementValue = toValue(getInputElement)
+    const getRawInputElementValue = toValue(getRawInputElement)
 
-    if (getRawInputElement) {
-      root = getRawInputElement()
+    let { root, input } = componentsValue || {}
+
+    if (getRawInputElementValue) {
+      root = getRawInputElementValue()
     }
 
-    if (getInputElement) {
-      input = getInputElement()
+    if (getInputElementValue) {
+      input = getInputElementValue()
     }
 
     return {

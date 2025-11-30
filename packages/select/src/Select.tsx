@@ -346,8 +346,8 @@ const Select = defineComponent<
       () => filledTagOptions.value as any,
       () => mergedFieldNames.value,
       () => mergedSearchValue.value,
-      mergedFilterOption.value as any,
-      optionFilterProp.value as any,
+      () => mergedFilterOption.value as any,
+      () => optionFilterProp.value as any,
     )
 
     const filledSearchOptions = computed(() => {

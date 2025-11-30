@@ -1,13 +1,14 @@
-import { onBeforeUnmount, onMounted } from 'vue'
+import type { MaybeRefOrGetter } from 'vue'
+import { onBeforeUnmount, onMounted, toValue } from 'vue'
 
 export default function useSelectTriggerControl(
   elements: () => (HTMLElement | SVGElement | undefined)[],
   open: () => boolean,
   triggerOpen: (open: boolean) => void,
-  customizedTrigger: boolean,
+  customizedTrigger: MaybeRefOrGetter<boolean>,
 ) {
   const onGlobalMouseDown = (event: MouseEvent) => {
-    if (customizedTrigger) {
+    if (toValue(customizedTrigger)) {
       return
     }
 
