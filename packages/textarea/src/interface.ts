@@ -35,7 +35,6 @@ export interface TextAreaProps {
   onClear?: InputProps['onClear']
   onChange?: ChangeEventHandler
   maxLength?: number
-  minLength?: number
   hidden?: boolean
   readOnly?: boolean
   placeholder?: string

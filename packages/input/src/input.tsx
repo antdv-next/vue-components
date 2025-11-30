@@ -130,8 +130,6 @@ const Input = defineComponent<
         value.value = cutValue
       }
 
-      // emit('update:value', cutValue)
-
       if (inputRef.value) {
         resolveOnChange(inputRef.value, e, onChange, cutValue)
       }
@@ -242,7 +240,6 @@ const Input = defineComponent<
       const config = countConfig.value
       const hasMaxLength = Number(mergedMax.value) > 0
       let mergedSuffix = suffixNode
-
       if (suffixNode || config?.show) {
         const dataCount = config?.showFormatter
           ? config.showFormatter({

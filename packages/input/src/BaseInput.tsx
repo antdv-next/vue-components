@@ -105,8 +105,7 @@ const BaseInput = defineComponent<
             [`${affixWrapperPrefixCls}-disabled`]: disabled, // Not used, but keep it
             [`${affixWrapperPrefixCls}-focused`]: focused, // Not used, but keep it
             [`${affixWrapperPrefixCls}-readonly`]: readOnly,
-            [`${affixWrapperPrefixCls}-input-with-clear-btn`]:
-                      suffix && allowClear && value,
+            [`${affixWrapperPrefixCls}-input-with-clear-btn`]: suffix && allowClear && value,
           },
           classNames?.affixWrapper,
           classNames?.variant,

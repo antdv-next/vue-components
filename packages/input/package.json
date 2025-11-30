@@ -16,7 +16,6 @@
     "./package.json": "./package.json"
   },
   "main": "dist/index.js",
-
   "files": [
     "dist",
     "package.json"
