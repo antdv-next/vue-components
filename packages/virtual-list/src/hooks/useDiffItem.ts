@@ -14,7 +14,7 @@ export default function useDiffItem<T>(data: Ref<T[]>, getKey: (item: T) => any)
         // Find added item
         const addedItem = newData.find((item) => {
           const key = getKey(item)
-          return !prevData.some(prevItem => getKey(prevItem) === key)
+          return !prevData.some(prevItem => getKey(prevItem as any) === key)
         })
 
         diffItem.value = addedItem
