@@ -1,7 +1,4 @@
-import warning, { noteOnce } from '@v-c/util/dist/warning'
-import { flattenChildren } from '@v-c/util/dist/props-util'
 import type { VNode } from 'vue'
-import { isMultiple } from '../BaseSelect'
 import type {
   BaseOptionType,
   DefaultOptionType,
@@ -10,6 +7,9 @@ import type {
   RawValueType,
   SelectProps,
 } from '../Select'
+import { flattenChildren } from '@v-c/util/dist/props-util'
+import warning, { noteOnce } from '@v-c/util/dist/warning'
+import { isMultiple } from '../BaseSelect'
 import { toArray } from './commonUtil'
 import { convertChildrenToData } from './legacyUtil'
 
@@ -78,15 +78,15 @@ function warningProps(props: SelectProps) {
   }
 
   noteOnce(
-    !defaultOpen || autoFocus,
+    !defaultOpen || !!autoFocus,
     '`defaultOpen` makes Select open without focus which means it will not close by click outside. You can set `autoFocus` if needed.',
   )
 
   if (value !== undefined && value !== null) {
     const values = toArray<RawValueType | LabelInValueType>(value as any)
     warning(
-      !labelInValue ||
-        values.every((val) => typeof val === 'object' && ('key' in (val as any) || 'value' in (val as any))),
+      !labelInValue
+      || values.every(val => typeof val === 'object' && ('key' in (val as any) || 'value' in (val as any))),
       '`value` should in shape of `{ value: string | number, label?: VueNode }` when you set `labelInValue` to `true`',
     )
 
@@ -98,7 +98,7 @@ function warningProps(props: SelectProps) {
 
   if (children) {
     let invalidateChildType: any = null
-    const childNodes = flattenChildren(children as VNode[])
+    const childNodes = flattenChildren(children as any[])
     childNodes.some((node: any) => {
       if (!node || !node.type) {
         return false
@@ -152,15 +152,15 @@ export function warningNullOptions(options: DefaultOptionType[], fieldNames: Fie
       for (let i = 0; i < optionsList.length; i++) {
         const option = optionsList[i]
 
-        if ((option as any)[fieldNames?.value] === null) {
+        if ((option as any)[fieldNames!.value!] === null) {
           warning(false, '`value` in Select options should not be `null`.')
           return true
         }
 
         if (
           !inGroup
-          && Array.isArray((option as any)[fieldNames?.options])
-          && recursiveOptions((option as any)[fieldNames?.options], true)
+          && Array.isArray((option as any)[fieldNames!.options!])
+          && recursiveOptions((option as any)[fieldNames!.options!], true)
         ) {
           break
         }

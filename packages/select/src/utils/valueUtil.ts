@@ -1,6 +1,6 @@
-import warning from '@v-c/util/dist/warning'
-import type { BaseOptionType, DefaultOptionType, FieldNames, RawValueType } from '../Select'
 import type { FlattenOptionData } from '../interface'
+import type { BaseOptionType, DefaultOptionType, FieldNames, RawValueType } from '../Select'
+import warning from '@v-c/util/dist/warning'
 
 function getKey(data: BaseOptionType, index: number) {
   const { key } = data as any
@@ -37,7 +37,7 @@ export function fillFieldNames(fieldNames: FieldNames | undefined, childrenAsDat
 
 export function flattenOptions<OptionType extends BaseOptionType = DefaultOptionType>(
   options: OptionType[],
-  { fieldNames, childrenAsData }: { fieldNames?: FieldNames; childrenAsData?: boolean } = {},
+  { fieldNames, childrenAsData }: { fieldNames?: FieldNames, childrenAsData?: boolean } = {},
 ): FlattenOptionData<OptionType>[] {
   const flattenList: FlattenOptionData<OptionType>[] = []
 
@@ -64,7 +64,8 @@ export function flattenOptions<OptionType extends BaseOptionType = DefaultOption
           label: (data as any)[fieldLabel],
           value,
         })
-      } else {
+      }
+      else {
         let grpLabel = (data as any)[groupLabel]
         if (grpLabel === undefined && childrenAsData) {
           grpLabel = (data as any).label
@@ -104,11 +105,7 @@ export function injectPropsWithOption<T extends object>(option: T): T {
   return newOption
 }
 
-export const getSeparatedContent = (
-  text: string,
-  tokens: string[],
-  end?: number,
-): string[] | null => {
+export function getSeparatedContent(text: string, tokens: string[], end?: number): string[] | null {
   if (!tokens || !tokens.length) {
     return null
   }

@@ -1,12 +1,12 @@
-import Select from './Select'
-import Option from './Option'
-import OptGroup from './OptGroup'
-import BaseSelect from './BaseSelect'
+import type { BaseSelectProps, BaseSelectPropsWithoutPrivate, BaseSelectRef } from './BaseSelect'
 import type { SelectProps } from './Select'
-import type { BaseSelectProps, BaseSelectRef, BaseSelectPropsWithoutPrivate } from './BaseSelect'
+import BaseSelect from './BaseSelect'
 import useBaseProps from './hooks/useBaseProps'
+import OptGroup from './OptGroup'
+import Option from './Option'
+import Select from './Select'
 
-export { Option, OptGroup, BaseSelect, useBaseProps }
-export type { SelectProps, BaseSelectProps, BaseSelectRef, BaseSelectPropsWithoutPrivate }
+export { BaseSelect, OptGroup, Option, useBaseProps }
+export type { BaseSelectProps, BaseSelectPropsWithoutPrivate, BaseSelectRef, SelectProps }
 
 export default Select

@@ -17,7 +17,7 @@ const TransBtn = defineComponent<TransBtnProps>((props) => {
   return () => {
     const { className, style, customizeIcon, customizeIconProps, children, onMouseDown, onClick } = props
 
-    const icon = typeof customizeIcon === 'function' ? customizeIcon(customizeIconProps) : customizeIcon
+    const icon = typeof customizeIcon === 'function' ? (customizeIcon as any)(customizeIconProps) : customizeIcon
 
     return (
       <span

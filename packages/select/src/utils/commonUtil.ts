@@ -28,7 +28,8 @@ export function getTitle(item: DisplayValueType): string {
   if (item) {
     if (isTitleType(item.title)) {
       title = (item.title as any).toString()
-    } else if (isTitleType(item.label)) {
+    }
+    else if (isTitleType(item.label)) {
       title = (item.label as any).toString()
     }
   }

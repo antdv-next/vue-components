@@ -1,15 +1,6 @@
 import type { AlignType, BuildInPlacements } from '@v-c/trigger'
-import { clsx } from '@v-c/util'
-import omit from '@v-c/util/dist/omit'
-import useEvent from '@v-c/util/dist/hooks/useEvent'
 import type { CSSProperties } from 'vue'
-import { computed, defineComponent, shallowRef, watch } from 'vue'
-import { useAllowClear } from '../hooks/useAllowClear'
-import { useProvideBaseSelectContext } from '../hooks/useBaseProps'
-import useLock from '../hooks/useLock'
-import useSelectTriggerControl from '../hooks/useSelectTriggerControl'
-import useOpen from '../hooks/useOpen'
-import useComponents from '../hooks/useComponents'
+import type { ComponentsConfig } from '../hooks/useComponents'
 import type {
   DisplayInfoType,
   DisplayValueType,
@@ -19,33 +10,42 @@ import type {
   RenderDOMFunc,
   RenderNode,
 } from '../interface'
-import SelectTrigger from '../SelectTrigger'
+import type { SelectInputRef } from '../SelectInput'
 import type { RefTriggerProps } from '../SelectTrigger'
+import { clsx } from '@v-c/util'
+import useEvent from '@v-c/util/dist/hooks/useEvent'
+import omit from '@v-c/util/dist/omit'
+import { computed, defineComponent, shallowRef, watch } from 'vue'
+import { useAllowClear } from '../hooks/useAllowClear'
+import { useProvideBaseSelectContext } from '../hooks/useBaseProps'
+import useComponents from '../hooks/useComponents'
+import useLock from '../hooks/useLock'
+import useOpen from '../hooks/useOpen'
+import useSelectTriggerControl from '../hooks/useSelectTriggerControl'
+import SelectInput from '../SelectInput'
+import SelectTrigger from '../SelectTrigger'
 import { getSeparatedContent, isValidCount } from '../utils/valueUtil'
 import Polite from './Polite'
-import type { SelectInputRef } from '../SelectInput'
-import SelectInput from '../SelectInput'
-import type { ComponentsConfig } from '../hooks/useComponents'
 
-export type BaseSelectSemanticName =
-  | 'prefix'
-  | 'suffix'
-  | 'input'
-  | 'clear'
-  | 'placeholder'
-  | 'content'
-  | 'item'
-  | 'itemContent'
-  | 'itemRemove'
+export type BaseSelectSemanticName
+  = | 'prefix'
+    | 'suffix'
+    | 'input'
+    | 'clear'
+    | 'placeholder'
+    | 'content'
+    | 'item'
+    | 'itemContent'
+    | 'itemRemove'
 
 export type {
   DisplayInfoType,
   DisplayValueType,
   Mode,
   Placement,
+  RawValueType,
   RenderDOMFunc,
   RenderNode,
-  RawValueType,
 }
 export interface RefOptionListProps {
   onKeyDown: (event: KeyboardEvent) => void
@@ -53,7 +53,7 @@ export interface RefOptionListProps {
   scrollTo?: (args: any) => void
 }
 
-export type CustomTagProps = {
+export interface CustomTagProps {
   label: any
   value: any
   disabled: boolean
@@ -204,12 +204,12 @@ const BaseSelect = defineComponent<BaseSelectProps>((props, { expose, attrs }) =
 
   const [mergedOpen, triggerOpen] = useOpen(
     () => props.open as any,
-    (nextOpen) => props.onPopupVisibleChange?.(nextOpen),
-    (nextOpen) => (props.disabled || emptyListContent.value ? false : nextOpen),
+    nextOpen => props.onPopupVisibleChange?.(nextOpen),
+    nextOpen => (props.disabled || emptyListContent.value ? false : nextOpen),
   )
 
   const tokenWithEnter = computed<boolean>(() =>
-    (props.tokenSeparators || []).some((tokenSeparator) => ['\n', '\r\n'].includes(tokenSeparator)),
+    (props.tokenSeparators || []).some(tokenSeparator => ['\n', '\r\n'].includes(tokenSeparator)),
   )
 
   const onInternalSearch = useEvent(
@@ -225,7 +225,7 @@ const BaseSelect = defineComponent<BaseSelectProps>((props, { expose, attrs }) =
       const separatedList = getSeparatedContent(
         searchText,
         props.tokenSeparators || [],
-        isValidCount(props.maxCount) ? props.maxCount - props.displayValues.length : undefined,
+        isValidCount(props.maxCount) ? props.maxCount! - props.displayValues.length : undefined,
       )
 
       const patchLabels: string[] = isCompositing ? null : (separatedList as any)
@@ -336,7 +336,7 @@ const BaseSelect = defineComponent<BaseSelectProps>((props, { expose, attrs }) =
   }
 
   const onSelectorRemove = useEvent((val: DisplayValueType) => {
-    const newValues = props.displayValues.filter((i) => i !== val)
+    const newValues = props.displayValues.filter(i => i !== val)
     props.onDisplayValuesChange(newValues, {
       type: 'remove',
       values: [val],
@@ -362,7 +362,8 @@ const BaseSelect = defineComponent<BaseSelectProps>((props, { expose, attrs }) =
     if (mergedSearchValue.value) {
       if (props.mode === 'tags') {
         props.onSearch(mergedSearchValue.value, { source: 'submit' })
-      } else if (props.mode === 'multiple') {
+      }
+      else if (props.mode === 'multiple') {
         props.onSearch('', { source: 'blur' })
       }
     }
@@ -384,7 +385,7 @@ const BaseSelect = defineComponent<BaseSelectProps>((props, { expose, attrs }) =
   const onPopupMouseEnter = () => {}
 
   let onTriggerVisibleChange: null | ((newOpen: boolean) => void)
-  if (!!mergedComponents.value.root) {
+  if (mergedComponents.value.root) {
     onTriggerVisibleChange = (newOpen: boolean) => {
       triggerOpen(newOpen)
     }
@@ -414,7 +415,7 @@ const BaseSelect = defineComponent<BaseSelectProps>((props, { expose, attrs }) =
   useProvideBaseSelectContext(baseSelectContext as any)
 
   const mergedSuffixIcon = computed(() => {
-    const nextSuffix = props.suffix ?? props.suffixIcon
+    const nextSuffix: any = props.suffix ?? props.suffixIcon
     if (typeof nextSuffix === 'function') {
       return nextSuffix({
         searchValue: mergedSearchValue.value,
