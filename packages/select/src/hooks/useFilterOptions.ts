@@ -1,5 +1,6 @@
+import type { MaybeRefOrGetter } from 'vue'
 import type { DefaultOptionType, FieldNames, SelectProps } from '../Select'
-import { computed } from 'vue'
+import { computed, toValue } from 'vue'
 import { toArray } from '../utils/commonUtil'
 import { injectPropsWithOption } from '../utils/valueUtil'
 
@@ -11,12 +12,15 @@ export default (
   options: () => DefaultOptionType[],
   fieldNames: () => FieldNames,
   searchValue?: () => string,
-  filterOption?: SelectProps['filterOption'],
-  optionFilterProp?: string,
+  filterOption?: MaybeRefOrGetter<SelectProps['filterOption']>,
+  optionFilterProp?: MaybeRefOrGetter<string | undefined>,
 ) =>
   computed(() => {
     const search = searchValue?.()
-    if (!search || filterOption === false) {
+    const filterOptionValue = toValue(filterOption)
+    const optionFilterPropValue = toValue(optionFilterProp)
+
+    if (!search || filterOptionValue === false) {
       return options()
     }
 
@@ -27,14 +31,14 @@ export default (
     } = fieldNames()
     const filteredOptions: DefaultOptionType[] = []
 
-    const customizeFilter = typeof filterOption === 'function'
+    const customizeFilter = typeof filterOptionValue === 'function'
 
     const upperSearch = search.toUpperCase()
     const filterFunc = customizeFilter
-      ? (filterOption as any)
+      ? (filterOptionValue as any)
       : (_: string, option: DefaultOptionType) => {
-          if (optionFilterProp) {
-            return includes((option as any)[optionFilterProp], upperSearch)
+          if (optionFilterPropValue) {
+            return includes((option as any)[optionFilterPropValue], upperSearch)
           }
 
           if ((option as any)[fieldOptions]) {

@@ -182,9 +182,9 @@ const BaseSelect = defineComponent<BaseSelectProps>(
     } as BaseSelectRef)
 
     const mergedComponents = useComponents(
-      props.components,
-      props.getInputElement,
-      props.getRawInputElement,
+      () => props.components,
+      () => props.getInputElement,
+      () => props.getRawInputElement,
     )
 
     const mergedSearchValue = computed(() => {
@@ -393,7 +393,7 @@ const BaseSelect = defineComponent<BaseSelectProps>(
       () => [containerRef.value?.nativeElement, triggerRef.value?.getPopupElement?.()],
       () => !!mergedOpen.value,
       triggerOpen,
-      !!mergedComponents.value.root,
+      () => !!mergedComponents.value.root,
     )
 
     const baseSelectContext = computed(() => ({

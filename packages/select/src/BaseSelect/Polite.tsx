@@ -1,5 +1,5 @@
-import { defineComponent } from 'vue'
 import type { DisplayValueType } from '.'
+import { defineComponent } from 'vue'
 
 export interface PoliteProps {
   visible: boolean
