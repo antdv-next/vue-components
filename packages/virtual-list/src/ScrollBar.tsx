@@ -29,6 +29,8 @@ function getPageXY(
   return obj[horizontal ? 'pageX' : 'pageY'] - window[horizontal ? 'scrollX' : 'scrollY']
 }
 
+export type ScrollBarDirectionType = 'ltr' | 'rtl'
+
 export default defineComponent({
   name: 'ScrollBar',
   props: {

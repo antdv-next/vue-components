@@ -3,16 +3,14 @@ import type { Key } from '@v-c/util/dist/type'
 import type { CSSProperties, PropType, VNode } from 'vue'
 import type { InnerProps } from './Filler'
 import type { ExtraRenderInfo } from './interface'
-import type { ScrollBarRef } from './ScrollBar'
+import type { ScrollBarDirectionType, ScrollBarRef } from './ScrollBar'
 import ResizeObserver from '@v-c/resize-observer'
+import { pureAttrs } from '@v-c/util/dist/props-util'
 import {
   computed,
-
   defineComponent,
-
   ref,
   shallowRef,
-
   watch,
 } from 'vue'
 import Filler from './Filler'
@@ -67,6 +65,21 @@ export interface ListProps<T = any> {
   itemKey: Key | ((item: T) => Key)
   component?: string
   virtual?: boolean
+  direction?: ScrollBarDirectionType
+  /**
+   * By default `scrollWidth` is same as container.
+   * When set this, it will show the horizontal scrollbar and
+   * `scrollWidth` will be used as the real width instead of container width.
+   * When set, `virtual` will always be enabled.
+   */
+  scrollWidth?: number
+  styles?: {
+    horizontalScrollBar?: CSSProperties
+    horizontalScrollBarThumb?: CSSProperties
+    verticalScrollBar?: CSSProperties
+    verticalScrollBarThumb?: CSSProperties
+  }
+  showScrollBar?: boolean | 'optional'
   onScroll?: (e: Event) => void
   onVirtualScroll?: (info: ScrollInfo) => void
   onVisibleChange?: (visibleList: T[], fullList: T[]) => void
@@ -84,6 +97,10 @@ export default defineComponent({
     fullHeight: { type: Boolean, default: true },
     itemKey: { type: [String, Number, Function] as PropType<Key | ((item: any) => Key)>, required: true },
     component: { type: String, default: 'div' },
+    direction: { type: String as PropType<ScrollBarDirectionType> },
+    scrollWidth: Number,
+    styles: Object,
+    showScrollBar: { type: [Boolean, String] as PropType<boolean | 'optional'>, default: 'optional' },
     virtual: { type: Boolean, default: true },
     onScroll: Function as PropType<(e: Event) => void>,
     onVirtualScroll: Function as PropType<(info: ScrollInfo) => void>,
@@ -91,6 +108,7 @@ export default defineComponent({
     innerProps: Object as PropType<InnerProps>,
     extraRender: Function as PropType<(info: ExtraRenderInfo) => VNode>,
   },
+  inheritAttrs: false,
   setup(props, { expose, attrs, slots }) {
     const itemHeight = computed(() => props.itemHeight)
     // =============================== Item Key ===============================
@@ -529,6 +547,7 @@ export default defineComponent({
       return (
         <div
           ref={containerRef}
+          {...pureAttrs(attrs)}
           style={{ position: 'relative', ...(attrs.style as CSSProperties) }}
           class={[props.prefixCls, attrs.class]}
         >
