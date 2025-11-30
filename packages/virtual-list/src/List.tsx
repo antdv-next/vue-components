@@ -142,7 +142,8 @@ export default defineComponent({
       return (
         useVirtual.value
         && data
-        && Math.max(props.itemHeight! * data.length, containerHeight.value) > props.height!
+        && (Math.max(props.itemHeight! * data.length, containerHeight.value) > props.height!
+          || !!props.scrollWidth)
       )
     })
 
@@ -150,6 +151,7 @@ export default defineComponent({
     const fillerInnerRef = ref<HTMLDivElement>()
     const containerRef = ref<HTMLDivElement>()
     const verticalScrollBarRef = shallowRef<ScrollBarRef>()
+    const horizontalScrollBarRef = shallowRef<ScrollBarRef>()
 
     const offsetTop = ref(0)
     const offsetLeft = ref(0)
@@ -157,7 +159,8 @@ export default defineComponent({
 
     // ScrollBar related
     const verticalScrollBarSpinSize = ref(0)
-    const scrollWidth = ref(0)
+    const horizontalScrollBarSpinSize = ref(0)
+    const contentScrollWidth = ref<number>(props.scrollWidth || 0)
 
     // ========================== Visible Calculation =========================
     const scrollHeight = ref(0)
@@ -291,11 +294,14 @@ export default defineComponent({
         width: sizeInfo.offsetWidth,
         height: sizeInfo.offsetHeight,
       }
+      contentScrollWidth.value = props.scrollWidth ?? sizeInfo.offsetWidth
     }
 
     // =============================== Scroll ===============================
+    const isRTL = computed(() => props.direction === 'rtl')
+
     const getVirtualScrollInfo = () => ({
-      x: offsetLeft.value,
+      x: isRTL.value ? -offsetLeft.value : offsetLeft.value,
       y: offsetTop.value,
     })
 
@@ -316,14 +322,24 @@ export default defineComponent({
     }
 
     // ========================== Scroll Position ===========================
+    const horizontalRange = computed(() =>
+      Math.max(0, (contentScrollWidth.value || 0) - size.value.width),
+    )
+
     const isScrollAtTop = computed(() => offsetTop.value === 0)
     const isScrollAtBottom = computed(() => offsetTop.value + props.height! >= scrollHeight.value)
     const isScrollAtLeft = computed(() => offsetLeft.value === 0)
-    const isScrollAtRight = computed(() => offsetLeft.value + size.value.width >= scrollWidth.value)
+    const isScrollAtRight = computed(() => offsetLeft.value >= horizontalRange.value)
+
+    const keepInHorizontalRange = (nextOffsetLeft: number) => {
+      const max = horizontalRange.value
+      return Math.max(0, Math.min(nextOffsetLeft, max))
+    }
 
     // ========================== Wheel & Touch =========================
     const delayHideScrollBar = () => {
       verticalScrollBarRef.value?.delayHidden()
+      horizontalScrollBarRef.value?.delayHidden()
     }
 
     const [onWheel] = useFrameWheel(
@@ -332,10 +348,13 @@ export default defineComponent({
       isScrollAtBottom,
       isScrollAtLeft,
       isScrollAtRight,
-      false, // horizontalScroll
+      horizontalRange.value > 0,
       (offsetY, isHorizontal) => {
         if (isHorizontal) {
-          // Not implemented yet
+          const next = isRTL.value ? offsetLeft.value - offsetY : offsetLeft.value + offsetY
+          const aligned = keepInHorizontalRange(next)
+          offsetLeft.value = aligned
+          triggerScroll({ x: isRTL.value ? -aligned : aligned })
         }
         else {
           syncScrollTop(top => top + offsetY)
@@ -348,8 +367,11 @@ export default defineComponent({
       componentRef,
       (isHorizontal, offset, _smoothOffset, _e) => {
         if (isHorizontal) {
-          // Not implemented yet
-          return false
+          const next = isRTL.value ? offsetLeft.value - offset : offsetLeft.value + offset
+          const aligned = keepInHorizontalRange(next)
+          offsetLeft.value = aligned
+          triggerScroll({ x: isRTL.value ? -aligned : aligned })
+          return true
         }
         else {
           syncScrollTop(top => top + offset)
@@ -370,7 +392,8 @@ export default defineComponent({
     const onScrollBar = (newScrollOffset: number, horizontal?: boolean) => {
       const newOffset = newScrollOffset
       if (horizontal) {
-        // Not implemented yet
+        offsetLeft.value = newOffset
+        triggerScroll({ x: isRTL.value ? -newOffset : newOffset })
       }
       else {
         syncScrollTop(newOffset)
@@ -390,9 +413,27 @@ export default defineComponent({
       [() => props.height, scrollHeight, inVirtual, () => size.value.height],
       () => {
         if (inVirtual.value && props.height && scrollHeight.value) {
-          // First parameter is container size, second is scroll range
           verticalScrollBarSpinSize.value = getSpinSize(size.value.height, scrollHeight.value)
         }
+      },
+      { immediate: true },
+    )
+
+    watch(
+      [() => size.value.width, () => contentScrollWidth.value],
+      () => {
+        if (inVirtual.value && contentScrollWidth.value) {
+          horizontalScrollBarSpinSize.value = getSpinSize(size.value.width, contentScrollWidth.value)
+        }
+      },
+      { immediate: true },
+    )
+
+    watch(
+      () => props.scrollWidth,
+      (val) => {
+        contentScrollWidth.value = val ?? size.value.width
+        offsetLeft.value = keepInHorizontalRange(offsetLeft.value)
       },
       { immediate: true },
     )
@@ -421,7 +462,9 @@ export default defineComponent({
         let scrollTop: number | undefined
 
         if ('left' in config) {
-          offsetLeft.value = config.left || 0
+          const aligned = keepInHorizontalRange(config.left || 0)
+          offsetLeft.value = aligned
+          triggerScroll({ x: isRTL.value ? -aligned : aligned })
         }
 
         if ('top' in config) {
@@ -518,11 +561,10 @@ export default defineComponent({
         componentStyle[props.fullHeight ? 'height' : 'maxHeight'] = `${props.height}px`
         Object.assign(componentStyle, ScrollStyle)
 
-        // Use custom ScrollBar when virtual scrolling is enabled
         if (useVirtual.value) {
           componentStyle.overflowY = 'hidden'
 
-          if (scrollWidth.value) {
+          if (horizontalRange.value > 0) {
             componentStyle.overflowX = 'hidden'
           }
 
@@ -538,7 +580,7 @@ export default defineComponent({
         virtual: inVirtual.value,
         offsetX: offsetLeft.value,
         offsetY: fillerOffset.value || 0,
-        rtl: false,
+        rtl: isRTL.value,
         getSize: getSize.value,
       })
 
@@ -549,7 +591,12 @@ export default defineComponent({
           ref={containerRef}
           {...pureAttrs(attrs)}
           style={{ position: 'relative', ...(attrs.style as CSSProperties) }}
-          class={[props.prefixCls, attrs.class]}
+          dir={isRTL.value ? 'rtl' : undefined}
+          class={[
+            props.prefixCls,
+            { [`${props.prefixCls}-rtl`]: isRTL.value },
+            attrs.class,
+          ]}
         >
           <ResizeObserver onResize={onHolderResize}>
             <Component
@@ -565,10 +612,11 @@ export default defineComponent({
                 height={scrollHeight.value}
                 offsetX={offsetLeft.value}
                 offsetY={fillerOffset.value}
+                scrollWidth={contentScrollWidth.value}
                 onInnerResize={collectHeight}
                 ref={fillerInnerRef}
                 innerProps={props.innerProps}
-                rtl={false}
+                rtl={isRTL.value}
                 extra={extraContent}
               >
                 {renderChildren()}
@@ -576,20 +624,40 @@ export default defineComponent({
             </Component>
           </ResizeObserver>
 
-          {/* ScrollBar */}
           {inVirtual.value && scrollHeight.value > (props.height || 0) && (
             <ScrollBar
               ref={verticalScrollBarRef}
               prefixCls={props.prefixCls}
               scrollOffset={offsetTop.value}
               scrollRange={scrollHeight.value}
-              rtl={false}
+              rtl={isRTL.value}
               onScroll={onScrollBar}
               onStartMove={onScrollbarStartMove}
               onStopMove={onScrollbarStopMove}
               spinSize={verticalScrollBarSpinSize.value}
               containerSize={size.value.height}
-              showScrollBar="optional"
+              showScrollBar={props.showScrollBar}
+              style={(props.styles as any)?.verticalScrollBar}
+              thumbStyle={(props.styles as any)?.verticalScrollBarThumb}
+            />
+          )}
+
+          {inVirtual.value && contentScrollWidth.value > size.value.width && (
+            <ScrollBar
+              ref={horizontalScrollBarRef}
+              prefixCls={props.prefixCls}
+              scrollOffset={offsetLeft.value}
+              scrollRange={contentScrollWidth.value}
+              rtl={isRTL.value}
+              onScroll={onScrollBar}
+              onStartMove={onScrollbarStartMove}
+              onStopMove={onScrollbarStopMove}
+              spinSize={horizontalScrollBarSpinSize.value}
+              containerSize={size.value.width}
+              horizontal
+              showScrollBar={props.showScrollBar}
+              style={(props.styles as any)?.horizontalScrollBar}
+              thumbStyle={(props.styles as any)?.horizontalScrollBarThumb}
             />
           )}
         </div>
