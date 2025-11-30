@@ -3,6 +3,7 @@ import type { HolderRef } from './BaseInput'
 import type { ChangeEventInfo, InputProps } from './interface'
 import { clsx } from '@v-c/util'
 import { triggerFocus } from '@v-c/util/dist/Dom/focus'
+import { KeyCodeStr } from '@v-c/util/dist/KeyCode'
 import omit from '@v-c/util/dist/omit'
 import { toPropsRefs } from '@v-c/util/dist/props-util'
 import { computed, defineComponent, shallowRef, watch } from 'vue'
@@ -156,7 +157,7 @@ const Input = defineComponent<
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (
-        e.key === 'Enter'
+        e.key === KeyCodeStr.Enter
         && !keyLockRef.value
         && !e.isComposing
       ) {
