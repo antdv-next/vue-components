@@ -12,27 +12,39 @@ const SingleContent = defineComponent<{ inputProps: SharedContentProps['inputPro
   (props, { expose, attrs }) => {
     const { inputProps } = props
     const selectInputCtx = useSelectInputContext()
-    const { prefixCls, searchValue, activeValue, displayValues, maxLength, mode }
-      = selectInputCtx.value || {}
     const baseProps = useBaseProps()
-    const { triggerOpen, title: rootTitle, showSearch, classNames, styles } = baseProps.value || {}
     const selectContext = useSelectContext()
+
+    // 从 selectInputCtx 中获取响应式值
+    const prefixCls = computed(() => selectInputCtx.value?.prefixCls)
+    const searchValue = computed(() => selectInputCtx.value?.searchValue)
+    const activeValue = computed(() => selectInputCtx.value?.activeValue)
+    const displayValues = computed(() => selectInputCtx.value?.displayValues)
+    const maxLength = computed(() => selectInputCtx.value?.maxLength)
+    const mode = computed(() => selectInputCtx.value?.mode)
+
+    // 从 baseProps 中获取响应式值
+    const triggerOpen = computed(() => baseProps.value?.triggerOpen)
+    const rootTitle = computed(() => baseProps.value?.title)
+    const showSearch = computed(() => baseProps.value?.showSearch)
+    const classNames = computed(() => baseProps.value?.classNames)
+    const styles = computed(() => baseProps.value?.styles)
 
     const inputChanged = shallowRef(false)
 
-    const combobox = computed(() => mode === 'combobox')
-    const displayValue = computed(() => displayValues?.[0])
+    const combobox = computed(() => mode.value === 'combobox')
+    const displayValue = computed(() => displayValues.value?.[0])
 
     const mergedSearchValue = computed(() => {
-      if (combobox.value && activeValue && !inputChanged.value && triggerOpen) {
-        return activeValue
+      if (combobox.value && activeValue.value && !inputChanged.value && triggerOpen.value) {
+        return activeValue.value
       }
-      return showSearch ? searchValue : ''
+      return showSearch.value ? searchValue.value : ''
     })
 
     const optionProps = computed(() => {
       let restProps: any = {
-        className: `${prefixCls}-content-value`,
+        className: `${prefixCls.value}-content-value`,
         style: { visibility: mergedSearchValue.value ? 'hidden' : 'visible' },
       }
       if (displayValue.value && selectContext.value?.flattenOptions) {
@@ -53,14 +65,14 @@ const SingleContent = defineComponent<{ inputProps: SharedContentProps['inputPro
       if (displayValue.value && !restProps.title) {
         restProps.title = getTitle(displayValue.value)
       }
-      if (rootTitle !== undefined) {
-        restProps.title = rootTitle
+      if (rootTitle.value !== undefined) {
+        restProps.title = rootTitle.value
       }
       return restProps
     })
 
     watch(
-      () => [combobox.value, activeValue],
+      () => [combobox.value, activeValue.value],
       () => {
         if (combobox.value) {
           inputChanged.value = false
@@ -71,7 +83,7 @@ const SingleContent = defineComponent<{ inputProps: SharedContentProps['inputPro
     expose()
 
     return () => (
-      <div class={clsx(`${prefixCls}-content`, classNames?.content)} style={styles?.content}>
+      <div class={clsx(`${prefixCls.value}-content`, classNames.value?.content)} style={styles.value?.content}>
         {displayValue.value
           ? (
               <div {...optionProps.value}>{displayValue.value.label}</div>
@@ -83,7 +95,7 @@ const SingleContent = defineComponent<{ inputProps: SharedContentProps['inputPro
           {...(inputProps as any)}
           {...attrs}
           value={mergedSearchValue.value}
-          maxLength={mode === 'combobox' ? maxLength : undefined}
+          maxLength={mode.value === 'combobox' ? maxLength.value : undefined}
           onInput={(e: any) => {
             inputChanged.value = true
             inputProps.onInput?.(e)

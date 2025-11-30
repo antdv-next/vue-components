@@ -1,6 +1,6 @@
 import type { ComputedRef, InjectionKey } from 'vue'
-import { computed, inject, provide } from 'vue'
 import type { SelectInputProps } from '.'
+import { computed, inject, provide } from 'vue'
 
 export type ContentContextProps = SelectInputProps
 
