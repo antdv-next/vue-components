@@ -1,49 +1,53 @@
+import type { SharedContentProps } from '.'
+import type { CustomTagProps, RenderNode } from '../../BaseSelect'
+import type { DisplayValueType, RawValueType } from '../../interface'
 import Overflow from '@v-c/overflow'
 import { clsx } from '@v-c/util'
 import { defineComponent } from 'vue'
-import Input from '../Input'
-import { useSelectInputContext } from '../context'
-import type { SharedContentProps } from '.'
-import type { DisplayValueType, RawValueType } from '../../interface'
-import type { RenderNode, CustomTagProps } from '../../BaseSelect'
+import useBaseProps from '../../hooks/useBaseProps'
 import TransBtn from '../../TransBtn'
 import { getTitle } from '../../utils/commonUtil'
-import useBaseProps from '../../hooks/useBaseProps'
+import { useSelectInputContext } from '../context'
+import Input from '../Input'
 import Placeholder from './Placeholder'
 
 function itemKey(value: DisplayValueType) {
   return value.key ?? value.value
 }
 
-const onPreventMouseDown = (event: MouseEvent) => {
+function onPreventMouseDown(event: MouseEvent) {
   event.preventDefault()
   event.stopPropagation()
 }
 
-export default defineComponent<{ inputProps: SharedContentProps['inputProps'] }>(
+export default defineComponent<
+  { inputProps: SharedContentProps['inputProps'] }
+>(
   (props, { expose }) => {
     const { inputProps } = props
-    const {
-      prefixCls,
-      displayValues,
-      searchValue,
-      mode,
-      onSelectorRemove,
-      removeIcon: removeIconFromContext,
-    } = useSelectInputContext().value || {}
-    const {
-      disabled,
-      showSearch,
-      triggerOpen,
-      toggleOpen,
-      autoClearSearchValue,
-      tagRender: tagRenderFromContext,
-      maxTagPlaceholder: maxTagPlaceholderFromContext,
-      maxTagTextLength,
-      maxTagCount,
-      classNames,
-      styles,
-    } = useBaseProps().value || {}
+    const selectInputContext = useSelectInputContext()
+    // const {
+    //   prefixCls,
+    //   displayValues,
+    //   searchValue,
+    //   mode,
+    //   onSelectorRemove,
+    //   removeIcon: removeIconFromContext,
+    // } = useSelectInputContext().value || {}
+    // const {
+    //   disabled,
+    //   showSearch,
+    //   triggerOpen,
+    //   toggleOpen,
+    //   autoClearSearchValue,
+    //   tagRender: tagRenderFromContext,
+    //   maxTagPlaceholder: maxTagPlaceholderFromContext,
+    //   maxTagTextLength,
+    //   maxTagCount,
+    //   classNames,
+    //   styles,
+    // } = useBaseProps().value || {}
+    const baseProps = useBaseProps()
 
     const selectionItemPrefixCls = `${prefixCls}-selection-item`
 
@@ -58,9 +62,9 @@ export default defineComponent<{ inputProps: SharedContentProps['inputProps'] }>
     const removeIcon: RenderNode = removeIconFromContext ?? '×'
     const maxTagPlaceholder:
       | any
-      | ((omittedValues: DisplayValueType[]) => any) =
-      maxTagPlaceholderFromContext ??
-      ((omittedValues: DisplayValueType[]) => `+ ${omittedValues.length} ...`)
+      | ((omittedValues: DisplayValueType[]) => any)
+        = maxTagPlaceholderFromContext
+          ?? ((omittedValues: DisplayValueType[]) => `+ ${omittedValues.length} ...`)
     const tagRender: ((props: CustomTagProps) => any) | undefined = tagRenderFromContext
 
     const onToggleOpen = (newOpen?: boolean) => {
@@ -127,12 +131,12 @@ export default defineComponent<{ inputProps: SharedContentProps['inputProps'] }>
           {tagRender?.({
             label: content,
             value,
-            index: info?.index,
+            index: info!.index!,
             disabled: itemDisabled,
             closable,
             onClose,
             isMaxTag: !!isMaxTag,
-          })}
+          } as any)}
         </span>
       )
     }
@@ -168,8 +172,8 @@ export default defineComponent<{ inputProps: SharedContentProps['inputProps'] }>
       if (!displayValues.length) {
         return null
       }
-      const content =
-        typeof maxTagPlaceholder === 'function'
+      const content
+        = typeof maxTagPlaceholder === 'function'
           ? maxTagPlaceholder(omittedValues)
           : maxTagPlaceholder
       return typeof tagRender === 'function'
@@ -179,27 +183,29 @@ export default defineComponent<{ inputProps: SharedContentProps['inputProps'] }>
 
     expose()
 
-    return (
-      <Overflow
-        prefixCls={`${prefixCls}-content`}
-        class={classNames?.content}
-        style={styles?.content}
-        prefix={!displayValues.length && (!searchValue || !triggerOpen) ? <Placeholder /> : null}
-        data={displayValues}
-        renderItem={renderItem}
-        renderRest={renderRest}
-        suffix={
-          <Input
-            disabled={disabled}
-            readOnly={!inputEditable}
-            {...(inputProps as any)}
-            value={inputValue || ''}
-            syncWidth
-          />
-        }
-        itemKey={itemKey as any}
-        maxCount={maxTagCount as any}
-      />
-    )
+    return () => {
+      return (
+        <Overflow
+          prefixCls={`${prefixCls}-content`}
+          class={classNames?.content}
+          style={styles?.content}
+          prefix={!displayValues.length && (!searchValue || !triggerOpen) ? <Placeholder /> : null}
+          data={displayValues}
+          renderItem={renderItem}
+          renderRest={renderRest}
+          suffix={(
+            <Input
+              disabled={disabled}
+              readOnly={!inputEditable}
+              {...(inputProps as any)}
+              value={inputValue || ''}
+              syncWidth
+            />
+          )}
+          itemKey={itemKey as any}
+          maxCount={maxTagCount as any}
+        />
+      )
+    }
   },
 )

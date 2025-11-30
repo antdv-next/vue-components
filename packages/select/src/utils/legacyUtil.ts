@@ -1,6 +1,6 @@
-import { isVNode } from 'vue'
-import { flattenChildren } from '@v-c/util/dist/props-util'
 import type { BaseOptionType, DefaultOptionType } from '../Select'
+import { flattenChildren } from '@v-c/util/dist/props-util'
+import { isVNode } from 'vue'
 
 function getNodeChildren(node: any) {
   const { children } = node || {}
@@ -49,11 +49,11 @@ export function convertChildrenToData<OptionType extends BaseOptionType = Defaul
       }
 
       return {
-        key: `__RC_SELECT_GRP__${key === null ? index : key}__`,
+        key: `__VC_SELECT_GRP__${key === null ? index : key}__`,
         label: key,
         ...restProps,
         options: convertChildrenToData(nodeChildren),
       } as any
     })
-    .filter((data) => data) as any
+    .filter(data => data) as any
 }

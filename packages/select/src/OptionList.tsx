@@ -1,7 +1,6 @@
 import type { FlattenOptionData } from './interface'
 import type { BaseOptionType, RawValueType } from './Select'
 import { clsx } from '@v-c/util'
-import useMemo from '@v-c/util/dist/hooks/useMemo'
 import KeyCode from '@v-c/util/dist/KeyCode'
 import omit from '@v-c/util/dist/omit'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
@@ -33,11 +32,14 @@ const OptionList = defineComponent<OptionListProps>((_props, { expose }) => {
 
   const itemPrefixCls = computed(() => `${base.value.prefixCls}-item`)
 
-  const memoFlattenOptions = useMemo<any[]>(
-    () => select.value.flattenOptions || [],
-    [() => base.value.open, () => select.value.flattenOptions],
-    (prev: any[], next: any[]) => next[0] && prev[1] !== next[1],
-  )
+  // const memoFlattenOptions = useMemo<any[]>(
+  //   () => select.value.flattenOptions || [],
+  //   [() => base.value.open, () => select.value.flattenOptions],
+  //   (prev: any[], next: any[]) => next[0] && prev[1] !== next[1],
+  // )
+  const memoFlattenOptions = computed<any[]>(() => {
+    return select.value?.flattenOptions || []
+  })
 
   const listRef = shallowRef<any>()
 

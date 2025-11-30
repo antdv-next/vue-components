@@ -1,14 +1,8 @@
+import type { DefaultOptionType, FieldNames, RawValueType } from '../Select'
 import { computed } from 'vue'
-import type { FieldNames, RawValueType } from '../Select'
 import { convertChildrenToData } from '../utils/legacyUtil'
 
-const useOptions = <OptionType>(
-  options: () => OptionType[],
-  children: () => any,
-  fieldNames: () => FieldNames,
-  optionFilterProp: () => string,
-  optionLabelProp: () => string,
-) => {
+function useOptions<OptionType = DefaultOptionType>(options: () => OptionType[], children: () => any, fieldNames: () => FieldNames, optionFilterProp: () => string, optionLabelProp: () => string) {
   return computed(() => {
     let mergedOptions = options()
     const childrenAsData = !mergedOptions
@@ -39,7 +33,8 @@ const useOptions = <OptionType>(
     const optionLabelPropVal = optionLabelProp() as any
 
     const dig = (optionList: OptionType[], isChildren = false) => {
-      if (!Array.isArray(optionList)) return
+      if (!Array.isArray(optionList))
+        return
       for (let i = 0; i < optionList.length; i += 1) {
         const option = optionList[i]
         if (!(option as any)[mergedFieldNames.options] || isChildren) {
@@ -47,7 +42,8 @@ const useOptions = <OptionType>(
           setLabelOptions(labelOptions, option, mergedFieldNames.label)
           setLabelOptions(labelOptions, option, optionFilterPropVal)
           setLabelOptions(labelOptions, option, optionLabelPropVal)
-        } else {
+        }
+        else {
           dig((option as any)[mergedFieldNames.options], true)
         }
       }

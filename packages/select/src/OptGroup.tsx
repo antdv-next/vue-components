@@ -1,5 +1,5 @@
-import { defineComponent } from 'vue'
 import type { DefaultOptionType } from './Select'
+import { defineComponent } from 'vue'
 
 export interface OptGroupProps extends Omit<DefaultOptionType, 'options'> {
   children?: any
