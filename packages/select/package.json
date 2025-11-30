@@ -1,14 +1,15 @@
 {
-  "name": "@v-c/virtual-list",
+  "name": "@v-c/select",
   "type": "module",
   "version": "0.0.0",
-  "description": "Vue Virtual List Component",
+  "description": "",
   "author": "",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "keywords": [
-    "vue",
-    "virtual-list",
-    "vue-component"
+    "slider"
   ],
   "exports": {
     ".": {
@@ -19,22 +20,26 @@
     "./dist/*": "./dist/*",
     "./package.json": "./package.json"
   },
-  "main": "./dist/index.js",
+  "main": "index.js",
+  "files": [
+    "dist",
+    "package.json"
+  ],
   "scripts": {
     "build": "vite build",
     "test": "vitest run",
     "prepublish": "pnpm build",
-    "bump": "bumpp",
-    "patch": "bumpp --release patch"
-  },
-  "publishConfig": {
-    "access": "public"
+    "bump": "bumpp --release patch"
   },
   "peerDependencies": {
     "vue": "^3.0.0"
   },
   "dependencies": {
-    "@v-c/resize-observer": "workspace:^",
-    "@v-c/util": "workspace:^"
+    "@v-c/util": "workspace:^",
+    "@v-c/trigger": "workspace:^",
+    "@v-c/overflow": "workspace:^",
+    "@v-c/virtual-list": "workspace:^"
+  },
+  "devDependencies": {
   }
 }

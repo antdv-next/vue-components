@@ -7,7 +7,7 @@ export function useGetSize<T>(
   mergedData: Ref<T[]>,
   getKey: GetKey<T>,
   heights: CacheMap,
-  itemHeight: number,
+  itemHeight: Ref<number>,
 ): ComputedRef<(startKey: any, endKey?: any) => { top: number, bottom: number }> {
   return computed(() => {
     return (startKey: any, endKey?: any) => {
@@ -26,14 +26,14 @@ export function useGetSize<T>(
       for (let i = 0; i < topIndex; i += 1) {
         const key = getKey(mergedData.value[i])
         const cacheHeight = heights.get(key)
-        top += cacheHeight === undefined ? itemHeight : cacheHeight
+        top += cacheHeight === undefined ? itemHeight.value : cacheHeight
       }
 
       let bottom = 0
       for (let i = mergedData.value.length - 1; i > bottomIndex; i -= 1) {
         const key = getKey(mergedData.value[i])
         const cacheHeight = heights.get(key)
-        bottom += cacheHeight === undefined ? itemHeight : cacheHeight
+        bottom += cacheHeight === undefined ? itemHeight.value : cacheHeight
       }
 
       return {

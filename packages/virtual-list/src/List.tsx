@@ -92,6 +92,7 @@ export default defineComponent({
     extraRender: Function as PropType<(info: ExtraRenderInfo) => VNode>,
   },
   setup(props, { expose, attrs, slots }) {
+    const itemHeight = computed(() => props.itemHeight)
     // =============================== Item Key ===============================
     const getKey = (item: any): Key => {
       if (typeof props.itemKey === 'function') {
@@ -170,11 +171,11 @@ export default defineComponent({
 
     watch(
       [
-        () => inVirtual.value,
-        () => useVirtual.value,
-        () => offsetTop.value,
-        () => mergedData.value,
-        () => heightUpdatedMark.value,
+        inVirtual,
+        useVirtual,
+        offsetTop,
+        mergedData,
+        heightUpdatedMark,
         () => props.height,
       ],
       () => {
@@ -242,7 +243,7 @@ export default defineComponent({
 
     // Sync scroll top when height changes
     watch(
-      () => scrollHeight.value,
+      scrollHeight,
       () => {
         const changedRecord = heights.getRecord()
         if (changedRecord.size === 1) {
@@ -368,7 +369,7 @@ export default defineComponent({
 
     // Calculate ScrollBar spin size
     watch(
-      [() => props.height, () => scrollHeight.value, () => inVirtual.value, () => size.value.height],
+      [() => props.height, scrollHeight, inVirtual, () => size.value.height],
       () => {
         if (inVirtual.value && props.height && scrollHeight.value) {
           // First parameter is container size, second is scroll range
@@ -448,7 +449,7 @@ export default defineComponent({
 
     // ================================ Effect ================================
     watch(
-      [() => start.value, () => end.value, () => mergedData.value],
+      [start, end, mergedData],
       () => {
         if (props.onVisibleChange) {
           const renderList = mergedData.value.slice(start.value, end.value + 1)
@@ -457,44 +458,43 @@ export default defineComponent({
       },
     )
 
-    // ================================ Render ================================
-    const renderChildren = () => {
-      const children: VNode[] = []
-      const data = mergedData.value
-      const defaultSlot = slots.default
-
-      if (!defaultSlot) {
-        return children
-      }
-
-      for (let i = start.value; i <= end.value; i += 1) {
-        const item = data[i]
-        const key = getKey(item)
-        // Call the slot function with item, index, and props
-        const nodes = defaultSlot({
-          item,
-          index: i,
-          style: {},
-          offsetX: offsetLeft.value,
-        })
-
-        // Wrap each node in Item component
-        const node = Array.isArray(nodes) ? nodes[0] : nodes
-        if (node) {
-          children.push(
-            <Item key={key} setRef={ele => setInstanceRef(item, ele)}>
-              {node}
-            </Item>,
-          )
-        }
-      }
-
-      return children
-    }
-
-    const getSize = useGetSize(mergedData, getKey, heights, props.itemHeight!)
+    const getSize = useGetSize(mergedData, getKey, heights, itemHeight as any)
 
     return () => {
+      // ================================ Render ================================
+      const renderChildren = () => {
+        const children: VNode[] = []
+        const data = mergedData.value
+        const defaultSlot = slots.default
+
+        if (!defaultSlot) {
+          return children
+        }
+
+        for (let i = start.value; i <= end.value; i += 1) {
+          const item = data[i]
+          const key = getKey(item)
+          // Call the slot function with item, index, and props
+          const nodes = defaultSlot({
+            item,
+            index: i,
+            style: {},
+            offsetX: offsetLeft.value,
+          })
+
+          // Wrap each node in Item component
+          const node = Array.isArray(nodes) ? nodes[0] : nodes
+          if (node) {
+            children.push(
+              <Item key={key} setRef={ele => setInstanceRef(item, ele)}>
+                {node}
+              </Item>,
+            )
+          }
+        }
+
+        return children
+      }
       const componentStyle: CSSProperties = {}
       if (props.height) {
         componentStyle[props.fullHeight ? 'height' : 'maxHeight'] = `${props.height}px`
