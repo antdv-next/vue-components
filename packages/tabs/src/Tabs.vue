@@ -4,7 +4,7 @@ import { clsx } from '@v-c/util'
 import useMergedState from '@v-c/util/dist/hooks/useMergedState'
 import isMobile from '@v-c/util/dist/isMobile'
 import omit from '@v-c/util/dist/omit'
-import { computed, onMounted, ref, toRefs, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, toRefs, watch } from 'vue'
 import useAnimateConfig from './hooks/useAnimateConfig'
 import { provideTabContext } from './TabContext'
 import TabNavListWrapper from './TabNavList/Wrapper.vue'
@@ -79,17 +79,16 @@ const activeIndex = ref(tabs.value.findIndex(item => item.key === mergedActiveKe
 
 const tabKeyStr = computed(() => tabs.value.map(tab => tab.key).join('_'))
 
-onMounted(() => {
-  watch([tabKeyStr, mergedActiveKey, activeIndex], () => {
-    activeIndex.value = tabs.value.findIndex(item => item.key === mergedActiveKey.value)
-    let newActiveIndex = tabs.value.findIndex(tab => tab.key === mergedActiveKey.value)
-    if (newActiveIndex === -1) {
-      newActiveIndex = Math.max(0, Math.min(activeIndex.value, tabs.value.length - 1))
-      setMergedActiveKey(tabs.value[newActiveIndex]?.key)
-    }
-    activeIndex.value = newActiveIndex
-  }, { immediate: true })
-})
+watch([tabKeyStr, mergedActiveKey, activeIndex], async () => {
+  await nextTick()
+  activeIndex.value = tabs.value.findIndex(item => item.key === mergedActiveKey.value)
+  let newActiveIndex = tabs.value.findIndex(tab => tab.key === mergedActiveKey.value)
+  if (newActiveIndex === -1) {
+    newActiveIndex = Math.max(0, Math.min(activeIndex.value, tabs.value.length - 1))
+    setMergedActiveKey(tabs.value[newActiveIndex]?.key)
+  }
+  activeIndex.value = newActiveIndex
+}, { immediate: true })
 
 // ===================== Accessibility ====================
 const [mergedId, setMergedId] = useMergedState(null as string | null, {

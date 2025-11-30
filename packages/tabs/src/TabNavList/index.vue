@@ -3,7 +3,7 @@ import type { CSSProperties, Ref } from 'vue'
 import type { SizeInfo, Tab, TabNavListProps } from '../interface'
 import ResizeObserver from '@v-c/resize-observer'
 import RenderComponent from '@v-c/util/dist/RenderComponent'
-import { computed, h, nextTick, onMounted, ref, shallowRef, toRefs, watch } from 'vue'
+import { computed, h, nextTick, onUnmounted, ref, shallowRef, toRefs, watch } from 'vue'
 import useIndicator from '../hooks/useIndicator'
 import useOffsets from '../hooks/useOffsets'
 import useTouchMove from '../hooks/useTouchMove'
@@ -46,7 +46,7 @@ const {
   popupClassName,
 } = toRefs(props)
 
-const tabBarGutter = computed(() => tabBarGutterProp.value ? `${tabBarGutterProp.value}px` : '0px')
+const tabBarGutter = computed(() => tabBarGutterProp.value ? `${tabBarGutterProp.value}px` : undefined)
 
 // const { tabs, prefixCls } = toRefs(useTabContext()?.value || {})
 const ctx = useTabContext()
@@ -182,17 +182,24 @@ useTouchMove(tabsWrapperRef, (offsetX, offsetY) => {
   return true
 })
 
-onMounted(() => {
-  watch(() => lockAnimation.value, () => {
-    clearTouchMoving()
+watch(
+  () => lockAnimation.value,
+  async (_n, _o, onCleanup) => {
+    await nextTick()
     if (lockAnimation.value) {
       touchMovingRef.value = setTimeout(() => {
         lockAnimation.value = 0
       }, 100)
     }
+    onCleanup(() => {
+      clearTouchMoving()
+    })
+  },
+  { immediate: true },
+)
 
-    return clearTouchMoving
-  }, { immediate: true })
+onUnmounted(() => {
+  clearTouchMoving()
 })
 // ===================== Visible Range =====================
 const visibleRangeRef = useVisibleRange(
@@ -436,9 +443,6 @@ const inkStyle = useIndicator({
   rtl,
 })
 
-watch(() => inkStyle.value, (newStyle) => {
-  console.log('newValue styles', newStyle, inkStyle.value)
-})
 // ========================== Measure ==========================
 function getTabSize(tab: HTMLElement, containerRect: { left: number, top: number }) {
   const { offsetWidth, offsetHeight, offsetTop, offsetLeft } = tab

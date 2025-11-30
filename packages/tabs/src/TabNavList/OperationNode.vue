@@ -64,13 +64,13 @@ const menuNode = computed(() => {
             ? h('button', {
                 'type': 'button',
                 'aria-label': removeAriaLabel.value || 'remove',
-                'tabIndex': 0,
-                'class': className.value,
+                'tabindex': 0,
+                'class': `${dropdownPrefix.value}-menu-item-remove`,
                 'onClick': (e: MouseEvent | KeyboardEvent) => {
                   e.stopPropagation()
                   onRemoveTab(e, key)
                 },
-              }, [(closeIcon || editable.value || '×') as VNodeChild])
+              }, [(closeIcon || editable.value?.removeIcon || '×') as VNodeChild])
             : null,
         ],
       })

@@ -50,7 +50,6 @@ export default defineComponent<{
           ...attrs,
         })
       }
-      console.log(render, 'render')
       return render
     }
   },

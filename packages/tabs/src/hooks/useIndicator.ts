@@ -13,12 +13,11 @@ interface UseIndicatorOptions {
 
 function useIndicator(options: UseIndicatorOptions) {
   const { activeTabOffset, horizontal, rtl, indicator } = options
-  const { size, align = 'center' } = indicator?.value || {}
-
   const inkStyle = ref<CSSProperties>()
   const inkBarRafRef = ref<number>()
 
   const getLength = (origin: number) => {
+    const size = indicator?.value?.size
     if (typeof size === 'function')
       return size(origin)
     if (typeof size === 'number')
@@ -39,8 +38,9 @@ function useIndicator(options: UseIndicatorOptions) {
       () => rtl.value,
       () => indicator?.value,
     ],
-    async () => {
+    async (_n, _o) => {
       await nextTick()
+      const align = indicator?.value?.align || 'center'
       const newInkStyle: CSSProperties = {}
 
       if (activeTabOffset.value) {
@@ -53,9 +53,6 @@ function useIndicator(options: UseIndicatorOptions) {
           if (align === 'center') {
             ;(newInkStyle)[key] = `${(activeTabOffset.value)[key] + activeTabOffset.value.width / 2}px`
             newInkStyle.transform = rtl.value ? 'translateX(50%)' : 'translateX(-50%)'
-          }
-          if (align === 'end') {
-            ;(newInkStyle)[key] = `${(activeTabOffset.value)[key] + activeTabOffset.value.width}px`
           }
           if (align === 'end') {
             ;(newInkStyle)[key] = `${(activeTabOffset.value)[key] + activeTabOffset.value.width}px`
@@ -94,8 +91,6 @@ function useIndicator(options: UseIndicatorOptions) {
           inkStyle.value = newInkStyle
         }
       })
-
-      return cleanInkBarRaf
     },
     { immediate: true },
   )
