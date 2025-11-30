@@ -47,31 +47,35 @@ const menuNode = computed(() => {
       onTabClick.value?.(key, domEvent)
       open.value = false
     },
-  }, props.tabs.map((tab) => {
-    const { closable, closeIcon, disabled, key, label } = tab
-    const removable = getRemovable(closable, closeIcon, editable.value, disabled)
-    return h(MenuItem, {
-      'key': key,
-      'id': `${popupId.value}-${key}`,
-      'role': 'option',
-      'aria-controls': id.value && `${id.value}-panel-${key}`,
-      'disabled': disabled,
-    }, [
-      h('span', {}, [label as VNodeChild]),
-      removable
-        ? h('button', {
-            'type': 'button',
-            'aria-label': removeAriaLabel.value || 'remove',
-            'tabIndex': 0,
-            'class': className.value,
-            'onClick': (e: MouseEvent | KeyboardEvent) => {
-              e.stopPropagation()
-              onRemoveTab(e, key)
-            },
-          }, [(closeIcon || editable.value || '×') as VNodeChild])
-        : null,
-    ])
-  }))
+  }, {
+    default: () => props.tabs.map((tab) => {
+      const { closable, closeIcon, disabled, key, label } = tab
+      const removable = getRemovable(closable, closeIcon, editable.value, disabled)
+      return h(MenuItem, {
+        'key': key,
+        'id': `${popupId.value}-${key}`,
+        'role': 'option',
+        'aria-controls': id.value && `${id.value}-panel-${key}`,
+        'disabled': disabled,
+      }, {
+        default: () => [
+          h('span', {}, [label as VNodeChild]),
+          removable
+            ? h('button', {
+                'type': 'button',
+                'aria-label': removeAriaLabel.value || 'remove',
+                'tabIndex': 0,
+                'class': className.value,
+                'onClick': (e: MouseEvent | KeyboardEvent) => {
+                  e.stopPropagation()
+                  onRemoveTab(e, key)
+                },
+              }, [(closeIcon || editable.value || '×') as VNodeChild])
+            : null,
+        ],
+      })
+    }),
+  })
 })
 
 const overlayClassName = computed(() => {
@@ -186,7 +190,7 @@ defineExpose({
         aria-haspopup="listbox"
         :aria-controls="popupId"
         :aria-expanded="open"
-        @keydown="{ onKeyDown }"
+        @keydown="onKeyDown"
       >
         <RenderComponent :render="moreIconNode" />
       </button>
