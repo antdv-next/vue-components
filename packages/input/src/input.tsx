@@ -315,7 +315,6 @@ const Input = defineComponent<
           autocomplete={autoComplete}
           ref={inputRef}
           value={formatValue.value}
-          onChange={onInternalChange}
           onInput={onInternalChange}
           onFocus={handleFocus}
           onBlur={handleBlur}
