@@ -108,6 +108,7 @@ const SelectInput = defineComponent<SelectInputProps>(
       }
     }
 
+    // 使用 getter 确保 nativeElement 是动态获取的
     expose({
       focus: (options?: FocusOptions) => {
         ;(inputRef.value || rootRef.value)?.focus?.(options)
@@ -115,7 +116,9 @@ const SelectInput = defineComponent<SelectInputProps>(
       blur: () => {
         ;(inputRef.value || rootRef.value)?.blur?.()
       },
-      nativeElement: rootRef.value as any,
+      get nativeElement() {
+        return rootRef.value
+      },
     } as SelectInputRef)
 
     const onInternalMouseDown = useEvent((event: MouseEvent) => {

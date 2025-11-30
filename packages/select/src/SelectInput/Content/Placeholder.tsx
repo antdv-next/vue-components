@@ -1,5 +1,5 @@
 import { clsx } from '@v-c/util'
-import { defineComponent } from 'vue'
+import { computed, defineComponent } from 'vue'
 import useBaseProps from '../../hooks/useBaseProps'
 import { useSelectInputContext } from '../context'
 
@@ -11,23 +11,30 @@ export default defineComponent<PlaceholderProps>((props) => {
   const selectInputContext = useSelectInputContext()
   const baseProps = useBaseProps()
 
+  // 从 selectInputContext 中获取响应式值
+  const prefixCls = computed(() => selectInputContext.value?.prefixCls)
+  const placeholder = computed(() => selectInputContext.value?.placeholder)
+  const displayValues = computed(() => selectInputContext.value?.displayValues)
+
+  // 从 baseProps 中获取响应式值
+  const classNames = computed(() => baseProps.value?.classNames)
+  const styles = computed(() => baseProps.value?.styles)
+
   return () => {
-    const { prefixCls, placeholder, displayValues } = selectInputContext.value || {}
-    const { classNames, styles } = baseProps.value || {}
     const { show = true } = props
 
-    if (displayValues?.length) {
+    if (displayValues.value?.length) {
       return null
     }
     return (
       <div
-        class={clsx(`${prefixCls}-placeholder`, classNames?.placeholder)}
+        class={clsx(`${prefixCls.value}-placeholder`, classNames.value?.placeholder)}
         style={{
           visibility: show ? 'visible' : 'hidden',
-          ...styles?.placeholder,
+          ...styles.value?.placeholder,
         }}
       >
-        {placeholder}
+        {placeholder.value}
       </div>
     )
   }

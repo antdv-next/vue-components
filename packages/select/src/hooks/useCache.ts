@@ -1,48 +1,47 @@
 import type { RawValueType } from '../BaseSelect'
 import type { DefaultOptionType, LabelInValueType } from '../Select'
-import { computed, ref } from 'vue'
+import { computed, shallowRef, watchEffect } from 'vue'
 
 export default (
   labeledValues: () => LabelInValueType[],
   valueOptions: () => Map<RawValueType, DefaultOptionType>,
 ) => {
-  const cacheRef = ref({
-    values: new Map<RawValueType, LabelInValueType>(),
-    options: new Map<RawValueType, DefaultOptionType>(),
-  })
+  const prevValueCache = shallowRef(new Map<RawValueType, LabelInValueType>())
+  const prevOptionCache = shallowRef(new Map<RawValueType, DefaultOptionType>())
 
   const filledLabeledValues = computed(() => {
-    const { values: prevValueCache, options: prevOptionCache } = cacheRef.value
-
     const patchedValues = labeledValues().map((item) => {
       if (item.label === undefined) {
         return {
           ...item,
-          label: prevValueCache.get(item.value)?.label,
+          label: prevValueCache.value.get(item.value)?.label,
         }
       }
       return item
     })
 
+    return patchedValues
+  })
+
+  // 使用 watchEffect 处理缓存更新，避免在 computed 中产生副作用
+  watchEffect(() => {
     const valueCache = new Map<RawValueType, LabelInValueType>()
     const optionCache = new Map<RawValueType, DefaultOptionType>()
 
-    patchedValues.forEach((item) => {
+    filledLabeledValues.value.forEach((item) => {
       valueCache.set(item.value, item)
-      const optionItem = valueOptions().get(item.value) || prevOptionCache.get(item.value)
+      const optionItem = valueOptions().get(item.value) || prevOptionCache.value.get(item.value)
       if (optionItem) {
         optionCache.set(item.value, optionItem)
       }
     })
 
-    cacheRef.value.values = valueCache
-    cacheRef.value.options = optionCache
-
-    return patchedValues
+    prevValueCache.value = valueCache
+    prevOptionCache.value = optionCache
   })
 
   const getOption = (val: RawValueType) =>
-    valueOptions().get(val) || cacheRef.value.options.get(val)
+    valueOptions().get(val) || prevOptionCache.value.get(val)
 
   return [filledLabeledValues, getOption] as const
 }

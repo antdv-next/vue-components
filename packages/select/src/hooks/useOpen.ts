@@ -9,7 +9,7 @@ function internalMacroTask(fn: VoidFunction) {
   channel.port2.postMessage(null)
 }
 
-function macroTask(fn: VoidFunction, times = 1) {
+export function macroTask(fn: VoidFunction, times = 1) {
   if (times <= 0) {
     fn()
     return
