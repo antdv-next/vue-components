@@ -1,7 +1,6 @@
-import { computed } from 'vue'
 import type { Component, VNode } from 'vue'
-import type { SelectInputProps, SelectInputRef } from '../SelectInput'
 import type { BaseSelectProps } from '../BaseSelect'
+import { computed } from 'vue'
 
 export interface ComponentsConfig {
   root?: Component | VNode | string

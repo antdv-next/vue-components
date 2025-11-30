@@ -1,15 +1,15 @@
-import useMergedState from '@v-c/util/dist/hooks/useMergedState'
-import useEvent from '@v-c/util/dist/hooks/useEvent'
 import type { ComputedRef } from 'vue'
+import useEvent from '@v-c/util/dist/hooks/useEvent'
+import useMergedState from '@v-c/util/dist/hooks/useMergedState'
 import { computed, onMounted, ref } from 'vue'
 
-const internalMacroTask = (fn: VoidFunction) => {
+function internalMacroTask(fn: VoidFunction) {
   const channel = new MessageChannel()
   channel.port1.onmessage = fn
   channel.port2.postMessage(null)
 }
 
-const macroTask = (fn: VoidFunction, times = 1) => {
+function macroTask(fn: VoidFunction, times = 1) {
   if (times <= 0) {
     fn()
     return
@@ -28,7 +28,7 @@ export type TriggerOpenType = (
   },
 ) => void
 
-type TriggerConfig = {
+interface TriggerConfig {
   ignoreNext?: boolean
   lazy?: boolean
 }
@@ -44,7 +44,7 @@ export default function useOpen(
   })
 
   const [stateOpen, setStateOpen] = useMergedState(false, {
-    value: computed(() => propOpen?.()),
+    value: computed(() => propOpen?.()) as any,
   })
 
   const mergedOpen = computed<boolean>(() => {

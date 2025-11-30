@@ -1,6 +1,6 @@
-import { computed, ref } from 'vue'
 import type { RawValueType } from '../BaseSelect'
 import type { DefaultOptionType, LabelInValueType } from '../Select'
+import { computed, ref } from 'vue'
 
 export default (
   labeledValues: () => LabelInValueType[],

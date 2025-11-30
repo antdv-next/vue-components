@@ -20,8 +20,8 @@ export default function useSelectTriggerControl(
     if (
       open()
       && elements()
-        .filter((element) => element)
-        .every((element) => !element!.contains(target) && element !== target)
+        .filter(element => element)
+        .every(element => !element!.contains(target) && element !== target)
     ) {
       triggerOpen(false)
     }
