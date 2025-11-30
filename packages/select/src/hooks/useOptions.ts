@@ -2,7 +2,13 @@ import type { DefaultOptionType, FieldNames, RawValueType } from '../Select'
 import { computed } from 'vue'
 import { convertChildrenToData } from '../utils/legacyUtil'
 
-function useOptions<OptionType = DefaultOptionType>(options: () => OptionType[], children: () => any, fieldNames: () => FieldNames, optionFilterProp: () => string, optionLabelProp: () => string) {
+function useOptions<OptionType = DefaultOptionType>(
+  options: () => OptionType[],
+  children: () => any,
+  fieldNames: () => FieldNames,
+  optionFilterProp: () => string,
+  optionLabelProp: () => string,
+) {
   return computed(() => {
     let mergedOptions = options()
     const childrenAsData = !mergedOptions

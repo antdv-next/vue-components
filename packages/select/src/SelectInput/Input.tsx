@@ -23,21 +23,28 @@ export interface InputProps {
 const Input = defineComponent<InputProps>(
   (props, { expose }) => {
     const selectContext = useSelectInputContext()
-    const {
-      prefixCls,
-      mode,
-      onSearch,
-      onSearchSubmit,
-      onInputBlur,
-      autoFocus,
-      tokenWithEnter,
-      placeholder,
-    } = selectContext.value || {}
-    const InputComponent = (selectContext.value as any)?.components?.input || 'input'
     const baseProps = useBaseProps()
-    const { id, classNames, styles, open, activeDescendantId, role, disabled } = baseProps.value || {}
 
-    const inputCls = clsx(`${prefixCls}-input`, classNames?.input, props.className)
+    // 从 selectContext 中获取响应式值
+    const prefixCls = computed(() => selectContext.value?.prefixCls)
+    const mode = computed(() => selectContext.value?.mode)
+    const onSearch = computed(() => selectContext.value?.onSearch)
+    const onSearchSubmit = computed(() => selectContext.value?.onSearchSubmit)
+    const onInputBlur = computed(() => selectContext.value?.onInputBlur)
+    const autoFocus = computed(() => selectContext.value?.autoFocus)
+    const tokenWithEnter = computed(() => selectContext.value?.tokenWithEnter)
+    const placeholder = computed(() => selectContext.value?.placeholder)
+
+    // 从 baseProps 中获取响应式值
+    const id = computed(() => baseProps.value?.id)
+    const classNames = computed(() => baseProps.value?.classNames)
+    const styles = computed(() => baseProps.value?.styles)
+    const open = computed(() => baseProps.value?.open)
+    const activeDescendantId = computed(() => baseProps.value?.activeDescendantId)
+    const role = computed(() => baseProps.value?.role)
+    const disabled = computed(() => baseProps.value?.disabled)
+
+    const inputCls = computed(() => clsx(`${prefixCls.value}-input`, classNames.value?.input, props.className))
 
     const compositionStatusRef = shallowRef<boolean>(false)
     const pastedTextRef = shallowRef<string | null>(null)
@@ -52,7 +59,7 @@ const Input = defineComponent<InputProps>(
     const handleInput = (event: Event) => {
       const target = event.target as HTMLInputElement
       let nextVal = target?.value ?? ''
-      if (tokenWithEnter && pastedTextRef.value && /[\r\n]/.test(pastedTextRef.value)) {
+      if (tokenWithEnter.value && pastedTextRef.value && /[\r\n]/.test(pastedTextRef.value)) {
         const replacedText = pastedTextRef.value
           .replace(/[\r\n]+$/, '')
           .replace(/\r\n/g, ' ')
@@ -60,8 +67,8 @@ const Input = defineComponent<InputProps>(
         nextVal = nextVal.replace(replacedText, pastedTextRef.value)
       }
       pastedTextRef.value = null
-      if (onSearch) {
-        onSearch(nextVal, true, compositionStatusRef.value)
+      if (onSearch.value) {
+        onSearch.value(nextVal, true, compositionStatusRef.value)
       }
       props.onInput?.(event)
     }
@@ -69,14 +76,14 @@ const Input = defineComponent<InputProps>(
     const handleKeyDown = (event: KeyboardEvent) => {
       const { key } = event
       const nextVal = (event.currentTarget as HTMLInputElement)?.value
-      if (key === 'Enter' && mode === 'tags' && !compositionStatusRef.value && onSearchSubmit) {
-        onSearchSubmit(nextVal)
+      if (key === 'Enter' && mode.value === 'tags' && !compositionStatusRef.value && onSearchSubmit.value) {
+        onSearchSubmit.value(nextVal)
       }
       props.onKeyDown?.(event)
     }
 
     const handleBlur = (event: FocusEvent) => {
-      onInputBlur?.()
+      onInputBlur.value?.()
       props.onBlur?.(event)
     }
 
@@ -86,9 +93,9 @@ const Input = defineComponent<InputProps>(
 
     const handleCompositionEnd = (event: CompositionEvent) => {
       compositionStatusRef.value = false
-      if (mode !== 'combobox') {
+      if (mode.value !== 'combobox') {
         const nextVal = (event.currentTarget as HTMLInputElement)?.value
-        onSearch?.(nextVal, true, false)
+        onSearch.value?.(nextVal, true, false)
       }
     }
 
@@ -109,19 +116,19 @@ const Input = defineComponent<InputProps>(
     }, [() => props.syncWidth, () => props.value])
 
     const sharedInputProps = computed(() => ({
-      id,
-      'type': mode === 'combobox' ? 'text' : 'search',
+      'id': id.value,
+      'type': mode.value === 'combobox' ? 'text' : 'search',
       ...props,
       'ref': inputRef,
       'style': {
-        ...styles?.input,
+        ...styles.value?.input,
         ...props.style,
-        '--select-input-width': widthCssVar.value as any,
+        '--select-input-width': `${widthCssVar.value}px`,
       },
-      autoFocus,
+      'autoFocus': autoFocus.value,
       'autoComplete': props.autoComplete || 'off',
-      'class': inputCls,
-      disabled,
+      'class': inputCls.value,
+      'disabled': disabled.value,
       'value': props.value || '',
       'onInput': handleInput,
       'onKeydown': handleKeyDown,
@@ -129,17 +136,18 @@ const Input = defineComponent<InputProps>(
       'onPaste': handlePaste,
       'onCompositionstart': handleCompositionStart,
       'onCompositionend': handleCompositionEnd,
-      'role': role || 'combobox',
-      'aria-expanded': open || false,
+      'role': role.value || 'combobox',
+      'aria-expanded': open.value || false,
       'aria-haspopup': 'listbox',
-      'aria-owns': `${id}_list`,
+      'aria-owns': `${id.value}_list`,
       'aria-autocomplete': 'list',
-      'aria-controls': `${id}_list`,
-      'aria-activedescendant': open ? activeDescendantId : undefined,
-      'placeholder': props.placeholder || placeholder,
+      'aria-controls': `${id.value}_list`,
+      'aria-activedescendant': open.value ? activeDescendantId.value : undefined,
+      'placeholder': props.placeholder || placeholder.value,
     }))
 
     return () => {
+      const InputComponent = (selectContext.value as any)?.components?.input || 'input'
       if (isVNode(InputComponent)) {
         const existingProps: any = (InputComponent as any).props || {}
         const mergedProps: any = { ...sharedInputProps.value, ...existingProps }
@@ -157,7 +165,7 @@ const Input = defineComponent<InputProps>(
       }
 
       const Component = InputComponent as any
-      return <Component {...(sharedInputProps.value as any)} />
+      return <Component {...(sharedInputProps as any)} />
     }
   },
 )

@@ -1,5 +1,5 @@
-import { computed } from 'vue'
 import type { DefaultOptionType, SearchConfig, SelectProps } from '../Select'
+import { computed } from 'vue'
 
 export default function useSearchConfig(
   showSearch: () => boolean | SearchConfig<DefaultOptionType> | undefined,

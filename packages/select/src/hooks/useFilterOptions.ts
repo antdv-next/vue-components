@@ -1,6 +1,6 @@
+import type { DefaultOptionType, FieldNames, SelectProps } from '../Select'
 import { computed } from 'vue'
 import { toArray } from '../utils/commonUtil'
-import type { DefaultOptionType, FieldNames, SelectProps } from '../Select'
 import { injectPropsWithOption } from '../utils/valueUtil'
 
 function includes(test: any, search: string) {
@@ -48,15 +48,16 @@ export default (
         }
 
     const wrapOption: (opt: DefaultOptionType) => DefaultOptionType = customizeFilter
-      ? (opt) => injectPropsWithOption(opt)
-      : (opt) => opt
+      ? opt => injectPropsWithOption(opt)
+      : opt => opt
 
     options().forEach((item) => {
       if ((item as any)[fieldOptions]) {
         const matchGroup = filterFunc(search, wrapOption(item))
         if (matchGroup) {
           filteredOptions.push(item)
-        } else {
+        }
+        else {
           const subOptions = (item as any)[fieldOptions].filter((subItem: DefaultOptionType) =>
             filterFunc(search, wrapOption(subItem)),
           )

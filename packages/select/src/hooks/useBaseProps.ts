@@ -1,6 +1,6 @@
 import type { ComputedRef, InjectionKey } from 'vue'
-import { computed, inject, provide } from 'vue'
 import type { BaseSelectProps } from '../BaseSelect'
+import { computed, inject, provide } from 'vue'
 
 export interface BaseSelectContextProps extends BaseSelectProps {
   triggerOpen: boolean
