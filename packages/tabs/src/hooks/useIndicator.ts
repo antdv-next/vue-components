@@ -43,7 +43,7 @@ function useIndicator(options: UseIndicatorOptions) {
       await nextTick()
       const newInkStyle: CSSProperties = {}
 
-      if (activeTabOffset) {
+      if (activeTabOffset.value) {
         if (horizontal.value) {
           newInkStyle.width = `${getLength(activeTabOffset.value.width)}px`
           const key = rtl.value ? 'right' : 'left'
