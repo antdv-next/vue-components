@@ -3,7 +3,7 @@ import type { CustomTagProps, RenderNode } from '../../BaseSelect'
 import type { DisplayValueType, RawValueType } from '../../interface'
 import Overflow from '@v-c/overflow'
 import { clsx } from '@v-c/util'
-import { defineComponent } from 'vue'
+import { computed, defineComponent } from 'vue'
 import useBaseProps from '../../hooks/useBaseProps'
 import TransBtn from '../../TransBtn'
 import { getTitle } from '../../utils/commonUtil'
@@ -26,53 +26,58 @@ export default defineComponent<
   (props, { expose }) => {
     const { inputProps } = props
     const selectInputContext = useSelectInputContext()
-    // const {
-    //   prefixCls,
-    //   displayValues,
-    //   searchValue,
-    //   mode,
-    //   onSelectorRemove,
-    //   removeIcon: removeIconFromContext,
-    // } = useSelectInputContext().value || {}
-    // const {
-    //   disabled,
-    //   showSearch,
-    //   triggerOpen,
-    //   toggleOpen,
-    //   autoClearSearchValue,
-    //   tagRender: tagRenderFromContext,
-    //   maxTagPlaceholder: maxTagPlaceholderFromContext,
-    //   maxTagTextLength,
-    //   maxTagCount,
-    //   classNames,
-    //   styles,
-    // } = useBaseProps().value || {}
     const baseProps = useBaseProps()
 
-    const selectionItemPrefixCls = `${prefixCls}-selection-item`
+    // 从 selectInputContext 中获取响应式值
+    const prefixCls = computed(() => selectInputContext.value?.prefixCls)
+    const displayValues = computed(() => selectInputContext.value?.displayValues ?? [])
+    const searchValue = computed(() => selectInputContext.value?.searchValue)
+    const mode = computed(() => selectInputContext.value?.mode)
+    const onSelectorRemove = computed(() => selectInputContext.value?.onSelectorRemove)
+    const removeIconFromContext = computed(() => selectInputContext.value?.removeIcon)
 
-    let computedSearchValue = searchValue
-    if (!triggerOpen && mode === 'multiple' && autoClearSearchValue !== false) {
-      computedSearchValue = ''
-    }
+    // 从 baseProps 中获取响应式值
+    const disabled = computed(() => baseProps.value?.disabled)
+    const showSearch = computed(() => baseProps.value?.showSearch)
+    const triggerOpen = computed(() => baseProps.value?.triggerOpen)
+    const toggleOpen = computed(() => baseProps.value?.toggleOpen)
+    const autoClearSearchValue = computed(() => baseProps.value?.autoClearSearchValue)
+    const tagRenderFromContext = computed(() => baseProps.value?.tagRender)
+    const maxTagPlaceholderFromContext = computed(() => baseProps.value?.maxTagPlaceholder)
+    const maxTagTextLength = computed(() => baseProps.value?.maxTagTextLength)
+    const maxTagCount = computed(() => baseProps.value?.maxTagCount)
+    const classNames = computed(() => baseProps.value?.classNames)
+    const styles = computed(() => baseProps.value?.styles)
 
-    const inputValue = showSearch ? computedSearchValue || '' : ''
-    const inputEditable: boolean = showSearch && !disabled
+    const selectionItemPrefixCls = computed(() => `${prefixCls.value}-selection-item`)
 
-    const removeIcon: RenderNode = removeIconFromContext ?? '×'
-    const maxTagPlaceholder:
-      | any
-      | ((omittedValues: DisplayValueType[]) => any)
-        = maxTagPlaceholderFromContext
-          ?? ((omittedValues: DisplayValueType[]) => `+ ${omittedValues.length} ...`)
-    const tagRender: ((props: CustomTagProps) => any) | undefined = tagRenderFromContext
+    const inputValue = computed(() => {
+      let computedSearchValue = searchValue.value
+      if (!triggerOpen.value && mode.value === 'multiple' && autoClearSearchValue.value !== false) {
+        computedSearchValue = ''
+      }
+      return showSearch.value ? computedSearchValue || '' : ''
+    })
+
+    const inputEditable = computed(() => showSearch.value && !disabled.value)
+
+    const removeIcon = computed<RenderNode>(() => removeIconFromContext.value ?? '×')
+
+    const maxTagPlaceholder = computed(() =>
+      maxTagPlaceholderFromContext.value
+      ?? ((omittedValues: DisplayValueType[]) => `+ ${omittedValues.length} ...`),
+    )
+
+    const tagRender = computed<((props: CustomTagProps) => any) | undefined>(
+      () => tagRenderFromContext.value,
+    )
 
     const onToggleOpen = (newOpen?: boolean) => {
-      toggleOpen?.(newOpen)
+      toggleOpen.value?.(newOpen)
     }
 
     const onRemove = (value: DisplayValueType) => {
-      onSelectorRemove?.(value)
+      onSelectorRemove.value?.(value)
     }
 
     const defaultRenderSelector = (
@@ -85,27 +90,27 @@ export default defineComponent<
       <span
         title={getTitle(item)}
         class={clsx(
-          selectionItemPrefixCls,
+          selectionItemPrefixCls.value,
           {
-            [`${selectionItemPrefixCls}-disabled`]: itemDisabled,
+            [`${selectionItemPrefixCls.value}-disabled`]: itemDisabled,
           },
-          classNames?.item,
+          classNames.value?.item,
         )}
-        style={styles?.item}
+        style={styles.value?.item}
       >
         <span
-          class={clsx(`${selectionItemPrefixCls}-content`, classNames?.itemContent)}
-          style={styles?.itemContent}
+          class={clsx(`${selectionItemPrefixCls.value}-content`, classNames.value?.itemContent)}
+          style={styles.value?.itemContent}
         >
           {content}
         </span>
         {closable && (
           <TransBtn
-            className={clsx(`${selectionItemPrefixCls}-remove`, classNames?.itemRemove)}
-            style={styles?.itemRemove}
+            className={clsx(`${selectionItemPrefixCls.value}-remove`, classNames.value?.itemRemove)}
+            style={styles.value?.itemRemove}
             onMouseDown={onPreventMouseDown}
             onClick={onClose as any}
-            customizeIcon={removeIcon}
+            customizeIcon={removeIcon.value}
           >
             ×
           </TransBtn>
@@ -124,11 +129,11 @@ export default defineComponent<
     ) => {
       const onMouseDown = (e: MouseEvent) => {
         onPreventMouseDown(e)
-        onToggleOpen(!triggerOpen)
+        onToggleOpen(!triggerOpen.value)
       }
       return (
         <span onMousedown={onMouseDown}>
-          {tagRender?.({
+          {tagRender.value?.({
             label: content,
             value,
             index: info!.index!,
@@ -143,15 +148,15 @@ export default defineComponent<
 
     const renderItem = (valueItem: DisplayValueType, info: { index: number }) => {
       const { disabled: itemDisabled, label, value } = valueItem
-      const closable = !disabled && !itemDisabled
+      const closable = !disabled.value && !itemDisabled
 
       let displayLabel: any = label
 
-      if (typeof maxTagTextLength === 'number') {
+      if (typeof maxTagTextLength.value === 'number') {
         if (typeof label === 'string' || typeof label === 'number') {
           const strLabel = String(displayLabel)
-          if (strLabel.length > maxTagTextLength) {
-            displayLabel = `${strLabel.slice(0, maxTagTextLength)}...`
+          if (strLabel.length > maxTagTextLength.value) {
+            displayLabel = `${strLabel.slice(0, maxTagTextLength.value)}...`
           }
         }
       }
@@ -163,20 +168,20 @@ export default defineComponent<
         onRemove(valueItem)
       }
 
-      return typeof tagRender === 'function'
-        ? customizeRenderSelector(value as any, displayLabel, itemDisabled, closable, onClose, undefined, info)
-        : defaultRenderSelector(valueItem, displayLabel, itemDisabled, closable, onClose)
+      return typeof tagRender.value === 'function'
+        ? customizeRenderSelector(value as any, displayLabel, !!itemDisabled, closable, onClose, undefined, info)
+        : defaultRenderSelector(valueItem, displayLabel, !!itemDisabled, closable, onClose)
     }
 
     const renderRest = (omittedValues: DisplayValueType[]) => {
-      if (!displayValues.length) {
+      if (!displayValues.value.length) {
         return null
       }
       const content
-        = typeof maxTagPlaceholder === 'function'
-          ? maxTagPlaceholder(omittedValues)
-          : maxTagPlaceholder
-      return typeof tagRender === 'function'
+        = typeof maxTagPlaceholder.value === 'function'
+          ? maxTagPlaceholder.value(omittedValues)
+          : maxTagPlaceholder.value
+      return typeof tagRender.value === 'function'
         ? customizeRenderSelector(undefined as any, content, false, false, undefined, true)
         : defaultRenderSelector({ title: content } as any, content, false)
     }
@@ -186,24 +191,24 @@ export default defineComponent<
     return () => {
       return (
         <Overflow
-          prefixCls={`${prefixCls}-content`}
-          class={classNames?.content}
-          style={styles?.content}
-          prefix={!displayValues.length && (!searchValue || !triggerOpen) ? <Placeholder /> : null}
-          data={displayValues}
+          prefixCls={`${prefixCls.value}-content`}
+          class={classNames.value?.content}
+          style={styles.value?.content}
+          prefix={!displayValues.value.length && (!searchValue.value || !triggerOpen.value) ? <Placeholder /> : null}
+          data={displayValues.value}
           renderItem={renderItem}
           renderRest={renderRest}
           suffix={(
             <Input
-              disabled={disabled}
-              readOnly={!inputEditable}
+              disabled={disabled.value}
+              readOnly={!inputEditable.value}
               {...(inputProps as any)}
-              value={inputValue || ''}
+              value={inputValue.value || ''}
               syncWidth
             />
           )}
           itemKey={itemKey as any}
-          maxCount={maxTagCount as any}
+          maxCount={maxTagCount.value as any}
         />
       )
     }

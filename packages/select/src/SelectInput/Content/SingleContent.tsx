@@ -1,19 +1,19 @@
+import type { SharedContentProps } from '.'
 import { clsx } from '@v-c/util'
 import { computed, defineComponent, shallowRef, watch } from 'vue'
-import Input from '../Input'
-import { useSelectInputContext } from '../context'
 import useBaseProps from '../../hooks/useBaseProps'
-import Placeholder from './Placeholder'
-import type { SharedContentProps } from '.'
 import useSelectContext from '../../SelectContext'
 import { getTitle } from '../../utils/commonUtil'
+import { useSelectInputContext } from '../context'
+import Input from '../Input'
+import Placeholder from './Placeholder'
 
 const SingleContent = defineComponent<{ inputProps: SharedContentProps['inputProps'] }>(
   (props, { expose, attrs }) => {
     const { inputProps } = props
     const selectInputCtx = useSelectInputContext()
-    const { prefixCls, searchValue, activeValue, displayValues, maxLength, mode } =
-      selectInputCtx.value || {}
+    const { prefixCls, searchValue, activeValue, displayValues, maxLength, mode }
+      = selectInputCtx.value || {}
     const baseProps = useBaseProps()
     const { triggerOpen, title: rootTitle, showSearch, classNames, styles } = baseProps.value || {}
     const selectContext = useSelectContext()
@@ -37,7 +37,7 @@ const SingleContent = defineComponent<{ inputProps: SharedContentProps['inputPro
       }
       if (displayValue.value && selectContext.value?.flattenOptions) {
         const option = selectContext.value.flattenOptions.find(
-          (opt) => opt.value === displayValue.value?.value,
+          opt => opt.value === displayValue.value?.value,
         )
         if (option?.data) {
           const { label, value, className, style, key, ...rest } = option.data as any
@@ -72,11 +72,13 @@ const SingleContent = defineComponent<{ inputProps: SharedContentProps['inputPro
 
     return () => (
       <div class={clsx(`${prefixCls}-content`, classNames?.content)} style={styles?.content}>
-        {displayValue.value ? (
-          <div {...optionProps.value}>{displayValue.value.label}</div>
-        ) : (
-          <Placeholder show={!mergedSearchValue.value} />
-        )}
+        {displayValue.value
+          ? (
+              <div {...optionProps.value}>{displayValue.value.label}</div>
+            )
+          : (
+              <Placeholder show={!mergedSearchValue.value} />
+            )}
         <Input
           {...(inputProps as any)}
           {...attrs}
