@@ -8,6 +8,7 @@ import getMiniDecimal, {
 } from '@v-c/mini-decimal'
 import { clsx } from '@v-c/util'
 import { triggerFocus } from '@v-c/util/dist/Dom/focus'
+import { KeyCodeStr } from '@v-c/util/dist/KeyCode'
 import omit from '@v-c/util/dist/omit'
 import { computed, defineComponent, shallowRef, watch, watchEffect } from 'vue'
 import useCursor from './hooks/useCursor'
@@ -279,12 +280,10 @@ const InputNumber = defineComponent<InputNumberProps>(
           setUncontrolledDecimalValue(updateValue)
           const outValue = updateValue.isEmpty() ? null : getDecimalValue(props.stringMode, updateValue)
           props.onChange?.(outValue as any)
-          emit('change', outValue as any)
 
           if (props.value === undefined) {
             setInputValue(updateValue, userTyping)
           }
-
           emit('update:value', outValue as any)
         }
 
@@ -312,7 +311,6 @@ const InputNumber = defineComponent<InputNumberProps>(
       }
 
       props.onInput?.(inputStr)
-      emit('input', inputStr)
 
       onNextPromise(() => {
         let nextInputStr = inputStr
@@ -329,13 +327,11 @@ const InputNumber = defineComponent<InputNumberProps>(
     // >>> Composition
     const onCompositionStart = (e: CompositionEvent) => {
       compositionRef.value = true
-      emit('compositionstart', e)
       props.onCompositionStart?.(e)
     }
 
     const onCompositionEnd = (e: CompositionEvent) => {
       compositionRef.value = false
-      emit('compositionend', e)
       props.onCompositionEnd?.(e)
 
       if (inputRef.value) {
@@ -371,11 +367,6 @@ const InputNumber = defineComponent<InputNumberProps>(
         type: up ? 'up' : 'down',
         emitter,
       })
-      emit('step', outValue as any, {
-        offset: shiftKeyRef.value ? getDecupleSteps(props.step ?? 1) : props.step ?? 1,
-        type: up ? 'up' : 'down',
-        emitter,
-      })
 
       inputRef.value?.focus()
     }
@@ -402,7 +393,6 @@ const InputNumber = defineComponent<InputNumberProps>(
 
     const onBeforeInput = (e: InputEvent) => {
       userTypingRef.value = true
-      emit('beforeinput', e)
       props.onBeforeInput?.(e)
     }
 
@@ -412,18 +402,16 @@ const InputNumber = defineComponent<InputNumberProps>(
 
       shiftKeyRef.value = shiftKey
 
-      if (key === 'Enter') {
+      if (key === KeyCodeStr.Enter) {
         if (!compositionRef.value) {
           userTypingRef.value = false
         }
         flushInputValue(false)
-        emit('pressEnter', event)
         props.onPressEnter?.(event)
       }
 
       if (props.keyboard === false) {
         props.onKeyDown?.(event)
-        emit('keydown', event)
         return
       }
 
@@ -433,13 +421,11 @@ const InputNumber = defineComponent<InputNumberProps>(
       }
 
       props.onKeyDown?.(event)
-      emit('keydown', event)
     }
 
     const onKeyUp = (event: KeyboardEvent) => {
       userTypingRef.value = false
       shiftKeyRef.value = false
-      emit('keyup', event)
       props.onKeyUp?.(event)
     }
 
@@ -463,13 +449,11 @@ const InputNumber = defineComponent<InputNumberProps>(
 
       focus.value = false
       userTypingRef.value = false
-      emit('blur', e)
       props.onBlur?.(e)
     }
 
     const onFocus = (e: FocusEvent) => {
       focus.value = true
-      emit('focus', e)
       props.onFocus?.(e)
     }
 
@@ -480,7 +464,6 @@ const InputNumber = defineComponent<InputNumberProps>(
         event.preventDefault()
       }
 
-      emit('mousedown', event)
       props.onMouseDown?.(event)
     }
 
@@ -627,33 +610,27 @@ const InputNumber = defineComponent<InputNumberProps>(
           style={mergedStyle}
           onMousedown={onInternalMouseDown}
           onMouseup={(e: MouseEvent) => {
-            emit('mouseup', e)
             props.onMouseUp?.(e)
           }}
           onMouseleave={(e: MouseEvent) => {
-            emit('mouseleave', e)
             props.onMouseLeave?.(e)
           }}
           onMousemove={(e: MouseEvent) => {
-            emit('mousemove', e)
             props.onMouseMove?.(e)
           }}
           onMouseenter={(e: MouseEvent) => {
-            emit('mouseenter', e)
             props.onMouseEnter?.(e)
           }}
           onMouseout={(e: MouseEvent) => {
-            emit('mouseout', e)
             props.onMouseOut?.(e)
           }}
           onClick={(e: MouseEvent) => {
-            emit('click', e)
             props.onClick?.(e)
           }}
         >
           {mode === 'spinner' && controls && downHandlerNode}
 
-          {prefixNode !== undefined && (
+          {!!prefixNode && (
             <div class={clsx(`${mergedPrefixCls}-prefix`, classNames?.prefix)} style={styles?.prefix}>
               {prefixNode}
             </div>
@@ -683,7 +660,7 @@ const InputNumber = defineComponent<InputNumberProps>(
             {...inputAttrs as any}
           />
 
-          {suffixNode !== undefined && (
+          {!!suffixNode && (
             <div class={clsx(`${mergedPrefixCls}-suffix`, classNames?.suffix)} style={styles?.suffix}>
               {suffixNode}
             </div>
@@ -704,27 +681,7 @@ const InputNumber = defineComponent<InputNumberProps>(
   {
     name: 'InputNumber',
     inheritAttrs: false,
-    emits: [
-      'change',
-      'update:value',
-      'input',
-      'pressEnter',
-      'step',
-      'mousedown',
-      'click',
-      'mouseup',
-      'mouseleave',
-      'mousemove',
-      'mouseenter',
-      'mouseout',
-      'focus',
-      'blur',
-      'keydown',
-      'keyup',
-      'compositionstart',
-      'compositionend',
-      'beforeinput',
-    ],
+    emits: ['update:value'],
   },
 )
 
