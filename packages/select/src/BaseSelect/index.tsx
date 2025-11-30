@@ -382,12 +382,15 @@ const BaseSelect = defineComponent<BaseSelectProps>(
 
     const onPopupMouseEnter = () => {}
 
-    let onTriggerVisibleChange: null | ((newOpen: boolean) => void)
-    if (mergedComponents.value.root) {
-      onTriggerVisibleChange = (newOpen: boolean) => {
-        triggerOpen(newOpen)
+    // 使用 computed 保持响应式
+    const onTriggerVisibleChange = computed(() => {
+      if (mergedComponents.value.root) {
+        return (newOpen: boolean) => {
+          triggerOpen(newOpen)
+        }
       }
-    }
+      return null
+    })
 
     useSelectTriggerControl(
       () => [containerRef.value?.nativeElement, triggerRef.value?.getPopupElement?.()],
@@ -520,7 +523,7 @@ const BaseSelect = defineComponent<BaseSelectProps>(
           builtinPlacements={props.builtinPlacements}
           getPopupContainer={props.getPopupContainer}
           empty={props.emptyOptions}
-          onPopupVisibleChange={onTriggerVisibleChange || undefined}
+          onPopupVisibleChange={onTriggerVisibleChange.value || undefined}
           onPopupMouseEnter={onPopupMouseEnter}
           onPopupMouseDown={onInternalMouseDown as any}
         >
