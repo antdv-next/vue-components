@@ -69,12 +69,9 @@ export interface TabPaneProps {
   destroyOnHidden?: boolean
 }
 
-export interface Tab extends Omit<TabPaneProps, 'tab' | 'children' | 'className'> {
+export interface Tab extends Omit<TabPaneProps, 'tab'> {
   key: string
   label: VueNode
-  class?: string
-  style?: CSSProperties
-  content?: VueNode
 }
 
 export type moreIcon = VueNode
