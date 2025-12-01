@@ -1,9 +1,14 @@
 import KeyCode from '@v-c/util/dist/KeyCode'
 
+/** keyCode Judgment function */
 export function isValidateOpenKey(currentKeyCode: number): boolean {
   return (
+    // Undefined for Edge bug:
+    // https://github.com/ant-design/ant-design/issues/51292
     !!currentKeyCode
+    // Other keys
     && ![
+      // System function button
       KeyCode.ESC,
       KeyCode.SHIFT,
       KeyCode.BACKSPACE,
@@ -17,9 +22,12 @@ export function isValidateOpenKey(currentKeyCode: number): boolean {
       KeyCode.EQUALS,
       KeyCode.CAPS_LOCK,
       KeyCode.CONTEXT_MENU,
+      // Arrow keys - should not trigger open when navigating in input
       KeyCode.UP,
+      // KeyCode.DOWN,
       KeyCode.LEFT,
       KeyCode.RIGHT,
+      // F1-F12
       KeyCode.F1,
       KeyCode.F2,
       KeyCode.F3,

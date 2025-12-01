@@ -2,9 +2,9 @@ import type { Key, VueNode } from '@v-c/util/dist/type'
 
 export type RawValueType = string | number
 
-export interface FlattenOptionData<OptionType> {
+export interface FlattenOptionData {
   label?: VueNode
-  data: OptionType
+  data: any
   key: Key
   value?: RawValueType
   groupOption?: boolean
@@ -19,7 +19,6 @@ export interface DisplayValueType {
   disabled?: boolean
   index?: number
 }
-
 export type RenderNode = VueNode | ((props: any) => VueNode)
 
 export type RenderDOMFunc = (props: any) => HTMLElement

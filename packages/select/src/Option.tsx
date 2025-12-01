@@ -1,15 +1,12 @@
-import type { VueNode } from '@v-c/util/dist/type'
-import type { DefaultOptionType } from './Select'
-import { defineComponent } from 'vue'
+import type { FunctionalComponent } from 'vue'
+import type { DefaultOptionType } from './Select.tsx'
 
 export interface OptionProps extends Omit<DefaultOptionType, 'label'> {
-  children: VueNode
+  /** Save for customize data */
   [prop: string]: any
 }
 
-const Option = defineComponent<OptionProps>(() => {
-  return () => null
-})
+const Option: FunctionalComponent<OptionProps> = () => null
 
 ;(Option as any).isSelectOption = true
 

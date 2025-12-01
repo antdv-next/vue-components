@@ -1,10 +1,12 @@
 import type { AlignType, BuildInPlacements } from '@v-c/trigger'
-import type { Placement, RenderDOMFunc } from './BaseSelect'
-import { Trigger } from '@v-c/trigger'
+import type { CSSProperties } from 'vue'
+import type { Placement, RenderDOMFunc } from './interface.ts'
+import Trigger from '@v-c/trigger'
 import { clsx } from '@v-c/util'
 import { computed, defineComponent, shallowRef } from 'vue'
 
 function getBuiltInPlacements(popupMatchSelectWidth: number | boolean): Record<string, AlignType> {
+  // Enable horizontal overflow auto-adjustment when a custom dropdown width is provided
   const adjustX = popupMatchSelectWidth === true ? 0 : 1
   return {
     bottomLeft: {
@@ -46,101 +48,127 @@ function getBuiltInPlacements(popupMatchSelectWidth: number | boolean): Record<s
   }
 }
 
-export interface RefTriggerProps {
-  getPopupElement: () => HTMLDivElement
-}
-
 export interface SelectTriggerProps {
   prefixCls: string
   disabled: boolean
   visible: boolean
   popupElement: any
+
   animation?: string
   transitionName?: string
   placement?: Placement
   builtinPlacements?: BuildInPlacements
-  popupStyle?: any
-  popupClassName?: string
-  direction?: string
+  popupStyle: CSSProperties
+  popupClassName: string
+  direction: string
   popupMatchSelectWidth?: boolean | number
   popupRender?: (menu: any) => any
   getPopupContainer?: RenderDOMFunc
-  popupAlign?: AlignType
-  empty?: boolean
+  popupAlign: AlignType
+  empty: boolean
+
   onPopupVisibleChange?: (visible: boolean) => void
-  onPopupMouseEnter?: () => void
-  onPopupMouseDown?: (event: MouseEvent) => void
+
+  onPopupMouseEnter: () => void
+  onPopupMouseDown: (event: MouseEvent) => void
 }
 
-const SelectTrigger = defineComponent<SelectTriggerProps>((props, { slots, expose }) => {
-  const triggerPopupRef = shallowRef<any>()
-  const popupMatchWidth = computed(() =>
-    props.popupMatchSelectWidth === undefined ? true : props.popupMatchSelectWidth,
-  )
+const defaults = {
+  direction: 'ltr',
+} as any
 
-  expose({
-    getPopupElement: () => triggerPopupRef.value?.popupElement,
-  })
+const SelectTrigger = defineComponent<
+  SelectTriggerProps
+>(
+  (props = defaults, { slots, attrs, expose }) => {
+    const mergedBuiltinPlacements = computed(() => {
+      return props?.builtinPlacements || getBuiltInPlacements(props.popupMatchSelectWidth!)
+    })
 
-  const popupPrefixCls = computed(() => `${props.prefixCls}-dropdown`)
+    // =================== Popup Width ===================
+    const isNumberPopupWidth = computed(() => typeof props.popupMatchSelectWidth === 'number')
 
-  const mergedBuiltinPlacements = computed(
-    () => props.builtinPlacements || getBuiltInPlacements(popupMatchWidth.value!),
-  )
-
-  const mergedTransitionName = computed(() =>
-    props.animation ? `${popupPrefixCls.value}-${props.animation}` : props.transitionName,
-  )
-
-  const isNumberPopupWidth = computed(() => typeof popupMatchWidth.value === 'number')
-
-  const stretch = computed(() => {
-    if (isNumberPopupWidth.value) {
-      return null
-    }
-    return popupMatchWidth.value === false ? 'minWidth' : 'width'
-  })
-
-  const mergedPopupStyle = computed(() => {
-    if (isNumberPopupWidth.value) {
-      return {
-        ...(props.popupStyle || {}),
-        width: popupMatchWidth.value as number,
+    const stretch = computed(() => {
+      if (isNumberPopupWidth.value) {
+        return null
       }
-    }
-    return props.popupStyle
-  })
+      return props.popupMatchSelectWidth === false ? 'minWidth' : 'width'
+    })
 
-  return () => {
-    const popupNode = props.popupRender ? props.popupRender(props.popupElement) : props.popupElement
-    return (
-      <Trigger
-        showAction={props.onPopupVisibleChange ? ['click'] : []}
-        hideAction={props.onPopupVisibleChange ? ['click'] : []}
-        popupPlacement={props.placement || (props.direction === 'rtl' ? 'bottomRight' : 'bottomLeft')}
-        builtinPlacements={mergedBuiltinPlacements.value}
-        prefixCls={popupPrefixCls.value}
-        popupMotion={{ name: mergedTransitionName.value }}
-        popup={(
-          <div onMouseenter={props.onPopupMouseEnter} onMousedown={props.onPopupMouseDown}>
-            {popupNode}
-          </div>
-        )}
-        ref={triggerPopupRef as any}
-        stretch={stretch.value as any}
-        popupAlign={props.popupAlign}
-        popupVisible={props.visible}
-        getPopupContainer={props.getPopupContainer}
-        popupClassName={clsx(props.popupClassName, {
-          [`${popupPrefixCls.value}-empty`]: props.empty,
-        })}
-        popupStyle={mergedPopupStyle.value}
-        onOpenChange={props.onPopupVisibleChange}
-      >
-        {slots.default?.()}
-      </Trigger>
-    )
-  }
-})
+    // ======================= Ref =======================
+    const triggerPopupRef = shallowRef()
+    expose({
+      getPopupElement: () => triggerPopupRef.value?.popupElement,
+    })
+    return () => {
+      const {
+        prefixCls,
+        popupElement,
+        popupRender,
+        animation,
+        transitionName,
+        popupStyle,
+        popupMatchSelectWidth,
+        onPopupVisibleChange,
+        placement,
+        direction = 'ltr',
+        builtinPlacements,
+        onPopupMouseEnter,
+        onPopupMouseDown,
+        popupAlign,
+        visible,
+        getPopupContainer,
+        popupClassName,
+        empty,
+        ...restProps
+      } = props
+      let popupNode: any = popupElement
+      if (popupRender) {
+        popupNode = popupRender(popupElement)
+      }
+      const popupPrefixCls = `${prefixCls}-dropdown`
+
+      // ===================== Motion ======================
+      const mergedTransitionName = animation ? `${popupPrefixCls}-${animation}` : transitionName
+
+      const mergedPopupStyle = popupStyle
+      if (isNumberPopupWidth.value) {
+        mergedPopupStyle.width = `${popupMatchSelectWidth}px`
+      }
+
+      return (
+        <Trigger
+          {...attrs}
+          {...restProps}
+          showAction={onPopupVisibleChange ? ['click'] : []}
+          hideAction={onPopupVisibleChange ? ['click'] : []}
+          popupPlacement={placement || (direction === 'rtl' ? 'bottomRight' : 'bottomLeft')}
+          builtinPlacements={mergedBuiltinPlacements.value}
+          prefixCls={popupPrefixCls}
+          popup={<div onMousedown={onPopupMouseDown} onMouseenter={onPopupMouseEnter}>{popupNode}</div>}
+          ref={triggerPopupRef as any}
+          stretch={stretch.value!}
+          popupMotion={{
+            name: mergedTransitionName,
+          }}
+          popupAlign={popupAlign}
+          popupVisible={visible}
+          getPopupContainer={getPopupContainer}
+          popupClassName={clsx(popupClassName, {
+            [`${popupPrefixCls}-empty`]: empty,
+          })}
+          popupStyle={mergedPopupStyle}
+          onPopupVisibleChange={onPopupVisibleChange}
+        >
+          {slots?.default?.()}
+        </Trigger>
+      )
+    }
+  },
+  {
+    name: 'SelectTrigger',
+    inheritAttrs: false,
+  },
+)
 
 export default SelectTrigger
