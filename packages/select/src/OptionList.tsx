@@ -12,7 +12,7 @@ import TransBtn from './TransBtn'
 import { isPlatformMac } from './utils/platformUtil'
 import { isValidCount } from './utils/valueUtil'
 
-export type OptionListProps = Record<string, never>
+export interface OptionListProps {}
 
 export interface RefOptionListProps {
   onKeyDown: (event: KeyboardEvent) => void

@@ -43,7 +43,7 @@ export type DraftValueType
     | DisplayValueType
     | (RawValueType | LabelInValueType | DisplayValueType)[]
 
-export type FilterFunc<OptionType> = (inputValue: string, option?: OptionType) => boolean
+export type FilterFunc = (inputValue: string, option?: DefaultOptionType) => boolean
 
 export interface FieldNames {
   value?: string
@@ -65,44 +65,42 @@ export interface DefaultOptionType extends BaseOptionType {
   children?: Omit<DefaultOptionType, 'children'>[]
 }
 
-export type SelectHandler<ValueType, OptionType extends BaseOptionType = DefaultOptionType> = (
-  value: ValueType,
-  option: OptionType,
-) => void
-
-type ArrayElementType<T> = T extends (infer E)[] ? E : T
+export type SelectHandler = (value: any, option: DefaultOptionType) => void
 
 export type SemanticName = BaseSelectSemanticName
 export type PopupSemantic = 'listItem' | 'list'
-export interface SearchConfig<OptionType> {
+export interface SearchConfig {
   searchValue?: string
   autoClearSearchValue?: boolean
   onSearch?: (value: string) => void
-  filterOption?: boolean | FilterFunc<OptionType>
-  filterSort?: (optionA: OptionType, optionB: OptionType, info: { searchValue: string }) => number
+  filterOption?: boolean | FilterFunc
+  filterSort?: (
+    optionA: DefaultOptionType,
+    optionB: DefaultOptionType,
+    info: { searchValue: string },
+  ) => number
   optionFilterProp?: string
 }
-export interface SelectProps<ValueType = any, OptionType extends BaseOptionType = DefaultOptionType>
-/* @vue-ignore */
-  extends Omit<BaseSelectPropsWithoutPrivate, 'showSearch'> {
+
+export interface SelectProps extends Omit<BaseSelectPropsWithoutPrivate, 'id' | 'showSearch' | 'prefixCls' | 'searchValue' | 'onSearch'> {
   prefixCls?: string
   id?: string
   backfill?: boolean
   fieldNames?: FieldNames
-  onSearch?: SearchConfig<OptionType>['onSearch']
-  showSearch?: boolean | SearchConfig<OptionType>
-  searchValue?: SearchConfig<OptionType>['searchValue']
+  onSearch?: SearchConfig['onSearch']
+  showSearch?: boolean | SearchConfig
+  searchValue?: SearchConfig['searchValue']
   autoClearSearchValue?: boolean
-  onSelect?: SelectHandler<ArrayElementType<ValueType>, OptionType>
-  onDeselect?: SelectHandler<ArrayElementType<ValueType>, OptionType>
-  onActive?: (value: ValueType) => void
-  filterOption?: SearchConfig<OptionType>['filterOption']
-  filterSort?: SearchConfig<OptionType>['filterSort']
+  onSelect?: SelectHandler
+  onDeselect?: SelectHandler
+  onActive?: (value: any) => void
+  filterOption?: SearchConfig['filterOption']
+  filterSort?: SearchConfig['filterSort']
   optionFilterProp?: string
   optionLabelProp?: string
   children?: any
-  options?: OptionType[]
-  optionRender?: (oriOption: FlattenOptionData<OptionType>, info: { index: number }) => any
+  options?: DefaultOptionType[]
+  optionRender?: (oriOption: FlattenOptionData<DefaultOptionType>, info: { index: number }) => any
   defaultActiveFirstOption?: boolean
   virtual?: boolean
   direction?: 'ltr' | 'rtl'
@@ -112,10 +110,10 @@ export interface SelectProps<ValueType = any, OptionType extends BaseOptionType 
   menuItemSelectedIcon?: RenderNode
   mode?: 'combobox' | 'multiple' | 'tags'
   labelInValue?: boolean
-  value?: ValueType | null
-  defaultValue?: ValueType | null
+  value?: any
+  defaultValue?: any
   maxCount?: number
-  onChange?: (value: ValueType, option?: OptionType | OptionType[]) => void
+  onChange?: (value: any, option?: DefaultOptionType | DefaultOptionType[]) => void
   classNames?: Partial<Record<SemanticName, string>>
   styles?: Partial<Record<SemanticName, CSSProperties>>
 }
@@ -160,7 +158,7 @@ const omitKeys: string[] = [
   'styles',
 ]
 
-const defaults: SelectProps = {
+const defaults: any = {
   popupMatchSelectWidth: true,
   listHeight: 200,
   listItemHeight: 20,
@@ -604,12 +602,7 @@ const Select = defineComponent<
   },
 )
 
-const TypedSelect = Select as unknown as (<
-  ValueType = any,
-  OptionType extends BaseOptionType | DefaultOptionType = DefaultOptionType,
->(
-  props: SelectProps<ValueType, OptionType> & { ref?: any },
-) => any) & {
+const TypedSelect = Select as unknown as ((props: SelectProps & { ref?: any }) => any) & {
   Option: typeof Option
   OptGroup: typeof OptGroup
 }

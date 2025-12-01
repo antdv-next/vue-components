@@ -98,7 +98,8 @@ export interface BaseSelectPrivateProps {
   emptyOptions: boolean
 }
 
-export type BaseSelectPropsWithoutPrivate = Omit<BaseSelectProps, keyof BaseSelectPrivateProps>
+// Vue TSX type resolver struggles with Omit + keyof, keep a simple alias instead.
+export type BaseSelectPropsWithoutPrivate = BaseSelectProps
 
 export interface BaseSelectProps extends BaseSelectPrivateProps {
   className?: string
