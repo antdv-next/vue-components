@@ -2,9 +2,9 @@ import type { DefaultOptionType, SearchConfig, SelectProps } from '../Select'
 import { computed } from 'vue'
 
 export default function useSearchConfig(
-  showSearch: () => boolean | SearchConfig<DefaultOptionType> | undefined,
-  props: () => SearchConfig<DefaultOptionType>,
-  mode: () => SelectProps<DefaultOptionType>['mode'],
+  showSearch: () => boolean | SearchConfig | undefined,
+  props: () => SearchConfig,
+  mode: () => SelectProps['mode'],
 ) {
   return computed(() => {
     const currentShowSearch = showSearch()
@@ -36,6 +36,6 @@ export default function useSearchConfig(
         ? true
         : currentShowSearch,
       searchConfig,
-    ] as [boolean | undefined, SearchConfig<DefaultOptionType>]
+    ] as [boolean | undefined, SearchConfig]
   })
 }
