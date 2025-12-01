@@ -7,6 +7,16 @@ export function isDOM(node: any): node is HTMLElement | SVGElement {
   return node instanceof HTMLElement || node instanceof SVGElement
 }
 
+export function getDOM(elementRef: MaybeRef) {
+  const unrefElementRef = unref(elementRef)
+  const dom = findDOMNode(unrefElementRef) || (unrefElementRef && typeof unrefElementRef === 'object' ? findDOMNode((unrefElementRef as any).nativeElement) : null)
+
+  if (dom && dom.nodeType === 3 && dom.nextElementSibling)
+    return dom.nextElementSibling as HTMLElement
+
+  return dom
+}
+
 /**
  * Return if a node is a DOM node. Else will return by `findDOMNode`
  */
