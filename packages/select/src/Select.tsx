@@ -83,6 +83,7 @@ export interface SearchConfig<OptionType> {
   optionFilterProp?: string
 }
 export interface SelectProps<ValueType = any, OptionType extends BaseOptionType = DefaultOptionType>
+/* @vue-ignore */
   extends Omit<BaseSelectPropsWithoutPrivate, 'showSearch'> {
   prefixCls?: string
   id?: string
@@ -167,7 +168,7 @@ const defaults: SelectProps = {
 }
 
 const Select = defineComponent<
-  SelectProps<any, DefaultOptionType>
+  SelectProps
 >(
   (props = defaults, { slots, expose, attrs }) => {
     const mergedId = useId(props.id)
