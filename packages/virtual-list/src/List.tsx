@@ -20,6 +20,7 @@ import { useGetSize } from './hooks/useGetSize'
 import useHeights from './hooks/useHeights'
 import useMobileTouchMove from './hooks/useMobileTouchMove'
 import useScrollDrag from './hooks/useScrollDrag'
+import useScrollTo from './hooks/useScrollTo'
 import Item from './Item'
 import ScrollBar from './ScrollBar'
 import { getSpinSize } from './utils/scrollbarUtil'
@@ -36,9 +37,11 @@ export interface ScrollInfo {
   y: number
 }
 
+export type ScrollTo = (arg?: number | ScrollConfig | null) => void
+
 export interface ListRef {
   nativeElement?: HTMLDivElement
-  scrollTo: (arg?: number | ScrollConfig) => void
+  scrollTo: ScrollTo
   getScrollInfo: () => ScrollInfo
 }
 
@@ -450,62 +453,34 @@ export default defineComponent({
     }
 
     // ================================= Ref ==================================
-    const scrollTo = (config?: number | ScrollConfig) => {
-      if (config === null || config === undefined) {
-        return
-      }
-
-      if (typeof config === 'number') {
-        syncScrollTop(config)
-      }
-      else if (config && typeof config === 'object') {
-        let scrollTop: number | undefined
-
-        if ('left' in config) {
-          const aligned = keepInHorizontalRange(config.left || 0)
-          offsetLeft.value = aligned
-          triggerScroll({ x: isRTL.value ? -aligned : aligned })
-        }
-
-        if ('top' in config) {
-          scrollTop = config.top
-        }
-        else if ('index' in config) {
-          const index = config.index || 0
-          const item = mergedData.value[index]
-          if (item) {
-            let itemTop = 0
-            for (let i = 0; i < index; i += 1) {
-              const key = getKey(mergedData.value[i])
-              const cacheHeight = heights.get(key)
-              itemTop += cacheHeight === undefined ? props.itemHeight! : cacheHeight
-            }
-            scrollTop = itemTop
-          }
-        }
-        else if ('key' in config) {
-          const index = mergedData.value.findIndex(item => getKey(item) === config.key)
-          if (index >= 0) {
-            let itemTop = 0
-            for (let i = 0; i < index; i += 1) {
-              const key = getKey(mergedData.value[i])
-              const cacheHeight = heights.get(key)
-              itemTop += cacheHeight === undefined ? props.itemHeight! : cacheHeight
-            }
-            scrollTop = itemTop
-          }
-        }
-
-        if (scrollTop !== undefined) {
-          syncScrollTop(scrollTop)
-        }
-      }
-    }
+    const scrollTo = useScrollTo(
+      componentRef as any,
+      mergedData,
+      heights,
+      itemHeight as any,
+      getKey,
+      () => collectHeight(true),
+      syncScrollTop,
+      delayHideScrollBar,
+    )
 
     expose({
       nativeElement: containerRef,
       getScrollInfo: getVirtualScrollInfo,
-      scrollTo,
+      scrollTo: (config: any) => {
+        function isPosScroll(arg: any): arg is ScrollPos {
+          return arg && typeof arg === 'object' && ('left' in arg || 'top' in arg)
+        }
+        if (isPosScroll(config)) {
+          if (config.left !== undefined) {
+            offsetLeft.value = keepInHorizontalRange(config.left)
+          }
+          scrollTo(config.top as any)
+        }
+        else {
+          scrollTo(config)
+        }
+      },
     })
 
     // ================================ Effect ================================

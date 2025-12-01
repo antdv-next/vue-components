@@ -1,6 +1,5 @@
-import type { ComputedRef, CSSProperties, InjectionKey } from 'vue'
-import type { RawValueType, RenderNode } from './BaseSelect'
-import type { FlattenOptionData } from './interface'
+import type { CSSProperties, Ref } from 'vue'
+import type { FlattenOptionData, RawValueType, RenderNode } from './interface'
 import type {
   BaseOptionType,
   FieldNames,
@@ -10,8 +9,11 @@ import type {
   SelectProps,
   SemanticName,
 } from './Select'
-import { computed, inject, provide } from 'vue'
+import { inject, provide, ref } from 'vue'
 
+/**
+ * SelectContext is only used for Select. BaseSelect should not consume this context.
+ */
 export interface SelectContextProps {
   classNames?: Partial<Record<SemanticName, string>> & {
     popup?: Partial<Record<PopupSemantic, string>>
@@ -21,7 +23,7 @@ export interface SelectContextProps {
   }
   options: BaseOptionType[]
   optionRender?: SelectProps['optionRender']
-  flattenOptions: FlattenOptionData<BaseOptionType>[]
+  flattenOptions: FlattenOptionData[]
   onActiveValue: OnActiveValue
   defaultActiveFirstOption?: boolean
   onSelect: OnInternalSelect
@@ -36,13 +38,17 @@ export interface SelectContextProps {
   maxCount?: number
 }
 
-const SelectContextKey: InjectionKey<ComputedRef<SelectContextProps>> = Symbol('SelectContextKey')
+const SelectContextKey = Symbol('SelectContext')
 
-export function useProvideSelectContext(value: ComputedRef<SelectContextProps>) {
+function useSelectProvider(value: Ref<SelectContextProps>) {
   provide(SelectContextKey, value)
 }
 
-export default function useSelectContext() {
-  const context = inject(SelectContextKey, null)
-  return computed(() => context?.value)
+function useSelectContext() {
+  return inject(SelectContextKey, ref(null))
+}
+
+export {
+  useSelectContext,
+  useSelectProvider,
 }
