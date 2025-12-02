@@ -84,8 +84,8 @@ importers:
         specifier: ^5.0.0-beta.6
         version: 5.0.0-beta.6(@microsoft/api-extractor@7.50.0(@types/node@20.19.24))(esbuild@0.25.9)(rolldown-vite@7.2.2(@types/node@20.19.24)(esbuild@0.25.9)(jiti@2.6.1)(less@4.4.2)(yaml@2.8.1))(rolldown@1.0.0-beta.50)(rollup@4.50.0)(typescript@5.9.3)
       vite-plugin-tsx-resolve-types:
-        specifier: ^0.0.6
-        version: 0.0.6(rolldown-vite@7.2.2(@types/node@20.19.24)(esbuild@0.25.9)(jiti@2.6.1)(less@4.4.2)(yaml@2.8.1))(typescript@5.9.3)
+        specifier: ^0.0.7
+        version: 0.0.7(rolldown-vite@7.2.2(@types/node@20.19.24)(esbuild@0.25.9)(jiti@2.6.1)(less@4.4.2)(yaml@2.8.1))(typescript@5.9.3)
       vitest:
         specifier: ^3.2.4
         version: 3.2.4(@types/debug@4.1.12)(@types/node@20.19.24)(esbuild@0.25.9)(jiti@2.6.1)(jsdom@22.1.0)(less@4.4.2)(yaml@2.8.1)
@@ -4576,8 +4576,8 @@ packages:
       vite:
         optional: true
 
-  vite-plugin-tsx-resolve-types@0.0.6:
-    resolution: {integrity: sha512-TnPunBeIDEu+KJnOPg987HjFTaiUTj2nAFt4Np5Cm2UZUK5PMzUqXWhkWPw5c4XvfiIBzowoN3NTNTy0bW4RRg==}
+  vite-plugin-tsx-resolve-types@0.0.7:
+    resolution: {integrity: sha512-WLI3TFDa1edKy8T4pUgMGYsmvrrzTkJKhWcSDgyrpvvgSAsToe91IIZsz3FJv1Uzs75/6/U9+CD5MYei3YP7TA==}
     peerDependencies:
       typescript: '>=5'
       vite: '>=4'
@@ -9457,12 +9457,12 @@ snapshots:
       - typescript
       - webpack
 
-  vite-plugin-tsx-resolve-types@0.0.6(rolldown-vite@7.2.2(@types/node@20.19.24)(esbuild@0.25.9)(jiti@2.6.1)(less@4.4.2)(yaml@2.8.1))(typescript@5.9.3):
+  vite-plugin-tsx-resolve-types@0.0.7(rolldown-vite@7.2.2(@types/node@20.19.24)(esbuild@0.25.9)(jiti@2.6.1)(less@4.4.2)(yaml@2.8.1))(typescript@5.9.3):
     dependencies:
-      '@babel/generator': 7.28.3
-      '@babel/parser': 7.28.4
+      '@babel/generator': 7.28.5
+      '@babel/parser': 7.28.5
       '@babel/traverse': 7.28.4
-      '@babel/types': 7.28.4
+      '@babel/types': 7.28.5
       '@vue/compiler-sfc': 3.5.22
       typescript: 5.9.3
       vite: rolldown-vite@7.2.2(@types/node@20.19.24)(esbuild@0.25.9)(jiti@2.6.1)(less@4.4.2)(yaml@2.8.1)
