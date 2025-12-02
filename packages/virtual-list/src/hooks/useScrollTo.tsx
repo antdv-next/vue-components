@@ -121,13 +121,11 @@ export default function useScrollTo(
               }
             }
           }
-
           if (targetTop !== undefined) {
             syncScrollTop(targetTop)
           }
 
           // One more time for sync
-
           if (targetTop !== syncState.value.lastTop) {
             needCollectHeight = true
           }
