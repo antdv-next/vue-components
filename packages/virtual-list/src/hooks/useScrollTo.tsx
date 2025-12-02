@@ -4,7 +4,7 @@ import type { GetKey } from '../interface.ts'
 import type CacheMap from '../utils/CacheMap.ts'
 import { warning } from '@v-c/util'
 import raf from '@v-c/util/dist/raf'
-import { nextTick, shallowRef, watch } from 'vue'
+import { shallowRef, watch } from 'vue'
 
 const MAX_TIMES = 10
 
@@ -49,8 +49,7 @@ export default function useScrollTo(
   // ========================== Sync Scroll ==========================
   watch(
     [syncState, containerRef],
-    async () => {
-      await nextTick()
+    () => {
       if (syncState.value && syncState.value.times < MAX_TIMES) {
         // Never reach
         if (!containerRef.value) {
@@ -67,7 +66,6 @@ export default function useScrollTo(
         // Go to next frame if height not exist
         if (height) {
           const mergedAlign = targetAlign || originAlign
-
           // Get top & bottom
           let stackTop = 0
           let itemTop = 0
@@ -149,6 +147,7 @@ export default function useScrollTo(
     },
     {
       immediate: true,
+      flush: 'post',
     },
   )
 
@@ -175,6 +174,7 @@ export default function useScrollTo(
       const { offset = 0 } = arg
 
       syncState.value = {
+        ...syncState.value,
         times: 0,
         index,
         offset,
