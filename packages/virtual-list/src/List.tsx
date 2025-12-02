@@ -59,13 +59,13 @@ export interface ScrollTarget {
 
 export type ScrollConfig = ScrollTarget | ScrollPos
 
-export interface ListProps<T = any> {
+export interface ListProps {
   prefixCls?: string
-  data?: T[]
+  data?: any[]
   height?: number
   itemHeight?: number
   fullHeight?: boolean
-  itemKey: Key | ((item: T) => Key)
+  itemKey: Key | ((item: any) => Key)
   component?: string
   virtual?: boolean
   direction?: ScrollBarDirectionType
@@ -85,7 +85,7 @@ export interface ListProps<T = any> {
   showScrollBar?: boolean | 'optional'
   onScroll?: (e: Event) => void
   onVirtualScroll?: (info: ScrollInfo) => void
-  onVisibleChange?: (visibleList: T[], fullList: T[]) => void
+  onVisibleChange?: (visibleList: any[], fullList: any[]) => void
   innerProps?: InnerProps
   extraRender?: (info: ExtraRenderInfo) => VNode
 }

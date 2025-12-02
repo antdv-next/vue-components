@@ -1,5 +1,8 @@
-import type { CSSProperties, PropType } from 'vue'
+import type { CSSProperties } from 'vue'
+import raf from '@v-c/util/src/raf.ts'
 import { computed, defineComponent, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
+
+export type ScrollBarDirectionType = 'ltr' | 'rtl'
 
 export interface ScrollBarProps {
   prefixCls: string
@@ -29,25 +32,8 @@ function getPageXY(
   return obj[horizontal ? 'pageX' : 'pageY'] - window[horizontal ? 'scrollX' : 'scrollY']
 }
 
-export type ScrollBarDirectionType = 'ltr' | 'rtl'
-
-export default defineComponent({
+export default defineComponent<ScrollBarProps>({
   name: 'ScrollBar',
-  props: {
-    prefixCls: { type: String, required: true },
-    scrollOffset: { type: Number, required: true },
-    scrollRange: { type: Number, required: true },
-    rtl: { type: Boolean, default: false },
-    onScroll: { type: Function as PropType<(scrollOffset: number, horizontal?: boolean) => void>, required: true },
-    onStartMove: { type: Function as PropType<() => void>, required: true },
-    onStopMove: { type: Function as PropType<() => void>, required: true },
-    horizontal: { type: Boolean, default: false },
-    style: Object as PropType<CSSProperties>,
-    thumbStyle: Object as PropType<CSSProperties>,
-    spinSize: { type: Number, required: true },
-    containerSize: { type: Number, required: true },
-    showScrollBar: { type: [Boolean, String] as PropType<boolean | 'optional'> },
-  },
   setup(props, { expose }) {
     const dragging = ref(false)
     const pageXY = ref<number | null>(null)
@@ -55,13 +41,11 @@ export default defineComponent({
 
     const isLTR = computed(() => !props.rtl)
 
-    // Refs
+    // ========================= Refs =========================
     const scrollbarRef = shallowRef<HTMLDivElement>()
     const thumbRef = shallowRef<HTMLDivElement>()
 
-    // Visible
-    // When showScrollBar is 'optional', start as visible (true)
-    // When showScrollBar is true/false, use that value
+    // ======================= Visible ========================
     const visible = ref(props.showScrollBar === 'optional' ? true : props.showScrollBar)
     let visibleTimeout: ReturnType<typeof setTimeout> | null = null
 
@@ -77,11 +61,11 @@ export default defineComponent({
       }, 3000)
     }
 
-    // Range
+    // ======================== Range =========================
     const enableScrollRange = computed(() => props.scrollRange - props.containerSize || 0)
     const enableOffsetRange = computed(() => props.containerSize - props.spinSize || 0)
 
-    // Top position
+    // ========================= Top ==========================
     const top = computed(() => {
       if (props.scrollOffset === 0 || enableScrollRange.value === 0) {
         return 0
@@ -90,7 +74,7 @@ export default defineComponent({
       return ptg * enableOffsetRange.value
     })
 
-    // State ref for event handlers
+    // ======================== Thumb =========================
     const stateRef = shallowRef({
       top: top.value,
       dragging: dragging.value,
@@ -117,12 +101,16 @@ export default defineComponent({
       pageXY.value = getPageXY(e, props.horizontal || false)
       startTop.value = stateRef.value.top
 
-      props.onStartMove()
+      props?.onStartMove?.()
       e.stopPropagation()
       e.preventDefault()
     }
 
-    // Effect: Add passive:false event listeners
+    // ======================== Effect ========================
+
+    // React make event as passive, but we need to preventDefault
+    // Add event on dom directly instead.
+    // ref: https://github.com/facebook/react/issues/9809
     onMounted(() => {
       const onScrollbarTouchStart = (e: TouchEvent) => {
         e.preventDefault()
@@ -143,7 +131,7 @@ export default defineComponent({
     })
 
     // Effect: Handle dragging
-    watch(dragging, (isDragging) => {
+    watch(dragging, (isDragging, _O, onCleanup) => {
       if (isDragging) {
         let moveRafId: number | null = null
 
@@ -153,9 +141,7 @@ export default defineComponent({
             pageY: statePageY,
             startTop: stateStartTop,
           } = stateRef.value
-
-          if (moveRafId)
-            cancelAnimationFrame(moveRafId)
+          raf.cancel(moveRafId!)
 
           const rect = scrollbarRef.value!.getBoundingClientRect()
           const scale = props.containerSize / (props.horizontal ? rect.width : rect.height)
@@ -180,8 +166,8 @@ export default defineComponent({
             newScrollTop = Math.max(newScrollTop, 0)
             newScrollTop = Math.min(newScrollTop, tmpEnableScrollRange)
 
-            moveRafId = requestAnimationFrame(() => {
-              props.onScroll(newScrollTop, props.horizontal)
+            moveRafId = raf(() => {
+              props?.onScroll?.(newScrollTop, props.horizontal)
             })
           }
         }
@@ -196,26 +182,25 @@ export default defineComponent({
         window.addEventListener('mouseup', onMouseUp, { passive: true } as any)
         window.addEventListener('touchend', onMouseUp, { passive: true } as any)
 
-        onUnmounted(() => {
+        onCleanup(() => {
           window.removeEventListener('mousemove', onMouseMove)
           window.removeEventListener('touchmove', onMouseMove)
           window.removeEventListener('mouseup', onMouseUp)
           window.removeEventListener('touchend', onMouseUp)
 
-          if (moveRafId)
-            cancelAnimationFrame(moveRafId)
+          raf.cancel(moveRafId!)
         })
       }
     })
 
     // Effect: Delay hidden on scroll offset change
-    watch(() => props.scrollOffset, () => {
+    watch(() => props.scrollOffset, (_n, _o, onCleanup) => {
       delayHidden()
-    })
-
-    onUnmounted(() => {
-      if (visibleTimeout)
-        clearTimeout(visibleTimeout)
+      onCleanup(() => {
+        if (visibleTimeout) {
+          clearTimeout(visibleTimeout)
+        }
+      })
     })
 
     // Imperative handle
@@ -224,7 +209,8 @@ export default defineComponent({
     })
 
     return () => {
-      const scrollbarPrefixCls = `${props.prefixCls}-scrollbar`
+      const { prefixCls, horizontal } = props
+      const scrollbarPrefixCls = `${prefixCls}-scrollbar`
 
       const containerStyle: CSSProperties = {
         position: 'absolute',
@@ -274,8 +260,8 @@ export default defineComponent({
           class={[
             scrollbarPrefixCls,
             {
-              [`${scrollbarPrefixCls}-horizontal`]: props.horizontal,
-              [`${scrollbarPrefixCls}-vertical`]: !props.horizontal,
+              [`${scrollbarPrefixCls}-horizontal`]: horizontal,
+              [`${scrollbarPrefixCls}-vertical`]: !horizontal,
               [`${scrollbarPrefixCls}-visible`]: visible.value,
             },
           ]}
