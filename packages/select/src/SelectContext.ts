@@ -45,7 +45,7 @@ function useSelectProvider(value: Ref<SelectContextProps>) {
 }
 
 function useSelectContext() {
-  return inject(SelectContextKey, ref(null))
+  return inject(SelectContextKey, ref(null)) as Ref<SelectContextProps | null>
 }
 
 export {
