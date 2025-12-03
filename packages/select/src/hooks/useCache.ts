@@ -1,5 +1,5 @@
 import type { Ref } from 'vue'
-import type { RawValueType } from '../BaseSelect'
+import type { RawValueType } from '../interface'
 import type { DefaultOptionType, LabelInValueType } from '../Select'
 import { computed, shallowRef } from 'vue'
 

@@ -1,12 +1,24 @@
 import type { VueNode } from '@v-c/util/dist/type'
-import type { CSSProperties } from 'vue'
-import type { BaseSelectSemanticName } from './BaseSelect'
+import type { CSSProperties, PropType, Ref } from 'vue'
+import type { BaseSelectProps, BaseSelectRef, BaseSelectSemanticName, DisplayInfoType } from './BaseSelect'
 import type { DisplayValueType, FlattenOptionData, RawValueType, RenderNode } from './interface'
+import useId from '@v-c/util/dist/hooks/useId'
+import { computed, defineComponent, shallowRef, toRef, watch } from 'vue'
+import { BaseSelect, isMultiple } from './BaseSelect'
+import useCache from './hooks/useCache'
+import useFilterOptions from './hooks/useFilterOptions'
+import useOptions from './hooks/useOptions'
+import useRefFunc from './hooks/useRefFunc'
+import useSearchConfig from './hooks/useSearchConfig'
+import OptionList from './OptionList'
+import { useSelectProvider } from './SelectContext'
+import { hasValue, isComboNoValue, toArray } from './utils/commonUtil'
+import { fillFieldNames, flattenOptions, injectPropsWithOption } from './utils/valueUtil'
 
 const OMIT_DOM_PROPS = ['inputValue']
 
 export type OnActiveValue = (
-  active: RawValueType,
+  active: RawValueType | null,
   index: number,
   info?: { source?: 'keyboard' | 'mouse' },
 ) => void
@@ -18,7 +30,8 @@ export interface LabelInValueType {
   value: RawValueType
 }
 
-export type DraftValueType = | RawValueType
+export type DraftValueType =
+  | RawValueType
   | LabelInValueType
   | DisplayValueType
   | (RawValueType | LabelInValueType | DisplayValueType)[]
@@ -96,7 +109,7 @@ export interface SelectProps {
   /**  @deprecated please use  showSearch.optionFilterProp */
   optionFilterProp?: string
   optionLabelProp?: string
-  options?: any
+  options?: DefaultOptionType[]
   optionRender?: (oriOption: FlattenOptionData, info: { index: number }) => any
 
   defaultActiveFirstOption?: boolean
@@ -117,4 +130,538 @@ export interface SelectProps {
   onChange?: (value: any, option?: any | any[]) => void
   classNames?: Partial<Record<SemanticName, string>>
   styles?: Partial<Record<SemanticName, CSSProperties>>
+  popupMatchSelectWidth?: boolean | number
 }
+
+function isRawValue(value: DraftValueType): value is RawValueType {
+  return !value || typeof value !== 'object'
+}
+
+const selectProps = {
+  prefixCls: { type: String, default: 'vc-select' },
+  id: String,
+  backfill: Boolean,
+  fieldNames: Object as PropType<FieldNames>,
+  showSearch: [Boolean, Object] as PropType<boolean | SearchConfig>,
+  searchValue: String,
+  onSearch: Function as PropType<(value: string) => void>,
+  autoClearSearchValue: { type: Boolean, default: true },
+  filterOption: [Boolean, Function] as PropType<boolean | FilterFunc>,
+  filterSort: Function as PropType<(optionA: any, optionB: any, info: { searchValue: string }) => number>,
+  optionFilterProp: String,
+  optionLabelProp: String,
+  options: Array as PropType<DefaultOptionType[]>,
+  optionRender: Function as PropType<(oriOption: FlattenOptionData, info: { index: number }) => any>,
+  defaultActiveFirstOption: { type: Boolean, default: undefined },
+  virtual: { type: Boolean, default: true },
+  direction: String as PropType<'ltr' | 'rtl'>,
+  listHeight: { type: Number, default: 200 },
+  listItemHeight: { type: Number, default: 20 },
+  labelRender: Function as PropType<(props: LabelInValueType) => any>,
+  menuItemSelectedIcon: [Object, Function] as PropType<RenderNode>,
+  mode: String as PropType<'combobox' | 'multiple' | 'tags'>,
+  labelInValue: Boolean,
+  value: [String, Number, Array, Object] as PropType<any>,
+  defaultValue: [String, Number, Array, Object] as PropType<any>,
+  maxCount: Number,
+  onChange: Function as PropType<(value: any, option?: any | any[]) => void>,
+  onSelect: Function as PropType<SelectHandler<any, any>>,
+  onDeselect: Function as PropType<SelectHandler<any, any>>,
+  onActive: Function as PropType<(value: any) => void>,
+  classNames: Object as PropType<Partial<Record<SemanticName, string>>>,
+  styles: Object as PropType<Partial<Record<SemanticName, CSSProperties>>>,
+  popupMatchSelectWidth: { type: [Boolean, Number], default: true },
+}
+
+const Select = defineComponent({
+  name: 'VcSelect',
+  inheritAttrs: false,
+  props: selectProps,
+  setup(props, { attrs, expose }) {
+    const baseSelectRef = shallowRef<BaseSelectRef | null>(null)
+
+    // Expose
+    expose({
+      focus: () => baseSelectRef.value?.focus(),
+      blur: () => baseSelectRef.value?.blur(),
+      scrollTo: (arg: any) => baseSelectRef.value?.scrollTo?.(arg),
+    })
+
+    const mergedId = useId(props.id)
+    const multiple = computed(() => isMultiple(props.mode as any))
+
+    // =========================== Search ===========================
+    const [mergedShowSearch, searchConfig] = useSearchConfig(
+      toRef(props, 'showSearch'),
+      {
+        filterOption: toRef(props, 'filterOption'),
+        searchValue: toRef(props, 'searchValue'),
+        optionFilterProp: toRef(props, 'optionFilterProp'),
+        filterSort: toRef(props, 'filterSort'),
+        onSearch: toRef(props, 'onSearch'),
+        autoClearSearchValue: toRef(props, 'autoClearSearchValue'),
+      },
+      toRef(props, 'mode'),
+    )
+
+    const mergedFilterOption = computed(() => {
+      if (searchConfig.value.filterOption === undefined && props.mode === 'combobox') {
+        return false
+      }
+      return searchConfig.value.filterOption
+    })
+
+    // ========================= FieldNames =========================
+    const mergedFieldNames = computed(() =>
+      fillFieldNames(props.fieldNames, false),
+    )
+
+    // =========================== Search ===========================
+    const internalSearchValue = shallowRef(props.searchValue || '')
+    watch(() => props.searchValue, (val) => {
+      if (val !== undefined) {
+        internalSearchValue.value = val
+      }
+    })
+
+    const setSearchValue = (val: string) => {
+      internalSearchValue.value = val
+    }
+
+    const mergedSearchValue = computed(() => internalSearchValue.value || '')
+
+    // =========================== Option ===========================
+    const parsedOptions = useOptions(
+      toRef(props, 'options'),
+      mergedFieldNames,
+      toRef(props, 'optionFilterProp'),
+      toRef(props, 'optionLabelProp'),
+    )
+
+    const valueOptions = computed(() => parsedOptions.value.valueOptions)
+    const labelOptions = computed(() => parsedOptions.value.labelOptions)
+    const mergedOptions = computed(() => parsedOptions.value.options)
+
+    // ========================= Wrap Value =========================
+    const convert2LabelValues = (draftValues: DraftValueType): LabelInValueType[] => {
+      // Convert to array
+      const valueList = toArray(draftValues)
+
+      // Convert to labelInValue type
+      return valueList.map((val) => {
+        let rawValue: RawValueType
+        let rawLabel: VueNode
+        let rawDisabled: boolean | undefined
+        let rawTitle: string | undefined
+
+        // Fill label & value
+        if (isRawValue(val)) {
+          rawValue = val
+        }
+        else {
+          rawLabel = (val as LabelInValueType).label
+          rawValue = (val as LabelInValueType).value
+        }
+
+        const option = valueOptions.value.get(rawValue)
+        if (option) {
+          // Fill missing props
+          if (rawLabel === undefined) {
+            rawLabel = option?.[props.optionLabelProp || mergedFieldNames.value.label]
+          }
+          rawDisabled = option?.disabled
+          rawTitle = option?.title
+        }
+
+        return {
+          label: rawLabel,
+          value: rawValue,
+          key: rawValue,
+          disabled: rawDisabled,
+          title: rawTitle,
+        } as LabelInValueType
+      })
+    }
+
+    // =========================== Values ===========================
+    const internalValue = shallowRef<any>(props.defaultValue)
+    watch(() => props.value, (val) => {
+      if (val !== undefined) {
+        internalValue.value = val
+      }
+    }, { immediate: true })
+
+    const setInternalValue = (val: any) => {
+      if (props.value === undefined) {
+        internalValue.value = val
+      }
+    }
+
+    // Merged value with LabelValueType
+    const rawLabeledValues = computed(() => {
+      const newInternalValue = multiple.value && internalValue.value === null ? [] : internalValue.value
+      const values = convert2LabelValues(newInternalValue)
+
+      // combobox no need save value when it's no value (exclude value equal 0)
+      if (props.mode === 'combobox' && isComboNoValue(values[0]?.value)) {
+        return []
+      }
+
+      return values
+    })
+
+    // Fill label with cache to avoid option remove
+    const [mergedValues, getMixedOption] = useCache(
+      rawLabeledValues as Ref<LabelInValueType[]>,
+      valueOptions,
+    )
+
+    const displayValues = computed(() => {
+      // `null` need show as placeholder instead
+      // https://github.com/ant-design/ant-design/issues/25057
+      if (!props.mode && mergedValues.value.length === 1) {
+        const firstValue = mergedValues.value[0]
+        if (
+          firstValue.value === null
+          && (firstValue.label === null || firstValue.label === undefined)
+        ) {
+          return []
+        }
+      }
+
+      return mergedValues.value.map((item) => ({
+        ...item,
+        label: (typeof props.labelRender === 'function' ? props.labelRender(item) : item.label) ?? item.value,
+      }))
+    })
+
+    /** Convert `displayValues` to raw value type set */
+    const rawValues = computed(() => new Set(mergedValues.value.map(val => val.value)))
+
+    // Sync combobox search value
+    watch(mergedValues, () => {
+      if (props.mode === 'combobox') {
+        const strValue = mergedValues.value[0]?.value
+        setSearchValue(hasValue(strValue) ? String(strValue) : '')
+      }
+    })
+
+    // ======================= Display Option =======================
+    // Create a placeholder item if not exist in `options`
+    const createTagOption = useRefFunc((val: RawValueType, label?: VueNode) => {
+      const mergedLabel = label ?? val
+      return {
+        [mergedFieldNames.value.value]: val,
+        [mergedFieldNames.value.label]: mergedLabel,
+      } as DefaultOptionType
+    })
+
+    // Fill tag as option if mode is `tags`
+    const filledTagOptions = computed(() => {
+      if (props.mode !== 'tags') {
+        return mergedOptions.value
+      }
+
+      // >>> Tag mode
+      const cloneOptions = [...mergedOptions.value]
+
+      // Check if value exist in options (include new patch item)
+      const existOptions = (val: RawValueType) => valueOptions.value.has(val)
+
+      // Fill current value as option
+      ;[...mergedValues.value]
+        .sort((a, b) => (a.value < b.value ? -1 : 1))
+        .forEach((item) => {
+          const val = item.value
+
+          if (!existOptions(val)) {
+            cloneOptions.push(createTagOption(val, item.label))
+          }
+        })
+
+      return cloneOptions
+    })
+
+    const filteredOptions = useFilterOptions(
+      filledTagOptions,
+      mergedFieldNames,
+      mergedSearchValue,
+      mergedFilterOption,
+      toRef(props, 'optionFilterProp'),
+    )
+
+    // Fill options with search value if needed
+    const filledSearchOptions = computed(() => {
+      if (
+        props.mode !== 'tags'
+        || !mergedSearchValue.value
+        || filteredOptions.value.some(
+          item => item[props.optionFilterProp || 'value'] === mergedSearchValue.value,
+        )
+      ) {
+        return filteredOptions.value
+      }
+      // ignore when search value equal select input value
+      if (filteredOptions.value.some(
+        item => item[mergedFieldNames.value.value] === mergedSearchValue.value,
+      )) {
+        return filteredOptions.value
+      }
+      // Fill search value as option
+      return [createTagOption(mergedSearchValue.value), ...filteredOptions.value]
+    })
+
+    const sorter = (inputOptions: DefaultOptionType[]): DefaultOptionType[] => {
+      const sortedOptions = [...inputOptions].sort((a, b) =>
+        searchConfig.value.filterSort!(a, b, { searchValue: mergedSearchValue.value }),
+      )
+      return sortedOptions.map((item) => {
+        if (Array.isArray(item.options)) {
+          return {
+            ...item,
+            options: item.options.length > 0 ? sorter(item.options) : item.options,
+          }
+        }
+        return item
+      })
+    }
+
+    const orderedFilteredOptions = computed(() => {
+      if (!searchConfig.value.filterSort) {
+        return filledSearchOptions.value
+      }
+
+      return sorter(filledSearchOptions.value)
+    })
+
+    const displayOptions = computed(() =>
+      flattenOptions(orderedFilteredOptions.value, {
+        fieldNames: mergedFieldNames.value,
+        childrenAsData: false,
+      }),
+    )
+
+    // =========================== Change ===========================
+    const triggerChange = (values: DraftValueType) => {
+      const labeledValues = convert2LabelValues(values)
+      setInternalValue(labeledValues)
+
+      if (
+        props.onChange
+        // Trigger event only when value changed
+        && (labeledValues.length !== mergedValues.value.length
+          || labeledValues.some((newVal, index) => mergedValues.value[index]?.value !== newVal?.value))
+      ) {
+        const returnValues = props.labelInValue
+          ? labeledValues.map(({ label: l, value: v }) => ({ label: l, value: v }))
+          : labeledValues.map(v => v.value)
+
+        const returnOptions = labeledValues.map(v =>
+          injectPropsWithOption(getMixedOption(v.value)),
+        )
+
+        props.onChange(
+          // Value
+          multiple.value ? returnValues : returnValues[0],
+          // Option
+          multiple.value ? returnOptions : returnOptions[0],
+        )
+      }
+    }
+
+    // ======================= Accessibility ========================
+    const activeValue = shallowRef<string | null>(null)
+    const accessibilityIndex = shallowRef(0)
+    const mergedDefaultActiveFirstOption = computed(() =>
+      props.defaultActiveFirstOption !== undefined ? props.defaultActiveFirstOption : props.mode !== 'combobox',
+    )
+
+    const onActiveValue: OnActiveValue = (active, index, { source = 'keyboard' } = {}) => {
+      accessibilityIndex.value = index
+
+      if (props.backfill && props.mode === 'combobox' && active !== null && source === 'keyboard') {
+        activeValue.value = String(active)
+      }
+
+      props.onActive?.(active)
+    }
+
+    // ========================= OptionList =========================
+    const triggerSelect = (val: RawValueType, selected: boolean, type?: DisplayInfoType) => {
+      const getSelectEnt = (): [RawValueType | LabelInValueType, DefaultOptionType] => {
+        const option = getMixedOption(val)
+        return [
+          props.labelInValue
+            ? {
+                label: option?.[mergedFieldNames.value.label],
+                value: val,
+              }
+            : val,
+          injectPropsWithOption(option) as DefaultOptionType,
+        ]
+      }
+
+      if (selected && props.onSelect) {
+        const [wrappedValue, option] = getSelectEnt()
+        props.onSelect(wrappedValue, option)
+      }
+      else if (!selected && props.onDeselect && type !== 'clear') {
+        const [wrappedValue, option] = getSelectEnt()
+        props.onDeselect(wrappedValue, option)
+      }
+    }
+
+    // Used for OptionList selection
+    const onInternalSelect = useRefFunc<OnInternalSelect>((val, info) => {
+      let cloneValues: (RawValueType | DisplayValueType)[]
+
+      // Single mode always trigger select only with option list
+      const mergedSelect = multiple.value ? info.selected : true
+
+      if (mergedSelect) {
+        cloneValues = multiple.value ? [...mergedValues.value, val] : [val]
+      }
+      else {
+        cloneValues = mergedValues.value.filter(v => v.value !== val)
+      }
+
+      triggerChange(cloneValues)
+      triggerSelect(val, mergedSelect)
+
+      // Clean search value if single or configured
+      if (props.mode === 'combobox') {
+        activeValue.value = ''
+      }
+      else if (!multiple.value || searchConfig.value.autoClearSearchValue) {
+        setSearchValue('')
+        activeValue.value = ''
+      }
+    })
+
+    // ======================= Display Change =======================
+    // BaseSelect display values change
+    const onDisplayValuesChange: BaseSelectProps['onDisplayValuesChange'] = (nextValues, info) => {
+      triggerChange(nextValues)
+      const { type, values } = info
+
+      if (type === 'remove' || type === 'clear') {
+        values.forEach((item) => {
+          triggerSelect(item.value!, false, type)
+        })
+      }
+    }
+
+    // =========================== Search ===========================
+    const onInternalSearch: BaseSelectProps['onSearch'] = (searchText, info) => {
+      setSearchValue(searchText)
+      activeValue.value = null
+
+      // [Submit] Tag mode should flush input
+      if (info.source === 'submit') {
+        const formatted = (searchText || '').trim()
+        // prevent empty tags from appearing when you click the Enter button
+        if (formatted) {
+          const newRawValues = Array.from(new Set<RawValueType>([...rawValues.value, formatted]))
+          triggerChange(newRawValues)
+          triggerSelect(formatted, true)
+          setSearchValue('')
+        }
+
+        return
+      }
+
+      if (info.source !== 'blur') {
+        if (props.mode === 'combobox') {
+          triggerChange(searchText)
+        }
+
+        searchConfig.value.onSearch?.(searchText)
+      }
+    }
+
+    const onInternalSearchSplit: BaseSelectProps['onSearchSplit'] = (words) => {
+      let patchValues: RawValueType[] = words
+
+      if (props.mode !== 'tags') {
+        patchValues = words
+          .map((word) => {
+            const opt = labelOptions.value.get(word)
+            return opt?.[mergedFieldNames.value.value] as RawValueType
+          })
+          .filter(val => val !== undefined)
+      }
+
+      const newRawValues = Array.from(new Set<RawValueType>([...rawValues.value, ...patchValues]))
+      triggerChange(newRawValues)
+      newRawValues.forEach((newRawValue) => {
+        triggerSelect(newRawValue, true)
+      })
+    }
+
+    // ========================== Context ===========================
+    const selectContext = computed(() => {
+      const realVirtual = props.virtual !== false && props.popupMatchSelectWidth !== false
+      return {
+        ...parsedOptions.value,
+        flattenOptions: displayOptions.value,
+        onActiveValue,
+        defaultActiveFirstOption: mergedDefaultActiveFirstOption.value,
+        onSelect: onInternalSelect,
+        menuItemSelectedIcon: props.menuItemSelectedIcon,
+        rawValues: rawValues.value,
+        fieldNames: mergedFieldNames.value,
+        virtual: realVirtual,
+        direction: props.direction,
+        listHeight: props.listHeight,
+        listItemHeight: props.listItemHeight,
+        childrenAsData: false,
+        maxCount: props.maxCount,
+        optionRender: props.optionRender,
+        classNames: props.classNames,
+        styles: props.styles,
+      }
+    })
+
+    useSelectProvider(selectContext)
+
+    return () => {
+      const restProps = { ...attrs }
+
+      return (
+        <BaseSelect
+          {...restProps}
+          // >>> MISC
+          id={mergedId}
+          prefixCls={props.prefixCls}
+          ref={(el: any) => { baseSelectRef.value = el }}
+          omitDomProps={OMIT_DOM_PROPS}
+          mode={props.mode}
+          // >>> Style
+          classNames={props.classNames}
+          styles={props.styles}
+          // >>> Values
+          displayValues={displayValues.value}
+          onDisplayValuesChange={onDisplayValuesChange}
+          maxCount={props.maxCount}
+          // >>> Trigger
+          direction={props.direction}
+          // >>> Search
+          showSearch={mergedShowSearch.value}
+          searchValue={mergedSearchValue.value}
+          onSearch={onInternalSearch}
+          autoClearSearchValue={searchConfig.value.autoClearSearchValue}
+          onSearchSplit={onInternalSearchSplit}
+          popupMatchSelectWidth={props.popupMatchSelectWidth}
+          // >>> OptionList
+          OptionList={OptionList}
+          emptyOptions={!displayOptions.value.length}
+          // >>> Accessibility
+          activeValue={activeValue.value || undefined}
+          activeDescendantId={`${mergedId}_list_${accessibilityIndex.value}`}
+        />
+      )
+    }
+  },
+})
+
+export default Select

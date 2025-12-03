@@ -20,7 +20,7 @@ export function toVueNode(value: VueNode | VueNode[]): VueNode[] {
   return toArray(value)
 }
 
-export function getTitle(item: DisplayValueType): string {
+export function getTitle(item: DisplayValueType): string | undefined {
   let title: string | undefined
   if (item) {
     if (isTitleType(item.title)) {
@@ -31,5 +31,20 @@ export function getTitle(item: DisplayValueType): string {
     }
   }
 
-  return title as any
+  return title
+}
+
+export const isClient
+  = typeof window !== 'undefined' && window.document && window.document.documentElement
+
+/** Is client side and not jsdom */
+export const isBrowserClient = typeof process !== 'undefined' && process.env?.NODE_ENV !== 'test' && isClient
+
+export function hasValue(value: any): boolean {
+  return value !== undefined && value !== null
+}
+
+/** combo mode no value judgment function */
+export function isComboNoValue(value: any): boolean {
+  return !value && value !== 0
 }
