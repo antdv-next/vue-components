@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Animate from './animate.vue'
 import Basic from './basic.vue'
 import Height from './height.vue'
 import Nest from './nest.vue'
@@ -10,6 +11,9 @@ import Switch from './switch.vue'
   <Story title="Virtual List">
     <Variant title="Basic">
       <Basic />
+    </Variant>
+    <Variant title="Animate">
+      <Animate />
     </Variant>
 
     <Variant title="Dynamic Height">
