@@ -13,8 +13,8 @@ export function useAllowClear(
   allowClear?: Ref<boolean | { clearIcon?: any }>,
   clearIcon?: Ref<any>,
   disabled?: Ref<boolean>,
-  mergedSearchValue?: Ref<string>,
-  mode?: Ref<Mode>,
+  mergedSearchValue?: Ref<string | undefined>,
+  mode?: Ref<Mode | undefined>,
 ) {
   // Convert boolean to object first
   const allowClearConfig = computed<Partial<AllowClearConfig>>(() => {

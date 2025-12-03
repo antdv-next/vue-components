@@ -58,16 +58,16 @@ export interface SelectTriggerProps {
   transitionName?: string
   placement?: Placement
   builtinPlacements?: BuildInPlacements
-  popupStyle: CSSProperties
-  popupClassName: string
-  direction: string
+  popupStyle?: CSSProperties
+  popupClassName?: string
+  direction?: string
   popupMatchSelectWidth?: boolean | number
   popupRender?: (menu: any) => any
   getPopupContainer?: RenderDOMFunc
-  popupAlign: AlignType
+  popupAlign?: AlignType
   empty: boolean
 
-  onPopupVisibleChange?: (visible: boolean) => void
+  onPopupVisibleChange?: ((visible: boolean) => void) | null
 
   onPopupMouseEnter: () => void
   onPopupMouseDown: (event: MouseEvent) => void
@@ -131,7 +131,7 @@ const SelectTrigger = defineComponent<
       // ===================== Motion ======================
       const mergedTransitionName = animation ? `${popupPrefixCls}-${animation}` : transitionName
 
-      const mergedPopupStyle = popupStyle
+      const mergedPopupStyle = popupStyle ?? {}
       if (isNumberPopupWidth.value) {
         mergedPopupStyle.width = `${popupMatchSelectWidth}px`
       }
@@ -158,7 +158,7 @@ const SelectTrigger = defineComponent<
             [`${popupPrefixCls}-empty`]: empty,
           })}
           popupStyle={mergedPopupStyle}
-          onPopupVisibleChange={onPopupVisibleChange}
+          onPopupVisibleChange={onPopupVisibleChange ?? undefined}
         >
           {slots?.default?.()}
         </Trigger>

@@ -15,14 +15,17 @@ import type {
 import { clsx } from '@v-c/util'
 import { getDOM } from '@v-c/util/dist/Dom/findDOMNode'
 import { KeyCodeStr } from '@v-c/util/dist/KeyCode'
-import { toPropsRefs } from '@v-c/util/dist/props-util'
 import { computed, defineComponent, shallowRef, watch } from 'vue'
 import { useAllowClear } from '../hooks/useAllowClear'
+import { useBaseSelectProvider } from '../hooks/useBaseProps'
 import useComponents from '../hooks/useComponents'
 import useLock from '../hooks/useLock'
 import useOpen from '../hooks/useOpen'
 import useSelectTriggerControl from '../hooks/useSelectTriggerControl'
+import SelectInput from '../SelectInput'
+import SelectTrigger from '../SelectTrigger'
 import { getSeparatedContent, isValidCount } from '../utils/valueUtil'
+import Polite from './Polite'
 
 export type BaseSelectSemanticName = 'prefix'
   | 'suffix'
@@ -230,29 +233,18 @@ const defaults = {
 export const BaseSelect = defineComponent<
   BaseSelectProps
 >(
-  (props = defaults, { attrs, expose }) => {
-    const {
-      mode,
-      getInputElement,
-      getRawInputElement,
-      components,
-      searchValue,
-      displayValues,
-      open,
-      tokenSeparators,
-      disabled,
-    } = toPropsRefs(
-      props,
-      'mode',
-      'getInputElement',
-      'getRawInputElement',
-      'components',
-      'searchValue',
-      'displayValues',
-      'open',
-      'tokenSeparators',
-      'disabled',
-    )
+  (props = defaults, { expose }) => {
+    // ============================== Refs for props ==============================
+    const mode = computed(() => props.mode)
+    const getInputElement = computed(() => props.getInputElement)
+    const getRawInputElement = computed(() => props.getRawInputElement)
+    const components = computed(() => props.components)
+    const searchValue = computed(() => props.searchValue)
+    const displayValues = computed(() => props.displayValues)
+    const open = computed(() => props.open)
+    const tokenSeparators = computed(() => props.tokenSeparators)
+    const disabled = computed(() => props.disabled)
+
     // ============================== MISC ==============================
     const multiple = computed(() => isMultiple(mode.value!))
     // ============================== Refs ==============================
@@ -288,8 +280,8 @@ export const BaseSelect = defineComponent<
     const emptyListContent = computed(() => !props.notFoundContent && props.emptyOptions)
     const [mergedOpen, triggerOpen] = useOpen(
       open as any,
-      (open) => {
-        props.onPopupVisibleChange?.(open)
+      (openVal) => {
+        props.onPopupVisibleChange?.(openVal)
       },
       (nextOpen) => {
         return props.disabled || emptyListContent.value ? false : nextOpen
@@ -298,7 +290,7 @@ export const BaseSelect = defineComponent<
 
     // ============================= Search =============================
     const tokenWithEnter = computed(() => {
-      return (tokenSeparators.value || []).some(tokenSeparator => ['\n', '\r\n'].includes(tokenSeparator))
+      return (tokenSeparators.value || []).some((tokenSeparator: string) => ['\n', '\r\n'].includes(tokenSeparator))
     })
 
     const onInternalSearch = (searchText: string, fromTyping: boolean, isCompositing: boolean) => {
@@ -415,7 +407,7 @@ export const BaseSelect = defineComponent<
         && displayValues.value.length
       ) {
         const cloneDisplayValues = [...displayValues.value]
-        let removedDisplayValue = null
+        let removedDisplayValue: DisplayValueType | null = null
 
         for (let i = cloneDisplayValues.length - 1; i >= 0; i -= 1) {
           const current = cloneDisplayValues[i]
@@ -444,19 +436,19 @@ export const BaseSelect = defineComponent<
       props?.onKeyDown?.(event)
     }
 
-    const onInternalKeyUp = (event: KeyboardEvent, ...rest: any[]) => {
+    const onInternalKeyUp = (event: KeyboardEvent) => {
       if (mergedOpen.value) {
-        listRef.value?.onKeyUp?.(event, ...rest)
+        listRef.value?.onKeyUp?.(event)
       }
       if (event.key === KeyCodeStr.Enter) {
         keyLockRef.value = false
       }
-      props?.onKeyUp?.(event, ...rest)
+      props?.onKeyUp?.(event)
     }
 
     // ============================ Selector ============================
     const onSelectorRemove = (val: DisplayValueType) => {
-      const newValues = displayValues.value.filter(i => i !== val)
+      const newValues = displayValues.value.filter((i: DisplayValueType) => i !== val)
 
       props?.onDisplayValuesChange(newValues, {
         type: 'remove',
@@ -502,7 +494,7 @@ export const BaseSelect = defineComponent<
       }
     }
 
-    const onInternalMouseDown = (event: MouseEvent, ...restArgs: any[]) => {
+    const onInternalMouseDown = (event: MouseEvent) => {
       const { target } = event
 
       const popupElement: HTMLDivElement = triggerRef?.value?.getPopupElement?.()
@@ -540,6 +532,9 @@ export const BaseSelect = defineComponent<
       }
     })
 
+    // Provide context
+    useBaseSelectProvider(baseSelectContext)
+
     // ============================= Clear ==============================
     const onClearMouseDown = () => {
       props?.onClear?.()
@@ -553,9 +548,9 @@ export const BaseSelect = defineComponent<
     const allowClearConfig = useAllowClear(
       computed(() => props.prefixCls),
       displayValues,
-      computed(() => props.allowClear),
+      computed(() => props.allowClear ?? false),
       computed(() => props.clearIcon),
-      disabled,
+      computed(() => disabled.value ?? false),
       mergedSearchValue,
       mode,
     )
@@ -566,6 +561,21 @@ export const BaseSelect = defineComponent<
         className,
         loading,
         showSearch,
+        prefix,
+        placeholder,
+        activeValue,
+        animation,
+        transitionName,
+        popupStyle,
+        popupClassName,
+        direction,
+        popupMatchSelectWidth,
+        popupRender,
+        popupAlign,
+        placement,
+        builtinPlacements,
+        getPopupContainer,
+        emptyOptions,
       } = props
       const mergedAllowClear = allowClearConfig.value.allowClear
       const clearNode = allowClearConfig.value.clearIcon
@@ -573,7 +583,7 @@ export const BaseSelect = defineComponent<
       // Only works in `combobox`
       const customizeInputElement = (mode.value === 'combobox' && typeof getInputElement.value === 'function' && getInputElement.value()) || null
       // Used for raw custom input trigger
-      let onTriggerVisibleChange: null | ((newOpen: boolean) => void)
+      let onTriggerVisibleChange: null | ((newOpen: boolean) => void) = null
       if (mergedComponents.value?.root) {
         onTriggerVisibleChange = (newOpen: boolean) => {
           triggerOpen(newOpen)
@@ -597,8 +607,8 @@ export const BaseSelect = defineComponent<
       const mergedSuffixIcon = mergedSuffixIconFn()
 
       // =========================== OptionList ===========================
-
       const optionList = <OptionList ref={listRef} />
+
       // ============================= Select =============================
       const mergedClassName = clsx(prefixCls, className, {
         [`${prefixCls}-focused`]: focused.value,
@@ -612,7 +622,80 @@ export const BaseSelect = defineComponent<
         [`${prefixCls}-customize-input`]: customizeInputElement,
         [`${prefixCls}-show-search`]: showSearch,
       })
-      return null
+
+      // >>> Render
+      let renderNode = (
+        <SelectInput
+          // Ref
+          ref={containerRef}
+          // Style
+          prefixCls={prefixCls}
+          className={mergedClassName}
+          // Focus state
+          focused={focused.value}
+          // UI
+          prefix={prefix}
+          suffix={mergedSuffixIcon}
+          clearIcon={clearNode}
+          // Type or mode
+          multiple={multiple.value}
+          mode={mode.value}
+          // Values
+          displayValues={displayValues.value}
+          placeholder={placeholder}
+          searchValue={mergedSearchValue.value}
+          activeValue={activeValue}
+          onSearch={onInternalSearch}
+          onSearchSubmit={onInternalSearchSubmit}
+          onInputBlur={onInputBlur}
+          onFocus={onInternalFocus}
+          onBlur={onInternalBlur}
+          onClearMouseDown={onClearMouseDown}
+          onKeyDown={onInternalKeyDown}
+          onKeyUp={onInternalKeyUp}
+          onSelectorRemove={onSelectorRemove}
+          // Token handling
+          tokenWithEnter={tokenWithEnter.value}
+          // Open
+          onMouseDown={onInternalMouseDown}
+          // Components
+          components={mergedComponents.value}
+        />
+      )
+
+      renderNode = (
+        <SelectTrigger
+          ref={triggerRef}
+          disabled={disabled.value ?? false}
+          prefixCls={prefixCls}
+          visible={mergedOpen.value}
+          popupElement={optionList}
+          animation={animation}
+          transitionName={transitionName}
+          popupStyle={popupStyle}
+          popupClassName={popupClassName}
+          direction={direction}
+          popupMatchSelectWidth={popupMatchSelectWidth}
+          popupRender={popupRender}
+          popupAlign={popupAlign}
+          placement={placement}
+          builtinPlacements={builtinPlacements}
+          getPopupContainer={getPopupContainer}
+          empty={emptyOptions}
+          onPopupVisibleChange={onTriggerVisibleChange}
+          onPopupMouseEnter={onPopupMouseEnter}
+          onPopupMouseDown={onInternalMouseDown}
+        >
+          {renderNode}
+        </SelectTrigger>
+      )
+
+      return (
+        <>
+          <Polite visible={focused.value && !mergedOpen.value} values={displayValues.value} />
+          {renderNode}
+        </>
+      )
     }
   },
   {

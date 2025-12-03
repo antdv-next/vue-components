@@ -47,6 +47,12 @@ export interface SelectInputProps {
   style?: CSSProperties
   focused?: boolean
   components: ComponentsConfig
+  // Events
+  onFocus?: (event: FocusEvent) => void
+  onBlur?: (event: FocusEvent) => void
+  onKeyDown?: (event: KeyboardEvent) => void
+  onKeyUp?: (event: KeyboardEvent) => void
+  onMouseDown?: (event: MouseEvent) => void
 }
 
 const DEFAULT_OMIT_PROPS = [
