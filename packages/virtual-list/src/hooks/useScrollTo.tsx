@@ -61,8 +61,8 @@ export default function useScrollTo(
 
         const height = containerRef.value.clientHeight
         let needCollectHeight = false
-        let newTargetAlign: 'top' | 'bottom' | undefined = targetAlign
-        let targetTop: number | undefined
+        let newTargetAlign: 'top' | 'bottom' | null = targetAlign ?? null
+        let targetTop: number | null = null
         // Go to next frame if height not exist
         if (height) {
           const mergedAlign = targetAlign || originAlign
@@ -119,7 +119,7 @@ export default function useScrollTo(
               }
             }
           }
-          if (targetTop !== undefined) {
+          if (targetTop !== null) {
             syncScrollTop(targetTop)
           }
 
@@ -133,8 +133,8 @@ export default function useScrollTo(
           syncState.value = {
             ...syncState.value,
             times: syncState.value.times + 1,
-            targetAlign: newTargetAlign,
-            lastTop: targetTop,
+            targetAlign: newTargetAlign as any,
+            lastTop: targetTop as any,
           }
         }
       }
@@ -174,7 +174,6 @@ export default function useScrollTo(
       const { offset = 0 } = arg
 
       syncState.value = {
-        ...syncState.value,
         times: 0,
         index,
         offset,
