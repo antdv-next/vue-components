@@ -448,7 +448,7 @@ const OptionList = defineComponent({
                     {iconVisible && (
                       <TransBtn
                         className={`${itemPrefixCls.value}-option-state`}
-                        customizeIcon={menuItemSelectedIcon}
+                        customizeIcon={menuItemSelectedIcon ?? null}
                         customizeIconProps={{
                           value,
                           disabled: mergedDisabled,
