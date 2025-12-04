@@ -15,12 +15,13 @@ export interface OptionsResult<OptionType> {
  */
 export default function useOptions<OptionType extends DefaultOptionType = DefaultOptionType>(
   options: Ref<OptionType[] | undefined>,
+  childrenList: Ref<any[]>,
   fieldNames: Ref<FieldNames>,
   optionFilterProp: Ref<string | undefined>,
   optionLabelProp: Ref<string | undefined>,
 ): Ref<OptionsResult<OptionType>> {
   return computed<OptionsResult<OptionType>>(() => {
-    const mergedOptions = options.value || []
+    const mergedOptions = options.value || childrenList.value || []
 
     const valueOptions = new Map<RawValueType, OptionType>()
     const labelOptions = new Map<VueNode, OptionType>()

@@ -3,6 +3,7 @@ import type { CSSProperties, PropType, Ref } from 'vue'
 import type { BaseSelectProps, BaseSelectRef, BaseSelectSemanticName, DisplayInfoType } from './BaseSelect'
 import type { DisplayValueType, FlattenOptionData, RawValueType, RenderNode } from './interface'
 import useId from '@v-c/util/dist/hooks/useId'
+import { filterEmpty } from '@v-c/util/dist/props-util'
 import { computed, defineComponent, shallowRef, toRef, watch } from 'vue'
 import { BaseSelect, isMultiple } from './BaseSelect'
 import useCache from './hooks/useCache'
@@ -13,6 +14,7 @@ import useSearchConfig from './hooks/useSearchConfig'
 import OptionList from './OptionList'
 import { useSelectProvider } from './SelectContext'
 import { hasValue, isComboNoValue, toArray } from './utils/commonUtil'
+import { convertChildrenToData } from './utils/legacyUtil.ts'
 import { fillFieldNames, flattenOptions, injectPropsWithOption } from './utils/valueUtil'
 
 const OMIT_DOM_PROPS = ['inputValue']
@@ -30,11 +32,11 @@ export interface LabelInValueType {
   value: RawValueType
 }
 
-export type DraftValueType =
-  | RawValueType
-  | LabelInValueType
-  | DisplayValueType
-  | (RawValueType | LabelInValueType | DisplayValueType)[]
+export type DraftValueType
+  = | RawValueType
+    | LabelInValueType
+    | DisplayValueType
+    | (RawValueType | LabelInValueType | DisplayValueType)[]
 
 export type FilterFunc = (inputValue: string, option?: any) => boolean
 
@@ -177,8 +179,9 @@ const Select = defineComponent({
   name: 'VcSelect',
   inheritAttrs: false,
   props: selectProps,
-  setup(props, { attrs, expose }) {
+  setup(props, { attrs, expose, slots }) {
     const baseSelectRef = shallowRef<BaseSelectRef | null>(null)
+    const childrenList = shallowRef<any[]>([])
 
     // Expose
     expose({
@@ -233,6 +236,7 @@ const Select = defineComponent({
     // =========================== Option ===========================
     const parsedOptions = useOptions(
       toRef(props, 'options'),
+      childrenList,
       mergedFieldNames,
       toRef(props, 'optionFilterProp'),
       toRef(props, 'optionLabelProp'),
@@ -329,7 +333,7 @@ const Select = defineComponent({
         }
       }
 
-      return mergedValues.value.map((item) => ({
+      return mergedValues.value.map(item => ({
         ...item,
         label: (typeof props.labelRender === 'function' ? props.labelRender(item) : item.label) ?? item.value,
       }))
@@ -626,7 +630,11 @@ const Select = defineComponent({
 
     return () => {
       const restProps = { ...attrs }
-
+      if (!props.options) {
+        const children = filterEmpty(slots?.default?.() || [])
+        // 处理数据
+        childrenList.value = convertChildrenToData(children)
+      }
       return (
         <BaseSelect
           {...restProps}
