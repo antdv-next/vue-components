@@ -1,11 +1,21 @@
 import type { VueNode } from '@v-c/util/dist/type'
 import type { CSSProperties, Ref } from 'vue'
-import type { BaseSelectProps, BaseSelectRef, BaseSelectSemanticName, DisplayInfoType } from './BaseSelect'
+import type {
+  BaseSelectProps,
+  BaseSelectPropsWithoutPrivate,
+  BaseSelectRef,
+  BaseSelectSemanticName,
+  DisplayInfoType,
+} from './BaseSelect'
 import type { DisplayValueType, FlattenOptionData, RawValueType, RenderNode } from './interface'
 import useId from '@v-c/util/dist/hooks/useId'
+import omit from '@v-c/util/dist/omit'
 import { filterEmpty } from '@v-c/util/dist/props-util'
 import { computed, defineComponent, shallowRef, toRef, watch } from 'vue'
-import { BaseSelect, isMultiple } from './BaseSelect'
+import {
+  BaseSelect,
+  isMultiple,
+} from './BaseSelect'
 import useCache from './hooks/useCache'
 import useFilterOptions from './hooks/useFilterOptions'
 import useOptions from './hooks/useOptions'
@@ -77,7 +87,7 @@ export interface SearchConfig {
   filterSort?: (optionA: any, optionB: any, info: { searchValue: string }) => number
   optionFilterProp?: string
 }
-export interface SelectProps {
+export interface SelectProps extends Omit<BaseSelectPropsWithoutPrivate, 'showSearch'> {
   prefixCls?: string
   id?: string
 
@@ -132,10 +142,54 @@ export interface SelectProps {
   onChange?: (value: any, option?: any | any[]) => void
   classNames?: Partial<Record<SemanticName, string>>
   styles?: Partial<Record<SemanticName, CSSProperties>>
-  popupMatchSelectWidth?: boolean | number
-  autoFocus?: boolean
-  placeholder?: VueNode
+  // popupMatchSelectWidth?: boolean | number
+  // autoFocus?: boolean
+  // placeholder?: VueNode
 }
+
+const omitKeyList: string[] = [
+  // Base
+  'id',
+  'mode',
+  'prefixCls',
+  'backfill',
+  'fieldNames',
+
+  // Search
+  'showSearch',
+  'searchValue',
+  'onSearch',
+  'autoClearSearchValue',
+  'filterOption',
+  'optionFilterProp',
+  'filterSort',
+
+  // Select
+  'onSelect',
+  'onDeselect',
+  'onActive',
+  'popupMatchSelectWidth',
+  'optionLabelProp',
+  'options',
+  'optionRender',
+  'children',
+  'defaultActiveFirstOption',
+  'menuItemSelectedIcon',
+  'virtual',
+  'direction',
+  'listHeight',
+  'listItemHeight',
+  'labelRender',
+
+  // Value
+  'value',
+  'defaultValue',
+  'labelInValue',
+  'onChange',
+  'maxCount',
+  'classNames',
+  'styles',
+]
 
 function isRawValue(value: DraftValueType): value is RawValueType {
   return !value || typeof value !== 'object'
@@ -601,7 +655,8 @@ const Select = defineComponent<SelectProps>({
     useSelectProvider(selectContext)
 
     return () => {
-      const restProps = { ...attrs }
+      const restAttrs = { ...attrs }
+      const restProps = omit(props, omitKeyList as any)
       if (!props.options) {
         const children = filterEmpty(slots?.default?.() || [])
         // 处理数据
@@ -619,6 +674,7 @@ const Select = defineComponent<SelectProps>({
       } = props
       return (
         <BaseSelect
+          {...restAttrs}
           {...restProps}
           placeholder={placeholder}
           // >>> MISC

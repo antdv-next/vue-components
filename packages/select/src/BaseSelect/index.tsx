@@ -15,6 +15,7 @@ import type {
 import { clsx } from '@v-c/util'
 import { getDOM } from '@v-c/util/dist/Dom/findDOMNode'
 import { KeyCodeStr } from '@v-c/util/dist/KeyCode'
+import omit from '@v-c/util/dist/omit'
 import { computed, defineComponent, shallowRef, watch } from 'vue'
 import { useAllowClear } from '../hooks/useAllowClear'
 import { useBaseSelectProvider } from '../hooks/useBaseProps'
@@ -124,7 +125,7 @@ export interface BaseSelectPrivateProps {
   emptyOptions: boolean
 }
 
-export type BaseSelectPropsWithoutPrivate = Omit<BaseSelectProps, 'id' | 'prefixCls' | 'omitDomProps' | 'displayValues' | 'onDisplayValuesChange' | 'activeValue' | 'activeDescendantId' | 'onActiveValueChange' | 'searchValue' | 'autoClearSearchValue' | 'onSearch' | 'onSearchSplit' | 'OptionList' | 'emptyOptions'>
+export type BaseSelectPropsWithoutPrivate = Omit<BaseSelectProps, keyof BaseSelectPrivateProps>
 
 export interface BaseSelectProps extends BaseSelectPrivateProps {
   // Style
@@ -225,6 +226,89 @@ export interface BaseSelectProps extends BaseSelectPrivateProps {
 
 export const isMultiple = (mode: Mode) => mode === 'tags' || mode === 'multiple'
 
+const omitKeys = [
+  'id',
+  'prefixCls',
+  'className',
+  'styles',
+  'classNames',
+  'showSearch',
+  'tagRender',
+  'showScrollBar',
+  'direction',
+  'omitDomProps',
+
+  // Value
+  'displayValues',
+  'onDisplayValuesChange',
+  'emptyOptions',
+  'notFoundContent',
+  'onClear',
+  'maxCount',
+  'placeholder',
+
+  // Mode
+  'mode',
+
+  // Status
+  'disabled',
+  'loading',
+
+  // Customize Input
+  'getInputElement',
+  'getRawInputElement',
+
+  // Open
+  'open',
+  'defaultOpen',
+  'onPopupVisibleChange',
+
+  // Active
+  'activeValue',
+  'onActiveValueChange',
+  'activeDescendantId',
+
+  // Search
+  'searchValue',
+  'autoClearSearchValue',
+  'onSearch',
+  'onSearchSplit',
+  'tokenSeparators',
+
+  // Icons
+  'allowClear',
+  'prefix',
+  'suffix',
+  'suffixIcon',
+  'clearIcon',
+
+  // Dropdown
+  'OptionList',
+  'animation',
+  'transitionName',
+  'popupStyle',
+  'popupClassName',
+  'popupMatchSelectWidth',
+  'popupRender',
+  'popupAlign',
+  'placement',
+  'builtinPlacements',
+  'getPopupContainer',
+
+  // Focus
+  'showAction',
+  'onFocus',
+  'onBlur',
+
+  // Rest Events
+  'onKeyUp',
+  'onKeyDown',
+  'onMouseDown',
+
+  // Components
+  'components',
+] as const
+
 const defaults = {
   showScrollBar: 'optional',
   notFoundContent: 'Not Found',
@@ -233,7 +317,7 @@ const defaults = {
 export const BaseSelect = defineComponent<
   BaseSelectProps
 >(
-  (props = defaults, { expose }) => {
+  (props = defaults, { expose, attrs }) => {
     // ============================== Refs for props ==============================
     const mode = computed(() => props.mode)
     const getInputElement = computed(() => props.getInputElement)
@@ -626,6 +710,8 @@ export const BaseSelect = defineComponent<
       // >>> Render
       let renderNode = (
         <SelectInput
+          {...attrs}
+          {...omit(props, omitKeys)}
           // Ref
           ref={containerRef}
           // Style
