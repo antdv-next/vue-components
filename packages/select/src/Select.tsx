@@ -1,5 +1,5 @@
 import type { VueNode } from '@v-c/util/dist/type'
-import type { CSSProperties, PropType, Ref } from 'vue'
+import type { CSSProperties, Ref } from 'vue'
 import type { BaseSelectProps, BaseSelectRef, BaseSelectSemanticName, DisplayInfoType } from './BaseSelect'
 import type { DisplayValueType, FlattenOptionData, RawValueType, RenderNode } from './interface'
 import useId from '@v-c/util/dist/hooks/useId'
@@ -133,53 +133,25 @@ export interface SelectProps {
   classNames?: Partial<Record<SemanticName, string>>
   styles?: Partial<Record<SemanticName, CSSProperties>>
   popupMatchSelectWidth?: boolean | number
+  autoFocus?: boolean
+  placeholder?: VueNode
 }
 
 function isRawValue(value: DraftValueType): value is RawValueType {
   return !value || typeof value !== 'object'
 }
 
-const selectProps = {
-  prefixCls: { type: String, default: 'vc-select' },
-  id: String,
-  backfill: Boolean,
-  fieldNames: Object as PropType<FieldNames>,
-  showSearch: [Boolean, Object] as PropType<boolean | SearchConfig>,
-  searchValue: String,
-  onSearch: Function as PropType<(value: string) => void>,
-  autoClearSearchValue: { type: Boolean, default: true },
-  filterOption: [Boolean, Function] as PropType<boolean | FilterFunc>,
-  filterSort: Function as PropType<(optionA: any, optionB: any, info: { searchValue: string }) => number>,
-  optionFilterProp: String,
-  optionLabelProp: String,
-  options: Array as PropType<DefaultOptionType[]>,
-  optionRender: Function as PropType<(oriOption: FlattenOptionData, info: { index: number }) => any>,
-  defaultActiveFirstOption: { type: Boolean, default: undefined },
-  virtual: { type: Boolean, default: true },
-  direction: String as PropType<'ltr' | 'rtl'>,
-  listHeight: { type: Number, default: 200 },
-  listItemHeight: { type: Number, default: 20 },
-  labelRender: Function as PropType<(props: LabelInValueType) => any>,
-  menuItemSelectedIcon: [Object, Function] as PropType<RenderNode>,
-  mode: String as PropType<'combobox' | 'multiple' | 'tags'>,
-  labelInValue: Boolean,
-  value: [String, Number, Array, Object] as PropType<any>,
-  defaultValue: [String, Number, Array, Object] as PropType<any>,
-  maxCount: Number,
-  onChange: Function as PropType<(value: any, option?: any | any[]) => void>,
-  onSelect: Function as PropType<SelectHandler<any, any>>,
-  onDeselect: Function as PropType<SelectHandler<any, any>>,
-  onActive: Function as PropType<(value: any) => void>,
-  classNames: Object as PropType<Partial<Record<SemanticName, string>>>,
-  styles: Object as PropType<Partial<Record<SemanticName, CSSProperties>>>,
-  popupMatchSelectWidth: { type: [Boolean, Number], default: true },
-}
+const defaults = {
+  prefixCls: 'vc-select',
+  popupMatchSelectWidth: true,
+  listHeight: 200,
+  listItemHeight: 20,
+} as any
 
-const Select = defineComponent({
+const Select = defineComponent<SelectProps>({
   name: 'VcSelect',
   inheritAttrs: false,
-  props: selectProps,
-  setup(props, { attrs, expose, slots }) {
+  setup(props = defaults, { attrs, expose, slots }) {
     const baseSelectRef = shallowRef<BaseSelectRef | null>(null)
     const childrenList = shallowRef<any[]>([])
 
@@ -635,31 +607,42 @@ const Select = defineComponent({
         // 处理数据
         childrenList.value = convertChildrenToData(children)
       }
+      const {
+        prefixCls,
+        mode,
+        classNames,
+        styles,
+        maxCount,
+        placeholder,
+        direction,
+        popupMatchSelectWidth,
+      } = props
       return (
         <BaseSelect
           {...restProps}
+          placeholder={placeholder}
           // >>> MISC
           id={mergedId}
-          prefixCls={props.prefixCls}
+          prefixCls={prefixCls!}
           ref={(el: any) => { baseSelectRef.value = el }}
           omitDomProps={OMIT_DOM_PROPS}
-          mode={props.mode}
+          mode={mode}
           // >>> Style
-          classNames={props.classNames}
-          styles={props.styles}
+          classNames={classNames}
+          styles={styles}
           // >>> Values
           displayValues={displayValues.value}
           onDisplayValuesChange={onDisplayValuesChange}
-          maxCount={props.maxCount}
+          maxCount={maxCount}
           // >>> Trigger
-          direction={props.direction}
+          direction={direction}
           // >>> Search
           showSearch={mergedShowSearch.value}
           searchValue={mergedSearchValue.value}
           onSearch={onInternalSearch}
           autoClearSearchValue={searchConfig.value.autoClearSearchValue}
           onSearchSplit={onInternalSearchSplit}
-          popupMatchSelectWidth={props.popupMatchSelectWidth}
+          popupMatchSelectWidth={popupMatchSelectWidth}
           // >>> OptionList
           OptionList={OptionList}
           emptyOptions={!displayOptions.value.length}
