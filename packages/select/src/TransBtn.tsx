@@ -6,7 +6,7 @@ import { defineComponent } from 'vue'
 export interface TransBtnProps {
   className: string
   style?: CSSProperties
-  customizeIcon: RenderNode
+  customizeIcon?: RenderNode
   customizeIconProps?: any
   onMouseDown?: (event: MouseEvent) => void
   onClick?: (event: MouseEvent) => void

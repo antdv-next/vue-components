@@ -329,7 +329,6 @@ const OptionList = defineComponent({
         role: 'listbox',
         id: `${id}_list`,
       }
-
       return (
         <>
           {virtual && (

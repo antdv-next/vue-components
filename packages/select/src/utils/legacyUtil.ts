@@ -9,6 +9,7 @@ function convertNodeToOption<OptionType extends BaseOptionType = DefaultOptionTy
     key,
     props,
   } = node as any
+  // 还有可能是slots的情况
 
   const { children, value, ...restProps } = props || {}
 
