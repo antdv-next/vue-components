@@ -2,8 +2,8 @@ import { defineComponent, ref } from 'vue'
 import Select from '../src'
 import './assets/index.less'
 
-const DropdownRenderDemo = defineComponent({
-  name: 'DropdownRenderDemo',
+const PopupRenderDemo = defineComponent({
+  name: 'PopupRenderDemo',
   setup() {
     const value = ref<string>()
     const items = ref(['jack', 'lucy', 'tom'])
@@ -16,7 +16,7 @@ const DropdownRenderDemo = defineComponent({
       }
     }
 
-    const dropdownRender = (menu: any) => (
+    const popupRender = (menu: any) => (
       <div>
         {menu}
         <div style={{ display: 'flex', padding: '8px', borderTop: '1px solid #e8e8e8' }}>
@@ -38,13 +38,13 @@ const DropdownRenderDemo = defineComponent({
 
     return () => (
       <div style={{ margin: '20px' }}>
-        <h2>Dropdown Render Demo</h2>
+        <h2>Popup Render Demo</h2>
 
         <Select
           value={value.value}
           style={{ width: '300px' }}
           placeholder="Select or add item"
-          dropdownRender={dropdownRender}
+          popupRender={popupRender}
           onChange={(val: string) => {
             value.value = val
           }}
@@ -55,4 +55,4 @@ const DropdownRenderDemo = defineComponent({
   },
 })
 
-export default DropdownRenderDemo
+export default PopupRenderDemo

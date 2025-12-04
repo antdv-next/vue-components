@@ -8,15 +8,28 @@ function convertNodeToOption<OptionType extends BaseOptionType = DefaultOptionTy
   const {
     key,
     props,
+    children,
   } = node as any
-  // 还有可能是slots的情况
 
-  const { children, value, ...restProps } = props || {}
+  const { value, label, ...restProps } = props || {}
+
+  // children 可能是函数（slot）或者直接的内容
+  let finalChildren = children
+  if (typeof children === 'function') {
+    finalChildren = children()
+  }
+  else if (children && typeof children === 'object' && 'default' in children) {
+    // 如果 children 是 slots 对象
+    finalChildren = typeof children.default === 'function' ? children.default() : children.default
+  }
+
+  // 使用 label > props.children > children 作为 label
+  const finalLabel = label ?? restProps.children ?? finalChildren
 
   return {
     key,
     value: value !== undefined ? value : key,
-    children,
+    label: finalLabel,
     ...restProps,
   } as OptionType
 }
