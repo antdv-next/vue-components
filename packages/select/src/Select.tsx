@@ -207,7 +207,6 @@ const Select = defineComponent<SelectProps>({
   inheritAttrs: false,
   setup(props = defaults, { attrs, expose, slots }) {
     const baseSelectRef = shallowRef<BaseSelectRef | null>(null)
-    const childrenList = shallowRef<any[]>([])
 
     // Expose
     expose({
@@ -259,10 +258,15 @@ const Select = defineComponent<SelectProps>({
 
     const mergedSearchValue = computed(() => internalSearchValue.value || '')
 
+    const childrenOptions = computed(() => {
+      const children = filterEmpty(slots?.default?.() ?? [])
+      return convertChildrenToData(children)
+    })
+
     // =========================== Option ===========================
     const parsedOptions = useOptions(
       toRef(props, 'options'),
-      childrenList,
+      childrenOptions,
       mergedFieldNames,
       toRef(props, 'optionFilterProp'),
       toRef(props, 'optionLabelProp'),
@@ -657,11 +661,6 @@ const Select = defineComponent<SelectProps>({
     return () => {
       const restAttrs = { ...attrs }
       const restProps = omit(props, omitKeyList as any)
-      if (!props.options) {
-        const children = filterEmpty(slots?.default?.() || [])
-        // 处理数据
-        childrenList.value = convertChildrenToData(children)
-      }
       const {
         prefixCls,
         mode,
