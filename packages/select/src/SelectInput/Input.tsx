@@ -22,6 +22,9 @@ export interface InputProps {
   autoComplete?: string
 }
 
+export interface InputRef {
+  input: HTMLInputElement
+}
 const Input = defineComponent<InputProps>(
   (props, { expose, attrs }) => {
     const selectInputContext = useSelectInputContext()

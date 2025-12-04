@@ -1,7 +1,8 @@
 import type { VueNode } from '@v-c/util/dist/type'
 import type { CSSProperties, VNode } from 'vue'
-import type { ComponentsConfig } from '../hooks/useComponents'
+import type { ComponentsConfig } from '../hooks'
 import type { DisplayValueType, Mode, RenderNode } from '../interface'
+import type { InputRef } from './Input.tsx'
 import { clsx } from '@v-c/util'
 import { getDOM } from '@v-c/util/dist/Dom/findDOMNode'
 import KeyCode from '@v-c/util/dist/KeyCode'
@@ -77,7 +78,7 @@ const SelectInput = defineComponent<SelectInputProps>(
     const baseProps = useBaseProps()
 
     const rootRef = shallowRef<HTMLDivElement>()
-    const inputRef = shallowRef<HTMLInputElement>()
+    const inputRef = shallowRef<InputRef>()
 
     // ===================== Computed Values ======================
     const prefixCls = computed(() => props.prefixCls)
@@ -105,7 +106,7 @@ const SelectInput = defineComponent<SelectInputProps>(
       const { keyCode } = event
 
       // Compatible with multiple lines in TextArea
-      const isTextAreaElement = inputRef.value instanceof HTMLTextAreaElement
+      const isTextAreaElement = inputRef.value?.input instanceof HTMLTextAreaElement
 
       // Prevent default behavior for up/down arrows when dropdown is open
       if (!isTextAreaElement && triggerOpen.value && (keyCode === KeyCode.UP || keyCode === KeyCode.DOWN)) {
@@ -136,10 +137,10 @@ const SelectInput = defineComponent<SelectInputProps>(
     expose({
       focus: (options?: FocusOptions) => {
         // Focus the inner input if available, otherwise fall back to root div.
-        (inputRef.value || rootRef.value)?.focus?.(options)
+        (inputRef.value?.input || rootRef.value)?.focus?.(options)
       },
       blur: () => {
-        (inputRef.value || rootRef.value)?.blur?.()
+        (inputRef.value?.input || rootRef.value)?.blur?.()
       },
       nativeElement: rootRef,
     })
@@ -147,7 +148,7 @@ const SelectInput = defineComponent<SelectInputProps>(
     // ====================== Open ======================
     const onInternalMouseDown = (event: MouseEvent) => {
       if (!disabled.value) {
-        if (event.target !== getDOM(inputRef)) {
+        if (event.target !== getDOM(inputRef.value?.input)) {
           event.preventDefault()
         }
 
@@ -156,7 +157,7 @@ const SelectInput = defineComponent<SelectInputProps>(
         const shouldPreventClose = triggerOpen.value && !multiple.value && (mode.value === 'combobox' || showSearch.value)
 
         if (!(event as any)._select_lazy) {
-          inputRef.value?.focus()
+          inputRef.value?.input?.focus()
 
           // Only toggle open if we should not prevent close
           if (!shouldPreventClose) {

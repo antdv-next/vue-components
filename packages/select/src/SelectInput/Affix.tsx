@@ -1,6 +1,5 @@
 // Affix is a simple wrapper which should not read context or logical props
-
-import { filterEmpty } from '@v-c/util/src/props-util'
+import { filterEmpty } from '@v-c/util/dist/props-util'
 import { defineComponent } from 'vue'
 
 const Affix = defineComponent(

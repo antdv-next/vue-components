@@ -1,6 +1,7 @@
 import type { VueNode } from '@v-c/util/dist/type'
 import type { CustomTagProps, RenderNode } from '../../BaseSelect'
 import type { DisplayValueType, RawValueType } from '../../interface'
+import type { InputRef } from '../Input'
 import type { SharedContentProps } from './index'
 import Overflow from '@v-c/overflow'
 import { clsx } from '@v-c/util'
@@ -22,11 +23,11 @@ function onPreventMouseDown(event: MouseEvent) {
 }
 
 const MultipleContent = defineComponent<SharedContentProps>(
-  (props) => {
+  (props, { expose }) => {
     const selectInputContext = useSelectInputContext()
     const baseProps = useBaseProps()
 
-    const inputRef = shallowRef<HTMLInputElement>()
+    const inputRef = shallowRef<InputRef>()
 
     // ===================== Computed Values ======================
     const prefixCls = computed(() => selectInputContext.value?.prefixCls ?? '')
@@ -77,6 +78,10 @@ const MultipleContent = defineComponent<SharedContentProps>(
     const onRemove = (value: DisplayValueType) => {
       onSelectorRemove.value?.(value)
     }
+
+    expose({
+      input: computed(() => inputRef.value?.input as any),
+    })
 
     // ======================== Item ========================
     // >>> Render Selector Node. Includes Item & Rest

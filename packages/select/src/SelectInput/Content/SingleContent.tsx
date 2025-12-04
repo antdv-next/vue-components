@@ -1,3 +1,4 @@
+import type { InputRef } from '../Input'
 import type { SharedContentProps } from './index'
 import { clsx } from '@v-c/util'
 import { computed, defineComponent, shallowRef, watch } from 'vue'
@@ -9,7 +10,7 @@ import Input from '../Input'
 import Placeholder from './Placeholder'
 
 const SingleContent = defineComponent<SharedContentProps>(
-  (props) => {
+  (props, { expose }) => {
     const selectInputContext = useSelectInputContext()
     const baseProps = useBaseProps()
     const selectContext = useSelectContext()
@@ -68,6 +69,10 @@ const SingleContent = defineComponent<SharedContentProps>(
         immediate: true,
       },
     )
+    const inputRef = shallowRef<InputRef>()
+    expose({
+      input: computed(() => inputRef.value?.input),
+    })
     return () => {
       const { prefixCls, mode, maxLength } = selectInputContext.value ?? {}
       const { classNames, styles } = baseProps.value ?? {}
@@ -93,6 +98,7 @@ const SingleContent = defineComponent<SharedContentProps>(
               inputProps.onChange?.(e)
               inputProps.onInput?.(e)
             }}
+            ref={inputRef}
           />
         </div>
       )

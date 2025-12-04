@@ -1,4 +1,5 @@
 import type { InputHTMLAttributes } from 'vue'
+import type { InputRef } from '../Input.tsx'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
 import { computed, defineComponent, shallowRef } from 'vue'
 import useBaseProps from '../../hooks/useBaseProps'
@@ -15,10 +16,10 @@ const SelectContent = defineComponent(
     const selectInputContext = useSelectInputContext()
     const baseProps = useBaseProps()
 
-    const inputRef = shallowRef<HTMLInputElement>()
+    const inputRef = shallowRef<InputRef>()
 
     expose({
-      input: inputRef,
+      input: computed(() => inputRef.value?.input as any),
     })
 
     const multiple = computed(() => selectInputContext.value?.multiple)

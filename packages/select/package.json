@@ -35,9 +35,9 @@
     "vue": "^3.0.0"
   },
   "dependencies": {
-    "@v-c/util": "workspace:^",
-    "@v-c/trigger": "workspace:^",
     "@v-c/overflow": "workspace:^",
+    "@v-c/trigger": "workspace:^",
+    "@v-c/util": "workspace:^",
     "@v-c/virtual-list": "workspace:^"
   },
   "devDependencies": {
