@@ -1,5 +1,6 @@
 import { defineComponent, ref } from 'vue'
-import Select, { Option } from '../src'
+import Select from '../src/index'
+import Option from '../src/Option'
 import './assets/index.less'
 import './single.less'
 

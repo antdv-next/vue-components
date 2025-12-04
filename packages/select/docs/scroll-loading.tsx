@@ -60,7 +60,7 @@ const ScrollLoadingDemo = defineComponent({
             value.value = val
           }}
           options={options.value}
-          dropdownRender={(menu: any) => (
+          popupRender={(menu: any) => (
             <div>
               {menu}
               {loading.value && (

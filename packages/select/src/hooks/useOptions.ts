@@ -1,5 +1,5 @@
 import type { VueNode } from '@v-c/util/dist/type'
-import type { Ref } from 'vue'
+import type { Ref, ShallowRef } from 'vue'
 import type { RawValueType } from '../interface'
 import type { DefaultOptionType, FieldNames } from '../Select'
 import { computed } from 'vue'
@@ -15,13 +15,13 @@ export interface OptionsResult<OptionType> {
  */
 export default function useOptions<OptionType extends DefaultOptionType = DefaultOptionType>(
   options: Ref<OptionType[] | undefined>,
-  childrenOptions: Ref<any[]>,
+  childrenOptions: ShallowRef<OptionType[]>,
   fieldNames: Ref<FieldNames>,
   optionFilterProp: Ref<string | undefined>,
   optionLabelProp: Ref<string | undefined>,
 ): Ref<OptionsResult<OptionType>> {
   return computed<OptionsResult<OptionType>>(() => {
-    // Get children from slots and convert to data
+    // Get options from props or children
     let mergedOptions: OptionType[] = []
 
     if (options.value && options.value.length > 0) {
@@ -72,7 +72,6 @@ export default function useOptions<OptionType extends DefaultOptionType = Defaul
     }
 
     dig(mergedOptions)
-    console.log(labelOptions.size, valueOptions.size)
 
     return {
       options: mergedOptions,

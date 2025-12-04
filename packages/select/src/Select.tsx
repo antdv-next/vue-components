@@ -258,15 +258,13 @@ const Select = defineComponent<SelectProps>({
 
     const mergedSearchValue = computed(() => internalSearchValue.value || '')
 
-    const childrenOptions = computed(() => {
-      const children = filterEmpty(slots?.default?.() ?? [])
-      return convertChildrenToData(children)
-    })
-
     // =========================== Option ===========================
+    // 存储从 slots 转换的 children options
+    const childrenOptionsRef = shallowRef<any[]>([])
+
     const parsedOptions = useOptions(
       toRef(props, 'options'),
-      childrenOptions,
+      childrenOptionsRef,
       mergedFieldNames,
       toRef(props, 'optionFilterProp'),
       toRef(props, 'optionLabelProp'),
@@ -658,7 +656,25 @@ const Select = defineComponent<SelectProps>({
 
     useSelectProvider(selectContext)
 
+    // 用于比较 children 是否变化的缓存
+    let lastChildrenKey = ''
+
     return () => {
+      // 在渲染函数内获取 children 并更新 ref
+      // 这里是在渲染上下文中调用 slots，不会产生警告
+      if (!props.options || props.options.length === 0) {
+        const children = filterEmpty(slots?.default?.() ?? [])
+        const newChildrenOptions = convertChildrenToData(children)
+
+        // 生成一个简单的 key 来比较是否变化
+        const newKey = newChildrenOptions.map((o: any) => `${o.value}`).join(',')
+        if (lastChildrenKey !== newKey) {
+          lastChildrenKey = newKey
+          // 直接更新，因为值确实变化了
+          childrenOptionsRef.value = newChildrenOptions
+        }
+      }
+
       const restAttrs = { ...attrs }
       const restProps = omit(props, omitKeyList as any)
       const {
