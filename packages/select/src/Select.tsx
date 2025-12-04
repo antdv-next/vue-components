@@ -30,11 +30,11 @@ export interface LabelInValueType {
   value: RawValueType
 }
 
-export type DraftValueType =
-  | RawValueType
-  | LabelInValueType
-  | DisplayValueType
-  | (RawValueType | LabelInValueType | DisplayValueType)[]
+export type DraftValueType
+  = | RawValueType
+    | LabelInValueType
+    | DisplayValueType
+    | (RawValueType | LabelInValueType | DisplayValueType)[]
 
 export type FilterFunc = (inputValue: string, option?: any) => boolean
 
@@ -329,7 +329,7 @@ const Select = defineComponent({
         }
       }
 
-      return mergedValues.value.map((item) => ({
+      return mergedValues.value.map(item => ({
         ...item,
         label: (typeof props.labelRender === 'function' ? props.labelRender(item) : item.label) ?? item.value,
       }))

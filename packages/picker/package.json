@@ -1,15 +1,16 @@
 {
-  "name": "@v-c/tabs",
+  "name": "@v-c/picker",
   "type": "module",
-  "version": "0.0.3",
-  "description": "tabs ui component for react",
+  "version": "0.0.1",
+  "description": "picker ui component for vue",
   "publishConfig": {
     "access": "public"
   },
   "author": "",
   "license": "MIT",
   "keywords": [
-    "decimal"
+    "picker",
+    "vue-component"
   ],
   "exports": {
     ".": {
@@ -32,13 +33,30 @@
     "bump": "bumpp --release patch"
   },
   "peerDependencies": {
+    "date-fns": ">= 2.x",
+    "dayjs": ">= 1.x",
+    "luxon": ">= 3.x",
+    "moment": ">= 2.x",
     "vue": "^3.0.0"
   },
+  "peerDependenciesMeta": {
+    "date-fns": {
+      "optional": true
+    },
+    "dayjs": {
+      "optional": true
+    },
+    "luxon": {
+      "optional": true
+    },
+    "moment": {
+      "optional": true
+    }
+  },
   "dependencies": {
-    "@v-c/dropdown": "workspace:^",
-    "@v-c/menu": "workspace:^",
-    "@v-c/overflow": "workspace:^",
-    "@v-c/resize-observer": "workspace:^",
     "@v-c/util": "workspace:^"
+  },
+  "devDependencies": {
+    "@types/luxon": "^3.7.1"
   }
 }
