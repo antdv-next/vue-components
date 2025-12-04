@@ -38,7 +38,8 @@ const SingleContent = defineComponent<SharedContentProps>(
       if (displayValue.value && selectContext.value?.flattenOptions) {
         const option = selectContext.value.flattenOptions.find(opt => opt.value === displayValue.value?.value)
         if (option?.data) {
-          const { label, value, className, style, key, ...rest } = option.data
+          // Exclude children to avoid Vue warning about setting readonly DOM property
+          const { label, value, className, style, key, children, ...rest } = option.data
           restProps = {
             ...restProps,
             ...rest,
