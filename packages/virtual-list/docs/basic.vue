@@ -8,7 +8,7 @@ interface Item {
 }
 
 const data: Item[] = []
-for (let i = 0; i < 1000; i += 1) {
+for (let i = 0; i < 100000; i += 1) {
   data.push({ id: i })
 }
 
