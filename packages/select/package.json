@@ -20,7 +20,7 @@
     "./dist/*": "./dist/*",
     "./package.json": "./package.json"
   },
-  "main": "index.js",
+  "main": "./dist/index.js",
   "files": [
     "dist",
     "package.json"
@@ -39,7 +39,5 @@
     "@v-c/trigger": "workspace:^",
     "@v-c/util": "workspace:^",
     "@v-c/virtual-list": "workspace:^"
-  },
-  "devDependencies": {
   }
 }

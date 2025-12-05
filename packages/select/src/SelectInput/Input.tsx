@@ -131,6 +131,9 @@ const Input = defineComponent<InputProps>(
           input.style.width = ''
         }
       },
+      {
+        immediate: true,
+      },
     )
     return () => {
       const {
@@ -169,7 +172,7 @@ const Input = defineComponent<InputProps>(
         'style': {
           ...styles?.input,
           ...style,
-          '--select-input-width': `${widthCssVar.value}px`,
+          '--select-input-width': widthCssVar.value,
         },
         autoFocus,
         'autocomplete': autoComplete || 'off',
