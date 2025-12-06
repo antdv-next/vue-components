@@ -74,12 +74,12 @@ const MultipleDemo = defineComponent({
           </label>
         </p>
 
-        <div style={{ width: '300px' }}>
+        <div style={{ width: '100%' }}>
           <Select
             autoFocus
             value={value.value}
             animation={useAnim.value ? 'slide-up' : undefined}
-            style={{ width: '500px' }}
+            style={{ width: '100%' }}
             mode="multiple"
             loading={loading.value}
             suffix={suffixIcon.value}
