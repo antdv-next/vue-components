@@ -1,7 +1,15 @@
 import type { ResizeObserverProps, SizeInfo } from '../index.tsx'
 import findDOMNode from '@v-c/util/dist/Dom/findDOMNode'
 import { filterEmpty } from '@v-c/util/dist/props-util'
-import { createVNode, defineComponent, inject, isVNode, onBeforeUnmount, onMounted, shallowRef } from 'vue'
+import {
+  computed,
+  createVNode,
+  defineComponent,
+  inject,
+  isVNode,
+  shallowRef,
+  watch,
+} from 'vue'
 import { CollectionContext } from '../Collection'
 import { observe, unobserve } from '../utils/observerUtil.ts'
 import DomWrapper from './DomWrapper'
@@ -76,17 +84,24 @@ const SingleObserver = defineComponent<ResizeObserverProps>({
         }
       }
     }
-    let currentElement: HTMLElement
-    onMounted(() => {
-      currentElement = getDom() as HTMLElement
-      if (currentElement && !props.disabled)
-        observe(currentElement, onInternalResize as any)
-    })
-
-    onBeforeUnmount(() => {
-      if (currentElement)
-        unobserve(currentElement, onInternalResize as any)
-    })
+    const disabled = computed(() => props.disabled)
+    // 记录上一个元素
+    watch(
+      [wrapperRef, disabled],
+      (_n, _o, onCleanup) => {
+        if (disabled.value) {
+          return
+        }
+        const currentElement = getDom() as HTMLElement
+        if (currentElement) {
+          observe(currentElement, onInternalResize as any)
+        }
+        onCleanup(() => {
+          if (currentElement)
+            unobserve(currentElement, onInternalResize as any)
+        })
+      },
+    )
     expose({
       getDom,
     })

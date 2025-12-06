@@ -40,7 +40,7 @@
     "typescript": "^5.9.3",
     "vite": "npm:rolldown-vite@7.2.2",
     "vite-plugin-dts": "^5.0.0-beta.6",
-    "vite-plugin-tsx-resolve-types": "1.0.1-beta.3",
+    "vite-plugin-tsx-resolve-types": "link:/Users/yanyu/workspace/github/aibayanyu20/vite-plugins/packages/tsx-resolve-types",
     "vitest": "^3.2.4",
     "vscode-oniguruma": "^2.0.1",
     "vscode-textmate": "^9.2.1",
