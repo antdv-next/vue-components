@@ -41,6 +41,8 @@ function showScrollbar() {
         <label><input type="radio" name="data" value="100" @change="() => setDataCount(100)"> 100</label>
         <label><input type="radio" name="data" value="200" @change="() => setDataCount(200)"> 200</label>
         <label><input type="radio" name="data" value="1000" @change="() => setDataCount(1000)"> 1000</label>
+        <label><input type="radio" name="data" value="100000" @change="() => setDataCount(100000)"> 100000</label>
+        <label><input type="radio" name="data" value="50000" @change="() => setDataCount(50000)"> 50000</label>
         <button type="button" @click="showScrollbar">
           Show scrollbar
         </button>
