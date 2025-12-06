@@ -8,7 +8,6 @@ import ResizeObserver from '@v-c/resize-observer'
 import { pureAttrs } from '@v-c/util/dist/props-util'
 import { computed, defineComponent, ref, shallowRef, toRaw, toRef, watch } from 'vue'
 import Filler from './Filler'
-import useDiffItem from './hooks/useDiffItem'
 import useFrameWheel from './hooks/useFrameWheel'
 import { useGetSize } from './hooks/useGetSize'
 import useHeights from './hooks/useHeights'
@@ -192,7 +191,6 @@ export default defineComponent({
     }
 
     // ================================ Range ================================
-    useDiffItem(mergedData, getKey)
 
     watch(
       [
@@ -246,6 +244,11 @@ export default defineComponent({
           }
 
           itemTop = currentItemBottom
+
+          if (startIndex !== undefined && endIndex !== undefined) {
+            itemTop = currentItemBottom + (dataLen - 1 - i) * itemHeight!
+            break
+          }
         }
 
         if (startIndex === undefined) {
@@ -530,7 +533,6 @@ export default defineComponent({
             )
           }
         }
-
         return children
       }
       const componentStyle: CSSProperties = {}
