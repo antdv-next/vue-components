@@ -1,7 +1,7 @@
 import type { Key } from '@v-c/util/dist/type'
 import type { Ref } from 'vue'
 import type { GetKey } from '../interface'
-import { onUnmounted, reactive, ref } from 'vue'
+import { onUnmounted, ref } from 'vue'
 import CacheMap from '../utils/CacheMap'
 
 function parseNumber(value: string) {
@@ -21,7 +21,7 @@ export default function useHeights<T>(
 ] {
   const updatedMark = ref(0)
   const instanceRef = ref(new Map<Key, HTMLElement>())
-  const heightsRef = reactive(new CacheMap())
+  const heightsRef = new CacheMap()
 
   const promiseIdRef = ref<number>(0)
 

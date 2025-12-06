@@ -6,13 +6,7 @@ import type { ExtraRenderInfo } from './interface'
 import type { ScrollBarDirectionType, ScrollBarRef } from './ScrollBar'
 import ResizeObserver from '@v-c/resize-observer'
 import { pureAttrs } from '@v-c/util/dist/props-util'
-import {
-  computed,
-  defineComponent,
-  ref,
-  shallowRef,
-  watch,
-} from 'vue'
+import { computed, defineComponent, ref, shallowRef, toRaw, toRef, watch } from 'vue'
 import Filler from './Filler'
 import useDiffItem from './hooks/useDiffItem'
 import useFrameWheel from './hooks/useFrameWheel'
@@ -114,12 +108,15 @@ export default defineComponent({
   inheritAttrs: false,
   setup(props, { expose, attrs, slots }) {
     const itemHeight = computed(() => props.itemHeight)
+    const itemKey = toRef(props, 'itemKey')
     // =============================== Item Key ===============================
     const getKey = (item: any): Key => {
-      if (typeof props.itemKey === 'function') {
-        return props.itemKey(item)
+      item = toRaw(item)
+      const _itemKey = itemKey.value
+      if (typeof _itemKey === 'function') {
+        return _itemKey(item)
       }
-      return item?.[props.itemKey as string]
+      return item?.[_itemKey as string]
     }
 
     // ================================ Height ================================
@@ -210,6 +207,7 @@ export default defineComponent({
           fillerOffset.value = undefined
           return
         }
+        const { itemHeight, height } = props
 
         if (!inVirtual.value) {
           scrollHeight.value = fillerInnerRef.value?.offsetHeight || 0
@@ -225,21 +223,21 @@ export default defineComponent({
         let endIndex: number | undefined
 
         const dataLen = mergedData.value.length
-        const data = mergedData.value
+        const data = toRaw(mergedData.value)
 
         for (let i = 0; i < dataLen; i += 1) {
           const item = data[i]
           const key = getKey(item)
 
           const cacheHeight = heights.get(key)
-          const currentItemBottom = itemTop + (cacheHeight === undefined ? props.itemHeight! : cacheHeight)
+          const currentItemBottom = itemTop + (cacheHeight === undefined ? itemHeight! : cacheHeight)
 
           if (currentItemBottom >= offsetTop.value && startIndex === undefined) {
             startIndex = i
             startOffset = itemTop
           }
 
-          if (currentItemBottom > offsetTop.value + props.height! && endIndex === undefined) {
+          if (currentItemBottom > offsetTop.value + height! && endIndex === undefined) {
             endIndex = i
           }
 
@@ -249,7 +247,7 @@ export default defineComponent({
         if (startIndex === undefined) {
           startIndex = 0
           startOffset = 0
-          endIndex = Math.ceil(props.height! / props.itemHeight!)
+          endIndex = Math.ceil(height! / itemHeight!)
         }
         if (endIndex === undefined) {
           endIndex = mergedData.value.length - 1
