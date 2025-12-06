@@ -101,6 +101,10 @@ const SingleObserver = defineComponent<ResizeObserverProps>({
             unobserve(currentElement, onInternalResize as any)
         })
       },
+      {
+        immediate: true,
+        flush: 'post',
+      },
     )
     expose({
       getDom,
