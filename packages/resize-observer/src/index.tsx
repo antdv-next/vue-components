@@ -1,5 +1,5 @@
 import { warning } from '@v-c/util'
-import { toArray } from '@v-c/util/dist/Children/toArray'
+import { filterEmpty } from '@v-c/util/dist/props-util'
 import { defineComponent } from 'vue'
 import { Collection } from './Collection.tsx'
 import SingleObserver from './SingleObserver'
@@ -31,7 +31,7 @@ export interface ResizeObserverProps {
 const ResizeObserver = defineComponent<ResizeObserverProps>({
   setup(props, { slots }) {
     return () => {
-      const childNodes = toArray(slots.default?.())
+      const childNodes = filterEmpty(slots.default?.() ?? [])
       if (process.env.NODE_ENV !== 'production') {
         if (childNodes.length > 1) {
           warning(
