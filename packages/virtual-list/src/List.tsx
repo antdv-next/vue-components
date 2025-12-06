@@ -127,7 +127,11 @@ export default defineComponent({
     )
 
     // ================================= MISC =================================
-    const mergedData = computed(() => props.data || EMPTY_DATA)
+    // const mergedData = computed(() => props.data || EMPTY_DATA)
+    const mergedData = shallowRef(props?.data || EMPTY_DATA)
+    watch(() => props.data, () => {
+      mergedData.value = props?.data || EMPTY_DATA
+    })
 
     const useVirtual = computed(
       () => !!(props.virtual !== false && props.height && props.itemHeight),
