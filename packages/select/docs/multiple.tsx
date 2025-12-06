@@ -3,7 +3,7 @@ import Select, { Option } from '../src'
 import './assets/index.less'
 
 const children: any[] = []
-for (let i = 10; i < 36; i += 1) {
+for (let i = 10; i < 100000; i += 1) {
   children.push({
     key: i.toString(36) + i,
     value: i.toString(36) + i,
