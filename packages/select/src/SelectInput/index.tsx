@@ -170,14 +170,12 @@ const SelectInput = defineComponent<SelectInputProps>(
         }
       }
 
-      const onMouseDown = attrs.onMousedown as ((event: MouseEvent) => void) | undefined
-      onMouseDown?.(event)
+      props?.onMouseDown?.(event)
     }
 
     const onInternalBlur = (event: FocusEvent) => {
       toggleOpen.value?.(false)
-      const onBlur = attrs.onBlur as ((event: FocusEvent) => void) | undefined
-      onBlur?.(event)
+      props?.onBlur?.(event)
     }
 
     // =================== Context ===================
@@ -194,7 +192,14 @@ const SelectInput = defineComponent<SelectInputProps>(
       const RootComponent = components.value?.root
 
       // ===================== Render =====================
-      const domProps = omit({ ...attrs } as any, DEFAULT_OMIT_PROPS as any)
+      const domProps = omit({
+        ...attrs,
+        onFocus: props.onFocus,
+        onBlur: props.onBlur,
+        onKeydown: props.onKeyDown,
+        onKeyup: props.onKeyUp,
+        onMousedown: props.onMouseDown,
+      } as any, DEFAULT_OMIT_PROPS as any)
 
       if (RootComponent) {
         if (isVNode(RootComponent)) {
@@ -217,6 +222,10 @@ const SelectInput = defineComponent<SelectInputProps>(
           style={style.value}
           // Mouse Events
           onMousedown={onInternalMouseDown}
+          // Keyboard & Focus Events
+          onKeydown={props.onKeyDown}
+          onKeyup={props.onKeyUp}
+          onFocus={props.onFocus}
           onBlur={onInternalBlur}
         >
           {/* Prefix */}
