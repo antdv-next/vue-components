@@ -75,7 +75,7 @@ function scrollToKey50() {
 
 function scrollToLast() {
   listRef.value?.scrollTo({
-    index: data.length - 2,
+    index: data.length - 1,
     align: 'top',
   })
 }
