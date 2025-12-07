@@ -474,14 +474,15 @@ const Select = defineComponent<SelectProps>({
     // =========================== Change ===========================
     const triggerChange = (values: DraftValueType) => {
       const labeledValues = convert2LabelValues(values)
+      const prevValues = mergedValues.value
       setInternalValue(labeledValues)
       const onChange = props.onChange
 
       if (
         onChange
         // Trigger event only when value changed
-        && (labeledValues.length !== mergedValues.value.length
-          || labeledValues.some((newVal, index) => mergedValues.value[index]?.value !== newVal?.value))
+        && (labeledValues.length !== prevValues.length
+          || labeledValues.some((newVal, index) => prevValues[index]?.value !== newVal?.value))
       ) {
         const returnValues = props.labelInValue
           ? labeledValues.map(({ label: l, value: v }) => ({ label: l, value: v }))
