@@ -3,7 +3,6 @@ import type { Ref } from 'vue'
 import type { GetKey } from '../interface'
 import type CacheMap from '../utils/CacheMap'
 import { warning } from '@v-c/util'
-import raf from '@v-c/util/dist/raf'
 import { shallowRef, watch } from 'vue'
 
 const MAX_TIMES = 10
@@ -35,8 +34,6 @@ export default function useScrollTo(
   syncScrollTop: (newTop: number) => void,
   triggerFlash: () => void,
 ): (arg: number | ScrollTarget) => void {
-  const scrollRef = shallowRef<number>()
-
   const syncState = shallowRef<{
     times: number
     index: number
@@ -166,7 +163,7 @@ export default function useScrollTo(
     }
 
     // Normal scroll logic
-    raf.cancel(scrollRef.value!)
+    // raf.cancel(scrollRef.value!)
 
     if (typeof arg === 'number') {
       syncScrollTop(arg)

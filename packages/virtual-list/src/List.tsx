@@ -209,7 +209,6 @@ export default defineComponent({
           fillerOffset.value = undefined
           return
         }
-        const { itemHeight, height } = props
 
         if (!inVirtual.value) {
           scrollHeight.value = fillerInnerRef.value?.offsetHeight || 0
@@ -218,6 +217,7 @@ export default defineComponent({
           fillerOffset.value = undefined
           return
         }
+        const { itemHeight, height } = props
 
         let itemTop = 0
         let startIndex: number | undefined
@@ -226,7 +226,6 @@ export default defineComponent({
 
         const dataLen = mergedData.value.length
         const data = toRaw(mergedData.value)
-
         for (let i = 0; i < dataLen; i += 1) {
           const item = data[i]
           const key = getKey(item)
@@ -430,7 +429,7 @@ export default defineComponent({
     )
 
     watch(
-      [() => size.value.width, () => contentScrollWidth.value],
+      [() => size.value.width, contentScrollWidth],
       () => {
         if (inVirtual.value && contentScrollWidth.value) {
           horizontalScrollBarSpinSize.value = getSpinSize(size.value.width, contentScrollWidth.value)
