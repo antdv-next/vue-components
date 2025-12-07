@@ -44,7 +44,7 @@ const SingleContent = defineComponent<SharedContentProps>(
             ...restProps,
             ...rest,
             title: getTitle(option.data),
-            class: clsx(restProps.className, className),
+            class: clsx(restProps.class, className),
             style: { ...restProps.style, ...style },
           }
         }
