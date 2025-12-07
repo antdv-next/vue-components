@@ -318,7 +318,9 @@ const Select = defineComponent<SelectProps>({
     // =========================== Values ===========================
     const internalValue = shallowRef<any>(props?.value ?? props.defaultValue)
     watch(() => props.value, (val) => {
-      internalValue.value = val
+      if (val !== internalValue.value) {
+        internalValue.value = val
+      }
     })
 
     const setInternalValue = (val: any) => {
