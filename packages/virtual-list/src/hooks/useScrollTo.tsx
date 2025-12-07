@@ -1,7 +1,7 @@
 import type { Key } from '@v-c/util/dist/type'
 import type { Ref } from 'vue'
-import type { GetKey } from '../interface.ts'
-import type CacheMap from '../utils/CacheMap.ts'
+import type { GetKey } from '../interface'
+import type CacheMap from '../utils/CacheMap'
 import { warning } from '@v-c/util'
 import raf from '@v-c/util/dist/raf'
 import { shallowRef, watch } from 'vue'
@@ -48,7 +48,7 @@ export default function useScrollTo(
 
   // ========================== Sync Scroll ==========================
   watch(
-    [syncState, containerRef],
+    syncState,
     () => {
       if (syncState.value && syncState.value.times < MAX_TIMES) {
         // Never reach
@@ -56,16 +56,20 @@ export default function useScrollTo(
           syncState.value = { ...syncState.value }
           return
         }
+
         collectHeight()
+
         const { targetAlign, originAlign, index, offset } = syncState.value
 
         const height = containerRef.value.clientHeight
         let needCollectHeight = false
         let newTargetAlign: 'top' | 'bottom' | null = targetAlign ?? null
         let targetTop: number | null = null
+
         // Go to next frame if height not exist
         if (height) {
           const mergedAlign = targetAlign || originAlign
+
           // Get top & bottom
           let stackTop = 0
           let itemTop = 0
@@ -119,6 +123,7 @@ export default function useScrollTo(
               }
             }
           }
+
           if (targetTop !== null) {
             syncScrollTop(targetTop)
           }
@@ -129,6 +134,7 @@ export default function useScrollTo(
           }
         }
 
+        // Trigger next effect
         if (needCollectHeight) {
           syncState.value = {
             ...syncState.value,
@@ -153,24 +159,29 @@ export default function useScrollTo(
 
   // =========================== Scroll To ===========================
   return (arg) => {
+    // When not argument provided, we think dev may want to show the scrollbar
     if (arg === null || arg === undefined) {
       triggerFlash()
       return
     }
-    // Normalize target
+
+    // Normal scroll logic
     raf.cancel(scrollRef.value!)
+
     if (typeof arg === 'number') {
       syncScrollTop(arg)
     }
     else if (arg && typeof arg === 'object') {
       let index: number
       const { align } = arg
+
       if ('index' in arg) {
         ({ index } = arg)
       }
       else {
         index = data.value.findIndex(item => getKey(item) === arg.key)
       }
+
       const { offset = 0 } = arg
 
       syncState.value = {
