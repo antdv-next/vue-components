@@ -475,9 +475,10 @@ const Select = defineComponent<SelectProps>({
     const triggerChange = (values: DraftValueType) => {
       const labeledValues = convert2LabelValues(values)
       setInternalValue(labeledValues)
+      const onChange = props.onChange
 
       if (
-        props.onChange
+        onChange
         // Trigger event only when value changed
         && (labeledValues.length !== mergedValues.value.length
           || labeledValues.some((newVal, index) => mergedValues.value[index]?.value !== newVal?.value))
@@ -490,7 +491,7 @@ const Select = defineComponent<SelectProps>({
           injectPropsWithOption(getMixedOption(v.value)),
         )
 
-        props.onChange(
+        onChange(
           // Value
           multiple.value ? returnValues : returnValues[0],
           // Option
