@@ -316,17 +316,13 @@ const Select = defineComponent<SelectProps>({
     }
 
     // =========================== Values ===========================
-    const internalValue = shallowRef<any>(props.defaultValue)
+    const internalValue = shallowRef<any>(props?.value ?? props.defaultValue)
     watch(() => props.value, (val) => {
-      if (val !== undefined) {
-        internalValue.value = val
-      }
-    }, { immediate: true })
+      internalValue.value = val
+    })
 
     const setInternalValue = (val: any) => {
-      if (props.value === undefined) {
-        internalValue.value = val
-      }
+      internalValue.value = val
     }
 
     // Merged value with LabelValueType
