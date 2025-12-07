@@ -359,9 +359,13 @@ export const BaseSelect = defineComponent<
       return typeof val === 'string' || typeof val === 'number' ? String(val) : ''
     })
 
+    const mergedNotFoundContent = computed(() => {
+      return props.notFoundContent ?? 'Not Found'
+    })
+
     // ============================== Open ==============================
     // Not trigger `open` when `notFoundContent` is empty
-    const emptyListContent = computed(() => !props.notFoundContent && props.emptyOptions)
+    const emptyListContent = computed(() => !mergedNotFoundContent.value && props.emptyOptions)
     const [mergedOpen, triggerOpen] = useOpen(
       open as any,
       (openVal) => {
@@ -609,6 +613,7 @@ export const BaseSelect = defineComponent<
     const baseSelectContext = computed(() => {
       return {
         ...props,
+        notFoundContent: mergedNotFoundContent.value,
         open: mergedOpen.value,
         triggerOpen: mergedOpen.value,
         toggleOpen: triggerOpen,
@@ -748,7 +753,6 @@ export const BaseSelect = defineComponent<
           components={mergedComponents.value}
         />
       )
-      console.log(mergedOpen.value)
 
       renderNode = (
         <SelectTrigger
