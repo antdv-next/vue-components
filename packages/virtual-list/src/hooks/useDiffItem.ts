@@ -1,25 +1,24 @@
 import type { Ref } from 'vue'
-import { ref, watch } from 'vue'
+import { shallowRef, watch } from 'vue'
+import { findListDiffIndex } from '../utils/algorithmUtil.ts'
 
-export default function useDiffItem<T>(data: Ref<T[]>, getKey: (item: T) => any): Ref<T | undefined> {
-  const prevDataRef = ref<T[]>([])
-  const diffItem = ref<T>()
+export default function useDiffItem<T>(
+  data: Ref<T[]>,
+  getKey: (item: T) => any,
+  onDiff?: (diffIndex: number) => void,
+): Ref<T | undefined> {
+  const prevData = shallowRef<T[]>(data.value)
+  const diffItem = shallowRef<T>()
 
   watch(
     data,
     (newData) => {
-      const prevData = prevDataRef.value
-
-      if (newData !== prevData) {
-        // Find added item
-        const addedItem = newData.find((item) => {
-          const key = getKey(item)
-          return !prevData.some(prevItem => getKey(prevItem as any) === key)
-        })
-
-        diffItem.value = addedItem
-        prevDataRef.value = newData
+      const diff = findListDiffIndex(prevData.value || [], data.value || [], getKey)
+      if (diff?.index !== undefined) {
+        onDiff?.(diff.index)
+        diffItem.value = newData[diff.index]
       }
+      prevData.value = newData
     },
     { immediate: true },
   )
