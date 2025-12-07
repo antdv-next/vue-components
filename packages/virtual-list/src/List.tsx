@@ -8,6 +8,7 @@ import ResizeObserver from '@v-c/resize-observer'
 import { pureAttrs } from '@v-c/util/dist/props-util'
 import { computed, defineComponent, ref, shallowRef, toRaw, toRef, watch } from 'vue'
 import Filler from './Filler'
+import useChildren from './hooks/useChildren'
 import useDiffItem from './hooks/useDiffItem'
 import useFrameWheel from './hooks/useFrameWheel'
 import { useGetSize } from './hooks/useGetSize'
@@ -15,7 +16,6 @@ import useHeights from './hooks/useHeights'
 import useMobileTouchMove from './hooks/useMobileTouchMove'
 import useScrollDrag from './hooks/useScrollDrag'
 import useScrollTo from './hooks/useScrollTo'
-import Item from './Item'
 import ScrollBar from './ScrollBar'
 import { getSpinSize } from './utils/scrollbarUtil'
 
@@ -192,7 +192,6 @@ export default defineComponent({
     }
 
     // ================================ Range ================================
-
     watch(
       [
         inVirtual,
@@ -504,40 +503,19 @@ export default defineComponent({
 
     const getSize = useGetSize(mergedData, getKey, heights, itemHeight as any)
 
+    const listChildren = useChildren(
+      mergedData,
+      start,
+      end,
+      contentScrollWidth,
+      offsetLeft,
+      setInstanceRef,
+      (item: any, index: number, props: any) => slots.default?.({ item, index, ...props }),
+      { getKey },
+    )
+
     return () => {
       // ================================ Render ================================
-      const renderChildren = () => {
-        const children: VNode[] = []
-        const data = mergedData.value
-        const defaultSlot = slots.default
-
-        if (!defaultSlot) {
-          return children
-        }
-
-        for (let i = start.value; i <= end.value; i += 1) {
-          const item = data[i]
-          const key = getKey(item)
-          // Call the slot function with item, index, and props
-          const nodes = defaultSlot({
-            item,
-            index: i,
-            style: {},
-            offsetX: offsetLeft.value,
-          })
-
-          // Wrap each node in Item component
-          const node = Array.isArray(nodes) ? nodes[0] : nodes
-          if (node) {
-            children.push(
-              <Item key={key} setRef={ele => setInstanceRef(item, ele)}>
-                {node}
-              </Item>,
-            )
-          }
-        }
-        return children
-      }
       const componentStyle: CSSProperties = {}
       if (props.height) {
         componentStyle[props.fullHeight ? 'height' : 'maxHeight'] = `${props.height}px`
@@ -601,7 +579,7 @@ export default defineComponent({
                 rtl={isRTL.value}
                 extra={extraContent}
               >
-                {renderChildren()}
+                {listChildren.value}
               </Filler>
             </Component>
           </ResizeObserver>
