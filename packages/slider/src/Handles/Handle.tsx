@@ -148,8 +148,6 @@ export default defineComponent({
         onChangeComplete,
         onFocus,
         onMouseenter,
-        styles,
-        classNames,
         ...restProps
       } = props
 
@@ -164,6 +162,8 @@ export default defineComponent({
         ariaLabelledByForHandle,
         ariaRequired,
         ariaValueTextFormatterForHandle,
+        classNames,
+        styles,
       } = sliderContext.value
       // ============================ Offset ============================
       const positionStyle = getDirectionStyle(direction, value, min, max)

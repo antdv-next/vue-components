@@ -588,6 +588,8 @@ const Slider = defineComponent<SliderProps>((props = sliderDefaults, {
       dots,
       handleRender,
       activeHandleRender,
+      classNames,
+      styles,
     } = props
 
     const mergedClassName = cls(prefixCls.value, props.className, (attrs as any).class, {
@@ -611,8 +613,8 @@ const Slider = defineComponent<SliderProps>((props = sliderDefaults, {
         id={id}
       >
         <div
-          class={cls(`${prefixCls.value}-rail`, props.classNames?.rail)}
-          style={{ ...railStyle, ...props.styles?.rail }}
+          class={cls(`${prefixCls.value}-rail`, classNames?.rail)}
+          style={{ ...railStyle, ...styles?.rail }}
         />
 
         {props.track !== false && (
