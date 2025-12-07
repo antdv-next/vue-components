@@ -33,7 +33,7 @@ export default function useScrollTo(
   collectHeight: () => void,
   syncScrollTop: (newTop: number) => void,
   triggerFlash: () => void,
-): (arg: number | ScrollTarget) => void {
+): [(arg: number | ScrollTarget) => void, () => number] {
   const syncState = shallowRef<{
     times: number
     index: number
@@ -42,6 +42,18 @@ export default function useScrollTo(
     targetAlign?: 'top' | 'bottom'
     lastTop?: number
   } | null>(null)
+
+  // =================== Calculate Total Height ====================
+  // Calculate the total scroll height based on all items
+  const getTotalHeight = () => {
+    let totalHeight = 0
+    for (let i = 0; i < data.value.length; i += 1) {
+      const key = getKey(data.value[i])
+      const cacheHeight = heights.get(key)
+      totalHeight += (cacheHeight === undefined ? itemHeight.value : cacheHeight)
+    }
+    return totalHeight
+  }
 
   // ========================== Sync Scroll ==========================
   watch(
@@ -155,7 +167,7 @@ export default function useScrollTo(
   )
 
   // =========================== Scroll To ===========================
-  return (arg) => {
+  const scrollTo = (arg: number | ScrollTarget | null | undefined) => {
     // When not argument provided, we think dev may want to show the scrollbar
     if (arg === null || arg === undefined) {
       triggerFlash()
@@ -189,4 +201,6 @@ export default function useScrollTo(
       }
     }
   }
+
+  return [scrollTo, getTotalHeight]
 }

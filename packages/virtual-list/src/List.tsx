@@ -459,14 +459,24 @@ export default defineComponent({
     }
 
     // ================================= Ref ==================================
-    const scrollTo = useScrollTo(
+    const [scrollTo, getTotalHeight] = useScrollTo(
       componentRef as any,
       mergedData,
       heights,
       itemHeight as any,
       getKey,
       () => collectHeight(true),
-      syncScrollTop,
+      (newTop: number) => {
+        // Use getTotalHeight to get more accurate max scroll height
+        const totalHeight = getTotalHeight()
+        const maxScrollHeight = Math.max(scrollHeight.value, totalHeight) - props.height!
+        const alignedTop = Math.max(0, Math.min(newTop, maxScrollHeight || 0))
+
+        if (componentRef.value) {
+          componentRef.value.scrollTop = alignedTop
+        }
+        offsetTop.value = alignedTop
+      },
       delayHideScrollBar,
     )
 
