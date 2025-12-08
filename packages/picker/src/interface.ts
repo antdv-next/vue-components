@@ -1,6 +1,6 @@
 import type { AlignType, BuildInPlacements } from '@v-c/trigger'
 import type { VueNode } from '@v-c/util/dist/type'
-import type { Component, CSSProperties, HTMLAttributes, InputHTMLAttributes, VNode } from 'vue'
+import type { CSSProperties, DefineComponent, HTMLAttributes, InputHTMLAttributes, VNode } from 'vue'
 import type { GenerateConfig } from './generate'
 
 export type NullableDateType<DateType> = DateType | null | undefined
@@ -276,9 +276,9 @@ export interface SharedPanelProps<DateType extends object = any> {
 }
 
 export type Components<DateType extends object = any> = Partial<
-  Record<InternalMode, Component<SharedPanelProps<DateType>>> & {
-    button?: Component | string
-    input?: Component | string
+  Record<InternalMode, DefineComponent<SharedPanelProps<DateType>>> & {
+    button?: DefineComponent | string
+    input?: DefineComponent | string
   }
 >
 
