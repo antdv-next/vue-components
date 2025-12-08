@@ -3,7 +3,7 @@ import type { PanelProps } from './Panel'
 import { getTransitionProps } from '@v-c/util/dist/utils/transition'
 import { defineComponent, nextTick, shallowRef, Transition, vShow, withDirectives } from 'vue'
 
-import { offset } from '../../util.ts'
+import { offset } from '../../util'
 import Panel from './Panel'
 
 export type ContentProps = {

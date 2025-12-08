@@ -1,10 +1,10 @@
 import type { MouseEventHandler } from '@v-c/util/dist/EventInterface'
 import type { CSSProperties } from 'vue'
-import type { IDialogPropTypes } from '../../IDialogPropTypes.ts'
+import type { IDialogPropTypes } from '../../IDialogPropTypes'
 import { classNames } from '@v-c/util'
-import pickAttrs from '@v-c/util/dist/pickAttrs.ts'
+import pickAttrs from '@v-c/util/dist/pickAttrs'
 import { defineComponent, shallowRef } from 'vue'
-import { useGetRefContext } from '../../context.ts'
+import { useGetRefContext } from '../../context'
 
 const sentinelStyle = { width: 0, height: 0, overflow: 'hidden', outline: 'none' }
 const entityStyle = { outline: 'none' }

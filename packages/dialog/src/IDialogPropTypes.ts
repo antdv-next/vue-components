@@ -1,5 +1,5 @@
 import type { GetContainer } from '@v-c/util/dist/PortalWrapper'
-import type { VueNode } from '@v-c/util/dist/type.ts'
+import type { VueNode } from '@v-c/util/dist/type'
 import type { CSSProperties } from 'vue'
 
 export interface ModalClassNames {

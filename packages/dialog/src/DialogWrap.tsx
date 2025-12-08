@@ -1,7 +1,7 @@
-import type { IDialogPropTypes } from './IDialogPropTypes.ts'
+import type { IDialogPropTypes } from './IDialogPropTypes'
 import Portal from '@v-c/portal'
 import { defineComponent, shallowRef, watch } from 'vue'
-import { useRefProvide } from './context.ts'
+import { useRefProvide } from './context'
 import Dialog from './Dialog'
 
 // fix issue #10656
