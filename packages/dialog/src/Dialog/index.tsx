@@ -1,14 +1,14 @@
 import type { CSSProperties } from 'vue'
-import type { IDialogPropTypes } from '../IDialogPropTypes.ts'
-import type { ContentRef } from './Content/Panel.tsx'
+import type { IDialogPropTypes } from '../IDialogPropTypes'
+import type { ContentRef } from './Content/Panel'
 import { warning } from '@v-c/util'
 import contains from '@v-c/util/dist/Dom/contains'
 import KeyCode from '@v-c/util/dist/KeyCode'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
 import { defineComponent, onUnmounted, shallowRef, useId, watch } from 'vue'
-import { getMotionName } from '../util.ts'
+import { getMotionName } from '../util'
 import Content from './Content'
-import Mask from './Mask.tsx'
+import Mask from './Mask'
 
 const defaults = {
   prefixCls: 'vc-dialog',
