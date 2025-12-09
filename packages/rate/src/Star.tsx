@@ -1,3 +1,4 @@
+import KeyCode, { KeyCodeStr } from '@v-c/util/dist/KeyCode'
 import { computed, defineComponent } from 'vue'
 
 export interface StarProps {
@@ -34,7 +35,7 @@ export default defineComponent<StarProps>({
     }
     const onKeyDown = (e: KeyboardEvent) => {
       const { index } = props
-      if (e.key === 'Enter' || e.keyCode === 13) {
+      if (e.key === KeyCodeStr.Enter || e.keyCode === KeyCode.ENTER) {
         emit('click', e, index)
       }
     }
@@ -63,16 +64,15 @@ export default defineComponent<StarProps>({
 
     return () => {
       const { disabled, prefixCls, characterRender, character, index, count, value } = props
-      const characterNode
-        = typeof character === 'function'
-          ? character({
-              disabled,
-              prefixCls,
-              index,
-              count,
-              value,
-            })
-          : character
+      const characterNode = typeof character === 'function'
+        ? character({
+            disabled,
+            prefixCls,
+            index,
+            count,
+            value,
+          })
+        : character
       let star = (
         <li class={cls.value}>
           <div

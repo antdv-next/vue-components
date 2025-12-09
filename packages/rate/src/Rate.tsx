@@ -47,7 +47,7 @@ export interface RateProps {
 }
 
 export default defineComponent<RateProps>({
-  name: 'ARate',
+  name: 'Rate',
   inheritAttrs: false,
   setup(props = defaults, { attrs, emit, expose }) {
     const [setStarRef, starRefs] = useRefs()
