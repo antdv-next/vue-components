@@ -1,7 +1,7 @@
 {
   "name": "@v-c/rate",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -12,8 +12,16 @@
     "./package.json": "./package.json"
   },
   "main": "dist/index.js",
+  "files": [
+    "dist",
+    "package.json"
+  ],
   "scripts": {
-    "build": "vite build"
+    "build": "vite build",
+    "test": "vitest run",
+    "prepublish": "pnpm build",
+    "patch": "bumpp --release patch",
+    "bump": "bumpp"
   },
   "peerDependencies": {
     "vue": "^3.0.0"
