@@ -1,9 +1,11 @@
 import type { FocusEventHandler, KeyboardEventHandler } from '@v-c/util/dist/EventInterface'
-import type { CSSProperties, VNode } from 'vue'
-import { classNames } from '@v-c/util'
+import type { VNode } from 'vue'
+import type { StarProps } from './Star'
+import { clsx } from '@v-c/util'
 import useMergedState from '@v-c/util/dist/hooks/useMergedState'
 import KeyCode from '@v-c/util/dist/KeyCode'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
+import { getAttrStyleAndClass } from '@v-c/util/dist/props-util'
 import { computed, defineComponent, onMounted, ref } from 'vue'
 import Star from './Star'
 import useRefs from './useRefs'
@@ -23,18 +25,13 @@ const defaults = {
   tabIndex: 0,
 } as RateProps
 
-export interface RateProps {
+export interface RateProps extends Pick<StarProps, 'count' | 'character' | 'characterRender' | 'allowHalf' | 'disabled'> {
   'prefixCls'?: string
   'defaultValue'?: number
   'value'?: number
-  'count'?: number
-  'allowHalf'?: boolean
   'allowClear'?: boolean
   'keyboard'?: boolean
-  'character'?: any
-  'characterRender'?: Function
-  'disabled'?: boolean
-  'direction'?: Direction
+  'direction'?: string
   'tabIndex'?: number | string
   'autoFocus'?: boolean
   'onHoverChange'?: (value: number) => void
@@ -44,12 +41,11 @@ export interface RateProps {
   'onKeyDown'?: KeyboardEventHandler
   'onMouseLeave'?: FocusEventHandler
   'onUpdate:value'?: (value: number) => void
+  'id'?: string
 }
 
-export default defineComponent<RateProps>({
-  name: 'Rate',
-  inheritAttrs: false,
-  setup(props = defaults, { attrs, emit, expose }) {
+export default defineComponent<RateProps>(
+  (props = defaults, { attrs, expose }) => {
     const [setStarRef, starRefs] = useRefs()
     const rateRef = ref<HTMLUListElement | null>(null)
 
@@ -96,21 +92,22 @@ export default defineComponent<RateProps>({
 
     const changeValue = (nextValue: number) => {
       setStateValue(nextValue)
-      emit('change', nextValue)
+      props?.onChange?.(nextValue)
     }
 
     const focused = ref(false)
 
     const onInternalFocus = () => {
       focused.value = true
-      emit('focus')
+      props?.onFocus?.()
     }
 
     const onInternalBlur = () => {
       focused.value = false
-      emit('blur')
+      props?.onBlur?.()
     }
 
+    // =========================== Hover ============================
     const hoverValue = ref<number>(null)
 
     const onHover = (event: MouseEvent, index: number) => {
@@ -119,7 +116,7 @@ export default defineComponent<RateProps>({
         hoverValue.value = nextHoverValue
         setCleanedValue(null)
       }
-      emit('hoverChange', hoverValue)
+      props?.onHoverChange?.(nextHoverValue)
     }
 
     const onMouseLeaveCallback = (event?: MouseEvent) => {
@@ -127,10 +124,10 @@ export default defineComponent<RateProps>({
       if (!disabled) {
         hoverValue.value = null
         setCleanedValue(null)
-        emit('hoverChange', undefined)
+        props?.onHoverChange?.(undefined)
       }
       if (event) {
-        emit('mouseLeave', event)
+        props?.onMouseLeave?.(event)
       }
     }
 
@@ -148,7 +145,7 @@ export default defineComponent<RateProps>({
 
     const onInternalKeyDown: KeyboardEventHandler = (event) => {
       const { keyCode } = event
-      const { value } = state
+      const value = state.value
       const { keyboard, count, direction, allowHalf } = props
       const reverse = direction === 'rtl'
       const step = allowHalf ? 0.5 : 1
@@ -172,7 +169,7 @@ export default defineComponent<RateProps>({
         }
       }
 
-      emit('keyDown', event)
+      props?.onKeyDown?.(event)
     }
 
     onMounted(() => {
@@ -183,9 +180,19 @@ export default defineComponent<RateProps>({
     })
 
     return () => {
-      const { count, allowHalf, disabled, prefixCls, direction, character, characterRender, tabIndex, ...restProps } = props
-      const { class: className, style } = attrs
-      const classString = classNames(prefixCls, className, {
+      const {
+        count,
+        allowHalf,
+        disabled,
+        prefixCls,
+        direction,
+        character,
+        characterRender,
+        tabIndex,
+        ...restProps
+      } = props
+      const { className, style, restAttrs } = getAttrStyleAndClass(attrs)
+      const classString = clsx(prefixCls, className, {
         [`${prefixCls}-disabled`]: disabled,
         [`${prefixCls}-rtl`]: direction === 'rtl',
       })
@@ -212,20 +219,24 @@ export default defineComponent<RateProps>({
 
       return (
         <ul
+          id={restProps.id}
           class={classString}
-          style={style as CSSProperties}
+          style={style}
           onMouseleave={onMouseLeaveCallback}
           tabindex={disabled ? -1 : tabIndex}
           onFocus={disabled ? null : onInternalFocus}
           onBlur={disabled ? null : onInternalBlur}
           onKeydown={disabled ? null : onInternalKeyDown}
           ref={rateRef}
-          role="radiogroup"
-          {...pickAttrs(restProps, { aria: true, data: true, attr: true })}
+          {...pickAttrs(restAttrs, { aria: true, data: true, attr: true })}
         >
           {starNodes}
         </ul>
       )
     }
   },
-})
+  {
+    inheritAttrs: false,
+    name: 'Rate',
+  },
+)
