@@ -4,7 +4,19 @@ import type { StrokeColorType } from '../interface'
 
 export const VIEW_BOX_SIZE = 100
 
-export function getCircleStyle(perimeter: number, perimeterWithoutGap: number, offset: number, percent: number, rotateDeg: number, gapDegree: number, gapPosition: ProgressProps['gapPosition'] | undefined, strokeColor: StrokeColorType, strokeLinecap: ProgressProps['strokeLinecap'], strokeWidth: number, stepSpace = 0): CSSProperties {
+export function getCircleStyle(
+  perimeter: number,
+  perimeterWithoutGap: number,
+  offset: number,
+  percent: number,
+  rotateDeg: number,
+  gapDegree: number,
+  gapPosition: ProgressProps['gapPosition'] | undefined,
+  strokeColor: StrokeColorType,
+  strokeLinecap: ProgressProps['strokeLinecap'],
+  strokeWidth: number,
+  stepSpace = 0,
+): CSSProperties {
   const offsetDeg = (offset / 100) * 360 * ((360 - gapDegree) / 360)
   const positionDeg
     = gapDegree === 0
@@ -35,8 +47,7 @@ export function getCircleStyle(perimeter: number, perimeterWithoutGap: number, o
     strokeDashoffset: strokeDashoffset + stepSpace,
     transform: `rotate(${rotateDeg + offsetDeg + positionDeg}deg)`,
     transformOrigin: `${halfSize}px ${halfSize}px`,
-    transition:
-            'stroke-dashoffset .3s ease 0s, stroke-dasharray .3s ease 0s, stroke .3s, stroke-width .06s ease .3s, opacity .3s ease 0s',
+    transition: 'stroke-dashoffset .3s ease 0s, stroke-dasharray .3s ease 0s, stroke .3s, stroke-width .06s ease .3s, opacity .3s ease 0s',
     fillOpacity: 0,
   }
 }

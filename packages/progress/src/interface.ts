@@ -1,10 +1,15 @@
 import type { MouseEventHandler } from '@v-c/util/dist/EventInterface'
+import type { CSSProperties } from 'vue'
+
+export type SemanticName = 'root' | 'rail' | 'track'
 
 export interface ProgressProps {
   id?: string
   strokeWidth?: number
   trailWidth?: number
   className?: string
+  classNames?: Partial<Record<SemanticName, string>>
+  styles?: Partial<Record<SemanticName, CSSProperties>>
   percent?: number | number[]
   strokeColor?: StrokeColorType
   trailColor?: string
@@ -15,6 +20,7 @@ export interface ProgressProps {
   gapPosition?: GapPositionType
   transition?: string
   onClick?: MouseEventHandler
+  loading?: boolean
   steps?: number | { count: number, gap: number }
 }
 
