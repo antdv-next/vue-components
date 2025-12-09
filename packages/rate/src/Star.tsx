@@ -1,4 +1,5 @@
-import KeyCode, { KeyCodeStr } from '@v-c/util/dist/KeyCode'
+import type { VueNode } from '@v-c/util/dist/type'
+import KeyCode from '@v-c/util/dist/KeyCode'
 import { computed, defineComponent } from 'vue'
 
 export interface StarProps {
@@ -7,36 +8,28 @@ export interface StarProps {
   prefixCls?: string
   allowHalf?: boolean
   disabled?: boolean
-  character?: any
-  characterRender?: Function
+  character?: ((props: StarProps) => any) | VueNode
+  characterRender?: ((origin: any, props: StarProps) => any)
+  onClick?: (e: MouseEvent | KeyboardEvent, index: number) => void
+  onHover?: (e: MouseEvent, index: number) => void
   focused?: boolean
   count?: number
-  onClick?: Function
-  onHover?: Function
 }
 
-const defaults = {
-  allowHalf: undefined,
-  disabled: undefined,
-  focused: undefined,
-} as StarProps
-export default defineComponent<StarProps>({
-  name: 'Star',
-  inheritAttrs: false,
-  emits: ['hover', 'click'],
-  setup(props = defaults, { emit }) {
+export default defineComponent<StarProps>(
+  (props) => {
     const onHover = (e: MouseEvent) => {
       const { index } = props
-      emit('hover', e, index)
+      props?.onHover?.(e, index)
     }
     const onClick = (e: MouseEvent) => {
       const { index } = props
-      emit('click', e, index)
+      props?.onClick?.(e, index)
     }
     const onKeyDown = (e: KeyboardEvent) => {
       const { index } = props
-      if (e.key === KeyCodeStr.Enter || e.keyCode === KeyCode.ENTER) {
-        emit('click', e, index)
+      if (e.keyCode === KeyCode.ENTER) {
+        props?.onClick?.(e, index)
       }
     }
 
@@ -54,7 +47,12 @@ export default defineComponent<StarProps>({
         }
       }
       else {
-        className += starValue <= value ? ` ${prefixCls}-full` : ` ${prefixCls}-zero`
+        if (starValue <= value) {
+          className += ` ${prefixCls}-full`
+        }
+        else {
+          className += ` ${prefixCls}-zero`
+        }
         if (starValue === value && focused) {
           className += ` ${prefixCls}-focused`
         }
@@ -63,9 +61,17 @@ export default defineComponent<StarProps>({
     })
 
     return () => {
-      const { disabled, prefixCls, characterRender, character, index, count, value } = props
+      const {
+        disabled,
+        prefixCls,
+        characterRender,
+        character,
+        index,
+        count,
+        value,
+      } = props
       const characterNode = typeof character === 'function'
-        ? character({
+        ? (character as any)({
             disabled,
             prefixCls,
             index,
@@ -96,4 +102,8 @@ export default defineComponent<StarProps>({
       return star
     }
   },
-})
+  {
+    name: 'RateStar',
+    inheritAttrs: false,
+  },
+)
