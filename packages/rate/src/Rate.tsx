@@ -31,7 +31,7 @@ export interface RateProps extends Pick<StarProps, 'count' | 'character' | 'char
   'value'?: number
   'allowClear'?: boolean
   'keyboard'?: boolean
-  'direction'?: string
+  'direction'?: Direction
   'tabIndex'?: number | string
   'autoFocus'?: boolean
   'onHoverChange'?: (value: number) => void
