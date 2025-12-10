@@ -133,6 +133,9 @@ importers:
 
   packages/dialog:
     dependencies:
+      '@v-c/portal':
+        specifier: workspace:^
+        version: link:../portal
       '@v-c/util':
         specifier: workspace:^
         version: link:../util
