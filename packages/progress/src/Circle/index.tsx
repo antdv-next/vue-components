@@ -1,4 +1,5 @@
 import type { ProgressProps } from '../interface.ts'
+import { getAttrStyleAndClass } from '@v-c/util/dist/props-util'
 import { omit } from '@v-c/util/dist/utils/omit'
 import { computed, defineComponent } from 'vue'
 import { defaultProps, useTransitionDuration } from '../common.ts'
@@ -39,15 +40,15 @@ const Circle = defineComponent<ProgressProps>(
         className,
         strokeWidth,
         gapPosition,
-        trailColor,
+        railColor,
         prefixCls,
-        trailWidth,
+        railWidth,
         classNames = {},
         styles = {},
         loading,
-
         ...restProps
       } = props
+      const { style, restAttrs } = getAttrStyleAndClass(attrs)
       const { count: stepCount, gap: stepGap } = stepObj.value ?? {}
       const { indeterminateStyleProps, indeterminateStyleAnimation } = getIndeterminateCircle({
         id: mergedId,
@@ -61,7 +62,7 @@ const Circle = defineComponent<ProgressProps>(
         rotateDeg.value,
         gapDegree.value,
         gapPosition,
-        trailColor!,
+        railColor!,
         mergedStrokeLinecap.value,
         strokeWidth!,
       )
@@ -92,11 +93,11 @@ const Circle = defineComponent<ProgressProps>(
                 ptg={ptg!}
                 radius={radius.value}
                 className={classNames.track}
-                prefixCls={props.prefixCls!}
+                prefixCls={prefixCls!}
                 gradientId={gradientId}
                 style={[circleStyleForStack, indeterminateStyleProps, styles.track]}
                 strokeLinecap={mergedStrokeLinecap.value}
-                strokeWidth={props.strokeWidth!}
+                strokeWidth={strokeWidth!}
                 gapDegree={gapDegree.value}
                 ref={(elem) => {
                 // https://reactjs.org/docs/refs-and-the-dom.html#callback-refs
@@ -120,7 +121,7 @@ const Circle = defineComponent<ProgressProps>(
 
         let stackPtg = 0
         return Array.from({ length: stepCount }).fill(null).map((_, index) => {
-          const color = index <= current - 1 ? strokeColorList.value[0] : trailColor
+          const color = index <= current - 1 ? strokeColorList.value[0] : railColor
           const stroke = color && typeof color === 'object' ? `url(#${gradientId})` : undefined
           const circleStyleForStack = getCircleStyle(
             perimeter.value,
@@ -141,14 +142,14 @@ const Circle = defineComponent<ProgressProps>(
           return (
             <circle
               key={index}
-              class={`${prefixCls}-circle-path`}
+              class={[`${prefixCls}-circle-path`, classNames.track]}
               r={radius.value}
               cx={halfSize}
               cy={halfSize}
               stroke={stroke}
               stroke-width={strokeWidth}
               opacity={1}
-              style={circleStyleForStack}
+              style={{ ...circleStyleForStack, ...styles.track }}
               ref={(elem) => {
                 paths.value[index] = elem as SVGPathElement
               }}
@@ -158,23 +159,29 @@ const Circle = defineComponent<ProgressProps>(
       }
       return (
         <svg
-          class={[`${prefixCls}-circle`, className]}
+          {...restAttrs}
+          class={[`${prefixCls}-circle`, classNames.root, className]}
           viewBox={`0 0 ${VIEW_BOX_SIZE} ${VIEW_BOX_SIZE}`}
-          style={attrs.style as any}
+          style={
+            {
+              ...styles.root,
+              ...style,
+            }
+          }
           id={id}
           role="presentation"
           {...omit(restProps, ['gapDegree', 'steps', 'percent', 'strokeLinecap', 'strokeColor'])}
         >
           {!stepCount && (
             <circle
-              class={`${prefixCls}-circle-trail`}
+              class={[`${prefixCls}-circle-rail`, classNames.rail]}
               r={radius.value}
               cx={halfSize}
               cy={halfSize}
-              stroke={trailColor}
+              stroke={railColor}
               stroke-linecap={mergedStrokeLinecap.value}
-              stroke-width={trailWidth || strokeWidth}
-              style={circleStyle}
+              stroke-width={railWidth || strokeWidth}
+              style={{ ...circleStyle, ...styles.rail }}
             />
           )}
           {stepCount ? getStepStokeList() : getStokeList()}

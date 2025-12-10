@@ -5,11 +5,13 @@ import { computed, defineComponent, shallowRef } from 'vue'
 interface BlockProps {
   bg: string
 }
-const Block = defineComponent<BlockProps>((props, { slots }) => {
-  return () => {
-    return <div style={{ width: '100%', height: '100%', background: props.bg }}>{slots.default?.()}</div>
-  }
-})
+const Block = defineComponent<BlockProps>(
+  (props, { slots }) => {
+    return () => {
+      return <div style={{ width: '100%', height: '100%', background: props.bg }}>{slots.default?.()}</div>
+    }
+  },
+)
 
 function getPtgColors(color: Record<string, string | boolean>, scale: number) {
   return Object.keys(color).map((key) => {

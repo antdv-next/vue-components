@@ -18,7 +18,9 @@
   "peerDependencies": {
     "vue": "^3.0.0"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@v-c/util": "workspace:^"
+  },
   "devDependencies": {
     "vue": "^3.5.22"
   }
