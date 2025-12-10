@@ -280,6 +280,10 @@ importers:
         version: 3.5.13(typescript@5.9.3)
 
   packages/progress:
+    dependencies:
+      '@v-c/util':
+        specifier: workspace:^
+        version: link:../util
     devDependencies:
       vue:
         specifier: ^3.5.22

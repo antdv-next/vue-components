@@ -6,16 +6,15 @@ export type SemanticName = 'root' | 'rail' | 'track'
 export interface ProgressProps {
   id?: string
   strokeWidth?: number
-  trailWidth?: number
+  railWidth?: number
   className?: string
   classNames?: Partial<Record<SemanticName, string>>
   styles?: Partial<Record<SemanticName, CSSProperties>>
   percent?: number | number[]
   strokeColor?: StrokeColorType
-  trailColor?: string
+  railColor?: string
   strokeLinecap?: StrokeLinecapType
   prefixCls?: string
-  // style?: CSSProperties
   gapDegree?: number
   gapPosition?: GapPositionType
   transition?: string
