@@ -1,7 +1,7 @@
 {
   "name": "@v-c/progress",
   "type": "module",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
