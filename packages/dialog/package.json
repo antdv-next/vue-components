@@ -1,22 +1,37 @@
 {
   "name": "@v-c/dialog",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
-    "./dist/*": "./dist/*",
+    "./dist/*.js": "./dist/*.js",
+    "./dist/*.d.ts": "./dist/*.d.ts",
     "./package.json": "./package.json"
   },
+  "files": [
+    "dist",
+    "package.json"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "types": "./dist/index.d.ts",
   "main": "dist/index.js",
   "scripts": {
-    "build": "vite build"
+    "build": "vite build",
+    "prepublish": "pnpm build",
+    "test": "vitest run",
+    "bump": "bumpp",
+    "bump:patch": "bumpp --release patch"
   },
   "peerDependencies": {
     "vue": "^3.0.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@v-c/util": "workspace:^"
+  }
 }
