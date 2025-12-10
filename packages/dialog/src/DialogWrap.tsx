@@ -56,12 +56,12 @@ const DialogWrap = defineComponent<IDialogPropTypes>(
         visible,
         getContainer,
         forceRender,
-        destroyOnClose = false,
+        destroyOnHidden = false,
         afterClose,
       } = props
 
       // Destroy on close will remove wrapped div
-      if (!forceRender && destroyOnClose && !animatedVisible) {
+      if (!forceRender && destroyOnHidden && !animatedVisible) {
         return null
       }
       return (
@@ -74,10 +74,9 @@ const DialogWrap = defineComponent<IDialogPropTypes>(
           <Dialog
             {...props}
             v-slots={slots}
-            destroyOnClose={destroyOnClose}
+            destroyOnHidden={destroyOnHidden}
             afterClose={() => {
               afterClose?.()
-              console.log('Sd')
               animatedVisible.value = false
             }}
           />

@@ -22,7 +22,7 @@ export interface ContentRef {
   changeActive: (next: boolean) => void
 }
 
-const Panel = defineComponent<PanelProps>(
+const Panel = defineComponent<PanelProps & { animationVisible: boolean }>(
   (props, { expose, slots }) => {
     // ================================= Refs =================================
     const { setPanel } = useGetRefContext()
@@ -70,6 +70,7 @@ const Panel = defineComponent<PanelProps>(
         onMouseDown,
         onMouseUp,
         modalRender,
+        animationVisible,
       } = props
       // ================================ Style =================================
       const contentStyle: CSSProperties = {}
@@ -132,8 +133,8 @@ const Panel = defineComponent<PanelProps>(
 
       const content = (
         <div
-          class={classNames(`${prefixCls}-content`, modalClassNames?.content)}
-          style={modalStyles?.content}
+          class={classNames(`${prefixCls}-container`, modalClassNames?.container)}
+          style={modalStyles?.container}
         >
           {closerNode}
           {headerNode}
@@ -150,7 +151,7 @@ const Panel = defineComponent<PanelProps>(
       )
 
       const renderContent = () => {
-        if (!visible && forceRender) {
+        if (!animationVisible && forceRender) {
           return null
         }
         return modalRender ? modalRender(content) : content

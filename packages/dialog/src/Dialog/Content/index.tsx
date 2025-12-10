@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'vue'
 import type { PanelProps } from './Panel'
 import { getTransitionProps } from '@v-c/util/dist/utils/transition'
-import { defineComponent, nextTick, shallowRef, Transition, vShow, withDirectives } from 'vue'
+import { defineComponent, nextTick, shallowRef, Transition, watch } from 'vue'
 
 import { offset } from '../../util'
 import Panel from './Panel'
@@ -27,13 +27,19 @@ const Content = defineComponent<ContentProps>(
         }
       })
     }
+    const animationVisible = shallowRef(props.visible)
+    watch(() => props.visible, () => {
+      if (props.visible) {
+        animationVisible.value = true
+      }
+    })
     return () => {
       const {
         prefixCls,
         className,
         style,
         visible,
-        destroyOnClose,
+        destroyOnHidden,
         onVisibleChanged,
         ariaId,
         title,
@@ -47,37 +53,37 @@ const Content = defineComponent<ContentProps>(
 
       // ============================= Render =============================
       const transitionProps = getTransitionProps(motionName)
-      const dom = (
-        <Panel
-          {...props}
-          v-slots={slots}
-          title={title}
-          ariaId={ariaId}
-          prefixCls={prefixCls}
-          style={{ ...style, ...contentStyle }}
-          class={[className]}
-          holderRef={(el) => {
-            dialogRef.value = el
-          }}
-        />
-      )
-      // 改造render函数
-      const renderDom = () => {
-        if (visible || !destroyOnClose) {
-          return withDirectives(dom, [
-            [vShow, visible],
-          ])
-        }
-        return null
-      }
       return (
         <Transition
           {...transitionProps}
           onBeforeEnter={onPrepare}
           onAfterEnter={() => onVisibleChanged?.(true)}
-          onAfterLeave={() => onVisibleChanged?.(false)}
+          onAfterLeave={() => {
+            onVisibleChanged?.(false)
+            animationVisible.value = false
+          }}
         >
-          {renderDom()}
+          {
+            (visible || !destroyOnHidden)
+              ? (
+                  <Panel
+                    v-show={visible}
+                    {...props}
+                    animationVisible={animationVisible.value!}
+                    v-slots={slots}
+                    title={title}
+                    ariaId={ariaId}
+                    prefixCls={prefixCls}
+                    style={{ ...style, ...contentStyle }}
+                    class={[className]}
+                    holderRef={(el) => {
+                      dialogRef.value = el
+                    }}
+                  />
+                )
+              : null
+
+          }
         </Transition>
       )
     }
