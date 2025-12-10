@@ -64,7 +64,6 @@ const Panel = defineComponent<PanelProps & { animationVisible: boolean }>(
         ariaId,
         style,
         className,
-        visible,
         forceRender,
         onClose,
         onMouseDown,
