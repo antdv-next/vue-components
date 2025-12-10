@@ -1,26 +1,37 @@
 {
   "name": "@v-c/drawer",
   "type": "module",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "drawer component for vue",
   "author": "",
   "license": "MIT",
   "keywords": [
     "drawer"
   ],
+  "files": [
+    "dist",
+    "package.json"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
-    "./dist/*": "./dist/*",
+    "./dist/*.js": "./dist/*.js",
+    "./dist/*.d.ts": "./dist/*.d.ts",
     "./package.json": "./package.json"
   },
   "main": "index.js",
   "scripts": {
     "build": "vite build",
-    "test": "vitest"
+    "prepublish": "pnpm build",
+    "test": "vitest run",
+    "bump": "bumpp",
+    "bump:patch": "bumpp --release patch"
   },
   "peerDependencies": {
     "vue": "^3.0.0"
