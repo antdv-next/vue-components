@@ -1,6 +1,5 @@
 import type { VueNode } from '@v-c/util/dist/type'
 import type { CSSProperties, HTMLAttributes } from 'vue'
-
 import type {
   CellRender,
   Components,
@@ -12,6 +11,8 @@ import type {
   SharedPanelProps,
   SharedTimeProps,
 } from '../interface'
+
+import { defineComponent } from 'vue'
 
 export interface BasePickerPanelProps<DateType extends object = any>
   extends
@@ -109,3 +110,10 @@ export type PickerPanelProps<DateType extends object = any>
     styles?: Partial<Record<PanelSemanticName, CSSProperties>>
     classNames?: Partial<Record<PanelSemanticName, string>>
   }
+
+export default function createPickerPanel<DateType extends object = any>() {
+  return defineComponent<PickerPanelProps<DateType>>({
+    name: 'PickerPanel',
+    inheritAttrs: false,
+  })
+}
