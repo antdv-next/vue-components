@@ -4,7 +4,6 @@ import './motion.less'
 export const maskMotion: DrawerProps['maskMotion'] = {
   appear: true,
   name: 'mask-motion',
-  onAppearEnd: console.warn,
 }
 
 export const motion: DrawerProps['motion'] = (placement: string) => ({

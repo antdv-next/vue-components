@@ -1,6 +1,6 @@
 import type { CSSProperties, Ref } from 'vue'
 import type { Placement } from '../Drawer'
-import { clsx } from '@v-c/util/src'
+import { clsx } from '@v-c/util'
 import { computed, shallowRef, watch } from 'vue'
 
 export interface UseDragOptions {

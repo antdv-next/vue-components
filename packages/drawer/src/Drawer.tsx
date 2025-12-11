@@ -1,132 +1,178 @@
 import type { PortalProps } from '@v-c/portal'
-import type { ExtractPropTypes, PropType } from 'vue'
+import type { DrawerPanelEvents } from './DrawerPanel'
 import type { DrawerPopupProps } from './DrawerPopup'
+import type { DrawerClassNames, DrawerStyles } from './inter'
 import Portal from '@v-c/portal'
-import { computed, defineComponent, onMounted, ref, watch } from 'vue'
+import { computed, defineComponent, shallowRef, watch } from 'vue'
+import { useRefProvide } from './context'
 import DrawerPopup from './DrawerPopup'
 import { warnCheck } from './util'
 
 export type Placement = 'left' | 'top' | 'right' | 'bottom'
 
-function drawerProps() {
-  return {
-    open: { type: Boolean, default: false },
-    prefixCls: { type: String, default: 'vc-drawer' },
-    placement: { type: String as PropType<Placement>, default: 'right' },
-    autoFocus: { type: Boolean, default: true },
-    keyboard: { type: Boolean, default: true },
-    width: { type: [Number, String], default: 378 },
-    mask: { type: Boolean, default: true },
-    maskClosable: { type: Boolean, default: true },
-    getContainer: { type: [Function, Boolean] as PropType<PortalProps['getContainer']>, default: undefined },
-    forceRender: { type: Boolean, default: false },
-    onAfterOpenChange: { type: Function },
-    destroyOnClose: { type: Boolean, default: false },
-    motion: { type: [Function, Object] },
-    maskMotion: { type: Object },
-  }
+export interface DrawerProps extends Omit<DrawerPopupProps, 'prefixCls' | 'inline'>, DrawerPanelEvents {
+  prefixCls?: string
+  open?: boolean
+  onClose?: (e: MouseEvent | KeyboardEvent) => void
+  destroyOnHidden?: boolean
+  getContainer?: PortalProps['getContainer']
+  panelRef?: any
+  wrapperClassName?: string
+  classNames?: DrawerClassNames
+  styles?: DrawerStyles
 }
 
-export type DrawerProps = Omit<DrawerPopupProps, 'prefixCls' | 'inline' | 'scrollLocker'> & Partial<ExtractPropTypes<ReturnType<typeof drawerProps>>>
+const defaults = {
+  prefixCls: 'vc-drawer',
+  placement: 'right',
+  autoFocus: true,
+  keyboard: true,
+  mask: true,
+  maskClosable: true,
+  destroyOnHidden: false,
+} as DrawerProps
 
-export default defineComponent({
+const Drawer = defineComponent<DrawerProps>({
   name: 'Drawer',
-  props: drawerProps(),
-  emits: ['close', 'afterOpenChange', 'mouseenter', 'mouseover', 'mouseleave', 'click', 'keydown', 'keyup'],
-  setup(props, { emit, slots }) {
-    const animatedVisible = ref(false)
-    const mounted = ref(false)
-    const popupRef = ref<HTMLDivElement>()
-    const lastActiveRef = ref<HTMLElement>()
+  props: {
+    open: {
+      type: Boolean,
+      default: undefined,
+    },
+  },
+  setup(rawProps, { slots, expose, attrs }) {
+    const mergedOpen = shallowRef<boolean>(!!rawProps.open)
 
-    // ============================= Warn =============================
+    const mergedProps = computed(() => {
+      return {
+        ...defaults,
+        ...(attrs as Record<string, any>),
+        ...(rawProps as Record<string, any>),
+        open: mergedOpen.value,
+      } as DrawerProps
+    })
+
     if (process.env.NODE_ENV !== 'production') {
-      warnCheck(props)
+      warnCheck(mergedProps.value)
     }
 
-    // ============================= Open =============================
-    onMounted(() => {
-      mounted.value = true
-    })
+    const animatedVisible = shallowRef(!!(mergedProps.value.forceRender || mergedOpen.value))
+    const prefixCls = computed(() => mergedProps.value.prefixCls ?? 'vc-drawer')
+    const lastActiveRef = shallowRef<HTMLElement | null>(null)
+    const popupRef = shallowRef<any>()
 
-    const mergedOpen = computed(() => mounted.value ? props.open : false)
+    const externalPanelRef = shallowRef<any>()
+    watch(
+      () => mergedProps.value.panelRef,
+      () => {
+        externalPanelRef.value = mergedProps.value.panelRef
+      },
+      { immediate: true },
+    )
 
-    // ============================ Focus =============================
-    watch(mergedOpen, (value) => {
-      if (value) {
-        lastActiveRef.value = document.activeElement as HTMLElement
+    const { panel } = useRefProvide((el) => {
+      const refTarget = externalPanelRef.value
+      if (typeof refTarget === 'function') {
+        refTarget(el)
+      }
+      else if (refTarget && typeof refTarget === 'object' && 'value' in refTarget) {
+        refTarget.value = el
       }
     })
 
-    // ============================= Open =============================
-    const internalAfterOpenChange: DrawerProps['onAfterOpenChange'] = (nextVisible: boolean) => {
-      animatedVisible.value = nextVisible
-      emit('afterOpenChange', nextVisible)
+    watch(
+      mergedOpen,
+      (visible) => {
+        if (visible) {
+          animatedVisible.value = true
+          lastActiveRef.value = document.activeElement as HTMLElement
+        }
+        else if (mergedProps.value.destroyOnHidden) {
+          animatedVisible.value = false
+        }
+      },
+      { immediate: true },
+    )
 
-      if (
-        !nextVisible
-        && lastActiveRef.value
-        && !popupRef.value?.contains(lastActiveRef.value)
-      ) {
-        lastActiveRef.value?.focus({ preventScroll: true })
+    const internalAfterOpenChange = (nextVisible: boolean) => {
+      if (nextVisible) {
+        animatedVisible.value = true
+      }
+      else if (mergedProps.value.destroyOnHidden) {
+        animatedVisible.value = false
+      }
+
+      mergedProps.value.afterOpenChange?.(nextVisible)
+
+      if (!nextVisible && lastActiveRef.value) {
+        const panelEl = popupRef.value?.panelRef?.value as HTMLDivElement | undefined
+        if (panelEl && !panelEl.contains(lastActiveRef.value)) {
+          try {
+            lastActiveRef.value?.focus?.({ preventScroll: true } as any)
+          }
+          catch (e) {
+            // Do nothing
+          }
+        }
       }
     }
+
+    expose({
+      panel,
+      popupRef,
+    })
 
     return () => {
-      const {
-        prefixCls = 'vc-drawer',
-        placement = 'right' as Placement,
-        autoFocus = true,
-        keyboard = true,
-        width = 378,
-        mask = true,
-        maskClosable = true,
-        getContainer,
-        forceRender,
-        destroyOnClose,
-      } = props
-      // ============================ Render ============================
-      if (!forceRender && !animatedVisible.value && !mergedOpen.value && destroyOnClose) {
+      mergedOpen.value = !!rawProps.open
+      const mp = mergedProps.value
+      const shouldRenderPopup = mp.forceRender || animatedVisible.value || mergedOpen.value
+      if (!shouldRenderPopup) {
         return null
       }
 
       const eventHandlers = {
-        onMouseenter: (e: MouseEvent) => emit('mouseenter', e),
-        onMouseover: (e: MouseEvent) => emit('mouseover', e),
-        onMouseleave: (e: MouseEvent) => emit('mouseleave', e),
-        onClick: (e: MouseEvent) => emit('click', e),
-        onKeydown: (e: KeyboardEvent) => emit('keydown', e),
-        onKeyup: (e: KeyboardEvent) => emit('keyup', e),
+        onMouseEnter: mp.onMouseEnter,
+        onMouseOver: mp.onMouseOver,
+        onMouseLeave: mp.onMouseLeave,
+        onClick: mp.onClick,
+        onKeyDown: mp.onKeyDown,
+        onKeyUp: mp.onKeyUp,
       }
 
-      const drawerPopupProps = {
-        ...props,
-        open: mergedOpen.value,
-        prefixCls,
-        placement,
-        autoFocus,
-        keyboard,
-        width,
-        mask,
-        maskClosable,
-        inline: getContainer === false,
-        afterOpenChange: internalAfterOpenChange,
-        ref: popupRef,
-        onClose: () => {
-          emit('close')
-        },
-        ...eventHandlers,
+      const popupNode = (
+        <DrawerPopup
+          {...mp}
+          {...eventHandlers}
+          ref={popupRef}
+          mask={mp.mask !== false}
+          maskClosable={mp.maskClosable !== false}
+          placement={(mp.placement ?? 'right') as any}
+          autoFocus={mp.autoFocus !== false}
+          keyboard={mp.keyboard !== false}
+          prefixCls={prefixCls.value}
+          inline={mp.getContainer === false}
+          open={mergedOpen.value}
+          afterOpenChange={internalAfterOpenChange}
+          v-slots={slots}
+        />
+      )
+
+      if (mp.getContainer === false) {
+        return popupNode
       }
+
       return (
         <Portal
-          open={mergedOpen.value || forceRender || animatedVisible.value}
+          open={mergedOpen.value || mp.forceRender || animatedVisible.value}
           autoDestroy={false}
-          getContainer={getContainer}
-          autoLock={mask && (mergedOpen.value || animatedVisible.value)}
+          getContainer={mp.getContainer}
+          autoLock={mp.mask !== false && (mergedOpen.value || animatedVisible.value)}
         >
-          <DrawerPopup {...drawerPopupProps} v-slots={slots} />
+          {popupNode}
         </Portal>
       )
     }
   },
 })
+
+export default Drawer

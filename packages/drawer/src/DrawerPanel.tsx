@@ -1,6 +1,6 @@
 import type { KeyboardEventHandler, MouseEventHandler } from '@v-c/util/dist/EventInterface'
-import { clsx } from '@v-c/util/src'
-import { getAttrStyleAndClass } from '@v-c/util/src/props-util'
+import { clsx } from '@v-c/util'
+import { getAttrStyleAndClass } from '@v-c/util/dist/props-util'
 import { defineComponent } from 'vue'
 import { useRefContext } from './context.ts'
 
