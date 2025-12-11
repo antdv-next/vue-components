@@ -232,8 +232,8 @@ const DrawerPopup = defineComponent<DrawerPopupProps>(
         nextWrapperStyle.width = typeof parseWidth === 'number' ? `${parseWidth}px` : parseWidth
       }
       else {
-        const parseWidth = parseWidthHeight(mergedSize.value)
-        nextWrapperStyle.height = typeof parseWidth === 'number' ? `${parseWidth}px` : parseWidth
+        const parseHeight = parseWidthHeight(mergedSize.value)
+        nextWrapperStyle.height = typeof parseHeight === 'number' ? `${parseHeight}px` : parseHeight
       }
       return nextWrapperStyle
     })
