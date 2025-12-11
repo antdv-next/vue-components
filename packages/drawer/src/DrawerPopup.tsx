@@ -6,6 +6,7 @@ import { clsx } from '@v-c/util'
 import { KeyCodeStr } from '@v-c/util/dist/KeyCode'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
 import { getAttrStyleAndClass, toPropsRefs } from '@v-c/util/dist/props-util'
+import { getTransitionProps } from '@v-c/util/dist/utils/transition'
 import { computed, defineComponent, nextTick, onBeforeUnmount, shallowRef, Transition, watch } from 'vue'
 import { useDrawerContext, useDrawerProvide } from './context'
 import DrawerPanel from './DrawerPanel'
@@ -285,9 +286,11 @@ const DrawerPopup = defineComponent<DrawerPopupProps>(
       } = props
       const { className, style, restAttrs } = getAttrStyleAndClass(attrs)
 
+      const maskMotionProps = getTransitionProps(maskMotion?.name, maskMotion)
+
       // ============================ Mask ============================
       const maskNode = (
-        <Transition key="mask" {...maskMotion}>
+        <Transition key="mask" {...maskMotionProps}>
           <div
             v-show={open.value}
             class={clsx(
@@ -331,9 +334,10 @@ const DrawerPopup = defineComponent<DrawerPopupProps>(
 
       // =========================== Panel ============================
       const motionProps = typeof motion === 'function' ? motion(placement.value) : motion
+      const panelMotionProps = getTransitionProps(motionProps?.name, motionProps)
       const panelNode = (
         <Transition
-          {...motionProps}
+          {...panelMotionProps}
           onBeforeEnter={() => {
             props?.afterOpenChange?.(true)
           }}
@@ -352,7 +356,6 @@ const DrawerPopup = defineComponent<DrawerPopupProps>(
             style={[
               wrapperStyle.value,
               styles?.wrapper,
-              !open.value && { display: 'none' },
             ]}
             {
               ...pickAttrs(restAttrs, { data: true })

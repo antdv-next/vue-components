@@ -8,6 +8,7 @@ import GetContainer from './get-container.vue'
 import Multiple from './multiple.vue'
 import NoMask from './no-mask.vue'
 import Placement from './placement.vue'
+import Resizable from './resizable.vue'
 
 import './assets/common.less'
 </script>
@@ -40,6 +41,9 @@ import './assets/common.less'
     </Variant>
     <Variant title="placement">
       <Placement />
+    </Variant>
+    <Variant title="resizable">
+      <Resizable />
     </Variant>
   </Story>
 </template>

@@ -6,10 +6,10 @@ export const maskMotion: DrawerProps['maskMotion'] = {
   name: 'mask-motion',
 }
 
-export const motion: DrawerProps['motion'] = (placement: string) => ({
+export const motion: any = (placement: string) => ({
   appear: true,
   name: `panel-motion-${placement}`,
-})
+} as any)
 
 const motionProps: Partial<DrawerProps> = {
   maskMotion,
