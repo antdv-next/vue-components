@@ -346,12 +346,13 @@ const DrawerPopup = defineComponent<DrawerPopupProps>(
             ref={wrapperRef}
             class={clsx(
               `${prefixCls}-content-wrapper`,
-              isDragging.value && `${prefixCls}-content-wrapper-resizing`,
+              isDragging.value && `${prefixCls}-content-wrapper-dragging`,
               drawerClassNames?.wrapper,
             )}
             style={[
               wrapperStyle.value,
               styles?.wrapper,
+              !open.value && { display: 'none' },
             ]}
             {
               ...pickAttrs(restAttrs, { data: true })

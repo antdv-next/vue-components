@@ -14,8 +14,22 @@ export interface RefContextProps {
 
 const RefContext: InjectionKey<RefContextProps> = Symbol('RefContext')
 
-export function useRefProvide(context: RefContextProps) {
-  provide(RefContext, context)
+export function useRefProvide(customSet?: (panel: HTMLDivElement) => void) {
+  const panel = shallowRef<HTMLDivElement>()
+  const setPanel = (el: HTMLDivElement) => {
+    panel.value = el
+    customSet?.(el)
+  }
+
+  provide(RefContext, {
+    panel,
+    setPanel,
+  })
+
+  return {
+    panel,
+    setPanel,
+  }
 }
 
 export function useRefContext() {
@@ -32,5 +46,6 @@ export function useDrawerContext() {
 }
 
 export function useDrawerProvide(props: Ref<DrawerContextProps>) {
-  return inject(DrawerContext, props)
+  provide(DrawerContext, props)
+  return props
 }
