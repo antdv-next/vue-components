@@ -1,5 +1,5 @@
-import type { InjectionKey, ShallowRef } from 'vue'
-import { inject, provide } from 'vue'
+import type { InjectionKey, Ref, ShallowRef } from 'vue'
+import { inject, provide, ref, shallowRef } from 'vue'
 
 export interface DrawerContextProps {
   pushDistance?: number | string
@@ -12,24 +12,25 @@ export interface RefContextProps {
   setPanel: (panel: HTMLDivElement) => void
 }
 
-const DrawerContext: InjectionKey<DrawerContextProps> = Symbol('DrawerContext')
+const RefContext: InjectionKey<RefContextProps> = Symbol('RefContext')
 
-export function useDrawerProvide() {
-  provide(DrawerContext, {
-    pushDistance: 0,
-    push: () => {},
-    pull: () => {},
-  })
+export function useRefProvide(context: RefContextProps) {
+  provide(RefContext, context)
 }
+
+export function useRefContext() {
+  return inject(RefContext, {
+    panel: shallowRef(),
+    setPanel: () => {},
+  })!
+}
+
+const DrawerContext: InjectionKey<Ref<DrawerContextProps>> = Symbol('DrawerContext')
 
 export function useDrawerContext() {
-  return inject(DrawerContext, {
-    pushDistance: 0,
-    push: () => {},
-    pull: () => {},
-  })
+  return inject(DrawerContext, ref())
 }
 
-export function useDrawerInject(props: DrawerContextProps) {
+export function useDrawerProvide(props: Ref<DrawerContextProps>) {
   return inject(DrawerContext, props)
 }

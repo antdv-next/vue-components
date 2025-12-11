@@ -1,10 +1,15 @@
-import type { CSSProperties, ExtractPropTypes, PropType, SlotsType, TransitionProps } from 'vue'
-import type { DrawerContextProps } from './context'
-import { classNames } from '@v-c/util'
+import type { CSSMotionProps } from '@v-c/util/dist/utils/transition'
+import type { CSSProperties } from 'vue'
+import type { DrawerPanelEvents } from './DrawerPanel'
+import type { DrawerClassNames, DrawerStyles } from './inter'
+import { clsx } from '@v-c/util'
+import { KeyCodeStr } from '@v-c/util/dist/KeyCode'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
-import { computed, defineComponent, onBeforeUnmount, ref, Transition, watch } from 'vue'
-import { useDrawerContext, useDrawerInject } from './context'
+import { getAttrStyleAndClass, toPropsRefs } from '@v-c/util/dist/props-util'
+import { computed, defineComponent, nextTick, onBeforeUnmount, shallowRef, Transition, watch } from 'vue'
+import { useDrawerContext, useDrawerProvide } from './context'
 import DrawerPanel from './DrawerPanel'
+import useDrag from './hooks/useDrag.ts'
 import { parseWidthHeight } from './util'
 
 const sentinelStyle: CSSProperties = {
@@ -21,321 +26,368 @@ export interface PushConfig {
   distance?: number | string
 }
 
-function drawerPopupProps() {
-  return {
-    prefixCls: { type: String, required: true },
-    open: { type: Boolean, default: false },
-    inline: { type: Boolean, default: false },
-    push: { type: [Boolean, Object], default: undefined },
-    forceRender: { type: Boolean, default: false },
-    autoFocus: { type: Boolean, default: false },
-    keyboard: { type: Boolean, default: true },
-    rootClassName: String,
-    rootStyle: Object as PropType<CSSProperties>,
-    zIndex: Number,
-    placement: String,
-    id: String,
-    width: [Number, String],
-    height: [Number, String],
-    mask: { type: Boolean, default: true },
-    maskClosable: { type: Boolean, default: true },
-    maskClassName: String,
-    maskStyle: Object,
-    motion: [Function, Object],
-    maskMotion: Object,
-    onAfterOpenChange: Function,
-    onClose: Function,
-    onMouseenter: Function,
-    onMouseover: Function,
-    onMouseleave: Function,
-    onClick: Function,
-    onKeydown: Function,
-    onKeyup: Function,
-  }
+// export type DrawerPopupProps = Partial<ExtractPropTypes<ReturnType<typeof drawerPopupProps>>>
+export interface DrawerPopupProps extends DrawerPanelEvents {
+  prefixCls: string
+  open?: boolean
+  inline?: boolean
+  push?: boolean | PushConfig
+  forceRender?: boolean
+  autoFocus?: boolean
+  keyboard?: boolean
+
+  // Root
+  rootClassName?: string
+  rootStyle?: CSSProperties
+  zIndex?: number
+
+  // Drawer
+  placement?: Placement
+  id?: string
+
+  width?: number | string
+  height?: number | string
+  /** Size of the drawer (width for left/right placement, height for top/bottom placement) */
+  size?: number | string
+  /** Maximum size of the drawer */
+  maxSize?: number
+
+  // Mask
+  mask?: boolean
+  maskClosable?: boolean
+  maskClassName?: string
+  maskStyle?: CSSProperties
+
+  motion?: CSSMotionProps | ((placement: Placement | undefined) => CSSMotionProps)
+  maskMotion?: CSSMotionProps
+
+  // Events
+  afterOpenChange?: (open: boolean) => void
+  onClose?: (e: MouseEvent | KeyboardEvent) => void
+
+  // classNames
+  classNames?: DrawerClassNames
+
+  // styles
+  styles?: DrawerStyles
+  drawerRender?: (node: any) => any
+
+  // resizable
+  /** Default size for uncontrolled resizable drawer */
+  defaultSize?: number | string
+  resizable?:
+    | boolean
+    | {
+      onResize?: (size: number) => void
+      onResizeStart?: () => void
+      onResizeEnd?: () => void
+    }
+
 }
 
-export type DrawerPopupProps = Partial<ExtractPropTypes<ReturnType<typeof drawerPopupProps>>>
+const DrawerPopup = defineComponent<DrawerPopupProps>(
+  (props, { expose, attrs, slots }) => {
+    // ================================ Refs ================================
+    const panelRef = shallowRef<HTMLDivElement>()
+    const sentinelStartRef = shallowRef<HTMLDivElement>()
+    const sentinelEndRef = shallowRef<HTMLDivElement>()
 
-function getTransitionProps(transitionName: string, opt: TransitionProps = {}) {
-  const transitionProps: TransitionProps = transitionName
-    ? {
-        name: transitionName,
-        appear: true,
-        // type: 'animation',
-        appearFromClass: `${transitionName}-appear ${transitionName}-appear-prepare`,
-        // appearActiveClass: `antdv-base-transtion`,
-        appearToClass: `${transitionName}-appear ${transitionName}-appear-active`,
-        enterFromClass: `${transitionName}-enter ${transitionName}-enter-prepare ${transitionName}-enter-start`,
-        enterActiveClass: `${transitionName}-enter ${transitionName}-enter-prepare`,
-        enterToClass: `${transitionName}-enter ${transitionName}-enter-active`,
-        leaveFromClass: ` ${transitionName}-leave`,
-        leaveActiveClass: `${transitionName}-leave ${transitionName}-leave-active`,
-        leaveToClass: `${transitionName}-leave ${transitionName}-leave-active`,
-        ...opt,
-      }
-    : { css: false, ...opt }
-  return transitionProps
-}
+    const {
+      open,
+      autoFocus,
+      placement,
+      push,
+      maxSize,
+    } = toPropsRefs(
+      props,
+      'open',
+      'autoFocus',
+      'push',
+      'placement',
+      'maxSize',
+    )
 
-export default defineComponent({
-  name: 'DrawerPopup',
-  props: drawerPopupProps(),
-  emits: ['close', 'afterOpenChange', 'mouseenter', 'mouseover', 'mouseleave', 'click', 'keydown', 'keyup'] as const,
-  slots: Object as SlotsType<{
-    default: () => any
-    drawerRender: () => any
-  }>,
-  setup(props, { attrs, slots, emit }) {
-    const panelRef = ref<HTMLDivElement>()
-    const sentinelStartRef = ref<HTMLDivElement>()
-    const sentinelEndRef = ref<HTMLDivElement>()
+    expose({
+      panelRef,
+    })
 
-    const onPanelKeyDown = (event: KeyboardEvent) => {
-      const { key, shiftKey } = event
-
+    const onPanelKeyDown = (e: KeyboardEvent) => {
+      const { onClose, keyboard } = props
+      const { key, shiftKey } = e
       switch (key) {
-        // Tab active
-        case 'Tab': {
-          if (!shiftKey && document.activeElement === sentinelEndRef.value) {
-            sentinelStartRef.value?.focus({ preventScroll: true })
-          }
-          else if (
-            shiftKey
-            && document.activeElement === sentinelStartRef.value
-          ) {
-            sentinelEndRef.value?.focus({ preventScroll: true })
+        case KeyCodeStr.Tab:{
+          if (key === KeyCodeStr.Tab) {
+            if (!shiftKey && document.activeElement === sentinelEndRef.value) {
+              sentinelStartRef.value?.focus({ preventScroll: true })
+            }
+            else if (shiftKey && document.activeElement === sentinelStartRef.value) {
+              sentinelEndRef.value?.focus({ preventScroll: true })
+            }
           }
           break
         }
 
         // Close
-        case 'Escape': {
-          if (props.onClose && props.keyboard) {
-            event.stopPropagation()
-            emit('close', event)
+        case KeyCodeStr.Escape:{
+          if (onClose && keyboard) {
+            e.stopPropagation()
+            onClose(e)
           }
-          break
         }
       }
     }
 
+    // ========================== Control ===========================
     // Auto Focus
-    watch(
-      () => props.open,
-      (open) => {
-        if (open && props.autoFocus) {
-          panelRef.value?.focus({ preventScroll: true })
-        }
-      },
-    )
+    watch([open], async () => {
+      await nextTick()
+      if (open.value && autoFocus.value) {
+        panelRef.value?.focus?.({ preventScroll: true })
+      }
+    }, {
+      immediate: true,
+      flush: 'post',
+    })
 
-    // Push state
-    const pushed = ref(false)
+    // ============================ Push ============================
+    const pushed = shallowRef(false)
+
     const parentContext = useDrawerContext()
 
     // Merge push distance
-    const pushDistance = computed(() => {
-      let pushConfig: PushConfig
-      if (typeof props.push === 'boolean') {
-        pushConfig = props.push ? {} : { distance: 0 }
+    const pushConfig = computed(() => {
+      if (typeof push.value === 'boolean') {
+        return push.value ? {} : { distance: 0 }
       }
       else {
-        pushConfig = props.push || {}
+        return push.value || {}
       }
-      return pushConfig?.distance ?? parentContext?.pushDistance ?? 180
     })
 
-    const mergedContext = computed<DrawerContextProps>(() => ({
-      pushDistance: pushDistance.value,
-      push: () => {
-        pushed.value = true
-      },
-      pull: () => {
-        pushed.value = false
-      },
-    }))
-    useDrawerInject(mergedContext.value)
+    const pushDistance = computed(() => pushConfig.value?.distance ?? parentContext.value?.pushDistance ?? 180)
+    const mergedContext = computed(() => {
+      return {
+        pushDistance: pushDistance.value,
+        push: () => {
+          pushed.value = true
+        },
+        pull: () => {
+          pushed.value = false
+        },
+      }
+    })
+    useDrawerProvide(mergedContext)
 
+    // ========================= ScrollLock =========================
     // Tell parent to push
-    watch(
-      () => props.open,
-      (open) => {
-        if (open) {
-          parentContext?.push?.()
-        }
-        else {
-          parentContext?.pull?.()
-        }
-      },
-    )
-
-    // Clean up
-    onBeforeUnmount(() => {
-      parentContext?.pull?.()
+    watch(open, () => {
+      if (open.value) {
+        parentContext?.value?.push?.()
+      }
+      else {
+        parentContext.value?.pull?.()
+      }
+    }, {
+      immediate: true,
     })
 
+    onBeforeUnmount(() => {
+      parentContext.value?.pull?.()
+    })
+
+    // ============================ Size ============================
+    const currentSize = shallowRef<number>()
+
+    const isHorizontal = computed(() => placement.value === 'left' || placement.value === 'right')
+
+    // Aggregate size logic with backward compatibility using useMemo
+    const mergedSize = computed(() => {
+      const legacySize = isHorizontal.value ? props.width : props.height
+      const nextMergedSize = props?.size ?? legacySize ?? currentSize.value ?? props?.defaultSize ?? (isHorizontal.value ? 378 : undefined)
+      return parseWidthHeight(nextMergedSize)
+    })
+
+    // >>> Style
+    const wrapperStyle = computed<CSSProperties>(() => {
+      const nextWrapperStyle: CSSProperties = {}
+      if (pushed.value && pushDistance.value) {
+        switch (placement.value) {
+          case 'top':
+            nextWrapperStyle.transform = `translateY(${pushDistance.value}px)`
+            break
+          case 'bottom':
+            nextWrapperStyle.transform = `translateY(${-pushDistance.value}px)`
+            break
+          case 'left':
+            nextWrapperStyle.transform = `translateX(${pushDistance.value}px)`
+            break
+          default:
+            nextWrapperStyle.transform = `translateX(${-pushDistance.value}px)`
+            break
+        }
+      }
+      if (isHorizontal.value) {
+        const parseWidth = parseWidthHeight(mergedSize.value)
+        nextWrapperStyle.width = typeof parseWidth === 'number' ? `${parseWidth}px` : parseWidth
+      }
+      else {
+        const parseWidth = parseWidthHeight(mergedSize.value)
+        nextWrapperStyle.height = typeof parseWidth === 'number' ? `${parseWidth}px` : parseWidth
+      }
+      return nextWrapperStyle
+    })
+
+    // =========================== Resize ===========================
+    const wrapperRef = shallowRef<HTMLDivElement>()
+    const isResizeable = computed(() => !!props.resizable)
+    const resizeConfig = computed(() => typeof props?.resizable === 'object' ? props?.resizable : {})
+
+    const onInternalResize = (size: number) => {
+      currentSize.value = size
+      resizeConfig?.value?.onResize?.(size)
+    }
+    const { dragElementProps, isDragging } = useDrag({
+      prefixCls: computed(() => `${props.prefixCls}-resizable`),
+      direction: placement as any,
+      className: computed(() => props?.classNames?.dragger),
+      style: computed(() => props?.styles?.dragger),
+      maxSize,
+      containerRef: wrapperRef,
+      currentSize: mergedSize,
+      onResize: onInternalResize,
+      onResizeStart: () => resizeConfig?.value?.onResizeStart?.(),
+      onResizeEnd: () => resizeConfig?.value?.onResizeEnd?.(),
+    })
     return () => {
       const {
-        prefixCls = 'vc-drawer',
-        open,
-        placement,
-        inline,
-
-        // Root
-        rootClassName,
-        rootStyle,
-        zIndex,
-
-        // Drawer
-        id,
-        motion = { name: 'panel-motion' },
-        width,
-        height,
-
-        // Mask
-        mask,
-        maskClosable,
-        maskMotion = { name: 'mask-motion' },
-        maskClassName,
+        onMouseEnter,
+        onMouseOver,
+        onMouseLeave,
+        onClick,
+        onKeyDown,
+        onKeyUp,
+        maskMotion,
         maskStyle,
+        styles,
+        prefixCls,
+        classNames: drawerClassNames,
+        maskClassName,
+        maskClosable,
+        onClose,
+        id,
+        drawerRender,
+        motion,
+        rootStyle,
+        rootClassName,
+        zIndex,
+        inline,
+        mask,
       } = props
-      const maskMotionProps = getTransitionProps(maskMotion.name)
-      // Mask Node
-      const maskNode = mask && (
-        <Transition key="mask" {...maskMotionProps}>
+      const { className, style, restAttrs } = getAttrStyleAndClass(attrs)
+
+      // ============================ Mask ============================
+      const maskNode = (
+        <Transition key="mask" {...maskMotion}>
           <div
-            v-show={open}
-            class={classNames(
+            v-show={open.value}
+            class={clsx(
               `${prefixCls}-mask`,
-              [attrs?.class],
+              drawerClassNames?.mask,
               maskClassName,
             )}
-            style={{
-              ...maskStyle,
-              ...attrs?.style as CSSProperties,
-            }}
-            onClick={() => {
-              if (maskClosable && open)
-                emit('close')
-            }}
-            // ref={maskRef}
+            style={[
+              maskStyle,
+              styles?.mask,
+            ]}
+            onClick={maskClosable && open.value ? onClose : undefined}
           />
         </Transition>
       )
 
-      // Panel Node
-      const motionProps = () => {
-        return typeof motion === 'function'
-          ? motion(placement)
-          : motion
-      }
-      const getMotion = motionProps()
-      const panelMotionProps = getTransitionProps(getMotion.name)
-
-      const wrapperStyle = () => {
-        const style: Record<string, any> = {}
-
-        if (pushed.value && pushDistance.value) {
-          switch (props.placement) {
-            case 'top':
-              style.transform = `translateY(${pushDistance.value}px)`
-              break
-            case 'bottom':
-              style.transform = `translateY(${-pushDistance.value}px)`
-              break
-            case 'left':
-              style.transform = `translateX(${pushDistance.value}px)`
-              break
-            default:
-              style.transform = `translateX(${-pushDistance.value}px)`
-              break
-          }
-        }
-
-        if (placement === 'left' || placement === 'right') {
-          style.width = parseWidthHeight(width)
-        }
-        else {
-          style.height = parseWidthHeight(height)
-        }
-
-        return style
+      // =========================== Events ===========================
+      const eventHandlers = {
+        onMouseEnter,
+        onMouseOver,
+        onMouseLeave,
+        onClick,
+        onKeyDown,
+        onKeyUp,
       }
 
-      const eventHandlers = () => ({
-        onMouseenter: (e: MouseEvent) => emit('mouseenter', e),
-        onMouseover: (e: MouseEvent) => emit('mouseover', e),
-        onMouseleave: (e: MouseEvent) => emit('mouseleave', e),
-        onClick: (e: MouseEvent) => emit('click', e),
-        onKeydown: (e: KeyboardEvent) => emit('keydown', e),
-        onKeyup: (e: KeyboardEvent) => emit('keyup', e),
-      })
-
+      // =========================== Render ==========================
+      // >>>>> Panel
       const content = (
         <DrawerPanel
           id={id}
-          // containerRef={motionRef}
           prefixCls={prefixCls}
-          class={classNames([attrs.class])}
-          style={{
-            ...attrs.style as CSSProperties,
-          }}
-          {...pickAttrs(props, { aria: true })}
+          class={clsx(className, drawerClassNames?.section)}
+          style={[style, styles?.section]}
+          {...restAttrs}
           {...eventHandlers}
         >
-          {slots.default?.()}
+          {slots?.default?.()}
         </DrawerPanel>
       )
 
-      const containerStyle = () => {
-        const style = { ...rootStyle }
-        if (zIndex)
-          style.zIndex = zIndex
-
-        return style
-      }
+      // =========================== Panel ============================
+      const motionProps = typeof motion === 'function' ? motion(placement.value) : motion
       const panelNode = (
         <Transition
-          key="panel"
-          {...panelMotionProps}
-          leaveActiveClass={`${prefixCls}-content-wrapper-hidden`}
-          onAfterEnter={() => emit('afterOpenChange', open)}
-          onAfterLeave={() => emit('afterOpenChange', open)}
+          {...motionProps}
+          onBeforeEnter={() => {
+            props?.afterOpenChange?.(true)
+          }}
+          onAfterLeave={() => {
+            props?.afterOpenChange?.(false)
+          }}
         >
           <div
-            v-show={open}
-            class={classNames(
+            v-show={open.value}
+            ref={wrapperRef}
+            class={clsx(
               `${prefixCls}-content-wrapper`,
-              [attrs.class],
+              isDragging.value && `${prefixCls}-content-wrapper-resizing`,
+              drawerClassNames?.wrapper,
             )}
-            style={{
-              ...wrapperStyle(),
-              ...attrs.style as CSSProperties,
-            }}
-            {...pickAttrs(props, { data: true })}
+            style={[
+              wrapperStyle.value,
+              styles?.wrapper,
+            ]}
+            {
+              ...pickAttrs(restAttrs, { data: true })
+            }
           >
-            {/* {slots.drawerRender ? slots.drawerRender?.({ content }) : content} */}
-            {content}
+            {isResizeable.value && <div {...dragElementProps.value} />}
+            {drawerRender ? drawerRender(content) : content}
           </div>
         </Transition>
       )
+
+      // >>>>> Container
+      const containerStyle: CSSProperties = {
+        ...rootStyle,
+      }
+      if (zIndex) {
+        containerStyle.zIndex = zIndex
+      }
+
       return (
         <div
-          class={classNames(
+          class={clsx(
             prefixCls,
-            `${prefixCls}-${placement}`,
+            `${prefixCls}-${placement.value}`,
             rootClassName,
             {
-              [`${prefixCls}-open`]: open,
+              [`${prefixCls}-open`]: open.value,
               [`${prefixCls}-inline`]: inline,
             },
           )}
-          style={containerStyle()}
+          style={containerStyle}
           tabindex={-1}
           ref={panelRef}
           onKeydown={onPanelKeyDown}
         >
-          {maskNode}
+          {mask && maskNode}
           <div
             tabindex={0}
             ref={sentinelStartRef}
@@ -355,4 +407,10 @@ export default defineComponent({
       )
     }
   },
-})
+  {
+    name: 'DrawerPopup',
+    inheritAttrs: false,
+  },
+)
+
+export default DrawerPopup

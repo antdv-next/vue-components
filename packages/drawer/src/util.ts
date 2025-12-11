@@ -3,12 +3,20 @@ import canUseDom from '@v-c/util/dist/Dom/canUseDom'
 import warning from '@v-c/util/dist/warning'
 
 export function parseWidthHeight(value?: number | string) {
-  if (typeof value === 'string' && String(Number(value)) === value) {
-    warning(
-      false,
-      'Invalid value type of `width` or `height` which should be number type instead.',
-    )
-    return Number(value)
+  if (typeof value === 'string') {
+    const num = Number(value.replace(/px$/i, ''))
+    const floatNum = parseFloat(value)
+
+    if (floatNum === num) {
+      warning(
+        false,
+        'Invalid value type of `width` or `height` which should be number type instead.',
+      )
+    }
+
+    if (!Number.isNaN(num)) {
+      return num
+    }
   }
 
   return value
@@ -16,7 +24,7 @@ export function parseWidthHeight(value?: number | string) {
 
 export function warnCheck(props: DrawerProps) {
   warning(
-    !('wrapperClassName' in props),
+    !(props.wrapperClassName),
     `'wrapperClassName' is removed. Please use 'rootClassName' instead.`,
   )
 
