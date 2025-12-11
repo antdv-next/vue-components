@@ -68,7 +68,7 @@ export default function useDrag(options: UseDragOptions) {
       return
     }
 
-    const currentPos = isDragging.value ? e.clientX : e.clientY
+    const currentPos = isHorizontal.value ? e.clientX : e.clientY
     let delta = currentPos - startPos.value
 
     // Adjust delta direction based on placement
