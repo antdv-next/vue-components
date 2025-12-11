@@ -89,7 +89,7 @@ const Circle = defineComponent<ProgressProps>(
             return (
               <PtgCircle
                 key={index}
-                color={color!}
+                color={color}
                 ptg={ptg!}
                 radius={radius.value}
                 className={classNames.track}

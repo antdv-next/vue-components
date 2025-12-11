@@ -31,7 +31,7 @@ export interface ColorGradientProps {
   strokeLinecap: ProgressProps['strokeLinecap']
   strokeWidth: ProgressProps['strokeWidth']
   size: number
-  color: string | StrokeColorObject
+  color?: string | StrokeColorObject
   gapDegree: number
   className?: string
 }
