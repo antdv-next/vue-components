@@ -1,42 +1,53 @@
-import type { HTMLAttributes } from 'vue'
-import { classNames } from '@v-c/util'
-import pickAttrs from '@v-c/util/dist/pickAttrs'
+import type { KeyboardEventHandler, MouseEventHandler } from '@v-c/util/dist/EventInterface'
+import { clsx } from '@v-c/util/src'
+import { getAttrStyleAndClass } from '@v-c/util/src/props-util'
 import { defineComponent } from 'vue'
+import { useRefContext } from './context.ts'
 
-export type DrawerPanelAccessibility = Pick<
-  HTMLAttributes,
-  keyof HTMLAttributes & string
->
-
-export interface DrawerPanelProps
-  extends DrawerPanelAccessibility {
-  prefixCls: string
-  id?: string
-  containerRef?: any
+export interface DrawerPanelEvents {
+  onMouseEnter?: MouseEventHandler
+  onMouseOver?: MouseEventHandler
+  onMouseLeave?: MouseEventHandler
+  onClick?: MouseEventHandler
+  onKeyDown?: KeyboardEventHandler
+  onKeyUp?: KeyboardEventHandler
 }
 
-export default defineComponent({
+export interface DrawerPanelProps extends DrawerPanelEvents {
+  prefixCls: string
+  id?: string
+}
+
+export default defineComponent<DrawerPanelProps>({
   name: 'DrawerPanel',
-  props: {
-    prefixCls: {
-      type: String,
-      required: true,
-    },
-    id: String,
-    containerRef: null,
-  },
-  emits: ['mouseenter', 'mouseover', 'mouseleave', 'click', 'keydown', 'keyup'],
+  inheritAttrs: false,
   setup(props, { slots, attrs }) {
+    const { setPanel } = useRefContext()
+    const setRef = (el: any) => {
+      setPanel?.(el)
+    }
     return () => {
-      const { prefixCls } = props
+      const { prefixCls, id } = props
+      const { className, style, restAttrs } = getAttrStyleAndClass(attrs)
+      const attrsProps = {
+        onMouseenter: props.onMouseEnter,
+        onMouseover: props.onMouseOver,
+        onMouseleave: props.onMouseLeave,
+        onClick: props.onClick,
+        onKeydown: props.onKeyDown,
+        onKeyup: props.onKeyUp,
+      }
 
       return (
         <div
-          class={classNames(`${prefixCls}-section`, [attrs.class])}
+          class={clsx(`${prefixCls}-section`, className)}
+          style={style}
           role="dialog"
-          {...pickAttrs(attrs, { aria: true })}
+          {...restAttrs}
+          {...attrsProps}
           aria-modal="true"
-          {...props}
+          id={id}
+          ref={setRef}
         >
           {slots.default?.()}
         </div>
