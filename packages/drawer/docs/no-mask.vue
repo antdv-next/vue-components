@@ -45,7 +45,19 @@ function onSwitch() {
       v-bind="motionProps"
     >
       <div class="content">
-        Content Area
+        <div class="menu-title">
+          Navigation
+        </div>
+        <ul class="menu">
+          <li>Option 1</li>
+          <li>Option 2</li>
+          <li>Option 3</li>
+          <li>Option 4</li>
+          <li>Option 5</li>
+          <li>Option 6</li>
+          <li>Option 7</li>
+          <li>Option 8</li>
+        </ul>
       </div>
     </Drawer>
   </div>
@@ -54,5 +66,21 @@ function onSwitch() {
 <style scoped>
 .content {
   padding: 20px;
+}
+
+.menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu li {
+  padding: 6px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.menu-title {
+  margin-bottom: 8px;
+  font-weight: 600;
 }
 </style>

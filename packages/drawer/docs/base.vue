@@ -4,6 +4,14 @@ import Drawer from '../src'
 import motionProps from './assets/motion.ts'
 
 const open = ref(false)
+
+function onClose() {
+  open.value = false
+}
+
+function onToggle() {
+  open.value = !open.value
+}
 </script>
 
 <template>
@@ -13,10 +21,7 @@ const open = ref(false)
       placement="right"
       width="60%"
       v-bind="motionProps"
-      @close="() => {
-        console.log('close')
-        open = false
-      }"
+      @close="onClose"
       @after-open-change="(c) => {
         console.log('transitionEnd: ', c);
       }"
@@ -24,7 +29,7 @@ const open = ref(false)
       content
     </Drawer>
     <div>
-      <button @click="() => open = !open">
+      <button @click="onToggle">
         打开
       </button>
     </div>
