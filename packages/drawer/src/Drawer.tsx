@@ -81,15 +81,15 @@ const Drawer = defineComponent<DrawerProps>({
           animatedVisible.value = true
           lastActiveRef.value = document.activeElement as HTMLElement
         }
-        else if (mergedProps.value.destroyOnHidden) {
-          animatedVisible.value = false
-        }
+        // else if (mergedProps.value.destroyOnHidden) {
+        //   animatedVisible.value = false
+        // }
       },
       { immediate: true },
     )
 
     const internalAfterOpenChange = (nextVisible: boolean) => {
-      if (nextVisible) {
+      if (nextVisible && nextVisible !== animatedVisible.value) {
         animatedVisible.value = true
       }
       else if (mergedProps.value.destroyOnHidden) {

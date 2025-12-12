@@ -295,7 +295,10 @@ const DrawerPopup = defineComponent<DrawerPopupProps>(
 
       // ============================ Mask ============================
       const maskNode = (
-        <Transition key="mask" {...maskMotionProps}>
+        <Transition
+          key="mask"
+          {...maskMotionProps}
+        >
           <div
             v-show={open.value}
             class={clsx(
