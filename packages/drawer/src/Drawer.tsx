@@ -3,6 +3,7 @@ import type { DrawerPanelEvents } from './DrawerPanel'
 import type { DrawerPopupProps } from './DrawerPopup'
 import type { DrawerClassNames, DrawerStyles } from './inter'
 import Portal from '@v-c/portal'
+import { omit } from '@v-c/util/dist/utils/omit'
 import { computed, defineComponent, shallowRef, watch } from 'vue'
 import { useRefProvide } from './context'
 import DrawerPopup from './DrawerPopup'
@@ -34,18 +35,11 @@ const defaults = {
 
 const Drawer = defineComponent<DrawerProps>({
   name: 'Drawer',
-  props: {
-    open: {
-      type: Boolean,
-      default: undefined,
-    },
-  },
-  setup(rawProps, { slots, expose, attrs }) {
+  setup(rawProps = defaults, { slots, expose, attrs }) {
     const mergedOpen = shallowRef<boolean>(!!rawProps.open)
 
     const mergedProps = computed(() => {
       return {
-        ...defaults,
         ...(attrs as Record<string, any>),
         ...(rawProps as Record<string, any>),
         open: mergedOpen.value,
@@ -141,8 +135,11 @@ const Drawer = defineComponent<DrawerProps>({
 
       const popupNode = (
         <DrawerPopup
-          {...mp}
+          {...omit(mp, ['onClose'])}
           {...eventHandlers}
+          onClose={(e) => {
+            mp?.onClose?.(e)
+          }}
           ref={popupRef}
           mask={mp.mask !== false}
           maskClosable={mp.maskClosable !== false}
