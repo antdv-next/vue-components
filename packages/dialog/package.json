@@ -12,15 +12,15 @@
     "./dist/*.d.ts": "./dist/*.d.ts",
     "./package.json": "./package.json"
   },
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "dist/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
     "dist",
     "package.json"
   ],
-  "publishConfig": {
-    "access": "public"
-  },
-  "types": "./dist/index.d.ts",
-  "main": "dist/index.js",
   "scripts": {
     "build": "vite build",
     "prepublish": "pnpm build",
@@ -32,7 +32,7 @@
     "vue": "^3.0.0"
   },
   "dependencies": {
-    "@v-c/util": "workspace:^",
-    "@v-c/portal": "workspace:^"
+    "@v-c/portal": "workspace:^",
+    "@v-c/util": "workspace:^"
   }
 }
