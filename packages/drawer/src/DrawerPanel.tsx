@@ -1,8 +1,9 @@
 import type { KeyboardEventHandler, MouseEventHandler } from '@v-c/util/dist/EventInterface'
 import { clsx } from '@v-c/util'
+import pickAttrs from '@v-c/util/dist/pickAttrs'
 import { getAttrStyleAndClass } from '@v-c/util/dist/props-util'
 import { defineComponent } from 'vue'
-import { useRefContext } from './context.ts'
+import { useRefContext } from './context'
 
 export interface DrawerPanelEvents {
   onMouseEnter?: MouseEventHandler
@@ -43,7 +44,7 @@ export default defineComponent<DrawerPanelProps>({
           class={clsx(`${prefixCls}-section`, className)}
           style={style}
           role="dialog"
-          {...restAttrs}
+          {...pickAttrs(restAttrs, { aria: true })}
           {...attrsProps}
           aria-modal="true"
           id={id}
