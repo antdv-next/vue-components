@@ -287,6 +287,11 @@ const DrawerPopup = defineComponent<DrawerPopupProps>(
       const { className, style, restAttrs } = getAttrStyleAndClass(attrs)
 
       const maskMotionProps = getTransitionProps(maskMotion?.name, maskMotion)
+      const onMaskClose = (e: MouseEvent) => {
+        if (maskClosable && open.value) {
+          onClose?.(e)
+        }
+      }
 
       // ============================ Mask ============================
       const maskNode = (
@@ -302,7 +307,7 @@ const DrawerPopup = defineComponent<DrawerPopupProps>(
               maskStyle,
               styles?.mask,
             ]}
-            onClick={maskClosable && open.value ? onClose : undefined}
+            onClick={onMaskClose}
           />
         </Transition>
       )

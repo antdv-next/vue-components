@@ -17,14 +17,14 @@ function onToggle() {
 <template>
   <div>
     <Drawer
-      v-model:open="open"
+      :open="open"
       placement="right"
       width="60%"
       v-bind="motionProps"
-      @close="onClose"
-      @after-open-change="(c) => {
+      :after-open-change="(c) => {
         console.log('transitionEnd: ', c);
       }"
+      @close="onClose"
     >
       content
     </Drawer>
