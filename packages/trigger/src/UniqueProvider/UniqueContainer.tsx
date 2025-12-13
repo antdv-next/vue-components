@@ -94,6 +94,9 @@ const UniqueContainer = defineComponent<UniqueContainerProps>(
         },
         onAfterLeave: (element: Element) => {
           motionVisible.value = false
+          // Clear cached position after leave animation completes
+          // This ensures next open starts from new position instead of old cached position
+          cachedOffsetStyleRef.value = {}
           baseTransitionProps.onAfterLeave?.(element)
         },
       }
