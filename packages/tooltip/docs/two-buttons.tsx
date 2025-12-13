@@ -9,10 +9,10 @@ export default defineComponent(() => {
   return () => (
     <UniqueProvider>
       <div style={{ margin: '100px', display: 'flex', gap: '16px' }}>
-        <Tooltip placement="top" trigger={['hover']} overlay="This is the first tooltip" motion={motion}>
+        <Tooltip placement="top" trigger={['hover']} overlay="This is the first tooltip" motion={motion as any}>
           <button type="button">Button 1</button>
         </Tooltip>
-        <Tooltip placement="top" trigger={['hover']} overlay="This is the second tooltip" motion={motion}>
+        <Tooltip placement="top" trigger={['hover']} overlay="This is the second tooltip" motion={motion as any}>
           <button type="button">Button 2</button>
         </Tooltip>
       </div>
