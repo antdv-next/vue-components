@@ -45,12 +45,12 @@ export default function useOpen(
   postOpen: (nextOpen: boolean) => boolean,
 ) {
   // SSR not support Portal which means we need delay `open` for the first time render
-  const rendered = shallowRef(false)
+  const rendered = shallowRef(propOpen.value ?? false)
   onMounted(() => {
     rendered.value = true
   })
 
-  const stateOpen = shallowRef(false)
+  const stateOpen = shallowRef(propOpen.value ?? false)
   watch(propOpen, () => {
     stateOpen.value = propOpen.value
   })

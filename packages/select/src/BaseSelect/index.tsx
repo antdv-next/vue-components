@@ -753,7 +753,7 @@ export const BaseSelect = defineComponent<
           components={mergedComponents.value}
         />
       )
-
+      console.log(mergedOpen.value)
       renderNode = (
         <SelectTrigger
           ref={triggerRef}

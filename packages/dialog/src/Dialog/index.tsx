@@ -58,6 +58,7 @@ const Dialog = defineComponent<IDialogPropTypes>(
         focusDialogContent()
       }
       else {
+        const _animatedVisible = animatedVisible.value
         // Clean up scroll bar & focus back
         animatedVisible.value = false
 
@@ -72,7 +73,7 @@ const Dialog = defineComponent<IDialogPropTypes>(
         }
 
         // Trigger afterClose only when change visible from true to false
-        if (animatedVisible.value) {
+        if (_animatedVisible) {
           props?.afterClose?.()
         }
         props?.afterOpenChange?.(newVisible)
