@@ -61,15 +61,15 @@ const DialogWrap = defineComponent<IDialogPropTypes>(
       } = props
 
       // Destroy on close will remove wrapped div
-      if (!forceRender && destroyOnHidden && !animatedVisible) {
+      if (!forceRender && destroyOnHidden && !animatedVisible.value) {
         return null
       }
       return (
         <Portal
-          open={!!(visible || forceRender || animatedVisible)}
+          open={(visible || forceRender || animatedVisible.value)}
           autoDestroy={false}
           getContainer={getContainer}
-          autoLock={!!(visible || animatedVisible)}
+          autoLock={(visible || animatedVisible.value)}
         >
           <Dialog
             {...props}
