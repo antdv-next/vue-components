@@ -232,7 +232,12 @@ const Popup = defineComponent<PopupProps>(
         },
         onAfterEnter: (element: Element) => {
           baseTransitionProps?.onAfterEnter?.(element)
-          onVisibleChanged?.(true)
+
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              onVisibleChanged?.(true)
+            })
+          })
         },
         onAfterLeave: (element: Element) => {
           baseTransitionProps.onAfterLeave?.(element)

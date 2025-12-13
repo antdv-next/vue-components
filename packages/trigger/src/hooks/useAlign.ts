@@ -14,15 +14,6 @@ import { collectScroller, getVisibleArea, getWin, toNum } from '../util'
 
 type Rect = Record<'x' | 'y' | 'width' | 'height', number>
 
-type Axis = 'x' | 'y'
-
-interface RectWithEdge extends Rect {
-  left: number
-  top: number
-  right: number
-  bottom: number
-}
-
 type Points = [topBottom: AlignPointTopBottom, leftRight: AlignPointLeftRight]
 
 function getUnitOffset(size: number, offset: OffsetType = 0) {
@@ -98,91 +89,6 @@ function reversePoints(points: Points, index: number): string {
       return point
     })
     .join('')
-}
-
-function parseOriginValue(value: string | undefined, size: number, axis: Axis) {
-  const fallback = size / 2
-  if (!value) {
-    return fallback
-  }
-
-  const val = value.trim()
-
-  if (!val) {
-    return fallback
-  }
-
-  if (val.endsWith('%')) {
-    return size * (parseFloat(val) / 100)
-  }
-
-  if (val.endsWith('px')) {
-    return parseFloat(val)
-  }
-
-  if (val === 'center') {
-    return fallback
-  }
-
-  if (axis === 'x') {
-    if (val === 'left') {
-      return 0
-    }
-    if (val === 'right') {
-      return size
-    }
-  }
-  else if (axis === 'y') {
-    if (val === 'top') {
-      return 0
-    }
-    if (val === 'bottom') {
-      return size
-    }
-  }
-
-  const num = parseFloat(val)
-  return Number.isNaN(num) ? fallback : num
-}
-
-function getTransformOriginPoint(origin: string | null, width: number, height: number) {
-  const [originX = '50%', originY = '50%']
-    = origin?.split(/\s+/).filter(Boolean) ?? []
-
-  return [
-    parseOriginValue(originX, width, 'x'),
-    parseOriginValue(originY, height, 'y'),
-  ]
-}
-
-function normalizeRect(
-  rect: DOMRect,
-  scaleX: number,
-  scaleY: number,
-  originX: number,
-  originY: number,
-): RectWithEdge {
-  const rawX = rect.x ?? rect.left
-  const rawY = rect.y ?? rect.top
-
-  const width = rect.width / scaleX
-  const height = rect.height / scaleY
-
-  const x = rawX - (1 - scaleX) * originX
-  const y = rawY - (1 - scaleY) * originY
-  const right = x + width
-  const bottom = y + height
-
-  return {
-    x,
-    y,
-    width,
-    height,
-    left: x,
-    top: y,
-    right,
-    bottom,
-  }
 }
 
 function shouldSwitchPlacement(
@@ -376,19 +282,25 @@ export default function useAlign(
 
       popupElement.parentElement?.removeChild(placeholderElement)
 
-      const widthValue = parseFloat(popupComputedStyle.width)
-      const heightValue = parseFloat(popupComputedStyle.height)
-      const baseWidth = !Number.isNaN(widthValue) && widthValue > 0 ? widthValue : popupElement.offsetWidth
-      const baseHeight = !Number.isNaN(heightValue) && heightValue > 0 ? heightValue : popupElement.offsetHeight
-      const safeBaseWidth = baseWidth || rawPopupRect.width || 1
-      const safeBaseHeight = baseHeight || rawPopupRect.height || 1
+      // Use the same logic as React version:
+      // Get popup dimensions from getBoundingClientRect and computedStyle
+      const popupRect = rawPopupRect
+      popupRect.x = popupRect.x ?? popupRect.left
+      popupRect.y = popupRect.y ?? popupRect.top
 
-      // Calculate scale
+      const { height, width } = popupComputedStyle
+
+      const popupHeight = popupRect.height
+      const popupWidth = popupRect.width
+
+      const popupMirrorRect = rawPopupMirrorRect
+
+      // Calculate scale (same as React version)
       const scaleX = toNum(
-        Math.round((rawPopupRect.width / safeBaseWidth) * 1000) / 1000,
+        Math.round((popupWidth / parseFloat(width)) * 1000) / 1000,
       )
       const scaleY = toNum(
-        Math.round((rawPopupRect.height / safeBaseHeight) * 1000) / 1000,
+        Math.round((popupHeight / parseFloat(height)) * 1000) / 1000,
       )
 
       // No need to align since it's not visible in view
@@ -399,24 +311,6 @@ export default function useAlign(
       ) {
         return
       }
-
-      const [originX, originY] = getTransformOriginPoint(
-        popupComputedStyle.transformOrigin,
-        safeBaseWidth,
-        safeBaseHeight,
-      )
-
-      const popupRect = normalizeRect(rawPopupRect, scaleX, scaleY, originX, originY)
-      const popupMirrorRect = normalizeRect(
-        rawPopupMirrorRect,
-        scaleX,
-        scaleY,
-        originX,
-        originY,
-      )
-
-      const popupHeight = popupRect.height
-      const popupWidth = popupRect.width
 
       // Offset
       const { offset, targetOffset } = placementInfo
@@ -808,18 +702,20 @@ export default function useAlign(
         nextOffsetY = Math.round(nextOffsetY)
         offsetY4Bottom = Math.round(offsetY4Bottom)
       }
+      // Divide by scale (same as React version)
       const nextOffsetInfo = {
         ready: true,
-        offsetX: nextOffsetX,
-        offsetY: nextOffsetY,
-        offsetR: offsetX4Right,
-        offsetB: offsetY4Bottom,
-        arrowX: nextArrowX,
-        arrowY: nextArrowY,
+        offsetX: nextOffsetX / scaleX,
+        offsetY: nextOffsetY / scaleY,
+        offsetR: offsetX4Right / scaleX,
+        offsetB: offsetY4Bottom / scaleY,
+        arrowX: nextArrowX / scaleX,
+        arrowY: nextArrowY / scaleY,
         scaleX,
         scaleY,
         align: nextAlignInfo,
       }
+      console.log({ ...nextOffsetInfo })
       Object.assign(offsetInfo, nextOffsetInfo)
     }
   }
