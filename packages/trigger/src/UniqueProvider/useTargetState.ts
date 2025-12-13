@@ -22,11 +22,10 @@ export default function useTargetState() {
       // Clear pending options when hiding
       pendingOptionsRef.value = null
       open.value = false
-      isAnimating.value = false
     }
     else {
       if (isAnimating.value && wasOpen) {
-        // If animating (appear or enter), cache new options
+        // If enter animation is in progress, cache new options
         pendingOptionsRef.value = nextOptions
       }
       else {
