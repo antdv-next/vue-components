@@ -470,13 +470,19 @@ export function generateTrigger(PortalComponent: any = Portal) {
         })
       }
 
-      watch([motionPrepareResolve], () => {
-        if (motionPrepareResolve.value) {
-          onAlign()
-          motionPrepareResolve.value()
-          motionPrepareResolve.value = undefined
-        }
-      })
+      watch(
+        [motionPrepareResolve],
+        () => {
+          if (motionPrepareResolve.value) {
+            onAlign()
+            motionPrepareResolve.value()
+            motionPrepareResolve.value = undefined
+          }
+        },
+        {
+          flush: 'post',
+        },
+      )
 
       // =========================== Action ===========================
       /**
