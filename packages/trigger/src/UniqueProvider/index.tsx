@@ -100,12 +100,6 @@ const UniqueProvider = defineComponent<UniqueProviderProps>(
       }, delay)
     }
 
-    // Callback after animation completes
-    const onVisibleChanged = (visible: boolean) => {
-      // Call useTargetState callback to handle animation state
-      onTargetVisibleChanged(visible)
-    }
-
     // =========================== Align ============================
     const [
       ready,
@@ -128,6 +122,33 @@ const UniqueProvider = defineComponent<UniqueProviderProps>(
       undefined, // onPopupAlign
       ref(false), // isMobile
     )
+
+    // ========================== Motion ============================
+    // Track animation state to prevent alignment during animation
+    const inMotion = shallowRef(false)
+
+    // Watch open state to set inMotion when opening
+    watch(open, () => {
+      if (open.value) {
+        inMotion.value = true
+      }
+    })
+
+    // Wrapper function that respects inMotion state (same as Trigger)
+    const triggerAlign = () => {
+      if (!inMotion.value) {
+        onAlign()
+      }
+    }
+
+    // Callback after animation completes
+    const onVisibleChanged = (visible: boolean) => {
+      // Call useTargetState callback to handle animation state
+      onTargetVisibleChanged(visible)
+      // When animation completes, mark inMotion as false and trigger align
+      inMotion.value = false
+      onAlign()
+    }
 
     const alignedClassName = computed(() => {
       if (!mergedOptions.value) {
@@ -154,7 +175,7 @@ const UniqueProvider = defineComponent<UniqueProviderProps>(
     watch(
       () => mergedOptions.value?.target,
       () => {
-        onAlign()
+        triggerAlign()
       },
       {
         immediate: true,
@@ -163,7 +184,7 @@ const UniqueProvider = defineComponent<UniqueProviderProps>(
 
     // =========================== Motion ===========================
     const onPrepare = () => {
-      onAlign()
+      triggerAlign()
       return Promise.resolve()
     }
 
@@ -213,7 +234,7 @@ const UniqueProvider = defineComponent<UniqueProviderProps>(
                 offsetY={offsetY.value}
                 offsetR={offsetR.value}
                 offsetB={offsetB.value}
-                onAlign={onAlign}
+                onAlign={triggerAlign}
                 onPrepare={onPrepare}
                 onResize={(size) => {
                   popupSize.value = {
