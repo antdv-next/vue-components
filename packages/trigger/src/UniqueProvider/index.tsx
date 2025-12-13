@@ -124,7 +124,7 @@ const UniqueProvider = defineComponent<UniqueProviderProps>(
     )
 
     // ========================== Motion ============================
-    // Track animation state to prevent alignment during animation
+    // Track animation state to prevent ResizeObserver from triggering align during animation
     const inMotion = shallowRef(false)
 
     // Watch open state to set inMotion when opening
@@ -134,7 +134,7 @@ const UniqueProvider = defineComponent<UniqueProviderProps>(
       }
     })
 
-    // Wrapper function that respects inMotion state (same as Trigger)
+    // triggerAlign is used by ResizeObserver - respects inMotion state
     const triggerAlign = () => {
       if (!inMotion.value) {
         onAlign()
@@ -172,19 +172,18 @@ const UniqueProvider = defineComponent<UniqueProviderProps>(
       hide,
     }
     // =========================== Align ============================
+    // When target changes, align immediately - don't check inMotion
+    // This ensures popup moves to new position immediately when switching targets
     watch(
       () => mergedOptions.value?.target,
       () => {
-        triggerAlign()
-      },
-      {
-        immediate: true,
+        onAlign()
       },
     )
 
     // =========================== Motion ===========================
     const onPrepare = () => {
-      triggerAlign()
+      onAlign()
       return Promise.resolve()
     }
 

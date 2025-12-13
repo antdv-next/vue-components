@@ -3,7 +3,7 @@ import type { CSSProperties } from 'vue'
 import type { AlignType, ArrowPos } from '../interface.ts'
 import { toPropsRefs } from '@v-c/util/dist/props-util'
 import { getTransitionProps } from '@v-c/util/dist/utils/transition'
-import { defineComponent, nextTick, shallowRef, Transition, watch, watchEffect } from 'vue'
+import { defineComponent, shallowRef, Transition, watch, watchEffect } from 'vue'
 import useOffsetStyle from '../hooks/useOffsetStyle'
 
 export interface UniqueContainerProps {
@@ -67,8 +67,7 @@ const UniqueContainer = defineComponent<UniqueContainerProps>(
     })
     watch(
       open,
-      async (nextVisible) => {
-        await nextTick()
+      (nextVisible) => {
         if (nextVisible) {
           motionVisible.value = true
         }
