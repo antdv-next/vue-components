@@ -1,8 +1,9 @@
 import type { MouseEventHandler } from '@v-c/util/dist/EventInterface'
 import type { CSSProperties } from 'vue'
 import type { IDialogPropTypes } from '../../IDialogPropTypes'
-import { classNames } from '@v-c/util'
+import { classNames, clsx } from '@v-c/util'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
+import { getStylePxValue } from '@v-c/util/dist/props-util'
 import { defineComponent, shallowRef } from 'vue'
 import { useGetRefContext } from '../../context'
 
@@ -74,10 +75,10 @@ const Panel = defineComponent<PanelProps & { animationVisible: boolean }>(
       // ================================ Style =================================
       const contentStyle: CSSProperties = {}
       if (width !== undefined) {
-        contentStyle.width = width
+        contentStyle.width = getStylePxValue(width)
       }
       if (height !== undefined) {
-        contentStyle.height = height
+        contentStyle.height = getStylePxValue(height)
       }
 
       // ================================ Render ================================
@@ -94,7 +95,15 @@ const Panel = defineComponent<PanelProps & { animationVisible: boolean }>(
 
       const headerNode = title
         ? (
-            <div class={classNames(`${prefixCls}-header`, modalClassNames?.header)} style={{ ...modalStyles?.header }}>{title}</div>
+            <div class={classNames(`${prefixCls}-header`, modalClassNames?.header)} style={{ ...modalStyles?.header }}>
+              <div
+                class={clsx(`${prefixCls}-title`, modalClassNames?.title)}
+                id={ariaId}
+                style={{ ...modalStyles?.title }}
+              >
+                {title}
+              </div>
+            </div>
           )
         : null
 

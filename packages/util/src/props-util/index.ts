@@ -117,3 +117,19 @@ export function getAttrStyleAndClass(
     restAttrs: pureAttrs(attrs, options),
   } as { className: any, style: any, restAttrs: Record<string, any> }
 }
+
+export function getStylePxValue(value: number | string | undefined | null) {
+  if (typeof value === 'number') {
+    return `${value}px`
+  }
+  else if (typeof value === 'string') {
+    const trimed = value.trim()
+    if (Number.isNaN(Number(trimed))) {
+      return trimed
+    }
+    else {
+      return `${Number(trimed)}px`
+    }
+  }
+  return value
+}
