@@ -3,6 +3,8 @@ import Image from './Image'
 import PreviewGroup from './PreviewGroup'
 
 export * from './Image'
+
+export type { PreviewGroupProps } from './PreviewGroup'
 export { PreviewGroup }
 export type { ImageProps }
 
