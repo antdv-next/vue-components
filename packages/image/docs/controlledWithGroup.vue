@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import Image from '../src'
-import PreviewGroup from '../src/PreviewGroup.tsx'
 import jpg1 from './assets/1.jpeg'
 import jpg2 from './assets/2.jpeg'
 import { defaultIcons } from './assets/common.tsx'
 
 const open = ref(false)
 const current = ref(1)
+const PreviewGroup = Image.PreviewGroup
 </script>
 
 <template>

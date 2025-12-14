@@ -60,6 +60,8 @@ export default function useMouseEvent(
       const hasChangedPosition = x !== transformX && y !== transformY
       if (!hasChangedPosition)
         return
+      if (!imgRef.value)
+        return
 
       const width = imgRef.value.offsetWidth * scale
       const height = imgRef.value.offsetHeight * scale
@@ -82,7 +84,7 @@ export default function useMouseEvent(
   }
 
   const onWheel = (event: WheelEvent) => {
-    if (!open.value || event.deltaX === 0) {
+    if (!open.value || event.deltaY === 0) {
       return
     }
     // Scale ratio depends on the deltaY size

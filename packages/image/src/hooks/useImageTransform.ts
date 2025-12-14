@@ -2,7 +2,7 @@ import type { Ref } from 'vue'
 import isEqual from '@v-c/util/dist/isEqual'
 import raf from '@v-c/util/dist/raf'
 import { ref, shallowRef } from 'vue'
-import { getClientSize } from '../util.ts'
+import { getClientSize } from '../util'
 
 export interface TransformType {
   x: number
@@ -100,6 +100,10 @@ export default function useImageTransform(
     centerY?,
     isTouch?,
   ) => {
+    if (!imgRef.value) {
+      return
+    }
+
     const { width, height, offsetWidth, offsetHeight, offsetLeft, offsetTop } = imgRef.value
 
     const _transform = transform.value

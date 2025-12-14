@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import Image from '../src'
-import PreviewGroup from '../src/PreviewGroup.tsx'
 import jpg1 from './assets/1.jpeg'
 import jpg2 from './assets/2.jpeg'
 import jpg3 from './assets/3.jpeg'
 import { defaultIcons } from './assets/common.tsx'
 import disabled from './assets/disabled.jpeg'
+const PreviewGroup = Image.PreviewGroup
 </script>
 
 <template>

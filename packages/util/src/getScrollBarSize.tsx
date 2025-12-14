@@ -49,7 +49,18 @@ export function getTargetScrollBarSize(target: HTMLElement) {
   if (typeof document === 'undefined' || !target || !(target instanceof Element))
     return { width: 0, height: 0 }
 
-  const { width, height } = getComputedStyle(target, '::-webkit-scrollbar')
+  // JSDOM does not implement `getComputedStyle` for pseudo elements, and will emit noisy errors.
+  if (typeof navigator !== 'undefined' && /jsdom/i.test(navigator.userAgent))
+    return { width: 0, height: 0 }
+
+  let width = '0px'
+  let height = '0px'
+  try {
+    ({ width, height } = getComputedStyle(target, '::-webkit-scrollbar'))
+  }
+  catch {
+    // Ignore errors for environments (e.g. JSDOM) that do not support pseudo element computed styles.
+  }
   return {
     width: ensureSize(width),
     height: ensureSize(height),
