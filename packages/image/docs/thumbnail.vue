@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Image from '../src'
-import PreviewGroup from '../src/PreviewGroup.tsx'
 import { defaultIcons } from './assets/common.tsx'
+const PreviewGroup = Image.PreviewGroup
 </script>
 
 <template>

@@ -72,6 +72,8 @@ export default defineConfig({
   ],
   resolve: {
     alias: [
+      // Force all packages to use the same Vue instance to avoid reactivity mismatch in tests/dev.
+      { find: /^vue$/, replacement: resolve(base, 'node_modules/vue/dist/vue.esm-bundler.js') },
       ...genListAlias(),
     ],
   },
