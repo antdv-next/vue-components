@@ -1,4 +1,4 @@
-@import "variables";
+@import 'variables';
 
 .@{stepsPrefixClass}-navigation {
   padding-top: 8px;
@@ -13,18 +13,13 @@
     text-align: center;
     overflow: visible;
 
-    &-container {
-      text-align: left;
-      padding-bottom: 8px;
-      outline: none;
-    }
 
     &-title {
       max-width: @stepNavContentMaxWidth;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-
+  
       &:after {
         display: none;
       }
@@ -38,7 +33,7 @@
     }
 
     &:after {
-      content: "";
+      content: '';
       display: inline-block;
       width: 16px;
       height: 16px;
@@ -53,11 +48,5 @@
       margin-left: -8px;
     }
 
-    &-active {
-      .@{stepsPrefixClass}-item-container {
-        padding-bottom: 5px;
-        border-bottom: 3px solid @primary-color;
-      }
-    }
   }
 }
