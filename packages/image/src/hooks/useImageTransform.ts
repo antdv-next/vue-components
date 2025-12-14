@@ -1,8 +1,8 @@
 import type { Ref } from 'vue'
 import isEqual from '@v-c/util/dist/isEqual'
 import raf from '@v-c/util/dist/raf'
-import { ref } from 'vue'
-import { getClientSize } from '../util'
+import { ref, shallowRef } from 'vue'
+import { getClientSize } from '../util.ts'
 
 export interface TransformType {
   x: number
@@ -53,18 +53,20 @@ const initialTransform = {
 }
 
 export default function useImageTransform(
-  imgRef: Ref<{ imgEl: HTMLImageElement }>,
-  minScale: number,
-  maxScale: number,
+  imgRef: Ref<HTMLImageElement>,
+  minScale: Ref<number>,
+  maxScale: Ref<number>,
   onTransform: (info: { transform: TransformType, action: TransformAction }) => void,
 ) {
-  const frame = ref<number | null>(null)
+  const frame = shallowRef<any>(null)
   const queue = ref<TransformType[]>([])
-  const transform = ref(initialTransform)
+  const transform = shallowRef<TransformType>(initialTransform)
 
   const resetTransform = (action: TransformAction) => {
-    transform.value = (initialTransform)
-    if (!isEqual(initialTransform, transform)) {
+    const oldTransform = transform.value
+    transform.value = initialTransform
+
+    if (!isEqual(initialTransform, oldTransform)) {
       onTransform?.({ transform: initialTransform, action })
     }
   }
@@ -74,12 +76,12 @@ export default function useImageTransform(
     if (frame.value === null) {
       queue.value = []
       frame.value = raf(() => {
-        let memoState: any = transform.value
+        const preState = transform.value
+        let memoState: any = preState
         queue.value.forEach((queueState) => {
           memoState = { ...memoState, ...queueState }
         })
         frame.value = null
-
         onTransform?.({ transform: memoState, action })
         transform.value = memoState
       })
@@ -98,20 +100,22 @@ export default function useImageTransform(
     centerY?,
     isTouch?,
   ) => {
-    if (!imgRef?.value?.imgEl)
-      return {}
-    const { width, height, offsetWidth, offsetHeight, offsetLeft, offsetTop } = imgRef.value.imgEl
+    const { width, height, offsetWidth, offsetHeight, offsetLeft, offsetTop } = imgRef.value
+
+    const _transform = transform.value
+    const _maxScale = maxScale.value
+    const _minScale = minScale.value
 
     let newRatio = ratio
-    let newScale = transform.value.scale * ratio
-    if (newScale > maxScale) {
-      newScale = maxScale
-      newRatio = maxScale / transform.value.scale
+    let newScale = _transform.scale * ratio
+    if (newScale > _maxScale) {
+      newScale = _maxScale
+      newRatio = _maxScale / _transform.scale
     }
-    else if (newScale < minScale) {
+    else if (newScale < _minScale) {
       // For mobile interactions, allow scaling down to the minimum scale.
-      newScale = isTouch ? newScale : minScale
-      newRatio = newScale / transform.value.scale
+      newScale = isTouch ? newScale : _minScale
+      newRatio = newScale / _transform.scale
     }
 
     /** Default center point scaling */
@@ -123,11 +127,11 @@ export default function useImageTransform(
     const diffImgX = diffRatio * width * 0.5
     const diffImgY = diffRatio * height * 0.5
     /** The difference between the click position and the edge of the document */
-    const diffOffsetLeft = diffRatio * (mergedCenterX - transform.value.x - offsetLeft)
-    const diffOffsetTop = diffRatio * (mergedCenterY - transform.value.y - offsetTop)
+    const diffOffsetLeft = diffRatio * (mergedCenterX - _transform.x - offsetLeft)
+    const diffOffsetTop = diffRatio * (mergedCenterY - _transform.y - offsetTop)
     /** Final positioning */
-    let newX = transform.value.x - (diffOffsetLeft - diffImgX)
-    let newY = transform.value.y - (diffOffsetTop - diffImgY)
+    let newX = _transform.x - (diffOffsetLeft - diffImgX)
+    let newY = _transform.y - (diffOffsetTop - diffImgY)
 
     /**
      * When zooming the image
