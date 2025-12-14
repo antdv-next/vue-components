@@ -1,8 +1,8 @@
-import type { PreviewGroupProps } from '../PreviewGroup.tsx'
 import type { Ref } from 'vue'
+import type { ImageElementProps, PreviewImageElementProps, RegisterImage } from '../interface'
+import type { PreviewGroupProps } from '../PreviewGroup.tsx'
 import { computed, shallowRef, watchEffect } from 'vue'
 import { COMMON_PROPS } from '../common.ts'
-import type { ImageElementProps, PreviewImageElementProps, RegisterImage } from '../interface'
 
 export type Items = Omit<PreviewImageElementProps & { id?: string }, 'canPreview'>[]
 
@@ -44,7 +44,7 @@ export default function usePreviewItems(
           }
         })
         return { data }
-      })
+      }) as Items
       return
     }
 

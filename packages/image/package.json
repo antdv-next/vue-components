@@ -19,10 +19,18 @@
     "./dist/*": "./dist/*",
     "./package.json": "./package.json"
   },
-  "main": "index.js",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "package.json"
+  ],
   "scripts": {
     "build": "vite build",
-    "test": "vitest"
+    "prepublish": "pnpm build",
+    "test": "vitest run",
+    "patch": "bumpp --release patch",
+    "bump": "bumpp"
   },
   "peerDependencies": {
     "vue": "^3.0.0"
