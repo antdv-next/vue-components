@@ -1,0 +1,39 @@
+import { defineComponent } from 'vue'
+import Image from '../src'
+import { defaultIcons } from './assets/common'
+
+export default defineComponent(() => {
+  return () => (
+    <div>
+      <Image
+        src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png?x-oss-process=image/auto-orient,1/resize,p_10/quality,q_10"
+        preview={{
+          icons: defaultIcons,
+          src: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
+        }}
+        width={200}
+      />
+
+      <br />
+      <h1>PreviewGroup</h1>
+      <Image.PreviewGroup preview={{ icons: defaultIcons }}>
+        <Image
+          key={1 as any}
+          src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png?x-oss-process=image/auto-orient,1/resize,p_10/quality,q_10"
+          preview={{
+            src: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
+          }}
+          width={200}
+        />
+        <Image
+          key={2 as any}
+          src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png?x-oss-process=image/auto-orient,1/resize,p_10/quality,q_10/contrast,-100"
+          preview={{
+            src: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png?x-oss-process=image/auto-orient,1/contrast,-100',
+          }}
+          width={200}
+        />
+      </Image.PreviewGroup>
+    </div>
+  )
+})

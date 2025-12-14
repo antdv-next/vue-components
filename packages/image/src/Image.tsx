@@ -6,7 +6,7 @@ import type { InternalPreviewConfig, PreviewSemanticName, ToolbarRenderInfoType 
 import { clsx } from '@v-c/util'
 import useMergedState from '@v-c/util/dist/hooks/useMergedState'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
-import { getAttrStyleAndClass } from '@v-c/util/dist/props-util'
+import { getAttrStyleAndClass, getStylePxValue } from '@v-c/util/dist/props-util'
 import { computed, defineComponent, shallowRef } from 'vue'
 import { COMMON_PROPS } from './common'
 import { usePreviewGroupContext } from './context'
@@ -46,7 +46,7 @@ export interface PreviewConfig extends Omit<InternalPreviewConfig, 'countRender'
 
 export type SemanticName = 'root' | 'image' | 'cover'
 
-export interface ImageProps extends Omit<ImageElementProps, 'src'> {
+export interface ImageProps extends Partial<Omit<ImageElementProps, 'src'>> {
   // Misc
   prefixCls?: string
   previewPrefixCls?: string
@@ -78,7 +78,6 @@ export interface ImageProps extends Omit<ImageElementProps, 'src'> {
 
   width?: string | number
   height?: string | number
-  style?: CSSProperties
 }
 
 const defaults = {
@@ -187,6 +186,7 @@ const Image = defineComponent<ImageProps>(
 
     // =========================== Render ===========================
     return () => {
+      const { width, height } = props
       const { className, style: attrStyle, restAttrs } = getAttrStyleAndClass(attrs)
 
       const coverPlacement
@@ -200,15 +200,14 @@ const Image = defineComponent<ImageProps>(
           : (cover.value as VueNode)
 
       const imgStyle = [
-        props.height ? { height: props.height } : null,
+        height ? { height: getStylePxValue(height) } : null,
         props.styles?.image,
         attrStyle,
-        props.style,
       ]
 
       const rootStyle: CSSProperties = {
-        width: props.width as any,
-        height: props.height as any,
+        width: getStylePxValue(width) as any,
+        height: getStylePxValue(height) as any,
         ...(props.styles?.root ?? {}),
       }
 
@@ -268,8 +267,8 @@ const Image = defineComponent<ImageProps>(
               class={imgCls}
               style={imgStyle as any}
               ref={getImgRef as any}
-              width={props.width}
-              height={props.height}
+              width={width}
+              height={height}
               onLoad={(srcAndOnload.value as any).onLoad}
               onError={onImgError}
             />
