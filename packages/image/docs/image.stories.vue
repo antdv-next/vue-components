@@ -1,60 +1,56 @@
 <script setup lang="ts">
-import ActionsRender from './actionsRender.vue'
-import Album from './album.vue'
-import Basic from './basic.vue'
-import Controlled from './controlled.vue'
-import ControlledWithGroup from './controlledWithGroup.vue'
-import CoverPlacement from './coverPlacement.vue'
-import Fallback from './fallback.vue'
-import ImageRender from './imageRender.vue'
-import Placeholder from './placeholder.vue'
-import PreviewGroup from './previewGroup.vue'
-import PreviewGroupItems from './previewGroupItems.vue'
-import Thumbnail from './thumbnail.vue'
-import './assets/index.less'
+// import ActionsRender from './actionsRender.vue'
+// import Album from './album.vue'
+// import Basic from './basic.vue'
+// import Controlled from './controlled.vue'
+// import ControlledWithGroup from './controlledWithGroup.vue'
+// import CoverPlacement from './coverPlacement.vue'
+// import Fallback from './fallback.vue'
+// import ImageRender from './imageRender.vue'
+// import Placeholder from './placeholder.vue'
+// import PreviewGroup from './previewGroup.vue'
+// import PreviewGroupItems from './previewGroupItems.vue'
+// import Thumbnail from './thumbnail.vue'
+// import './assets/index.less'
 </script>
 
 <template>
   <Story title="Image">
     <Variant title="actionsRender">
-      <ActionsRender />
+      <!--      <ActionsRender /> -->
     </Variant>
     <Variant title="album">
-      <Album />
+      <!--      <Album /> -->
     </Variant>
     <Variant title="basic">
-      <Basic />
+      <!--      <Basic /> -->
     </Variant>
     <Variant title="controlled">
-      <Controlled />
+      <!--      <Controlled /> -->
     </Variant>
     <Variant title="controlledWithGroup">
-      <ControlledWithGroup />
+      <!--      <ControlledWithGroup /> -->
     </Variant>
     <Variant title="coverPlacement">
-      <CoverPlacement />
+      <!--      <CoverPlacement /> -->
     </Variant>
     <Variant title="fallback">
-      <Fallback />
+      <!--      <Fallback /> -->
     </Variant>
     <Variant title="imageRender">
-      <ImageRender />
+      <!--      <ImageRender /> -->
     </Variant>
     <Variant title="placeholder">
-      <Placeholder />
+      <!--      <Placeholder /> -->
     </Variant>
     <Variant title="previewGroup">
-      <PreviewGroup />
+      <!--      <PreviewGroup /> -->
     </Variant>
     <Variant title="previewGroupItems">
-      <PreviewGroupItems />
+      <!--      <PreviewGroupItems /> -->
     </Variant>
     <Variant title="thumbnail">
-      <Thumbnail />
+      <!--      <Thumbnail /> -->
     </Variant>
   </Story>
 </template>
-
-<style scoped>
-
-</style>
