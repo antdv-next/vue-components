@@ -187,8 +187,8 @@ const Steps = defineComponent<StepsProps>(
           key={stepIndex}
           // Style
           prefixCls={prefixCls.value}
-          classNames={classNames}
-          styles={styles}
+          classNames={classNames ?? {}}
+          styles={styles ?? {}}
           // Data
           data={data}
           nextStatus={nextStatus}

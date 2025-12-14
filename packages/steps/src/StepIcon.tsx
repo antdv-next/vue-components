@@ -31,7 +31,7 @@ const StepIcon = defineComponent(
     const stepIconSemanticContext = useStepIconSemanticContext()
     return () => {
       const { className, style, restAttrs } = getAttrStyleAndClass(attrs)
-      const { prefixCls, classNames, styles } = stepsContext.value ?? {}
+      const { prefixCls, classNames = {}, styles = {} } = stepsContext.value ?? {}
 
       const { className: itemClassName, style: itemStyle } = stepIconSemanticContext.value ?? {}
 
