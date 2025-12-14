@@ -8,7 +8,6 @@ import type {
 } from '../interface'
 import { isDOM } from '@v-c/util/dist/Dom/findDOMNode'
 import isVisible from '@v-c/util/dist/Dom/isVisible'
-import { rafDebounce } from '@v-c/util/dist/raf'
 import { computed, nextTick, reactive, ref, shallowRef, toRefs, watch } from 'vue'
 import { collectScroller, getVisibleArea, getWin, toNum } from '../util'
 
@@ -160,8 +159,13 @@ export default function useAlign(
     prevFlipRef.value = {}
   }
 
+  let cacheTargetRect: any = null
+
   // ========================= Align =========================
-  const _onAlign = () => {
+  const _onAlign = (cache = false) => {
+    if (cache && !cacheTargetRect) {
+      return
+    }
     if (popupEle.value && target.value && open.value && !mobile?.value) {
       const popupElement = popupEle.value
       const doc = popupElement.ownerDocument
@@ -208,7 +212,14 @@ export default function useAlign(
         }
       }
       else {
-        const rect = target.value.getBoundingClientRect()
+        const targetRectInfo = target.value.getBoundingClientRect()
+        const rect = cache ? Object.assign(targetRectInfo, cacheTargetRect ?? {}) : targetRectInfo
+        if (!cache) {
+          cacheTargetRect = {
+            width: rect.width,
+            height: rect.height,
+          }
+        }
         rect.x = rect.x ?? rect.left
         rect.y = rect.y ?? rect.top
         targetRect = {
@@ -715,21 +726,20 @@ export default function useAlign(
         scaleY,
         align: nextAlignInfo,
       }
-      console.log({ ...nextOffsetInfo })
       Object.assign(offsetInfo, nextOffsetInfo)
     }
   }
   // 给onAlign添加一个requestAnimationFrame的效果，合并多次调用
-  const onAlign = rafDebounce(_onAlign)
+  const onAlign = _onAlign
 
-  const triggerAlign = () => {
+  const triggerAlign = (cache?: boolean) => {
     alignCountRef.value += 1
     const id = alignCountRef.value
 
     // Merge all align requirement into one frame
     Promise.resolve().then(() => {
       if (alignCountRef.value === id) {
-        onAlign()
+        onAlign(cache)
       }
     })
   }

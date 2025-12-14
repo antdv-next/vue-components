@@ -396,6 +396,9 @@ export function generateTrigger(PortalComponent: any = Portal) {
         if (!inMotion.value) {
           onAlign()
         }
+        else {
+          onAlign(true)
+        }
       }
 
       const onScroll = () => {
@@ -464,9 +467,10 @@ export function generateTrigger(PortalComponent: any = Portal) {
 
       // We will trigger align when motion is in prepare
       const onPrepare = () => {
+        syncTargetSize()
         return new Promise<void>((resolve) => {
-          syncTargetSize()
           motionPrepareResolve.value = resolve
+          inMotion.value = true
         })
       }
 
