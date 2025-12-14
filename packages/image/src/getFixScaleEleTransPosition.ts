@@ -41,10 +41,10 @@ export default function getFixScaleEleTransPosition(
   height: number,
   left: number,
   top: number,
-): null | { [key: string]: number } {
+): null | { x: number, y: number } {
   const { width: clientWidth, height: clientHeight } = getClientSize()
 
-  let fixPos = null
+  let fixPos: null | { x: number, y: number } = null
 
   if (width <= clientWidth && height <= clientHeight) {
     fixPos = {
@@ -56,7 +56,7 @@ export default function getFixScaleEleTransPosition(
     fixPos = {
       ...fixPoint('x', left, width, clientWidth),
       ...fixPoint('y', top, height, clientHeight),
-    }
+    } as { x: number, y: number }
   }
 
   return fixPos
