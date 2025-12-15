@@ -53,10 +53,8 @@ export default defineComponent(() => {
       <div style={{ border: '1px solid red', width: '700px', padding: '10px' }}>
         <h5 style={{ margin: '10px' }}>大数据量下优化建议：</h5>
         初始展开的节点少，向dom中插入节点就会少，速度更快。
-        {' '}
         <br />
         treeNodes 总数据量尽量少变化，缓存并复用计算出的 treeNodes。
-        {' '}
         <br />
       </div>
 

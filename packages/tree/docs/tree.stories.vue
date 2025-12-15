@@ -1,61 +1,60 @@
 <script setup lang="ts">
-import Basic from './basic'
-import BigData from './bigData'
-import Contextmenu from './contextmenu'
-import Controlled from './controlled'
-import CustomSwitcherIcon from './customSwitcherIcon'
-import Draggable from './draggable'
-import DraggableAllowDrop from './draggableAllowDrop'
-import Dropdown from './dropdown'
-import Dynamic from './dynamic'
-import ExpandAction from './expandAction'
-import FieldNames from './fieldNames'
-import Icon from './icon'
-import Selectable from './selectable'
-import './assets/index.less'
+// import Basic from './basic'
+// import BigData from './bigData'
+// import Contextmenu from './contextmenu'
+// import Controlled from './controlled'
+// import CustomSwitcherIcon from './customSwitcherIcon'
+// import Draggable from './draggable'
+// import DraggableAllowDrop from './draggableAllowDrop'
+// import Dropdown from './dropdown'
+// import Dynamic from './dynamic'
+// import ExpandAction from './expandAction'
+// import FieldNames from './fieldNames'
+// import Icon from './icon'
+// import Selectable from './selectable'
+// import './assets/index.less'
 </script>
 
 <template>
   <Story title="Tree">
     <Variant title="basic">
-      <Basic />
+      <!--      <Basic /> -->
     </Variant>
     <Variant title="controlled">
-      <Controlled />
+      <!--      <Controlled /> -->
     </Variant>
     <Variant title="fieldNames">
-      <FieldNames />
+      <!--      <FieldNames /> -->
     </Variant>
     <Variant title="dynamic">
-      <Dynamic />
+      <!--      <Dynamic /> -->
     </Variant>
     <Variant title="draggable">
-      <Draggable />
+      <!--      <Draggable /> -->
     </Variant>
     <Variant title="draggableAllowDrop">
-      <DraggableAllowDrop />
+      <!--      <DraggableAllowDrop /> -->
     </Variant>
     <Variant title="expandAction">
-      <ExpandAction />
+      <!--      <ExpandAction /> -->
     </Variant>
     <Variant title="selectable">
-      <Selectable />
+      <!--      <Selectable /> -->
     </Variant>
     <Variant title="icon">
-      <Icon />
+      <!--      <Icon /> -->
     </Variant>
     <Variant title="customSwitcherIcon">
-      <CustomSwitcherIcon />
+      <!--      <CustomSwitcherIcon /> -->
     </Variant>
     <Variant title="dropdown">
-      <Dropdown />
+      <!--      <Dropdown /> -->
     </Variant>
     <Variant title="contextmenu">
-      <Contextmenu />
+      <!--      <Contextmenu /> -->
     </Variant>
     <Variant title="bigData">
-      <BigData />
+      <!--      <BigData /> -->
     </Variant>
   </Story>
 </template>
-
