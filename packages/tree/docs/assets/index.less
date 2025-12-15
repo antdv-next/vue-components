@@ -1,0 +1,293 @@
+@treePrefixCls: ~'vc-tree';
+@treeNodePrefixCls: ~'@{treePrefixCls}-treenode';
+
+.@{treePrefixCls} {
+  margin: 0;
+  padding: 8px;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, 'Apple Color Emoji',
+    'Segoe UI Emoji';
+  font-size: 14px;
+  line-height: 1.5715;
+  color: #111827;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+
+  &-focused:not(&-active-focused) {
+    border-color: #22d3ee;
+    box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.2);
+  }
+
+  .@{treeNodePrefixCls} {
+    position: relative;
+    display: flex;
+    align-items: center;
+    line-height: 24px;
+    white-space: nowrap;
+    outline: 0;
+
+    &.dragging {
+      background: rgba(100, 100, 255, 0.08);
+    }
+
+    &.drop-container {
+      > .@{treePrefixCls}-node-content-wrapper::after {
+        position: absolute;
+        top: -2px;
+        right: -2px;
+        bottom: -2px;
+        left: -2px;
+        border: 2px solid #ef4444;
+        border-radius: 6px;
+        content: '';
+        pointer-events: none;
+      }
+    }
+
+    &.drop-target {
+      background: rgba(34, 197, 94, 0.12);
+    }
+
+    &.filter-node {
+      > .@{treePrefixCls}-node-content-wrapper {
+        color: #a60000 !important;
+        font-weight: 700 !important;
+      }
+    }
+  }
+
+  .@{treePrefixCls}-indent {
+    display: inline-flex;
+    align-items: stretch;
+  }
+
+  .@{treePrefixCls}-indent-unit {
+    width: 18px;
+    height: 24px;
+  }
+
+  .@{treePrefixCls}-draggable-icon {
+    margin-right: 6px;
+    color: #6b7280;
+    user-select: none;
+  }
+
+  .@{treePrefixCls}-switcher,
+  .@{treePrefixCls}-checkbox,
+  .@{treePrefixCls}-iconEle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    margin-right: 6px;
+    line-height: 16px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .@{treePrefixCls}-switcher {
+    border-radius: 4px;
+
+    &::before {
+      content: '';
+      display: inline-block;
+      width: 0;
+      height: 0;
+      border-style: solid;
+      border-width: 5px 0 5px 6px;
+      border-color: transparent transparent transparent #6b7280;
+      transform: rotate(0deg);
+      transition: transform 0.15s ease;
+    }
+
+    &_open::before {
+      transform: rotate(90deg);
+    }
+
+    &-noop {
+      cursor: default;
+      visibility: hidden;
+    }
+  }
+
+  .@{treePrefixCls}-checkbox {
+    width: 14px;
+    height: 14px;
+    border: 1px solid #9ca3af;
+    border-radius: 3px;
+    background: #fff;
+    position: relative;
+
+    &-checked {
+      background: #2563eb;
+      border-color: #2563eb;
+
+      &::after {
+        content: '';
+        position: absolute;
+        left: 3px;
+        top: 1px;
+        width: 4px;
+        height: 7px;
+        border: 2px solid #fff;
+        border-top: 0;
+        border-left: 0;
+        transform: rotate(45deg);
+      }
+    }
+
+    &-indeterminate {
+      background: #2563eb;
+      border-color: #2563eb;
+
+      &::after {
+        content: '';
+        position: absolute;
+        left: 2px;
+        top: 5px;
+        width: 8px;
+        height: 2px;
+        background: #fff;
+      }
+    }
+
+    &-disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  .@{treePrefixCls}-node-content-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 6px;
+    border-radius: 6px;
+    cursor: pointer;
+
+    &:hover {
+      background: rgba(15, 23, 42, 0.06);
+    }
+  }
+
+  .@{treePrefixCls}-node-selected {
+    background: rgba(37, 99, 235, 0.12);
+  }
+
+  .@{treePrefixCls}-title {
+    user-select: none;
+  }
+
+  .@{treePrefixCls}-treenode-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+
+    .@{treePrefixCls}-node-content-wrapper {
+      cursor: not-allowed;
+    }
+  }
+}
+
+// ============================== Demo styles ==============================
+.cus-label {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.draggable-demo {
+  padding: 0 20px;
+
+  .draggable-container {
+    margin: 10px 30px;
+    width: 300px;
+    height: 200px;
+    overflow: auto;
+    border: 1px solid #ccc;
+  }
+}
+
+.expandAction-demo {
+  padding: 0 20px;
+}
+
+.selectable-demo {
+  padding: 0 20px;
+
+  .selectable-container {
+    margin: 10px 30px;
+    overflow: auto;
+    border: 1px solid #ccc;
+    padding: 8px;
+
+    .@{treeNodePrefixCls}[data-selectable="false"] {
+      .@{treePrefixCls}-node-content-wrapper .@{treePrefixCls}-title {
+        text-decoration: line-through;
+      }
+    }
+  }
+}
+
+.demo-dropdown-trigger {
+  width: 240px;
+  height: 30px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 4px 8px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.demo-dropdown-tree {
+  padding: 8px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  width: 320px;
+}
+
+.vc-tree-contextmenu {
+  position: fixed;
+  z-index: 1070;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+@des: 2px;
+.customize-icon {
+  display: inline-block;
+  position: relative;
+  background: #2f54eb;
+  border-radius: 3px;
+  box-sizing: border-box;
+  width: 12px;
+  height: 12px;
+  vertical-align: top;
+
+  &:before {
+    content: '';
+    position: absolute;
+    left: @des;
+    right: @des;
+    top: @des;
+    bottom: @des;
+    background: #fff;
+    border-radius: 100%;
+  }
+
+  &.sub-icon {
+    background: #ff4d4f;
+  }
+
+  &.selected-icon {
+    background: green;
+  }
+}
+

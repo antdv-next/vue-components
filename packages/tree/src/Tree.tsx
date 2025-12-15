@@ -995,7 +995,7 @@ export default defineComponent({
       const dropToChild = dragChildrenKeys.value.includes(dropTargetKey.value)
       warning(
         !dropToChild,
-        'Can not drop to dragNode\'s children node. This is a bug of rc-tree. Please report an issue.',
+        'Can not drop to dragNode\'s children node. This is a bug of vc-tree. Please report an issue.',
       )
 
       const posArr = posToArr(dropTargetPos.value || '0')
