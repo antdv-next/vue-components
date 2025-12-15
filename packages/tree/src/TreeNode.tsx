@@ -2,7 +2,7 @@ import type { PropType } from 'vue'
 import type { TreeNodeProps } from './interface'
 import { clsx } from '@v-c/util'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
-import { computed, defineComponent, inject, ref } from 'vue'
+import { computed, defineComponent, inject, ref, watchEffect } from 'vue'
 import { TreeContextKey, UnstableContextKey } from './contextTypes'
 import Indent from './Indent'
 import getEntity from './utils/keyUtil'
@@ -84,6 +84,16 @@ const TreeNode = defineComponent({
         || (!context.loadData && !hasChildren.value)
         || (context.loadData && props.loaded && !hasChildren.value)
       )
+    })
+
+    watchEffect(() => {
+      if (props.loading) {
+        return
+      }
+
+      if (typeof context.loadData === 'function' && props.expanded && !memoizedIsLeaf.value && !props.loaded) {
+        context.onNodeLoad(convertNodePropsToEventData(props as any))
+      }
     })
 
     const nodeState = computed(() => {
@@ -367,6 +377,7 @@ const TreeNode = defineComponent({
           role="treeitem"
           aria-expanded={memoizedIsLeaf.value ? undefined : props.expanded}
           aria-selected={context.selectable ? props.selected : undefined}
+          data-selectable={props.selectable === false ? 'false' : undefined}
           class={clsx(props.className, `${context.prefixCls}-treenode`, context.classNames?.item, {
             [`${context.prefixCls}-treenode-disabled`]: isDisabled.value,
             [`${context.prefixCls}-treenode-switcher-${props.expanded ? 'open' : 'close'}`]: !memoizedIsLeaf.value,
@@ -377,6 +388,7 @@ const TreeNode = defineComponent({
             [`${context.prefixCls}-treenode-active`]: props.active,
             [`${context.prefixCls}-treenode-leaf-last`]: isEndNode.value,
             [`${context.prefixCls}-treenode-draggable`]: isDraggable.value,
+            dragging: context.draggingNodeKey === props.eventKey,
             'drop-target': context.dropTargetKey === props.eventKey,
             'drop-container': context.dropContainerKey === props.eventKey,
             'drag-over': !isDisabled.value && props.dragOver,
