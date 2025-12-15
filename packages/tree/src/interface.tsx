@@ -6,6 +6,14 @@ export type { ScrollTo } from '@v-c/virtual-list'
 
 export type Key = VCKey
 
+/**
+ * Typescript not support `bigint` as index type yet.
+ * We use this to mark the `bigint` type is for `Key` usage.
+ * It's safe to remove this when typescript fix:
+ * https://github.com/microsoft/TypeScript/issues/50217
+ */
+export type SafeKey = Exclude<Key, bigint>
+
 export interface TreeNodeProps<TreeDataType extends BasicDataNode = DataNode> {
   eventKey?: Key // Pass by parent
   prefixCls?: string
@@ -42,7 +50,7 @@ export interface TreeNodeProps<TreeDataType extends BasicDataNode = DataNode> {
   disableCheckbox?: boolean
   icon?: IconType
   switcherIcon?: IconType
-  children?: VueNode
+  // children?: VueNode
 }
 
 export type IconType = VueNode | ((props: TreeNodeProps) => VueNode)
