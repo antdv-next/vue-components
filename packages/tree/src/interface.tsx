@@ -1,11 +1,16 @@
 import type { MouseEventHandler } from '@v-c/util/dist/EventInterface'
-import type { Key, VueNode } from '@v-c/util/dist/type'
-import type { CSSProperties } from 'vue'
+import type { Key as VCKey, VueNode } from '@v-c/util/dist/type'
+import type { CSSProperties, VNode } from 'vue'
 
-export interface TreeNodeProps {
-  eventKey?: Key // Pass by parent `cloneElement`
+export type { ScrollTo } from '@v-c/virtual-list'
+
+export type Key = VCKey
+
+export interface TreeNodeProps<TreeDataType extends BasicDataNode = DataNode> {
+  eventKey?: Key // Pass by parent
   prefixCls?: string
   className?: string
+  style?: CSSProperties
   id?: string
 
   // By parent
@@ -16,14 +21,14 @@ export interface TreeNodeProps {
   loading?: boolean
   halfChecked?: boolean
 
-  title?: VueNode | ((data: BasicDataNode) => any)
+  title?: VueNode | ((data: TreeDataType) => VueNode)
   dragOver?: boolean
   dragOverGapTop?: boolean
   dragOverGapBottom?: boolean
   pos?: string
   domRef?: HTMLDivElement
   /** New added in Tree for easy data access */
-  data?: BasicDataNode
+  data?: TreeDataType
   isStart?: boolean[]
   isEnd?: boolean[]
   active?: boolean
@@ -37,6 +42,7 @@ export interface TreeNodeProps {
   disableCheckbox?: boolean
   icon?: IconType
   switcherIcon?: IconType
+  children?: VueNode
 }
 
 export type IconType = VueNode | ((props: TreeNodeProps) => VueNode)
@@ -55,4 +61,81 @@ export interface BasicDataNode {
   className?: string
   style?: CSSProperties
   [key: string]: any
+}
+
+/** Provide a wrap type define for developer to wrap with customize fieldNames data type */
+export type FieldDataNode<T, ChildFieldName extends string = 'children'> = BasicDataNode
+  & T
+  & Partial<Record<ChildFieldName, FieldDataNode<T, ChildFieldName>[]>>
+
+export type DataNode = FieldDataNode<{
+  key: Key
+  title?: VueNode | ((data: DataNode) => VueNode)
+}>
+
+export type EventDataNode<TreeDataType> = {
+  key: Key
+  expanded: boolean
+  selected: boolean
+  checked: boolean
+  loaded: boolean
+  loading: boolean
+  halfChecked: boolean
+  dragOver: boolean
+  dragOverGapTop: boolean
+  dragOverGapBottom: boolean
+  pos: string
+  active: boolean
+} & TreeDataType
+& BasicDataNode
+
+export type NodeElement = VNode & {
+  type: any & {
+    isTreeNode?: boolean
+  }
+}
+
+export interface Entity {
+  node: NodeElement
+  index: number
+  key: Key
+  pos: string
+  parent?: Entity
+  children?: Entity[]
+}
+
+export interface DataEntity<TreeDataType extends BasicDataNode = any>
+  extends Omit<Entity, 'node' | 'parent' | 'children'> {
+  node: TreeDataType
+  nodes: TreeDataType[]
+  parent?: DataEntity<TreeDataType>
+  children?: DataEntity<TreeDataType>[]
+  level: number
+}
+
+export type KeyEntities<DateType extends BasicDataNode = any> = Record<string, DataEntity<DateType>>
+
+export interface FlattenNode<TreeDataType extends BasicDataNode = DataNode> {
+  parent: FlattenNode<TreeDataType> | null
+  children: FlattenNode<TreeDataType>[]
+  pos: string
+  data: TreeDataType
+  title: VueNode
+  key: Key
+  isStart: boolean[]
+  isEnd: boolean[]
+}
+
+export type GetKey<RecordType> = (record: RecordType, index?: number) => Key
+
+export type GetCheckDisabled<RecordType> = (record: RecordType) => boolean
+
+export type Direction = 'ltr' | 'rtl' | undefined
+
+export interface FieldNames {
+  title?: string
+  /** @private Internal usage for `rc-tree-select`, safe to remove if no need */
+  _title?: string[]
+  key?: string
+  children?: string
 }
