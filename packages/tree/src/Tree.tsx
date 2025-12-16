@@ -1,4 +1,5 @@
 import type { VueNode } from '@v-c/util/dist/type'
+import type { CSSMotionProps } from '@v-c/util/dist/utils/transition'
 import type { CSSProperties } from 'vue'
 import type { DraggableConfig, NodeDragEventParams, NodeMouseEventHandler, NodeMouseEventParams } from './contextTypes'
 import type {
@@ -154,7 +155,7 @@ export interface TreeProps<TreeDataType extends BasicDataNode = DataNode> {
    */
   onActiveChange?: (key: Key | null) => void
   filterTreeNode?: (treeNode: EventDataNode<TreeDataType>) => boolean
-  motion?: any
+  motion?: CSSMotionProps
   switcherIcon?: IconType
 
   // Virtual List

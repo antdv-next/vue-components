@@ -1,6 +1,7 @@
 import type { Key } from '@v-c/util/dist/type'
 import type { Ref } from 'vue'
 import type { GetKey } from '../interface'
+import { getDOM } from '@v-c/util/dist/Dom/findDOMNode'
 import { onUnmounted, ref } from 'vue'
 import CacheMap from '../utils/CacheMap'
 
@@ -36,6 +37,7 @@ export default function useHeights<T>(
       let changed = false
 
       instanceRef.value.forEach((element, key) => {
+        element = getDOM(element) as any
         if (element && element.offsetParent) {
           const { offsetHeight } = element
           const { marginTop, marginBottom } = getComputedStyle(element)

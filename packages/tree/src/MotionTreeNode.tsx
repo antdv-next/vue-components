@@ -1,15 +1,17 @@
+import type { CSSMotionProps } from '@v-c/util/dist/utils/transition'
 import type { FlattenNode, TreeNodeProps } from './interface'
 import type { TreeNodeRequiredProps } from './utils/treeUtil'
 import { clsx } from '@v-c/util'
+import omit from '@v-c/util/dist/omit'
 import { getTransitionProps } from '@v-c/util/dist/utils/transition'
-import { computed, defineComponent, inject, nextTick, onBeforeUnmount, ref, shallowRef, Transition, watch } from 'vue'
+import { computed, defineComponent, inject, nextTick, onBeforeUnmount, ref, Transition, watch } from 'vue'
 import { TreeContextKey } from './contextTypes'
 import TreeNode from './TreeNode'
 import { getTreeNodeProps } from './utils/treeUtil'
 
 export interface MotionTreeNodeProps extends Omit<TreeNodeProps, 'domRef'> {
   active?: boolean
-  motion?: any
+  motion?: CSSMotionProps
   motionNodes?: FlattenNode[] | null
   motionType?: 'show' | 'hide' | null
   onMotionStart?: () => void
@@ -17,35 +19,18 @@ export interface MotionTreeNodeProps extends Omit<TreeNodeProps, 'domRef'> {
   treeNodeRequiredProps: TreeNodeRequiredProps
 }
 
-function toStyleValue(value: any) {
-  if (value === undefined || value === null)
-    return ''
-  if (typeof value === 'number')
-    return `${value}px`
-  return String(value)
-}
-
-function toStyleObject(style: Record<string, any> | undefined) {
-  const mergedStyle: Record<string, any> = {}
-  if (!style)
-    return mergedStyle
-  Object.keys(style).forEach((key) => {
-    mergedStyle[key] = toStyleValue((style as any)[key])
-  })
-  return mergedStyle
-}
-
 const MotionTreeNode = defineComponent<MotionTreeNodeProps>(
   (props) => {
     const context = inject(TreeContextKey, null as any)
     const prefixCls = computed(() => context?.prefixCls)
 
+    const targetVisible = computed(() => props.motionNodes && props.motionType !== 'hide')
+
     const motionEndCalled = ref(false)
     const visible = ref(false)
-    const motionStyle = shallowRef<Record<string, any>>({})
     let motionLeaveTimer: any = null
 
-    const motionName = computed(() => (props.motion as any)?.motionName)
+    const motionName = computed(() => props?.motion?.name)
 
     const triggerMotionEnd = () => {
       if (props.motionNodes && !motionEndCalled.value) {
@@ -89,65 +74,30 @@ const MotionTreeNode = defineComponent<MotionTreeNodeProps>(
       { immediate: true },
     )
 
-    const getStartStyle = (el: HTMLElement, entering: boolean) => {
-      if (entering) {
-        return (props.motion as any)?.onEnterStart?.(el) ?? (props.motion as any)?.onAppearStart?.(el)
+    const onVisibleChanged = (newVisible: boolean) => {
+      if (targetVisible.value === newVisible) {
+        triggerMotionEnd()
       }
-      return (props.motion as any)?.onLeaveStart?.(el)
     }
-
-    const getActiveStyle = (el: HTMLElement, entering: boolean) => {
-      if (entering) {
-        return (props.motion as any)?.onEnterActive?.(el) ?? (props.motion as any)?.onAppearActive?.(el)
-      }
-      return (props.motion as any)?.onLeaveActive?.(el)
-    }
-
     return () => {
-      if (props.motionNodes) {
+      const { motionNodes, treeNodeRequiredProps, active } = props
+      if (motionNodes) {
         const motionNodes = props.motionNodes || []
-        const requiredProps = props.treeNodeRequiredProps
+        const requiredProps = treeNodeRequiredProps
 
         return (
           <Transition
-            {...getTransitionProps(motionName.value, { appear: false })}
-            onBeforeEnter={(el: any) => {
-              motionStyle.value = toStyleObject(getStartStyle(el as HTMLElement, true))
-            }}
-            onEnter={(el: any) => {
-              nextTick(() => {
-                motionStyle.value = toStyleObject(getActiveStyle(el as HTMLElement, true))
-              })
-            }}
-            onAfterEnter={() => {
-              motionStyle.value = {}
-              triggerMotionEnd()
-            }}
-            onBeforeLeave={(el: any) => {
-              motionStyle.value = toStyleObject(getStartStyle(el as HTMLElement, false))
-            }}
-            onLeave={(el: any) => {
-              if (motionLeaveTimer) {
-                clearTimeout(motionLeaveTimer)
-                motionLeaveTimer = null
-              }
-              motionLeaveTimer = setTimeout(() => {
-                motionStyle.value = toStyleObject(getActiveStyle(el as HTMLElement, false))
-              })
+            {...getTransitionProps(motionName.value)}
+            onBeforeEnter={() => {
+              onVisibleChanged(true)
             }}
             onAfterLeave={() => {
-              if (motionLeaveTimer) {
-                clearTimeout(motionLeaveTimer)
-                motionLeaveTimer = null
-              }
-              motionStyle.value = {}
-              triggerMotionEnd()
+              onVisibleChanged(false)
             }}
           >
             {visible.value && (
               <div
                 class={clsx(`${prefixCls.value}-treenode-motion`, motionName.value)}
-                style={motionStyle.value}
               >
                 {motionNodes.map((treeNode) => {
                   const {
@@ -169,7 +119,7 @@ const MotionTreeNode = defineComponent<MotionTreeNodeProps>(
                       {...restProps}
                       {...treeNodeProps}
                       title={title}
-                      active={props.active}
+                      active={active}
                       data={nodeData}
                       key={key}
                       isStart={isStart}
@@ -183,8 +133,12 @@ const MotionTreeNode = defineComponent<MotionTreeNodeProps>(
         )
       }
 
-      const { motion: _motion, motionNodes: _motionNodes, motionType: _motionType, onMotionStart: _onMotionStart, onMotionEnd: _onMotionEnd, treeNodeRequiredProps: _treeNodeRequiredProps, ...restProps } = props as any
-      return <TreeNode {...restProps} active={props.active} />
+      return (
+        <TreeNode
+          {...omit(props, ['motion', 'motionNodes', 'motionType', 'onMotionStart', 'onMotionEnd', 'treeNodeRequiredProps'])}
+          active={active}
+        />
+      )
     }
   },
   {

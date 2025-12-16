@@ -1,3 +1,4 @@
+import type { CSSMotionProps } from '@v-c/util/dist/utils/transition'
 import type { ListRef } from '@v-c/virtual-list'
 import type { DataEntity, DataNode, FlattenNode, Key, KeyEntities, ScrollTo } from './interface'
 import VirtualList from '@v-c/virtual-list'
@@ -102,7 +103,7 @@ export interface NodeListProps {
   dragging?: boolean
   dragOverNodeKey: Key | null
   dropPosition: number | null
-  motion?: any
+  motion?: CSSMotionProps
 
   // Virtual list
   height?: number
