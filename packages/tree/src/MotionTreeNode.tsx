@@ -4,7 +4,7 @@ import type { TreeNodeRequiredProps } from './utils/treeUtil'
 import { clsx } from '@v-c/util'
 import omit from '@v-c/util/dist/omit'
 import { getTransitionProps } from '@v-c/util/dist/utils/transition'
-import { computed, defineComponent, inject, nextTick, onBeforeUnmount, ref, Transition, watch } from 'vue'
+import { computed, defineComponent, inject, onBeforeUnmount, ref, Transition, watch } from 'vue'
 import { TreeContextKey } from './contextTypes'
 import TreeNode from './TreeNode'
 import { getTreeNodeProps } from './utils/treeUtil'
@@ -25,53 +25,42 @@ const MotionTreeNode = defineComponent<MotionTreeNodeProps>(
     const prefixCls = computed(() => context?.prefixCls)
 
     const targetVisible = computed(() => props.motionNodes && props.motionType !== 'hide')
-
-    const motionEndCalled = ref(false)
+    const triggerMotionEndRef = ref(false)
     const visible = ref(false)
-    let motionLeaveTimer: any = null
 
     const motionName = computed(() => props?.motion?.name)
 
     const triggerMotionEnd = () => {
-      if (props.motionNodes && !motionEndCalled.value) {
-        motionEndCalled.value = true
+      if (props.motionNodes && !triggerMotionEndRef.value) {
+        triggerMotionEndRef.value = true
         props.onMotionEnd?.()
       }
     }
 
-    onBeforeUnmount(() => {
-      if (motionLeaveTimer) {
-        clearTimeout(motionLeaveTimer)
-        motionLeaveTimer = null
+    const triggerMotionStart = () => {
+      if (props.motionNodes) {
+        props?.onMotionStart?.()
       }
+    }
+
+    onBeforeUnmount(() => {
+      triggerMotionStart()
       triggerMotionEnd()
     })
 
     watch(
-      () => [props.motionNodes, props.motionType] as const,
-      ([nodes, type], prev) => {
-        if (!nodes)
-          return
-        if (nodes === prev?.[0] && type === prev?.[1])
-          return
-
-        motionEndCalled.value = false
-        props.onMotionStart?.()
-
-        if (type === 'hide') {
-          visible.value = true
-          nextTick(() => {
-            visible.value = false
-          })
-        }
-        else {
-          visible.value = false
-          nextTick(() => {
-            visible.value = true
-          })
+      () => props.motionNodes,
+      () => {
+        if (props.motionNodes) {
+          if (targetVisible.value !== visible.value) {
+            visible.value = !!targetVisible.value
+          }
         }
       },
-      { immediate: true },
+      {
+        immediate: true,
+        flush: 'post',
+      },
     )
 
     const onVisibleChanged = (newVisible: boolean) => {
