@@ -1,3 +1,4 @@
+import type { CSSMotionProps } from '@v-c/util/dist/utils/transition'
 import type { TreeRef } from '../src'
 import { defineComponent, onMounted, ref } from 'vue'
 import Tree from '../src'
@@ -6,13 +7,33 @@ import './animation.less'
 
 const defaultExpandedKeys = ['0', '0-2', '0-9-2']
 
-const motion = {
-  motionName: 'node-motion',
-  motionAppear: false,
-  onAppearStart: () => ({ height: 0 }),
-  onAppearActive: (node: HTMLElement) => ({ height: node.scrollHeight }),
-  onLeaveStart: (node: HTMLElement) => ({ height: node.offsetHeight }),
-  onLeaveActive: () => ({ height: 0 }),
+const motion: CSSMotionProps = {
+  name: 'node-motion',
+  appear: false,
+  onBeforeEnter(el) {
+    const _el = el as HTMLElement
+    if (_el) {
+      _el.style.height = '0px'
+    }
+  },
+  onEnter(el) {
+    const _el = el as HTMLElement
+    if (_el) {
+      _el.style.height = `${_el.scrollHeight}px`
+    }
+  },
+  onBeforeLeave(el) {
+    const _el = el as HTMLElement
+    if (_el) {
+      _el.style.height = `${_el.offsetHeight}px`
+    }
+  },
+  onAfterLeave(el) {
+    const _el = el as HTMLElement
+    if (_el) {
+      _el.style.height = ''
+    }
+  },
 }
 
 function getTreeData() {
