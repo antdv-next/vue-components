@@ -14,22 +14,22 @@ const DropIndicator = defineComponent<DropIndicatorProps>(
         position: 'absolute',
         right: 0,
         backgroundColor: 'red',
-        height: 2,
+        height: `${2}px`,
       }
 
       switch (props.dropPosition) {
         case -1:
           style.top = 0
-          style.left = -props.dropLevelOffset * props.indent
+          style.left = `${-props.dropLevelOffset * props.indent}px`
           break
         case 1:
           style.bottom = 0
-          style.left = -props.dropLevelOffset * props.indent
+          style.left = `${-props.dropLevelOffset * props.indent}px`
           break
         case 0:
         default:
           style.bottom = 0
-          style.left = props.indent
+          style.left = `${props.indent}px`
           break
       }
 
@@ -43,4 +43,3 @@ const DropIndicator = defineComponent<DropIndicatorProps>(
 )
 
 export default DropIndicator
-

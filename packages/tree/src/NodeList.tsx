@@ -1,7 +1,7 @@
 import type { ListRef } from '@v-c/virtual-list'
 import type { FlattenNode, Key, KeyEntities, ScrollTo } from './interface'
 import VirtualList from '@v-c/virtual-list'
-import { Fragment, computed, defineComponent, ref } from 'vue'
+import { computed, defineComponent, ref } from 'vue'
 import TreeNode from './TreeNode'
 import { getKey, getTreeNodeProps } from './utils/treeUtil'
 
@@ -108,7 +108,7 @@ const NodeList = defineComponent<NodeListProps>(
 
     return () => {
       return (
-        <Fragment>
+        <>
           {props.focused && props.activeItem && (
             <span style={HIDDEN_STYLE} aria-live="assertive">
               {getAccessibilityPath(props.activeItem)}
@@ -188,7 +188,7 @@ const NodeList = defineComponent<NodeListProps>(
               )
             }}
           </VirtualListAny>
-        </Fragment>
+        </>
       )
     }
   },
