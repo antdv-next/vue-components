@@ -1,7 +1,8 @@
 import type { FlattenNode, TreeNodeProps } from './interface'
 import type { TreeNodeRequiredProps } from './utils/treeUtil'
 import { clsx } from '@v-c/util'
-import { computed, defineComponent, inject, nextTick, onBeforeUnmount, onMounted, ref, Transition, watch } from 'vue'
+import { getTransitionProps } from '@v-c/util/dist/utils/transition'
+import { computed, defineComponent, inject, nextTick, onBeforeUnmount, ref, shallowRef, Transition, watch } from 'vue'
 import { TreeContextKey } from './contextTypes'
 import TreeNode from './TreeNode'
 import { getTreeNodeProps } from './utils/treeUtil'
@@ -24,54 +25,14 @@ function toStyleValue(value: any) {
   return String(value)
 }
 
-function applyStyle(el: HTMLElement, style: Record<string, any> | undefined) {
-  const keys: string[] = []
+function toStyleObject(style: Record<string, any> | undefined) {
+  const mergedStyle: Record<string, any> = {}
   if (!style)
-    return keys
-
+    return mergedStyle
   Object.keys(style).forEach((key) => {
-    keys.push(key)
-    ;(el.style as any)[key] = toStyleValue((style as any)[key])
+    mergedStyle[key] = toStyleValue((style as any)[key])
   })
-
-  return keys
-}
-
-function clearStyle(el: HTMLElement, keys: string[]) {
-  keys.forEach((key) => {
-    ;(el.style as any)[key] = ''
-  })
-}
-
-function waitTransitionEnd(el: HTMLElement, done: () => void) {
-  let ended = false
-
-  function cleanup() {
-    el.removeEventListener('transitionend', onEnd)
-    el.removeEventListener('animationend', onEnd)
-  }
-
-  function onEnd(e: Event) {
-    if (ended)
-      return
-    if (e.target !== el)
-      return
-    ended = true
-    cleanup()
-    done()
-  }
-
-  el.addEventListener('transitionend', onEnd)
-  el.addEventListener('animationend', onEnd)
-
-  // Fallback
-  window.setTimeout(() => {
-    if (ended)
-      return
-    ended = true
-    cleanup()
-    done()
-  }, 1000)
+  return mergedStyle
 }
 
 const MotionTreeNode = defineComponent<MotionTreeNodeProps>(
@@ -79,17 +40,12 @@ const MotionTreeNode = defineComponent<MotionTreeNodeProps>(
     const context = inject(TreeContextKey, null as any)
     const prefixCls = computed(() => context?.prefixCls)
 
-    const visible = ref(true)
-    const mounted = ref(false)
     const motionEndCalled = ref(false)
+    const visible = ref(false)
+    const motionStyle = shallowRef<Record<string, any>>({})
+    let motionLeaveTimer: any = null
 
-    const targetVisible = computed(() => !!props.motionNodes && props.motionType !== 'hide')
-
-    const triggerMotionStart = () => {
-      if (props.motionNodes) {
-        props.onMotionStart?.()
-      }
-    }
+    const motionName = computed(() => (props.motion as any)?.motionName)
 
     const triggerMotionEnd = () => {
       if (props.motionNodes && !motionEndCalled.value) {
@@ -98,93 +54,101 @@ const MotionTreeNode = defineComponent<MotionTreeNodeProps>(
       }
     }
 
-    onMounted(() => {
-      mounted.value = true
-      triggerMotionStart()
-
-      if (props.motionNodes && !targetVisible.value) {
-        nextTick(() => {
-          visible.value = false
-        })
-      }
-    })
-
     onBeforeUnmount(() => {
+      if (motionLeaveTimer) {
+        clearTimeout(motionLeaveTimer)
+        motionLeaveTimer = null
+      }
       triggerMotionEnd()
     })
 
     watch(
       () => [props.motionNodes, props.motionType] as const,
-      () => {
-        if (!props.motionNodes)
+      ([nodes, type], prev) => {
+        if (!nodes)
           return
-        if (!mounted.value)
+        if (nodes === prev?.[0] && type === prev?.[1])
           return
 
-        const nextVisible = targetVisible.value
-        if (visible.value !== nextVisible) {
-          visible.value = nextVisible
+        motionEndCalled.value = false
+        props.onMotionStart?.()
+
+        if (type === 'hide') {
+          visible.value = true
+          nextTick(() => {
+            visible.value = false
+          })
+        }
+        else {
+          visible.value = false
+          nextTick(() => {
+            visible.value = true
+          })
         }
       },
+      { immediate: true },
     )
 
-    const motionName = computed(() => (props.motion as any)?.motionName)
+    const getStartStyle = (el: HTMLElement, entering: boolean) => {
+      if (entering) {
+        return (props.motion as any)?.onEnterStart?.(el) ?? (props.motion as any)?.onAppearStart?.(el)
+      }
+      return (props.motion as any)?.onLeaveStart?.(el)
+    }
+
+    const getActiveStyle = (el: HTMLElement, entering: boolean) => {
+      if (entering) {
+        return (props.motion as any)?.onEnterActive?.(el) ?? (props.motion as any)?.onAppearActive?.(el)
+      }
+      return (props.motion as any)?.onLeaveActive?.(el)
+    }
 
     return () => {
       if (props.motionNodes) {
         const motionNodes = props.motionNodes || []
         const requiredProps = props.treeNodeRequiredProps
 
-        const getStartStyle = (el: HTMLElement, entering: boolean) => {
-          if (entering) {
-            return (props.motion as any)?.onAppearStart?.(el) ?? (props.motion as any)?.onEnterStart?.(el)
-          }
-          return (props.motion as any)?.onLeaveStart?.(el)
-        }
-
-        const getActiveStyle = (el: HTMLElement, entering: boolean) => {
-          if (entering) {
-            return (props.motion as any)?.onAppearActive?.(el) ?? (props.motion as any)?.onEnterActive?.(el)
-          }
-          return (props.motion as any)?.onLeaveActive?.(el)
-        }
-
         return (
           <Transition
-            css={false}
+            {...getTransitionProps(motionName.value, { appear: false })}
             onBeforeEnter={(el: any) => {
-              motionEndCalled.value = false
-              const keys = applyStyle(el as HTMLElement, getStartStyle(el as HTMLElement, true))
-              ;(el as any).__vcTreeMotionKeys = keys
+              motionStyle.value = toStyleObject(getStartStyle(el as HTMLElement, true))
             }}
-            onEnter={(el: any, done: () => void) => {
+            onEnter={(el: any) => {
               nextTick(() => {
-                applyStyle(el as HTMLElement, getActiveStyle(el as HTMLElement, true))
-                waitTransitionEnd(el as HTMLElement, done)
+                motionStyle.value = toStyleObject(getActiveStyle(el as HTMLElement, true))
               })
             }}
-            onAfterEnter={(el: any) => {
-              clearStyle(el as HTMLElement, (el as any).__vcTreeMotionKeys || [])
+            onAfterEnter={() => {
+              motionStyle.value = {}
               triggerMotionEnd()
             }}
             onBeforeLeave={(el: any) => {
-              motionEndCalled.value = false
-              const keys = applyStyle(el as HTMLElement, getStartStyle(el as HTMLElement, false))
-              ;(el as any).__vcTreeMotionKeys = keys
+              motionStyle.value = toStyleObject(getStartStyle(el as HTMLElement, false))
             }}
-            onLeave={(el: any, done: () => void) => {
-              nextTick(() => {
-                applyStyle(el as HTMLElement, getActiveStyle(el as HTMLElement, false))
-                waitTransitionEnd(el as HTMLElement, done)
+            onLeave={(el: any) => {
+              if (motionLeaveTimer) {
+                clearTimeout(motionLeaveTimer)
+                motionLeaveTimer = null
+              }
+              motionLeaveTimer = setTimeout(() => {
+                motionStyle.value = toStyleObject(getActiveStyle(el as HTMLElement, false))
               })
             }}
-            onAfterLeave={(el: any) => {
-              clearStyle(el as HTMLElement, (el as any).__vcTreeMotionKeys || [])
+            onAfterLeave={() => {
+              if (motionLeaveTimer) {
+                clearTimeout(motionLeaveTimer)
+                motionLeaveTimer = null
+              }
+              motionStyle.value = {}
               triggerMotionEnd()
             }}
           >
             {visible.value && (
-              <div class={clsx(`${prefixCls.value}-treenode-motion`, motionName.value)}>
+              <div
+                class={clsx(`${prefixCls.value}-treenode-motion`, motionName.value)}
+                style={motionStyle.value}
+              >
                 {motionNodes.map((treeNode) => {
                   const {
                     data: nodeData,
