@@ -1,6 +1,7 @@
-import type { Key } from '../src/interface'
+import type { Key } from '../src'
 import { defineComponent } from 'vue'
 import Tree from '../src'
+import './assets/index.less'
 
 const treeData = [
   {

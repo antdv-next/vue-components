@@ -2,6 +2,8 @@ import type { TreeRef } from '../src'
 import type { Key } from '../src/interface'
 import { defineComponent, reactive, ref } from 'vue'
 import Tree, { TreeNode } from '../src'
+import './assets/index.less'
+import './basic.less'
 
 const treeData = [
   {

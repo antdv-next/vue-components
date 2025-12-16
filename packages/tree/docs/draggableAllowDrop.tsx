@@ -2,6 +2,7 @@ import type { Key } from '../src/interface'
 import { defineComponent, reactive } from 'vue'
 import Tree from '../src'
 import { gData } from './utils/dataUtil'
+import './assets/index.less'
 
 function allowDrop({ dropNode, dropPosition }: any) {
   if (!dropNode.children) {

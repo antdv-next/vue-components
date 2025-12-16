@@ -1,9 +1,11 @@
 import type { ActionType } from '@v-c/trigger'
-import type { Key } from '../src/interface'
+import type { Key } from '../src'
 import Trigger from '@v-c/trigger'
 import { computed, defineComponent, reactive, ref } from 'vue'
 import Tree from '../src'
 import { gData } from './utils/dataUtil'
+import './assets/index.less'
+import './dropdown.less'
 
 const builtinPlacements = {
   topLeft: {
