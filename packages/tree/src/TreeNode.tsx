@@ -1,10 +1,9 @@
-import type { Key } from './interface'
-import type { PropType } from 'vue'
+import type { TreeNodeProps } from './interface'
 import { clsx } from '@v-c/util'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
 import { computed, defineComponent, inject, ref, watchEffect } from 'vue'
-import Indent from './Indent'
 import { TreeContextKey, UnstableContextKey } from './contextTypes'
+import Indent from './Indent'
 import getEntity from './utils/keyUtil'
 import { convertNodePropsToEventData } from './utils/treeUtil'
 
@@ -12,44 +11,8 @@ const ICON_OPEN = 'open'
 const ICON_CLOSE = 'close'
 const defaultTitle = '---'
 
-const TreeNode = defineComponent({
-  name: 'TreeNode',
-  props: {
-    eventKey: [String, Number] as PropType<Key>,
-    className: String,
-    style: Object as PropType<any>,
-    id: String,
-
-    expanded: Boolean,
-    selected: Boolean,
-    checked: Boolean,
-    loaded: Boolean,
-    loading: Boolean,
-    halfChecked: Boolean,
-
-    title: [String, Number, Object, Function] as PropType<any>,
-    dragOver: Boolean,
-    dragOverGapTop: Boolean,
-    dragOverGapBottom: Boolean,
-    pos: String,
-    domRef: Object as PropType<HTMLDivElement>,
-    data: Object as PropType<any>,
-    isStart: Array as PropType<boolean[]>,
-    isEnd: Array as PropType<boolean[]>,
-    active: Boolean,
-    onMouseMove: Function as PropType<(e: MouseEvent) => void>,
-
-    // By user
-    isLeaf: Boolean,
-    checkable: { type: Boolean as PropType<boolean | undefined>, default: undefined },
-    selectable: { type: Boolean as PropType<boolean | undefined>, default: undefined },
-    disabled: Boolean,
-    disableCheckbox: Boolean,
-    icon: [String, Number, Object, Function] as PropType<any>,
-    switcherIcon: [String, Number, Object, Function] as PropType<any>,
-  },
-  inheritAttrs: false,
-  setup(props, { attrs }) {
+const TreeNode = defineComponent<TreeNodeProps>(
+  (props, { attrs }) => {
     const context = inject(TreeContextKey, null as any)
     const unstableContext = inject(UnstableContextKey, {} as any)
 
@@ -60,12 +23,14 @@ const TreeNode = defineComponent({
     })
 
     const isCheckable = computed(() => {
-      if (!context.checkable || props.checkable === false) return false
+      if (!context.checkable || props.checkable === false)
+        return false
       return context.checkable
     })
 
     const isSelectable = computed(() => {
-      if (typeof props.selectable === 'boolean') return props.selectable
+      if (typeof props.selectable === 'boolean')
+        return props.selectable
       return context.selectable
     })
 
@@ -75,38 +40,45 @@ const TreeNode = defineComponent({
     })
 
     const memoizedIsLeaf = computed(() => {
-      if (props.isLeaf === false) return false
+      if (props.isLeaf === false)
+        return false
       return props.isLeaf
         || (!context.loadData && !hasChildren.value)
         || (context.loadData && props.loaded && !hasChildren.value)
     })
 
     watchEffect(() => {
-      if (props.loading) return
+      if (props.loading)
+        return
       if (typeof context.loadData === 'function' && props.expanded && !memoizedIsLeaf.value && !props.loaded) {
         context.onNodeLoad(convertNodePropsToEventData(props))
       }
     })
 
     const nodeState = computed(() => {
-      if (memoizedIsLeaf.value) return null
+      if (memoizedIsLeaf.value)
+        return null
       return props.expanded ? ICON_OPEN : ICON_CLOSE
     })
 
     const onSelect = (e: MouseEvent) => {
-      if (isDisabled.value) return
+      if (isDisabled.value)
+        return
       context.onNodeSelect(e, convertNodePropsToEventData(props))
     }
 
     const onCheck = (e: MouseEvent) => {
-      if (isDisabled.value) return
-      if (!isCheckable.value || props.disableCheckbox) return
+      if (isDisabled.value)
+        return
+      if (!isCheckable.value || props.disableCheckbox)
+        return
       context.onNodeCheck(e, convertNodePropsToEventData(props), !props.checked)
     }
 
     const onSelectorClick = (e: MouseEvent) => {
       context.onNodeClick(e, convertNodePropsToEventData(props))
-      if (isSelectable.value) onSelect(e)
+      if (isSelectable.value)
+        onSelect(e)
       else onCheck(e)
     }
 
@@ -171,13 +143,15 @@ const TreeNode = defineComponent({
     }
 
     const onExpand = (e: MouseEvent) => {
-      if (props.loading) return
+      if (props.loading)
+        return
       context.onNodeExpand(e, convertNodePropsToEventData(props))
     }
 
     const renderSwitcherIconDom = (isInternalLeaf: boolean) => {
       const switcherIcon = props.switcherIcon || context.switcherIcon
-      if (typeof switcherIcon === 'function') return (switcherIcon as any)({ ...props, isLeaf: isInternalLeaf })
+      if (typeof switcherIcon === 'function')
+        return (switcherIcon as any)({ ...props, isLeaf: isInternalLeaf })
       return switcherIcon
     }
 
@@ -225,8 +199,10 @@ const TreeNode = defineComponent({
 
     const dropIndicatorNode = computed(() => {
       const rootDraggable = Boolean(context.draggable)
-      if (!(!props.disabled && rootDraggable && context.dragOverNodeKey === props.eventKey)) return null
-      if (context.dropPosition === null || context.dropLevelOffset === null || context.indent === null) return null
+      if (!(!props.disabled && rootDraggable && context.dragOverNodeKey === props.eventKey))
+        return null
+      if (context.dropPosition === null || context.dropLevelOffset === null || context.indent === null)
+        return null
 
       return context.dropIndicatorRender({
         dropPosition: context.dropPosition,
@@ -238,7 +214,8 @@ const TreeNode = defineComponent({
     })
 
     const checkboxNode = computed(() => {
-      if (!isCheckable.value) return null
+      if (!isCheckable.value)
+        return null
 
       const custom = typeof isCheckable.value !== 'boolean' ? isCheckable.value : null
 
@@ -287,8 +264,10 @@ const TreeNode = defineComponent({
       }
 
       let titleNode
-      if (typeof title === 'function') titleNode = title(props.data)
-      else if (context.titleRender) titleNode = context.titleRender(props.data)
+      if (typeof title === 'function')
+        titleNode = (title as any)(props.data)
+      else if (context.titleRender)
+        titleNode = context.titleRender(props.data)
       else titleNode = title
 
       return (
@@ -314,7 +293,8 @@ const TreeNode = defineComponent({
     })
 
     const dragHandlerNode = computed(() => {
-      if (!context.draggable?.icon) return null
+      if (!context.draggable?.icon)
+        return null
       return <span class={`${context.prefixCls}-draggable-icon`}>{context.draggable.icon}</span>
     })
 
@@ -343,7 +323,7 @@ const TreeNode = defineComponent({
             [`${context.prefixCls}-treenode-active`]: props.active,
             [`${context.prefixCls}-treenode-leaf-last`]: isEndNode.value,
             [`${context.prefixCls}-treenode-draggable`]: isDraggable.value,
-            dragging: context.draggingNodeKey === props.eventKey,
+            'dragging': context.draggingNodeKey === props.eventKey,
             'drop-target': context.dropTargetKey === props.eventKey,
             'drop-container': context.dropContainerKey === props.eventKey,
             'drag-over': !isDisabled.value && props.dragOver,
@@ -377,7 +357,11 @@ const TreeNode = defineComponent({
       )
     }
   },
-})
+  {
+    name: 'TreeNode',
+    inheritAttrs: false,
+  },
+)
 
 ;(TreeNode as any).isTreeNode = true
 

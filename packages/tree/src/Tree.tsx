@@ -13,16 +13,17 @@ import type {
   ScrollTo,
   TreeNodeProps,
 } from './interface'
+import type { NodeListRef } from './NodeList'
+import type { AllowDrop } from './util'
 import { clsx } from '@v-c/util'
-import KeyCode from '@v-c/util/dist/KeyCode'
 import useMergedState from '@v-c/util/dist/hooks/useMergedState'
+import KeyCode from '@v-c/util/dist/KeyCode'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
 import warning from '@v-c/util/dist/warning'
 import { computed, defineComponent, onBeforeUnmount, provide, reactive, ref, shallowRef, watchEffect } from 'vue'
+import { TreeContextKey } from './contextTypes'
 import DropIndicator from './DropIndicator'
 import NodeList from './NodeList'
-import type { NodeListRef } from './NodeList'
-import { TreeContextKey } from './contextTypes'
 import {
   arrAdd,
   arrDel,
@@ -33,7 +34,6 @@ import {
   parseCheckedKeys,
   posToArr,
 } from './util'
-import type { AllowDrop } from './util'
 import { conductCheck } from './utils/conductUtil'
 import getEntity from './utils/keyUtil'
 import {
@@ -261,7 +261,8 @@ const Tree = defineComponent<TreeProps>(
       return keys
     }, {
       value: computed(() => {
-        if (props.expandedKeys === undefined) return
+        if (props.expandedKeys === undefined)
+          return
 
         const keys = props.expandedKeys || []
         if (props.autoExpandParent) {
@@ -278,7 +279,8 @@ const Tree = defineComponent<TreeProps>(
       () => calcSelectedKeys(props.defaultSelectedKeys || [], { multiple: mergedMultiple.value }) || [],
       {
         value: computed(() => {
-          if (props.selectedKeys === undefined) return
+          if (props.selectedKeys === undefined)
+            return
           return calcSelectedKeys(props.selectedKeys, { multiple: mergedMultiple.value }) || []
         }) as any,
       },
@@ -288,7 +290,8 @@ const Tree = defineComponent<TreeProps>(
       () => props.defaultCheckedKeys || [],
       {
         value: computed(() => {
-          if (props.checkedKeys === undefined) return
+          if (props.checkedKeys === undefined)
+            return
           return parseCheckedKeys(props.checkedKeys)?.checkedKeys || []
         }) as any,
       },
@@ -298,7 +301,8 @@ const Tree = defineComponent<TreeProps>(
       () => [],
       {
         value: computed(() => {
-          if (props.checkedKeys === undefined) return
+          if (props.checkedKeys === undefined)
+            return
           return parseCheckedKeys(props.checkedKeys)?.halfCheckedKeys || []
         }) as any,
       },
@@ -372,7 +376,8 @@ const Tree = defineComponent<TreeProps>(
     }))
 
     const getActiveItem = computed(() => {
-      if (activeKey.value === null) return null
+      if (activeKey.value === null)
+        return null
       return flattenNodes.value.find(({ key }) => key === activeKey.value) || null
     })
 
@@ -383,7 +388,8 @@ const Tree = defineComponent<TreeProps>(
     expose<TreeRef>({ scrollTo })
 
     function onActiveChange(newActiveKey: Key | null) {
-      if (activeKey.value === newActiveKey) return
+      if (activeKey.value === newActiveKey)
+        return
 
       setActiveKey(newActiveKey)
 
@@ -422,10 +428,12 @@ const Tree = defineComponent<TreeProps>(
     function onNodeLoad(treeNode: EventDataNode<any>) {
       const key = treeNode.key
 
-      if (getEntity(keyEntities.value, key)?.children?.length) return
+      if (getEntity(keyEntities.value, key)?.children?.length)
+        return
 
       const loadData = props.loadData
-      if (!loadData || loadedKeys.value.includes(key) || loadingKeys.value.includes(key)) return
+      if (!loadData || loadedKeys.value.includes(key) || loadingKeys.value.includes(key))
+        return
 
       loadingKeys.value = arrAdd(loadingKeys.value, key)
 
@@ -495,10 +503,12 @@ const Tree = defineComponent<TreeProps>(
       const expanded = treeNode.expanded
       const key = treeNode.key
 
-      if (treeNode.isLeaf || e.shiftKey || e.metaKey || e.ctrlKey) return
+      if (treeNode.isLeaf || e.shiftKey || e.metaKey || e.ctrlKey)
+        return
 
       const node = flattenNodes.value.find(nodeItem => nodeItem.key === key)
-      if (!node) return
+      if (!node)
+        return
 
       const eventNode = convertNodePropsToEventData({
         ...getTreeNodeProps(key, getTreeNodeRequiredProps.value),
@@ -610,7 +620,8 @@ const Tree = defineComponent<TreeProps>(
 
         nextCheckedKeys.forEach((checkedKey) => {
           const entity = getEntity(keyEntities.value, checkedKey)
-          if (!entity) return
+          if (!entity)
+            return
 
           const { node, pos } = entity
           eventObj.checkedNodes.push(node)
@@ -738,7 +749,8 @@ const Tree = defineComponent<TreeProps>(
 
       if (dragNodeProps.eventKey !== nodeProps.eventKey) {
         delayedDragEnterLogic[pos!] = window.setTimeout(() => {
-          if (draggingNodeKey.value === null) return
+          if (draggingNodeKey.value === null)
+            return
 
           let newExpandedKeys = [...expandedKeys.value]
           const entity = getEntity(keyEntities.value, nodeProps.eventKey!)
@@ -779,7 +791,8 @@ const Tree = defineComponent<TreeProps>(
     }
 
     const onNodeDragOver = (event: DragEvent, nodeProps: TreeNodeProps<any>) => {
-      if (!dragNodeProps || !dragStartMousePosition) return
+      if (!dragNodeProps || !dragStartMousePosition)
+        return
 
       const {
         dropPosition: nextDropPosition,
@@ -802,7 +815,8 @@ const Tree = defineComponent<TreeProps>(
         props.direction,
       )
 
-      if (dragChildrenKeys.value.includes(nextDropTargetKey) || !nextDropAllowed) return
+      if (dragChildrenKeys.value.includes(nextDropTargetKey) || !nextDropAllowed)
+        return
 
       if (dragNodeProps.eventKey === nextDropTargetKey && nextDropLevelOffset === 0) {
         if (
@@ -867,7 +881,7 @@ const Tree = defineComponent<TreeProps>(
       props.onDragLeave?.({ event, node: convertNodePropsToEventData(nodeProps as any) })
     }
 
-    const onNodeDragEnd = (event: DragEvent, nodeProps: TreeNodeProps<any> | null, _outsideTree?: boolean) => {
+    function onNodeDragEnd(event: DragEvent, nodeProps: TreeNodeProps<any> | null, _outsideTree?: boolean) {
       dragOverNodeKey.value = null
       cleanDragState()
 
@@ -880,35 +894,44 @@ const Tree = defineComponent<TreeProps>(
     }
 
     const onNodeDrop = (event: DragEvent, _nodeProps: TreeNodeProps<any> | null, outsideTree = false) => {
-      if (!dropAllowed.value) return
+      const dropAllowedValue = dropAllowed.value
+      const dropPositionValue = dropPosition.value
+      const dropTargetKeyValue = dropTargetKey.value
+      const dropTargetPosValue = dropTargetPos.value
+      const dragChildrenKeysValue = dragChildrenKeys.value
+      const dragNodePropsValue = dragNodeProps
+
+      if (!dropAllowedValue)
+        return
 
       dragOverNodeKey.value = null
       cleanDragState()
 
-      if (dropTargetKey.value === null) return
+      if (dropTargetKeyValue === null)
+        return
 
       const abstractDropNodeProps = {
-        ...getTreeNodeProps(dropTargetKey.value, getTreeNodeRequiredProps.value),
-        active: getActiveItem.value?.key === dropTargetKey.value,
-        data: getEntity(keyEntities.value, dropTargetKey.value)?.node,
+        ...getTreeNodeProps(dropTargetKeyValue, getTreeNodeRequiredProps.value),
+        active: getActiveItem.value?.key === dropTargetKeyValue,
+        data: getEntity(keyEntities.value, dropTargetKeyValue)?.node,
       }
 
       warning(
-        !dragChildrenKeys.value.includes(dropTargetKey.value),
+        !dragChildrenKeysValue.includes(dropTargetKeyValue),
         'Can not drop to dragNode\'s children node. This is a bug of vc-tree. Please report an issue.',
       )
 
-      const posArr = posToArr(dropTargetPos.value || '0')
+      const posArr = posToArr(dropTargetPosValue || '0')
 
       const dropResult: any = {
         event,
         node: convertNodePropsToEventData(abstractDropNodeProps as any),
-        dragNode: dragNodeProps ? convertNodePropsToEventData(dragNodeProps as any) : null,
-        dragNodesKeys: dragNodeProps
-          ? [dragNodeProps.eventKey].concat(dragChildrenKeys.value)
-          : dragChildrenKeys.value,
-        dropToGap: dropPosition.value !== 0,
-        dropPosition: (dropPosition.value || 0) + Number(posArr[posArr.length - 1]),
+        dragNode: dragNodePropsValue ? convertNodePropsToEventData(dragNodePropsValue as any) : null,
+        dragNodesKeys: dragNodePropsValue
+          ? [dragNodePropsValue.eventKey].concat(dragChildrenKeysValue)
+          : dragChildrenKeysValue,
+        dropToGap: dropPositionValue !== 0,
+        dropPosition: (dropPositionValue || 0) + Number(posArr[posArr.length - 1]),
       }
 
       if (!outsideTree) {
@@ -936,7 +959,7 @@ const Tree = defineComponent<TreeProps>(
 
         const expandable
           = activeItem.data.isLeaf === false
-          || !!((activeItem.data as any)[mergedFieldNames.value.children] || []).length
+            || !!((activeItem.data as any)[mergedFieldNames.value.children] || []).length
 
         const eventNode = convertNodePropsToEventData({
           ...getTreeNodeProps(activeKey.value!, required),
@@ -990,9 +1013,12 @@ const Tree = defineComponent<TreeProps>(
 
     const draggableConfig = computed(() => {
       const draggable = props.draggable ?? defaultProps.draggable
-      if (!draggable) return undefined
-      if (typeof draggable === 'object') return draggable as DraggableConfig
-      if (typeof draggable === 'function') return { nodeDraggable: draggable }
+      if (!draggable)
+        return undefined
+      if (typeof draggable === 'object')
+        return draggable as DraggableConfig
+      if (typeof draggable === 'function')
+        return { nodeDraggable: draggable }
       return {}
     })
 
@@ -1014,7 +1040,8 @@ const Tree = defineComponent<TreeProps>(
       dropPosition: dropPosition.value,
       indent: indent.value,
       dropIndicatorRender: (diProps: any) => {
-        if (props.dropIndicatorRender) return props.dropIndicatorRender(diProps)
+        if (props.dropIndicatorRender)
+          return props.dropIndicatorRender(diProps)
         return (
           <DropIndicator
             dropPosition={diProps.dropPosition}

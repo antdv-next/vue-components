@@ -40,4 +40,3 @@ const Indent = defineComponent<IndentProps>(
 )
 
 export default Indent
-
