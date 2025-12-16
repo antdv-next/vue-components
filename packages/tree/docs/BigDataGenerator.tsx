@@ -39,19 +39,25 @@ export default defineComponent({
         <h2>big data generator</h2>
         <form onSubmit={onGen}>
           <label style={{ marginRight: '10px' }}>
-            x:{' '}
-            <input ref={xRef} defaultValue={props.x} type="number" min="1" required style={{ width: '60px' }} />
+            x:
+            {' '}
+            <input ref={xRef} value={(props as any).x} type="number" min="1" required style={{ width: '60px' }} />
           </label>
           <label style={{ marginRight: '10px' }}>
-            y:{' '}
-            <input ref={yRef} defaultValue={props.y} type="number" min="0" required style={{ width: '60px' }} />
+            y:
+            {' '}
+            <input ref={yRef} value={props.y} type="number" min="0" required style={{ width: '60px' }} />
           </label>
           <label style={{ marginRight: '10px' }}>
-            z:{' '}
-            <input ref={zRef} defaultValue={props.z} type="number" min="0" required style={{ width: '60px' }} />
+            z:
+            {' '}
+            <input ref={zRef} value={props.z} type="number" min="0" required style={{ width: '60px' }} />
           </label>
           <button type="submit">Generate</button>
-          <p>total nodes: {nums.value ?? calcTotal(props.x, props.y, props.z)}</p>
+          <p>
+            total nodes:
+            {nums.value ?? calcTotal(props.x, props.y, props.z)}
+          </p>
         </form>
         <p style={{ fontSize: '12px' }}>
           x：每一级下的节点总数。y：每级节点里有y个节点、存在子节点。z：树的level层级数（0表示一级）
@@ -60,4 +66,3 @@ export default defineComponent({
     )
   },
 })
-

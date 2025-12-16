@@ -1,0 +1,60 @@
+.animation {
+  .vc-tree-treenode {
+    display: flex;
+
+    .vc-tree-indent {
+      position: relative;
+      align-self: stretch;
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: stretch;
+
+      .vc-tree-indent-unit {
+        position: relative;
+        height: 100%;
+
+        &::before {
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          border-right: 1px solid blue;
+          left: 50%;
+          content: '';
+        }
+
+        &-end {
+          &::before {
+            display: none;
+          }
+        }
+
+        // End should ignore
+        // &-end {
+        //   &::before {
+        //     display: none;
+        //   }
+        // }
+      }
+    }
+
+    .vc-tree-switcher-noop {
+      &::before {
+        content: '';
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        background: red;
+        border-radius: 100%;
+      }
+    }
+
+    // Motion
+    &-motion:not(.node-motion-appear-active) {
+      // .vc-tree-indent-unit {
+      //   &::before {
+      //     display: none;
+      //   }
+      // }
+    }
+  }
+}

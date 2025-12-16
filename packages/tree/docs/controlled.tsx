@@ -2,6 +2,7 @@ import type { Key } from '../src/interface'
 import { defineComponent, reactive } from 'vue'
 import Tree, { TreeNode } from '../src'
 import { gData, getRadioSelectKeys } from './utils/dataUtil'
+import './assets/index.less'
 
 export default defineComponent(() => {
   const state = reactive({
