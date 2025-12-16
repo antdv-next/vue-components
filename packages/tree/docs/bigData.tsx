@@ -3,6 +3,7 @@ import type { DemoDataNode } from './utils/dataUtil'
 import { defineComponent, reactive } from 'vue'
 import Tree, { TreeNode } from '../src'
 import BigDataGenerator from './BigDataGenerator'
+import './assets/index.less'
 
 export default defineComponent(() => {
   const state = reactive({

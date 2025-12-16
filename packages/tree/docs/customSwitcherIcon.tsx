@@ -1,6 +1,7 @@
 import type { Key } from '../src/interface'
 import { defineComponent, reactive } from 'vue'
 import Tree, { TreeNode } from '../src'
+import './assets/index.less'
 
 const arrowPath
   = 'M869 487.8L491.2 159.9c-2.9-2.5-6.6-3.9-10.5-3.9h-88'

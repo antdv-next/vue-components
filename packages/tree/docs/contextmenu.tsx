@@ -1,6 +1,7 @@
 import type { Key } from '../src/interface'
 import { defineComponent, onBeforeUnmount, reactive, ref, Teleport } from 'vue'
 import Tree, { TreeNode } from '../src'
+import './assets/index.less'
 
 export default defineComponent(() => {
   const state = reactive({
