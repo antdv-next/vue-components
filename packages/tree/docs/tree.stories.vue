@@ -12,7 +12,6 @@ import ExpandAction from './expandAction'
 import FieldNames from './fieldNames'
 import Icon from './icon'
 import Selectable from './selectable'
-import './assets/index.less'
 </script>
 
 <template>

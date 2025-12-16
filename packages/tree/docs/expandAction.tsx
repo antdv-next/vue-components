@@ -1,5 +1,6 @@
 import { defineComponent } from 'vue'
 import Tree, { TreeNode } from '../src'
+import './assets/index.less'
 
 export default defineComponent(() => {
   return () => (

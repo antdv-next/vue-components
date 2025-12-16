@@ -1,6 +1,7 @@
-import type { Key } from '../src/interface'
+import type { Key } from '../src'
 import { defineComponent, onMounted, reactive } from 'vue'
 import Tree from '../src'
+import './assets/index.less'
 
 function generateTreeNodes(key: string) {
   const arr: any[] = []
