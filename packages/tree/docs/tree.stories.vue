@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import Animation from './animation'
+import AnimationDraggable from './animation-draggable'
 import Basic from './basic'
 import BigData from './bigData'
 import Contextmenu from './contextmenu'
@@ -33,6 +35,12 @@ import Selectable from './selectable'
     </Variant>
     <Variant title="draggableAllowDrop">
       <DraggableAllowDrop />
+    </Variant>
+    <Variant title="animation">
+      <Animation />
+    </Variant>
+    <Variant title="animationDraggable">
+      <AnimationDraggable />
     </Variant>
     <Variant title="expandAction">
       <ExpandAction />
