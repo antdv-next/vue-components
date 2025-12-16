@@ -23,7 +23,7 @@ import warning from '@v-c/util/dist/warning'
 import { computed, defineComponent, onBeforeUnmount, provide, reactive, ref, shallowRef, watchEffect } from 'vue'
 import { TreeContextKey } from './contextTypes'
 import DropIndicator from './DropIndicator'
-import NodeList from './NodeList'
+import NodeList, { MOTION_KEY, MotionEntity } from './NodeList'
 import {
   arrAdd,
   arrDel,
@@ -240,7 +240,10 @@ const Tree = defineComponent<TreeProps>(
       return convertDataToEntities(mergedTreeData.value as any, { fieldNames: mergedFieldNames.value })
     })
 
-    const keyEntities = computed<KeyEntities<any>>(() => entities.value.keyEntities)
+    const keyEntities = computed<KeyEntities<any>>(() => ({
+      [MOTION_KEY]: MotionEntity,
+      ...entities.value.keyEntities,
+    }))
 
     const [expandedKeys, setExpandedKeys] = useMergedState<Key[]>(() => {
       let keys: Key[] = []
@@ -248,7 +251,9 @@ const Tree = defineComponent<TreeProps>(
       const defaultExpandParent = props.defaultExpandParent ?? defaultProps.defaultExpandParent
 
       if (defaultExpandAll) {
-        keys = Object.values(keyEntities.value).map(entity => entity.key)
+        keys = Object.values(keyEntities.value)
+          .filter(entity => entity.key !== MOTION_KEY)
+          .map(entity => entity.key)
       }
       else {
         keys = props.defaultExpandedKeys || []
@@ -319,7 +324,8 @@ const Tree = defineComponent<TreeProps>(
       if (!mergedCheckStrictly.value) {
         // Skip conduct check when tree data not ready to avoid warning:
         // `Tree missing follow keys: ...`
-        if (Object.keys(keyEntities.value || {}).length) {
+        const hasTreeEntity = Object.keys(keyEntities.value || {}).some(key => key !== MOTION_KEY)
+        if (hasTreeEntity) {
           const conductKeys = conductCheck(checkedKeysValue, true, keyEntities.value)
           checkedKeysValue = conductKeys.checkedKeys
           halfCheckedKeysValue = conductKeys.halfCheckedKeys
@@ -338,9 +344,20 @@ const Tree = defineComponent<TreeProps>(
     const loadingKeys = ref<Key[]>([])
 
     const focused = ref(false)
+    const listChanging = ref(false)
     const [activeKey, setActiveKey] = useMergedState<Key | null>(null, {
       value: computed(() => props.activeKey === undefined ? undefined : props.activeKey) as any,
     })
+
+    function onListChangeStart() {
+      listChanging.value = true
+    }
+
+    function onListChangeEnd() {
+      setTimeout(() => {
+        listChanging.value = false
+      })
+    }
 
     const draggingNodeKey = ref<Key | null>(null)
     const dragChildrenKeys = ref<Key[]>([])
@@ -471,6 +488,10 @@ const Tree = defineComponent<TreeProps>(
     function onNodeExpand(e: MouseEvent, treeNode: EventDataNode<any>) {
       const expanded = treeNode.expanded
       const key = (treeNode as any)[mergedFieldNames.value.key]
+
+      // Do nothing when motion is in progress
+      if (listChanging.value)
+        return
 
       const targetExpanded = !expanded
       const certain = expandedKeys.value.includes(key)
@@ -1134,6 +1155,7 @@ const Tree = defineComponent<TreeProps>(
             selectable={mergedSelectable.value}
             checkable={!!mergedCheckable.value}
             dragging={draggingNodeKey.value !== null}
+            motion={props.motion}
             height={props.height}
             itemHeight={props.itemHeight}
             virtual={mergedVirtual.value}
@@ -1145,6 +1167,8 @@ const Tree = defineComponent<TreeProps>(
             onBlur={onBlur}
             onKeyDown={onKeyDown}
             onActiveChange={onActiveChange}
+            onListChangeStart={onListChangeStart}
+            onListChangeEnd={onListChangeEnd}
             onContextmenu={props.onContextMenu}
             onScroll={props.onScroll}
             scrollWidth={props.scrollWidth}
