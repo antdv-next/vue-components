@@ -50,7 +50,7 @@ export interface TreeNodeProps<TreeDataType extends BasicDataNode = DataNode> {
   disableCheckbox?: boolean
   icon?: IconType
   switcherIcon?: IconType
-  // children?: VueNode
+  children?: VueNode
 }
 
 export type IconType = VueNode | ((props: TreeNodeProps) => VueNode)
