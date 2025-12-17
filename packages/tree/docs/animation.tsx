@@ -22,10 +22,22 @@ const motion: CSSMotionProps = {
       _el.style.height = `${_el.scrollHeight}px`
     }
   },
+  onAfterEnter(el) {
+    const _el = el as HTMLElement
+    if (_el) {
+      _el.style.height = ''
+    }
+  },
   onBeforeLeave(el) {
     const _el = el as HTMLElement
     if (_el) {
       _el.style.height = `${_el.offsetHeight}px`
+    }
+  },
+  onLeave(el) {
+    const _el = el as HTMLElement
+    if (_el) {
+      _el.style.height = '0px'
     }
   },
   onAfterLeave(el) {

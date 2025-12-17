@@ -171,7 +171,6 @@ const NodeList = defineComponent<NodeListProps>(
 
     function onMotionEnd() {
       const latestData = dataRef.value
-
       prevData.value = latestData
       transitionData.value = latestData
       transitionRange.value = []
@@ -303,7 +302,7 @@ const NodeList = defineComponent<NodeListProps>(
               // and check the `restList` to see if has the MOTION_KEY node
               // but this will cause performance issue for long list compare
               // we just check `originList` and repeat trigger `onMotionEnd`
-              if (originList.every(item => itemKey(item) !== MOTION_KEY)) {
+              if (motionType.value && originList.every(item => itemKey(item) !== MOTION_KEY)) {
                 onMotionEnd()
               }
             }}
