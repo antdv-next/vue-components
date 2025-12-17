@@ -24,11 +24,13 @@ const MotionTreeNode = defineComponent<MotionTreeNodeProps>(
     const context = inject(TreeContextKey, null as any)
     const prefixCls = computed(() => context?.prefixCls)
 
-    const targetVisible = computed(() => props.motionNodes && props.motionType !== 'hide')
+    let hideTimer: ReturnType<typeof setTimeout> | null = null
+
     const triggerMotionEndRef = ref(false)
-    const visible = ref(false)
+    const visible = ref(true)
 
     const motionName = computed(() => props?.motion?.name)
+    const targetVisible = computed(() => !!props.motionNodes && props.motionType !== 'hide')
 
     const triggerMotionEnd = () => {
       if (props.motionNodes && !triggerMotionEndRef.value) {
@@ -44,17 +46,50 @@ const MotionTreeNode = defineComponent<MotionTreeNodeProps>(
     }
 
     onBeforeUnmount(() => {
-      triggerMotionStart()
+      if (hideTimer) {
+        clearTimeout(hideTimer)
+        hideTimer = null
+      }
       triggerMotionEnd()
     })
 
     watch(
       () => props.motionNodes,
-      () => {
-        if (props.motionNodes) {
-          if (targetVisible.value !== visible.value) {
-            visible.value = !!targetVisible.value
+      (newMotionNodes, prevMotionNodes) => {
+        if (newMotionNodes) {
+          // New motion start
+          if (!prevMotionNodes) {
+            triggerMotionEndRef.value = false
+            triggerMotionStart()
           }
+
+          if (targetVisible.value !== visible.value) {
+            // Always ensure at least one frame rendered for leave motion
+            if (targetVisible.value) {
+              if (hideTimer) {
+                clearTimeout(hideTimer)
+                hideTimer = null
+              }
+              visible.value = true
+            }
+            else {
+              visible.value = true
+              if (hideTimer) {
+                clearTimeout(hideTimer)
+              }
+              hideTimer = setTimeout(() => {
+                visible.value = false
+                hideTimer = null
+              })
+            }
+          }
+        }
+        else if (newMotionNodes === null) {
+          if (hideTimer) {
+            clearTimeout(hideTimer)
+            hideTimer = null
+          }
+          visible.value = true
         }
       },
       {
@@ -71,9 +106,8 @@ const MotionTreeNode = defineComponent<MotionTreeNodeProps>(
     return () => {
       const { motionNodes, treeNodeRequiredProps, active, motion, motionType } = props
       if (motionNodes) {
-        const motionNodes = props.motionNodes || []
+        const _motionNodes = motionNodes ?? []
         const requiredProps = treeNodeRequiredProps
-
         const treeNodeMotionProps = getTransitionProps(motionName.value, {
           ...motion,
           appear: motionType === 'show',
@@ -81,7 +115,7 @@ const MotionTreeNode = defineComponent<MotionTreeNodeProps>(
         return (
           <Transition
             {...treeNodeMotionProps}
-            onBeforeEnter={() => {
+            onAfterEnter={() => {
               onVisibleChanged(true)
             }}
             onAfterLeave={() => {
@@ -92,7 +126,7 @@ const MotionTreeNode = defineComponent<MotionTreeNodeProps>(
               <div
                 class={clsx(`${prefixCls.value}-treenode-motion`)}
               >
-                {motionNodes.map((treeNode) => {
+                {_motionNodes.map((treeNode) => {
                   const {
                     data: nodeData,
                     title,
