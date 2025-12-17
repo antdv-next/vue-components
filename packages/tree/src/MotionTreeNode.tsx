@@ -69,14 +69,17 @@ const MotionTreeNode = defineComponent<MotionTreeNodeProps>(
       }
     }
     return () => {
-      const { motionNodes, treeNodeRequiredProps, active } = props
+      const { motionNodes, treeNodeRequiredProps, active, motion } = props
       if (motionNodes) {
         const motionNodes = props.motionNodes || []
         const requiredProps = treeNodeRequiredProps
 
+        const treeNodeMotionProps = getTransitionProps(motionName.value, {
+          ...motion,
+        })
         return (
           <Transition
-            {...getTransitionProps(motionName.value)}
+            {...treeNodeMotionProps}
             onBeforeEnter={() => {
               onVisibleChanged(true)
             }}

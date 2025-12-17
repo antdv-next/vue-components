@@ -273,19 +273,20 @@ const NodeList = defineComponent<NodeListProps>(
     const mergedData = computed(() => (props.motion ? transitionData.value : (props.data || [])))
 
     return () => {
+      const { motion, focused, activeItem, focusable, disabled, tabIndex } = props
       return (
         <>
-          {props.focused && props.activeItem && (
+          {focused && activeItem && (
             <span style={HIDDEN_STYLE} aria-live="assertive">
-              {getAccessibilityPath(props.activeItem)}
+              {getAccessibilityPath(activeItem)}
             </span>
           )}
 
           <div>
             <input
               style={HIDDEN_STYLE}
-              disabled={props.focusable === false || props.disabled}
-              tabindex={props.focusable !== false ? props.tabIndex : undefined}
+              disabled={focusable === false || disabled}
+              tabindex={focusable !== false ? tabIndex : undefined}
               onKeydown={props.onKeyDown}
               onFocus={props.onFocus}
               onBlur={props.onBlur}
@@ -343,7 +344,6 @@ const NodeList = defineComponent<NodeListProps>(
               const restProps = { ...(nodeData || {}) }
               delete restProps.key
               delete restProps.children
-
               return (
                 <MotionTreeNode
                   {...restProps}
@@ -354,8 +354,8 @@ const NodeList = defineComponent<NodeListProps>(
                   data={nodeData}
                   isStart={isStart}
                   isEnd={isEnd}
-                  motion={props.motion}
-                  motionNodes={mergedKey === MOTION_KEY ? transitionRange.value : null}
+                  motion={motion}
+                  motionNodes={key === MOTION_KEY ? transitionRange.value : null}
                   motionType={motionType.value}
                   onMotionStart={props.onListChangeStart}
                   onMotionEnd={onMotionEnd}
