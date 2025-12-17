@@ -69,13 +69,14 @@ const MotionTreeNode = defineComponent<MotionTreeNodeProps>(
       }
     }
     return () => {
-      const { motionNodes, treeNodeRequiredProps, active, motion } = props
+      const { motionNodes, treeNodeRequiredProps, active, motion, motionType } = props
       if (motionNodes) {
         const motionNodes = props.motionNodes || []
         const requiredProps = treeNodeRequiredProps
 
         const treeNodeMotionProps = getTransitionProps(motionName.value, {
           ...motion,
+          appear: motionType === 'show',
         })
         return (
           <Transition
@@ -89,7 +90,7 @@ const MotionTreeNode = defineComponent<MotionTreeNodeProps>(
           >
             {visible.value && (
               <div
-                class={clsx(`${prefixCls.value}-treenode-motion`, motionName.value)}
+                class={clsx(`${prefixCls.value}-treenode-motion`)}
               >
                 {motionNodes.map((treeNode) => {
                   const {

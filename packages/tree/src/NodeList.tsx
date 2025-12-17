@@ -1,6 +1,7 @@
 import type { CSSMotionProps } from '@v-c/util/dist/utils/transition'
 import type { ListRef } from '@v-c/virtual-list'
 import type { DataEntity, DataNode, FlattenNode, Key, KeyEntities, ScrollTo } from './interface'
+import { toPropsRefs } from '@v-c/util/dist/props-util'
 import VirtualList from '@v-c/virtual-list'
 import { computed, defineComponent, ref, shallowRef, watch } from 'vue'
 import MotionTreeNode from './MotionTreeNode'
@@ -129,9 +130,10 @@ const NodeList = defineComponent<NodeListProps>(
   (props, { attrs, expose }) => {
     const listRef = ref<ListRef>()
     const indentMeasurerRef = ref<HTMLDivElement>()
+    const { expandedKeys, data } = toPropsRefs(props, 'expandedKeys', 'data')
 
     const treeNodeRequiredProps = computed(() => ({
-      expandedKeys: props.expandedKeys || [],
+      expandedKeys: expandedKeys.value || [],
       selectedKeys: props.selectedKeys || [],
       loadedKeys: props.loadedKeys || [],
       loadingKeys: props.loadingKeys || [],
@@ -160,9 +162,9 @@ const NodeList = defineComponent<NodeListProps>(
 
     const dataRef = shallowRef<FlattenNode[]>(props.data || [])
     watch(
-      () => props.data,
+      data,
       (newData) => {
-        dataRef.value = newData || []
+        dataRef.value = (newData || []) as any
       },
       { immediate: true },
     )
@@ -179,15 +181,6 @@ const NodeList = defineComponent<NodeListProps>(
     }
 
     watch(
-      () => props.motion,
-      (motion) => {
-        if (!motion) {
-          onMotionEnd()
-        }
-      },
-    )
-
-    watch(
       () => props.dragging,
       (dragging) => {
         if (!dragging) {
@@ -198,82 +191,58 @@ const NodeList = defineComponent<NodeListProps>(
     )
 
     watch(
-      [() => props.expandedKeys, () => props.data] as const,
-      ([nextExpandedKeys, nextData]) => {
-        const currentData = nextData || []
-
-        if (!props.motion) {
-          prevExpandedKeys.value = nextExpandedKeys
-          prevData.value = currentData
-          transitionData.value = currentData
-          transitionRange.value = []
-          motionType.value = null
-          return
-        }
-
-        const prevExpandedKeysValue = prevExpandedKeys.value
-        prevExpandedKeys.value = nextExpandedKeys
-
-        const diffExpanded = findExpandedKeys(prevExpandedKeysValue, nextExpandedKeys)
-
+      [() => expandedKeys.value, () => data.value],
+      () => {
+        const diffExpanded = findExpandedKeys(prevExpandedKeys.value, expandedKeys.value)
         if (diffExpanded.key !== null) {
           if (diffExpanded.add) {
-            const keyIndex = prevData.value.findIndex(({ key }) => key === diffExpanded.key)
-            if (keyIndex === -1) {
-              prevData.value = currentData
-              transitionData.value = currentData
-              return
-            }
-
+            const keyIndex = prevData.value?.findIndex?.(({ key }) => key === diffExpanded.key)
             const rangeNodes = getMinimumRangeTransitionRange(
-              getExpandRange(prevData.value, currentData, diffExpanded.key),
+              getExpandRange(prevData.value!, data.value!, diffExpanded.key),
               props.virtual,
               props.height,
               props.itemHeight,
             )
 
-            const newTransitionData: FlattenNode[] = prevData.value.slice()
-            newTransitionData.splice(keyIndex + 1, 0, MotionFlattenData)
-
+            const newTransitionData: FlattenNode[] = prevData.value?.slice?.() ?? []
+            newTransitionData.splice(keyIndex! + 1, 0, MotionFlattenData)
             transitionData.value = newTransitionData
             transitionRange.value = rangeNodes
             motionType.value = 'show'
           }
           else {
-            const keyIndex = currentData.findIndex(({ key }) => key === diffExpanded.key)
-            if (keyIndex === -1) {
-              prevData.value = currentData
-              transitionData.value = currentData
-              return
-            }
-
+            const keyIndex = data.value?.findIndex?.(({ key }) => key === diffExpanded.key)
             const rangeNodes = getMinimumRangeTransitionRange(
-              getExpandRange(currentData, prevData.value, diffExpanded.key),
+              getExpandRange(data.value!, prevData.value!, diffExpanded.key),
               props.virtual,
               props.height,
               props.itemHeight,
             )
 
-            const newTransitionData: FlattenNode[] = currentData.slice()
-            newTransitionData.splice(keyIndex + 1, 0, MotionFlattenData)
-
+            const newTransitionData: FlattenNode[] = data.value?.slice?.() ?? []
+            newTransitionData.splice(keyIndex! + 1, 0, MotionFlattenData)
             transitionData.value = newTransitionData
             transitionRange.value = rangeNodes
             motionType.value = 'hide'
           }
         }
-        else if (prevData.value !== currentData) {
-          prevData.value = currentData
-          transitionData.value = currentData
+        else if (prevData.value !== data.value) {
+          // If whole data changed, we just refresh the list
+          prevData.value = data.value || []
+          transitionData.value = data.value || []
         }
+        prevExpandedKeys.value = expandedKeys.value || []
       },
-      { immediate: true, flush: 'sync' },
+      {
+        immediate: true,
+        flush: 'post',
+      },
     )
 
     const mergedData = computed(() => (props.motion ? transitionData.value : (props.data || [])))
 
     return () => {
-      const { motion, focused, activeItem, focusable, disabled, tabIndex } = props
+      const { motion, focused, activeItem, focusable, disabled, tabIndex, prefixCls } = props
       return (
         <>
           {focused && activeItem && (
@@ -297,7 +266,7 @@ const NodeList = defineComponent<NodeListProps>(
           </div>
 
           <div
-            class={`${props.prefixCls}-treenode`}
+            class={`${prefixCls}-treenode`}
             aria-hidden
             style={{
               position: 'absolute',
@@ -309,8 +278,8 @@ const NodeList = defineComponent<NodeListProps>(
               padding: 0,
             }}
           >
-            <div class={`${props.prefixCls}-indent`}>
-              <div ref={indentMeasurerRef} class={`${props.prefixCls}-indent-unit`} />
+            <div class={`${prefixCls}-indent`}>
+              <div ref={indentMeasurerRef} class={`${prefixCls}-indent-unit`} />
             </div>
           </div>
 
@@ -323,13 +292,17 @@ const NodeList = defineComponent<NodeListProps>(
             virtual={props.virtual}
             itemHeight={props.itemHeight}
             scrollWidth={props.scrollWidth}
-            prefixCls={`${props.prefixCls}-list`}
+            prefixCls={`${prefixCls}-list`}
             ref={listRef}
             role="tree"
             style={props.style}
             onContextmenu={props.onContextmenu}
             onScroll={props.onScroll}
             onVisibleChange={(originList: FlattenNode[]) => {
+              // The best match is using `fullList` - `originList` = `restList`
+              // and check the `restList` to see if has the MOTION_KEY node
+              // but this will cause performance issue for long list compare
+              // we just check `originList` and repeat trigger `onMotionEnd`
               if (originList.every(item => itemKey(item) !== MOTION_KEY)) {
                 onMotionEnd()
               }
