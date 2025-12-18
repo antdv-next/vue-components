@@ -532,6 +532,9 @@ export default defineComponent({
           props.onVisibleChange(renderList, mergedData.value)
         }
       },
+      {
+        flush: 'post',
+      },
     )
 
     const getSize = useGetSize(mergedData, getKey, heights, itemHeight as any)
