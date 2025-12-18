@@ -1,5 +1,5 @@
-import warning from '@v-c/util/dist/warning'
 import type { TreeSelectProps } from '../TreeSelect'
+import warning from '@v-c/util/dist/warning'
 import { toArray } from './valueUtil'
 
 export default function warningProps(props: TreeSelectProps & { searchPlaceholder?: string }) {
@@ -48,4 +48,3 @@ export default function warningProps(props: TreeSelectProps & { searchPlaceholde
     )
   }
 }
-

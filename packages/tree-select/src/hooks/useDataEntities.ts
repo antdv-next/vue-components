@@ -1,8 +1,8 @@
 import type { DataEntity, KeyEntities } from '@v-c/tree'
 import type { Ref } from 'vue'
 import type { DataNode, FieldNames, SafeKey } from '../interface'
-import { warning } from '@v-c/util'
 import { convertDataToEntities } from '@v-c/tree'
+import { warning } from '@v-c/util'
 import { shallowRef, watchEffect } from 'vue'
 import { isNil } from '../utils/valueUtil'
 
