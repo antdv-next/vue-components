@@ -137,37 +137,12 @@ export default defineComponent({
       () => !!(props.virtual !== false && props.height && props.itemHeight),
     )
 
-    const containerHeight = ref(0)
-    const measuredCount = ref(0)
-
-    const syncHeightsMeta = () => {
-      let nextHeight = 0
-      let nextCount = 0
-
-      for (const key in heights.maps) {
-        const value = heights.maps[key]
-        if (value !== undefined) {
-          nextHeight += value
-          nextCount += 1
-        }
-      }
-
-      if (containerHeight.value !== nextHeight) {
-        containerHeight.value = nextHeight
-      }
-      if (measuredCount.value !== nextCount) {
-        measuredCount.value = nextCount
-      }
-    }
-
-    watch(heightUpdatedMark, syncHeightsMeta, { immediate: true, flush: 'sync' })
-
     const inVirtual = computed(() => {
       const data = mergedData.value
       return (
         useVirtual.value
         && data
-        && (Math.max(props.itemHeight! * data.length, containerHeight.value) > props.height!
+        && (props.itemHeight! * data.length > props.height!
           || !!props.scrollWidth)
       )
     })
@@ -246,7 +221,6 @@ export default defineComponent({
         let endIndex: number | undefined
 
         const dataLen = mergedData.value.length
-        const totalHeight = containerHeight.value + Math.max(0, dataLen - measuredCount.value) * itemHeight!
         const data = toRaw(mergedData.value)
         for (let i = 0; i < dataLen; i += 1) {
           const item = data[i]
@@ -265,10 +239,6 @@ export default defineComponent({
           }
 
           itemTop = currentItemBottom
-
-          if (startIndex !== undefined && endIndex !== undefined) {
-            break
-          }
         }
 
         if (startIndex === undefined) {
@@ -282,7 +252,7 @@ export default defineComponent({
 
         endIndex = Math.min(endIndex + 1, mergedData.value.length - 1)
 
-        scrollHeight.value = totalHeight
+        scrollHeight.value = itemTop
         start.value = startIndex
         end.value = endIndex
         fillerOffset.value = startOffset
@@ -307,6 +277,16 @@ export default defineComponent({
               const diffHeight = realStartHeight - props.itemHeight!
               syncScrollTop(ori => ori + diffHeight)
             }
+          }
+        }
+
+        // When list height shrinks (e.g. collapse motion), browser may clamp `scrollTop`
+        // but our `offsetTop` ref won't update automatically. Clamp it here to avoid
+        // leaving blank space at the bottom in virtual mode.
+        if (useVirtual.value && props.height) {
+          const maxScrollTop = Math.max(0, scrollHeight.value - props.height)
+          if (offsetTop.value > maxScrollTop) {
+            syncScrollTop(maxScrollTop)
           }
         }
 
