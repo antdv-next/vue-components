@@ -121,7 +121,6 @@ export default defineComponent({
 
     // =============================== Item Key ===============================
     const getKey = (item: any): Key => {
-      item = toRaw(item)
       const _itemKey = itemKeyProp
       if (typeof _itemKey === 'function') {
         return _itemKey(item)
@@ -259,6 +258,7 @@ export default defineComponent({
         let endIndex: number | undefined
 
         const data = toRaw(mergedData.value)
+        const _offsetTop = offsetTop.value
         for (let i = 0; i < dataLen; i += 1) {
           const item = data[i]
           const key = getKey(item)
@@ -266,12 +266,12 @@ export default defineComponent({
           const cacheHeight = heights.get(key)
           const currentItemBottom = itemTop + (cacheHeight === undefined ? itemHeight! : cacheHeight)
 
-          if (currentItemBottom >= offsetTop.value && startIndex === undefined) {
+          if (currentItemBottom >= _offsetTop && startIndex === undefined) {
             startIndex = i
             startOffset = itemTop
           }
 
-          if (currentItemBottom > offsetTop.value + height! && endIndex === undefined) {
+          if (currentItemBottom > _offsetTop + height! && endIndex === undefined) {
             endIndex = i
           }
 
@@ -284,10 +284,10 @@ export default defineComponent({
           endIndex = Math.ceil(height! / itemHeight!)
         }
         if (endIndex === undefined) {
-          endIndex = mergedData.value.length - 1
+          endIndex = data.length - 1
         }
 
-        endIndex = Math.min(endIndex + 1, mergedData.value.length - 1)
+        endIndex = Math.min(endIndex + 1, data.length - 1)
 
         scrollHeight.value = itemTop
         start.value = startIndex
