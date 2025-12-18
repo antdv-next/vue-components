@@ -1,6 +1,6 @@
 import type { Ref } from 'vue'
-import type { TreeSelectProps } from '../TreeSelect'
 import type { DataNode, FieldNames } from '../interface'
+import type { TreeSelectProps } from '../TreeSelect'
 import { computed } from 'vue'
 import { fillLegacyProps } from '../utils/legacyUtil'
 
@@ -48,4 +48,3 @@ export default function useFilterTreeData(
     return filterTreeNodes(treeData.value)
   })
 }
-

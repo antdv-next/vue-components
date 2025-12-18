@@ -1,9 +1,10 @@
-import TreeSelect from './TreeSelect'
 import type { TreeSelectProps } from './TreeSelect'
 import TreeNode from './TreeNode'
+import TreeSelect from './TreeSelect'
 import { SHOW_ALL, SHOW_CHILD, SHOW_PARENT } from './utils/strategyUtil'
 
-export { TreeNode, SHOW_ALL, SHOW_CHILD, SHOW_PARENT }
+export { SHOW_ALL, SHOW_CHILD, SHOW_PARENT, TreeNode }
+
 export type { TreeSelectProps }
 
 type TreeSelectType = typeof TreeSelect & {

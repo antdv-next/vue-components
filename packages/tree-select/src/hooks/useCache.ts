@@ -34,4 +34,3 @@ export default function useCache(values: Ref<LabeledValueType[]>): [Ref<LabeledV
 
   return [filledValues]
 }
-
