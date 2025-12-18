@@ -6,6 +6,7 @@ import type {
   FlattenNode,
   Key,
   KeyEntities,
+  ScrollTo,
   TreeNodeProps,
 } from './interface'
 import type { TreeProps, TreeRef } from './Tree'
@@ -22,6 +23,7 @@ export type {
   FlattenNode,
   Key,
   KeyEntities,
+  ScrollTo,
   TreeNodeProps,
   TreeProps,
   TreeRef,

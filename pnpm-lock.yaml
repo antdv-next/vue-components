@@ -458,6 +458,21 @@ importers:
         specifier: ^3.0.0
         version: 3.5.25(typescript@5.9.3)
 
+  packages/tree-select:
+    dependencies:
+      '@v-c/select':
+        specifier: workspace:^
+        version: link:../select
+      '@v-c/tree':
+        specifier: workspace:^
+        version: link:../tree
+      '@v-c/util':
+        specifier: workspace:^
+        version: link:../util
+      vue:
+        specifier: ^3.0.0
+        version: 3.5.25(typescript@5.9.3)
+
   packages/trigger:
     dependencies:
       '@v-c/portal':

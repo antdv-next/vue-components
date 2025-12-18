@@ -1,0 +1,42 @@
+{
+  "name": "@v-c/tree-select",
+  "type": "module",
+  "version": "0.0.0",
+  "description": "",
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": "",
+  "license": "MIT",
+  "keywords": [
+    "trigger"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./dist/*": "./dist/*",
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.js",
+  "files": [
+    "dist",
+    "package.json"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "test": "vitest",
+    "prepublish": "pnpm build",
+    "bump": "bumpp --release patch"
+  },
+  "peerDependencies": {
+    "vue": "^3.0.0"
+  },
+  "dependencies": {
+    "@v-c/util": "workspace:^",
+    "@v-c/tree": "workspace:^",
+    "@v-c/select": "workspace:^"
+  }
+}
