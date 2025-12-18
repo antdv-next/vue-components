@@ -34,6 +34,12 @@ export interface FlattenDataNode {
   parent?: FlattenDataNode
 }
 
+export interface SimpleModeConfig {
+  id?: string
+  pId?: string
+  rootPId?: SafeKey | null
+}
+
 /** @deprecated This is only used for legacy compatible. Not works on new code. */
 export interface LegacyCheckedNode {
   pos: string

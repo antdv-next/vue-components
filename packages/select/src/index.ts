@@ -1,4 +1,11 @@
-import type { BaseSelectProps, BaseSelectRef, CustomTagProps, RefOptionListProps } from './BaseSelect'
+import type {
+  BaseSelectProps,
+  BaseSelectPropsWithoutPrivate,
+  BaseSelectRef,
+  BaseSelectSemanticName,
+  CustomTagProps,
+  RefOptionListProps,
+} from './BaseSelect'
 import type { DisplayInfoType, DisplayValueType, FlattenOptionData, Mode, Placement, RawValueType, RenderNode } from './interface'
 import type {
   BaseOptionType,
@@ -35,7 +42,9 @@ export {
 export type {
   BaseOptionType,
   BaseSelectProps,
+  BaseSelectPropsWithoutPrivate,
   BaseSelectRef,
+  BaseSelectSemanticName,
   CustomTagProps,
   DefaultOptionType,
   DisplayInfoType,
