@@ -1,6 +1,6 @@
 import type { VNode } from 'vue'
 import type { BaseOptionType, DefaultOptionType } from '../Select'
-import { isVNode } from 'vue'
+import { isVNode, toRaw } from 'vue'
 
 function convertNodeToOption<OptionType extends BaseOptionType = DefaultOptionType>(
   node: VNode,
@@ -38,7 +38,7 @@ export function convertChildrenToData<OptionType extends BaseOptionType = Defaul
   nodes: VNode[],
   optionOnly: boolean = false,
 ): OptionType[] {
-  return nodes
+  return toRaw(nodes)
     .map((node: VNode, index: number): OptionType | null => {
       if (!isVNode(node) || !node.type) {
         return null
