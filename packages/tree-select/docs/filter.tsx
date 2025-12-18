@@ -1,7 +1,7 @@
 import { defineComponent, ref } from 'vue'
 import TreeSelect, { SHOW_PARENT } from '../src'
-import './assets/index.less'
 import { gData } from './utils/dataUtil'
+import './assets/index.less'
 
 export default defineComponent({
   name: 'TreeSelectFilterDemo',
@@ -61,7 +61,6 @@ export default defineComponent({
           placeholder={<i>请下拉选择</i>}
           treeLine
           maxTagTextLength={10}
-          // @ts-expect-error legacy prop
           inputValue={null}
           value={simpleValue.value as any}
           treeData={simpleTreeData.value as any}

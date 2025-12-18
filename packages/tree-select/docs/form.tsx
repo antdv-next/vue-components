@@ -1,7 +1,7 @@
 import { defineComponent, ref } from 'vue'
 import TreeSelect from '../src'
-import './assets/index.less'
 import { gData } from './utils/dataUtil'
+import './assets/index.less'
 
 export default defineComponent({
   name: 'TreeSelectFormDemo',
@@ -64,4 +64,3 @@ export default defineComponent({
     )
   },
 })
-

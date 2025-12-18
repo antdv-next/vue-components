@@ -1,7 +1,7 @@
 import { defineComponent, ref } from 'vue'
 import TreeSelect from '../src'
-import './assets/index.less'
 import { generateTreeNodes, getNewTreeData } from './utils/dataUtil'
+import './assets/index.less'
 
 function getTreeData() {
   return [
@@ -82,4 +82,3 @@ export default defineComponent({
     )
   },
 })
-
