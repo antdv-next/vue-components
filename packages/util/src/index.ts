@@ -1,5 +1,11 @@
 export { default as classNames, clsx } from './classnames'
 export { default as RenderComponent } from './RenderComponent'
+export { default as KeyCode } from './KeyCode'
+export { default as omit } from './omit'
 export { default as get } from './utils/get'
 export { default as set } from './utils/set'
+export { default as useId } from './hooks/useId'
+export { default as useMergedState } from './hooks/useMergedState'
 export { default as warning } from './warning'
+
+export type { VueNode } from './type'
