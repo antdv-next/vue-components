@@ -1,7 +1,7 @@
 import { defineComponent, ref } from 'vue'
 import TreeSelect, { SHOW_PARENT } from '../src'
-import './assets/index.less'
 import Gen from './utils/big-data-generator'
+import './assets/index.less'
 
 export default defineComponent({
   name: 'TreeSelectBigDataDemo',
@@ -77,4 +77,3 @@ export default defineComponent({
     )
   },
 })
-
