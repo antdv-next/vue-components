@@ -14,6 +14,7 @@ import type {
   SelectProps,
 } from './Select'
 import { BaseSelect } from './BaseSelect'
+import { useBaseProps } from './hooks'
 import OptGroup from './OptGroup'
 import Option from './Option'
 import OptionList from './OptionList'
@@ -26,6 +27,7 @@ export {
   Option,
   OptionList,
   Select,
+  useBaseProps,
   useSelectContext,
   useSelectProvider,
 }
