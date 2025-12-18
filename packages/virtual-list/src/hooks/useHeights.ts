@@ -25,6 +25,13 @@ export default function useHeights<T>(
   const heightsRef = new CacheMap()
 
   const promiseIdRef = ref<number>(0)
+  const observedElements = new Map<Key, Element>()
+  const resizeObserver
+    = typeof window !== 'undefined' && 'ResizeObserver' in window
+      ? new window.ResizeObserver(() => {
+          collectHeight()
+        })
+      : null
 
   function cancelRaf() {
     promiseIdRef.value += 1
@@ -82,9 +89,22 @@ export default function useHeights<T>(
       return
     }
 
+    // Clear previous observer
+    const prevObserved = observedElements.get(key)
+    if (prevObserved && resizeObserver) {
+      resizeObserver.unobserve(prevObserved)
+      observedElements.delete(key)
+    }
+
     if (instance) {
       instanceRef.value.set(key, instance)
       collectHeight()
+
+      const element = getDOM(instance)
+      if (element && element.nodeType === 1 && resizeObserver) {
+        resizeObserver.observe(element as Element)
+        observedElements.set(key, element as Element)
+      }
     }
     else {
       instanceRef.value.delete(key)
@@ -103,6 +123,8 @@ export default function useHeights<T>(
 
   onUnmounted(() => {
     cancelRaf()
+    resizeObserver?.disconnect?.()
+    observedElements.clear()
   })
 
   return [setInstanceRef, collectHeight, heightsRef, updatedMark]

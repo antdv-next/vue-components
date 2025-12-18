@@ -38,8 +38,8 @@ const SingleObserver = defineComponent<ResizeObserverProps>({
         || (elementRef.value && typeof elementRef.value === 'object' ? findDOMNode((elementRef.value as any).nativeElement) : null)
         || findDOMNode(wrapperRef.value)
       // 判断当前的dom是不是一个text元素
-      if (dom && dom.nodeType === 3 && dom.nextElementSibling)
-        return dom.nextElementSibling as HTMLElement
+      if (dom && (dom.nodeType === 3 || dom.nodeType === 8) && (dom as any).nextElementSibling)
+        return (dom as any).nextElementSibling as HTMLElement
       return dom
     }
 

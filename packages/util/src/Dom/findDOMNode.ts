@@ -11,8 +11,10 @@ export function getDOM(elementRef: MaybeRef) {
   const unrefElementRef = unref(elementRef)
   const dom = findDOMNode(unrefElementRef) || (unrefElementRef && typeof unrefElementRef === 'object' ? findDOMNode((unrefElementRef as any).nativeElement) : null)
 
-  if (dom && dom.nodeType === 3 && dom.nextElementSibling)
-    return dom.nextElementSibling as HTMLElement
+  // Vue components may render as Fragment/Transition placeholders, whose `$el` is a Text/Comment node.
+  // In that case, resolve to the next element sibling as the real measurable DOM element.
+  if (dom && (dom.nodeType === 3 || dom.nodeType === 8) && (dom as any).nextElementSibling)
+    return (dom as any).nextElementSibling as HTMLElement
 
   return dom
 }
