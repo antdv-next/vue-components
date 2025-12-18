@@ -6,7 +6,7 @@ import type { ExtraRenderInfo } from './interface'
 import type { ScrollBarDirectionType, ScrollBarRef } from './ScrollBar'
 import ResizeObserver from '@v-c/resize-observer'
 import { pureAttrs } from '@v-c/util/dist/props-util'
-import { computed, defineComponent, ref, shallowRef, toRaw, toRef, watch } from 'vue'
+import { computed, defineComponent, ref, shallowRef, toRaw, watch } from 'vue'
 import Filler from './Filler'
 import useChildren from './hooks/useChildren'
 import useDiffItem from './hooks/useDiffItem'
@@ -108,11 +108,21 @@ export default defineComponent({
   inheritAttrs: false,
   setup(props, { expose, attrs, slots }) {
     const itemHeight = computed(() => props.itemHeight)
-    const itemKey = toRef(props, 'itemKey')
+
+    // Keep `itemKey` in a plain variable to avoid triggering Vue reactivity tracking
+    // for every `getKey` call (which can be extremely hot for large lists).
+    let itemKeyProp = props.itemKey
+    watch(
+      () => props.itemKey,
+      (val) => {
+        itemKeyProp = val
+      },
+    )
+
     // =============================== Item Key ===============================
     const getKey = (item: any): Key => {
       item = toRaw(item)
-      const _itemKey = itemKey.value
+      const _itemKey = itemKeyProp
       if (typeof _itemKey === 'function') {
         return _itemKey(item)
       }
@@ -214,13 +224,40 @@ export default defineComponent({
           return
         }
         const { itemHeight, height } = props
+        const dataLen = mergedData.value.length
+
+        // Fast path when no item has measured height yet (common on first render).
+        // Avoid looping through the entire data list, which can be extremely slow for large datasets.
+        if (!dataLen) {
+          scrollHeight.value = 0
+          start.value = 0
+          end.value = -1
+          fillerOffset.value = 0
+          return
+        }
+
+        if (heights.id === 0) {
+          const safeItemHeight = itemHeight!
+          const safeListHeight = height!
+
+          const startIndex = Math.max(0, Math.floor(offsetTop.value / safeItemHeight))
+          const startOffset = startIndex * safeItemHeight
+
+          let endIndex = startIndex + Math.ceil(safeListHeight / safeItemHeight)
+          endIndex = Math.min(endIndex + 1, dataLen - 1)
+
+          scrollHeight.value = dataLen * safeItemHeight
+          start.value = startIndex
+          end.value = endIndex
+          fillerOffset.value = startOffset
+          return
+        }
 
         let itemTop = 0
         let startIndex: number | undefined
         let startOffset: number | undefined
         let endIndex: number | undefined
 
-        const dataLen = mergedData.value.length
         const data = toRaw(mergedData.value)
         for (let i = 0; i < dataLen; i += 1) {
           const item = data[i]
@@ -451,7 +488,9 @@ export default defineComponent({
     function onFallbackScroll(e: Event) {
       const target = e.currentTarget as HTMLDivElement
       const newScrollTop = target.scrollTop
-      if (!useVirtual.value) {
+      // In non-virtual render (either `useVirtual` disabled, or `inVirtual` not reached),
+      // keep native scroll behavior and just sync state.
+      if (!useVirtual.value || !inVirtual.value) {
         offsetTop.value = newScrollTop
       }
       else if (newScrollTop !== offsetTop.value) {
@@ -533,11 +572,34 @@ export default defineComponent({
     return () => {
       // ================================ Render ================================
       const componentStyle: CSSProperties = {}
+
+      const getHolderSizeStyle = (style: any): Pick<CSSProperties, 'height' | 'maxHeight'> => {
+        if (!style) {
+          return {}
+        }
+        if (Array.isArray(style)) {
+          return style.reduce((acc, item) => Object.assign(acc, getHolderSizeStyle(item)), {})
+        }
+        if (typeof style === 'object') {
+          const { height, maxHeight } = style as any
+          const sizeStyle: Pick<CSSProperties, 'height' | 'maxHeight'> = {}
+          if (height !== undefined)
+            sizeStyle.height = height
+          if (maxHeight !== undefined)
+            sizeStyle.maxHeight = maxHeight
+          return sizeStyle
+        }
+        return {}
+      }
+
       if (props.height) {
         componentStyle[props.fullHeight ? 'height' : 'maxHeight'] = `${props.height}px`
         Object.assign(componentStyle, ScrollStyle)
 
-        if (useVirtual.value) {
+        // Only lock native scrolling when we are really in virtual mode.
+        // If `useVirtual` is enabled but `inVirtual` is false (e.g. small list, or inaccurate `itemHeight`),
+        // we should keep native scrolling available.
+        if (inVirtual.value) {
           componentStyle.overflowY = 'hidden'
 
           if (horizontalRange.value > 0) {
@@ -547,6 +609,14 @@ export default defineComponent({
           if (scrollMoving.value) {
             componentStyle.pointerEvents = 'none'
           }
+        }
+      }
+      else {
+        // When virtual is disabled, some consumers set a fixed height via `style` instead of `height` prop.
+        // Apply `height/maxHeight` to the scroll holder as well so native scrolling works as expected.
+        const holderSizeStyle = getHolderSizeStyle((attrs as any).style)
+        if (holderSizeStyle.height !== undefined || holderSizeStyle.maxHeight !== undefined) {
+          Object.assign(componentStyle, holderSizeStyle, ScrollStyle)
         }
       }
 
