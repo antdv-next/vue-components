@@ -1,4 +1,3 @@
-import type { VNode } from 'vue'
 import type { AcceptConfig, AjaxUploaderExpose, BeforeUploadFileType, UploadProgressEvent, UploadProps, UploadRequestError, UploadRequestOption, VcFile } from './interface'
 import { classNames as clsx } from '@v-c/util'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
@@ -360,7 +359,10 @@ const AjaxUploader = defineComponent<UploadProps>(
       abort()
       document.removeEventListener('paste', onFilePaste)
     })
-
+    const instance: AjaxUploaderExpose = {
+      abort,
+    }
+    expose(instance)
     return () => {
       const {
         component,
@@ -387,16 +389,9 @@ const AjaxUploader = defineComponent<UploadProps>(
       }
       const acceptFormat = typeof accept === 'string' ? accept : accept?.format
       // 处理自定义组件
-      const Tag = component as {
-        new: () => VNode
-      }
-
-      const instance: AjaxUploaderExpose = {
-        abort,
-      }
-      expose(instance)
+      const Tag = component as any
       return (
-        <component is={Tag} class={cls.value} {...events.value} role={hasControlInside ? undefined : 'button'} style={style}>
+        <Tag class={cls.value} {...events.value} role={hasControlInside ? undefined : 'button'} style={style}>
           <input
             {...pickAttrs(otherProps, { aria: true, data: true })}
             id={id}
@@ -415,7 +410,7 @@ const AjaxUploader = defineComponent<UploadProps>(
             {...(capture != null ? { capture } : {})}
           />
           {slots.default?.()}
-        </component>
+        </Tag>
       )
     }
   },
