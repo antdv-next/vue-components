@@ -1,10 +1,9 @@
 import type { VNode } from 'vue'
-import type { AjaxUploaderExpose, BeforeUploadFileType, UploadProgressEvent, UploadProps, UploadRequestError, UploadRequestOption, VcFile } from './interface'
+import type { AcceptConfig, AjaxUploaderExpose, BeforeUploadFileType, UploadProgressEvent, UploadProps, UploadRequestError, UploadRequestOption, VcFile } from './interface'
 import { classNames as clsx } from '@v-c/util'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
 import { computed, defineComponent, onMounted, onUnmounted, onUpdated, ref } from 'vue'
 import attrAccept from './attrAccept'
-import { generatorUploadProps } from './interface'
 import defaultRequest from './request'
 import traverseFileTree from './traverseFileTree'
 import getUid from './uid'
@@ -18,9 +17,8 @@ interface ParsedFileInfo {
   parsedFile: VcFile | null
 }
 
-const AjaxUploader = defineComponent<UploadProps>({
-  props: generatorUploadProps(),
-  setup(props, { attrs, expose, slots }) {
+const AjaxUploader = defineComponent<UploadProps>(
+  (props, { attrs, expose, slots }) => {
     const uid = ref(getUid())
     let _isMounted = false
 
@@ -36,6 +34,36 @@ const AjaxUploader = defineComponent<UploadProps>({
         [className!]: className,
       })
     })
+
+    const filterFile = (file: VcFile | File, force = false) => {
+      const { accept, directory } = props
+
+      let filterFn: Exclude<AcceptConfig['filter'], 'native'> | undefined
+      let acceptFormat: string | undefined
+
+      if (typeof accept === 'string') {
+        acceptFormat = accept
+      }
+      else {
+        const { filter, format } = accept || {}
+
+        acceptFormat = format
+        if (filter === 'native') {
+          filterFn = () => true
+        }
+        else {
+          filterFn = filter
+        }
+      }
+
+      const mergedFilter
+        = filterFn
+          || (directory || force
+            ? (currentFile: VcFile) => attrAccept(currentFile, acceptFormat)
+            : () => true)
+
+      return mergedFilter(file as VcFile)
+    }
 
     // ================== internal api ===========================
     const onClick = (event: MouseEvent | KeyboardEvent) => {
@@ -101,7 +129,7 @@ const AjaxUploader = defineComponent<UploadProps>({
       } as UploadRequestOption
 
       onStart?.(origin)
-      reqs[uid] = request(requestOption)
+      reqs[uid] = request(requestOption, { defaultRequest })
     }
 
     /**
@@ -116,7 +144,7 @@ const AjaxUploader = defineComponent<UploadProps>({
           transformedFile = await beforeUpload(file, fileList)
         }
         catch (e) {
-          // Rejection will also trade as false
+        // Rejection will also trade as false
           transformedFile = false
         }
         if (transformedFile === false) {
@@ -150,8 +178,8 @@ const AjaxUploader = defineComponent<UploadProps>({
       }
 
       const parsedData
-        // string type is from legacy `transformFile`.
-        // Not sure if this will work since no related test case works with it
+      // string type is from legacy `transformFile`.
+      // Not sure if this will work since no related test case works with it
         = (typeof transformedFile === 'object' || typeof transformedFile === 'string')
           && transformedFile
           ? transformedFile
@@ -201,7 +229,7 @@ const AjaxUploader = defineComponent<UploadProps>({
       if (!dataTransfer)
         return
 
-      const { multiple, accept, directory } = props
+      const { multiple, directory } = props
 
       const items: DataTransferItem[] = [...(dataTransfer.items || [])]
       let files: File[] = [...(dataTransfer.files || [])]
@@ -211,12 +239,14 @@ const AjaxUploader = defineComponent<UploadProps>({
       }
 
       if (directory) {
-        files = await traverseFileTree(Array.prototype.slice.call(items), (_file: VcFile) =>
-          attrAccept(_file, accept))
+        files = await traverseFileTree(
+          Array.prototype.slice.call(items),
+          (currentFile: VcFile) => filterFile(currentFile),
+        )
         uploadFiles(files)
       }
       else {
-        let acceptFiles = [...files].filter((file: File) => attrAccept(file as VcFile, accept))
+        let acceptFiles = [...files].filter(file => filterFile(file, true))
 
         if (multiple === false) {
           acceptFiles = files.slice(0, 1)
@@ -243,11 +273,8 @@ const AjaxUploader = defineComponent<UploadProps>({
     }
 
     const onChange = (e: Event) => {
-      const { accept, directory } = props
       const { files } = e.target as HTMLInputElement
-      const acceptedFiles = [...(files || [])].filter(
-        (file: File) => !directory || attrAccept(file, accept),
-      )
+      const acceptedFiles = [...(files || [])].filter(file => filterFile(file))
       uploadFiles(acceptedFiles)
       reset()
     }
@@ -358,6 +385,7 @@ const AjaxUploader = defineComponent<UploadProps>({
         ...props,
         ...attrs,
       }
+      const acceptFormat = typeof accept === 'string' ? accept : accept?.format
       // 处理自定义组件
       const Tag = component as {
         new: () => VNode
@@ -382,7 +410,7 @@ const AjaxUploader = defineComponent<UploadProps>({
             class={classNames.input}
             {...dirProps.value}
             multiple={multiple}
-            accept={accept}
+            accept={acceptFormat}
             onChange={onChange}
             {...(capture != null ? { capture } : {})}
           />
@@ -391,6 +419,6 @@ const AjaxUploader = defineComponent<UploadProps>({
       )
     }
   },
-})
+)
 
 export default AjaxUploader
