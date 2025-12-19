@@ -1,7 +1,7 @@
 import type {
   BasicDataNode,
-  DataNode,
   DataEntity,
+  DataNode,
   EventDataNode,
   FieldNames,
   FlattenNode,
@@ -18,13 +18,14 @@ import TreeNode from './TreeNode'
 export { TreeNode }
 export { UnstableContextKey } from './contextTypes'
 export { conductCheck } from './utils/conductUtil'
-export { convertDataToEntities, flattenTreeData } from './utils/treeUtil'
+export { convertDataToEntities, fillFieldNames, flattenTreeData } from './utils/treeUtil'
 
 export type {
   BasicDataNode,
-  DataNode,
   DataEntity,
+  DataNode,
   EventDataNode,
+  ExpandAction,
   FieldNames,
   FlattenNode,
   IconType,
@@ -32,7 +33,6 @@ export type {
   KeyEntities,
   ScrollTo,
   TreeNodeProps,
-  ExpandAction,
   TreeProps,
   TreeRef,
 }
