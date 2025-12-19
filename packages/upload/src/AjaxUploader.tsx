@@ -1,5 +1,5 @@
 import type { AcceptConfig, AjaxUploaderExpose, BeforeUploadFileType, UploadProgressEvent, UploadProps, UploadRequestError, UploadRequestOption, VcFile } from './interface'
-import { classNames as clsx } from '@v-c/util'
+import { clsx } from '@v-c/util'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
 import { computed, defineComponent, onMounted, onUnmounted, onUpdated, ref } from 'vue'
 import attrAccept from './attrAccept'
