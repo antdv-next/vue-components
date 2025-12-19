@@ -22,7 +22,7 @@ const defaults = {
 } satisfies UploadProps
 
 const Upload = defineComponent<UploadProps>(
-  (props, { attrs, expose, slots }) => {
+  (props = defaults, { attrs, expose, slots }) => {
     const uploaderRef = ref<AjaxUploaderExpose>()
     const abort = (file: VcFile) => {
       uploaderRef.value?.abort(file)
