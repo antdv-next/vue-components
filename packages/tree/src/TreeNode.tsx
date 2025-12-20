@@ -217,21 +217,23 @@ const TreeNode = defineComponent<TreeNodeProps>(
     const checkboxNode = computed(() => {
       if (!isCheckable.value)
         return null
+      const { checked, halfChecked, disableCheckbox, title } = props
+      const prefixCls = context.prefixCls
 
       const custom = typeof isCheckable.value !== 'boolean' ? isCheckable.value : null
 
       return (
         <span
-          class={clsx(`${context.prefixCls}-checkbox`, {
-            [`${context.prefixCls}-checkbox-checked`]: props.checked,
-            [`${context.prefixCls}-checkbox-indeterminate`]: !props.checked && props.halfChecked,
-            [`${context.prefixCls}-checkbox-disabled`]: isDisabled.value || props.disableCheckbox,
+          class={clsx(`${prefixCls}-checkbox`, {
+            [`${prefixCls}-checkbox-checked`]: checked,
+            [`${prefixCls}-checkbox-indeterminate`]: !checked && halfChecked,
+            [`${prefixCls}-checkbox-disabled`]: isDisabled.value || disableCheckbox,
           })}
           onClick={onCheck}
           role="checkbox"
-          aria-checked={props.halfChecked ? 'mixed' : props.checked}
-          aria-disabled={isDisabled.value || props.disableCheckbox}
-          aria-label={`Select ${typeof props.title === 'string' ? props.title : 'tree node'}`}
+          aria-checked={halfChecked ? 'mixed' : checked}
+          aria-disabled={isDisabled.value || disableCheckbox}
+          aria-label={`Select ${typeof title === 'string' ? title : 'tree node'}`}
         >
           {custom}
         </span>

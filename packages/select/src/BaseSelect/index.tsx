@@ -2,7 +2,7 @@ import type { AlignType, BuildInPlacements } from '@v-c/trigger'
 import type { VueNode } from '@v-c/util/dist/type'
 import type { ScrollConfig, ScrollTo } from '@v-c/virtual-list'
 import type { CSSProperties } from 'vue'
-import type { ComponentsConfig } from '../hooks/useComponents'
+import type { ComponentsConfig } from '../hooks'
 import type {
   DisplayInfoType,
   DisplayValueType,
@@ -17,8 +17,7 @@ import { getDOM } from '@v-c/util/dist/Dom/findDOMNode'
 import { KeyCodeStr } from '@v-c/util/dist/KeyCode'
 import omit from '@v-c/util/dist/omit'
 import { computed, defineComponent, shallowRef, watch } from 'vue'
-import { useAllowClear } from '../hooks/useAllowClear'
-import { useBaseSelectProvider } from '../hooks/useBaseProps'
+import { useAllowClear, useBaseSelectProvider } from '../hooks'
 import useComponents from '../hooks/useComponents'
 import useLock from '../hooks/useLock'
 import useOpen from '../hooks/useOpen'
