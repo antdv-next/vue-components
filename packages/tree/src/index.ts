@@ -15,10 +15,12 @@ import type { ExpandAction, TreeProps, TreeRef } from './Tree'
 import Tree from './Tree'
 import TreeNode from './TreeNode'
 
-export { TreeNode }
 export { UnstableContextKey } from './contextTypes'
+
+export { TreeNode }
+export { conductExpandParent } from './util.ts'
 export { conductCheck } from './utils/conductUtil'
-export { convertDataToEntities, fillFieldNames, flattenTreeData } from './utils/treeUtil'
+export { convertDataToEntities, convertTreeToData, fillFieldNames, flattenTreeData } from './utils/treeUtil'
 
 export type {
   BasicDataNode,

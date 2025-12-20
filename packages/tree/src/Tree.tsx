@@ -21,7 +21,7 @@ import useMergedState from '@v-c/util/dist/hooks/useMergedState'
 import KeyCode from '@v-c/util/dist/KeyCode'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
 import warning from '@v-c/util/dist/warning'
-import { computed, defineComponent, onBeforeUnmount, provide, reactive, ref, shallowRef, watchEffect } from 'vue'
+import { computed, defineComponent, onBeforeUnmount, provide, reactive, ref, shallowRef, watch, watchEffect } from 'vue'
 import { TreeContextKey } from './contextTypes'
 import DropIndicator from './DropIndicator'
 import NodeList, { MOTION_KEY, MotionEntity } from './NodeList'
@@ -202,18 +202,18 @@ const defaultProps: Required<Pick<TreeProps, 'prefixCls' | 'showLine' | 'showIco
 
 const Tree = defineComponent<TreeProps>(
   (props = defaultProps, { slots, attrs, expose }) => {
-    const mergedPrefixCls = computed(() => props.prefixCls ?? defaultProps.prefixCls)
-    const mergedShowLine = computed(() => props.showLine ?? defaultProps.showLine)
-    const mergedShowIcon = computed(() => props.showIcon ?? defaultProps.showIcon)
-    const mergedSelectable = computed(() => props.selectable ?? defaultProps.selectable)
-    const mergedMultiple = computed(() => props.multiple ?? defaultProps.multiple)
-    const mergedCheckable = computed(() => props.checkable ?? defaultProps.checkable)
-    const mergedCheckStrictly = computed(() => props.checkStrictly ?? defaultProps.checkStrictly)
-    const mergedDisabled = computed(() => props.disabled ?? defaultProps.disabled)
-    const mergedFocusable = computed(() => props.focusable ?? defaultProps.focusable)
-    const mergedTabIndex = computed(() => props.tabIndex ?? defaultProps.tabIndex)
-    const mergedVirtual = computed(() => props.virtual ?? defaultProps.virtual)
-    const mergedAllowDrop = computed<AllowDrop<any>>(() => props.allowDrop ?? defaultProps.allowDrop)
+    const mergedPrefixCls = computed(() => props.prefixCls)
+    const mergedShowLine = computed(() => props.showLine)
+    const mergedShowIcon = computed(() => props.showIcon)
+    const mergedSelectable = computed(() => props.selectable)
+    const mergedMultiple = computed(() => props.multiple)
+    const mergedCheckable = computed(() => props.checkable)
+    const mergedCheckStrictly = computed(() => props.checkStrictly)
+    const mergedDisabled = computed(() => props.disabled)
+    const mergedFocusable = computed(() => props.focusable)
+    const mergedTabIndex = computed(() => props.tabIndex)
+    const mergedVirtual = computed(() => props.virtual)
+    const mergedAllowDrop = computed<AllowDrop<any>>(() => props.allowDrop!)
 
     const mergedFieldNames = computed(() => fillFieldNames(props.fieldNames))
 
@@ -246,10 +246,10 @@ const Tree = defineComponent<TreeProps>(
       ...entities.value.keyEntities,
     }))
 
-    const [expandedKeys, setExpandedKeys] = useMergedState<Key[]>(() => {
+    const getInitExpandedKeys = () => {
       let keys: Key[] = []
-      const defaultExpandAll = props.defaultExpandAll ?? defaultProps.defaultExpandAll
-      const defaultExpandParent = props.defaultExpandParent ?? defaultProps.defaultExpandParent
+      const defaultExpandAll = props.defaultExpandAll
+      const defaultExpandParent = props.defaultExpandParent
 
       if (defaultExpandAll) {
         keys = Object.values(keyEntities.value)
@@ -257,62 +257,81 @@ const Tree = defineComponent<TreeProps>(
           .map(entity => entity.key)
       }
       else {
-        keys = props.defaultExpandedKeys || []
+        keys = props?.expandedKeys || props.defaultExpandedKeys || []
       }
-
       if (defaultExpandParent) {
         keys = conductExpandParent(keys, keyEntities.value)
       }
 
       return keys
-    }, {
-      value: computed(() => {
-        if (props.expandedKeys === undefined)
-          return
+    }
 
-        const keys = props.expandedKeys || []
-        if (props.autoExpandParent) {
-          return conductExpandParent(keys, keyEntities.value)
-        }
+    const expandedKeys = shallowRef<Key[]>(getInitExpandedKeys())
 
-        return keys
-      }) as any,
+    const setExpandedKeys = (keys: Key[]) => {
+      expandedKeys.value = keys
+    }
+    watch(() => props.expandedKeys, () => {
+      if (props.expandedKeys === undefined)
+        return
+
+      const keys = props.expandedKeys || []
+      if (props.autoExpandParent) {
+        expandedKeys.value = conductExpandParent(keys, keyEntities.value)
+        return
+      }
+      expandedKeys.value = keys
     })
 
     const flattenNodes = computed(() => flattenTreeData(mergedTreeData.value as any, expandedKeys.value, mergedFieldNames.value))
 
-    const [selectedKeys, setSelectedKeys] = useMergedState<Key[]>(
-      () => calcSelectedKeys(props.defaultSelectedKeys || [], { multiple: mergedMultiple.value }) || [],
-      {
-        value: computed(() => {
-          if (props.selectedKeys === undefined)
-            return
-          return calcSelectedKeys(props.selectedKeys, { multiple: mergedMultiple.value }) || []
-        }) as any,
-      },
-    )
+    const selectedKeys = shallowRef<Key[]>(calcSelectedKeys(
+      props?.selectedKeys || props.defaultSelectedKeys || [],
+      { multiple: mergedMultiple.value },
+    ) || [])
+    watch(() => props.selectedKeys, () => {
+      if (props.selectedKeys === undefined) {
+        return
+      }
+      selectedKeys.value = calcSelectedKeys(props.selectedKeys, { multiple: mergedMultiple.value }) || []
+    })
 
-    const [rawCheckedKeys, setRawCheckedKeys] = useMergedState<Key[]>(
-      () => props.defaultCheckedKeys || [],
-      {
-        value: computed(() => {
-          if (props.checkedKeys === undefined)
-            return
-          return parseCheckedKeys(props.checkedKeys)?.checkedKeys || []
-        }) as any,
-      },
-    )
+    const setSelectedKeys = (keys: Key[]) => {
+      selectedKeys.value = keys
+    }
 
-    const [rawHalfCheckedKeys, setRawHalfCheckedKeys] = useMergedState<Key[]>(
-      () => [],
-      {
-        value: computed(() => {
-          if (props.checkedKeys === undefined)
-            return
-          return parseCheckedKeys(props.checkedKeys)?.halfCheckedKeys || []
-        }) as any,
-      },
-    )
+    const defaultCheckedKeysFn = () => {
+      if (typeof props?.checkedKeys === 'object' && props?.checkedKeys !== null && !Array.isArray(props?.checkedKeys) && 'checked' in props?.checkedKeys) {
+        return props?.checkedKeys.checked || []
+      }
+      if (Array.isArray(props?.checkedKeys)) {
+        return props?.checkedKeys
+      }
+      return props?.defaultCheckedKeys || []
+    }
+    const rawCheckedKeys = shallowRef<Key[]>(defaultCheckedKeysFn())
+    const setRawCheckedKeys = (keys: Key[]) => {
+      rawCheckedKeys.value = keys
+    }
+    watch(() => props.checkedKeys, () => {
+      if (props.checkedKeys === undefined) {
+        return
+      }
+      const parsed = parseCheckedKeys(props.checkedKeys)
+      rawCheckedKeys.value = parsed?.checkedKeys || []
+    })
+
+    const rawHalfCheckedKeys = shallowRef<Key[]>([])
+    const setRawHalfCheckedKeys = (keys: Key[]) => {
+      rawHalfCheckedKeys.value = keys
+    }
+    watch(() => props.checkedKeys, () => {
+      if (props.checkedKeys === undefined) {
+        return
+      }
+      const parsed = parseCheckedKeys(props.checkedKeys)
+      rawHalfCheckedKeys.value = parsed?.halfCheckedKeys || []
+    })
 
     const mergedChecked = computed(() => {
       if (!mergedCheckable.value) {
@@ -1149,7 +1168,7 @@ const Tree = defineComponent<TreeProps>(
         >
           <NodeList
             ref={listRef}
-            prefixCls={mergedPrefixCls.value}
+            prefixCls={mergedPrefixCls.value!}
             style={props.style}
             data={flattenNodes.value as any}
             disabled={mergedDisabled.value}
