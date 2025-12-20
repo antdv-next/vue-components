@@ -11,16 +11,17 @@ export interface IndentProps {
 const Indent = defineComponent<IndentProps>(
   (props) => {
     return () => {
-      const baseClassName = `${props.prefixCls}-indent-unit`
+      const { prefixCls, level, isStart, isEnd } = props
+      const baseClassName = `${prefixCls}-indent-unit`
       const list = []
 
-      for (let i = 0; i < props.level; i += 1) {
+      for (let i = 0; i < level; i += 1) {
         list.push(
           <span
             key={i}
             class={clsx(baseClassName, {
-              [`${baseClassName}-start`]: props.isStart?.[i],
-              [`${baseClassName}-end`]: props.isEnd?.[i],
+              [`${baseClassName}-start`]: isStart?.[i],
+              [`${baseClassName}-end`]: isEnd?.[i],
             })}
           />,
         )

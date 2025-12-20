@@ -1,6 +1,7 @@
 import type { TreeNodeProps } from './interface'
 import { clsx } from '@v-c/util'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
+import { filterEmpty } from '@v-c/util/dist/props-util'
 import { computed, defineComponent, inject, ref, watchEffect } from 'vue'
 import { TreeContextKey, UnstableContextKey } from './contextTypes'
 import Indent from './Indent'
@@ -264,11 +265,18 @@ const TreeNode = defineComponent<TreeNodeProps>(
       }
 
       let titleNode
-      if (typeof title === 'function')
+      if (typeof title === 'function') {
         titleNode = (title as any)(props.data)
-      else if (context.titleRender)
-        titleNode = context.titleRender(props.data)
-      else titleNode = title
+      }
+      else if (context.titleRender) {
+        let _titleRender = context.titleRender(props.data)
+        _titleRender = Array.isArray(_titleRender) ? _titleRender : [_titleRender]
+        _titleRender = filterEmpty(_titleRender).filter(Boolean)
+        titleNode = _titleRender.length ? _titleRender : title
+      }
+      else {
+        titleNode = title
+      }
 
       return (
         <span

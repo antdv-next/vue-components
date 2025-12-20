@@ -40,17 +40,14 @@ export default defineComponent({
         <form onSubmit={onGen}>
           <label style={{ marginRight: '10px' }}>
             x:
-            {' '}
             <input ref={xRef} value={(props as any).x} type="number" min="1" required style={{ width: '60px' }} />
           </label>
           <label style={{ marginRight: '10px' }}>
             y:
-            {' '}
             <input ref={yRef} value={props.y} type="number" min="0" required style={{ width: '60px' }} />
           </label>
           <label style={{ marginRight: '10px' }}>
             z:
-            {' '}
             <input ref={zRef} value={props.z} type="number" min="0" required style={{ width: '60px' }} />
           </label>
           <button type="submit">Generate</button>

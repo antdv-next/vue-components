@@ -218,7 +218,6 @@ export function traverseDataNodes(
     const children = node ? (node as any)[mergeChildrenPropName] : dataNodes
     const pos = node ? getPosition(parent!.pos, index!) : '0'
     const connectNodes = node ? [...(pathNodes || []), node] : []
-
     if (node) {
       const key: Key = syntheticGetKey(node, pos)
       callback({
@@ -248,7 +247,7 @@ export function traverseDataNodes(
     }
   }
 
-  processNode(null, undefined, { node: null, pos: '0', level: -1 }, [])
+  processNode(null)
 }
 
 interface Wrapper {

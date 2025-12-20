@@ -150,7 +150,7 @@ export interface TreeProps<TreeDataType extends BasicDataNode = DataNode> {
     dropToGap: boolean
   }) => void
   /**
-   * Used for `rc-tree-select` only.
+   * Used for `vc-tree-select` only.
    * Do not use in your production code directly since this will be refactor.
    */
   onActiveChange?: (key: Key | null) => void
@@ -1146,7 +1146,8 @@ const Tree = defineComponent<TreeProps>(
     provide(TreeContextKey, contextValue)
 
     return () => {
-      if (!props.treeData) {
+      const { treeData } = props
+      if (!treeData) {
         const parsed = convertTreeToData(slots.default?.())
         const signature = getTreeDataSignature(parsed as any)
         if (signature !== slotTreeDataSignature.value) {
@@ -1156,14 +1157,18 @@ const Tree = defineComponent<TreeProps>(
       }
 
       const domProps = pickAttrs(attrs, { aria: true, data: true })
-
       return (
         <div
-          class={clsx(mergedPrefixCls.value, props.className, props.rootClassName, {
-            [`${mergedPrefixCls.value}-show-line`]: mergedShowLine.value,
-            [`${mergedPrefixCls.value}-focused`]: focused.value,
-            [`${mergedPrefixCls.value}-active-focused`]: activeKey.value !== null,
-          })}
+          class={clsx(
+            mergedPrefixCls.value,
+            props.className,
+            props.rootClassName,
+            {
+              [`${mergedPrefixCls.value}-show-line`]: mergedShowLine.value,
+              [`${mergedPrefixCls.value}-focused`]: focused.value,
+              [`${mergedPrefixCls.value}-active-focused`]: activeKey.value !== null,
+            },
+          )}
           style={props.rootStyle}
         >
           <NodeList

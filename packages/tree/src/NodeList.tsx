@@ -241,7 +241,26 @@ const NodeList = defineComponent<NodeListProps>(
     const mergedData = computed(() => (props.motion ? transitionData.value : (props.data || [])))
 
     return () => {
-      const { motion, focused, activeItem, focusable, disabled, tabIndex, prefixCls } = props
+      const {
+        motion,
+        focused,
+        activeItem,
+        focusable,
+        disabled,
+        tabIndex,
+        prefixCls,
+        virtual,
+        itemHeight,
+        height,
+        scrollWidth,
+        onScroll,
+        onContextmenu,
+        onKeyDown,
+        onFocus,
+        onBlur,
+        onListChangeStart,
+        onActiveChange,
+      } = props
       return (
         <>
           {focused && activeItem && (
@@ -255,9 +274,9 @@ const NodeList = defineComponent<NodeListProps>(
               style={HIDDEN_STYLE}
               disabled={focusable === false || disabled}
               tabindex={focusable !== false ? tabIndex : undefined}
-              onKeydown={props.onKeyDown}
-              onFocus={props.onFocus}
-              onBlur={props.onBlur}
+              onKeydown={onKeyDown}
+              onFocus={onFocus}
+              onBlur={onBlur}
               value=""
               onInput={noop}
               aria-label="for screen reader"
@@ -286,17 +305,17 @@ const NodeList = defineComponent<NodeListProps>(
             {...attrs}
             data={mergedData.value}
             itemKey={itemKey}
-            height={props.height}
+            height={height}
             fullHeight={false}
-            virtual={props.virtual}
-            itemHeight={props.itemHeight}
-            scrollWidth={props.scrollWidth}
+            virtual={virtual}
+            itemHeight={itemHeight}
+            scrollWidth={scrollWidth}
             prefixCls={`${prefixCls}-list`}
             ref={listRef}
             role="tree"
             style={props.style}
-            onContextmenu={props.onContextmenu}
-            onScroll={props.onScroll}
+            onContextmenu={onContextmenu}
+            onScroll={onScroll}
             onVisibleChange={(originList: FlattenNode[]) => {
               // The best match is using `fullList` - `originList` = `restList`
               // and check the `restList` to see if has the MOTION_KEY node
@@ -329,10 +348,10 @@ const NodeList = defineComponent<NodeListProps>(
                   motion={motion}
                   motionNodes={key === MOTION_KEY ? transitionRange.value : null}
                   motionType={motionType.value}
-                  onMotionStart={props.onListChangeStart}
+                  onMotionStart={onListChangeStart}
                   onMotionEnd={onMotionEnd}
                   treeNodeRequiredProps={treeNodeRequiredProps.value}
-                  onMouseMove={() => props.onActiveChange?.(null)}
+                  onMouseMove={() => onActiveChange?.(null)}
                 />
               )
             }}
