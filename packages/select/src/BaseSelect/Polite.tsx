@@ -1,5 +1,5 @@
 import type { DisplayValueType } from '../interface'
-import { defineComponent } from 'vue'
+import { defineComponent, isVNode } from 'vue'
 
 export interface PoliteProps {
   visible: boolean
@@ -26,7 +26,7 @@ const Polite = defineComponent<PoliteProps>(
           {/* Merge into one string to make screen reader work as expect */}
           {`${values
             .slice(0, MAX_COUNT)
-            .map(({ label, value }) => (['number', 'string'].includes(typeof label) ? label : value))
+            .map(({ label, value }) => (['number', 'string'].includes(typeof label) ? label : ((isVNode(label) || Array.isArray(label)) ? label : value)))
             .join(', ')}`}
           {values.length > MAX_COUNT ? ', ...' : null}
         </span>

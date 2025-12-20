@@ -394,7 +394,7 @@ const OptionList = defineComponent({
       }
 
       const syncLoadData = baseProps.value?.searchValue ? undefined : loadData
-
+      console.log(mergedCheckedKeys.value)
       return (
         <div onMousedown={onListMouseDown}>
           {activeEntity.value && open && (

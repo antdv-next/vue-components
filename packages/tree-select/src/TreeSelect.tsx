@@ -7,7 +7,8 @@ import type { CheckedStrategy } from './utils/strategyUtil'
 import { BaseSelect } from '@v-c/select'
 import { conductCheck } from '@v-c/tree'
 import { omit, useId, useMergedState } from '@v-c/util'
-import { computed, defineComponent, shallowRef } from 'vue'
+import { filterEmpty } from '@v-c/util/dist/props-util'
+import { computed, defineComponent, shallowRef, watch } from 'vue'
 import useCache from './hooks/useCache'
 import useCheckedKeys from './hooks/useCheckedKeys'
 import useDataEntities from './hooks/useDataEntities'
@@ -236,10 +237,13 @@ const TreeSelect = defineComponent<TreeSelectProps>({
     const mergedTreeNodeFilterProp = computed(() => searchConfig.value.treeNodeFilterProp || 'value')
     const mergedAutoClearSearchValue = computed(() => searchConfig.value.autoClearSearchValue !== false)
 
-    const [internalValue, setInternalValue] = useMergedState<any>(() => props.defaultValue, {
-      value: computed(() => props.value as any) as any,
+    const internalValue = shallowRef(props?.value ?? props?.defaultValue)
+    watch(() => props.value, () => {
+      internalValue.value = props?.value
     })
-
+    const setInternalValue = (val: any) => {
+      internalValue.value = val
+    }
     const mergedShowCheckedStrategy = computed(() => {
       if (!props.treeCheckable) {
         return SHOW_ALL
@@ -355,6 +359,21 @@ const TreeSelect = defineComponent<TreeSelectProps>({
       })
     }
 
+    const renderTreeTitleRender = (node: DataNode) => {
+      let label: any
+      const labelInfo = props?.treeTitleRender?.(node as any)
+      if (typeof labelInfo === 'string' || typeof labelInfo === 'number') {
+        label = labelInfo
+      }
+      else {
+        const labelArr = filterEmpty(Array.isArray(labelInfo) ? labelInfo : [labelInfo])
+        if (labelArr.length) {
+          label = labelArr.length === 1 ? labelArr[0] : labelArr
+        }
+      }
+      return label
+    }
+
     const convert2LabelValues = (draftValues: DefaultValueType) => {
       const values = toLabeledValues(draftValues)
 
@@ -369,7 +388,7 @@ const TreeSelect = defineComponent<TreeSelectProps>({
         // Fill missing label & status
         if (entity) {
           rawLabel = props.treeTitleRender
-            ? props.treeTitleRender(entity.node as any)
+            ? renderTreeTitleRender(entity.node as any)
             : (rawLabel ?? getLabel(entity.node as any))
           rawDisabled = (entity.node as any).disabled
         }
@@ -426,7 +445,13 @@ const TreeSelect = defineComponent<TreeSelectProps>({
 
       const labeledValues = values.map((val) => {
         const targetItem = rawLabeledValues.value.find(item => item.value === val)
-        const label = props.labelInValue ? targetItem?.label : props.treeTitleRender?.(targetItem as any)
+        let label
+        if (props.labelInValue) {
+          label = targetItem?.label
+        }
+        else {
+          label = renderTreeTitleRender(targetItem as any)
+        }
         return {
           value: val,
           label,
@@ -686,7 +711,6 @@ const TreeSelect = defineComponent<TreeSelectProps>({
 
       const restAttrs = { ...attrs }
       const restProps = omit(props, omitKeyList as any)
-
       return (
         <BaseSelect
           {...restAttrs}
@@ -722,4 +746,4 @@ const TreeSelect = defineComponent<TreeSelectProps>({
   },
 })
 
-export default TreeSelect as any
+export default TreeSelect

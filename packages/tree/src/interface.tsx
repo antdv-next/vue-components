@@ -19,7 +19,7 @@ export interface TreeNodeProps<TreeDataType extends BasicDataNode = DataNode> {
   prefixCls?: string
   className?: string
   style?: CSSProperties
-  id?: string
+  id?: Key
 
   // By parent
   expanded?: boolean

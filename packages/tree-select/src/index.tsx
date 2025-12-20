@@ -21,3 +21,4 @@ ExportTreeSelect.SHOW_PARENT = SHOW_PARENT
 ExportTreeSelect.SHOW_CHILD = SHOW_CHILD
 
 export default ExportTreeSelect
+export type { DataNode } from './interface'
