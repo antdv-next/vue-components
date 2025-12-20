@@ -190,7 +190,7 @@ const NodeList = defineComponent<NodeListProps>(
     )
 
     watch(
-      [() => expandedKeys.value, () => data.value],
+      [expandedKeys, data],
       () => {
         const diffExpanded = findExpandedKeys(prevExpandedKeys.value, expandedKeys.value)
         if (diffExpanded.key !== null) {

@@ -22,7 +22,8 @@ export type AllowDrop<TreeDataType extends BasicDataNode = DataNode> = (
 ) => boolean
 
 export function arrDel(list: Key[], value: Key) {
-  if (!list) return []
+  if (!list)
+    return []
   const clone = list.slice()
   const index = clone.indexOf(value)
   if (index >= 0) {
@@ -230,7 +231,8 @@ export function calcDropPosition<TreeDataType extends BasicDataNode = DataNode>(
 }
 
 export function calcSelectedKeys(selectedKeys: Key[], { multiple }: { multiple?: boolean }) {
-  if (!selectedKeys) return undefined
+  if (!selectedKeys)
+    return undefined
 
   if (multiple) {
     return selectedKeys.slice()
@@ -272,16 +274,19 @@ export function conductExpandParent(keyList: Key[], keyEntities: KeyEntities): K
   const expandedKeys = new Set<Key>()
 
   function conductUp(key: Key) {
-    if (expandedKeys.has(key)) return
+    if (expandedKeys.has(key))
+      return
 
     const entity = getEntity(keyEntities, key)
-    if (!entity) return
+    if (!entity)
+      return
 
     expandedKeys.add(key)
 
     const { parent, node } = entity
 
-    if (node.disabled) return
+    if (node.disabled)
+      return
 
     if (parent) {
       conductUp(parent.key)
@@ -294,4 +299,3 @@ export function conductExpandParent(keyList: Key[], keyEntities: KeyEntities): K
 
   return [...expandedKeys]
 }
-
