@@ -283,7 +283,7 @@ const OptionList = defineComponent({
     const onKeyDown = (event: KeyboardEvent) => {
       const which = (event as any).which || (event as any).keyCode
       const expandedKeysSet = new Set(mergedExpandedKeys.value || [])
-
+      console.log(which, 'which')
       switch (which) {
         case KeyCode.UP:
           offsetActiveKey(-1)
@@ -344,7 +344,6 @@ const OptionList = defineComponent({
     }
 
     const onKeyUp = () => {}
-
     expose<RefOptionListProps>({
       scrollTo: (scroll) => {
         treeRef.value?.scrollTo(scroll)
@@ -394,7 +393,6 @@ const OptionList = defineComponent({
       }
 
       const syncLoadData = baseProps.value?.searchValue ? undefined : loadData
-      console.log(mergedCheckedKeys.value)
       return (
         <div onMousedown={onListMouseDown}>
           {activeEntity.value && open && (
