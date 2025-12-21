@@ -300,16 +300,21 @@ const Tree = defineComponent<TreeProps>(
       selectedKeys.value = keys
     }
 
-    const defaultCheckedKeysFn = () => {
-      if (typeof props?.checkedKeys === 'object' && props?.checkedKeys !== null && !Array.isArray(props?.checkedKeys) && 'checked' in props?.checkedKeys) {
-        return props?.checkedKeys.checked || []
+    const getDefaultCheckedKeyEntity = () => {
+      const parsed = parseCheckedKeys(props?.checkedKeys as any)
+      if (parsed) {
+        return {
+          checkedKeys: parsed.checkedKeys || [],
+          halfCheckedKeys: parsed.halfCheckedKeys || [],
+        }
       }
-      if (Array.isArray(props?.checkedKeys)) {
-        return props?.checkedKeys
+      return {
+        checkedKeys: props?.defaultCheckedKeys || [],
+        halfCheckedKeys: [],
       }
-      return props?.defaultCheckedKeys || []
     }
-    const rawCheckedKeys = shallowRef<Key[]>(defaultCheckedKeysFn())
+    const defaultCheckedKeyEntity = getDefaultCheckedKeyEntity()
+    const rawCheckedKeys = shallowRef<Key[]>(defaultCheckedKeyEntity.checkedKeys)
     const setRawCheckedKeys = (keys: Key[]) => {
       rawCheckedKeys.value = keys
     }
@@ -321,7 +326,7 @@ const Tree = defineComponent<TreeProps>(
       rawCheckedKeys.value = parsed?.checkedKeys || []
     })
 
-    const rawHalfCheckedKeys = shallowRef<Key[]>([])
+    const rawHalfCheckedKeys = shallowRef<Key[]>(defaultCheckedKeyEntity.halfCheckedKeys)
     const setRawHalfCheckedKeys = (keys: Key[]) => {
       rawHalfCheckedKeys.value = keys
     }

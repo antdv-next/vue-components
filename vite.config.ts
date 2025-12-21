@@ -40,6 +40,8 @@ const comps = [
   'color-picker',
   'overflow',
   'menu',
+  'tree',
+  'tree-select',
 ]
 
 export function genListAlias() {
