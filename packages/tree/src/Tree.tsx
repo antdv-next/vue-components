@@ -175,6 +175,7 @@ export interface TreeProps<TreeDataType extends BasicDataNode = DataNode> {
 
 export interface TreeRef {
   scrollTo: ScrollTo
+  onKeyDown: (event: any) => void
 }
 
 const defaultProps: Required<Pick<TreeProps, 'prefixCls' | 'showLine' | 'showIcon' | 'selectable' | 'multiple' | 'checkable' | 'disabled' | 'checkStrictly' | 'draggable' | 'defaultExpandParent' | 'autoExpandParent' | 'defaultExpandAll' | 'defaultExpandedKeys' | 'defaultCheckedKeys' | 'defaultSelectedKeys' | 'allowDrop' | 'expandAction' | 'focusable' | 'tabIndex' | 'virtual'>> = {
@@ -427,7 +428,7 @@ const Tree = defineComponent<TreeProps>(
       listRef.value?.scrollTo(scroll)
     }
 
-    expose<TreeRef>({ scrollTo })
+    expose<TreeRef>({ scrollTo, onKeyDown })
 
     function onActiveChange(newActiveKey: Key | null) {
       if (activeKey.value === newActiveKey)
