@@ -21,38 +21,35 @@ export type PopupShowTimeConfig<DateType extends object = any> = Omit<
 >
 & Pick<SharedTimeProps<DateType>, 'disabledTime'>
 
-export interface PopupProps<DateType extends object = any, PresetValue = DateType>
-  extends Pick<InputHTMLAttributes, 'onFocus' | 'onBlur'>,
-  FooterProps<DateType>,
-  PopupPanelProps<DateType> {
-  panelRender?: SharedPickerProps['panelRender']
+export type PopupProps<DateType extends object = any, PresetValue = DateType>
+  = Pick<InputHTMLAttributes, 'onFocus' | 'onBlur'>
+    & FooterProps<DateType>
+    & PopupPanelProps<DateType>
+    & {
+      panelRender?: SharedPickerProps['panelRender']
 
-  // Presets
-  presets: ValueDate<DateType>[]
-  onPresetHover: (presetValue: PresetValue) => void
-  onPresetSubmit: (presetValue: PresetValue) => void
+      presets: ValueDate<DateType>[]
+      onPresetHover: (presetValue: PresetValue) => void
+      onPresetSubmit: (presetValue: PresetValue) => void
 
-  // Range
-  activeInfo?: [activeInputLeft: number, activeInputRight: number, selectorWidth: number]
-  // Direction
-  direction?: 'ltr' | 'rtl'
+      activeInfo?: [activeInputLeft: number, activeInputRight: number, selectorWidth: number]
+      direction?: 'ltr' | 'rtl'
 
-  // Fill
-  /** TimePicker or showTime only */
-  defaultOpenValue: DateType
+      defaultOpenValue: DateType
 
-  // Change
-  needConfirm: boolean
-  isInvalid: (date: DateType | DateType[]) => boolean
-  onOk: VoidFunction
+      needConfirm: boolean
+      isInvalid: (date: DateType | DateType[]) => boolean
+      onOk: VoidFunction
 
-  onPanelMouseDown?: MouseEventHandler
+      onPanelMouseDown?: MouseEventHandler
 
-  classNames?: SharedPickerProps['classNames']
-  styles?: SharedPickerProps['styles']
-}
+      classNames?: SharedPickerProps['classNames']
+      styles?: SharedPickerProps['styles']
+    }
 
-export default defineComponent(<DateType extends object = any>(props: PopupProps<DateType>) => {
+//  PopupProps<DateType>
+
+export default defineComponent(<DateType extends object = any>(props) => {
   const activeInfo = computed(() => props.activeInfo || [0, 0, 0])
 
   const ctx = usePickerContext()

@@ -23,8 +23,11 @@ export type PopupPanelProps<DateType extends object = any>
     }
 
 // provider components
-const PickerPanelProvider = defineComponent<{ value: PickerHackContextProps }>({
+const PickerPanelProvider = defineComponent({
   name: 'PickerPanelProvider',
+  props: {
+    value: Object as PropType<PickerHackContextProps>,
+  },
   setup(props, { slots }) {
     providePickerHackContext(toRef(props, 'value'))
     return () => {
@@ -35,7 +38,8 @@ const PickerPanelProvider = defineComponent<{ value: PickerHackContextProps }>({
   },
 })
 
-export default defineComponent(<DateType extends object = any>(props: PopupPanelProps<DateType>) => {
+// PopupPanelProps<DateType>
+export default defineComponent(<DateType extends object = any>(props) => {
   const ctx = usePickerContext()
 
   const {

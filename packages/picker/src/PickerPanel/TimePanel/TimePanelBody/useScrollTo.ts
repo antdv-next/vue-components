@@ -1,81 +1,81 @@
-import { ref, unref } from 'vue';
-import { raf } from '@v-c/util';
+import { raf } from '@v-c/util'
+import { ref, unref } from 'vue'
 
-const SPEED_PTG = 1 / 3;
+const SPEED_PTG = 1 / 3
 
 export default function useScrollTo(
   ulRef: any,
   value: any,
 ) {
-  const scrollingRef = ref(false);
-  const scrollRafRef = ref<number | null>(null);
-  const scrollDistRef = ref<number | null>(null);
-  const scrollRafTimesRef = ref<number>(0);
+  const scrollingRef = ref(false)
+  const scrollRafRef = ref<number | null>(null)
+  const scrollDistRef = ref<number | null>(null)
+  const scrollRafTimesRef = ref<number>(0)
 
-  const isScrolling = () => scrollingRef.value;
+  const isScrolling = () => scrollingRef.value
 
   const stopScroll = () => {
     if (scrollRafRef.value) {
-      raf.cancel(scrollRafRef.value);
+      raf.cancel(scrollRafRef.value)
     }
-    scrollingRef.value = false;
-  };
+    scrollingRef.value = false
+  }
 
   const startScroll = () => {
-    const ul = unref(ulRef);
-    const val = unref(value);
+    const ul = unref(ulRef)
+    const val = unref(value)
 
-    scrollDistRef.value = null;
-    scrollRafTimesRef.value = 0;
+    scrollDistRef.value = null
+    scrollRafTimesRef.value = 0
 
     if (ul) {
-      const targetLi = ul.querySelector(`[data-value="${val}"]`) as HTMLLIElement;
-      const firstLi = ul.querySelector(`li`) as HTMLLIElement;
+      const targetLi = ul.querySelector(`[data-value="${val}"]`) as HTMLLIElement
+      const firstLi = ul.querySelector(`li`) as HTMLLIElement
 
       const doScroll = () => {
-        stopScroll();
-        scrollingRef.value = true;
-        scrollRafTimesRef.value += 1;
+        stopScroll()
+        scrollingRef.value = true
+        scrollRafTimesRef.value += 1
 
-        const { scrollTop: currentTop } = ul;
+        const { scrollTop: currentTop } = ul
 
-        const firstLiTop = firstLi.offsetTop;
-        const targetLiTop = targetLi?.offsetTop || 0;
-        const targetTop = targetLiTop - firstLiTop;
+        const firstLiTop = firstLi.offsetTop
+        const targetLiTop = targetLi?.offsetTop || 0
+        const targetTop = targetLiTop - firstLiTop
 
-        const isVisible = ul.offsetParent !== null;
+        const isVisible = ul.offsetParent !== null
 
         if ((targetLiTop === 0 && targetLi !== firstLi) || !isVisible) {
           if (scrollRafTimesRef.value <= 5) {
-            scrollRafRef.value = raf(doScroll);
+            scrollRafRef.value = raf(doScroll)
           }
-          return;
+          return
         }
 
-        const nextTop = currentTop + (targetTop - currentTop) * SPEED_PTG;
-        const dist = Math.abs(targetTop - nextTop);
+        const nextTop = currentTop + (targetTop - currentTop) * SPEED_PTG
+        const dist = Math.abs(targetTop - nextTop)
 
         if (scrollDistRef.value !== null && scrollDistRef.value < dist) {
-          stopScroll();
-          return;
+          stopScroll()
+          return
         }
-        scrollDistRef.value = dist;
+        scrollDistRef.value = dist
 
         if (dist <= 1) {
-          ul.scrollTop = targetTop;
-          stopScroll();
-          return;
+          ul.scrollTop = targetTop
+          stopScroll()
+          return
         }
 
-        ul.scrollTop = nextTop;
-        scrollRafRef.value = raf(doScroll);
-      };
+        ul.scrollTop = nextTop
+        scrollRafRef.value = raf(doScroll)
+      }
 
       if (targetLi && firstLi) {
-        doScroll();
+        doScroll()
       }
     }
-  };
+  }
 
-  return [startScroll, stopScroll, isScrolling] as const;
+  return [startScroll, stopScroll, isScrolling] as const
 }

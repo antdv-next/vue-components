@@ -1,5 +1,5 @@
 import type { Ref } from 'vue'
-import type { FormatType, InternalMode, Locale, SharedPickerProps } from '../../interface'
+import type { InternalMode, Locale, SharedPickerProps } from '../../interface'
 import { computed } from 'vue'
 import { getRowFormat, toArray } from '../../utils/miscUtil'
 

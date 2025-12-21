@@ -14,5 +14,10 @@ export default defineConfig({
         entry,
       },
     },
+    optimizeDeps: {
+      include: [
+        'mermaid',
+      ],
+    },
   } as UserConfig),
 })

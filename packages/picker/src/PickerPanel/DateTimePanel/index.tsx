@@ -1,10 +1,10 @@
-import { defineComponent, computed } from 'vue';
-import type { PropType } from 'vue';
-import useTimeInfo from '../../hooks/useTimeInfo';
-import { fillTime } from '../../utils/dateUtil';
-import DatePanel from '../DatePanel';
-import TimePanel from '../TimePanel';
-import type { PanelMode } from '../../interface';
+import type { PropType } from 'vue'
+import type { PanelMode } from '../../interface'
+import { computed, defineComponent } from 'vue'
+import useTimeInfo from '../../hooks/useTimeInfo'
+import { fillTime } from '../../utils/dateUtil'
+import DatePanel from '../DatePanel'
+import TimePanel from '../TimePanel'
 
 export default defineComponent({
   name: 'DateTimePanel',
@@ -33,37 +33,37 @@ export default defineComponent({
     value: Object as PropType<any>,
   },
   setup(props) {
-    const generateConfig = computed(() => props.generateConfig);
-    const showTime = computed(() => (typeof props.showTime === 'object' ? props.showTime : {}));
+    const generateConfig = computed(() => props.generateConfig)
+    const showTime = computed(() => (typeof props.showTime === 'object' ? props.showTime : {}))
 
-    const [getValidTime] = useTimeInfo(generateConfig, showTime);
+    const [getValidTime] = useTimeInfo(generateConfig, showTime)
 
     return () => {
-      const { prefixCls, generateConfig, onSelect, value, pickerValue, onHover } = props;
-      const panelPrefixCls = `${prefixCls}-datetime-panel`;
+      const { prefixCls, generateConfig, onSelect, value, pickerValue, onHover } = props
+      const panelPrefixCls = `${prefixCls}-datetime-panel`
 
       const mergeTime = (date: any) => {
         if (value) {
-          return fillTime(generateConfig, date, value);
+          return fillTime(generateConfig, date, value)
         }
-        return fillTime(generateConfig, date, pickerValue);
-      };
+        return fillTime(generateConfig, date, pickerValue)
+      }
 
       const onDateHover = (date: any) => {
-        onHover?.(date ? mergeTime(date) : date);
-      };
+        onHover?.(date ? mergeTime(date) : date)
+      }
 
       const onDateSelect = (date: any) => {
-        const cloneDate = mergeTime(date);
-        onSelect(getValidTime(cloneDate, cloneDate));
-      };
+        const cloneDate = mergeTime(date)
+        onSelect(getValidTime(cloneDate, cloneDate))
+      }
 
       return (
         <div class={panelPrefixCls}>
           <DatePanel {...props} onSelect={onDateSelect} onHover={onDateHover} />
           <TimePanel {...props} />
         </div>
-      );
-    };
+      )
+    }
   },
-});
+})

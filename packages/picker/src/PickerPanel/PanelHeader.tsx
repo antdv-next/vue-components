@@ -1,12 +1,12 @@
-import { defineComponent, computed } from 'vue';
-import type { PropType } from 'vue';
-import classNames from 'classnames';
-import { usePanelContext, usePickerHackContext } from './context';
-import { isSameOrAfter } from '../utils/dateUtil';
+import type { PropType } from 'vue'
+import { clsx } from '@v-c/util'
+import { computed, defineComponent } from 'vue'
+import { isSameOrAfter } from '../utils/dateUtil'
+import { usePanelContext, usePickerHackContext } from './context'
 
 const HIDDEN_STYLE: any = {
   visibility: 'hidden',
-};
+}
 
 export default defineComponent({
   name: 'PanelHeader',
@@ -18,76 +18,76 @@ export default defineComponent({
     getEnd: { type: Function as PropType<(date: any) => any> },
   },
   setup(props, { slots }) {
-    const context = usePanelContext();
-    const pickerHackContext = usePickerHackContext();
+    const context = usePanelContext()!
+    const pickerHackContext = usePickerHackContext()
 
     const disabledOffsetPrev = computed(() => {
-      const { minDate, generateConfig, locale, pickerValue, panelType } = context.value;
-      const { offset, getEnd } = props;
+      const { minDate, generateConfig, locale, pickerValue, panelType } = context.value
+      const { offset, getEnd } = props
 
       if (!minDate || !offset || !getEnd) {
-        return false;
+        return false
       }
 
-      const prevPanelLimitDate = getEnd(offset(-1, pickerValue));
+      const prevPanelLimitDate = getEnd(offset(-1, pickerValue))
 
-      return !isSameOrAfter(generateConfig, locale, prevPanelLimitDate, minDate, panelType);
-    });
+      return !isSameOrAfter(generateConfig, locale, prevPanelLimitDate, minDate, panelType)
+    })
 
     const disabledSuperOffsetPrev = computed(() => {
-      const { minDate, generateConfig, locale, pickerValue, panelType } = context.value;
-      const { superOffset, getEnd } = props;
+      const { minDate, generateConfig, locale, pickerValue, panelType } = context.value
+      const { superOffset, getEnd } = props
 
       if (!minDate || !superOffset || !getEnd) {
-        return false;
+        return false
       }
 
-      const prevPanelLimitDate = getEnd(superOffset(-1, pickerValue));
+      const prevPanelLimitDate = getEnd(superOffset(-1, pickerValue))
 
-      return !isSameOrAfter(generateConfig, locale, prevPanelLimitDate, minDate, panelType);
-    });
+      return !isSameOrAfter(generateConfig, locale, prevPanelLimitDate, minDate, panelType)
+    })
 
     const disabledOffsetNext = computed(() => {
-      const { maxDate, generateConfig, locale, pickerValue, panelType } = context.value;
-      const { offset, getStart } = props;
+      const { maxDate, generateConfig, locale, pickerValue, panelType } = context.value
+      const { offset, getStart } = props
 
       if (!maxDate || !offset || !getStart) {
-        return false;
+        return false
       }
 
-      const nextPanelLimitDate = getStart(offset(1, pickerValue));
+      const nextPanelLimitDate = getStart(offset(1, pickerValue))
 
-      return !isSameOrAfter(generateConfig, locale, maxDate, nextPanelLimitDate, panelType);
-    });
+      return !isSameOrAfter(generateConfig, locale, maxDate, nextPanelLimitDate, panelType)
+    })
 
     const disabledSuperOffsetNext = computed(() => {
-      const { maxDate, generateConfig, locale, pickerValue, panelType } = context.value;
-      const { superOffset, getStart } = props;
+      const { maxDate, generateConfig, locale, pickerValue, panelType } = context.value
+      const { superOffset, getStart } = props
 
       if (!maxDate || !superOffset || !getStart) {
-        return false;
+        return false
       }
 
-      const nextPanelLimitDate = getStart(superOffset(1, pickerValue));
+      const nextPanelLimitDate = getStart(superOffset(1, pickerValue))
 
-      return !isSameOrAfter(generateConfig, locale, maxDate, nextPanelLimitDate, panelType);
-    });
+      return !isSameOrAfter(generateConfig, locale, maxDate, nextPanelLimitDate, panelType)
+    })
 
     const onOffset = (distance: number) => {
-      const { offset, onChange } = props;
-      const { pickerValue } = context.value;
+      const { offset, onChange } = props
+      const { pickerValue } = context.value
       if (offset && onChange) {
-        onChange(offset(distance, pickerValue));
+        onChange(offset(distance, pickerValue))
       }
-    };
+    }
 
     const onSuperOffset = (distance: number) => {
-      const { superOffset, onChange } = props;
-      const { pickerValue } = context.value;
+      const { superOffset, onChange } = props
+      const { pickerValue } = context.value
       if (superOffset && onChange) {
-        onChange(superOffset(distance, pickerValue));
+        onChange(superOffset(distance, pickerValue))
       }
-    };
+    }
 
     return () => {
       const {
@@ -99,31 +99,31 @@ export default defineComponent({
         superPrevIcon = '\u00AB',
         superNextIcon = '\u00BB',
         locale,
-      } = context.value;
+      } = context.value
 
-      const { hidePrev, hideNext, hideHeader } = pickerHackContext?.value || {};
-      const { offset, superOffset } = props;
+      const { hidePrev, hideNext, hideHeader } = pickerHackContext?.value || {}
+      const { offset, superOffset } = props
 
       if (hideHeader) {
-        return null;
+        return null
       }
 
-      const headerPrefixCls = `${prefixCls}-header`;
+      const headerPrefixCls = `${prefixCls}-header`
 
-      const prevBtnCls = `${headerPrefixCls}-prev-btn`;
-      const nextBtnCls = `${headerPrefixCls}-next-btn`;
-      const superPrevBtnCls = `${headerPrefixCls}-super-prev-btn`;
-      const superNextBtnCls = `${headerPrefixCls}-super-next-btn`;
+      const prevBtnCls = `${headerPrefixCls}-prev-btn`
+      const nextBtnCls = `${headerPrefixCls}-next-btn`
+      const superPrevBtnCls = `${headerPrefixCls}-super-prev-btn`
+      const superNextBtnCls = `${headerPrefixCls}-super-next-btn`
 
       return (
-        <div class={classNames(headerPrefixCls, panelClassNames.header)} style={styles.header}>
+        <div class={clsx(headerPrefixCls, panelClassNames?.header)} style={styles?.header}>
           {superOffset && (
             <button
               type="button"
               aria-label={locale.previousYear}
               onClick={() => onSuperOffset(-1)}
               tabindex={-1}
-              class={classNames(
+              class={clsx(
                 superPrevBtnCls,
                 disabledSuperOffsetPrev.value && `${superPrevBtnCls}-disabled`,
               )}
@@ -139,7 +139,7 @@ export default defineComponent({
               aria-label={locale.previousMonth}
               onClick={() => onOffset(-1)}
               tabindex={-1}
-              class={classNames(prevBtnCls, disabledOffsetPrev.value && `${prevBtnCls}-disabled`)}
+              class={clsx(prevBtnCls, disabledOffsetPrev.value && `${prevBtnCls}-disabled`)}
               disabled={disabledOffsetPrev.value}
               style={hidePrev ? HIDDEN_STYLE : {}}
             >
@@ -153,7 +153,7 @@ export default defineComponent({
               aria-label={locale.nextMonth}
               onClick={() => onOffset(1)}
               tabindex={-1}
-              class={classNames(nextBtnCls, disabledOffsetNext.value && `${nextBtnCls}-disabled`)}
+              class={clsx(nextBtnCls, disabledOffsetNext.value && `${nextBtnCls}-disabled`)}
               disabled={disabledOffsetNext.value}
               style={hideNext ? HIDDEN_STYLE : {}}
             >
@@ -166,7 +166,7 @@ export default defineComponent({
               aria-label={locale.nextYear}
               onClick={() => onSuperOffset(1)}
               tabindex={-1}
-              class={classNames(
+              class={clsx(
                 superNextBtnCls,
                 disabledSuperOffsetNext.value && `${superNextBtnCls}-disabled`,
               )}
@@ -177,7 +177,7 @@ export default defineComponent({
             </button>
           )}
         </div>
-      );
-    };
+      )
+    }
   },
-});
+})

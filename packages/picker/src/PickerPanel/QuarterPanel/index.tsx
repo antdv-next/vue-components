@@ -1,10 +1,10 @@
-import { defineComponent, computed } from 'vue';
-import type { PropType } from 'vue';
-import { useInfo, providePanelContext } from '../context';
-import PanelBody from '../PanelBody';
-import PanelHeader from '../PanelHeader';
-import { formatValue } from '../../utils/dateUtil';
-import type { PanelMode } from '../../interface';
+import type { PropType } from 'vue'
+import type { PanelMode } from '../../interface'
+import { computed, defineComponent } from 'vue'
+import { formatValue } from '../../utils/dateUtil'
+import { providePanelContext, useInfo } from '../context'
+import PanelBody from '../PanelBody'
+import PanelHeader from '../PanelHeader'
 
 export default defineComponent({
   name: 'QuarterPanel',
@@ -33,11 +33,11 @@ export default defineComponent({
   },
   setup(props) {
     const panelContext = computed(() => {
-      const [info] = useInfo(props, 'quarter');
-      return info;
-    });
+      const [info] = useInfo(props, 'quarter')
+      return info
+    })
 
-    providePanelContext(panelContext);
+    providePanelContext(panelContext)
 
     return () => {
       const {
@@ -47,26 +47,26 @@ export default defineComponent({
         pickerValue,
         onPickerValueChange,
         onModeChange,
-      } = props;
-      const panelPrefixCls = `${prefixCls}-quarter-panel`;
+      } = props
+      const panelPrefixCls = `${prefixCls}-quarter-panel`
 
-      const baseDate = generateConfig.setMonth(pickerValue, 0);
+      const baseDate = generateConfig.setMonth(pickerValue, 0)
 
       const getCellDate = (date: any, offset: number) => {
-        return generateConfig.addMonth(date, offset * 3);
-      };
+        return generateConfig.addMonth(date, offset * 3)
+      }
 
       const getCellText = (date: any) => {
         return formatValue(date, {
           locale,
           format: locale.cellQuarterFormat,
           generateConfig,
-        });
-      };
+        })
+      }
 
       const getCellClassName = () => ({
         [`${prefixCls}-cell-in-view`]: true,
-      });
+      })
 
       const yearNode = (
         <button
@@ -74,7 +74,7 @@ export default defineComponent({
           key="year"
           aria-label={locale.yearSelect}
           onClick={() => {
-            onModeChange('year');
+            onModeChange('year')
           }}
           tabindex={-1}
           class={`${prefixCls}-year-btn`}
@@ -85,7 +85,7 @@ export default defineComponent({
             generateConfig,
           })}
         </button>
-      );
+      )
 
       return (
         <div class={panelPrefixCls}>
@@ -109,7 +109,7 @@ export default defineComponent({
             getCellClassName={getCellClassName}
           />
         </div>
-      );
-    };
+      )
+    }
   },
-});
+})

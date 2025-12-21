@@ -219,15 +219,16 @@ export default function useRangeValue<ValueType extends DateType[], DateType ext
     const endEmpty = !end
 
     const validateEmptyDateRange = allowEmpty.value
-      ? // Validate empty start
-      (!startEmpty || allowEmpty.value[0])
-        && // Validate empty end
-        (!endEmpty || allowEmpty.value[1])
+      ? (
+          // Validate empty start
+          (!startEmpty || allowEmpty.value[0])
+          // Validate empty end
+          && (!endEmpty || allowEmpty.value[1])
+        )
       : true
 
     // >>> Order
-    const validateOrder
-      = !order.value
+    const validateOrder = !order.value
       || startEmpty
       || endEmpty
       || isSame(generateConfig.value, locale.value, start, end, picker.value as any)
@@ -235,16 +236,16 @@ export default function useRangeValue<ValueType extends DateType[], DateType ext
 
     // >>> Invalid
     const validateDates
-      = // Validate start
-      (disabled.value[0] || !start || !isInvalidateDate(start, { activeIndex: 0 }))
-      && // Validate end
-      (disabled.value[1] || !end || !isInvalidateDate(end, { from: start, activeIndex: 1 }))
-      // >>> Result
+      // Validate start
+      = (disabled.value[0] || !start || !isInvalidateDate(start, { activeIndex: 0 }))
+      // Validate end
+        && (disabled.value[1] || !end || !isInvalidateDate(end, { from: start, activeIndex: 1 }))
+    // >>> Result
     const allPassed
-      = // Null value is from clear button
-      isNullValue
-      || // Normal check
-      (validateEmptyDateRange && validateOrder && validateDates)
+      // Null value is from clear button
+      = isNullValue
+      // Normal check
+        || (validateEmptyDateRange && validateOrder && validateDates)
 
     if (allPassed) {
       // Sync value with submit value
@@ -284,48 +285,48 @@ export default function useRangeValue<ValueType extends DateType[], DateType ext
     computed(() => !interactiveFinished.value),
     (next) => {
       if (next === false) { // When next is false, it means condition became false -> !interactiveFinished is false -> interactiveFinished is true
-         // Logic in React: useLockEffect(!interactiveFinished, ...)
-         // If !interactiveFinished is true (interactive), it calls callback(true).
-         // If !interactiveFinished is false (finished), it calls callback(false) after delay.
-         // React code checks: if (interactiveFinished) ... which corresponds to callback(false).
-         
-         // Wait, useLockEffect implementation in Vue:
-         // watch(condition, (val) => { if (val) callback(val) else raf(() => callback(!!val)) })
-         // callback receives boolean.
-         
-         // React code:
-         /*
+        // Logic in React: useLockEffect(!interactiveFinished, ...)
+        // If !interactiveFinished is true (interactive), it calls callback(true).
+        // If !interactiveFinished is false (finished), it calls callback(false) after delay.
+        // React code checks: if (interactiveFinished) ... which corresponds to callback(false).
+
+        // Wait, useLockEffect implementation in Vue:
+        // watch(condition, (val) => { if (val) callback(val) else raf(() => callback(!!val)) })
+        // callback receives boolean.
+
+        // React code:
+        /*
          useLockEffect(!interactiveFinished, () => {
              if (interactiveFinished) { ... }
          }, 2)
          */
-         // React useLockEffect signature: (value: boolean, callback: (next: boolean) => void)
-         
-         // In my Vue implementation:
-         /*
+        // React useLockEffect signature: (value: boolean, callback: (next: boolean) => void)
+
+        // In my Vue implementation:
+        /*
          watch(condition, (val) => {
              if (val) callback(val)
              else raf(() => callback(!!val))
          })
          */
-         // If condition is true, callback(true).
-         // If condition is false, callback(false) (after raf).
-         
-         // So if !interactiveFinished becomes false (finished), callback(false) is called.
-         // Inside callback(next), if next is false, then interactiveFinished is true.
-         
-         if (!next) {
-            // Always try to trigger submit first
-            triggerSubmit()
+        // If condition is true, callback(true).
+        // If condition is false, callback(false) (after raf).
 
-            // Trigger calendar change since this is a effect reset
-            triggerCalendarChange(mergedValue.value)
+        // So if !interactiveFinished becomes false (finished), callback(false) is called.
+        // Inside callback(next), if next is false, then interactiveFinished is true.
 
-            // Sync with value anyway
-            submitValue.value = mergedValue.value
-         }
+        if (!next) {
+          // Always try to trigger submit first
+          triggerSubmit()
+
+          // Trigger calendar change since this is a effect reset
+          triggerCalendarChange(mergedValue.value)
+
+          // Sync with value anyway
+          submitValue.value = mergedValue.value
+        }
       }
-    }
+    },
   )
 
   return [flushSubmit, triggerSubmit] as const

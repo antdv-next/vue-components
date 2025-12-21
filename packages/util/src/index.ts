@@ -1,4 +1,5 @@
 export { default as classNames, clsx } from './classnames'
+export { default as raf } from './raf'
 export { default as RenderComponent } from './RenderComponent'
 export { default as get } from './utils/get'
 export { default as set } from './utils/set'

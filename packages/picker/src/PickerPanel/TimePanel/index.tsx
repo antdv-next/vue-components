@@ -1,11 +1,11 @@
-import { defineComponent, computed } from 'vue';
-import type { PropType } from 'vue';
-import classNames from 'classnames';
-import { useInfo, providePanelContext } from '../context';
-import PanelHeader from '../PanelHeader';
-import TimePanelBody from './TimePanelBody';
-import { formatValue } from '../../utils/dateUtil';
-import type { PanelMode } from '../../interface';
+import type { PropType } from 'vue'
+import type { PanelMode } from '../../interface'
+import { clsx } from '@v-c/util'
+import { computed, defineComponent } from 'vue'
+import { formatValue } from '../../utils/dateUtil'
+import { providePanelContext, useInfo } from '../context'
+import PanelHeader from '../PanelHeader'
+import TimePanelBody from './TimePanelBody'
 
 export default defineComponent({
   name: 'TimePanel',
@@ -35,25 +35,25 @@ export default defineComponent({
   },
   setup(props) {
     const panelContext = computed(() => {
-      const [info] = useInfo(props, 'time');
-      return info;
-    });
+      const [info] = useInfo(props, 'time')
+      return info
+    })
 
-    providePanelContext(panelContext);
+    providePanelContext(panelContext)
 
     return () => {
-      const { prefixCls, value, locale, generateConfig, showTime } = props;
-      const format = typeof showTime === 'object' ? showTime.format : undefined;
-      const panelPrefixCls = `${prefixCls}-time-panel`;
+      const { prefixCls, value, locale, generateConfig, showTime } = props
+      const format = typeof showTime === 'object' ? showTime.format : undefined
+      const panelPrefixCls = `${prefixCls}-time-panel`
 
       return (
-        <div class={classNames(panelPrefixCls)}>
+        <div class={clsx(panelPrefixCls)}>
           <PanelHeader>
             {value ? formatValue(value, { locale, format, generateConfig }) : '\u00A0'}
           </PanelHeader>
           <TimePanelBody {...(typeof showTime === 'object' ? showTime : {})} />
         </div>
-      );
-    };
+      )
+    }
   },
-});
+})

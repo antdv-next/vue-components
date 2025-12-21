@@ -1,9 +1,9 @@
 import type { Ref } from 'vue'
-import type { FormatType, InternalMode, PickerMode } from '../../interface'
+import type { InternalMode } from '../../interface'
 import { warning } from '@v-c/util'
 import { computed, toRefs } from 'vue'
-import { fillShowTimeConfig, getTimeProps } from '../../hooks/useTimeConfig'
 import useLocale from '../../hooks/useLocale'
+import { fillShowTimeConfig, getTimeProps } from '../../hooks/useTimeConfig'
 import { toArray } from '../../utils/miscUtil'
 import { fillClearIcon } from '../Selector/hooks/useClearIcon'
 import useDisabledBoundary from './useDisabledBoundary'
@@ -11,7 +11,7 @@ import { useFieldFormat } from './useFieldFormat'
 import useInputReadOnly from './useInputReadOnly'
 import useInvalidate from './useInvalidate'
 
-type PickedProps<DateType extends object = any> = {
+interface PickedProps<DateType extends object = any> {
   generateConfig?: any
   locale?: any
   picker?: any

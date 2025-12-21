@@ -33,7 +33,7 @@ export default function useInvalidate<DateType extends object = any>(
     if ((picker.value === 'date' || picker.value === 'time') && showTime.value) {
       const range = info && info.activeIndex === 1 ? 'end' : 'start'
       const { disabledHours, disabledMinutes, disabledSeconds, disabledMilliseconds }
-          = (showTime.value as any).disabledTime?.(date, range, { from: outsideInfo.from }) || {}
+        = (showTime.value as any).disabledTime?.(date, range, { from: outsideInfo.from }) || {}
 
       const {
         disabledHours: legacyDisabledHours,

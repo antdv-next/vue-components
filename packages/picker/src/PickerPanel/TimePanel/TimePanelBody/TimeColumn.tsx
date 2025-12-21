@@ -1,19 +1,19 @@
-import { defineComponent, ref, watch, onMounted, onBeforeUnmount } from 'vue';
-import type { PropType } from 'vue';
-import classNames from 'classnames';
-import { usePanelContext } from '../../context';
-import useScrollTo from './useScrollTo';
+import type { PropType } from 'vue'
+import { clsx } from '@v-c/util'
+import { defineComponent, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { usePanelContext } from '../../context'
+import useScrollTo from './useScrollTo'
 
-const SCROLL_DELAY = 300;
+const SCROLL_DELAY = 300
 
 export interface Unit<ValueType = number | string> {
-  label: any;
-  value: ValueType;
-  disabled?: boolean;
+  label: any
+  value: ValueType
+  disabled?: boolean
 }
 
 function flattenUnits(units: Unit<string | number>[]) {
-  return units.map(({ value, label, disabled }) => [value, label, disabled].join(',')).join(';');
+  return units.map(({ value, label, disabled }) => [value, label, disabled].join(',')).join(';')
 }
 
 export default defineComponent({
@@ -29,69 +29,69 @@ export default defineComponent({
     changeOnScroll: { type: Boolean },
   },
   setup(props) {
-    const context = usePanelContext();
-    const ulRef = ref<HTMLUListElement>();
-    const checkDelayRef = ref<any>();
+    const context = usePanelContext()
+    const ulRef = ref<HTMLUListElement>()
+    const checkDelayRef = ref<any>()
 
     const clearDelayCheck = () => {
-      clearTimeout(checkDelayRef.value);
-    };
+      clearTimeout(checkDelayRef.value)
+    }
 
-    const [syncScroll, stopScroll, isScrolling] = useScrollTo(ulRef, () => props.value ?? props.optionalValue);
+    const [syncScroll, stopScroll, isScrolling] = useScrollTo(ulRef, () => props.value ?? props.optionalValue)
 
     watch(
       [() => props.value, () => props.optionalValue, () => flattenUnits(props.units)],
       () => {
-        syncScroll();
-        clearDelayCheck();
+        syncScroll()
+        clearDelayCheck()
       },
-      { flush: 'post' }
-    );
-    
+      { flush: 'post' },
+    )
+
     onMounted(() => {
-        syncScroll();
-    });
+      syncScroll()
+    })
 
     onBeforeUnmount(() => {
-      stopScroll();
-      clearDelayCheck();
-    });
+      stopScroll()
+      clearDelayCheck()
+    })
 
     const onInternalScroll = (event: Event) => {
-      clearDelayCheck();
-      const target = event.target as HTMLUListElement;
+      clearDelayCheck()
+      const target = event.target as HTMLUListElement
 
       if (!isScrolling() && props.changeOnScroll) {
         checkDelayRef.value = setTimeout(() => {
-          const ul = ulRef.value!;
-          const firstLi = ul.querySelector(`li`) as HTMLLIElement;
-          const firstLiTop = firstLi.offsetTop;
-          const liList = Array.from(ul.querySelectorAll(`li`)) as HTMLLIElement[];
-          const liTopList = liList.map((li) => li.offsetTop - firstLiTop);
+          const ul = ulRef.value!
+          const firstLi = ul.querySelector(`li`) as HTMLLIElement
+          const firstLiTop = firstLi.offsetTop
+          const liList = Array.from(ul.querySelectorAll(`li`)) as HTMLLIElement[]
+          const liTopList = liList.map(li => li.offsetTop - firstLiTop)
           const liDistList = liTopList.map((top, index) => {
             if (props.units[index].disabled) {
-              return Number.MAX_SAFE_INTEGER;
+              return Number.MAX_SAFE_INTEGER
             }
-            return Math.abs(top - target.scrollTop);
-          });
+            return Math.abs(top - target.scrollTop)
+          })
 
-          const minDist = Math.min(...liDistList);
-          const minDistIndex = liDistList.findIndex((dist) => dist === minDist);
-          const targetUnit = props.units[minDistIndex];
+          const minDist = Math.min(...liDistList)
+          const minDistIndex = liDistList.findIndex(dist => dist === minDist)
+          const targetUnit = props.units[minDistIndex]
           if (targetUnit && !targetUnit.disabled) {
-            props.onChange(targetUnit.value);
+            props.onChange(targetUnit.value)
           }
-        }, SCROLL_DELAY);
+        }, SCROLL_DELAY)
       }
-    };
+    }
 
     return () => {
-      const { units, value, type, onChange, onHover, onDblClick } = props;
-      const { prefixCls, cellRender, now, locale, classNames: panelClassNames, styles } = context.value;
+      const { units, value, type, onChange, onHover, onDblClick } = props
+      const { prefixCls, cellRender, now, locale, classNames: panelClassNames, styles } = context!.value
 
-      const panelPrefixCls = `${prefixCls}-time-panel`;
-      const cellPrefixCls = `${prefixCls}-time-panel-cell`;
-      const columnPrefixCls = `${panelPrefixCls}-column`;
+      const panelPrefixCls = `${prefixCls}-time-panel`
+      const cellPrefixCls = `${prefixCls}-time-panel-cell`
+      const columnPrefixCls = `${panelPrefixCls}-column`
 
       return (
         <ul
@@ -101,31 +101,31 @@ export default defineComponent({
           onScroll={onInternalScroll}
         >
           {units.map(({ label, value: unitValue, disabled }) => {
-            const inner = <div class={`${cellPrefixCls}-inner`}>{label}</div>;
+            const inner = <div class={`${cellPrefixCls}-inner`}>{label}</div>
 
             return (
               <li
                 key={unitValue}
-                style={styles.item}
-                class={classNames(cellPrefixCls, panelClassNames.item, {
+                style={styles?.item}
+                class={clsx(cellPrefixCls, panelClassNames!.item, {
                   [`${cellPrefixCls}-selected`]: value === unitValue,
                   [`${cellPrefixCls}-disabled`]: disabled,
                 })}
                 onClick={() => {
                   if (!disabled) {
-                    onChange(unitValue);
+                    onChange(unitValue)
                   }
                 }}
                 onDblclick={() => {
-                   if (!disabled && onDblClick) {
-                      onDblClick();
-                   }
+                  if (!disabled && onDblClick) {
+                    onDblClick()
+                  }
                 }}
                 onMouseenter={() => {
-                  onHover(unitValue);
+                  onHover(unitValue)
                 }}
                 onMouseleave={() => {
-                  onHover(null!);
+                  onHover(null!)
                 }}
                 data-value={unitValue}
               >
@@ -140,10 +140,10 @@ export default defineComponent({
                     })
                   : inner}
               </li>
-            );
+            )
           })}
         </ul>
-      );
-    };
+      )
+    }
   },
-});
+})

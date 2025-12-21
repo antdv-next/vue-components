@@ -100,11 +100,11 @@ function fillShowConfig(
     parsedShowSecond = true
   }
   else if (hasShowConfig) {
-    const existFalse = [parsedShowHour, parsedShowMinute, parsedShowSecond].some(
-      show => show === false,
+    const existFalse = [parsedShowHour, parsedShowMinute, parsedShowSecond].includes(
+      false,
     )
-    const existTrue = [parsedShowHour, parsedShowMinute, parsedShowSecond].some(
-      show => show === true,
+    const existTrue = [parsedShowHour, parsedShowMinute, parsedShowSecond].includes(
+      true,
     )
     const defaultShow = existFalse ? true : !existTrue
 
@@ -127,7 +127,7 @@ export function getTimeProps<DateType extends object>(
     showTimePropsForLocale: SharedTimeProps<DateType>,
     showTimeFormat: string,
     propFormat: string,
-  ] {
+] {
   const { showTime } = componentProps
 
   const [pickedProps, propFormat] = pickTimeProps(componentProps)
@@ -220,7 +220,7 @@ export function fillShowTimeConfig<DateType extends object>(
     // ======================== Format ========================
     const timeFormat
       = showTimeFormat
-      || fillTimeFormat(showHour, showMinute, showSecond, showMillisecond, showMeridiem)
+        || fillTimeFormat(showHour, showMinute, showSecond, showMillisecond, showMeridiem)
 
     // ======================== Props =========================
     return {

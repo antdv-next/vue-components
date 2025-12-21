@@ -1,9 +1,9 @@
-import { defineComponent } from 'vue';
-import type { PropType, VNode } from 'vue';
-import classNames from 'classnames';
-import { usePanelContext, usePickerHackContext } from './context';
-import { formatValue, isInRange, isSame } from '../utils/dateUtil';
-import type { DisabledDate } from '../interface';
+import type { PropType, VNode } from 'vue'
+import type { DisabledDate } from '../interface'
+import { clsx } from '@v-c/util'
+import { defineComponent } from 'vue'
+import { formatValue, isInRange, isSame } from '../utils/dateUtil'
+import { usePanelContext, usePickerHackContext } from './context'
 
 export default defineComponent({
   name: 'PanelBody',
@@ -22,8 +22,8 @@ export default defineComponent({
     cellSelection: { type: Boolean, default: true },
   },
   setup(props) {
-    const context = usePanelContext();
-    const pickerHackContext = usePickerHackContext();
+    const context = usePanelContext()!
+    const pickerHackContext = usePickerHackContext()
 
     return () => {
       const {
@@ -41,7 +41,7 @@ export default defineComponent({
         values,
         locale,
         onSelect,
-      } = context.value;
+      } = context.value
 
       const {
         rowNum,
@@ -56,98 +56,98 @@ export default defineComponent({
         headerCells,
         cellSelection,
         disabledDate,
-      } = props;
+      } = props
 
-      const { onCellDblClick } = pickerHackContext?.value || {};
+      const { onCellDblClick } = pickerHackContext?.value || {}
 
-      const mergedDisabledDate = disabledDate || contextDisabledDate;
-      const cellPrefixCls = `${prefixCls}-cell`;
+      const mergedDisabledDate = disabledDate || contextDisabledDate
+      const cellPrefixCls = `${prefixCls}-cell`
 
       const matchValues = (date: any) =>
-        values.some((singleValue) =>
-          singleValue && isSame(generateConfig, locale, date, singleValue, panelType)
-        );
+        (values || []).some(singleValue =>
+          singleValue && isSame(generateConfig, locale, date, singleValue, panelType),
+        )
 
-      const rows: VNode[] = [];
+      const rows: VNode[] = []
 
       for (let row = 0; row < rowNum; row += 1) {
-        const rowNode: VNode[] = [];
-        let rowStartDate: any;
+        const rowNode: VNode[] = []
+        let rowStartDate: any
 
         for (let col = 0; col < colNum; col += 1) {
-          const offset = row * colNum + col;
-          const currentDate = getCellDate(baseDate, offset);
+          const offset = row * colNum + col
+          const currentDate = getCellDate(baseDate, offset)
 
           const disabled = mergedDisabledDate?.(currentDate, {
             type: panelType,
-          });
+          })
 
           if (col === 0) {
-            rowStartDate = currentDate;
+            rowStartDate = currentDate
             if (prefixColumn) {
-              rowNode.push(prefixColumn(rowStartDate));
+              rowNode.push(prefixColumn(rowStartDate))
             }
           }
 
-          let inRange = false;
-          let rangeStart = false;
-          let rangeEnd = false;
+          let inRange = false
+          let rangeStart = false
+          let rangeEnd = false
 
           if (cellSelection && hoverRangeValue) {
-            const [hoverStart, hoverEnd] = hoverRangeValue;
-            inRange = isInRange(generateConfig, hoverStart, hoverEnd, currentDate);
-            rangeStart = isSame(generateConfig, locale, currentDate, hoverStart, panelType);
-            rangeEnd = isSame(generateConfig, locale, currentDate, hoverEnd, panelType);
+            const [hoverStart, hoverEnd] = hoverRangeValue
+            inRange = isInRange(generateConfig, hoverStart, hoverEnd, currentDate)
+            rangeStart = isSame(generateConfig, locale, currentDate, hoverStart, panelType)
+            rangeEnd = isSame(generateConfig, locale, currentDate, hoverEnd, panelType)
           }
 
-          const title = titleFormat
+          const title: string | null | undefined = titleFormat
             ? formatValue(currentDate, {
                 locale,
                 format: titleFormat,
                 generateConfig,
               })
-            : undefined;
+            : undefined
 
-          const inner = <div class={`${cellPrefixCls}-inner`}>{getCellText(currentDate)}</div>;
+          const inner = <div class={`${cellPrefixCls}-inner`}>{getCellText(currentDate)}</div>
 
           rowNode.push(
             <td
               key={col}
-              title={title}
-              class={classNames(cellPrefixCls, panelClassNames.item, {
+              title={title!}
+              class={clsx(cellPrefixCls, panelClassNames?.item, {
                 [`${cellPrefixCls}-disabled`]: disabled,
-                [`${cellPrefixCls}-hover`]: (hoverValue || []).some((date) =>
+                [`${cellPrefixCls}-hover`]: (hoverValue || []).some(date =>
                   isSame(generateConfig, locale, currentDate, date, panelType),
                 ),
                 [`${cellPrefixCls}-in-range`]: inRange && !rangeStart && !rangeEnd,
                 [`${cellPrefixCls}-range-start`]: rangeStart,
                 [`${cellPrefixCls}-range-end`]: rangeEnd,
                 [`${prefixCls}-cell-selected`]:
-                  !hoverRangeValue &&
+                  !hoverRangeValue
                   // WeekPicker use row instead
-                  panelType !== 'week' &&
-                  matchValues(currentDate),
+                  && panelType !== 'week'
+                  && matchValues(currentDate),
                 ...getCellClassName(currentDate),
               })}
-              style={styles.item}
+              style={styles?.item}
               onClick={() => {
                 if (!disabled) {
-                  onSelect(currentDate);
+                  onSelect(currentDate)
                 }
               }}
               onDblclick={() => {
                 if (!disabled && onCellDblClick) {
-                  onCellDblClick();
+                  onCellDblClick()
                 }
               }}
               onMouseenter={() => {
                 if (!disabled) {
-                  onHover?.(currentDate);
+                  onHover?.(currentDate)
                 }
               }}
               onMouseleave={() => {
                 if (!disabled) {
-                  onHover?.(null);
+                  onHover?.(null)
                 }
               }}
             >
@@ -161,21 +161,21 @@ export default defineComponent({
                   })
                 : inner}
             </td>,
-          );
+          )
         }
 
         rows.push(
           <tr key={row} class={rowClassName?.(rowStartDate!)}>
             {rowNode}
           </tr>,
-        );
+        )
       }
 
       return (
-        <div class={classNames(`${prefixCls}-body`, panelClassNames.body)} style={styles.body}>
+        <div class={clsx(`${prefixCls}-body`, panelClassNames?.body)} style={styles?.body}>
           <table
-            class={classNames(`${prefixCls}-content`, panelClassNames.content)}
-            style={styles.content}
+            class={clsx(`${prefixCls}-content`, panelClassNames?.content)}
+            style={styles?.content}
           >
             {headerCells && (
               <thead>
@@ -185,7 +185,7 @@ export default defineComponent({
             <tbody>{rows}</tbody>
           </table>
         </div>
-      );
-    },
+      )
+    }
   },
-});
+})

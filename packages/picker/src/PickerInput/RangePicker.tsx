@@ -1,13 +1,16 @@
 import type { PropType } from 'vue'
-import type { BaseInfo, InternalMode, OpenConfig, PanelMode, RangeTimeProps, SharedHTMLAttrs, SharedPickerProps, ValueDate } from '../interface'
+import type { BaseInfo, InternalMode, OpenConfig, PanelMode, RangeTimeProps } from '../interface'
 import type { PopupShowTimeConfig } from './Popup'
 import type { SelectorIdType } from './Selector/RangeSelector'
 import { clsx } from '@v-c/util'
 import omit from '@v-c/util/dist/omit'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
 import warning from '@v-c/util/dist/warning'
-import { computed, defineComponent, provide, ref, watch, watchEffect } from 'vue'
-import { useSemantic } from '../hooks/useSemantic'
+import { computed, defineComponent, ref, watch } from 'vue'
+import useSemantic from '../hooks/useSemantic'
+import PickerTrigger from '../PickerTrigger'
+import { pickTriggerProps } from '../PickerTrigger/util'
+import { fillIndex, getFromDate, toArray } from '../utils/miscUtil'
 import { providePickerContext } from './context'
 import useCellRender from './hooks/useCellRender'
 import useFieldsInvalidate from './hooks/useFieldsInvalidate'
@@ -20,9 +23,6 @@ import useRangeDisabledDate from './hooks/useRangeDisabledDate'
 import useRangePickerValue from './hooks/useRangePickerValue'
 import useRangeValue, { useInnerValue } from './hooks/useRangeValue'
 import useShowNow from './hooks/useShowNow'
-import PickerTrigger from '../PickerTrigger'
-import { pickTriggerProps } from '../PickerTrigger/util'
-import { fillIndex, getFromDate, toArray } from '../utils/miscUtil'
 import Popup from './Popup'
 import RangeSelector from './Selector/RangeSelector'
 
@@ -597,8 +597,8 @@ export default defineComponent({
         return (
           // Value is empty
           !value.value?.[index]
-          && // DefaultValue is empty
-          !defaultValue.value?.[index]
+          // DefaultValue is empty
+          && !defaultValue.value?.[index]
         )
       }
 

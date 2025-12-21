@@ -1,11 +1,10 @@
-import { defineComponent, computed } from 'vue';
-import type { PropType } from 'vue';
-import classNames from 'classnames';
-import { useInfo, providePanelContext } from '../context';
-import PanelBody from '../PanelBody';
-import PanelHeader from '../PanelHeader';
-import { formatValue } from '../../utils/dateUtil';
-import type { DisabledDate, PanelMode } from '../../interface';
+import type { PropType } from 'vue'
+import type { DisabledDate, PanelMode } from '../../interface'
+import { computed, defineComponent } from 'vue'
+import { formatValue } from '../../utils/dateUtil'
+import { providePanelContext, useInfo } from '../context'
+import PanelBody from '../PanelBody'
+import PanelHeader from '../PanelHeader'
 
 export default defineComponent({
   name: 'MonthPanel',
@@ -35,11 +34,11 @@ export default defineComponent({
   },
   setup(props) {
     const panelContext = computed(() => {
-      const [info] = useInfo(props, 'month');
-      return info;
-    });
+      const [info] = useInfo(props, 'month')
+      return info
+    })
 
-    providePanelContext(panelContext);
+    providePanelContext(panelContext)
 
     return () => {
       const {
@@ -50,23 +49,23 @@ export default defineComponent({
         disabledDate,
         onPickerValueChange,
         onModeChange,
-      } = props;
+      } = props
 
-      const panelPrefixCls = `${prefixCls}-month-panel`;
-      const baseDate = generateConfig.setMonth(pickerValue, 0);
+      const panelPrefixCls = `${prefixCls}-month-panel`
+      const baseDate = generateConfig.setMonth(pickerValue, 0)
 
-      const monthsLocale =
-        locale.shortMonths ||
-        (generateConfig.locale.getShortMonths
-          ? generateConfig.locale.getShortMonths(locale.locale)
-          : []);
+      const monthsLocale
+        = locale.shortMonths
+          || (generateConfig.locale.getShortMonths
+            ? generateConfig.locale.getShortMonths(locale.locale)
+            : [])
 
       const getCellDate = (date: any, offset: number) => {
-        return generateConfig.addMonth(date, offset);
-      };
+        return generateConfig.addMonth(date, offset)
+      }
 
       const getCellText = (date: any) => {
-        const month = generateConfig.getMonth(date);
+        const month = generateConfig.getMonth(date)
 
         return locale.monthFormat
           ? formatValue(date, {
@@ -74,25 +73,25 @@ export default defineComponent({
               format: locale.monthFormat,
               generateConfig,
             })
-          : monthsLocale[month];
-      };
+          : monthsLocale[month]
+      }
 
       const getCellClassName = () => ({
         [`${prefixCls}-cell-in-view`]: true,
-      });
+      })
 
       const mergedDisabledDate: DisabledDate<any> | undefined = disabledDate
         ? (currentDate, disabledInfo) => {
-            const startDate = generateConfig.setDate(currentDate, 1);
+            const startDate = generateConfig.setDate(currentDate, 1)
             const nextMonthStartDate = generateConfig.setMonth(
               startDate,
               generateConfig.getMonth(startDate) + 1,
-            );
-            const endDate = generateConfig.addDate(nextMonthStartDate, -1);
+            )
+            const endDate = generateConfig.addDate(nextMonthStartDate, -1)
 
-            return disabledDate(startDate, disabledInfo) && disabledDate(endDate, disabledInfo);
+            return disabledDate(startDate, disabledInfo) && disabledDate(endDate, disabledInfo)
           }
-        : undefined;
+        : undefined
 
       const yearNode = (
         <button
@@ -100,7 +99,7 @@ export default defineComponent({
           key="year"
           aria-label={locale.yearSelect}
           onClick={() => {
-            onModeChange('year');
+            onModeChange('year')
           }}
           tabindex={-1}
           class={`${prefixCls}-year-btn`}
@@ -111,7 +110,7 @@ export default defineComponent({
             generateConfig,
           })}
         </button>
-      );
+      )
 
       return (
         <div class={panelPrefixCls}>
@@ -136,7 +135,7 @@ export default defineComponent({
             getCellClassName={getCellClassName}
           />
         </div>
-      );
-    };
+      )
+    }
   },
-});
+})
