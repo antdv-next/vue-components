@@ -1,11 +1,25 @@
 import type { VueNode } from '@v-c/util/dist/type'
+import type { PaginationLocale, SizeChangerRender } from './interface'
 import KeyCode from '@v-c/util/dist/KeyCode'
 import { computed, defineComponent, ref } from 'vue'
-import { optionsProps } from './interface'
 
-const Options = defineComponent({
-  props: optionsProps(),
-  setup(props) {
+interface OptionsProps {
+  disabled?: boolean
+  locale: PaginationLocale
+  rootPrefixCls: string
+  selectPrefixCls?: string
+  pageSize: number
+  pageSizeOptions?: number[]
+  goButton?: boolean | string
+  changeSize?: (size: number) => void
+  quickGo?: (value: number | undefined) => void
+  buildOptionText?: (value: number | string) => string
+  showSizeChanger: boolean
+  sizeChangerRender?: SizeChangerRender
+}
+
+const Options = defineComponent<OptionsProps>(
+  (props) => {
     const defaultPageSizeOptions = [10, 20, 50, 100]
 
     const goInputText = ref('')
@@ -17,7 +31,10 @@ const Options = defineComponent({
     })
 
     const handleChange = (e: Event) => {
-      goInputText.value = (e.target as HTMLInputElement).value
+      const value = (e.target as HTMLInputElement).value
+      if (/^\d*$/.test(value)) {
+        goInputText.value = value
+      }
     }
 
     const handleBlur = (e: FocusEvent) => {
@@ -57,13 +74,13 @@ const Options = defineComponent({
     const getPageSizeOptions = () => {
       if (
         getterPageSizeOptions.value.some(
-          option => option.toString() === props.pageSize!.toString(),
+          option => option.toString() === props.pageSize.toString(),
         )
       ) {
         return getterPageSizeOptions.value
       }
       return getterPageSizeOptions.value
-        .concat([props.pageSize!])
+        .concat([props.pageSize])
         .sort((a, b) => {
           const numberA = Number.isNaN(Number(a)) ? 0 : Number(a)
           const numberB = Number.isNaN(Number(b)) ? 0 : Number(b)
@@ -88,7 +105,7 @@ const Options = defineComponent({
       const mergeBuildOptionText
         = typeof buildOptionText === 'function'
           ? buildOptionText
-          : (value: string | number) => `${value} ${locale!.items_per_page}`
+          : (value: string | number) => `${value} ${locale.items_per_page}`
 
       const prefixCls = `${rootPrefixCls}-options`
 
@@ -103,12 +120,12 @@ const Options = defineComponent({
       // =========== size Changer ===========
       if (showSizeChanger && sizeChangerRender) {
         changeSelect = sizeChangerRender({
-          disabled,
-          'size': pageSize!,
+          'disabled': disabled as any,
+          'size': pageSize,
           'onSizeChange': (nextValue) => {
             changeSize?.(Number(nextValue))
           },
-          'aria-label': locale!.page_size!,
+          'aria-label': locale.page_size as any,
           'className': `${prefixCls}-size-changer`,
           'options': getPageSizeOptions().map(opt => ({
             label: mergeBuildOptionText(opt),
@@ -130,7 +147,7 @@ const Options = defineComponent({
                     disabled={disabled}
                     class={`${prefixCls}-quick-jumper-button`}
                   >
-                    {locale!.jump_to_confirm}
+                    {locale.jump_to_confirm}
                   </button>
                 )
               : (
@@ -142,7 +159,7 @@ const Options = defineComponent({
 
         goInput = (
           <div class={`${prefixCls}-quick-jumper`}>
-            {locale!.jump_to}
+            {locale.jump_to}
             <input
               disabled={disabled}
               type="text"
@@ -150,9 +167,9 @@ const Options = defineComponent({
               onChange={handleChange}
               onKeyup={go}
               onBlur={handleBlur}
-              aria-label={locale!.page}
+              aria-label={locale.page}
             />
-            {locale!.page}
+            {locale.page}
             {gotoButton}
           </div>
         )
@@ -166,6 +183,6 @@ const Options = defineComponent({
       )
     }
   },
-})
+)
 
 export default Options

@@ -7,6 +7,7 @@ import KeyCode from '@v-c/util/dist/KeyCode'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
 import { getAttrStyleAndClass } from '@v-c/util/dist/props-util'
 import { cloneElement } from '@v-c/util/dist/vnode'
+import warning from '@v-c/util/dist/warning'
 import {
   computed,
   defineComponent,
@@ -19,8 +20,6 @@ import {
 import zhCN from './locale/zh_CN'
 import Options from './Options.tsx'
 import Pager from './Pager'
-
-function noop() {}
 
 function isInteger(v: number) {
   const value = Number(v)
@@ -37,45 +36,60 @@ function calculatePage(p: number | undefined, pageSize: number, total: number) {
   return Math.floor((total - 1) / _pageSize) + 1
 }
 
-const defaultProps = {
+const paginationDefaults = {
   prefixCls: 'vc-pagination',
   selectPrefixCls: 'vc-select',
   defaultCurrent: 1,
   total: 0,
   defaultPageSize: 10,
-  onChange: noop,
   showPrevNextJumpers: true,
   showTitle: true,
-  onShowSizeChange: noop,
   locale: zhCN,
   totalBoundaryShowSizeChanger: 50,
-  itemRender: defaultItemRender,
-} as any
+} as const
 
-const Pagination = defineComponent<PaginationProps>({
-  name: 'VCPagination',
-  inheritAttrs: false,
-  setup(props = defaultProps, { attrs }) {
-    const paginationRef = ref()
-    const defaultPrefixCls = 'vc-pagination'
+const Pagination = defineComponent<PaginationProps>(
+  (props, { attrs }) => {
+    const paginationRef = ref<HTMLUListElement>()
+
+    const mergedPrefixCls = computed(() => props.prefixCls ?? paginationDefaults.prefixCls)
+    const mergedSelectPrefixCls = computed(
+      () => props.selectPrefixCls ?? paginationDefaults.selectPrefixCls,
+    )
+    const mergedLocale = computed(() => props.locale ?? paginationDefaults.locale)
+    const mergedTotal = computed(() => props.total ?? paginationDefaults.total)
+    const mergedShowPrevNextJumpers = computed(
+      () => props.showPrevNextJumpers ?? paginationDefaults.showPrevNextJumpers,
+    )
+    const mergedShowTitle = computed(
+      () => props.showTitle ?? paginationDefaults.showTitle,
+    )
+    const mergedTotalBoundaryShowSizeChanger = computed(
+      () =>
+        props.totalBoundaryShowSizeChanger
+        ?? paginationDefaults.totalBoundaryShowSizeChanger,
+    )
 
     const pageSizeProp = toRef(props, 'pageSize')
-    const [pageSize, setPageSize] = useMergedState(10, {
+    const [pageSize, setPageSize] = useMergedState(paginationDefaults.defaultPageSize, {
       value: pageSizeProp as Ref<number>,
-      defaultValue: props.defaultPageSize || 10,
+      defaultValue: props.defaultPageSize ?? paginationDefaults.defaultPageSize,
     })
 
     const currentProp = toRef(props, 'current')
     const allPages = computed(() =>
-      calculatePage(undefined, pageSize.value!, props.total!),
+      calculatePage(undefined, pageSize.value!, mergedTotal.value),
     )
-    const [current, setCurrent] = useMergedState(1, {
+    const [current, setCurrent] = useMergedState(paginationDefaults.defaultCurrent, {
       value: currentProp as Ref<number>,
-      defaultValue: props.defaultCurrent || 1,
+      defaultValue: props.defaultCurrent ?? paginationDefaults.defaultCurrent,
       postState: (c: number | undefined) =>
         Math.max(
           1,
-          Math.min(c!, calculatePage(undefined, pageSize.value!, props.total!)),
+          Math.min(
+            c ?? 1,
+            calculatePage(undefined, pageSize.value!, mergedTotal.value),
+          ),
         ),
     })
 
@@ -84,20 +98,19 @@ const Pagination = defineComponent<PaginationProps>({
       internalInputVal.value = current.value
     })
 
-    const calcPaginationCls = computed(() => {
-      const { prefixCls = defaultPrefixCls, align, simple, disabled } = props
-      return classNames(props.prefixCls, {
-        [`${prefixCls}-start`]: align === 'start',
-        [`${prefixCls}-center`]: align === 'center',
-        [`${prefixCls}-end`]: align === 'end',
-        [`${prefixCls}-simple`]: simple,
-        [`${prefixCls}-disabled`]: disabled,
+    if (process.env.NODE_ENV !== 'production') {
+      watchEffect(() => {
+        const hasCurrent = 'current' in props
+        warning(
+          hasCurrent ? !!props.onChange : true,
+          'You provided a `current` prop to a Pagination component without an `onChange` handler. This will render a read-only component.',
+        )
       })
-    })
+    }
 
     function getValidValue(e: any): number {
       const inputValue = e.target.value
-      const allPages = calculatePage(undefined, pageSize.value, props.total!)
+      const allPages = calculatePage(undefined, pageSize.value, mergedTotal.value)
       let value: number
       if (inputValue === '') {
         value = inputValue
@@ -118,17 +131,18 @@ const Pagination = defineComponent<PaginationProps>({
       return (
         isInteger(page)
         && page !== current.value
-        && isInteger(props.total!)
-        && props.total! > 0
+        && isInteger(mergedTotal.value)
+        && mergedTotal.value > 0
       )
     }
 
     function getItemIcon(icon: VueNode, label: string) {
+      const prefixCls = mergedPrefixCls.value
       let iconNode = icon || (
         <button
           type="button"
           aria-label={label}
-          class={`${props.prefixCls}-item-link`}
+          class={`${prefixCls}-item-link`}
         />
       )
       if (typeof icon === 'function') {
@@ -149,14 +163,14 @@ const Pagination = defineComponent<PaginationProps>({
     )
     const jumpNextPage = computed(() =>
       Math.min(
-        calculatePage(undefined, pageSize.value, props.total!),
+        calculatePage(undefined, pageSize.value, mergedTotal.value),
         current.value + (props.showLessItems ? 3 : 5),
       ),
     )
     const hasPrev = computed(() => current.value > 1)
     const hasNext = computed(
       () =>
-        current.value < calculatePage(undefined, pageSize.value, props.total!),
+        current.value < calculatePage(undefined, pageSize.value, mergedTotal.value),
     )
     const goButton = computed(
       () => props.showQuickJumper && (props.showQuickJumper as any).goButton,
@@ -167,7 +181,7 @@ const Pagination = defineComponent<PaginationProps>({
         const currentPage = calculatePage(
           undefined,
           pageSize.value,
-          props.total!,
+          mergedTotal.value,
         )
         let newPage = page
         if (page > currentPage) {
@@ -307,7 +321,7 @@ const Pagination = defineComponent<PaginationProps>({
     }
 
     function changePageSize(size: number) {
-      const newCurrent = calculatePage(size, pageSize.value, props.total!)
+      const newCurrent = calculatePage(size, pageSize.value, mergedTotal.value)
       const nextCurrent
         = current.value > newCurrent && newCurrent !== 0
           ? newCurrent
@@ -321,29 +335,38 @@ const Pagination = defineComponent<PaginationProps>({
     }
 
     const shouldDisplayQuickJumper = computed(() =>
-      props.total! > pageSize.value ? props.showQuickJumper : false,
+      mergedTotal.value > pageSize.value ? props.showQuickJumper : false,
     )
 
     return () => {
       const {
-        prefixCls = defaultPrefixCls,
-        selectPrefixCls = 'vc-select',
-        showTotal,
-        total = 0,
-        locale,
+        align,
         simple,
-        showTitle,
+        showTotal,
         showLessItems,
         jumpPrevIcon,
         jumpNextIcon,
         pageSizeOptions,
         disabled,
-        showPrevNextJumpers,
-        itemRender = defaultItemRender,
-        totalBoundaryShowSizeChanger = 50,
-        showSizeChanger = total > totalBoundaryShowSizeChanger,
+        classNames: paginationClassNames,
+        styles,
+        hideOnSinglePage,
         sizeChangerRender,
+        showSizeChanger: showSizeChangerProp,
+        totalBoundaryShowSizeChanger,
+        itemRender,
       } = props
+
+      const prefixCls = mergedPrefixCls.value
+      const selectPrefixCls = mergedSelectPrefixCls.value
+      const locale = mergedLocale.value
+      const total = mergedTotal.value
+      const showTitle = mergedShowTitle.value
+      const showPrevNextJumpers = mergedShowPrevNextJumpers.value
+      const totalBoundary
+        = totalBoundaryShowSizeChanger ?? mergedTotalBoundaryShowSizeChanger.value
+      const showSizeChanger = showSizeChangerProp ?? total > totalBoundary
+      const mergedItemRender = itemRender || defaultItemRender
 
       const { style, className } = getAttrStyleAndClass(attrs)
       const dataOrAriaAttributeProps = pickAttrs(attrs, {
@@ -351,18 +374,28 @@ const Pagination = defineComponent<PaginationProps>({
         data: true,
       })
 
+      // ================== Render ==================
+      // When hideOnSinglePage is true and there is only 1 page, hide the pager
+      if (hideOnSinglePage && total <= pageSize.value) {
+        return null
+      }
+
+      const itemClassName = paginationClassNames?.item
+      const itemStyle = styles?.item
+
       let prev = renderPrev(prevPage.value)
       if (prev) {
         const prevDisabled = !hasPrev.value || !allPages.value
         prev = (
           <li
-            title={props.showTitle ? locale?.prev_page : undefined}
+            title={showTitle ? locale?.prev_page : undefined}
             onClick={prevHandle}
             tabindex={prevDisabled ? undefined : 0}
             onKeydown={runIfEnterPrev}
-            class={classNames(`${prefixCls}-prev`, {
+            class={classNames(`${prefixCls}-prev`, itemClassName, {
               [`${prefixCls}-disabled`]: prevDisabled,
             })}
+            style={itemStyle}
             aria-disabled={prevDisabled}
           >
             {prev}
@@ -375,11 +408,11 @@ const Pagination = defineComponent<PaginationProps>({
         let nextDisabled: boolean, nextTabIndex: number | null
 
         if (simple) {
-          nextDisabled = !hasNext
-          nextTabIndex = hasPrev ? 0 : null
+          nextDisabled = !hasNext.value
+          nextTabIndex = hasPrev.value ? 0 : null
         }
         else {
-          nextDisabled = !hasNext || !allPages
+          nextDisabled = !hasNext.value || !allPages.value
           nextTabIndex = nextDisabled ? null : 0
         }
 
@@ -389,9 +422,10 @@ const Pagination = defineComponent<PaginationProps>({
             onClick={nextHandle}
             tabindex={nextTabIndex ?? undefined}
             onKeydown={runIfEnterNext}
-            class={classNames(`${prefixCls}-next`, {
+            class={classNames(`${prefixCls}-next`, itemClassName, {
               [`${prefixCls}-disabled`]: nextDisabled,
             })}
+            style={itemStyle}
             aria-disabled={nextDisabled}
           >
             {next}
@@ -424,32 +458,33 @@ const Pagination = defineComponent<PaginationProps>({
               </button>
             )
           }
-        }
-        else {
+          else {
+            gotoButton = (
+              <span onClick={handleGoTO} onKeyup={handleGoTO}>
+                {goButton.value}
+              </span>
+            )
+          }
+
           gotoButton = (
-            <span onClick={handleGoTO} onKeyup={handleGoTO}>
-              {goButton}
-            </span>
+            <li
+              title={
+                showTitle
+                  ? `${locale?.jump_to}${current.value}/${allPages.value}`
+                  : undefined
+              }
+              class={`${prefixCls}-simple-pager`}
+            >
+              {gotoButton}
+            </li>
           )
         }
-
-        gotoButton = (
-          <li
-            title={
-              showTitle
-                ? `${locale?.jump_to}${current.value}/${allPages.value}`
-                : undefined
-            }
-            class={`${prefixCls}-simple-pager`}
-          >
-            {gotoButton}
-          </li>
-        )
 
         simplePager = (
           <li
             title={showTitle ? `${current.value}/${allPages.value}` : undefined}
-            class={`${prefixCls}-simple-pager`}
+            class={classNames(`${prefixCls}-simple-pager`, itemClassName)}
+            style={itemStyle}
           >
             {isReadOnly
               ? (
@@ -458,7 +493,8 @@ const Pagination = defineComponent<PaginationProps>({
               : (
                   <input
                     type="text"
-                    value={internalInputVal}
+                    aria-label={locale?.jump_to}
+                    value={internalInputVal.value}
                     disabled={disabled}
                     onKeydown={handleKeyDown}
                     onKeyup={handleKeyUp}
@@ -468,19 +504,21 @@ const Pagination = defineComponent<PaginationProps>({
                   />
                 )}
             <span class={`${prefixCls}-slash`}>/</span>
-            {allPages}
+            {allPages.value}
           </li>
         )
       }
 
       // ====================== Normal ======================
-      const pagerProps = {
+      const pagerProps: any = {
         rootPrefixCls: prefixCls,
         onClick: handleChange,
-        onKeypress: runIfEnter,
+        onKeyPress: runIfEnter,
         showTitle,
-        itemRender,
+        itemRender: mergedItemRender,
         page: -1,
+        className: itemClassName,
+        style: itemStyle,
       }
 
       const pagerList: (VNode | null)[] = []
@@ -492,7 +530,7 @@ const Pagination = defineComponent<PaginationProps>({
               {...pagerProps}
               key="noPager"
               page={1}
-              class={`${prefixCls}-item-disabled`}
+              className={`${prefixCls}-item-disabled`}
             />,
           )
         }
@@ -512,12 +550,12 @@ const Pagination = defineComponent<PaginationProps>({
         const prevItemTitle = showLessItems ? locale?.prev_3 : locale?.prev_5
         const nextItemTitle = showLessItems ? locale?.next_3 : locale?.next_5
 
-        const jumpPrevContent = itemRender(
+        const jumpPrevContent = mergedItemRender(
           jumpPrevPage.value,
           'jump-prev',
           getItemIcon(jumpPrevIcon, 'prev page'),
         )
-        const jumpNextContent = itemRender(
+        const jumpNextContent = mergedItemRender(
           jumpNextPage.value,
           'jump-next',
           getItemIcon(jumpNextIcon, 'next page'),
@@ -626,10 +664,18 @@ const Pagination = defineComponent<PaginationProps>({
         }
       }
 
+      const cls = classNames(prefixCls, props.className, className, {
+        [`${prefixCls}-start`]: align === 'start',
+        [`${prefixCls}-center`]: align === 'center',
+        [`${prefixCls}-end`]: align === 'end',
+        [`${prefixCls}-simple`]: simple,
+        [`${prefixCls}-disabled`]: disabled,
+      })
+
       return (
         <ul
           ref={paginationRef}
-          class={[calcPaginationCls.value, className]}
+          class={cls}
           style={style}
           {...dataOrAriaAttributeProps}
         >
@@ -654,6 +700,7 @@ const Pagination = defineComponent<PaginationProps>({
       )
     }
   },
-})
+  { name: 'VCPagination', inheritAttrs: false },
+)
 
 export default Pagination
