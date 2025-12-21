@@ -1,4 +1,4 @@
-import type { Component, CSSProperties, InputHTMLAttributes } from 'vue'
+import type { Component, CSSProperties } from 'vue'
 
 export interface VcFile extends File {
   uid: string
@@ -51,8 +51,7 @@ export type CustomUploadRequestOption = (
   info: { defaultRequest: (option: UploadRequestOption) => { abort: () => void } | void },
 ) => void | { abort: () => void }
 
-export interface UploadProps
-  extends Omit<InputHTMLAttributes, 'onError' | 'onProgress' | 'accept'> {
+export interface UploadProps {
   name?: string
   style?: CSSProperties
   className?: string
