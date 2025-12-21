@@ -1,21 +1,23 @@
 <script setup lang="ts">
 import type { Dayjs } from 'dayjs'
-import dayjs from 'dayjs'
+// import dayjs from 'dayjs'
+import type { Moment } from 'moment'
+import moment from 'moment'
 import { ref } from 'vue'
-import dayjsGenerateConfig from '../src/generate/dayjs'
+import dayjsGenerateConfig from '../src/generate/moment'
 import Picker from '../src/index'
 import enUS from '../src/locale/en_US'
 import zhCN from '../src/locale/zh_CN'
 
-const defaultValue = dayjs('2019-11-28 01:02:03')
-const value = ref<Dayjs | null>(defaultValue)
+const defaultValue = moment('2019-11-28 01:02:03')
+const value = ref<Moment | null>(defaultValue)
 
-function onChange(val: Dayjs | null, dateString: string) {
+function onChange(val: Moment | null, dateString: string) {
   console.log('Change:', val, dateString)
   value.value = val
 }
 
-function onSelect(val: Dayjs) {
+function onSelect(val: Moment) {
   console.log('Select:', val)
 }
 
@@ -24,8 +26,8 @@ const sharedProps = {
   onSelect,
   onChange,
   presets: [
-    { label: 'Hello World!', value: dayjs() },
-    { label: 'Now', value: () => dayjs() },
+    { label: 'Hello World!', value: moment() },
+    { label: 'Now', value: () => moment() },
   ],
 }
 
@@ -72,10 +74,10 @@ const weekRef = ref()
           :default-picker-value="defaultValue.clone().subtract(1, 'month')"
           :show-time="{
             showSecond: false,
-            defaultValue: dayjs('11:28:39', 'HH:mm:ss'),
+            defaultValue: moment('11:28:39', 'HH:mm:ss'),
           }"
           show-today
-          :disabled-time="(date: Dayjs) => {
+          :disabled-time="(date: Moment) => {
             if (date && date.isSame(defaultValue, 'date')) {
               return {
                 disabledHours: () => [1, 3, 5, 7, 9, 11],

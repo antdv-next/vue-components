@@ -186,7 +186,7 @@ export default defineComponent({
     const selectorRef = usePickerRef(expose)
 
     // ======================= Semantic =======================
-    const [mergedClassNames, mergedStyles] = useSemantic(classNames, styles)
+    const [mergedClassNames, mergedStyles] = useSemantic(classNames, styles).value
 
     // ========================= Open =========================
     const [mergedOpen, setMergeOpen] = useOpen(open, defaultOpen, disabled, onOpenChange.value)

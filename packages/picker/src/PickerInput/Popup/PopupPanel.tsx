@@ -4,7 +4,7 @@ import type { PickerPanelProps } from '../../PickerPanel'
 import type { PickerHackContextProps } from '../../PickerPanel/context'
 import type { FooterProps } from './Footer'
 import { computed, defineComponent, toRef, toRefs } from 'vue'
-import createPickerPanel from '../../PickerPanel'
+import PickerPanel from '../../PickerPanel'
 import { providePickerHackContext } from '../../PickerPanel/context'
 import { usePickerContext } from '../context'
 import { offsetPanelDate } from '../hooks/useRangePickerValue'
@@ -101,7 +101,6 @@ export default defineComponent(<DateType extends object = any>(props) => {
     // ======================== Render ========================
     const { prefixCls } = ctx.value
     // Multiple
-    const PickerPanel = createPickerPanel<DateType>()
     if (multiplePanel?.value) {
       return (
         <div class={`${prefixCls}-panels`}>

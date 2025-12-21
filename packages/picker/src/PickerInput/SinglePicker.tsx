@@ -237,7 +237,7 @@ export default defineComponent({
     const toggleDates = useToggleDates(generateConfig, locale, internalPicker)
 
     // ======================= Semantic =======================
-    const [mergedClassNames, mergedStyles] = useSemantic(classNames, styles)
+    const semanticCtx = useSemantic(classNames, styles)
 
     // ========================= Open =========================
     const [mergedOpen, triggerOpen] = useOpen(open, defaultOpen, computed(() => [disabled.value]), onOpenChange.value)
@@ -566,15 +566,18 @@ export default defineComponent({
     }
 
     // ======================= Context ========================
-    const context = computed(() => ({
-      prefixCls: prefixCls.value,
-      locale: locale.value,
-      generateConfig: generateConfig.value,
-      button: components.value.button,
-      input: components.value.input,
-      classNames: mergedClassNames.value,
-      styles: mergedStyles.value,
-    }))
+    const context = computed(() => {
+      const [mergedClassNames, mergedStyles] = semanticCtx.value
+      return {
+        prefixCls: prefixCls.value,
+        locale: locale.value,
+        generateConfig: generateConfig.value,
+        button: components.value.button,
+        input: components.value.input,
+        classNames: mergedClassNames,
+        styles: mergedStyles,
+      }
+    })
 
     providePickerContext(context)
 
@@ -605,6 +608,7 @@ export default defineComponent({
     }, { flush: 'post' })
 
     return () => {
+      const [mergedClassNames, mergedStyles] = semanticCtx.value
       // >>> Render
       const panel = (
         <Popup
@@ -656,8 +660,8 @@ export default defineComponent({
         <PickerTrigger
           {...pickTriggerProps(fp.value)}
           popupElement={panel}
-          popupStyle={mergedStyles.value.popup?.root}
-          popupClassName={clsx(rootClassName.value, mergedClassNames.value.popup?.root)}
+          popupStyle={mergedStyles.value?.popup?.root}
+          popupClassName={clsx(rootClassName.value, mergedClassNames.value?.popup?.root)}
           // Visible
           visible={mergedOpen.value}
           onClose={onPopupClose}
@@ -668,8 +672,8 @@ export default defineComponent({
             // Ref
             // ref={selectorRef} // Selector ref is handled via expose in usePickerRef
             // Style
-            class={clsx(fp.value.className, rootClassName.value, mergedClassNames.value.root)}
-            style={{ ...mergedStyles.value.root, ...fp.value.style }}
+            class={clsx(fp.value.className, rootClassName.value, mergedClassNames.root)}
+            style={{ ...mergedStyles.root, ...fp.value.style }}
             // Icon
             suffixIcon={suffixIcon.value}
             removeIcon={removeIcon.value}
