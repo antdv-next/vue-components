@@ -54,6 +54,7 @@
     }
   },
   "dependencies": {
+    "@v-c/overflow": "workspace:^",
     "@v-c/util": "workspace:^"
   },
   "devDependencies": {
