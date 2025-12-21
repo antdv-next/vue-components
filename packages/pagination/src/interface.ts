@@ -1,11 +1,7 @@
 import type { VueNode } from '@v-c/util/dist/type'
 import type {
-  Component,
   CSSProperties,
-  ExtractPropTypes,
   PropType,
-  VNode,
-  VNodeChild,
 } from 'vue'
 
 export interface PaginationLocale {
@@ -25,132 +21,54 @@ export interface PaginationLocale {
   page_size?: string
 }
 
-export type ItemRender = (
-  page: number,
-  type: 'page' | 'prev' | 'next' | 'jump-prev' | 'jump-next',
-  element: VNode,
-) => VNodeChild
+type SemanticName = 'item'
+export interface PaginationData {
+  styles?: Partial<Record<SemanticName, CSSProperties>>
+  classNames?: Partial<Record<SemanticName, string>>
+  className: string
+  selectPrefixCls: string
+  prefixCls: string
+  pageSizeOptions: number[]
 
-export function paginationProps() {
-  return {
-    disabled: {
-      type: Boolean,
-      default: undefined,
-    },
-    prefixCls: {
-      type: String,
-      default: 'vc-pagination',
-    },
-    selectPrefixCls: {
-      type: String,
-      default: 'vc-select',
-    },
-    pageSizeOptions: {
-      type: Array as PropType<number[]>,
-      default: undefined,
-    },
-    totalBoundaryShowSizeChanger: {
-      type: Number,
-      default: 50,
-    },
-    current: Number,
-    pageSize: Number,
-    defaultCurrent: {
-      type: Number,
-      default: 1,
-    },
-    defaultPageSize: {
-      type: Number,
-      default: 10,
-    },
-    total: {
-      type: Number,
-      default: 0,
-    },
-    hideOnSinglePage: {
-      type: Boolean,
-      default: false,
-    },
-    align: {
-      type: String as PropType<'start' | 'center' | 'end'>,
-      default: 'start',
-    },
-    style: {
-      type: Object as PropType<CSSProperties>,
-      default: undefined,
-    },
-    className: {
-      type: String,
-      default: undefined,
-    },
-    showSizeChanger: {
-      type: Boolean,
-      default: undefined,
-    },
-    showLessItems: {
-      type: Boolean,
-      default: false,
-    },
-    selectComponentClass: Object as PropType<Component>,
-    showTotal: Function as PropType<
-      (total: number, range: [number, number]) => VNodeChild
-    >,
-    showTitle: {
-      type: Boolean,
-      default: true,
-    },
-    simple: {
-      type: [Boolean, Object] as PropType<boolean | { readOnly?: boolean }>,
-      default: undefined,
-    },
-    itemRender: {
-      type: Function as PropType<ItemRender>,
-      default: undefined,
-    },
-    prevIcon: {
-      type: Object as PropType<VNode | Component>,
-      default: undefined,
-    },
-    nextIcon: {
-      type: Object as PropType<VNode | Component>,
-      default: undefined,
-    },
-    jumpPrevIcon: {
-      type: Object as PropType<VNode | Component>,
-      default: undefined,
-    },
-    jumpNextIcon: {
-      type: Object as PropType<VNode | Component>,
-      default: undefined,
-    },
-    showPrevNextJumpers: {
-      type: Boolean,
-      default: true,
-    },
-    onChange: {
-      type: Function as PropType<(page: number, pageSize: number) => void>,
-      default: undefined,
-    },
-    locale: {
-      type: Object as PropType<PaginationLocale>,
-      default: undefined,
-    },
-    showQuickJumper: {
-      type: [Boolean, Object] as PropType<boolean | { goButton?: VNode }>,
-      default: undefined,
-    },
-    onShowSizeChange: {
-      type: Function as PropType<(current: number, pageSize: number) => void>,
-      default: undefined,
-    },
-    sizeChangerRender: {
-      type: Function as PropType<SizeChangerRender>,
-    },
-  }
+  current: number
+  defaultCurrent: number
+  total: number
+  totalBoundaryShowSizeChanger?: number
+  pageSize: number
+  defaultPageSize: number
+
+  hideOnSinglePage: boolean
+  align: 'start' | 'center' | 'end'
+  showSizeChanger: boolean
+  sizeChangerRender?: SizeChangerRender
+  showLessItems: boolean
+  showPrevNextJumpers: boolean
+  showQuickJumper: boolean | object
+  showTitle: boolean
+  simple: boolean | { readOnly?: boolean }
+  disabled: boolean
+
+  locale: PaginationLocale
+
+  prevIcon: VueNode
+  nextIcon: VueNode
+  jumpPrevIcon: VueNode
+  jumpNextIcon: VueNode
 }
 
-export type PaginationProps = ExtractPropTypes<ReturnType<typeof paginationProps>>
-
+export interface PaginationProps
+  extends Partial<PaginationData> {
+  onChange?: (page: number, pageSize: number) => void
+  onShowSizeChange?: (current: number, size: number) => void
+  itemRender?: (
+    page: number,
+    type: 'page' | 'prev' | 'next' | 'jump-prev' | 'jump-next',
+    element: VueNode,
+  ) => VueNode
+  showTotal?: (total: number, range: [number, number]) => VueNode
+  // WAI-ARIA
+  role?: string | undefined
+}
 export type SizeChangerRender = (info: {
   'disabled': boolean
   'size': number

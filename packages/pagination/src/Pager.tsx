@@ -1,41 +1,32 @@
-import type { PropType } from 'vue'
-import type { ItemRender } from './interface'
+import type { PaginationLocale, SizeChangerRender } from './interface'
 import { classNames } from '@v-c/util'
 import { defineComponent } from 'vue'
 
 type OnClick = (page: number) => void
 
-const Pager = defineComponent({
+interface OptionsProps {
+  disabled?: boolean
+  locale: PaginationLocale
+  rootPrefixCls: string
+  selectPrefixCls?: string
+  pageSize: number
+  pageSizeOptions?: number[]
+  goButton?: boolean | string
+  changeSize?: (size: number) => void
+  quickGo?: (value: number) => void
+  buildOptionText?: (value: number | string) => string
+  showSizeChanger: boolean
+  sizeChangerRender?: SizeChangerRender
+}
+const defaultPageSizeOptions = [10, 20, 50, 100]
+
+const defaults = {
+  pageSizeOptions: defaultPageSizeOptions,
+} as any
+
+const Pager = defineComponent<OptionsProps>({
   inheritAttrs: false,
-  props: {
-    itemRender: {
-      type: Function as PropType<ItemRender>,
-    },
-    rootPrefixCls: {
-      type: String,
-    },
-    page: {
-      type: Number,
-    },
-    active: {
-      type: Boolean,
-    },
-    className: {
-      type: [String, Array],
-    },
-    showTitle: {
-      type: Boolean,
-    },
-    onClick: {
-      type: Function as PropType<OnClick>,
-    },
-    onKeyPress: {
-      type: Function as PropType<
-        (e: KeyboardEvent, onClick: OnClick, page: number) => void
-      >,
-    },
-  },
-  setup(props) {
+  setup(props = defaults) {
     const handleClick = () => {
       props.onClick?.(props.page!)
     }
