@@ -1,4 +1,3 @@
-import type { ResizeObserverProps } from '@v-c/resize-observer'
 import type { VueNode } from '@v-c/util/dist/type'
 import type { PropType } from 'vue'
 import type { SelectorProps } from '../../interface'
