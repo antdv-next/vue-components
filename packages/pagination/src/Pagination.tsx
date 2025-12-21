@@ -259,8 +259,12 @@ const Pagination = defineComponent<PaginationProps>(
         'prev',
         getItemIcon(props.prevIcon, 'prev page'),
       )
+      const nextProps: Record<string, any> = {}
+      if (!hasPrev.value) {
+        nextProps.disabled = true
+      }
       return isVNode(prevButton)
-        ? cloneElement(prevButton, { disabled: !hasPrev.value })
+        ? cloneElement(prevButton, nextProps)
         : prevButton
     }
 
@@ -271,8 +275,12 @@ const Pagination = defineComponent<PaginationProps>(
         'next',
         getItemIcon(props.nextIcon, 'next page'),
       )
+      const nextProps: Record<string, any> = {}
+      if (!hasNext.value) {
+        nextProps.disabled = true
+      }
       return isVNode(nextButton)
-        ? cloneElement(nextButton, { disabled: !hasNext.value })
+        ? cloneElement(nextButton, nextProps)
         : nextButton
     }
 
