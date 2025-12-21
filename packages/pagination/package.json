@@ -8,6 +8,26 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./dist/locale/*.js": {
+        "import": "./dist/locale/*.js",
+        "require": "./dist/locale/*.cjs",
+        "types": "./dist/locale/*.d.ts"
+    },
+    "./dist/locale/*": {
+      "import": "./dist/locale/*.js",
+      "require": "./dist/locale/*.cjs",
+      "types": "./dist/locale/*.d.ts"
+    },
+    "./locale/*.js": {
+        "import": "./dist/locale/*.js",
+        "require": "./dist/locale/*.cjs",
+        "types": "./dist/locale/*.d.ts"
+    },
+    "./locale/*": {
+      "import": "./dist/locale/*.js",
+      "require": "./dist/locale/*.cjs",
+      "types": "./dist/locale/*.d.ts"
+    },
     "./dist/*": "./dist/*",
     "./package.json": "./package.json"
   },
