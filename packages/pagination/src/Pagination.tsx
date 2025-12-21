@@ -100,7 +100,7 @@ const Pagination = defineComponent<PaginationProps>(
 
     if (process.env.NODE_ENV !== 'production') {
       watchEffect(() => {
-        const hasCurrent = 'current' in props
+        const hasCurrent = props?.current !== undefined
         warning(
           hasCurrent ? !!props.onChange : true,
           'You provided a `current` prop to a Pagination component without an `onChange` handler. This will render a read-only component.',
@@ -479,7 +479,6 @@ const Pagination = defineComponent<PaginationProps>(
             </li>
           )
         }
-
         simplePager = (
           <li
             title={showTitle ? `${current.value}/${allPages.value}` : undefined}

@@ -1,7 +1,7 @@
 import type { VueNode } from '@v-c/util/dist/type'
 import type { PaginationLocale, SizeChangerRender } from './interface'
 import KeyCode from '@v-c/util/dist/KeyCode'
-import { computed, defineComponent, ref } from 'vue'
+import { computed, defineComponent, nextTick, ref } from 'vue'
 
 interface OptionsProps {
   disabled?: boolean
@@ -10,7 +10,7 @@ interface OptionsProps {
   selectPrefixCls?: string
   pageSize: number
   pageSizeOptions?: number[]
-  goButton?: boolean | string
+  goButton?: boolean | string | any
   changeSize?: (size: number) => void
   quickGo?: (value: number | undefined) => void
   buildOptionText?: (value: number | string) => string
@@ -41,9 +41,9 @@ const Options = defineComponent<OptionsProps>(
       if (props.goButton || goInputText.value === '') {
         return
       }
-
-      goInputText.value = ''
-
+      nextTick(() => {
+        goInputText.value = ''
+      })
       const relTarget = e.relatedTarget as HTMLInputElement | null
 
       if (
@@ -66,7 +66,9 @@ const Options = defineComponent<OptionsProps>(
         return
       }
       if (e.keyCode === KeyCode.ENTER || e.type === 'click') {
-        goInputText.value = ''
+        nextTick(() => {
+          goInputText.value = ''
+        })
         props.quickGo?.(getValidValue.value)
       }
     }
@@ -163,8 +165,8 @@ const Options = defineComponent<OptionsProps>(
             <input
               disabled={disabled}
               type="text"
-              value={goInputText}
-              onChange={handleChange}
+              value={goInputText.value}
+              onInput={handleChange}
               onKeyup={go}
               onBlur={handleBlur}
               aria-label={locale.page}
