@@ -217,6 +217,27 @@ importers:
         specifier: ^3.0.0
         version: 3.5.13(typescript@5.9.3)
 
+  packages/mentions:
+    dependencies:
+      '@v-c/input':
+        specifier: workspace:^
+        version: link:../input
+      '@v-c/menu':
+        specifier: workspace:^
+        version: link:../menu
+      '@v-c/textarea':
+        specifier: workspace:^
+        version: link:../textarea
+      '@v-c/trigger':
+        specifier: workspace:^
+        version: link:../trigger
+      '@v-c/util':
+        specifier: workspace:^
+        version: link:../util
+      vue:
+        specifier: ^3.0.0
+        version: 3.5.25(typescript@5.9.3)
+
   packages/menu:
     dependencies:
       '@v-c/overflow':
