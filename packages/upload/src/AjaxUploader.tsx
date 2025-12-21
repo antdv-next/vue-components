@@ -386,7 +386,7 @@ const AjaxUploader = defineComponent<UploadProps>(
       } = {
         ...props,
         ...attrs,
-      }
+      } as any
       const acceptFormat = typeof accept === 'string' ? accept : accept?.format
       // 处理自定义组件
       const Tag = component as any
