@@ -1,8 +1,8 @@
 import type { RefOptionListProps } from '@v-c/select'
-import type { DataEntity, FlattenNode, ScrollTo } from '@v-c/tree'
+import type { DataEntity, TreeRef } from '@v-c/tree'
 import type { DataNode, Key } from './interface'
 import { useBaseProps } from '@v-c/select'
-import Tree, { flattenTreeData, UnstableContextKey } from '@v-c/tree'
+import Tree, { UnstableContextKey } from '@v-c/tree'
 import { KeyCode } from '@v-c/util'
 import { computed, defineComponent, provide, ref, shallowRef, watch } from 'vue'
 import { useLegacyContext } from './LegacyContext'
@@ -34,7 +34,7 @@ const OptionList = defineComponent({
     const context = useTreeSelectContext()
     const legacyContext = useLegacyContext()
 
-    const treeRef = ref<{ scrollTo: ScrollTo } | null>(null)
+    const treeRef = ref<TreeRef | null>(null)
 
     const memoTreeData = computed(() => context.value?.treeData || [])
 
@@ -249,82 +249,16 @@ const OptionList = defineComponent({
       { immediate: true },
     )
 
-    const flattenNodes = computed<FlattenNode<any>[]>(() =>
-      flattenTreeData(memoTreeData.value as any, mergedExpandedKeys.value || [], context.value?.fieldNames as any),
-    )
-
-    const activeItem = computed(() => {
-      if (activeKey.value === null) {
-        return null
-      }
-      return flattenNodes.value.find(({ key }) => key === activeKey.value) || null
-    })
-
-    function offsetActiveKey(offset: number) {
-      const nodes = flattenNodes.value
-      if (!nodes.length) {
-        return
-      }
-
-      const currentActiveKey = activeKey.value
-
-      let index = nodes.findIndex(({ key }) => key === currentActiveKey)
-      if (index === -1 && offset < 0) {
-        index = nodes.length
-      }
-
-      index = (index + offset + nodes.length) % nodes.length
-      const newActiveKey = nodes[index].key
-      activeKey.value = newActiveKey
-      treeRef.value?.scrollTo({ key: newActiveKey, offset: context.value?.listItemScrollOffset || 0 })
-    }
-
     // ========================= Keyboard =========================
     const onKeyDown = (event: KeyboardEvent) => {
       const which = (event as any).which || (event as any).keyCode
-      const expandedKeysSet = new Set(mergedExpandedKeys.value || [])
-      console.log(which, 'which')
       switch (which) {
         case KeyCode.UP:
-          offsetActiveKey(-1)
-          event.preventDefault()
-          return
         case KeyCode.DOWN:
-          offsetActiveKey(1)
-          event.preventDefault()
-          return
         case KeyCode.LEFT:
-        case KeyCode.RIGHT: {
-          const item = activeItem.value
-          if (!item) {
-            return
-          }
-
-          const children = (item.data as any)?.[context.value?.fieldNames.children as any] || []
-          const expandable = (item.data as any)?.isLeaf === false || !!children.length
-
-          if (which === KeyCode.LEFT) {
-            if (expandable && expandedKeysSet.has(activeKey.value!)) {
-              onInternalExpand((mergedExpandedKeys.value || []).filter(k => k !== activeKey.value))
-            }
-            else if (item.parent) {
-              activeKey.value = item.parent.key
-              treeRef.value?.scrollTo({ key: item.parent.key, offset: context.value?.listItemScrollOffset || 0 })
-            }
-            event.preventDefault()
-          }
-          else if (which === KeyCode.RIGHT) {
-            if (expandable && !expandedKeysSet.has(activeKey.value!)) {
-              onInternalExpand(Array.from(new Set([...(mergedExpandedKeys.value || []), activeKey.value!])))
-            }
-            else if (item.children && item.children.length) {
-              activeKey.value = item.children[0].key
-              treeRef.value?.scrollTo({ key: item.children[0].key, offset: context.value?.listItemScrollOffset || 0 })
-            }
-            event.preventDefault()
-          }
-          return
-        }
+        case KeyCode.RIGHT:
+          treeRef.value?.onKeyDown(event)
+          break
         case KeyCode.ENTER: {
           if (activeEntity.value) {
             const isNodeDisabled = nodeDisabled(activeEntity.value.node as any)
