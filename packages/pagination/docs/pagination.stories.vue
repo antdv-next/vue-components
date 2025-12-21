@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import type { ItemRender } from '../src/interface'
+import type { PaginationProps } from '../src'
 import { computed, h, ref } from 'vue'
 import Pagination from '../src/index'
 import '../assets/index.less'
 
+type ItemRender = PaginationProps['itemRender']
 // controlled
 const current = ref(1)
 function handleChange(page: number) {
