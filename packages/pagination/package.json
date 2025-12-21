@@ -1,7 +1,7 @@
 {
   "name": "@v-c/pagination",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -11,9 +11,20 @@
     "./dist/*": "./dist/*",
     "./package.json": "./package.json"
   },
-  "main": "dist/index.js",
+  "main": "./dist/index.js",
+  "files": [
+    "dist",
+    "package.json"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
-    "build": "vite build"
+    "build": "vite build",
+    "test": "vitest",
+    "prepublish": "pnpm build",
+    "patch": "bumpp --release patch",
+    "bump": "bumpp"
   },
   "peerDependencies": {
     "vue": "^3.0.0"
