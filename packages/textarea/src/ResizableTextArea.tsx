@@ -148,6 +148,7 @@ const ResizableTextArea = defineComponent<
         onResize,
         prefixCls,
         disabled,
+        readOnly,
       } = props
       const { style, restAttrs, className } = getAttrStyleAndClass(attrs, {
         omits: ['onKeydown'],
@@ -188,6 +189,7 @@ const ResizableTextArea = defineComponent<
               'onResize',
               'onChange',
             ]) as any}
+            readonly={readOnly}
             ref={textareaRef}
             style={mergedStyle}
             class={clsx(
