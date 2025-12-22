@@ -1,4 +1,4 @@
-import type { Ref } from 'vue'
+import type { ComputedRef, Ref } from 'vue'
 import type { GenerateConfig } from '../../generate'
 import type {
   PanelMode,
@@ -14,7 +14,7 @@ export default function useInvalidate<DateType extends object = any>(
   generateConfig: Ref<GenerateConfig<DateType>>,
   picker: Ref<PanelMode>,
   disabledDate: Ref<SharedPickerProps<DateType>['disabledDate'] | undefined>,
-  showTime: Ref<SharedTimeProps<DateType> | RangeTimeProps<DateType> | undefined>,
+  showTime: Ref<SharedTimeProps<DateType> | RangeTimeProps | null> | ComputedRef<SharedTimeProps<DateType> | RangeTimeProps | null>,
 ) {
   // Check disabled date
   const isInvalidate = (date: DateType, info?: { from?: DateType, activeIndex: number }) => {

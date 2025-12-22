@@ -201,7 +201,7 @@ export default defineComponent({
     const propFormat = computed(() => timePropsInfo.value[3])
     const timeProps = computed(() => timePropsInfo.value[0])
 
-    const filledLocale = useLocale(props.locale!, localeTimeProps)
+    const filledLocale = useLocale(computed(() => props.locale!), localeTimeProps)
 
     const internalPicker = computed(() => props.picker === 'date' && props.showTime ? 'datetime' : props.picker)
 

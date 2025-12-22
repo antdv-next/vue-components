@@ -1,4 +1,4 @@
-import type { Ref } from 'vue'
+import type { ComputedRef, Ref } from 'vue'
 import type { GenerateConfig } from '../../generate'
 import type { BaseInfo, FormatType, Locale } from '../../interface'
 import { computed, ref, watch } from 'vue'
@@ -17,6 +17,8 @@ function useUtil<MergedValueType extends object[], DateType extends MergedValueT
 ) {
   const getDateTexts = (dates: MergedValueType) => {
     return dates.map(date =>
+      // eslint-disable-next-line ts/ban-ts-comment
+      // @ts-expect-error
       formatValue(date, { generateConfig: generateConfig.value, locale: locale.value, format: formatList.value[0] }),
     ) as any as [string, string]
   }
@@ -29,6 +31,8 @@ function useUtil<MergedValueType extends object[], DateType extends MergedValueT
       const prev = source[i] || null
       const next = target[i] || null
 
+      // eslint-disable-next-line ts/ban-ts-comment
+      // @ts-expect-error
       if (prev !== next && !isSameTimestamp(generateConfig.value, prev, next)) {
         diffIndex = i
         break
@@ -143,14 +147,14 @@ export function useInnerValue<ValueType extends DateType[], DateType extends obj
 }
 
 export default function useRangeValue<ValueType extends DateType[], DateType extends object = any>(
-  info: {
-    generateConfig: Ref<GenerateConfig<DateType>>
-    locale: Ref<Locale>
-    picker: Ref<string>
-    allowEmpty: Ref<boolean[]>
-    order: Ref<boolean>
+  info: ComputedRef<{
+    generateConfig: GenerateConfig<DateType>
+    locale: Locale
+    picker: string
+    allowEmpty: boolean[]
+    order: boolean
     onChange?: (dates: ValueType | null, dateStrings: [string, string] | null) => void
-  },
+  }>,
   mergedValue: Ref<ValueType>,
   setInnerValue: (nextValue: ValueType) => void,
   getCalendarValue: () => ValueType,
@@ -161,19 +165,10 @@ export default function useRangeValue<ValueType extends DateType[], DateType ext
   open: Ref<boolean>,
   isInvalidateDate: (date: DateType, info?: { from?: DateType, activeIndex: number }) => boolean,
 ) {
-  const {
-    generateConfig,
-    locale,
-    picker,
-    onChange,
-    allowEmpty,
-    order,
-  } = info
-
-  const orderOnChange = computed(() => (disabled.value.some(d => d) ? false : order.value))
+  const orderOnChange = computed(() => (disabled.value.some(d => d) ? false : info.value.order))
 
   // ============================= Util =============================
-  const [getDateTexts, isSameDates] = useUtil<ValueType>(generateConfig, locale, formatList)
+  const [getDateTexts, isSameDates] = useUtil<ValueType>(computed(() => info.value.generateConfig), computed(() => info.value.locale), formatList)
 
   // ============================ Values ============================
   // Used for trigger `onChange` event.
@@ -188,6 +183,15 @@ export default function useRangeValue<ValueType extends DateType[], DateType ext
 
   // ============================ Submit ============================
   const triggerSubmit = (nextValue?: ValueType) => {
+    const {
+      generateConfig,
+      locale,
+      picker,
+      onChange,
+      allowEmpty,
+      order,
+    } = info.value
+
     const isNullValue = nextValue === null
 
     let clone = [...(nextValue || submitValue.value)] as ValueType
@@ -198,6 +202,8 @@ export default function useRangeValue<ValueType extends DateType[], DateType ext
 
       for (let i = 0; i < maxLen; i += 1) {
         if (!disabled.value[i]) {
+          // eslint-disable-next-line ts/ban-ts-comment
+          // @ts-expect-error
           clone[i] = null
         }
       }
@@ -205,7 +211,7 @@ export default function useRangeValue<ValueType extends DateType[], DateType ext
 
     // Only when exist value to sort
     if (orderOnChange.value && clone[0] && clone[1]) {
-      clone = orderDates(clone, generateConfig.value)
+      clone = orderDates(clone, generateConfig)
     }
 
     // Sync `calendarValue`
@@ -218,21 +224,21 @@ export default function useRangeValue<ValueType extends DateType[], DateType ext
     const startEmpty = !start
     const endEmpty = !end
 
-    const validateEmptyDateRange = allowEmpty.value
+    const validateEmptyDateRange = allowEmpty
       ? (
           // Validate empty start
-          (!startEmpty || allowEmpty.value[0])
+          (!startEmpty || allowEmpty[0])
           // Validate empty end
-          && (!endEmpty || allowEmpty.value[1])
+          && (!endEmpty || allowEmpty[1])
         )
       : true
 
     // >>> Order
-    const validateOrder = !order.value
+    const validateOrder = !order
       || startEmpty
       || endEmpty
-      || isSame(generateConfig.value, locale.value, start, end, picker.value as any)
-      || generateConfig.value.isAfter(end, start)
+      || isSame(generateConfig, locale, start, end, picker as any)
+      || generateConfig.isAfter(end, start)
 
     // >>> Invalid
     const validateDates

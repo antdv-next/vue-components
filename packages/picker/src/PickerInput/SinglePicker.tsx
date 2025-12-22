@@ -1,4 +1,11 @@
-import type { BaseInfo, PanelMode, SelectorProps, SharedPickerProps, SharedTimeProps, ValueDate } from '../interface'
+import type {
+  BaseInfo,
+  PanelMode,
+  SelectorProps,
+  SharedPickerProps,
+  SharedTimeProps,
+  ValueDate,
+} from '../interface'
 import { clsx } from '@v-c/util'
 import omit from '@v-c/util/dist/omit'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
@@ -24,8 +31,9 @@ import SingleSelector from './Selector/SingleSelector'
 
 // TODO: isInvalidateDate with showTime.disabledTime should not provide `range` prop
 
-export interface BasePickerProps<DateType extends object = any>
-  extends SharedPickerProps<DateType> {
+export interface BasePickerProps<
+  DateType extends object = any,
+> extends SharedPickerProps<DateType> {
   // Structure
   id?: string
 
@@ -38,7 +46,10 @@ export interface BasePickerProps<DateType extends object = any>
   // Value
   value?: DateType | DateType[] | null
   defaultValue?: DateType | DateType[]
-  onChange?: (date: DateType | DateType[], dateString: string | string[]) => void
+  onChange?: (
+    date: DateType | DateType[],
+    dateString: string | string[],
+  ) => void
   onCalendarChange?: (
     date: DateType | DateType[],
     dateString: string | string[],
@@ -88,7 +99,8 @@ export interface BasePickerProps<DateType extends object = any>
 }
 
 export interface PickerProps<DateType extends object = any>
-  extends BasePickerProps<DateType>,
+  extends
+  BasePickerProps<DateType>,
   Omit<SharedTimeProps<DateType>, 'format' | 'defaultValue'> {}
 
 export default defineComponent({
@@ -168,8 +180,14 @@ export default defineComponent({
   },
   setup(props, { expose, attrs }) {
     // ========================= Prop =========================
-    const [filledProps, internalPicker, complexPicker, formatList, maskFormat, isInvalidateDate]
-      = useFilledProps(props as any)
+    const [
+      filledProps,
+      internalPicker,
+      complexPicker,
+      formatList,
+      maskFormat,
+      isInvalidateDate,
+    ] = useFilledProps(props as any)
 
     // Destructure filledProps using toRefs to keep reactivity?
     // filledProps is a ComputedRef. We can access .value.
@@ -240,16 +258,29 @@ export default defineComponent({
     const semanticCtx = useSemantic(classNames, styles)
 
     // ========================= Open =========================
-    const [mergedOpen, triggerOpen] = useOpen(open, defaultOpen, computed(() => [disabled.value]), onOpenChange.value)
+    const [mergedOpen, triggerOpen] = useOpen(
+      open,
+      defaultOpen,
+      computed(() => [disabled.value]),
+      onOpenChange.value,
+    )
 
     // ======================= Calendar =======================
-    const onInternalCalendarChange = (dates: any[], dateStrings: string[], info: BaseInfo) => {
+    const onInternalCalendarChange = (
+      dates: any[],
+      dateStrings: string[],
+      info: BaseInfo,
+    ) => {
       if (onCalendarChange.value) {
         const filteredInfo = {
           ...info,
         }
         delete filteredInfo.range
-        onCalendarChange.value(pickerParam(dates), pickerParam(dateStrings), filteredInfo)
+        onCalendarChange.value(
+          pickerParam(dates),
+          pickerParam(dateStrings),
+          filteredInfo,
+        )
       }
     }
 
@@ -258,24 +289,31 @@ export default defineComponent({
     }
 
     // ======================== Values ========================
-    const [mergedValue, setInnerValue, getCalendarValue, triggerCalendarChange, triggerOk]
-      = useInnerValue(
-        generateConfig,
-        locale,
-        formatList,
-        ref(false), // rangeValue
-        order,
-        defaultValue,
-        value,
-        onInternalCalendarChange,
-        onInternalOk,
-      )
+    const [
+      mergedValue,
+      setInnerValue,
+      getCalendarValue,
+      triggerCalendarChange,
+      triggerOk,
+    ] = useInnerValue(
+      generateConfig,
+      locale,
+      formatList,
+      ref(false), // rangeValue
+      order,
+      defaultValue,
+      value,
+      onInternalCalendarChange,
+      onInternalOk,
+    )
 
     const calendarValue = computed(() => getCalendarValue.value)
 
     // ======================== Active ========================
     // In SinglePicker, we will always get `activeIndex` is 0.
-    const [focused, triggerFocus, lastOperation, activeIndex] = useRangeActive(computed(() => [disabled.value]))
+    const [focused, triggerFocus, lastOperation, activeIndex] = useRangeActive(
+      computed(() => [disabled.value]),
+    )
 
     const onSharedFocus = (event: FocusEvent) => {
       triggerFocus(true)
@@ -297,10 +335,19 @@ export default defineComponent({
     }
 
     /** Extends from `mergedMode` to patch `datetime` mode */
-    const internalMode = computed(() => mergedMode.value === 'date' && showTime.value ? 'datetime' : mergedMode.value)
+    const internalMode = computed(() =>
+      mergedMode.value === 'date' && showTime.value
+        ? 'datetime'
+        : mergedMode.value,
+    )
 
     // ======================= Show Now =======================
-    const mergedShowNow = useShowNow(picker as any, mergedMode, showNow, showToday)
+    const mergedShowNow = useShowNow(
+      picker as any,
+      mergedMode,
+      showNow,
+      showToday,
+    )
 
     // ======================== Value =========================
     const onInternalChange = (dates: any[], dateStrings: string[]) => {
@@ -309,15 +356,18 @@ export default defineComponent({
       }
     }
 
+    const rangeValueInfo = computed(() => {
+      return {
+        ...fp.value,
+        onChange: onInternalChange,
+      }
+    })
     const [
       ,
       /** Trigger `onChange` directly without check `disabledDate` */
       triggerSubmitChange,
     ] = useRangeValue(
-      {
-        ...fp.value,
-        onChange: onInternalChange,
-      } as any, // FIXME: type
+      rangeValueInfo,
       mergedValue,
       setInnerValue,
       () => getCalendarValue.value,
@@ -335,13 +385,18 @@ export default defineComponent({
       isInvalidateDate,
     )
 
-    const submitInvalidate = computed(() => submitInvalidates.value.some(invalidated => invalidated))
+    const submitInvalidate = computed(() =>
+      submitInvalidates.value.some(invalidated => invalidated),
+    )
 
     // ===================== Picker Value =====================
     // Proxy to single pickerValue
     const onInternalPickerValueChange = (
       dates: any[],
-      info: BaseInfo & { source: 'reset' | 'panel', mode: [PanelMode, PanelMode] },
+      info: BaseInfo & {
+        source: 'reset' | 'panel'
+        mode: [PanelMode, PanelMode]
+      },
     ) => {
       if (onPickerValueChange.value) {
         const cleanInfo = { ...info, mode: info.mode[0] }
@@ -369,12 +424,17 @@ export default defineComponent({
 
     // >>> Mode need wait for `pickerValue`
     // useEvent in React
-    const triggerModeChange = (nextPickerValue: any, nextMode: PanelMode, triggerEvent?: boolean) => {
+    const triggerModeChange = (
+      nextPickerValue: any,
+      nextMode: PanelMode,
+      triggerEvent?: boolean,
+    ) => {
       setMode(nextMode)
 
       // Compatible with `onPanelChange`
       if (onPanelChange.value && triggerEvent !== false) {
-        const lastPickerValue = nextPickerValue || calendarValue.value[calendarValue.value.length - 1]
+        const lastPickerValue
+          = nextPickerValue || calendarValue.value[calendarValue.value.length - 1]
         onPanelChange.value(lastPickerValue, nextMode)
       }
     }
@@ -392,7 +452,10 @@ export default defineComponent({
 
     // ======================== Click =========================
     const onSelectorClick = (event: MouseEvent) => {
-      if (!disabled.value && !selectorRef.value?.nativeElement?.contains(document.activeElement)) {
+      if (
+        !disabled.value
+        && !selectorRef.value?.nativeElement?.contains(document.activeElement)
+      ) {
         // Click to focus the enabled input
         selectorRef.value?.focus()
       }
@@ -412,7 +475,9 @@ export default defineComponent({
     const internalHoverValue = ref<any>(null)
 
     const hoverValues = computed(() => {
-      const values = [internalHoverValue.value, ...calendarValue.value].filter(date => date)
+      const values = [internalHoverValue.value, ...calendarValue.value].filter(
+        date => date,
+      )
       return multiple.value ? values : values.slice(0, 1)
     })
 
@@ -452,7 +517,9 @@ export default defineComponent({
 
     // TODO: handle this
     const onPresetSubmit = (nextValue: any) => {
-      const nextCalendarValues = multiple.value ? toggleDates(getCalendarValue.value, nextValue) : [nextValue]
+      const nextCalendarValues = multiple.value
+        ? toggleDates(getCalendarValue.value, nextValue)
+        : [nextValue]
       const passed = triggerSubmitChange(nextCalendarValues)
 
       if (passed && !multiple.value) {
@@ -484,14 +551,20 @@ export default defineComponent({
         return
       }
 
-      const nextValues = multiple.value ? toggleDates(getCalendarValue.value, date) : [date]
+      const nextValues = multiple.value
+        ? toggleDates(getCalendarValue.value, date)
+        : [date]
 
       // Only trigger calendar event but not update internal `calendarValue` state
       triggerCalendarChange(nextValues)
 
       // >>> Trigger next active if !needConfirm
       // Fully logic check `useRangeValue` hook
-      if (!needConfirm.value && !complexPicker.value && internalPicker.value === internalMode.value) {
+      if (
+        !needConfirm.value
+        && !complexPicker.value
+        && internalPicker.value === internalMode.value
+      ) {
         triggerConfirm()
       }
     }
@@ -503,7 +576,11 @@ export default defineComponent({
     }
 
     // >>> cellRender
-    const onInternalCellRender = useCellRender(cellRender, dateRender, monthCellRender)
+    const onInternalCellRender = useCellRender(
+      cellRender,
+      dateRender,
+      monthCellRender,
+    )
 
     // >>> invalid
 
@@ -584,28 +661,41 @@ export default defineComponent({
     // ======================== Effect ========================
     // >>> Mode
     // Reset for every active
-    watch([mergedOpen, activeIndex, picker], () => {
-      if (mergedOpen.value && activeIndex.value !== undefined) {
-        // Legacy compatible. This effect update should not trigger `onPanelChange`
-        triggerModeChange(null, picker.value as any, false)
-      }
-    }, { flush: 'post' })
+    watch(
+      [mergedOpen, activeIndex, picker],
+      () => {
+        if (mergedOpen.value && activeIndex.value !== undefined) {
+          // Legacy compatible. This effect update should not trigger `onPanelChange`
+          triggerModeChange(null, picker.value as any, false)
+        }
+      },
+      { flush: 'post' },
+    )
 
     // >>> For complex picker, we need check if need to focus next one
-    watch(mergedOpen, () => {
-      const lastOp = lastOperation()
+    watch(
+      mergedOpen,
+      () => {
+        const lastOp = lastOperation()
 
-      // Trade as confirm on field leave
-      if (!mergedOpen.value && lastOp === 'input') {
-        triggerOpen(false)
-        triggerConfirm()
-      }
+        // Trade as confirm on field leave
+        if (!mergedOpen.value && lastOp === 'input') {
+          triggerOpen(false)
+          triggerConfirm()
+        }
 
-      // Submit with complex picker
-      if (!mergedOpen.value && complexPicker.value && !needConfirm.value && lastOp === 'panel') {
-        triggerConfirm()
-      }
-    }, { flush: 'post' })
+        // Submit with complex picker
+        if (
+          !mergedOpen.value
+          && complexPicker.value
+          && !needConfirm.value
+          && lastOp === 'panel'
+        ) {
+          triggerConfirm()
+        }
+      },
+      { flush: 'post' },
+    )
 
     return () => {
       const [mergedClassNames, mergedStyles] = semanticCtx.value
@@ -661,7 +751,10 @@ export default defineComponent({
           {...pickTriggerProps(fp.value)}
           popupElement={panel}
           popupStyle={mergedStyles.value?.popup?.root}
-          popupClassName={clsx(rootClassName.value, mergedClassNames.value?.popup?.root)}
+          popupClassName={clsx(
+            rootClassName.value,
+            mergedClassNames.value?.popup?.root,
+          )}
           // Visible
           visible={mergedOpen.value}
           onClose={onPopupClose}
@@ -672,14 +765,20 @@ export default defineComponent({
             // Ref
             // ref={selectorRef} // Selector ref is handled via expose in usePickerRef
             // Style
-            class={clsx(fp.value.className, rootClassName.value, mergedClassNames.root)}
+            class={clsx(
+              fp.value.className,
+              rootClassName.value,
+              mergedClassNames.root,
+            )}
             style={{ ...mergedStyles.root, ...fp.value.style }}
             // Icon
             suffixIcon={suffixIcon.value}
             removeIcon={removeIcon.value}
             // Active
             activeHelp={!!internalHoverValue.value}
-            allHelp={!!internalHoverValue.value && hoverSource.value === 'preset'}
+            allHelp={
+              !!internalHoverValue.value && hoverSource.value === 'preset'
+            }
             focused={focused.value}
             onFocus={onSelectorFocus}
             onBlur={onSelectorBlur}

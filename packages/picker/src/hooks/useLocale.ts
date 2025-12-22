@@ -105,11 +105,11 @@ type ShowProps<DateType extends object> = Pick<
     'showHour' | 'showMinute' | 'showSecond' | 'showMillisecond' | 'use12Hours'
 >
 export default function useLocale<DateType extends object>(
-  locale: Locale,
+  locale: ComputedRef<Locale>,
   showProps: ComputedRef<ShowProps<DateType>> | Ref<ShowProps<DateType>>,
 ): ComputedRef<Locale> {
   const { showHour, showMinute, showSecond, showMillisecond, use12Hours } = showProps.value
   return computed<Locale>(() =>
-    fillLocale(locale, showHour, showMinute, showSecond, showMillisecond, use12Hours),
+    fillLocale(locale.value, showHour, showMinute, showSecond, showMillisecond, use12Hours),
   )
 }

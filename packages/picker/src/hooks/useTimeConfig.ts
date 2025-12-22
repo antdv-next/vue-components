@@ -68,22 +68,22 @@ export interface ComponentProps<DateType extends object> {
 
 /** Check if all the showXXX is `undefined` */
 function existShowConfig(
-  showHour: boolean,
-  showMinute: boolean,
-  showSecond: boolean,
-  showMillisecond: boolean,
+  showHour: boolean | undefined,
+  showMinute: boolean | undefined,
+  showSecond: boolean | undefined,
+  showMillisecond: boolean | undefined,
 ) {
   return [showHour, showMinute, showSecond, showMillisecond].some(show => show !== undefined)
 }
 
 /** Fill the showXXX if needed */
 function fillShowConfig(
-  hasShowConfig: boolean,
-  showHour: boolean,
-  showMinute: boolean,
-  showSecond: boolean,
-  showMillisecond: boolean,
-): [showHour: boolean, showMinute: boolean, showSecond: boolean, showMillisecond: boolean] {
+  hasShowConfig: boolean | undefined,
+  showHour: boolean | undefined,
+  showMinute: boolean | undefined,
+  showSecond: boolean | undefined,
+  showMillisecond: boolean | undefined,
+): [showHour: boolean | undefined, showMinute: boolean | undefined, showSecond: boolean | undefined, showMillisecond: boolean | undefined] {
   let parsedShowHour = showHour
   let parsedShowMinute = showMinute
   let parsedShowSecond = showSecond
@@ -125,7 +125,7 @@ export function getTimeProps<DateType extends object>(
 ): [
     showTimeProps: SharedTimeProps<DateType>,
     showTimePropsForLocale: SharedTimeProps<DateType>,
-    showTimeFormat: string,
+    showTimeFormat: string | undefined,
     propFormat: string,
 ] {
   const { showTime } = componentProps
@@ -167,11 +167,11 @@ export function getTimeProps<DateType extends object>(
 
 export function fillShowTimeConfig<DateType extends object>(
   picker: InternalMode,
-  showTimeFormat: string,
+  showTimeFormat: string | undefined,
   propFormat: string,
   timeConfig: SharedTimeProps<DateType>,
   locale: Locale,
-): SharedTimeProps<DateType> {
+): SharedTimeProps<DateType> | null {
   const isTimePicker = picker === 'time'
 
   if (picker === 'datetime' || isTimePicker) {

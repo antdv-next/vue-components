@@ -19,7 +19,7 @@ export default function useCellRender<DateType extends object = any>(
 
   // ======================== Render ========================
   // Merged render
-  const mergedCellRender = (current: DateType | number, info: CellRenderInfo<DateType>) => {
+  const mergedCellRender = (current: string | DateType | number, info: CellRenderInfo<DateType>) => {
     if (cellRender.value) {
       return cellRender.value(current, info)
     }
@@ -30,7 +30,7 @@ export default function useCellRender<DateType extends object = any>(
       return dateRender.value(date, info.today)
     }
     if (monthCellRender?.value && info.type === 'month') {
-      return monthCellRender.value(date, info.locale)
+      return monthCellRender.value(date, info.locale!)
     }
     return info.originNode
   }

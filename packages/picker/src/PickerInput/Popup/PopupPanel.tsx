@@ -13,20 +13,26 @@ export type MustProp<DateType extends object> = Required<
   Pick<PickerPanelProps<DateType>, 'mode' | 'onPanelChange'>
 >
 
-export type PopupPanelProps<DateType extends object = any>
+type PopupPanelPropsWrapper<DateType extends object = any>
   = MustProp<DateType>
     & Omit<PickerPanelProps<DateType>, 'onPickerValueChange' | 'showTime'>
-    & FooterProps<DateType> & {
-      multiplePanel?: boolean
-      range?: boolean
-      onPickerValueChange: (date: DateType) => void
-    }
+    & FooterProps<DateType>
+
+interface PopupPanelProps<DateType extends object = any>
+  extends /* @vue-ignore */ PopupPanelPropsWrapper<DateType> {
+  multiplePanel?: boolean
+  range?: boolean
+  onPickerValueChange: (date: DateType) => void
+}
 
 // provider components
 const PickerPanelProvider = defineComponent({
   name: 'PickerPanelProvider',
   props: {
-    value: Object as PropType<PickerHackContextProps>,
+    value: {
+      type: Object as PropType<PickerHackContextProps>,
+      required: true,
+    },
   },
   setup(props, { slots }) {
     providePickerHackContext(toRef(props, 'value'))
@@ -38,8 +44,7 @@ const PickerPanelProvider = defineComponent({
   },
 })
 
-// PopupPanelProps<DateType>
-export default defineComponent(<DateType extends object = any>(props) => {
+export default defineComponent(<DateType extends object = any>(props: PopupPanelProps<DateType>) => {
   const ctx = usePickerContext()
 
   const {

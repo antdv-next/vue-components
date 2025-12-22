@@ -57,7 +57,7 @@ export function pickProps<T extends object>(
 export function getRowFormat(
   picker: InternalMode,
   locale: Locale,
-  format?: SharedPickerProps['format'],
+  format?: SharedPickerProps['format'] | null,
 ) {
   if (format) {
     return format

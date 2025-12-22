@@ -26,6 +26,85 @@ import useShowNow from './hooks/useShowNow'
 import Popup from './Popup'
 import RangeSelector from './Selector/RangeSelector'
 
+export interface BaseRangePickerProps<DateType extends object>
+  extends Omit<SharedPickerProps<DateType>, 'showTime' | 'id'> {
+  // Structure
+  id?: SelectorIdType
+
+  separator?: React.ReactNode
+
+  // Value
+  value?: RangeValueType<DateType> | null
+  defaultValue?: RangeValueType<DateType>
+  onChange?: (
+    dates: NoUndefinedRangeValueType<DateType> | null,
+    dateStrings: [string, string],
+  ) => void
+  onCalendarChange?: (
+    dates: NoUndefinedRangeValueType<DateType>,
+    dateStrings: [string, string],
+    info: BaseInfo,
+  ) => void
+  onOk?: (values: NoUndefinedRangeValueType<DateType>) => void
+
+  // Placeholder
+  placeholder?: [string, string]
+
+  // Picker Value
+  /**
+   * Config the popup panel date.
+   * Every time active the input to open popup will reset with `defaultPickerValue`.
+   *
+   * Note: `defaultPickerValue` priority is higher than `value` for the first open.
+   */
+  defaultPickerValue?: [DateType, DateType] | DateType | null
+  /**
+   * Config each start & end field popup panel date.
+   * When config `pickerValue`, you must also provide `onPickerValueChange` to handle changes.
+   */
+  pickerValue?: [DateType, DateType] | DateType | null
+  /**
+   * Each popup panel `pickerValue` includes `mode` change will trigger the callback.
+   * @param date The changed picker value
+   * @param info.source `panel` from the panel click. `reset` from popup open or field typing
+   * @param info.mode Next `mode` panel
+   */
+  onPickerValueChange?: (
+    date: [DateType, DateType],
+    info: BaseInfo & {
+      source: 'reset' | 'panel'
+      mode: [PanelMode, PanelMode]
+    },
+  ) => void
+
+  // Preset
+  presets?: ValueDate<Exclude<RangeValueType<DateType>, null>>[]
+  /** @deprecated Please use `presets` instead */
+  ranges?: Record<
+    string,
+    Exclude<RangeValueType<DateType>, null> | (() => Exclude<RangeValueType<DateType>, null>)
+  >
+
+  // Control
+  disabled?: boolean | [boolean, boolean]
+  allowEmpty?: boolean | [boolean, boolean]
+
+  // Time
+  showTime?: boolean | RangeTimeProps<DateType>
+
+  // Mode
+  mode?: [startMode: PanelMode, endMode: PanelMode]
+  /** Trigger on each `mode` or `pickerValue` changed. */
+  onPanelChange?: (
+    values: NoUndefinedRangeValueType<DateType>,
+    modes: [startMode: PanelMode, endMode: PanelMode],
+  ) => void
+}
+
+export interface RangePickerProps<DateType extends object>
+  extends BaseRangePickerProps<DateType>,
+  Omit<RangeTimeProps<DateType>, 'format' | 'defaultValue' | 'defaultOpenValue'> {}
+
 function separateConfig<T>(config: T | [T, T] | null | undefined, defaultConfig: T): [T, T] {
   const singleConfig = config ?? defaultConfig
 

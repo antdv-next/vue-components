@@ -1,7 +1,8 @@
-import type { Ref } from 'vue'
-import type { InternalMode } from '../../interface'
+import type { ComputedRef, Ref } from 'vue'
+import type { FormatType, InternalMode, PickerMode } from '../../interface'
+import type { RangePickerProps } from '../RangePicker'
 import { warning } from '@v-c/util'
-import { computed, toRefs } from 'vue'
+import { computed } from 'vue'
 import useLocale from '../../hooks/useLocale'
 import { fillShowTimeConfig, getTimeProps } from '../../hooks/useTimeConfig'
 import { toArray } from '../../utils/miscUtil'
@@ -11,26 +12,30 @@ import { useFieldFormat } from './useFieldFormat'
 import useInputReadOnly from './useInputReadOnly'
 import useInvalidate from './useInvalidate'
 
-interface PickedProps<DateType extends object = any> {
-  generateConfig?: any
-  locale?: any
-  picker?: any
-  prefixCls?: any
-  styles?: any
-  classNames?: any
-  order?: any
-  components?: any
-  inputRender?: any
-  clearIcon?: any
-  allowClear?: any
-  needConfirm?: any
-  format?: any
-  inputReadOnly?: any
-  disabledDate?: any
-  minDate?: any
-  maxDate?: any
-  defaultOpenValue?: any
-  previewValue?: any
+type UseInvalidate<DateType extends object = any> = typeof useInvalidate<DateType>
+
+type PickedProps<DateType extends object = any> = Pick<
+  RangePickerProps<DateType>,
+  | 'generateConfig'
+  | 'locale'
+  | 'picker'
+  | 'prefixCls'
+  | 'styles'
+  | 'classNames'
+  | 'order'
+  | 'components'
+  | 'inputRender'
+  | 'clearIcon'
+  | 'allowClear'
+  | 'needConfirm'
+  | 'format'
+  | 'inputReadOnly'
+  | 'disabledDate'
+  | 'minDate'
+  | 'maxDate'
+  | 'defaultOpenValue'
+  | 'previewValue'
+> & {
   multiple?: boolean
   // RangePicker showTime definition is different with Picker
   showTime?: any
@@ -61,6 +66,15 @@ function useList<T>(value: Ref<T | T[] | undefined>, fillMode = false) {
   })
 }
 
+type FilledProps<InProps extends PickedProps, DateType extends GetGeneric<InProps>, UpdaterProps extends object> = ComputedRef<Omit<InProps, keyof UpdaterProps | 'showTime' | 'value' | 'defaultValue'>
+  & UpdaterProps & {
+    picker: PickerMode
+    showTime?: ExcludeBooleanType<InProps['showTime']>
+    value?: ToArrayType<InProps['value'], DateType>
+    defaultValue?: ToArrayType<InProps['value'], DateType>
+    pickerValue?: ToArrayType<InProps['value'], DateType>
+    defaultPickerValue?: ToArrayType<InProps['value'], DateType>
+  }>
 /**
  * Align the outer props with unique typed and fill undefined props.
  * This is shared with both RangePicker and Picker. This will do:
@@ -74,66 +88,43 @@ export default function useFilledProps<
 >(
   props: InProps,
   updater?: () => UpdaterProps,
-) {
-  const {
-    generateConfig,
-    locale,
-    picker,
-    prefixCls,
-    previewValue,
-    styles,
-    classNames,
-    order,
-    components,
-    inputRender,
-    allowClear,
-    clearIcon,
-    needConfirm,
-    multiple,
-    format,
-    inputReadOnly,
-    disabledDate,
-    minDate,
-    maxDate,
-    showTime,
-    value,
-    defaultValue,
-    pickerValue,
-    defaultPickerValue,
-  } = toRefs(props)
-
+): [
+  filledProps: FilledProps<InProps, DateType, UpdaterProps>,
+  internalPicker: ComputedRef<InternalMode>,
+  complexPicker: ComputedRef<boolean | undefined>,
+  formatList: ComputedRef<FormatType<DateType>[]>,
+  maskFormat: ComputedRef<string | undefined>,
+  isInvalidateDate: ReturnType<UseInvalidate<DateType>>,
+] {
   // Default Values
-  const mergedPicker = computed(() => picker?.value || 'date')
-  const mergedPrefixCls = computed(() => prefixCls?.value || 'rc-picker')
-  const mergedPreviewValue = computed(() => previewValue?.value || 'hover')
-  const mergedStyles = computed(() => styles?.value || {})
-  const mergedClassNames = computed(() => classNames?.value || {})
-  const mergedOrder = computed(() => order?.value ?? true)
-  const mergedComponents = computed(() => ({ input: inputRender?.value, ...components?.value }))
+  const mergedPicker = computed(() => props.picker || 'date')
+  const mergedPrefixCls = computed(() => props.prefixCls || 'rc-picker')
+  const mergedPreviewValue = computed(() => props.previewValue || 'hover')
+  const mergedStyles = computed(() => props.styles || {})
+  const mergedClassNames = computed(() => props.classNames || {})
+  const mergedOrder = computed(() => props.order ?? true)
+  const mergedComponents = computed(() => ({ input: props.inputRender, ...props.components }))
 
-  const values = useList(value)
-  const defaultValues = useList(defaultValue)
-  const pickerValues = useList(pickerValue)
-  const defaultPickerValues = useList(defaultPickerValue)
+  const values = useList(computed(() => props.value))
+  const defaultValues = useList(computed(() => props.defaultValue))
+  const pickerValues = useList(computed(() => props.pickerValue))
+  const defaultPickerValues = useList(computed(() => props.defaultPickerValue))
 
   // ======================== Picker ========================
   /** Almost same as `picker`, but add `datetime` for `date` with `showTime` */
   const internalPicker = computed<InternalMode>(() =>
-    mergedPicker.value === 'date' && showTime?.value ? 'datetime' : mergedPicker.value,
+    mergedPicker.value === 'date' && props.showTime ? 'datetime' : mergedPicker.value,
   )
 
   /** The picker is `datetime` or `time` */
   const multipleInteractivePicker = computed(() => internalPicker.value === 'time' || internalPicker.value === 'datetime')
-  const complexPicker = computed(() => multipleInteractivePicker.value || multiple?.value)
-  const mergedNeedConfirm = computed(() => needConfirm?.value ?? multipleInteractivePicker.value)
+  const complexPicker = computed(() => multipleInteractivePicker.value || props.multiple)
+  const mergedNeedConfirm = computed(() => props.needConfirm ?? multipleInteractivePicker.value)
 
   // ========================== Time ==========================
   // Auto `format` need to check `showTime.showXXX` first.
   // And then merge the `locale` into `mergedShowTime`.
-  const timePropsInfo = computed(() => getTimeProps({
-    ...props,
-    picker: internalPicker.value,
-  }))
+  const timePropsInfo = computed(() => getTimeProps(props))
 
   // [timeProps, localeTimeProps, showTimeFormat, propFormat]
   const timeProps = computed(() => timePropsInfo.value[0])
@@ -142,7 +133,7 @@ export default function useFilledProps<
   const propFormat = computed(() => timePropsInfo.value[3])
 
   // ======================= Locales ========================
-  const mergedLocale = useLocale(locale?.value, localeTimeProps)
+  const mergedLocale = useLocale(computed(() => props.locale), localeTimeProps)
 
   const mergedShowTime = computed(() =>
     fillShowTimeConfig(
@@ -181,7 +172,7 @@ export default function useFilledProps<
     classNames: mergedClassNames.value,
     order: mergedOrder.value,
     components: mergedComponents.value,
-    clearIcon: fillClearIcon(mergedPrefixCls.value, allowClear?.value, clearIcon?.value),
+    clearIcon: fillClearIcon(mergedPrefixCls.value, props.allowClear, props.clearIcon),
     showTime: mergedShowTime.value,
     value: values.value,
     defaultValue: defaultValues.value,
@@ -194,24 +185,28 @@ export default function useFilledProps<
   const [formatList, maskFormat] = useFieldFormat<DateType>(
     internalPicker,
     mergedLocale,
-    format,
+    computed(() => props.format),
   )
 
   // ======================= ReadOnly =======================
-  const mergedInputReadOnly = useInputReadOnly(formatList, inputReadOnly, multiple)
+  const mergedInputReadOnly = useInputReadOnly(
+    formatList,
+    computed(() => props.inputReadOnly),
+    computed(() => props.multiple),
+  )
 
   // ======================= Boundary =======================
   const disabledBoundaryDate = useDisabledBoundary(
-    generateConfig,
-    mergedLocale,
-    disabledDate,
-    minDate,
-    maxDate,
+    computed(() => props.generateConfig),
+    computed(() => props.locale),
+    computed(() => props.disabledDate),
+    computed(() => props.minDate),
+    computed(() => props.maxDate),
   )
 
   // ====================== Invalidate ======================
   const isInvalidateDate = useInvalidate(
-    generateConfig,
+    computed(() => props.generateConfig),
     mergedPicker,
     disabledBoundaryDate as any, // useDisabledBoundary returns a function, which is compatible with DisabledDate
     mergedShowTime,
@@ -226,7 +221,7 @@ export default function useFilledProps<
   }))
 
   return [
-    mergedProps,
+    mergedProps as unknown as FilledProps<InProps, DateType, UpdaterProps>,
     internalPicker,
     complexPicker,
     formatList,
