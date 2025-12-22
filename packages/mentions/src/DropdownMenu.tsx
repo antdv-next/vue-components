@@ -1,6 +1,7 @@
 import type { MenuRef } from '@v-c/menu'
 import type { DataDrivenOptionProps } from './Mentions'
 import Menu, { Item as MenuItem } from '@v-c/menu'
+import { getDOM } from '@v-c/util/dist/Dom/findDOMNode'
 import { computed, defineComponent, nextTick, onBeforeUnmount, shallowRef, watch } from 'vue'
 import { useMentionsContext } from './MentionsContext'
 
@@ -58,8 +59,15 @@ const DropdownMenu = defineComponent<DropdownMenuProps>(
 
     watch(
       () => menuRef.value?.list,
-      (list) => {
+      (list, _, onCleanup) => {
+        if (list) {
+          list = getDOM(list) as any
+        }
         bindListEvents(list || null)
+        onCleanup(() => {
+          removeListListeners?.()
+          removeListListeners = undefined
+        })
       },
       {
         immediate: true,

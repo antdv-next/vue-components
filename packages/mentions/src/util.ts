@@ -123,14 +123,23 @@ export function setInputSelection(
   input.focus()
 }
 
-export function validateSearch(text: string, split: MentionsProps['split']) {
-  return !split || !text.includes(split)
+export function validateSearch(): typeof validateSearch
+export function validateSearch(text: string, split: MentionsProps['split']): boolean
+export function validateSearch(text?: string, split?: MentionsProps['split']) {
+  if (text === undefined && split === undefined) {
+    return validateSearch
+  }
+  return !split || !(text ?? '').includes(split)
 }
 
-export function filterOption(
-  input: string,
-  { value = '' }: OptionProps,
-): boolean {
-  const lowerCase = input.toLowerCase()
+export function filterOption(): typeof filterOption
+export function filterOption(input: string, option: OptionProps): boolean
+export function filterOption(input?: string, option?: OptionProps): boolean | typeof filterOption {
+  if (input === undefined && option === undefined) {
+    return filterOption
+  }
+  const inputText = typeof input === 'string' ? input : String(input ?? '')
+  const lowerCase = inputText.toLowerCase()
+  const value = option?.value ?? ''
   return value.toLowerCase().includes(lowerCase)
 }
