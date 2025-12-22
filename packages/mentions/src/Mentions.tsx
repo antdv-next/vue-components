@@ -225,7 +225,7 @@ const InternalMentions = defineComponent<InternalMentionsProps>(
     const getOptions = (targetMeasureText: string) => {
       let list
       const options = props?.options ?? []
-      const filterOption = props?.filterOption
+      const filterOption = props?.filterOption ?? defaultFilterOption
 
       if (options && options.length > 0) {
         list = options.map(item => ({
@@ -251,7 +251,10 @@ const InternalMentions = defineComponent<InternalMentionsProps>(
         if (filterOption === false) {
           return true
         }
-        return filterOption?.(targetMeasureText, option)
+        if (typeof filterOption !== 'function') {
+          return true
+        }
+        return filterOption(targetMeasureText, option)
       })
     }
 
@@ -377,10 +380,9 @@ const InternalMentions = defineComponent<InternalMentionsProps>(
         const nextMeasureText = selectionStartText.slice(
           measureIndex + nextMeasurePrefix.length,
         )
-        const validateMeasure: boolean = props.validateSearch?.(
-          nextMeasureText,
-          props.split!,
-        ) ?? false
+        const validateSearchFn
+          = typeof props.validateSearch === 'function' ? props.validateSearch : defaultValidateSearch
+        const validateMeasure: boolean = validateSearchFn(nextMeasureText, props.split!)
         const matchOption = !!getOptions(nextMeasureText).length
 
         if (validateMeasure) {

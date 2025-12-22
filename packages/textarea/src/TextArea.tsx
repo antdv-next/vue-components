@@ -132,12 +132,14 @@ const TextArea = defineComponent<TextAreaProps>(
       }
       props?.onKeydown?.(e)
     }
-    const handleFocus = () => {
+    const handleFocus = (e: any) => {
       focused.value = true
+      props?.onFocus?.(e)
     }
 
-    const handleBlur = () => {
+    const handleBlur = (e: any) => {
       focused.value = false
+      props?.onBlur?.(e)
     }
 
     // ============================== Reset ===============================
@@ -254,6 +256,8 @@ const TextArea = defineComponent<TextAreaProps>(
               'onChange',
               'onKeydown',
               'onPressEnter',
+              'onFocus',
+              'onBlur',
             ])}
             autoSize={autoSize}
             maxLength={maxLength}
