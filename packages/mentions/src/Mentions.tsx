@@ -627,16 +627,6 @@ const Mentions = defineComponent<MentionsProps>(
         hasWrapper: hasSuffix.value,
         onChange: triggerChange,
       }
-
-      if (!hasSuffix.value) {
-        return (
-          <InternalMentions
-            ref={mentionRef as any}
-            {...internalProps}
-          />
-        )
-      }
-
       return (
         <BaseInput
           ref={holderRef as any}
