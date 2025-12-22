@@ -121,7 +121,7 @@ const DropdownMenu = defineComponent<DropdownMenuProps>(
           }}
         >
           {options.map((option, index) => {
-            const { key, disabled, className, style, label } = option
+            const { key, disabled, class: className, style, label } = option
             return (
               <MenuItem
                 key={key}

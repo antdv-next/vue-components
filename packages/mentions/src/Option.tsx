@@ -4,7 +4,7 @@ export interface OptionProps {
   value?: string
   key?: string
   disabled?: boolean
-  className?: string
+  class?: string
   style?: CSSProperties
 }
 
