@@ -1,14 +1,16 @@
 import type { CommonInputProps } from '@v-c/input'
 import type { TextAreaProps, TextAreaRef } from '@v-c/textarea'
 import type { VueNode } from '@v-c/util'
-import type { CSSProperties, StyleValue } from 'vue'
+import type { CSSProperties } from 'vue'
 import type { OptionProps } from './Option'
-import { KeyCode, useId } from '@v-c/util'
+import TextArea from '@v-c/textarea'
+import { KeyCode, omit, useId } from '@v-c/util'
 import { toArray } from '@v-c/util/dist/Children/toArray'
 import { filterEmpty, getAttrStyleAndClass } from '@v-c/util/dist/props-util'
 import { computed, defineComponent, shallowRef, watch } from 'vue'
 import { useUnstableContext } from './context'
 import useEffectState from './hooks/useEffectState'
+import { MentionsProvider } from './MentionsContext.ts'
 import {
   filterOption as defaultFilterOption,
   validateSearch as defaultValidateSearch,
@@ -38,7 +40,6 @@ export interface MentionsProps extends BaseTextareaAttrs {
   defaultValue?: string
   notFoundContent?: VueNode
   split?: string
-  style?: StyleValue
   transitionName?: string
   placement?: Placement
   direction?: Direction
@@ -67,7 +68,48 @@ export interface MentionsProps extends BaseTextareaAttrs {
     popup?: CSSProperties
   }
   onPopupScroll?: (event: UIEvent) => void
+  rows?: HTMLTextAreaElement['rows']
 }
+
+const omitKeys = [
+  'prefixCls',
+  'className',
+  'style',
+  'classNames',
+  'styles',
+
+  'prefix',
+  'split',
+  'notFoundContent',
+  'value',
+  'defaultValue',
+  'children',
+  'options',
+  'allowClear',
+  'hasWrapper',
+  'silent',
+
+  'validateSearch',
+  'filterOption',
+  'onChange',
+  'onKeyDown',
+  'onKeyUp',
+  'onPressEnter',
+  'onSearch',
+  'onSelect',
+  'onFocus',
+  'onBlur',
+
+  'transitionName',
+  'placement',
+  'direction',
+  'getPopupContainer',
+  'popupClassName',
+
+  'rows',
+  'visible',
+  'onPopupScroll',
+]
 
 export interface MentionsRef {
   focus: VoidFunction
@@ -120,6 +162,9 @@ const InternalMentions = defineComponent<InternalMentionsProps>(
     const measureLocation = shallowRef(0)
     const activeIndex = shallowRef(0)
     const isFocus = shallowRef(false)
+    const setActiveIndex = (index: number) => {
+      activeIndex.value = index
+    }
     // ================================ Id ================================
     const uniqueKey = useId(props.id)
 
@@ -399,8 +444,80 @@ const InternalMentions = defineComponent<InternalMentionsProps>(
       props?.onPopupScroll?.(event)
     }
     return () => {
-      const { style } = props
-      const { className, restAttrs } = getAttrStyleAndClass(attrs)
+      const {
+        classNames: mentionClassNames,
+        styles,
+        rows = 1,
+        prefixCls,
+        notFoundContent,
+      } = props
+      const restProps = omit(props, omitKeys as any)
+
+      const { className, restAttrs, style } = getAttrStyleAndClass(attrs)
+      // ============================== Styles ==============================
+      const resizeStyle = styles?.textarea?.resize ?? style?.resize
+      const mergedTextareaStyle = {
+        ...styles?.textarea,
+      }
+      // Only add resize if it has a valid value, avoid setting undefined
+      if (resizeStyle !== undefined) {
+        mergedTextareaStyle.resize = resizeStyle
+      }
+      const mergedStyles = {
+        ...styles,
+        textarea: mergedTextareaStyle,
+      }
+
+      // ============================== Render ==============================
+      const mentionNode = (
+        <>
+          <TextArea
+            classNames={{
+              texarea: mentionClassNames?.textarea,
+            } as any}
+            /**
+             * Example:<Mentions style={{ resize: 'none' }} />.
+             * If written this way, resizing here will become invalid.
+             * The TextArea component code and found that the resize parameter in the style of the ResizeTextArea component is obtained from prop.style.
+             * Just pass the resize attribute and leave everything else unchanged.
+             */
+            styles={mergedStyles}
+            ref={textareaRef as any}
+            value={mergedValue.value}
+            {...restAttrs}
+            {...restProps}
+            {
+              ...{
+                rows,
+              }
+            }
+            onChange={onInternalChange}
+            onKeydown={onInternalKeyDown}
+            onKeyup={onInternalKeyUp}
+            onPressEnter={onInternalPressEnter}
+            onFocus={onInternalFocus}
+            onBlur={onInternalBlur}
+          />
+          { mergedMeasuring.value && (
+            <div ref={measureRef} class={`${prefixCls}-measure`}>
+              {mergedValue.value.slice(0, mergedMeasureLocation.value)}
+              <MentionsProvider
+                value={{
+                  notFoundContent,
+                  activeIndex: activeIndex.value,
+                  setActiveIndex,
+                  selectOption,
+                  onFocus: onDropdownFocus,
+                  onBlur: onDropdownBlur,
+                  onScroll: onInternalPopupScroll,
+                }}
+              >
+                {/*    */}
+              </MentionsProvider>
+            </div>
+          )}
+        </>
+      )
       return null
     }
   },

@@ -40,6 +40,9 @@ export interface TextAreaProps {
   placeholder?: string
   autoFocus?: boolean
   onKeydown?: (e: KeyboardEvent) => void
+  onKeyup?: (e: KeyboardEvent) => void
+  onFocus?: (e: FocusEvent) => void
+  onBlur?: (e: FocusEvent) => void
 }
 
 export interface TextAreaRef {
