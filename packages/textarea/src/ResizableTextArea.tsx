@@ -172,7 +172,7 @@ const ResizableTextArea = defineComponent<
           disabled={!(autoSize || onResize)}
         >
           <textarea
-            {...restAttrs}
+            {...omit(restAttrs, ['readonly'])}
             {...omit(props, [
               'suffix',
               'classNames',
@@ -189,7 +189,7 @@ const ResizableTextArea = defineComponent<
               'onResize',
               'onChange',
             ]) as any}
-            readonly={readOnly}
+            readonly={restAttrs?.readonly ?? readOnly}
             ref={textareaRef}
             style={mergedStyle}
             class={clsx(
