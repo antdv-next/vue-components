@@ -1,6 +1,8 @@
 import type { CSSProperties } from 'vue'
 import type { DataDrivenOptionProps, Direction, Placement } from './Mentions'
-import { defineComponent, shallowRef } from 'vue'
+import Trigger from '@v-c/trigger'
+import { computed, defineComponent, shallowRef } from 'vue'
+import DropdownMenu from './DropdownMenu'
 
 const BUILT_IN_PLACEMENTS = {
   bottomRight: {
@@ -53,6 +55,12 @@ interface KeywordTriggerProps {
 const KeywordTrigger = defineComponent<KeywordTriggerProps>(
   (props, { slots }) => {
     const opened = shallowRef(false)
+    const dropdownPlacement = computed(() => {
+      if (props.direction === 'rtl') {
+        return props.placement === 'top' ? 'topLeft' : 'bottomLeft'
+      }
+      return props.placement === 'top' ? 'topRight' : 'bottomRight'
+    })
     return () => {
       const {
         prefixCls,
@@ -62,13 +70,36 @@ const KeywordTrigger = defineComponent<KeywordTriggerProps>(
         getPopupContainer,
         popupClassName,
         popupStyle,
-        direction,
-        placement,
       } = props
 
       const dropdownPrefix = `${prefixCls}-dropdown`
 
-      return null
+      const dropdownElement = (
+        <DropdownMenu
+          prefixCls={dropdownPrefix}
+          options={options}
+          opened={opened.value}
+        />
+      )
+
+      return (
+        <Trigger
+          prefixCls={dropdownPrefix}
+          popupVisible={visible}
+          popup={dropdownElement}
+          popupPlacement={dropdownPlacement.value}
+          popupMotion={{ name: transitionName }}
+          builtinPlacements={BUILT_IN_PLACEMENTS}
+          getPopupContainer={getPopupContainer}
+          popupClassName={popupClassName}
+          popupStyle={popupStyle}
+          afterOpenChange={(nextOpen) => {
+            opened.value = nextOpen
+          }}
+        >
+          {slots?.default?.()}
+        </Trigger>
+      )
     }
   },
   {
@@ -76,3 +107,5 @@ const KeywordTrigger = defineComponent<KeywordTriggerProps>(
     inheritAttrs: false,
   },
 )
+
+export default KeywordTrigger

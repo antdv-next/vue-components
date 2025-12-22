@@ -3,14 +3,17 @@ import type { TextAreaProps, TextAreaRef } from '@v-c/textarea'
 import type { VueNode } from '@v-c/util'
 import type { CSSProperties } from 'vue'
 import type { OptionProps } from './Option'
+import { BaseInput } from '@v-c/input'
 import TextArea from '@v-c/textarea'
-import { KeyCode, omit, useId } from '@v-c/util'
+import { clsx, KeyCode, omit, useId } from '@v-c/util'
 import { toArray } from '@v-c/util/dist/Children/toArray'
 import { filterEmpty, getAttrStyleAndClass } from '@v-c/util/dist/props-util'
 import { computed, defineComponent, shallowRef, watch } from 'vue'
 import { useUnstableContext } from './context'
 import useEffectState from './hooks/useEffectState'
+import KeywordTrigger from './KeywordTrigger'
 import { MentionsProvider } from './MentionsContext.ts'
+
 import {
   filterOption as defaultFilterOption,
   validateSearch as defaultValidateSearch,
@@ -18,7 +21,6 @@ import {
   getLastMeasureIndex,
   replaceWithMeasure,
   setInputSelection,
-  validateSearch,
 } from './util'
 
 type BaseTextareaAttrs = Omit<
@@ -86,14 +88,15 @@ const omitKeys = [
   'children',
   'options',
   'allowClear',
+  'suffix',
   'hasWrapper',
   'silent',
 
   'validateSearch',
   'filterOption',
   'onChange',
-  'onKeyDown',
-  'onKeyUp',
+  'onKeydown',
+  'onKeyup',
   'onPressEnter',
   'onSearch',
   'onSelect',
@@ -127,6 +130,7 @@ interface InternalMentionsProps extends MentionsProps {
 
 const defaults = {
   prefix: '@',
+  prefixCls: 'vc-mentions',
   split: ' ',
   notFoundContent: 'Not Found',
   validateSearch: defaultValidateSearch,
@@ -335,6 +339,7 @@ const InternalMentions = defineComponent<InternalMentionsProps>(
 
         if (!mergedOptions.value.length) {
           stopMeasure()
+          return
         }
 
         const option = mergedOptions.value[activeIndex.value]
@@ -372,7 +377,10 @@ const InternalMentions = defineComponent<InternalMentionsProps>(
         const nextMeasureText = selectionStartText.slice(
           measureIndex + nextMeasurePrefix.length,
         )
-        const validateMeasure: boolean = validateSearch(nextMeasureText, props.split!)
+        const validateMeasure: boolean = props.validateSearch?.(
+          nextMeasureText,
+          props.split!,
+        ) ?? false
         const matchOption = !!getOptions(nextMeasureText).length
 
         if (validateMeasure) {
@@ -473,7 +481,7 @@ const InternalMentions = defineComponent<InternalMentionsProps>(
         <>
           <TextArea
             classNames={{
-              texarea: mentionClassNames?.textarea,
+              textarea: mentionClassNames?.textarea,
             } as any}
             /**
              * Example:<Mentions style={{ resize: 'none' }} />.
@@ -512,13 +520,39 @@ const InternalMentions = defineComponent<InternalMentionsProps>(
                   onScroll: onInternalPopupScroll,
                 }}
               >
-                {/*    */}
+                <KeywordTrigger
+                  prefixCls={prefixCls}
+                  transitionName={props.transitionName}
+                  placement={props.placement}
+                  direction={props.direction}
+                  options={mergedOptions.value}
+                  visible
+                  getPopupContainer={props.getPopupContainer}
+                  popupClassName={clsx(props.popupClassName, mentionClassNames?.popup)}
+                  popupStyle={styles?.popup}
+                >
+                  <span>{mergedMeasurePrefix.value}</span>
+                </KeywordTrigger>
               </MentionsProvider>
+              {mergedValue.value.slice(
+                mergedMeasureLocation.value + mergedMeasurePrefix.value.length,
+              )}
             </div>
           )}
         </>
       )
-      return null
+      if (!props.hasWrapper) {
+        return (
+          <div
+            class={clsx(prefixCls, props.className, className)}
+            style={style}
+            ref={containerRef}
+          >
+            {mentionNode}
+          </div>
+        )
+      }
+      return mentionNode
     }
   },
   {
@@ -526,3 +560,113 @@ const InternalMentions = defineComponent<InternalMentionsProps>(
     inheritAttrs: false,
   },
 )
+
+const Mentions = defineComponent<MentionsProps>(
+  (props, { expose, attrs }) => {
+    const hasSuffix = computed(() => !!(props.suffix || props.allowClear))
+
+    const holderRef = shallowRef<any>()
+    const mentionRef = shallowRef<MentionsRef>()
+
+    const mergedValue = shallowRef(props?.value ?? props?.defaultValue ?? '')
+    watch(() => props.value, () => {
+      mergedValue.value = props.value ?? ''
+    })
+    const setMergedValue = (value: string) => {
+      mergedValue.value = value
+    }
+
+    const triggerChange = (nextValue: string) => {
+      setMergedValue(nextValue)
+      props?.onChange?.(nextValue)
+    }
+
+    const handleReset = () => {
+      triggerChange('')
+    }
+
+    expose({
+      focus: () => mentionRef.value?.focus?.(),
+      blur: () => mentionRef.value?.blur?.(),
+      textarea: computed(() => mentionRef.value?.textarea || null),
+      nativeElement: computed(() => holderRef.value?.nativeElement || mentionRef.value?.nativeElement),
+    })
+
+    return () => {
+      const {
+        suffix,
+        prefixCls = 'vc-mentions',
+        allowClear,
+        classNames: mentionsClassNames,
+        styles,
+        className: propsClassName,
+        disabled,
+        onClear,
+        id,
+        value: _value,
+        defaultValue: _defaultValue,
+        onChange: _onChange,
+        ...rest
+      } = props
+
+      const { className, style } = getAttrStyleAndClass(attrs)
+      const internalClassName = clsx(mentionsClassNames?.mentions, propsClassName)
+
+      const internalProps = {
+        ...attrs,
+        ...rest,
+        id,
+        value: mergedValue.value,
+        prefixCls,
+        className: internalClassName,
+        classNames: mentionsClassNames,
+        styles,
+        disabled,
+        hasWrapper: hasSuffix.value,
+        onChange: triggerChange,
+      }
+
+      if (!hasSuffix.value) {
+        return (
+          <InternalMentions
+            ref={mentionRef as any}
+            {...internalProps}
+          />
+        )
+      }
+
+      return (
+        <BaseInput
+          ref={holderRef as any}
+          suffix={suffix}
+          prefixCls={prefixCls}
+          value={mergedValue.value}
+          allowClear={allowClear}
+          handleReset={handleReset}
+          class={clsx(
+            prefixCls,
+            propsClassName,
+            className,
+            { [`${prefixCls}-has-suffix`]: hasSuffix.value },
+          )}
+          style={style}
+          classNames={mentionsClassNames}
+          styles={styles as any}
+          disabled={disabled}
+          onClear={onClear}
+        >
+          <InternalMentions
+            ref={mentionRef as any}
+            {...internalProps}
+          />
+        </BaseInput>
+      )
+    }
+  },
+  {
+    name: 'Mentions',
+    inheritAttrs: false,
+  },
+)
+
+export default Mentions
