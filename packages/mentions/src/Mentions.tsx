@@ -1,17 +1,22 @@
 import type { CommonInputProps } from '@v-c/input'
 import type { TextAreaProps, TextAreaRef } from '@v-c/textarea'
 import type { VueNode } from '@v-c/util'
-import type { CSSProperties } from 'vue'
+import type { CSSProperties, StyleValue } from 'vue'
 import type { OptionProps } from './Option'
-import { useId } from '@v-c/util'
+import { KeyCode, useId } from '@v-c/util'
 import { toArray } from '@v-c/util/dist/Children/toArray'
-import { filterEmpty } from '@v-c/util/dist/props-util'
+import { filterEmpty, getAttrStyleAndClass } from '@v-c/util/dist/props-util'
 import { computed, defineComponent, shallowRef, watch } from 'vue'
 import { useUnstableContext } from './context'
-import useEffectState from './hooks/useEffectState.ts'
+import useEffectState from './hooks/useEffectState'
 import {
   filterOption as defaultFilterOption,
   validateSearch as defaultValidateSearch,
+  getBeforeSelectionText,
+  getLastMeasureIndex,
+  replaceWithMeasure,
+  setInputSelection,
+  validateSearch,
 } from './util'
 
 type BaseTextareaAttrs = Omit<
@@ -33,7 +38,7 @@ export interface MentionsProps extends BaseTextareaAttrs {
   defaultValue?: string
   notFoundContent?: VueNode
   split?: string
-  style?: CSSProperties
+  style?: StyleValue
   transitionName?: string
   placement?: Placement
   direction?: Direction
@@ -207,7 +212,195 @@ const InternalMentions = defineComponent<InternalMentionsProps>(
     // Mark that we will reset input selection to target position when user select option
     const onSelectionEffect = useEffectState()
 
+    const startMeasure = (
+      nextMeasureText: string,
+      nextMeasurePrefix: string,
+      nextMeasureLocation: number,
+    ) => {
+      measuring.value = true
+      measureText.value = nextMeasureText
+      measurePrefix.value = nextMeasurePrefix
+      measureLocation.value = nextMeasureLocation
+      activeIndex.value = 0
+    }
+
+    const stopMeasure = (callback?: VoidFunction) => {
+      measuring.value = false
+      measureLocation.value = 0
+      measureText.value = ''
+      onSelectionEffect(callback)
+    }
+
+    // ============================== Change ==============================
+    const triggerChange = (nextValue: string) => {
+      mergedValue.value = nextValue
+      props?.onChange?.(nextValue)
+    }
+
+    const onInternalChange = (e: any) => {
+      const nextValue = e?.target?.value
+      triggerChange(nextValue)
+    }
+
+    const selectOption = (option: OptionProps) => {
+      const { value: mentionValue = '' } = option
+      const textArea = getTextArea()!
+      const { text, selectionLocation } = replaceWithMeasure(mergedValue.value, {
+        measureLocation: mergedMeasureLocation.value,
+        targetText: mentionValue,
+        prefix: mergedMeasurePrefix.value,
+        selectionStart: textArea?.selectionStart as number,
+        split: props.split!,
+      })
+      triggerChange(text)
+      stopMeasure(() => {
+        // We need restore the selection position
+        setInputSelection(textArea, selectionLocation)
+      })
+
+      props?.onSelect?.(option, mergedMeasurePrefix.value)
+    }
+
+    // ============================= KeyEvent =============================
+    // Check if hit the measure keyword
+    const onInternalKeyDown = (event: any) => {
+      const { which } = event
+      props?.onKeydown?.(event)
+      // Skip if not measuring
+      if (!mergedMeasuring.value) {
+        return
+      }
+      if (which === KeyCode.UP || which === KeyCode.DOWN) {
+        // Control arrow function
+        const optionLen = mergedOptions.value.length
+        const offset = which === KeyCode.UP ? -1 : 1
+        activeIndex.value = (activeIndex.value + offset + optionLen) % optionLen
+        event.preventDefault()
+      }
+      else if (which === KeyCode.ESC) {
+        stopMeasure()
+      }
+      else if (which === KeyCode.ENTER) {
+        // Measure hit
+        event.preventDefault()
+        // loading skip
+        if (props?.silent) {
+          return
+        }
+
+        if (!mergedOptions.value.length) {
+          stopMeasure()
+        }
+
+        const option = mergedOptions.value[activeIndex.value]
+        selectOption(option)
+      }
+    }
+
+    /**
+     * When to start measure:
+     * 1. When user press `prefix`
+     * 2. When measureText !== prevMeasureText
+     *  - If measure hit
+     *  - If measuring
+     *
+     * When to stop measure:
+     * 1. Selection is out of range
+     * 2. Contains `space`
+     * 3. ESC or select one
+     */
+    const onInternalKeyUp = (event: any) => {
+      const { key, which } = event
+      const target = event.target as HTMLTextAreaElement
+      const selectionStartText = getBeforeSelectionText(target)
+      const { location: measureIndex, prefix: nextMeasurePrefix } = getLastMeasureIndex(selectionStartText, mergedPrefix.value as string[])
+
+      // If the client implements an onKeyUp handler, call it
+      props?.onKeyup?.(event)
+      // Skip if match the white key list
+      if (
+        [KeyCode.ESC, KeyCode.UP, KeyCode.DOWN, KeyCode.ENTER].includes(which)
+      ) {
+        return
+      }
+      if (measureIndex !== -1) {
+        const nextMeasureText = selectionStartText.slice(
+          measureIndex + nextMeasurePrefix.length,
+        )
+        const validateMeasure: boolean = validateSearch(nextMeasureText, props.split!)
+        const matchOption = !!getOptions(nextMeasureText).length
+
+        if (validateMeasure) {
+          // adding AltGraph also fort azert keyboard
+          if (
+            key === nextMeasurePrefix
+            || key === 'Shift'
+            || which === KeyCode.ALT
+            || key === 'AltGraph'
+            || mergedMeasuring.value
+            || (nextMeasureText !== mergedMeasureText.value && matchOption)
+          ) {
+            startMeasure(nextMeasureText, nextMeasurePrefix, measureIndex)
+          }
+        }
+        else if (mergedMeasuring.value) {
+          // Stop if measureText is invalidate
+          stopMeasure()
+        }
+        /**
+         * We will trigger `onSearch` to developer since they may use for async update.
+         * If met `space` means user finished searching.
+         */
+        const onSearch = props?.onSearch
+        if (onSearch && validateMeasure) {
+          onSearch(nextMeasureText, nextMeasurePrefix)
+        }
+      }
+      else if (mergedMeasuring.value) {
+        stopMeasure()
+      }
+    }
+
+    const onInternalPressEnter = (event: any) => {
+      const onPressEnter = props?.onPressEnter
+      if (!mergedMeasuring.value && onPressEnter) {
+        onPressEnter(event)
+      }
+    }
+    // ============================ Focus Blur ============================
+    const focusRef = shallowRef<number>()
+    const onInternalFocus = (event?: FocusEvent) => {
+      window.clearTimeout(focusRef.value)
+      const onFocus = props?.onFocus
+      if (!isFocus.value && event && onFocus) {
+        onFocus(event)
+      }
+      isFocus.value = true
+    }
+
+    const onInternalBlur = (event?: any) => {
+      focusRef.value = window.setTimeout(() => {
+        isFocus.value = false
+        stopMeasure()
+        props?.onBlur?.(event)
+      }, 0)
+    }
+
+    const onDropdownFocus = () => {
+      onInternalFocus()
+    }
+
+    const onDropdownBlur = () => {
+      onInternalBlur()
+    }
+
+    // ============================== Scroll ===============================
+    const onInternalPopupScroll = (event: UIEvent) => {
+      props?.onPopupScroll?.(event)
+    }
     return () => {
+      const { style } = props
+      const { className, restAttrs } = getAttrStyleAndClass(attrs)
       return null
     }
   },
