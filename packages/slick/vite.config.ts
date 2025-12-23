@@ -7,7 +7,7 @@ const entry = fg.sync(['src/**/*.ts', 'src/**/*.tsx', '!src/**/*.test.ts', '!src
 
 export default defineConfig({
   ...mergeConfig(buildCommon({
-    external: ['vue', /^@v-c\//, 'throttle-debounce', 'json2mq'],
+    external: ['vue', /^@v-c\//, 'es-toolkit'],
   }), {
     build: {
       lib: {
