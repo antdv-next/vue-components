@@ -1,10 +1,18 @@
-export const baseUrl = '/img/react-slick'
+// @ts-expect-error this img
+import abstract01 from './img/react-slick/abstract01.jpg'
+// @ts-expect-error this img
+import abstract02 from './img/react-slick/abstract02.jpg'
+// @ts-expect-error this img
+import abstract03 from './img/react-slick/abstract03.jpg'
+// @ts-expect-error this img
+import abstract04 from './img/react-slick/abstract04.jpg'
 
+export const baseUrl = '/img/react-slick'
 export const imageUrls = [
-  `${baseUrl}/abstract01.jpg`,
-  `${baseUrl}/abstract02.jpg`,
-  `${baseUrl}/abstract03.jpg`,
-  `${baseUrl}/abstract04.jpg`,
+  abstract01,
+  abstract02,
+  abstract03,
+  abstract04,
 ]
 
 export function renderNumberSlides(count: number, start = 1) {
