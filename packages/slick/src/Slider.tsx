@@ -1,11 +1,21 @@
 import type { InnerSliderRef, SlickProps, SlickRef } from './interface'
 import { toArray } from '@v-c/util/dist/Children/toArray'
 import { filterEmpty } from '@v-c/util/dist/props-util'
-import json2mq from 'json2mq'
 import { cloneVNode, defineComponent, isVNode, onBeforeUnmount, onMounted, shallowRef } from 'vue'
 import defaultProps from './default-props'
 import InnerSlider from './InnerSlider'
 import { canUseDOM, filterSettings } from './utils/innerSliderUtils'
+
+function toMediaQuery(query: { minWidth?: number, maxWidth?: number }) {
+  const parts: string[] = []
+  if (typeof query.minWidth === 'number') {
+    parts.push(`(min-width: ${query.minWidth}px)`)
+  }
+  if (typeof query.maxWidth === 'number') {
+    parts.push(`(max-width: ${query.maxWidth}px)`)
+  }
+  return parts.join(' and ')
+}
 
 const Slider = defineComponent<SlickProps>((props, { slots, expose }) => {
   const breakpoint = shallowRef<number | null>(null)
@@ -39,10 +49,10 @@ const Slider = defineComponent<SlickProps>((props, { slots, expose }) => {
       breakpoints.forEach((value, index) => {
         let bQuery = ''
         if (index === 0) {
-          bQuery = json2mq({ minWidth: 0, maxWidth: value })
+          bQuery = toMediaQuery({ minWidth: 0, maxWidth: value })
         }
         else {
-          bQuery = json2mq({
+          bQuery = toMediaQuery({
             minWidth: breakpoints[index - 1] + 1,
             maxWidth: value,
           })
@@ -52,7 +62,7 @@ const Slider = defineComponent<SlickProps>((props, { slots, expose }) => {
         })
       })
 
-      const query = json2mq({ minWidth: breakpoints.slice(-1)[0] })
+      const query = toMediaQuery({ minWidth: breakpoints.slice(-1)[0] })
       canUseDOM() && media(query, () => {
         breakpoint.value = null
       })
