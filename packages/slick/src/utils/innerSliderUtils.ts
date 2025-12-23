@@ -1,3 +1,4 @@
+import { getStylePxValue } from '@v-c/util/dist/props-util'
 import defaultProps from '../default-props'
 
 interface TouchObject {
@@ -711,9 +712,9 @@ export function getTrackCSS(spec: SlickSpec) {
   if (spec.fade)
     style = { opacity: 1 }
   if (trackWidth)
-    style.width = trackWidth
+    style.width = getStylePxValue(trackWidth)
   if (trackHeight)
-    style.height = trackHeight
+    style.height = getStylePxValue(trackHeight)
 
   // Fallback for IE8
   // if (typeof window !== 'undefined' && window && !window.addEventListener && window.attachEvent) {

@@ -1,5 +1,6 @@
 import type { TrackProps } from './interface'
 import { clsx } from '@v-c/util'
+import { getStylePxValue } from '@v-c/util/dist/props-util'
 import { cloneVNode, defineComponent, isVNode } from 'vue'
 import {
   getPostClones,
@@ -60,16 +61,16 @@ function getSlideStyle(spec: TrackProps & { index: number }) {
   const style: Record<string, any> = {}
 
   if (spec.variableWidth === undefined || spec.variableWidth === false) {
-    style.width = spec.slideWidth
+    style.width = getStylePxValue(spec.slideWidth)
   }
 
   if (spec.fade) {
     style.position = 'relative'
     if (spec.vertical && spec.slideHeight) {
-      style.top = -spec.index * parseInt(String(spec.slideHeight), 10)
+      style.top = getStylePxValue(-spec.index * parseInt(String(spec.slideHeight), 10))
     }
     else if (spec.slideWidth) {
-      style.left = -spec.index * parseInt(String(spec.slideWidth), 10)
+      style.left = getStylePxValue(-spec.index * parseInt(String(spec.slideWidth), 10))
     }
     style.opacity = spec.currentSlide === spec.index ? 1 : 0
     style.zIndex = spec.currentSlide === spec.index ? 999 : 998
