@@ -1,4 +1,4 @@
-import type { Reactive } from 'vue'
+import type { ComputedRef } from 'vue'
 import type { GenerateConfig } from '../../../generate'
 import type { Locale, SelectorProps } from '../../../interface'
 import { warning } from '@v-c/util'
@@ -99,30 +99,30 @@ export type UseInputProps<DateType extends object = any> = Pick<
 }
 
 export default function useInputProps<DateType extends object = any>(
-  props: Reactive<UseInputProps<DateType>>,
+  props: ComputedRef<UseInputProps<DateType>>,
   /** Used for SinglePicker */
   postProps?: (info: { valueTexts: string[] }) => Partial<InputProps>,
 ) {
   // ======================== Parser ========================
   const parseDate = (str: string, formatStr: string) => {
-    const { generateConfig, locale } = props
+    const { generateConfig, locale } = props.value
     const parsed = generateConfig.locale.parse(locale.locale, str, [formatStr])
     return parsed && generateConfig.isValidate(parsed) ? parsed : null
   }
 
   // ========================= Text =========================
-  const firstFormat = computed(() => props.format[0])
+  const firstFormat = computed(() => props.value.format[0])
 
   const getText = (date: DateType) => {
-    const { locale, generateConfig } = props
+    const { locale, generateConfig } = props.value
     return formatValue(date, { locale, format: firstFormat.value, generateConfig })
   }
 
-  const valueTexts = computed(() => (props.value as DateType[] || []).map(getText))
+  const valueTexts = computed(() => (props.value.value || []).map(getText))
 
   // ========================= Size =========================
   const size = computed(() => {
-    const { picker, generateConfig } = props
+    const { picker, generateConfig } = props.value
     const defaultSize = picker === 'time' ? 8 : 10
     const length
       = typeof firstFormat.value === 'function'
@@ -133,7 +133,7 @@ export default function useInputProps<DateType extends object = any>(
 
   // ======================= Validate =======================
   const validateFormat = (text: string) => {
-    const { format } = props
+    const { format } = props.value
     for (let i = 0; i < format.length; i += 1) {
       const singleFormat = format[i]
 
@@ -182,7 +182,7 @@ export default function useInputProps<DateType extends object = any>(
       onOpenChange,
       onKeyDown,
       open,
-    } = props
+    } = props.value
 
     const inputProps: InputProps = {
       ...pickedAttrs,

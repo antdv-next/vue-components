@@ -1,6 +1,7 @@
 import type { ComputedRef, Ref } from 'vue'
 import type { FormatType, InternalMode, PickerMode } from '../../interface'
 import type { RangePickerProps } from '../RangePicker'
+import type { PickerProps } from '../SinglePicker'
 import { warning } from '@v-c/util'
 import { computed } from 'vue'
 import useLocale from '../../hooks/useLocale'
@@ -66,7 +67,7 @@ function useList<T>(value: Ref<T | T[] | undefined>, fillMode = false) {
   })
 }
 
-type FilledProps<InProps extends PickedProps, DateType extends GetGeneric<InProps>, UpdaterProps extends object> = ComputedRef<Omit<InProps, keyof UpdaterProps | 'showTime' | 'value' | 'defaultValue'>
+type FilledProps<InProps extends PickedProps, DateType extends GetGeneric<InProps>, UpdaterProps extends object = object> = Omit<InProps, keyof UpdaterProps | 'showTime' | 'value' | 'defaultValue'>
   & UpdaterProps & {
     picker: PickerMode
     showTime?: ExcludeBooleanType<InProps['showTime']>
@@ -74,7 +75,8 @@ type FilledProps<InProps extends PickedProps, DateType extends GetGeneric<InProp
     defaultValue?: ToArrayType<InProps['value'], DateType>
     pickerValue?: ToArrayType<InProps['value'], DateType>
     defaultPickerValue?: ToArrayType<InProps['value'], DateType>
-  }>
+  }
+
 /**
  * Align the outer props with unique typed and fill undefined props.
  * This is shared with both RangePicker and Picker. This will do:
@@ -82,14 +84,14 @@ type FilledProps<InProps extends PickedProps, DateType extends GetGeneric<InProp
  * - handle the legacy props fill like `clearIcon` + `allowClear` = `clearIcon`
  */
 export default function useFilledProps<
-  InProps extends PickedProps,
+  InProps extends PickerProps,
   DateType extends GetGeneric<InProps>,
   UpdaterProps extends object,
 >(
   props: InProps,
   updater?: () => UpdaterProps,
 ): [
-  filledProps: FilledProps<InProps, DateType, UpdaterProps>,
+  filledProps: ComputedRef<FilledProps<InProps, DateType, UpdaterProps>>,
   internalPicker: ComputedRef<InternalMode>,
   complexPicker: ComputedRef<boolean | undefined>,
   formatList: ComputedRef<FormatType<DateType>[]>,
@@ -98,7 +100,7 @@ export default function useFilledProps<
 ] {
   // Default Values
   const mergedPicker = computed(() => props.picker || 'date')
-  const mergedPrefixCls = computed(() => props.prefixCls || 'rc-picker')
+  const mergedPrefixCls = computed(() => props.prefixCls || 'vc-picker')
   const mergedPreviewValue = computed(() => props.previewValue || 'hover')
   const mergedStyles = computed(() => props.styles || {})
   const mergedClassNames = computed(() => props.classNames || {})
@@ -213,15 +215,20 @@ export default function useFilledProps<
   )
 
   // ======================== Merged ========================
-  const mergedProps = computed(() => ({
-    ...filledProps.value,
-    needConfirm: mergedNeedConfirm.value,
-    inputReadOnly: mergedInputReadOnly.value,
-    disabledDate: disabledBoundaryDate,
-  }))
+  const mergedProps: ComputedRef<FilledProps<InProps, DateType, UpdaterProps>> = computed(
+    () => {
+      const target = {
+        ...filledProps.value,
+        needConfirm: mergedNeedConfirm.value,
+        inputReadOnly: mergedInputReadOnly.value,
+        disabledDate: disabledBoundaryDate,
+      }
+      return target as unknown as FilledProps<InProps, DateType, UpdaterProps>
+    },
+  )
 
   return [
-    mergedProps as unknown as FilledProps<InProps, DateType, UpdaterProps>,
+    mergedProps,
     internalPicker,
     complexPicker,
     formatList,

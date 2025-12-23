@@ -52,21 +52,6 @@ function orderDates<DateType extends object, DatesType extends DateType[]>(
   return [...dates].sort((a, b) => (generateConfig.isAfter(a, b) ? 1 : -1)) as DatesType
 }
 
-function useSyncState<T>(defaultState: Ref<T>, onChange?: (next: T) => void) {
-  const state = ref<T>(defaultState.value) as Ref<T>
-
-  watch(defaultState, (val) => {
-    state.value = val
-  })
-
-  const setValue = (next: T) => {
-    state.value = next
-    onChange?.(next)
-  }
-
-  return [state, setValue] as const
-}
-
 /**
  * Control the internal `value` align with prop `value` and provide a temp `calendarValue` for ui.
  * `calendarValue` will be reset when blur & focus & open.

@@ -141,10 +141,10 @@ export default defineComponent({
 
     // ======================== Inputs ========================
     const [getInputProps, getText] = useInputProps(
-      {
+      computed(() => ({
         ...props,
         onChange: onSingleChange,
-      } as any,
+      })),
       ({ valueTexts }) => ({
         value: valueTexts[0] || '',
         active: props.focused,

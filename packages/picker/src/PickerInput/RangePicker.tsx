@@ -1,5 +1,6 @@
+import type { VueNode } from '@v-c/util/dist/type'
 import type { PropType } from 'vue'
-import type { BaseInfo, InternalMode, OpenConfig, PanelMode, RangeTimeProps } from '../interface'
+import type { BaseInfo, InternalMode, OpenConfig, PanelMode, RangeTimeProps, SharedPickerProps, ValueDate } from '../interface'
 import type { PopupShowTimeConfig } from './Popup'
 import type { SelectorIdType } from './Selector/RangeSelector'
 import { clsx } from '@v-c/util'
@@ -31,7 +32,7 @@ export interface BaseRangePickerProps<DateType extends object>
   // Structure
   id?: SelectorIdType
 
-  separator?: React.ReactNode
+  separator?: VueNode
 
   // Value
   value?: RangeValueType<DateType> | null

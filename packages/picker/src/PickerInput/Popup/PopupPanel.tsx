@@ -18,7 +18,7 @@ type PopupPanelPropsWrapper<DateType extends object = any>
     & Omit<PickerPanelProps<DateType>, 'onPickerValueChange' | 'showTime'>
     & FooterProps<DateType>
 
-interface PopupPanelProps<DateType extends object = any>
+export interface PopupPanelProps<DateType extends object = any>
   extends /* @vue-ignore */ PopupPanelPropsWrapper<DateType> {
   multiplePanel?: boolean
   range?: boolean

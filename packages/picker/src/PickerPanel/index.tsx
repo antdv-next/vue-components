@@ -186,7 +186,7 @@ export default defineComponent({
     const pickerContext = usePickerContext()
     const rootRef = ref<HTMLDivElement>()
 
-    const mergedPrefixCls = computed(() => pickerContext.value.prefixCls || props.prefixCls || 'rc-picker')
+    const mergedPrefixCls = computed(() => pickerContext.value.prefixCls || props.prefixCls || 'vc-picker')
 
     // Time
     const timePropsInfo = computed(() => getTimeProps({
