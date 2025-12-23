@@ -16,6 +16,7 @@ import {
   nextTick,
   onBeforeUnmount,
   onMounted,
+  onUpdated,
   reactive,
   shallowRef,
   watch,
@@ -43,8 +44,8 @@ import {
   swipeStart as swipeStartUtil,
 } from './utils/innerSliderUtils'
 
-const InnerSlider = defineComponent<SlickProps>((props, { slots, expose }) => {
-  const mergedProps = computed(() => ({ ...defaultProps, ...props })) as ComputedRef<Required<SlickProps>>
+const InnerSlider = defineComponent<SlickProps>((props = defaultProps, { slots, expose }) => {
+  const mergedProps = computed(() => ({ ...props })) as ComputedRef<Required<SlickProps>>
   const listRef = shallowRef<HTMLDivElement | null>(null)
   const trackRef = shallowRef<HTMLDivElement | null>(null)
   const callbackTimers: Array<ReturnType<typeof setTimeout>> = []
@@ -56,19 +57,21 @@ const InnerSlider = defineComponent<SlickProps>((props, { slots, expose }) => {
   let asNavForIndex: number | null = null
   let clickable = true
 
-  const children = computed(() => {
-    const rawChildren = slots.default?.() ?? []
+  let latestChildren: any[] = []
+  let latestChildrenCount = 0
+  let lastChildrenCount = 0
+
+  const resolveChildren = () => {
+    const rawChildren = slots?.default?.() || []
     const flattened = filterEmpty(toArray(rawChildren))
     return flattened.filter(child => child !== false)
-  })
-
-  const childrenCount = computed(() => children.value.length)
+  }
 
   const state = reactive<InnerSliderState>({
     ...initialState,
     currentSlide: mergedProps.value.initialSlide ?? 0,
     targetSlide: mergedProps.value.initialSlide ?? 0,
-    slideCount: childrenCount.value,
+    slideCount: 0,
   })
 
   const setState = (nextState: Partial<InnerSliderState>, callback?: () => void) => {
@@ -83,7 +86,8 @@ const InnerSlider = defineComponent<SlickProps>((props, { slots, expose }) => {
     ...state,
     listRef: listRef.value,
     trackRef: trackRef.value,
-    children: children.value,
+    slideCount: latestChildrenCount,
+    children: latestChildren,
     ...extra,
   })
 
@@ -115,11 +119,14 @@ const InnerSlider = defineComponent<SlickProps>((props, { slots, expose }) => {
   }
 
   const ssrInit = () => {
+    if (latestChildrenCount === 0) {
+      return {}
+    }
     if (mergedProps.value.variableWidth) {
       let trackWidth = 0
       let trackLeft = 0
       const childrenWidths: number[] = []
-      const slideCount = childrenCount.value
+      const slideCount = latestChildrenCount
       const preClones = getPreClones({
         ...mergedProps.value,
         ...state,
@@ -131,7 +138,7 @@ const InnerSlider = defineComponent<SlickProps>((props, { slots, expose }) => {
         slideCount,
       })
 
-      children.value.forEach((child: any) => {
+      latestChildren.forEach((child: any) => {
         const width = child?.props?.style?.width
         const widthValue = typeof width === 'number'
           ? width
@@ -161,7 +168,7 @@ const InnerSlider = defineComponent<SlickProps>((props, { slots, expose }) => {
       return { trackStyle }
     }
 
-    const slideCount = childrenCount.value
+    const slideCount = latestChildrenCount
     const spec = { ...mergedProps.value, ...state, slideCount }
     const totalSlideCount = getPreClones(spec) + getPostClones(spec) + slideCount
     const trackWidth = (100 / mergedProps.value.slidesToShow) * totalSlideCount
@@ -602,6 +609,7 @@ const InnerSlider = defineComponent<SlickProps>((props, { slots, expose }) => {
   }
 
   onMounted(() => {
+    lastChildrenCount = latestChildrenCount
     mergedProps.value.onInit?.()
     if (mergedProps.value.lazyLoad) {
       const slidesToLoad = getOnDemandLazySlides(getSpec())
@@ -652,7 +660,12 @@ const InnerSlider = defineComponent<SlickProps>((props, { slots, expose }) => {
     }
   })
 
-  watch([mergedProps, childrenCount], ([nextProps, nextCount], [prevProps, prevCount]) => {
+  const handlePropsOrChildrenChange = (
+    prevProps: SlickProps,
+    nextProps: SlickProps,
+    prevCount: number,
+    nextCount: number,
+  ) => {
     if (!prevProps) {
       return
     }
@@ -676,10 +689,10 @@ const InnerSlider = defineComponent<SlickProps>((props, { slots, expose }) => {
     )
     if (setTrackStyle) {
       updateState(getSpec(), setTrackStyle, () => {
-        if (state.currentSlide >= childrenCount.value) {
+        if (state.currentSlide >= latestChildrenCount) {
           changeSlide({
             message: 'index',
-            index: childrenCount.value - mergedProps.value.slidesToShow,
+            index: latestChildrenCount - mergedProps.value.slidesToShow,
             currentSlide: state.currentSlide,
           })
         }
@@ -699,7 +712,31 @@ const InnerSlider = defineComponent<SlickProps>((props, { slots, expose }) => {
         }
       })
     }
+  }
+
+  watch(mergedProps, (nextProps, prevProps) => {
+    if (prevProps) {
+      handlePropsOrChildrenChange(
+        prevProps as SlickProps,
+        nextProps as SlickProps,
+        lastChildrenCount,
+        latestChildrenCount,
+      )
+      lastChildrenCount = latestChildrenCount
+    }
   }, { flush: 'post' })
+
+  onUpdated(() => {
+    if (latestChildrenCount !== lastChildrenCount) {
+      handlePropsOrChildrenChange(
+        mergedProps.value,
+        mergedProps.value,
+        lastChildrenCount,
+        latestChildrenCount,
+      )
+      lastChildrenCount = latestChildrenCount
+    }
+  })
 
   onBeforeUnmount(() => {
     if (animationEndCallback) {
@@ -738,6 +775,9 @@ const InnerSlider = defineComponent<SlickProps>((props, { slots, expose }) => {
   })
 
   return () => {
+    const renderChildren = resolveChildren()
+    latestChildren = renderChildren
+    latestChildrenCount = renderChildren.length
     const className = clsx('slick-slider', mergedProps.value.className, {
       'slick-vertical': mergedProps.value.vertical,
       'slick-initialized': true,
@@ -745,7 +785,8 @@ const InnerSlider = defineComponent<SlickProps>((props, { slots, expose }) => {
     const spec = {
       ...mergedProps.value,
       ...state,
-      children: children.value,
+      slideCount: latestChildrenCount,
+      children: renderChildren,
     }
     let trackProps = extractObject(spec, [
       'fade',
@@ -781,12 +822,12 @@ const InnerSlider = defineComponent<SlickProps>((props, { slots, expose }) => {
       focusOnSelect: mergedProps.value.focusOnSelect && clickable
         ? selectHandler
         : undefined,
-      children: children.value,
+      children: renderChildren,
       nodeRef: trackRef,
     }
 
     let dots: any
-    if (mergedProps.value.dots === true && state.slideCount >= mergedProps.value.slidesToShow) {
+    if (mergedProps.value.dots === true && latestChildrenCount >= mergedProps.value.slidesToShow) {
       let dotProps = extractObject(spec, [
         'dotsClass',
         'slideCount',
