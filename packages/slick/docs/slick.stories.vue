@@ -38,94 +38,154 @@ import './assets/docs.css'
 <template>
   <Story title="Slick">
     <Variant title="Simple">
-      <SimpleSlider />
+      <div class="content">
+        <SimpleSlider />
+      </div>
     </Variant>
     <Variant title="AdaptiveHeight">
-      <AdaptiveHeight />
+      <div class="content">
+        <AdaptiveHeight />
+      </div>
     </Variant>
     <Variant title="AppendDots">
-      <AppendDots />
+      <div class="content">
+        <AppendDots />
+      </div>
     </Variant>
     <Variant title="AsNavFor">
-      <AsNavFor />
+      <div class="content">
+        <AsNavFor />
+      </div>
     </Variant>
     <Variant title="AutoPlay">
-      <AutoPlay />
+      <div class="content">
+        <AutoPlay />
+      </div>
     </Variant>
     <Variant title="AutoPlayMethods">
-      <AutoPlayMethods />
+      <div class="content">
+        <AutoPlayMethods />
+      </div>
     </Variant>
     <Variant title="CenterMode">
-      <CenterMode />
+      <div class="content">
+        <CenterMode />
+      </div>
     </Variant>
     <Variant title="CustomArrows">
-      <CustomArrows />
+      <div class="content">
+        <CustomArrows />
+      </div>
     </Variant>
     <Variant title="CustomPaging">
-      <CustomPaging />
+      <div class="content">
+        <CustomPaging />
+      </div>
     </Variant>
     <Variant title="CustomSlides">
-      <CustomSlides />
+      <div class="content">
+        <CustomSlides />
+      </div>
     </Variant>
     <Variant title="DynamicSlides">
-      <DynamicSlides />
+      <div class="content">
+        <DynamicSlides />
+      </div>
     </Variant>
     <Variant title="Fade">
-      <Fade />
+      <div class="content">
+        <Fade />
+      </div>
     </Variant>
     <Variant title="FocusOnSelect">
-      <FocusOnSelect />
+      <div class="content">
+        <FocusOnSelect />
+      </div>
     </Variant>
     <Variant title="LazyLoad">
-      <LazyLoad />
+      <div class="content">
+        <LazyLoad />
+      </div>
     </Variant>
     <Variant title="MultipleItems">
-      <MultipleItems />
+      <div class="content">
+        <MultipleItems />
+      </div>
     </Variant>
     <Variant title="MultipleRows">
-      <MultipleRows />
+      <div class="content">
+        <MultipleRows />
+      </div>
     </Variant>
     <Variant title="PauseOnHover">
-      <PauseOnHover />
+      <div class="content">
+        <PauseOnHover />
+      </div>
     </Variant>
     <Variant title="PreviousNextMethods">
-      <PreviousNextMethods />
+      <div class="content">
+        <PreviousNextMethods />
+      </div>
     </Variant>
     <Variant title="Resizable">
-      <Resizable />
+      <div class="content">
+        <Resizable />
+      </div>
     </Variant>
     <Variant title="Responsive">
-      <Responsive />
+      <div class="content">
+        <Responsive />
+      </div>
     </Variant>
     <Variant title="Rtl">
-      <Rtl />
+      <div class="content">
+        <Rtl />
+      </div>
     </Variant>
     <Variant title="SlickGoTo">
-      <SlickGoTo />
+      <div class="content">
+        <SlickGoTo />
+      </div>
     </Variant>
     <Variant title="SlideChangeHooks">
-      <SlideChangeHooks />
+      <div class="content">
+        <SlideChangeHooks />
+      </div>
     </Variant>
     <Variant title="SwipeToSlide">
-      <SwipeToSlide />
+      <div class="content">
+        <SwipeToSlide />
+      </div>
     </Variant>
     <Variant title="UnevenSetsFinite">
-      <UnevenSetsFinite />
+      <div class="content">
+        <UnevenSetsFinite />
+      </div>
     </Variant>
     <Variant title="UnevenSetsInfinite">
-      <UnevenSetsInfinite />
+      <div class="content">
+        <UnevenSetsInfinite />
+      </div>
     </Variant>
     <Variant title="VariableWidth">
-      <VariableWidth />
+      <div class="content">
+        <VariableWidth />
+      </div>
     </Variant>
     <Variant title="VerticalMode">
-      <VerticalMode />
+      <div class="content">
+        <VerticalMode />
+      </div>
     </Variant>
     <Variant title="VerticalModeWhenUnslick">
-      <VerticalModeWhenUnslick />
+      <div class="content">
+        <VerticalModeWhenUnslick />
+      </div>
     </Variant>
     <Variant title="VerticalSwipeToSlide">
-      <VerticalSwipeToSlide />
+      <div class="content">
+        <VerticalSwipeToSlide />
+      </div>
     </Variant>
   </Story>
 </template>
