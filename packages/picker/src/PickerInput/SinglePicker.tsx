@@ -2,8 +2,6 @@ import type { PropType } from 'vue'
 import type {
   BaseInfo,
   PanelMode,
-  PickerMode,
-  PickerRef,
   SelectorProps,
   SharedPickerProps,
   SharedTimeProps,
