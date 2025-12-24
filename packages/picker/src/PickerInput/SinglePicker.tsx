@@ -102,7 +102,14 @@ export interface BasePickerProps<
 export interface PickerProps<DateType extends object = any>
   extends /** @vue-ignore */ BasePickerProps<DateType>, Omit<SharedTimeProps<DateType>, 'format' | 'defaultValue'> {}
 
-export default defineComponent(<DateType extends object = any>(props: PickerProps<DateType>, { expose }: { expose: (props: Record<string, any>) => void }) => {
+export default defineComponent(<DateType extends object = any>(props: PickerProps<DateType>, { attrs, expose }: { attrs: Record<string, any>, expose: (props: Record<string, any>) => void }) => {
+  const allProps = computed(() => {
+    return {
+      ...props,
+      ...attrs,
+    }
+  })
+
   // ========================= Prop =========================
   const [
     filledProps,
@@ -111,7 +118,7 @@ export default defineComponent(<DateType extends object = any>(props: PickerProp
     formatList,
     maskFormat,
     isInvalidateDate,
-  ] = useFilledProps(props as any)
+  ] = useFilledProps(allProps as any)
 
   // Destructure filledProps using toRefs to keep reactivity?
   // filledProps is a ComputedRef. We can access .value.
@@ -271,6 +278,7 @@ export default defineComponent(<DateType extends object = any>(props: PickerProp
     showNow,
     showToday,
   )
+  console.log(picker.value, mergedMode.value, showNow.value, showToday.value, mergedShowNow)
 
   // ======================== Value =========================
   const onInternalChange = (dates: any[], dateStrings: string[]) => {
@@ -793,9 +801,18 @@ export default defineComponent(<DateType extends object = any>(props: PickerProp
 
     // ... other props like showTime, etc.
     showTime: [Boolean, Object],
-    showNow: Boolean,
-    showToday: Boolean,
-    defaultOpen: Boolean,
+    showNow: {
+      type: Boolean,
+      default: undefined,
+    },
+    showToday: {
+      type: Boolean,
+      default: undefined,
+    },
+    defaultOpen: {
+      type: Boolean,
+      default: undefined,
+    },
     open: { type: Boolean, default: undefined },
     onOpenChange: Function as PropType<PickerProps<any>['onOpenChange']>,
     className: String,

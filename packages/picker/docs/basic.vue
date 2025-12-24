@@ -52,6 +52,17 @@ const weekRef = ref()
         />
         <Picker v-bind="sharedProps" :locale="enUS" :value="value" />
       </div>
+
+      <div style="margin: 0 8px">
+        <h3>Uncontrolled</h3>
+        <Picker
+          :generate-config="momentGenerateConfig"
+          :locale="zhCN"
+          allow-clear
+          show-today
+          :render-extra-footer="() => 'extra'"
+        />
+      </div>
     </div>
   </div>
 </template>

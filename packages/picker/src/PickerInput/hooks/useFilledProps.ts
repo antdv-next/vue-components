@@ -88,7 +88,7 @@ export default function useFilledProps<
   DateType extends GetGeneric<InProps>,
   UpdaterProps extends object,
 >(
-  props: InProps,
+  props: ComputedRef<InProps>,
   updater?: () => UpdaterProps,
 ): [
   filledProps: ComputedRef<FilledProps<InProps, DateType, UpdaterProps>>,
@@ -99,34 +99,34 @@ export default function useFilledProps<
   isInvalidateDate: ReturnType<UseInvalidate<DateType>>,
 ] {
   // Default Values
-  const mergedPicker = computed(() => props.picker || 'date')
-  const mergedPrefixCls = computed(() => props.prefixCls || 'vc-picker')
-  const mergedPreviewValue = computed(() => props.previewValue || 'hover')
-  const mergedStyles = computed(() => props.styles || {})
-  const mergedClassNames = computed(() => props.classNames || {})
-  const mergedOrder = computed(() => props.order ?? true)
-  const mergedComponents = computed(() => ({ input: props.inputRender, ...props.components }))
+  const mergedPicker = computed(() => props.value.picker || 'date')
+  const mergedPrefixCls = computed(() => props.value.prefixCls || 'vc-picker')
+  const mergedPreviewValue = computed(() => props.value.previewValue || 'hover')
+  const mergedStyles = computed(() => props.value.styles || {})
+  const mergedClassNames = computed(() => props.value.classNames || {})
+  const mergedOrder = computed(() => props.value.order ?? true)
+  const mergedComponents = computed(() => ({ input: props.value.inputRender, ...props.value.components }))
 
-  const values = useList(computed(() => props.value))
-  const defaultValues = useList(computed(() => props.defaultValue))
-  const pickerValues = useList(computed(() => props.pickerValue))
-  const defaultPickerValues = useList(computed(() => props.defaultPickerValue))
+  const values = useList(computed(() => props.value.value))
+  const defaultValues = useList(computed(() => props.value.defaultValue))
+  const pickerValues = useList(computed(() => props.value.pickerValue))
+  const defaultPickerValues = useList(computed(() => props.value.defaultPickerValue))
 
   // ======================== Picker ========================
   /** Almost same as `picker`, but add `datetime` for `date` with `showTime` */
   const internalPicker = computed<InternalMode>(() =>
-    mergedPicker.value === 'date' && props.showTime ? 'datetime' : mergedPicker.value,
+    mergedPicker.value === 'date' && props.value.showTime ? 'datetime' : mergedPicker.value,
   )
 
   /** The picker is `datetime` or `time` */
   const multipleInteractivePicker = computed(() => internalPicker.value === 'time' || internalPicker.value === 'datetime')
-  const complexPicker = computed(() => multipleInteractivePicker.value || props.multiple)
-  const mergedNeedConfirm = computed(() => props.needConfirm ?? multipleInteractivePicker.value)
+  const complexPicker = computed(() => multipleInteractivePicker.value || props.value.multiple)
+  const mergedNeedConfirm = computed(() => props.value.needConfirm ?? multipleInteractivePicker.value)
 
   // ========================== Time ==========================
   // Auto `format` need to check `showTime.showXXX` first.
   // And then merge the `locale` into `mergedShowTime`.
-  const timePropsInfo = computed(() => getTimeProps(props))
+  const timePropsInfo = computed(() => getTimeProps(props.value))
 
   // [timeProps, localeTimeProps, showTimeFormat, propFormat]
   const timeProps = computed(() => timePropsInfo.value[0])
@@ -135,7 +135,7 @@ export default function useFilledProps<
   const propFormat = computed(() => timePropsInfo.value[3])
 
   // ======================= Locales ========================
-  const mergedLocale = useLocale(computed(() => props.locale), localeTimeProps)
+  const mergedLocale = useLocale(computed(() => props.value.locale), localeTimeProps)
 
   const mergedShowTime = computed(() =>
     fillShowTimeConfig(
@@ -165,7 +165,7 @@ export default function useFilledProps<
 
   // ======================== Props =========================
   const filledProps = computed(() => ({
-    ...props,
+    ...props.value,
     previewValue: mergedPreviewValue.value,
     prefixCls: mergedPrefixCls.value,
     locale: mergedLocale.value,
@@ -174,7 +174,7 @@ export default function useFilledProps<
     classNames: mergedClassNames.value,
     order: mergedOrder.value,
     components: mergedComponents.value,
-    clearIcon: fillClearIcon(mergedPrefixCls.value, props.allowClear, props.clearIcon),
+    clearIcon: fillClearIcon(mergedPrefixCls.value, props.value.allowClear, props.value.clearIcon),
     showTime: mergedShowTime.value,
     value: values.value,
     defaultValue: defaultValues.value,
@@ -187,28 +187,28 @@ export default function useFilledProps<
   const [formatList, maskFormat] = useFieldFormat<DateType>(
     internalPicker,
     mergedLocale,
-    computed(() => props.format),
+    computed(() => props.value.format),
   )
 
   // ======================= ReadOnly =======================
   const mergedInputReadOnly = useInputReadOnly(
     formatList,
-    computed(() => props.inputReadOnly),
-    computed(() => props.multiple),
+    computed(() => props.value.inputReadOnly),
+    computed(() => props.value.multiple),
   )
 
   // ======================= Boundary =======================
   const disabledBoundaryDate = useDisabledBoundary(
-    computed(() => props.generateConfig),
-    computed(() => props.locale),
-    computed(() => props.disabledDate),
-    computed(() => props.minDate),
-    computed(() => props.maxDate),
+    computed(() => props.value.generateConfig),
+    computed(() => props.value.locale),
+    computed(() => props.value.disabledDate),
+    computed(() => props.value.minDate),
+    computed(() => props.value.maxDate),
   )
 
   // ====================== Invalidate ======================
   const isInvalidateDate = useInvalidate(
-    computed(() => props.generateConfig),
+    computed(() => props.value.generateConfig),
     mergedPicker,
     disabledBoundaryDate as any, // useDisabledBoundary returns a function, which is compatible with DisabledDate
     mergedShowTime,

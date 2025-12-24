@@ -47,9 +47,8 @@ export type PopupProps<DateType extends object = any, PresetValue = DateType>
       styles?: SharedPickerProps['styles']
     }
 
-//  PopupProps<DateType>
-
-export default defineComponent(<DateType extends object = any>(props) => {
+//
+export default defineComponent(<DateType extends object = any>(props: PopupProps<DateType>) => {
   const activeInfo = computed(() => props.activeInfo || [0, 0, 0])
 
   const ctx = usePickerContext()
