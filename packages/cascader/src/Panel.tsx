@@ -188,12 +188,6 @@ const Panel = defineComponent<PanelProps>((props = panelDefaults) => {
       </div>
     )
   }
-}) as unknown as (<
-  OptionType extends DefaultOptionType = DefaultOptionType,
-  ValueField extends keyof OptionType = keyof OptionType,
-  Multiple extends boolean | any = false,
->(
-  props: PanelProps<OptionType, ValueField, Multiple>,
-) => any)
+})
 
 export default Panel

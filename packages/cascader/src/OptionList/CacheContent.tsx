@@ -10,15 +10,21 @@ const cacheContentDefaults: CacheContentProps = {
   open: false,
 }
 
-const CacheContent = defineComponent<CacheContentProps>((props = cacheContentDefaults, { slots }) => {
-  const cached = shallowRef<any[] | null>(null)
+const CacheContent = defineComponent<CacheContentProps>(
+  (props = cacheContentDefaults, { slots }) => {
+    const cached = shallowRef<any[] | null>(null)
 
-  return () => {
-    if (props.open || cached.value === null) {
-      cached.value = slots.default?.() ?? []
+    return () => {
+      if (props.open || cached.value === null) {
+        cached.value = slots.default?.() ?? []
+      }
+      return cached.value
     }
-    return cached.value
-  }
-})
+  },
+  {
+    inheritAttrs: false,
+    name: 'CacheContent',
+  },
+)
 
 export default CacheContent

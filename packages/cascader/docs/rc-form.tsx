@@ -1,7 +1,8 @@
 import type { CascaderProps } from '../src'
+import type { Option2 } from './utils'
+import { omit } from '@v-c/util'
 import { defineComponent, ref } from 'vue'
 import Cascader from '../src'
-import type { Option2 } from './utils'
 import { arrayTreeFilter } from './utils'
 import './assets/index.less'
 
@@ -78,8 +79,8 @@ const CascaderInput = defineComponent<{
   }
 
   return () => (
-    <Cascader {...props} onChange={onChange}>
-      <input placeholder={props.placeholder} value={getLabel()} readOnly />
+    <Cascader {...omit(props, ['onChange']) as any} onChange={onChange}>
+      <input placeholder={props.placeholder} value={getLabel()} readonly />
     </Cascader>
   )
 })

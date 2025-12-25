@@ -20,6 +20,9 @@ const OptionList = defineComponent((_, { expose }) => {
       }}
     />
   )
+}, {
+  name: 'OptionList',
+  inheritAttrs: false,
 })
 
 export default OptionList
