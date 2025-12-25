@@ -1,24 +1,25 @@
-import warning from '@v-c/util/dist/warning';
-import type { ExpandableConfig, LegacyExpandableProps } from '../interface';
+import type { ExpandableConfig, LegacyExpandableProps } from '../interface'
+import warning from '@v-c/util/dist/warning'
 
-export const INTERNAL_COL_DEFINE = 'RC_TABLE_INTERNAL_COL_DEFINE';
+export const INTERNAL_COL_DEFINE = 'RC_TABLE_INTERNAL_COL_DEFINE'
 
 export function getExpandableProps<RecordType>(
   props: LegacyExpandableProps<RecordType> & {
-    expandable?: ExpandableConfig<RecordType>;
+    expandable?: ExpandableConfig<RecordType>
   },
 ): ExpandableConfig<RecordType> {
-  const { expandable, ...legacyExpandableConfig } = props;
-  let config: ExpandableConfig<RecordType>;
+  const { expandable, ...legacyExpandableConfig } = props
+  let config: ExpandableConfig<RecordType>
   if (props.expandable !== undefined) {
     config = {
       ...legacyExpandableConfig,
       ...expandable,
-    } as ExpandableConfig<RecordType>;
-  } else {
+    } as ExpandableConfig<RecordType>
+  }
+  else {
     if (
-      process.env.NODE_ENV !== 'production' &&
-      [
+      process.env.NODE_ENV !== 'production'
+      && [
         'indentSize',
         'expandedRowKeys',
         'defaultExpandedRowKeys',
@@ -31,18 +32,18 @@ export function getExpandableProps<RecordType>(
         'expandedRowClassName',
         'expandIconColumnIndex',
         'showExpandColumn',
-      ].some(prop => prop in props)
+      ].some(prop => (props as any)[prop] !== undefined)
     ) {
-      warning(false, 'expanded related props have been moved into `expandable`.');
+      warning(false, 'expanded related props have been moved into `expandable`.')
     }
 
-    config = legacyExpandableConfig as ExpandableConfig<RecordType>;
+    config = legacyExpandableConfig as ExpandableConfig<RecordType>
   }
   if (config.showExpandColumn === false) {
-    config.expandIconColumnIndex = -1;
+    config.expandIconColumnIndex = -1
   }
 
-  return config;
+  return config
 }
 
 /**
@@ -50,12 +51,10 @@ export function getExpandableProps<RecordType>(
  * @param {object} props
  */
 export function getDataAndAriaProps(props: Record<string, any>) {
-  /* eslint-disable no-param-reassign */
   return Object.keys(props).reduce<Record<string, any>>((memo, key) => {
     if (key.startsWith('data-') || key.startsWith('aria-')) {
-      memo[key] = props[key];
+      memo[key] = props[key]
     }
-    return memo;
-  }, {});
-  /* eslint-enable */
+    return memo
+  }, {})
 }
