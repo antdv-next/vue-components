@@ -1,6 +1,6 @@
 import type { VNodeChild } from 'vue'
 import { clsx } from '@v-c/util'
-import { cloneVNode, defineComponent, isVNode } from 'vue'
+import { cloneVNode, createVNode, defineComponent, isVNode } from 'vue'
 import { canGoNext } from './utils/innerSliderUtils'
 
 interface ArrowProps {
@@ -48,9 +48,8 @@ const PrevArrow = defineComponent<ArrowProps>((props) => {
       currentSlide: props.currentSlide,
       slideCount: props.slideCount,
     }
-
     if (props.prevArrow && isVNode(props.prevArrow)) {
-      return cloneVNode(props.prevArrow, {
+      return createVNode(props.prevArrow, {
         ...prevArrowProps,
         ...customProps,
       })
