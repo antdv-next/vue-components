@@ -19,8 +19,8 @@
 import FixedColumnsAutoHeight from './fixedColumns-auto-height.tsx'
 import FixedColumnsResize from './fixedColumns-resize.tsx'
 import FixedColumns from './fixedColumns.tsx'
-// import FixedColumnsAndHeader from './fixedColumnsAndHeader.tsx'
-// import FixedColumnsAndHeaderRtl from './fixedColumnsAndHeaderRtl.tsx'
+import FixedColumnsAndHeader from './fixedColumnsAndHeader.tsx'
+import FixedColumnsAndHeaderRtl from './fixedColumnsAndHeaderRtl.tsx'
 // import GroupingColumnsHidden from './grouping-columns-hidden.tsx'
 // import GroupingColumns from './grouping-columns.tsx'
 // import HideHeader from './hide-header.tsx'
@@ -77,10 +77,10 @@ import './assets/index.less'
       <FixedColumnsResize />
     </Variant>
     <Variant title="fixed-columns-and-header">
-      <!--      <FixedColumnsAndHeader /> -->
+      <FixedColumnsAndHeader />
     </Variant>
     <Variant title="fixed-columns-and-header-rtl">
-      <!--      <FixedColumnsAndHeaderRtl /> -->
+      <FixedColumnsAndHeaderRtl />
     </Variant>
     <Variant title="grouping-columns">
       <!--      <GroupingColumns /> -->

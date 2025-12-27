@@ -2,17 +2,21 @@ import type { CSSProperties } from 'vue'
 import type {
   AlignType,
   CellEllipsisType,
+  CellType,
   ColumnType,
   CustomizeComponent,
   DataIndex,
   DefaultRecordType,
+  RenderedCell,
   ScopeType,
 } from '../interface'
-import { clsx } from '@v-c/util'
+import { clsx, warning } from '@v-c/util'
 import { filterEmpty, getStylePxValue } from '@v-c/util/dist/props-util'
-import { computed, defineComponent, isVNode, toRef } from 'vue'
+import getValue from '@v-c/util/dist/utils/get'
+import { defineComponent, isVNode } from 'vue'
+import { useInjectPerfContext } from '../context/PerfContext'
 import { useInjectTableContext } from '../context/TableContext'
-import useCellRender from './useCellRender'
+import { validateValue } from '../utils/valueUtil'
 import useHoverState from './useHoverState'
 
 export interface CellProps<RecordType extends DefaultRecordType> {
@@ -87,6 +91,64 @@ function getTitleFromCellRenderChildren({
   return undefined
 }
 
+function isRenderCell<RecordType>(data: any): data is RenderedCell<RecordType> {
+  return data && typeof data === 'object' && !Array.isArray(data) && !isVNode(data)
+}
+
+function resolveCellRender<RecordType>({
+  record,
+  dataIndex,
+  renderIndex,
+  children,
+  render,
+  perfRecord,
+}: {
+  record: RecordType | undefined
+  dataIndex: DataIndex<RecordType> | undefined
+  renderIndex: number
+  children: any
+  render?: ColumnType<RecordType>['render']
+  perfRecord?: { renderWithProps: boolean }
+}): [any, CellType<RecordType>?] | [any] {
+  if (validateValue(children)) {
+    return [children]
+  }
+
+  const path
+    = dataIndex === null || dataIndex === undefined || dataIndex === ''
+      ? []
+      : Array.isArray(dataIndex)
+        ? dataIndex
+        : [dataIndex]
+
+  const value: any = getValue(record as any, path as any)
+
+  let returnChildNode = value
+  let returnCellProps: CellType<RecordType> | undefined
+
+  if (render) {
+    const renderData = render(value, record as RecordType, renderIndex)
+    if (isRenderCell<RecordType>(renderData)) {
+      if (process.env.NODE_ENV !== 'production') {
+        warning(
+          false,
+          '`columns.render` return cell props is deprecated with perf issue, please use `onCell` instead.',
+        )
+      }
+      returnChildNode = renderData.props?.children ?? renderData.children
+      returnCellProps = renderData.props
+      if (perfRecord) {
+        perfRecord.renderWithProps = true
+      }
+    }
+    else {
+      returnChildNode = renderData
+    }
+  }
+
+  return [returnChildNode, returnCellProps] as [any, CellType<RecordType>?] | [any]
+}
+
 const Cell = defineComponent<CellProps<any>>({
   name: 'TableCell',
   props: [
@@ -123,22 +185,7 @@ const Cell = defineComponent<CellProps<any>>({
   ] as any,
   setup(props, { slots }) {
     const tableContext = useInjectTableContext()
-    const slotChildren = computed(() => props.children ?? slots?.default?.())
-
-    const recordRef = toRef(props, 'record')
-    const dataIndexRef = toRef(props, 'dataIndex')
-    const renderRef = toRef(props, 'render')
-    const shouldCellUpdateRef = toRef(props, 'shouldCellUpdate')
-    const renderIndexRef = computed(() => props.renderIndex ?? props.index ?? 0)
-
-    const cellRender = useCellRender(
-      recordRef as any,
-      dataIndexRef as any,
-      renderIndexRef,
-      slotChildren,
-      renderRef as any,
-      shouldCellUpdateRef as any,
-    )
+    const perfRecord = useInjectPerfContext()
 
     return () => {
       const {
@@ -151,6 +198,9 @@ const Cell = defineComponent<CellProps<any>>({
         align,
         record,
         index,
+        renderIndex,
+        dataIndex,
+        render,
         rowType,
         colSpan,
         rowSpan,
@@ -169,7 +219,16 @@ const Cell = defineComponent<CellProps<any>>({
 
       const cellPrefixCls = `${prefixCls}-cell`
       const mergedAppendNode = appendNode ?? slots?.appendNode?.()
-      const [childNode, legacyCellProps] = cellRender.value
+      const mergedRenderIndex = renderIndex ?? index ?? 0
+      const slotChildren = props.children ?? slots?.default?.()
+      const [childNode, legacyCellProps] = resolveCellRender({
+        record,
+        dataIndex,
+        renderIndex: mergedRenderIndex,
+        children: slotChildren,
+        render,
+        perfRecord,
+      })
 
       const fixedStyle: CSSProperties = {}
       const isFixStart = typeof fixStart === 'number' && !tableContext.allColumnsFixedLeft

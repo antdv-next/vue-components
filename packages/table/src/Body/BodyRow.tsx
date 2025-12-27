@@ -200,7 +200,6 @@ const BodyRow = defineComponent<BodyRowProps<any>>({
 
             const scope = column.rowScope ? column.rowScope : column.title ? 'row' : undefined
             const CellComponent = column.rowScope ? scopeCellComponent : BodyCellComponent
-
             return (
               <Cell
                 className={clsx(columnClassName, classNames?.cell)}

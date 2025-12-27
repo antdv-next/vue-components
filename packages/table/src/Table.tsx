@@ -268,6 +268,9 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
 
   const colsKeys = computed(() => getColumnsKey(flattenColumns.value))
   const colWidths = computed(() => colsKeys.value.map(columnKey => colsWidths.value.get(columnKey)))
+  watch(colWidths, () => {
+    console.log(colWidths.value)
+  }, { immediate: true })
   const stickyRef = ref<any>(null)
   const stickyConfig = useSticky(computed(() => props.sticky), mergedPrefixCls)
 
@@ -494,29 +497,8 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
     return 'auto'
   })
 
-  const headerColWidths = computed(() => {
-    if (typeof customizeScrollBody.value === 'function') {
-      return flattenColumns.value.map(({ width }, index) => {
-        const colWidth = index === flattenColumns.value.length - 1
-          ? (width as number) - scrollbarSize.value
-          : width
-        if (typeof colWidth === 'number' && !Number.isNaN(colWidth)) {
-          return colWidth
-        }
-        if (process.env.NODE_ENV !== 'production') {
-          warning(
-            (props.columns || []).length === 0,
-            'When use `components.body` with render props. Each column should have a fixed `width` value.',
-          )
-        }
-        return 0
-      }) as number[]
-    }
-    return colWidths.value as number[]
-  })
-
   const headerProps = computed(() => ({
-    colWidths: headerColWidths.value,
+    colWidths: colWidths.value,
     columCount: flattenColumns.value.length,
     stickyOffsets: mergedStickyOffsets.value,
     onHeaderRow: props.onHeaderRow,
@@ -594,7 +576,6 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
         measureColumnWidth={fixHeader.value || horizonScroll.value || stickyConfig.value.isSticky}
       />
     )
-
     const bodyColGroupNode = (
       <ColGroup
         colWidths={flattenColumns.value.map(({ width }) => width!)}
@@ -660,7 +641,8 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
         scrollX: mergedScrollX.value,
         tableLayout: mergedTableLayout.value,
         onScroll: onInternalScroll,
-      }
+      } as any
+      console.log(fixedHolderProps)
 
       groupTableNode = (
         <>

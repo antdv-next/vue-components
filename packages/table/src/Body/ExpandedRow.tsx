@@ -1,7 +1,7 @@
+import type { CustomizeComponent } from '../interface'
 import { defineComponent } from 'vue'
 import Cell from '../Cell'
 import { useInjectTableContext } from '../context/TableContext'
-import type { CustomizeComponent } from '../interface'
 
 export interface ExpandedRowProps {
   prefixCls: string
@@ -59,7 +59,6 @@ const ExpandedRow = defineComponent<ExpandedRowProps>({
           </div>
         )
       }
-
       return (
         <Component class={className} style={{ display: expanded ? null : 'none' }}>
           <Cell component={cellComponent} prefixCls={prefixCls} colSpan={colSpan}>
