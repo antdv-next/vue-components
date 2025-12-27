@@ -39,18 +39,17 @@ export default defineComponent({
     hoverRangeValue: Array as PropType<any>,
     hoverValue: Array as PropType<any>,
     values: Array as PropType<any>,
-    showTime: [Boolean, Object] as PropType<any>,
+    showTime: { type: [Boolean, Object] as PropType<any>, default: undefined },
     prevIcon: Object as PropType<any>,
     nextIcon: Object as PropType<any>,
     superPrevIcon: Object as PropType<any>,
     superNextIcon: Object as PropType<any>,
   },
-  setup(props, { slots }) {
+  setup(props) {
     const panelContext = computed(() => {
-      const [info] = useInfo(props, props.mode)
+      const [info] = useInfo(props as any, props.mode)
       return info
     })
-
     providePanelContext(panelContext)
 
     return () => {
@@ -92,7 +91,7 @@ export default defineComponent({
                 })}
                 onClick={() => {
                   if (!disabled) {
-                    onSelect(date)
+                    onSelect?.(date)
                   }
                 }}
                 onMouseenter={() => {
@@ -148,7 +147,7 @@ export default defineComponent({
       }
 
       const getCellClassName = (date: any) => {
-        const [_, now] = useInfo(props, mode) // Re-calling useInfo here to get 'now'.
+        const [_, now] = useInfo(props as any, mode) // Re-calling useInfo here to get 'now'.
         // Note: useInfo logic for 'now' is just generateConfig.getNow().
         // calling useInfo inside render is fine, but maybe inefficient.
         // I can just get 'now' from panelContext.value.now
@@ -174,7 +173,7 @@ export default defineComponent({
           aria-label={locale.yearSelect}
           key="year"
           onClick={() => {
-            onModeChange('year', pickerValue)
+            onModeChange?.('year', pickerValue)
           }}
           tabindex={-1}
           class={`${prefixCls}-year-btn`}
@@ -192,7 +191,7 @@ export default defineComponent({
           aria-label={locale.monthSelect}
           key="month"
           onClick={() => {
-            onModeChange('month', pickerValue)
+            onModeChange?.('month', pickerValue)
           }}
           tabindex={-1}
           class={`${prefixCls}-month-btn`}

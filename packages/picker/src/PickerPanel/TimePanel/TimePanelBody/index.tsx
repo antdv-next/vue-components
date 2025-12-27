@@ -14,19 +14,19 @@ export default defineComponent({
   name: 'TimePanelBody',
   inheritAttrs: false,
   props: {
-    showHour: Boolean,
-    showMinute: Boolean,
-    showSecond: Boolean,
-    showMillisecond: Boolean,
-    use12Hours: Boolean,
-    changeOnScroll: Boolean,
+    showHour: { type: Boolean, default: undefined },
+    showMinute: { type: Boolean, default: undefined },
+    showSecond: { type: Boolean, default: undefined },
+    showMillisecond: { type: Boolean, default: undefined },
+    use12Hours: { type: Boolean, default: undefined },
+    changeOnScroll: { type: Boolean, default: undefined },
     format: String,
-    showNow: Boolean,
+    showNow: { type: Boolean, default: undefined },
     hourStep: Number,
     minuteStep: Number,
     secondStep: Number,
     millisecondStep: Number,
-    hideDisabledOptions: Boolean,
+    hideDisabledOptions: { type: Boolean, default: undefined },
     defaultValue: Object,
     defaultOpenValue: Object,
     disabledHours: Function,
@@ -35,7 +35,7 @@ export default defineComponent({
     disabledTime: Function,
   },
   setup(props) {
-    const context = usePanelContext()
+    const context = usePanelContext()!
     const pickerHackContext = usePickerHackContext()
 
     const value = computed(() => context.value.values?.[0] || null)
@@ -43,7 +43,7 @@ export default defineComponent({
 
     const [getValidTime, rowHourUnits, getMinuteUnits, getSecondUnits, getMillisecondUnits] = useTimeInfo(
       generateConfig,
-      computed(() => props),
+      computed(() => props as any),
       value,
     )
 
@@ -233,7 +233,7 @@ export default defineComponent({
       }
 
       return (
-        <div class={clsx(`${prefixCls}-content`, panelClassNames.content)} style={styles.content}>
+        <div class={clsx(`${prefixCls}-content`, panelClassNames?.content)} style={styles?.content}>
           {showHour && (
             <TimeColumn
               units={hourUnits}

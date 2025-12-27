@@ -1,4 +1,4 @@
-import type { Ref } from 'vue'
+import type { ComputedRef, Ref } from 'vue'
 import type { OpenConfig } from '../../interface'
 import { computed } from 'vue'
 import useDelayState from './useDelayState'
@@ -10,7 +10,7 @@ import useDelayState from './useDelayState'
 export default function useOpen(
   open: Ref<boolean | undefined>,
   defaultOpen: Ref<boolean | undefined>,
-  disabledList: Ref<boolean[] | undefined>,
+  disabledList: Ref<Array<boolean | undefined>> | ComputedRef<Array<boolean | undefined>>,
   onOpenChange?: (open: boolean) => void,
 ) {
   const mergedOpen = computed(() => (disabledList.value?.every(disabled => disabled) ? false : open.value))

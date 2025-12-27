@@ -1,4 +1,4 @@
-import type { Ref } from 'vue'
+import type { ComputedRef, Ref } from 'vue'
 import { computed, ref, watch } from 'vue'
 import useLockEffect from './useLockEffect'
 
@@ -12,7 +12,7 @@ export type NextActive<DateType> = (nextValue: [DateType | null | undefined, Dat
  * When click outside to close the panel, trigger event if it can trigger onChange.
  */
 export default function useRangeActive<DateType>(
-  disabled: Ref<boolean[]>,
+  disabled: Ref<(boolean | undefined)[]> | ComputedRef<(boolean | undefined)[]>,
   empty: Ref<boolean[]> = ref([]),
   mergedOpen: Ref<boolean | undefined> = ref(false),
 ) {

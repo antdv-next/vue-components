@@ -3,7 +3,7 @@ import type { ValueDate } from '../../interface'
 import { defineComponent } from 'vue'
 
 export interface PresetPanelProps<DateType extends object = any> {
-  prefixCls: string
+  prefixCls: string | undefined
   presets: ValueDate<DateType>[]
   onClick: (value: DateType) => void
   onHover: (value: DateType | null) => void

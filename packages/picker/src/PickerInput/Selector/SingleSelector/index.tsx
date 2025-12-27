@@ -1,6 +1,5 @@
 import type { PropType } from 'vue'
-import type { GenerateConfig } from '../../../generate'
-import type { InternalMode, Locale, SelectorProps } from '../../../interface'
+import type { InternalMode, SelectorProps } from '../../../interface'
 import type { InputRef } from '../Input'
 import { clsx } from '@v-c/util'
 import { computed, defineComponent, ref } from 'vue'
@@ -20,15 +19,15 @@ export interface SingleSelectorProps<DateType extends object = any>
 
   internalPicker: InternalMode
 
-  disabled: boolean
+  disabled?: boolean
 
   /** All the field show as `placeholder` */
-  allHelp: boolean
+  allHelp?: boolean
 
   placeholder?: string
 
   // Invalid
-  invalid: boolean
+  invalid?: boolean
   onInvalid: (valid: boolean) => void
 
   removeIcon?: any
@@ -101,7 +100,7 @@ export default defineComponent(<DateType extends object = any>(props: SingleSele
       ...props,
       'aria-required': !!props['aria-required'],
       'onChange': onSingleChange,
-    })),
+    })) as any,
     ({ valueTexts }) => ({
       value: valueTexts[0] || '',
       active: props.focused,
@@ -217,7 +216,7 @@ export default defineComponent(<DateType extends object = any>(props: SingleSele
     'prefix': Object as PropType<SingleSelectorProps<any>['prefix']>,
     'clearIcon': Object as PropType<SingleSelectorProps<any>['clearIcon']>,
     'suffixIcon': Object as PropType<SingleSelectorProps<any>['suffixIcon']>,
-    'focused': Boolean as PropType<SingleSelectorProps<any>['focused']>,
+    'focused': { type: Boolean as PropType<SingleSelectorProps<any>['focused']>, default: undefined },
     'onFocus': Function as PropType<SingleSelectorProps<any>['onFocus']>,
     'onBlur': Function as PropType<SingleSelectorProps<any>['onBlur']>,
     'onSubmit': Function as PropType<SingleSelectorProps<any>['onSubmit']>,
@@ -231,29 +230,29 @@ export default defineComponent(<DateType extends object = any>(props: SingleSele
     'maskFormat': String as PropType<SingleSelectorProps<any>['maskFormat']>,
     'onInputChange': Function as PropType<SingleSelectorProps<any>['onInputChange']>,
     'onInvalid': Function as PropType<SingleSelectorProps<any>['onInvalid']>,
-    'preserveInvalidOnBlur': Boolean as PropType<SingleSelectorProps<any>['preserveInvalidOnBlur']>,
+    'preserveInvalidOnBlur': { type: Boolean as PropType<SingleSelectorProps<any>['preserveInvalidOnBlur']>, default: undefined },
     'onOpenChange': Function as PropType<SingleSelectorProps<any>['onOpenChange']>,
-    'inputReadOnly': Boolean as PropType<SingleSelectorProps<any>['inputReadOnly']>,
-    'activeHelp': Boolean as PropType<SingleSelectorProps<any>['activeHelp']>,
-    'open': Boolean as PropType<SingleSelectorProps<any>['open']>,
+    'inputReadOnly': { type: Boolean as PropType<SingleSelectorProps<any>['inputReadOnly']>, default: undefined },
+    'activeHelp': { type: Boolean as PropType<SingleSelectorProps<any>['activeHelp']>, default: undefined },
+    'open': { type: Boolean as PropType<SingleSelectorProps<any>['open']>, default: undefined },
 
     // SingleSelectorProps specific
     'id': String as PropType<SingleSelectorProps<any>['id']>,
     'value': Array as PropType<SingleSelectorProps<any>['value']>,
     'onChange': Function as PropType<SingleSelectorProps<any>['onChange']>,
     'internalPicker': String as PropType<SingleSelectorProps<any>['internalPicker']>,
-    'disabled': Boolean as PropType<SingleSelectorProps<any>['disabled']>,
-    'allHelp': Boolean as PropType<SingleSelectorProps<any>['allHelp']>,
+    'disabled': { type: Boolean as PropType<SingleSelectorProps<any>['disabled']>, default: undefined },
+    'allHelp': { type: Boolean as PropType<SingleSelectorProps<any>['allHelp']>, default: undefined },
     'placeholder': String as PropType<SingleSelectorProps<any>['placeholder']>,
-    'invalid': Boolean as PropType<SingleSelectorProps<any>['invalid']>,
+    'invalid': { type: Boolean as PropType<SingleSelectorProps<any>['invalid']>, default: undefined },
     'removeIcon': Object as PropType<SingleSelectorProps<any>['removeIcon']>,
     'maxTagCount': [Number, String] as PropType<number | 'responsive'>,
-    'multiple': Boolean as PropType<SingleSelectorProps<any>['multiple']>,
+    'multiple': { type: Boolean as PropType<SingleSelectorProps<any>['multiple']>, default: undefined },
 
     // Native Input
-    'required': Boolean as PropType<boolean>,
-    'aria-required': Boolean as PropType<boolean | undefined>,
-    'autoFocus': Boolean as PropType<boolean>,
+    'required': { type: Boolean as PropType<boolean>, default: undefined },
+    'aria-required': { type: Boolean as PropType<boolean | undefined>, default: undefined },
+    'autoFocus': { type: Boolean as PropType<boolean>, default: undefined },
     'tabIndex': [Number, String] as PropType<number | string>,
     'onMouseDown': Function as PropType<(e: MouseEvent) => void>,
   },

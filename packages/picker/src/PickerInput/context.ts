@@ -5,7 +5,7 @@ import type { Components, Locale } from '../interface'
 import { inject, provide, ref } from 'vue'
 
 export interface PickerContextProps<DateType = any> {
-  prefixCls: string
+  prefixCls: string | undefined
   locale: Locale
   generateConfig: GenerateConfig<DateType>
   /** Customize button component */

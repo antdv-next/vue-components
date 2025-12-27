@@ -21,16 +21,16 @@ export default defineComponent({
   props: {
     format: String,
     validateFormat: { type: Function as PropType<(value: string) => boolean>, required: true },
-    active: Boolean,
+    active: { type: Boolean, default: undefined },
     showActiveCls: { type: Boolean, default: true },
     suffixIcon: [Object, String] as PropType<any>,
     value: String,
     onChange: { type: Function as PropType<(value: string) => void>, required: true },
     onSubmit: { type: Function as PropType<() => void>, required: true },
-    helped: Boolean,
+    helped: { type: Boolean, default: undefined },
     onHelp: { type: Function as PropType<() => void>, required: true },
-    preserveInvalidOnBlur: Boolean,
-    invalid: Boolean,
+    preserveInvalidOnBlur: { type: Boolean, default: undefined },
+    invalid: { type: Boolean, default: undefined },
     clearIcon: [Object, String] as PropType<any>,
 
     // HTML Input props
@@ -38,8 +38,8 @@ export default defineComponent({
     onBlur: Function as PropType<(e: FocusEvent) => void>,
     onMouseUp: Function as PropType<(e: MouseEvent) => void>,
     onKeyDown: Function as PropType<(e: KeyboardEvent) => void>,
-    inputReadOnly: Boolean,
-    autofocus: Boolean,
+    inputReadOnly: { type: Boolean, default: undefined },
+    autofocus: { type: Boolean, default: undefined },
   },
   setup(props, { attrs, expose }) {
     const {

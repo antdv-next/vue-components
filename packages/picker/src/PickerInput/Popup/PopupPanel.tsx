@@ -151,6 +151,7 @@ export default defineComponent(<DateType extends object = any>(props: PopupPanel
     // Panel control
     mode: { type: String as PropType<PopupPanelProps['mode']>, required: true },
     onPanelChange: { type: Function as PropType<PopupPanelProps['onPanelChange']>, required: true },
+    value: { type: Object as PropType<PopupPanelProps['value']> },
 
     picker: { type: String as PropType<PopupPanelProps['picker']> },
     direction: { type: String as PropType<PopupPanelProps['direction']> },
@@ -172,7 +173,7 @@ export default defineComponent(<DateType extends object = any>(props: PopupPanel
     onHover: { type: Function as PropType<PopupPanelProps['onHover']> },
 
     // Week
-    showWeek: { type: Boolean as PropType<PopupPanelProps['showWeek']> },
+    showWeek: { type: Boolean as PropType<PopupPanelProps['showWeek']>, default: undefined },
 
     // Components & icons
     components: { type: Object as PropType<PopupPanelProps['components']> },
@@ -182,29 +183,29 @@ export default defineComponent(<DateType extends object = any>(props: PopupPanel
     superNextIcon: { type: [Object, String] as PropType<PopupPanelProps['superNextIcon']> },
 
     // Limitation
-    disabledDate: { type: Function as PropType<PopupPanelProps['disabledDate']>, required: true },
+    disabledDate: { type: Function as PropType<PopupPanelProps['disabledDate']> },
     minDate: { type: Object as PropType<PopupPanelProps['minDate']> },
     maxDate: { type: Object as PropType<PopupPanelProps['maxDate']> },
 
     // Time related (from SharedTimeProps)
     format: { type: String as PropType<PopupPanelProps['format']> },
-    showHour: { type: Boolean as PropType<PopupPanelProps['showHour']> },
-    showMinute: { type: Boolean as PropType<PopupPanelProps['showMinute']> },
-    showSecond: { type: Boolean as PropType<PopupPanelProps['showSecond']> },
-    showMillisecond: { type: Boolean as PropType<PopupPanelProps['showMillisecond']> },
-    use12Hours: { type: Boolean as PropType<PopupPanelProps['use12Hours']> },
+    showHour: { type: Boolean as PropType<PopupPanelProps['showHour']>, default: undefined },
+    showMinute: { type: Boolean as PropType<PopupPanelProps['showMinute']>, default: undefined },
+    showSecond: { type: Boolean as PropType<PopupPanelProps['showSecond']>, default: undefined },
+    showMillisecond: { type: Boolean as PropType<PopupPanelProps['showMillisecond']>, default: undefined },
+    use12Hours: { type: Boolean as PropType<PopupPanelProps['use12Hours']>, default: undefined },
     hourStep: { type: Number as PropType<PopupPanelProps['hourStep']> },
     minuteStep: { type: Number as PropType<PopupPanelProps['minuteStep']> },
     secondStep: { type: Number as PropType<PopupPanelProps['secondStep']> },
     millisecondStep: { type: Number as PropType<PopupPanelProps['millisecondStep']> },
-    hideDisabledOptions: { type: Boolean as PropType<PopupPanelProps['hideDisabledOptions']> },
+    hideDisabledOptions: { type: Boolean as PropType<PopupPanelProps['hideDisabledOptions']>, default: undefined },
     defaultValue: { type: Object as PropType<PopupPanelProps['defaultValue']> },
     defaultOpenValue: { type: Object as PropType<PopupPanelProps['defaultOpenValue']> },
     disabledHours: { type: Function as PropType<PopupPanelProps['disabledHours']> },
     disabledMinutes: { type: Function as PropType<PopupPanelProps['disabledMinutes']> },
     disabledSeconds: { type: Function as PropType<PopupPanelProps['disabledSeconds']> },
     disabledTime: { type: Function as PropType<PopupPanelProps['disabledTime']> },
-    changeOnScroll: { type: Boolean as PropType<PopupPanelProps['changeOnScroll']> },
+    changeOnScroll: { type: Boolean as PropType<PopupPanelProps['changeOnScroll']>, default: undefined },
 
     // Attrs
     tabindex: { type: Number as PropType<PopupPanelProps['tabindex']> },
@@ -214,7 +215,7 @@ export default defineComponent(<DateType extends object = any>(props: PopupPanel
     renderExtraFooter: { type: Function as PropType<PopupPanelProps['renderExtraFooter']> },
     showNow: { type: Boolean as PropType<PopupPanelProps['showNow']>, required: true },
     needConfirm: { type: Boolean as PropType<PopupPanelProps['needConfirm']>, required: true },
-    invalid: { type: Boolean as PropType<PopupPanelProps['invalid']> },
+    invalid: { type: Boolean as PropType<PopupPanelProps['invalid']>, default: undefined },
     onSubmit: { type: Function as PropType<PopupPanelProps['onSubmit']>, required: true },
     onNow: { type: Function as PropType<PopupPanelProps['onNow']>, required: true },
     showTime: { type: Object as PropType<PopupPanelProps['showTime']> },
@@ -224,8 +225,8 @@ export default defineComponent(<DateType extends object = any>(props: PopupPanel
     generateConfig: { type: Object as PropType<PopupPanelProps['generateConfig']>, required: true },
 
     // Multiple panel control
-    multiplePanel: { type: Boolean as PropType<PopupPanelProps['multiplePanel']> },
-    range: { type: Boolean as PropType<PopupPanelProps['range']> },
+    multiplePanel: { type: Boolean as PropType<PopupPanelProps['multiplePanel']>, default: undefined },
+    range: { type: Boolean as PropType<PopupPanelProps['range']>, default: undefined },
 
     // Picker value change (handled by PopupPanel)
     onPickerValueChange: { type: Function as PropType<PopupPanelProps['onPickerValueChange']>, required: true },
@@ -235,6 +236,6 @@ export default defineComponent(<DateType extends object = any>(props: PopupPanel
     classNames: { type: Object as PropType<PopupPanelProps['classNames']> },
 
     // Internal
-    hideHeader: { type: Boolean as PropType<PopupPanelProps['hideHeader']> },
+    hideHeader: { type: Boolean as PropType<PopupPanelProps['hideHeader']>, default: undefined },
   },
 })

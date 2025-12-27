@@ -13,7 +13,8 @@ import { useFieldFormat } from './useFieldFormat'
 import useInputReadOnly from './useInputReadOnly'
 import useInvalidate from './useInvalidate'
 
-type UseInvalidate<DateType extends object = any> = typeof useInvalidate<DateType>
+type UseInvalidate<DateType extends object = any>
+  = typeof useInvalidate<DateType>
 
 type PickedProps<DateType extends object = any> = Pick<
   RangePickerProps<DateType>,
@@ -67,7 +68,11 @@ function useList<T>(value: Ref<T | T[] | undefined>, fillMode = false) {
   })
 }
 
-type FilledProps<InProps extends PickedProps, DateType extends GetGeneric<InProps>, UpdaterProps extends object = object> = Omit<InProps, keyof UpdaterProps | 'showTime' | 'value' | 'defaultValue'>
+type FilledProps<
+  InProps extends PickedProps,
+  DateType extends GetGeneric<InProps>,
+  UpdaterProps extends object = object,
+> = Omit<InProps, keyof UpdaterProps | 'showTime' | 'value' | 'defaultValue'>
   & UpdaterProps & {
     picker: PickerMode
     showTime?: ExcludeBooleanType<InProps['showTime']>
@@ -105,23 +110,40 @@ export default function useFilledProps<
   const mergedStyles = computed(() => props.value.styles || {})
   const mergedClassNames = computed(() => props.value.classNames || {})
   const mergedOrder = computed(() => props.value.order ?? true)
-  const mergedComponents = computed(() => ({ input: props.value.inputRender, ...props.value.components }))
+  const mergedComponents = computed(() => ({
+    input: props.value.inputRender,
+    ...props.value.components,
+  }))
 
   const values = useList(computed(() => props.value.value))
   const defaultValues = useList(computed(() => props.value.defaultValue))
   const pickerValues = useList(computed(() => props.value.pickerValue))
-  const defaultPickerValues = useList(computed(() => props.value.defaultPickerValue))
+  const defaultPickerValues = useList(
+    computed(() => props.value.defaultPickerValue),
+  )
 
   // ======================== Picker ========================
   /** Almost same as `picker`, but add `datetime` for `date` with `showTime` */
   const internalPicker = computed<InternalMode>(() =>
-    mergedPicker.value === 'date' && props.value.showTime ? 'datetime' : mergedPicker.value,
+    mergedPicker.value === 'date' && props.value.showTime
+      ? 'datetime'
+      : mergedPicker.value,
   )
 
   /** The picker is `datetime` or `time` */
-  const multipleInteractivePicker = computed(() => internalPicker.value === 'time' || internalPicker.value === 'datetime')
-  const complexPicker = computed(() => multipleInteractivePicker.value || props.value.multiple)
-  const mergedNeedConfirm = computed(() => props.value.needConfirm ?? multipleInteractivePicker.value)
+  const multipleInteractivePicker = computed(
+    () =>
+      internalPicker.value === 'time' || internalPicker.value === 'datetime',
+  )
+  const complexPicker = computed(
+    () => multipleInteractivePicker.value || props.value.multiple,
+  )
+
+  const mergedNeedConfirm = computed(
+    () => {
+      return props.value.needConfirm ?? multipleInteractivePicker.value
+    },
+  )
 
   // ========================== Time ==========================
   // Auto `format` need to check `showTime.showXXX` first.
@@ -135,7 +157,10 @@ export default function useFilledProps<
   const propFormat = computed(() => timePropsInfo.value[3])
 
   // ======================= Locales ========================
-  const mergedLocale = useLocale(computed(() => props.value.locale), localeTimeProps)
+  const mergedLocale = useLocale(
+    computed(() => props.value.locale),
+    localeTimeProps,
+  )
 
   const mergedShowTime = computed(() =>
     fillShowTimeConfig(
@@ -153,7 +178,9 @@ export default function useFilledProps<
     // In Vue setup runs once.
     if (mergedPicker.value === 'time') {
       if (
-        ['disabledHours', 'disabledMinutes', 'disabledSeconds'].some(key => (props as any)[key])
+        ['disabledHours', 'disabledMinutes', 'disabledSeconds'].some(
+          key => (props as any)[key],
+        )
       ) {
         warning(
           false,
@@ -174,7 +201,11 @@ export default function useFilledProps<
     classNames: mergedClassNames.value,
     order: mergedOrder.value,
     components: mergedComponents.value,
-    clearIcon: fillClearIcon(mergedPrefixCls.value, props.value.allowClear, props.value.clearIcon),
+    clearIcon: fillClearIcon(
+      mergedPrefixCls.value,
+      props.value.allowClear,
+      props.value.clearIcon,
+    ),
     showTime: mergedShowTime.value,
     value: values.value,
     defaultValue: defaultValues.value,
@@ -215,8 +246,8 @@ export default function useFilledProps<
   )
 
   // ======================== Merged ========================
-  const mergedProps: ComputedRef<FilledProps<InProps, DateType, UpdaterProps>> = computed(
-    () => {
+  const mergedProps: ComputedRef<FilledProps<InProps, DateType, UpdaterProps>>
+    = computed(() => {
       const target = {
         ...filledProps.value,
         needConfirm: mergedNeedConfirm.value,
@@ -224,8 +255,7 @@ export default function useFilledProps<
         disabledDate: disabledBoundaryDate,
       }
       return target as unknown as FilledProps<InProps, DateType, UpdaterProps>
-    },
-  )
+    })
 
   return [
     mergedProps,

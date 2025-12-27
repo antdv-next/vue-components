@@ -26,7 +26,7 @@ export default defineComponent({
     onChange: { type: Function as PropType<(value: number | string) => void>, required: true },
     onHover: { type: Function as PropType<(value: number | string) => void>, required: true },
     onDblClick: { type: Function as PropType<() => void> },
-    changeOnScroll: { type: Boolean },
+    changeOnScroll: { type: Boolean, default: undefined },
   },
   setup(props) {
     const context = usePanelContext()
@@ -107,7 +107,7 @@ export default defineComponent({
               <li
                 key={unitValue}
                 style={styles?.item}
-                class={clsx(cellPrefixCls, panelClassNames!.item, {
+                class={clsx(cellPrefixCls, panelClassNames?.item, {
                   [`${cellPrefixCls}-selected`]: value === unitValue,
                   [`${cellPrefixCls}-disabled`]: disabled,
                 })}

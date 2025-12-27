@@ -43,7 +43,7 @@ export default defineComponent({
     prefix: { type: [Object, String] as PropType<VueNode> },
     clearIcon: { type: [Object, String] as PropType<VueNode> },
     suffixIcon: { type: [Object, String] as PropType<VueNode> },
-    focused: { type: Boolean },
+    focused: { type: Boolean, default: undefined },
     onFocus: { type: Function as PropType<(e: FocusEvent) => void> },
     onBlur: { type: Function as PropType<(e: FocusEvent) => void> },
     onSubmit: { type: Function as PropType<() => void> },
@@ -57,11 +57,11 @@ export default defineComponent({
     maskFormat: { type: String },
     onInputChange: { type: Function as PropType<() => void> },
     onInvalid: { type: Function as PropType<(valid: boolean, index?: number) => void> },
-    preserveInvalidOnBlur: { type: Boolean },
+    preserveInvalidOnBlur: { type: Boolean, default: undefined },
     onOpenChange: { type: Function as PropType<(open: boolean) => void> },
-    inputReadOnly: { type: Boolean },
-    activeHelp: { type: Boolean },
-    open: { type: Boolean },
+    inputReadOnly: { type: Boolean, default: undefined },
+    activeHelp: { type: Boolean, default: undefined },
+    open: { type: Boolean, default: undefined },
 
     // RangeSelectorProps
     id: { type: [String, Object] as PropType<SelectorIdType> },
@@ -70,14 +70,14 @@ export default defineComponent({
     value: { type: Array as PropType<any[]> },
     onChange: { type: Function as PropType<(date: any, index?: number) => void> },
     disabled: { type: Array as PropType<any[]> },
-    allHelp: { type: Boolean },
+    allHelp: { type: Boolean, default: undefined },
     placeholder: { type: [String, Array] as PropType<string | [string, string]> },
     invalid: { type: Array as PropType<any[]> },
     placement: { type: String },
     onActiveInfo: { type: Function as PropType<(info: any) => void> },
 
     // HTML Props
-    autoFocus: Boolean,
+    autoFocus: { type: Boolean, default: undefined },
     tabindex: Number,
   },
   setup(props, { attrs, expose }) {

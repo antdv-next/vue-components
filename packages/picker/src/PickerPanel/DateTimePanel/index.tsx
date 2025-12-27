@@ -1,5 +1,6 @@
 import type { PropType } from 'vue'
 import type { PanelMode } from '../../interface'
+import { omit } from '@v-c/util'
 import { computed, defineComponent } from 'vue'
 import useTimeInfo from '../../hooks/useTimeInfo'
 import { fillTime } from '../../utils/dateUtil'
@@ -25,7 +26,7 @@ export default defineComponent({
     hoverRangeValue: Array as PropType<any>,
     hoverValue: Array as PropType<any>,
     values: Array as PropType<any>,
-    showTime: [Boolean, Object] as PropType<any>,
+    showTime: { type: [Boolean, Object] as PropType<any>, default: undefined },
     prevIcon: Object as PropType<any>,
     nextIcon: Object as PropType<any>,
     superPrevIcon: Object as PropType<any>,
@@ -55,12 +56,17 @@ export default defineComponent({
 
       const onDateSelect = (date: any) => {
         const cloneDate = mergeTime(date)
-        onSelect(getValidTime(cloneDate, cloneDate))
+        onSelect?.(getValidTime(cloneDate, cloneDate))
       }
 
+      const datePanelProps = {
+        ...omit(props, ['onSelect', 'onHover']),
+        onSelect: onDateSelect,
+        onHover: onDateHover,
+      }
       return (
         <div class={panelPrefixCls}>
-          <DatePanel {...props} onSelect={onDateSelect} onHover={onDateHover} />
+          <DatePanel {...datePanelProps} />
           <TimePanel {...props} />
         </div>
       )

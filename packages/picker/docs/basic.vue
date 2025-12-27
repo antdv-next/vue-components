@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Moment } from 'moment'
 import moment from 'moment'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import momentGenerateConfig from '../src/generate/moment'
 import Picker from '../src/index'
 import enUS from '../src/locale/en_US'
@@ -19,17 +19,20 @@ function onSelect(val: Moment) {
   console.log('Select:', val)
 }
 
-const sharedProps = {
-  generateConfig: momentGenerateConfig,
-  onSelect,
-  onChange,
-  presets: [
-    { label: 'Hello World!', value: moment() },
-    { label: 'Now', value: () => moment() },
-  ],
-}
+const sharedProps = computed(() => {
+  return {
+    generateConfig: momentGenerateConfig,
+    onSelect,
+    value: value.value,
+    onChange,
+    presets: [
+      { label: 'Hello World!', value: moment() },
+      { label: 'Now', value: () => moment() },
+    ],
+  }
+})
 
-const weekRef = ref()
+// const weekRef = ref()
 </script>
 
 <template>
@@ -48,9 +51,8 @@ const weekRef = ref()
           :class-names="{ root: 'light', popup: { container: 'popup-c' } }"
           open
           :styles="{ popup: { container: { backgroundColor: 'red' } } }"
-          :value="value"
         />
-        <Picker v-bind="sharedProps" :locale="enUS" :value="value" />
+        <Picker v-bind="sharedProps" :locale="enUS" />
       </div>
 
       <div style="margin: 0 8px">
@@ -61,6 +63,43 @@ const weekRef = ref()
           allow-clear
           show-today
           :render-extra-footer="() => 'extra'"
+        />
+      </div>
+
+      <br>
+      <div style="margin: 0 8px">
+        <h3>Datetime</h3>
+        <Picker
+          v-bind="sharedProps"
+          :locale="zhCN"
+          :default-picker-value="defaultValue.clone().subtract(1, 'month')"
+          :show-time="{
+            showSecond: false,
+            defaultValue: moment('11:28:39', 'HH:mm:ss'),
+          }"
+          show-today
+          :disabled-time="
+            (date: any) => {
+              if (date && date.isSame(defaultValue, 'date')) {
+                return {
+                  disabledHours: () => [1, 3, 5, 7, 9, 11],
+                }
+              }
+
+              return {}
+            }
+          "
+          change-on-blur
+        />
+      </div>
+
+      <div style="margin: 200px 8px">
+        <h3>Uncontrolled Datetime</h3>
+        <Picker
+          format="YYYY-MM-DD HH:mm:ss"
+          :locale="enUS"
+          show-time
+          :generate-config="momentGenerateConfig"
         />
       </div>
     </div>

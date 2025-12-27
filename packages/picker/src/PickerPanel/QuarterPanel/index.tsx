@@ -25,7 +25,7 @@ export default defineComponent({
     hoverRangeValue: Array as PropType<any>,
     hoverValue: Array as PropType<any>,
     values: Array as PropType<any>,
-    showTime: [Boolean, Object] as PropType<any>,
+    showTime: { type: [Boolean, Object] as PropType<any>, default: undefined },
     prevIcon: Object as PropType<any>,
     nextIcon: Object as PropType<any>,
     superPrevIcon: Object as PropType<any>,
@@ -33,7 +33,7 @@ export default defineComponent({
   },
   setup(props) {
     const panelContext = computed(() => {
-      const [info] = useInfo(props, 'quarter')
+      const [info] = useInfo(props as any, 'quarter')
       return info
     })
 
@@ -74,7 +74,7 @@ export default defineComponent({
           key="year"
           aria-label={locale.yearSelect}
           onClick={() => {
-            onModeChange('year')
+            onModeChange?.('year')
           }}
           tabindex={-1}
           class={`${prefixCls}-year-btn`}

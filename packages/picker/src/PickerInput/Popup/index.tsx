@@ -37,7 +37,7 @@ export type PopupProps<DateType extends object = any, PresetValue = DateType>
 
       defaultOpenValue: DateType
 
-      needConfirm: boolean
+      needConfirm: boolean | undefined
       isInvalid: (date: DateType | DateType[]) => boolean
       onOk: VoidFunction
 
@@ -245,9 +245,9 @@ export default defineComponent(<DateType extends object = any>(props: PopupProps
     renderExtraFooter: { type: Function as PropType<PopupProps['renderExtraFooter']> },
     showNow: { type: Boolean as PropType<PopupProps['showNow']>, required: true },
     generateConfig: { type: Object as PropType<PopupProps['generateConfig']>, required: true },
-    disabledDate: { type: Function as PropType<PopupProps['disabledDate']>, required: true },
+    disabledDate: { type: Function as PropType<PopupProps['disabledDate']> },
     showTime: { type: Object as PropType<PopupProps['showTime']> },
-    invalid: { type: Boolean as PropType<PopupProps['invalid']> },
+    invalid: { type: Boolean as PropType<PopupProps['invalid']>, default: undefined },
     onSubmit: { type: Function as PropType<PopupProps['onSubmit']>, required: true },
     onNow: { type: Function as PropType<PopupProps['onNow']>, required: true },
     locale: { type: Object as PropType<PopupProps['locale']>, required: true },
@@ -265,7 +265,7 @@ export default defineComponent(<DateType extends object = any>(props: PopupProps
     hoverValue: { type: Array as PropType<PopupProps['hoverValue']> },
     hoverRangeValue: { type: Array as PropType<any> },
     onHover: { type: Function as PropType<PopupProps['onHover']> },
-    showWeek: { type: Boolean as PropType<PopupProps['showWeek']> },
+    showWeek: { type: Boolean as PropType<PopupProps['showWeek']>, default: undefined },
     components: { type: Object as PropType<PopupProps['components']> },
     prevIcon: { type: [Object, String] as PropType<PopupProps['prevIcon']> },
     nextIcon: { type: [Object, String] as PropType<PopupProps['nextIcon']> },
@@ -274,25 +274,25 @@ export default defineComponent(<DateType extends object = any>(props: PopupProps
     minDate: { type: Object as PropType<PopupProps['minDate']> },
     maxDate: { type: Object as PropType<PopupProps['maxDate']> },
     format: { type: String as PropType<PopupProps['format']> },
-    showHour: { type: Boolean as PropType<PopupProps['showHour']> },
-    showMinute: { type: Boolean as PropType<PopupProps['showMinute']> },
-    showSecond: { type: Boolean as PropType<PopupProps['showSecond']> },
-    showMillisecond: { type: Boolean as PropType<PopupProps['showMillisecond']> },
-    use12Hours: { type: Boolean as PropType<PopupProps['use12Hours']> },
+    showHour: { type: Boolean as PropType<PopupProps['showHour']>, default: undefined },
+    showMinute: { type: Boolean as PropType<PopupProps['showMinute']>, default: undefined },
+    showSecond: { type: Boolean as PropType<PopupProps['showSecond']>, default: undefined },
+    showMillisecond: { type: Boolean as PropType<PopupProps['showMillisecond']>, default: undefined },
+    use12Hours: { type: Boolean as PropType<PopupProps['use12Hours']>, default: undefined },
     hourStep: { type: Number as PropType<PopupProps['hourStep']> },
     minuteStep: { type: Number as PropType<PopupProps['minuteStep']> },
     secondStep: { type: Number as PropType<PopupProps['secondStep']> },
     millisecondStep: { type: Number as PropType<PopupProps['millisecondStep']> },
-    hideDisabledOptions: { type: Boolean as PropType<PopupProps['hideDisabledOptions']> },
+    hideDisabledOptions: { type: Boolean as PropType<PopupProps['hideDisabledOptions']>, default: undefined },
     defaultValue: { type: Object as PropType<PopupProps['defaultValue']> },
     disabledHours: { type: Function as PropType<PopupProps['disabledHours']> },
     disabledMinutes: { type: Function as PropType<PopupProps['disabledMinutes']> },
     disabledSeconds: { type: Function as PropType<PopupProps['disabledSeconds']> },
     disabledTime: { type: Function as PropType<PopupProps['disabledTime']> },
-    changeOnScroll: { type: Boolean as PropType<PopupProps['changeOnScroll']> },
+    changeOnScroll: { type: Boolean as PropType<PopupProps['changeOnScroll']>, default: undefined },
     tabindex: { type: Number as PropType<PopupProps['tabindex']> },
-    multiplePanel: { type: Boolean as PropType<PopupProps['multiplePanel']> },
-    range: { type: Boolean as PropType<PopupProps['range']> },
+    multiplePanel: { type: Boolean as PropType<PopupProps['multiplePanel']>, default: undefined },
+    range: { type: Boolean as PropType<PopupProps['range']>, default: undefined },
     onPickerValueChange: { type: Function as PropType<PopupProps['onPickerValueChange']>, required: true },
 
     // Popup-specific
@@ -303,11 +303,12 @@ export default defineComponent(<DateType extends object = any>(props: PopupProps
     activeInfo: { type: Array as PropType<any> },
     direction: { type: String as PropType<PopupProps['direction']> },
     defaultOpenValue: { type: Object as PropType<PopupProps['defaultOpenValue']>, required: true },
-    needConfirm: { type: Boolean as PropType<PopupProps['needConfirm']>, required: true },
+    needConfirm: { type: Boolean as PropType<PopupProps['needConfirm']>, default: undefined },
     isInvalid: { type: Function as PropType<PopupProps['isInvalid']>, required: true },
     onOk: { type: Function as PropType<PopupProps['onOk']>, required: true },
     onPanelMouseDown: { type: Function as PropType<PopupProps['onPanelMouseDown']> },
     classNames: { type: Object as PropType<PopupProps['classNames']> },
     styles: { type: Object as PropType<PopupProps['styles']> },
+    value: { type: Object as PropType<PopupProps['value']> },
   },
 })

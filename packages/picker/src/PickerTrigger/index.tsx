@@ -50,7 +50,7 @@ export default defineComponent({
     transitionName: { type: String },
     getPopupContainer: { type: Function as PropType<(node: HTMLElement) => HTMLElement> },
     popupAlign: { type: Object as PropType<AlignType> },
-    range: { type: Boolean },
+    range: { type: Boolean, default: undefined },
 
     // Placement
     popupClassName: { type: String },
@@ -59,7 +59,7 @@ export default defineComponent({
     direction: { type: String as PropType<'ltr' | 'rtl'> },
 
     // Visible
-    visible: { type: Boolean },
+    visible: { type: Boolean, default: undefined },
     onClose: { type: Function as PropType<() => void> },
   },
   setup(props, { slots }) {

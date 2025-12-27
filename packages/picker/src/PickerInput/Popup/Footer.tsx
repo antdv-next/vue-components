@@ -78,9 +78,11 @@ export default defineComponent<FooterProps>({
 
     const [getValidTime] = useTimeInfo(generateConfig, showTime, now)
 
-    const nowDisabled = computed(() => disabledDate.value(now.value, {
-      type: mode.value,
-    }))
+    const nowDisabled = computed(() =>
+      disabledDate.value(now.value, {
+        type: mode.value,
+      }),
+    )
 
     const onInternalNow = () => {
       if (!nowDisabled.value) {
@@ -90,7 +92,13 @@ export default defineComponent<FooterProps>({
     }
 
     return () => {
-      const { prefixCls, locale, button: Button = 'button', classNames, styles } = pickerCtx.value
+      const {
+        prefixCls,
+        locale,
+        button: Button = 'button',
+        classNames,
+        styles,
+      } = pickerCtx.value
       // ======================== Extra =========================
       const extraNode = renderExtraFooter.value?.(mode.value)
       // ======================== Ranges ========================
@@ -100,7 +108,10 @@ export default defineComponent<FooterProps>({
       const presetNode = showNow.value && (
         <li class={nowPrefixCls}>
           <a
-            class={clsx(nowBtnPrefixCls, nowDisabled.value && `${nowBtnPrefixCls}-disabled`)}
+            class={clsx(
+              nowBtnPrefixCls,
+              nowDisabled.value && `${nowBtnPrefixCls}-disabled`,
+            )}
             aria-disabled={nowDisabled.value}
             onClick={onInternalNow}
           >
@@ -134,7 +145,9 @@ export default defineComponent<FooterProps>({
           class={clsx(`${prefixCls}-footer`, classNames.popup?.footer)}
           style={styles.popup?.footer}
         >
-          {extraNode && <div class={`${prefixCls}-footer-extra`}>{extraNode}</div>}
+          {extraNode && (
+            <div class={`${prefixCls}-footer-extra`}>{extraNode}</div>
+          )}
           {rangeNode}
         </div>
       )
