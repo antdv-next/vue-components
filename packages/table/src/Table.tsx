@@ -51,7 +51,18 @@ import { getDOM } from '@v-c/util/dist/Dom/findDOMNode'
 import { getTargetScrollBarSize } from '@v-c/util/dist/getScrollBarSize'
 import isEqual from '@v-c/util/dist/isEqual'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
-import { computed, defineComponent, isVNode, nextTick, onMounted, reactive, ref, watch, watchEffect } from 'vue'
+import {
+  computed,
+  defineComponent,
+  isVNode,
+  nextTick,
+  onMounted,
+  reactive,
+  ref,
+  shallowRef,
+  watch,
+  watchEffect,
+} from 'vue'
 import Body from './Body'
 import ColGroup from './ColGroup'
 import { EXPAND_COLUMN, INTERNAL_HOOKS } from './constant'
@@ -194,11 +205,13 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
 
   const componentWidth = ref(0)
 
+  const slotChildren = shallowRef<any>(null)
+
   const [columns, flattenColumns, flattenScrollX] = useColumns(
     {
       prefixCls: mergedPrefixCls,
       columns: computed(() => props.columns),
-      children: slots.default?.(),
+      children: slotChildren,
       expandable: computed(() => !!expandableConfig.value.expandedRowRender),
       columnTitle: computed(() => expandableConfig.value.columnTitle),
       expandedKeys: mergedExpandedKeys,
@@ -553,6 +566,7 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
   })
 
   return () => {
+    slotChildren.value = slots.default?.()
     const renderFixedHeaderTable = (fixedHolderPassProps: FixedHeaderProps<any>) => (
       <>
         <Header {...fixedHolderPassProps} />

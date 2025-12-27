@@ -7,7 +7,7 @@ import Column from './sugar/Column'
 import ColumnGroup from './sugar/ColumnGroup'
 import Table, { genTable } from './Table'
 import { INTERNAL_COL_DEFINE } from './utils/legacyUtil'
-import VirtualTable, { genVirtualTable } from './VirtualTable'
+import VirtualTable from './VirtualTable'
 
 export {
   Column,
@@ -16,7 +16,6 @@ export {
   type ColumnType,
   EXPAND_COLUMN,
   genTable,
-  genVirtualTable,
   INTERNAL_COL_DEFINE,
   INTERNAL_HOOKS,
   type Reference,
