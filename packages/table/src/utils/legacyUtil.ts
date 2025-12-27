@@ -1,7 +1,7 @@
 import type { ExpandableConfig, LegacyExpandableProps } from '../interface'
 import warning from '@v-c/util/dist/warning'
 
-export const INTERNAL_COL_DEFINE = 'RC_TABLE_INTERNAL_COL_DEFINE'
+export const INTERNAL_COL_DEFINE = 'VC_TABLE_INTERNAL_COL_DEFINE'
 
 export function getExpandableProps<RecordType>(
   props: LegacyExpandableProps<RecordType> & {
@@ -10,11 +10,12 @@ export function getExpandableProps<RecordType>(
 ): ExpandableConfig<RecordType> {
   const { expandable, ...legacyExpandableConfig } = props
   let config: ExpandableConfig<RecordType>
+
   if (props.expandable !== undefined) {
     config = {
       ...legacyExpandableConfig,
       ...expandable,
-    } as ExpandableConfig<RecordType>
+    } as any
   }
   else {
     if (
@@ -32,29 +33,18 @@ export function getExpandableProps<RecordType>(
         'expandedRowClassName',
         'expandIconColumnIndex',
         'showExpandColumn',
+        'title',
       ].some(prop => (props as any)[prop] !== undefined)
     ) {
       warning(false, 'expanded related props have been moved into `expandable`.')
     }
 
-    config = legacyExpandableConfig as ExpandableConfig<RecordType>
+    config = legacyExpandableConfig as any
   }
+
   if (config.showExpandColumn === false) {
     config.expandIconColumnIndex = -1
   }
 
   return config
-}
-
-/**
- * Returns only data- and aria- key/value pairs
- * @param {object} props
- */
-export function getDataAndAriaProps(props: Record<string, any>) {
-  return Object.keys(props).reduce<Record<string, any>>((memo, key) => {
-    if (key.startsWith('data-') || key.startsWith('aria-')) {
-      memo[key] = props[key]
-    }
-    return memo
-  }, {})
 }

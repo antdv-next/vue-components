@@ -1,3 +1,4 @@
+import type { VueNode } from '@v-c/util'
 /**
  * ColumnType which applied in antd: https://ant.design/components/table-cn/#Column
  * - defaultSortOrder
@@ -14,9 +15,7 @@
  * - onFilter
  * - onFilterDropdownVisibleChange
  */
-
-import type { VueNode } from '@v-c/util/dist/type'
-import type { CSSProperties, Ref, TdHTMLAttributes } from 'vue'
+import type { CSSProperties, HTMLAttributes, TdHTMLAttributes } from 'vue'
 import type { DeepNamePath } from './namePathType'
 
 export type Key = string | number
@@ -30,21 +29,7 @@ export type DefaultRecordType = Record<string, any>
 
 export type TableLayout = 'auto' | 'fixed'
 
-export type SemanticName = 'section' | 'title' | 'footer' | 'content'
-
-export type ComponentsSemantic = 'wrapper' | 'cell' | 'row'
-
-export type TableClassNames = Partial<Record<SemanticName, string>> & {
-  body?: Partial<Record<ComponentsSemantic, string>>
-  header?: Partial<Record<ComponentsSemantic, string>>
-}
-
-export type TableStyles = Partial<Record<SemanticName, CSSProperties>> & {
-  body?: Partial<Record<ComponentsSemantic, CSSProperties>>
-  header?: Partial<Record<ComponentsSemantic, CSSProperties>>
-}
-
-export type ScrollConfig = {
+export interface ScrollConfig {
   /** The index of the row to scroll to */
   index?: number
   /** The key of the row to scroll to */
@@ -54,11 +39,13 @@ export type ScrollConfig = {
   /**
    * Additional offset in pixels to apply to the scroll position.
    * Only effective when using `key` or `index` mode.
+   * Ignored when using `top` mode.
+   * When offset is set, the target element will always be aligned to the top of the container.
    */
   offset?: number
 }
 
-export type Reference = {
+export interface Reference {
   nativeElement: HTMLDivElement
   scrollTo: (config: ScrollConfig) => void
 }
@@ -70,20 +57,12 @@ export type RowClassName<RecordType> = (
   indent: number,
 ) => string
 
-export type TransformCellText<RecordType> = (opt: {
-  text: any
-  column: ColumnType<RecordType>
-  record: any
-  index: number
-}) => any
-
 // =================== Column ===================
-export interface CellType<RecordType = DefaultRecordType> {
+export interface CellType<RecordType> {
   key?: Key
   className?: string
-  class?: string
   style?: CSSProperties
-  children?: VueNode
+  // children?: React.ReactNode
   column?: ColumnsType<RecordType>[number]
   colSpan?: number
   rowSpan?: number
@@ -96,7 +75,7 @@ export interface CellType<RecordType = DefaultRecordType> {
 
 export interface RenderedCell<RecordType> {
   props?: CellType<RecordType>
-  children?: VueNode
+  // children?: React.ReactNode;
 }
 
 export type Direction = 'ltr' | 'rtl'
@@ -104,11 +83,11 @@ export type Direction = 'ltr' | 'rtl'
 // SpecialString will be removed in antd@6
 export type SpecialString<T> = T | (string & NonNullable<unknown>)
 
-export type DataIndex<T = any> =
-  | DeepNamePath<T>
-  | SpecialString<T>
-  | number
-  | (SpecialString<T> | number)[]
+export type DataIndex<T = any>
+  = | DeepNamePath<T>
+    | SpecialString<T>
+    | number
+    | (SpecialString<T> | number)[]
 
 export type CellEllipsisType = { showTitle?: boolean } | boolean
 
@@ -122,30 +101,12 @@ interface ColumnSharedType<RecordType> {
   title?: VueNode
   key?: Key
   className?: string
-  class?: string
   hidden?: boolean
   fixed?: FixedType
   onHeaderCell?: GetComponentProps<ColumnsType<RecordType>[number]>
-  /** @deprecated Please use `onHeaderCell` instead */
-  customHeaderCell?: GetComponentProps<ColumnsType<RecordType>[number]>
   ellipsis?: CellEllipsisType
   align?: AlignType
   rowScope?: RowScopeType
-  customFilterDropdown?: boolean
-  /** @deprecated Please use slots instead */
-  slots?: {
-    filterIcon?: string
-    filterDropdown?: string
-    customRender?: string
-    title?: string
-  }
-
-  /**
-   * @private Internal usage.
-   *
-   * !!! DO NOT USE IN PRODUCTION ENVIRONMENT !!!
-   */
-  __originColumn__?: any
 }
 
 export interface ColumnGroupType<RecordType> extends ColumnSharedType<RecordType> {
@@ -162,23 +123,11 @@ export interface ColumnType<RecordType> extends ColumnSharedType<RecordType> {
     record: RecordType,
     index: number,
   ) => VueNode | RenderedCell<RecordType>
-  customRender?: (opt: {
-    value: any
-    text: any
-    record: RecordType
-    index: number
-    renderIndex: number
-    column: ColumnType<RecordType>
-  }) => VueNode | RenderedCell<RecordType>
   shouldCellUpdate?: (record: RecordType, prevRecord: RecordType) => boolean
   rowSpan?: number
   width?: number | string
   minWidth?: number
-  maxWidth?: number
-  resizable?: boolean
   onCell?: GetComponentProps<RecordType>
-  /** @deprecated Please use `onCell` instead */
-  customCell?: GetComponentProps<RecordType>
   /** @deprecated Please use `onCell` instead */
   onCellClick?: (record: RecordType, e: MouseEvent) => void
 }
@@ -196,26 +145,17 @@ export interface StickyOffsets {
   end: readonly number[]
   widths: readonly number[]
   isSticky?: boolean
-  // Legacy alias for internal left/right usage
-  left?: readonly number[]
-  right?: readonly number[]
-}
-
-export type AdditionalProps = TdHTMLAttributes & {
-  colSpan?: number
-  rowSpan?: number
-  scope?: ScopeType
-  className?: string
 }
 
 // ================= Customized =================
 export type GetComponentProps<DataType> = (
   data: DataType,
   index?: number,
-  column?: ColumnType<any>,
-) => AdditionalProps
+) => HTMLAttributes & TdHTMLAttributes
 
-export type CustomizeComponent = any
+type Component = any
+
+export type CustomizeComponent = Component
 
 export type OnCustomizeScroll = (info: {
   currentTarget?: HTMLElement
@@ -226,10 +166,10 @@ export type CustomizeScrollBody<RecordType> = (
   data: readonly RecordType[],
   info: {
     scrollbarSize: number
-    ref: Ref<{ scrollLeft: number; scrollTo?: (scrollConfig: ScrollConfig) => void }>
+    // ref: React.Ref<{ scrollLeft: number; scrollTo?: (scrollConfig: ScrollConfig) => void }>;
     onScroll: OnCustomizeScroll
   },
-) => VueNode
+) => any
 
 export interface TableComponents<RecordType> {
   table?: CustomizeComponent
@@ -242,10 +182,10 @@ export interface TableComponents<RecordType> {
   body?:
     | CustomizeScrollBody<RecordType>
     | {
-        wrapper?: CustomizeComponent
-        row?: CustomizeComponent
-        cell?: CustomizeComponent
-      }
+      wrapper?: CustomizeComponent
+      row?: CustomizeComponent
+      cell?: CustomizeComponent
+    }
 }
 
 export type GetComponent = (
@@ -278,15 +218,18 @@ export interface LegacyExpandableProps<RecordType> {
   /** @deprecated Use `expandable.expandIconColumnIndex` instead */
   expandIconColumnIndex?: number
   /** @deprecated Use `expandable.expandedRowClassName` instead */
-  expandedRowClassName?: string | RowClassName<RecordType>
+  expandedRowClassName?: RowClassName<RecordType>
   /** @deprecated Use `expandable.childrenColumnName` instead */
   childrenColumnName?: string
   title?: PanelRender<RecordType>
 }
 
-export type ExpandedRowRender<ValueType> =
-  | ((record: ValueType, index: number, indent: number, expanded: boolean) => VueNode)
-  | ((opt: { record: ValueType; index: number; indent: number; expanded: boolean }) => VueNode)
+export type ExpandedRowRender<ValueType> = (
+  record: ValueType,
+  index: number,
+  indent: number,
+  expanded: boolean,
+) => any
 
 export interface RenderExpandIconProps<RecordType> {
   prefixCls: string
@@ -296,7 +239,9 @@ export interface RenderExpandIconProps<RecordType> {
   onExpand: TriggerEventHandler<RecordType>
 }
 
-export type RenderExpandIcon<RecordType> = (props: RenderExpandIconProps<RecordType>) => VueNode
+export type RenderExpandIcon<RecordType> = (
+  props: RenderExpandIconProps<RecordType>,
+) => any
 
 export interface ExpandableConfig<RecordType> {
   expandedRowKeys?: readonly Key[]
@@ -321,10 +266,13 @@ export interface ExpandableConfig<RecordType> {
 }
 
 // =================== Render ===================
-export type PanelRender<RecordType> = (data: readonly RecordType[]) => VueNode
+export type PanelRender<RecordType> = (data: readonly RecordType[]) => any
 
 // =================== Events ===================
-export type TriggerEventHandler<RecordType> = (record: RecordType, event: MouseEvent) => void
+export type TriggerEventHandler<RecordType> = (
+  record: RecordType,
+  event: MouseEvent,
+) => void
 
 // =================== Sticky ===================
 export interface TableSticky {

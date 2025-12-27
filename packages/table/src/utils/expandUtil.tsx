@@ -1,4 +1,5 @@
-import type { RenderExpandIconProps, Key, GetRowKey, ExpandableConfig } from '../interface';
+import type { ExpandableConfig, GetRowKey, Key, RenderExpandIconProps } from '../interface'
+import { clsx } from '@v-c/util'
 
 export function renderExpandIcon<RecordType>({
   prefixCls,
@@ -7,27 +8,26 @@ export function renderExpandIcon<RecordType>({
   expanded,
   expandable,
 }: RenderExpandIconProps<RecordType>) {
-  const expandClassName = `${prefixCls}-row-expand-icon`;
+  const expandClassName = `${prefixCls}-row-expand-icon`
 
   if (!expandable) {
-    return <span class={[expandClassName, `${prefixCls}-row-spaced`]} />;
+    return <span class={clsx(expandClassName, `${prefixCls}-row-spaced`)} />
   }
 
   const onClick = (event: MouseEvent) => {
-    onExpand(record, event);
-    event.stopPropagation();
-  };
+    onExpand(record, event)
+    event.stopPropagation()
+  }
 
   return (
     <span
-      class={{
-        [expandClassName]: true,
+      class={clsx(expandClassName, {
         [`${prefixCls}-row-expanded`]: expanded,
         [`${prefixCls}-row-collapsed`]: !expanded,
-      }}
+      })}
       onClick={onClick}
     />
-  );
+  )
 }
 
 export function findAllChildrenKeys<RecordType>(
@@ -35,19 +35,19 @@ export function findAllChildrenKeys<RecordType>(
   getRowKey: GetRowKey<RecordType>,
   childrenColumnName: string,
 ): Key[] {
-  const keys: Key[] = [];
+  const keys: Key[] = []
 
   function dig(list: readonly RecordType[]) {
     (list || []).forEach((item, index) => {
-      keys.push(getRowKey(item, index));
+      keys.push(getRowKey(item, index))
 
-      dig((item as any)[childrenColumnName]);
-    });
+      dig((item as any)[childrenColumnName])
+    })
   }
 
-  dig(data);
+  dig(data)
 
-  return keys;
+  return keys
 }
 
 export function computedExpandedClassName<RecordType>(
@@ -57,10 +57,10 @@ export function computedExpandedClassName<RecordType>(
   indent: number,
 ) {
   if (typeof cls === 'string') {
-    return cls;
+    return cls
   }
   if (typeof cls === 'function') {
-    return cls(record, index, indent);
+    return cls(record, index, indent)
   }
-  return '';
+  return ''
 }
