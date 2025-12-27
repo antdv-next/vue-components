@@ -120,6 +120,8 @@ export interface TableProps<RecordType = any>
   'title'?: PanelRender<RecordType>
   'footer'?: PanelRender<RecordType>
   'summary'?: (data: readonly RecordType[]) => any
+  'headerCell'?: (ctx: { column: ColumnType<any>, index: number, text: any }) => any
+  'bodyCell'?: (ctx: { column: ColumnType<any>, index: number, text: any, record: RecordType }) => any
   'caption'?: any
 
   'id'?: string
