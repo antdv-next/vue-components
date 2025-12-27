@@ -43,9 +43,8 @@ import StickyHeader from './stickyHeader.tsx'
 import StickyHeaderAndSummary from './stickyHeaderAndSummary.tsx'
 import SubTable from './subTable.tsx'
 import TitleAndFooter from './title-and-footer.tsx'
-// import VirtualColumns from './virtual-columns.tsx'
-// import VirtualListGrid from './virtual-list-grid.tsx'
-// import VirtualList from './virtual-list.tsx'
+import VirtualColumns from './virtual-columns.tsx'
+import VirtualList from './virtual-list.tsx'
 import Virtual from './virtual.tsx'
 import './assets/index.less'
 </script>
@@ -188,13 +187,10 @@ import './assets/index.less'
       <Virtual />
     </Variant>
     <Variant title="virtual-columns">
-      <!--      <VirtualColumns /> -->
+      <VirtualColumns />
     </Variant>
     <Variant title="virtual-list">
-      <!--      <VirtualList /> -->
-    </Variant>
-    <Variant title="virtual-list-grid">
-      <!--      <VirtualListGrid /> -->
+      <VirtualList />
     </Variant>
   </Story>
 </template>

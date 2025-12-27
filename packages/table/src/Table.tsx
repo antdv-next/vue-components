@@ -651,7 +651,6 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
         tableLayout: mergedTableLayout.value,
         onScroll: onInternalScroll,
       } as any
-      console.log(fixedHolderProps)
 
       groupTableNode = (
         <>

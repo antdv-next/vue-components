@@ -34,6 +34,9 @@ export function getColumnsKey<T = any>(columns: readonly GetColumnKeyColumn<T>[]
 }
 
 export function validateValue<T>(val: T) {
+  if (Array.isArray(val) && val.length === 0) {
+    return false
+  }
   return val !== null && val !== undefined
 }
 

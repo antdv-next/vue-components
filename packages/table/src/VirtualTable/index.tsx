@@ -78,6 +78,7 @@ const VirtualTable = defineComponent<VirtualTableProps<any>>(
       )
       return (
         <Table
+          {...attrs}
           {...restProps}
           className={mergedClassName}
           scroll={{ ...scroll, x: mergedScrollX.value, y: mergedScrollY.value }}

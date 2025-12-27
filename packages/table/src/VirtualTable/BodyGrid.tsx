@@ -145,7 +145,6 @@ const BodyGrid = defineComponent<GridProps<any>>({
         }
 
         const sizeInfo = getSize(rowKey)
-
         return (
           <BodyLine
             key={index}
@@ -235,14 +234,17 @@ const BodyGrid = defineComponent<GridProps<any>>({
           onScroll={staticContext.onScroll as any}
           extraRender={extraRender}
         >
-          {(item: any, index: number, itemProps: any) => (
-            <BodyLine
-              data={item}
-              rowKey={item.rowKey}
-              index={index}
-              style={itemProps?.style}
-            />
-          )}
+          {(dataInfo: Record<string, any>) => {
+            const { item, index, ...itemProps } = dataInfo
+            return (
+              <BodyLine
+                data={dataInfo.item}
+                rowKey={item.rowKey}
+                index={index}
+                style={itemProps?.style}
+              />
+            )
+          }}
         </VirtualListAny>
       )
     }

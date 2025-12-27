@@ -1,12 +1,12 @@
 import type { CSSProperties } from 'vue'
-import { computed, defineComponent } from 'vue'
-import { clsx } from '@v-c/util'
-import Cell from '../Cell'
 import type { FlattenData } from '../hooks/useFlattenRecords'
+import { clsx } from '@v-c/util'
+import { computed, defineComponent } from 'vue'
+import Cell from '../Cell'
 import useRowInfo from '../hooks/useRowInfo'
-import VirtualCell from './VirtualCell'
-import { useInjectStaticContext } from './context'
 import { computedExpandedClassName } from '../utils/expandUtil'
+import { useInjectStaticContext } from './context'
+import VirtualCell from './VirtualCell'
 
 export interface BodyLineProps<RecordType = any> {
   data: FlattenData<RecordType>
@@ -98,7 +98,6 @@ const BodyLine = defineComponent<BodyLineProps<any>>({
         ...rowStyle,
         ...(typeof rowPropsStyle === 'object' ? rowPropsStyle : {}),
       }
-
       const rowNode = (
         <RowComponent
           {...rowProps.value}

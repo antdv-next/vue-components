@@ -27,7 +27,7 @@ const columns3: ColumnsType = [
   { title: 'title2', dataIndex: 'b', width: 500 },
 ]
 
-const data: RecordType[] = new Array(4 * 10000).fill(null).map((_, index) => ({
+const data: RecordType[] = Array.from({ length: 4 * 10000 }).fill(null).map((_, index) => ({
   a: `a${index}`,
   b: `b${index}`,
   c: `c${index}`,

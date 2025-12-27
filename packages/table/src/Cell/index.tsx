@@ -122,7 +122,6 @@ function resolveCellRender<RecordType>({
         : [dataIndex]
 
   const value: any = getValue(record as any, path as any)
-
   let returnChildNode = value
   let returnCellProps: CellType<RecordType> | undefined
 
@@ -229,7 +228,6 @@ const Cell = defineComponent<CellProps<any>>({
         render,
         perfRecord,
       })
-
       const fixedStyle: CSSProperties = {}
       const isFixStart = typeof fixStart === 'number' && !tableContext.allColumnsFixedLeft
       const isFixEnd = typeof fixEnd === 'number' && !tableContext.allColumnsFixedLeft
