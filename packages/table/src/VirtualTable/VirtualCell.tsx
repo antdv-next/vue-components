@@ -83,9 +83,12 @@ const VirtualCell = defineComponent<VirtualCellProps<any>>({
 
       const marginOffset = colSpan > 1 ? (colWidth as number) - concatColWidth : 0
 
+      const normalizedCellStyle = cellStyle && !Array.isArray(cellStyle) && typeof cellStyle === 'object'
+        ? cellStyle
+        : {}
       const mergedStyle: CSSProperties = {
-        ...cellStyle,
-        ...style,
+        ...normalizedCellStyle,
+        ...(style || {}),
         flex: `0 0 ${concatColWidth}px`,
         width: `${concatColWidth}px`,
         marginRight: typeof marginOffset === 'number' ? `${marginOffset}px` : marginOffset,

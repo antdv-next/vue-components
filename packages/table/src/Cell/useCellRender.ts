@@ -17,7 +17,7 @@ function isRenderCell<RecordType>(
 
 export default function useCellRender<RecordType>(
   record: RecordType,
-  dataIndex: DataIndex<RecordType>,
+  dataIndex: DataIndex<RecordType> | undefined,
   renderIndex: number,
   children?: any,
   render?: ColumnType<RecordType>['render'],
@@ -46,7 +46,7 @@ export default function useCellRender<RecordType>(
 
       if (render) {
         const renderData = render(value, record, renderIndex)
-        if (isRenderCell(renderData)) {
+        if (isRenderCell<RecordType>(renderData)) {
           if (process.env.NODE_ENV !== 'production') {
             warning(
               false,

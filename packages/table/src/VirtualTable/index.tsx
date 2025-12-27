@@ -1,16 +1,17 @@
-import { computed, defineComponent, reactive, ref, watchEffect } from 'vue'
+import type { CustomizeScrollBody, GetComponent, Reference } from '../interface'
+import type { TableProps } from '../Table'
 import { clsx, get, warning } from '@v-c/util'
 import useEvent from '@v-c/util/dist/hooks/useEvent'
+import { computed, defineComponent, reactive, ref, watchEffect } from 'vue'
 import { INTERNAL_HOOKS } from '../constant'
 import { makeImmutable } from '../context/TableContext'
-import type { CustomizeScrollBody, GetComponent, Reference } from '../interface'
-import Table, { DEFAULT_PREFIX, type TableProps } from '../Table'
+import Table, { DEFAULT_PREFIX } from '../Table'
 import BodyGrid from './BodyGrid'
 import { useProvideStaticContext } from './context'
 
 export interface VirtualTableProps<RecordType> extends Omit<TableProps<RecordType>, 'scroll'> {
   listItemHeight?: number
-  scroll: { x?: number; y?: number }
+  scroll: { x?: number, y?: number }
 }
 
 const VirtualTable = defineComponent<VirtualTableProps<any>>((props, { expose, slots }) => {
@@ -96,7 +97,7 @@ const VirtualTable = defineComponent<VirtualTableProps<any>>((props, { expose, s
   }
 })
 
-export const genVirtualTable = (_shouldTriggerRender?: any) => {
+export function genVirtualTable(_shouldTriggerRender?: any) {
   return makeImmutable(VirtualTable, _shouldTriggerRender)
 }
 

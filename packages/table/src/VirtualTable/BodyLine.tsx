@@ -93,6 +93,11 @@ const BodyLine = defineComponent<BodyLineProps<any>>({
         rowStyle.position = 'absolute'
         rowStyle.pointerEvents = 'none'
       }
+      const rowPropsStyle = rowProps.value?.style
+      const mergedRowStyle = {
+        ...rowStyle,
+        ...(typeof rowPropsStyle === 'object' ? rowPropsStyle : {}),
+      }
 
       const rowNode = (
         <RowComponent
@@ -101,7 +106,7 @@ const BodyLine = defineComponent<BodyLineProps<any>>({
           class={clsx(className, `${tableContext.prefixCls}-row`, rowProps.value?.className, rowProps.value?.class, {
             [`${tableContext.prefixCls}-row-extra`]: extra,
           })}
-          style={{ ...rowStyle, ...(rowProps.value?.style || {}) }}
+          style={mergedRowStyle}
         >
           {tableContext.flattenColumns.map((column, colIndex) => {
             return (

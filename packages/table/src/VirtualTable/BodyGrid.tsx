@@ -1,12 +1,12 @@
-import type { CSSProperties } from 'vue'
-import { computed, defineComponent, reactive, ref, watch, watchEffect } from 'vue'
 import type { ListRef } from '@v-c/virtual-list'
+import type { CSSProperties } from 'vue'
+import type { ColumnType, Key, OnCustomizeScroll, ScrollConfig } from '../interface'
 import VirtualList from '@v-c/virtual-list'
+import { computed, defineComponent, reactive, ref, watch, watchEffect } from 'vue'
 import { useInjectTableContext } from '../context/TableContext'
 import useFlattenRecords from '../hooks/useFlattenRecords'
-import type { ColumnType, Key, OnCustomizeScroll, ScrollConfig } from '../interface'
 import BodyLine from './BodyLine'
-import { useProvideGridContext, useInjectStaticContext } from './context'
+import { useInjectStaticContext, useProvideGridContext } from './context'
 
 export interface GridProps<RecordType = any> {
   data: RecordType[]
@@ -170,7 +170,8 @@ const BodyGrid = defineComponent<GridProps<any>>({
         const { offset, ...restConfig } = config || {}
         if (offset) {
           listRef.value.scrollTo({ ...restConfig, offset, align: 'top' } as any)
-        } else {
+        }
+        else {
           listRef.value.scrollTo(config as any)
         }
       },

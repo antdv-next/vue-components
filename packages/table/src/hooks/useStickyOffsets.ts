@@ -3,7 +3,7 @@ import type { ColumnType, StickyOffsets } from '../interface'
 import { computed, unref } from 'vue'
 
 export default function useStickyOffsets<RecordType>(
-  colWidths: Ref<number[]> | number[],
+  colWidths: Ref<(number | undefined)[]> | (number | undefined)[],
   flattenColumns: Ref<readonly ColumnType<RecordType>[]> | readonly ColumnType<RecordType>[],
 ) {
   return computed<StickyOffsets>(() => {
@@ -46,7 +46,6 @@ export default function useStickyOffsets<RecordType>(
     const startOffsets = getOffsets(0, columnCount, 1)
     const endOffsets = getOffsets(columnCount - 1, -1, -1).reverse()
 
-    console.log(startOffsets, endOffsets, normalizedWidths)
     return {
       start: startOffsets,
       end: endOffsets,

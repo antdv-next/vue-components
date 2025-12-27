@@ -1,3 +1,4 @@
+import type { ComputedRef } from 'vue'
 import { computed } from 'vue'
 import { useInjectTableContext } from '../context/TableContext'
 import type { OnHover } from '../hooks/useHover'
@@ -10,7 +11,7 @@ function inHoverRange(cellStartRow: number, cellRowSpan: number, startRow: numbe
 export default function useHoverState(
   rowIndex: number,
   rowSpan: number,
-): [hovering: ReturnType<typeof computed>, onHover: OnHover] {
+): [hovering: ComputedRef<boolean>, onHover: OnHover] {
   const context = useInjectTableContext()
   const hovering = computed(() => {
     return inHoverRange(rowIndex, rowSpan || 1, context.hoverStartRow, context.hoverEndRow)

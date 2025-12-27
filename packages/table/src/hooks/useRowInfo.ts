@@ -33,11 +33,11 @@ export default function useRowInfo<RecordType>(
     const customRowProps = tableContext.onRow?.(mergedRecord, mergedRecordIndex) || {}
     const onRowClick = customRowProps?.onClick
 
-    const onClick = (event: MouseEvent, ...args: any[]) => {
+    const onClick = (event: MouseEvent) => {
       if (tableContext.expandRowByClick && expandable.value) {
         tableContext.onTriggerExpand(mergedRecord, event)
       }
-      onRowClick?.(event, ...args)
+      onRowClick?.(event as any)
     }
 
     let computeRowClassName = ''

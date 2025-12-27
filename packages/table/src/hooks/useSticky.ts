@@ -6,7 +6,7 @@ import type { TableSticky } from '../interface'
 const defaultContainer = canUseDom() ? window : null
 
 export default function useSticky(
-  sticky: Ref<boolean | TableSticky> | boolean | TableSticky,
+  sticky: Ref<boolean | TableSticky | undefined> | boolean | TableSticky | undefined,
   prefixCls: Ref<string> | string,
 ) {
   return computed(() => {

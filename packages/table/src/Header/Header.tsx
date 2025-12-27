@@ -14,8 +14,8 @@ import HeaderRow from './HeaderRow'
 
 function parseHeaderRows<RecordType>(
   rootColumns: ColumnsType<RecordType>,
-  classNames: TableProps['classNames']['header'],
-  styles: TableProps['styles']['header'],
+  classNames: NonNullable<TableProps['classNames']>['header'],
+  styles: NonNullable<TableProps['styles']>['header'],
 ): CellType<RecordType>[][] {
   const rows: CellType<RecordType>[][] = []
 
@@ -85,13 +85,14 @@ export interface HeaderProps<RecordType> {
   columns: ColumnsType<RecordType>
   flattenColumns: readonly ColumnType<RecordType>[]
   stickyOffsets: StickyOffsets
-  onHeaderRow: GetComponentProps<readonly ColumnType<RecordType>[]>
+  onHeaderRow?: GetComponentProps<readonly ColumnType<RecordType>[]>
 }
 
-const Header = defineComponent<HeaderProps<any>>({
+const Header = defineComponent({
   name: 'TableHeader',
+  inheritAttrs: false,
   props: ['columns', 'flattenColumns', 'stickyOffsets', 'onHeaderRow'] as any,
-  setup(props) {
+  setup(props: HeaderProps<any>) {
     const context = useInjectTableContext()
     const headerCls = computed(() => context.classNames?.header || {})
     const headerStyles = computed(() => context.styles?.header || {})
@@ -128,9 +129,6 @@ const Header = defineComponent<HeaderProps<any>>({
       )
     }
   },
-}, {
-  inheritAttrs: false,
-  name: 'TableHeader',
 })
 
 export default Header

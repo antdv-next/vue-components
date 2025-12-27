@@ -62,7 +62,7 @@ export interface CellType<RecordType> {
   key?: Key
   className?: string
   style?: CSSProperties
-  // children?: React.ReactNode
+  children?: VueNode
   column?: ColumnsType<RecordType>[number]
   colSpan?: number
   rowSpan?: number
@@ -75,7 +75,7 @@ export interface CellType<RecordType> {
 
 export interface RenderedCell<RecordType> {
   props?: CellType<RecordType>
-  // children?: React.ReactNode;
+  children?: VueNode
 }
 
 export type Direction = 'ltr' | 'rtl'
@@ -148,10 +148,18 @@ export interface StickyOffsets {
 }
 
 // ================= Customized =================
+export type CellAttributes = HTMLAttributes & TdHTMLAttributes & {
+  colSpan?: number
+  rowSpan?: number
+  colspan?: number
+  rowspan?: number
+  className?: string
+}
+
 export type GetComponentProps<DataType> = (
   data: DataType,
   index?: number,
-) => HTMLAttributes & TdHTMLAttributes
+) => CellAttributes
 
 type Component = any
 

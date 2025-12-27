@@ -1,6 +1,6 @@
 import type { Ref } from 'vue'
-import { computed, unref } from 'vue'
 import type { GetRowKey, Key } from '../interface'
+import { computed, unref } from 'vue'
 
 export interface FlattenData<RecordType> {
   record: RecordType

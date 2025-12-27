@@ -1,8 +1,8 @@
 import type { Ref } from 'vue'
-import { computed, unref } from 'vue'
+import type { ColumnType, StickyOffsets } from '../interface'
 import useMemo from '@v-c/util/dist/hooks/useMemo'
 import isEqual from '@v-c/util/dist/isEqual'
-import type { ColumnType, StickyOffsets } from '../interface'
+import { computed, unref } from 'vue'
 import { getCellFixedInfo } from '../utils/fixUtil'
 
 export default function useFixedInfo<RecordType>(

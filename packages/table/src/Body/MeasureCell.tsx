@@ -1,7 +1,7 @@
 import type { Key } from '../interface'
-import { defineComponent, ref } from 'vue'
 import ResizeObserver from '@v-c/resize-observer'
 import { useLayoutEffect } from '@v-c/util/dist/hooks/useLayoutEffect'
+import { defineComponent, ref } from 'vue'
 
 export interface MeasureCellProps {
   columnKey: Key

@@ -1,7 +1,4 @@
 import type { Ref } from 'vue'
-import { computed, ref, unref } from 'vue'
-import { warning } from '@v-c/util'
-import { INTERNAL_HOOKS } from '../constant'
 import type {
   ExpandableConfig,
   ExpandableType,
@@ -11,6 +8,9 @@ import type {
   TriggerEventHandler,
 } from '../interface'
 import type { TableProps } from '../Table'
+import { warning } from '@v-c/util'
+import { computed, ref, unref } from 'vue'
+import { INTERNAL_HOOKS } from '../constant'
 import { findAllChildrenKeys, renderExpandIcon } from '../utils/expandUtil'
 import { getExpandableProps } from '../utils/legacyUtil'
 
@@ -84,7 +84,8 @@ export default function useExpand<RecordType>(
     const hasKey = newExpandedKeys.has(rowKey)
     if (hasKey) {
       newExpandedKeys.delete(rowKey)
-    } else {
+    }
+    else {
       newExpandedKeys.add(rowKey)
     }
 

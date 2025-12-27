@@ -1,6 +1,6 @@
 import type { InjectionKey } from 'vue'
-import { inject, provide } from 'vue'
 import type { GetComponent, TableSticky } from '../interface'
+import { inject, provide } from 'vue'
 
 export interface StaticContextProps {
   scrollY: number
@@ -17,18 +17,18 @@ export interface GridContextProps {
 const StaticContextKey: InjectionKey<StaticContextProps> = Symbol('TableVirtualStaticContext')
 const GridContextKey: InjectionKey<GridContextProps> = Symbol('TableVirtualGridContext')
 
-export const useProvideStaticContext = (value: StaticContextProps) => {
+export function useProvideStaticContext(value: StaticContextProps) {
   provide(StaticContextKey, value)
 }
 
-export const useInjectStaticContext = () => {
+export function useInjectStaticContext() {
   return inject(StaticContextKey, {} as StaticContextProps)
 }
 
-export const useProvideGridContext = (value: GridContextProps) => {
+export function useProvideGridContext(value: GridContextProps) {
   provide(GridContextKey, value)
 }
 
-export const useInjectGridContext = () => {
+export function useInjectGridContext() {
   return inject(GridContextKey, {} as GridContextProps)
 }

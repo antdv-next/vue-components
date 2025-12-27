@@ -16,7 +16,7 @@ interface StickyScrollBarProps {
   scrollBodyRef: { value?: HTMLDivElement | null }
   onScroll: (params: { scrollLeft?: number }) => void
   offsetScroll: number
-  container: HTMLElement | Window
+  container: HTMLElement | Window | null
   direction: string
 }
 
@@ -81,15 +81,16 @@ const StickyScrollBar = defineComponent<StickyScrollBarProps>({
     const checkScrollBarVisible = () => {
       raf.cancel(rafRef.value as any)
       rafRef.value = raf(() => {
-        if (!props.scrollBodyRef.value) {
+        if (!props.scrollBodyRef.value || !props.container) {
           return
         }
+        const container = props.container
         const tableOffsetTop = getOffset(props.scrollBodyRef.value).top
         const tableBottomOffset = tableOffsetTop + props.scrollBodyRef.value.offsetHeight
         const currentClientOffset
-          = props.container === window
+          = container === window
             ? document.documentElement.scrollTop + window.innerHeight
-            : getOffset(props.container).top + (props.container as HTMLElement).clientHeight
+            : getOffset(container).top + (container as HTMLElement).clientHeight
 
         if (
           tableBottomOffset - getScrollBarSize() <= currentClientOffset
@@ -143,11 +144,12 @@ const StickyScrollBar = defineComponent<StickyScrollBarProps>({
         removeScrollListeners.value?.()
         removeScrollListeners.value = null
 
-        if (!props.scrollBodyRef.value) {
+        if (!props.scrollBodyRef.value || !props.container) {
           return
         }
-        const scrollParents: (HTMLElement | SVGElement)[] = []
-        let parent = getDOM(props.scrollBodyRef.value)
+        const container = props.container
+        const scrollParents: Element[] = []
+        let parent = getDOM(props.scrollBodyRef.value) as Element | null
         while (parent) {
           scrollParents.push(parent)
           parent = parent.parentElement
@@ -157,7 +159,7 @@ const StickyScrollBar = defineComponent<StickyScrollBarProps>({
         })
         window.addEventListener(RESIZE_EVENT, checkScrollBarVisible, false)
         window.addEventListener(SCROLL_EVENT, checkScrollBarVisible, false)
-        props.container.addEventListener(SCROLL_EVENT, checkScrollBarVisible, false)
+        container.addEventListener(SCROLL_EVENT, checkScrollBarVisible, false)
 
         removeScrollListeners.value = () => {
           scrollParents.forEach((p) => {
@@ -165,7 +167,7 @@ const StickyScrollBar = defineComponent<StickyScrollBarProps>({
           })
           window.removeEventListener(RESIZE_EVENT, checkScrollBarVisible)
           window.removeEventListener(SCROLL_EVENT, checkScrollBarVisible)
-          props.container.removeEventListener(SCROLL_EVENT, checkScrollBarVisible)
+          container.removeEventListener(SCROLL_EVENT, checkScrollBarVisible)
         }
       },
       { immediate: true },

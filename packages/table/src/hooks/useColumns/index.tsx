@@ -1,7 +1,4 @@
 import type { Ref } from 'vue'
-import { computed, unref } from 'vue'
-import { warning } from '@v-c/util'
-import { EXPAND_COLUMN } from '../../constant'
 import type {
   ColumnGroupType,
   ColumnsType,
@@ -13,10 +10,12 @@ import type {
   RenderExpandIcon,
   TriggerEventHandler,
 } from '../../interface'
+import { warning } from '@v-c/util'
+import { flattenChildren } from '@v-c/util/dist/props-util'
+import { computed, isVNode, unref } from 'vue'
+import { EXPAND_COLUMN } from '../../constant'
 import { INTERNAL_COL_DEFINE } from '../../utils/legacyUtil'
 import useWidthColumns from './useWidthColumns'
-import { flattenChildren } from '@v-c/util/dist/props-util'
-import { isVNode } from 'vue'
 
 export function convertChildrenToColumns<RecordType>(children: any): ColumnsType<RecordType> {
   return flattenChildren(children)
@@ -62,8 +61,8 @@ function flatColumns<RecordType>(
     .filter(column => column && typeof column === 'object')
     .reduce((list, column, index) => {
       const { fixed } = column
-      const parsedFixed =
-        fixed === true || fixed === 'left' ? 'start' : fixed === 'right' ? 'end' : fixed
+      const parsedFixed
+        = fixed === true || fixed === 'left' ? 'start' : fixed === 'right' ? 'end' : fixed
       const mergedKey = `${parentKey}-${index}`
 
       const subColumns = (column as ColumnGroupType<RecordType>).children
@@ -97,12 +96,12 @@ export default function useColumns<RecordType>(
     columnTitle?: Ref<any> | any
     getRowKey: Ref<GetRowKey<RecordType>> | GetRowKey<RecordType>
     onTriggerExpand: TriggerEventHandler<RecordType>
-    expandIcon?: Ref<RenderExpandIcon<RecordType>> | RenderExpandIcon<RecordType>
-    rowExpandable?: Ref<(record: RecordType) => boolean> | ((record: RecordType) => boolean)
+    expandIcon?: Ref<RenderExpandIcon<RecordType> | undefined> | RenderExpandIcon<RecordType>
+    rowExpandable?: Ref<((record: RecordType) => boolean) | undefined> | ((record: RecordType) => boolean) | undefined
     expandIconColumnIndex?: Ref<number | undefined> | number
     expandedRowOffset?: number
     direction?: Ref<Direction> | Direction
-    expandRowByClick?: Ref<boolean> | boolean
+    expandRowByClick?: Ref<boolean | undefined> | boolean | undefined
     columnWidth?: Ref<number | string | undefined> | number | string
     fixed?: Ref<FixedType | undefined> | FixedType
     scrollWidth?: Ref<number | null | undefined> | number | null | undefined
@@ -135,8 +134,8 @@ export default function useColumns<RecordType>(
       if (!cloneColumns.includes(EXPAND_COLUMN)) {
         const expandColIndex = expandIconColumnIndex || 0
         const fixed = unref(options.fixed)
-        const insertIndex =
-          expandColIndex === 0 && (fixed === 'right' || fixed === 'end')
+        const insertIndex
+          = expandColIndex === 0 && (fixed === 'right' || fixed === 'end')
             ? baseColumns.value.length
             : expandColIndex
         if (insertIndex >= 0) {
@@ -157,37 +156,41 @@ export default function useColumns<RecordType>(
       )
 
       const prevColumn = baseColumns.value[expandColumnIndex]
-      let fixedColumn: FixedType | null
+      let fixedColumn: FixedType | undefined
       const fixed = unref(options.fixed)
       if (fixed) {
         fixedColumn = fixed
-      } else {
-        fixedColumn = prevColumn ? prevColumn.fixed : null
+      }
+      else {
+        fixedColumn = prevColumn?.fixed
       }
 
+      const prefixCls = unref(options.prefixCls) || ''
       const expandColumn = {
         [INTERNAL_COL_DEFINE]: {
-          className: `${unref(options.prefixCls)}-expand-icon-col`,
+          className: `${prefixCls}-expand-icon-col`,
           columnType: 'EXPAND_COLUMN',
         },
         title: unref(options.columnTitle),
         fixed: fixedColumn,
-        className: `${unref(options.prefixCls)}-row-expand-icon-cell`,
+        className: `${prefixCls}-row-expand-icon-cell`,
         width: unref(options.columnWidth),
         render: (_: any, record: RecordType, index: number) => {
           const rowKey = unref(options.getRowKey)(record, index)
           const expanded = unref(options.expandedKeys).has(rowKey)
-          const recordExpandable = unref(options.rowExpandable)
-            ? unref(options.rowExpandable)(record)
-            : true
+          const rowExpandable = unref(options.rowExpandable)
+          const recordExpandable = rowExpandable ? rowExpandable(record) : true
 
-          const icon = unref(options.expandIcon)({
-            prefixCls: unref(options.prefixCls),
-            expanded,
-            expandable: recordExpandable,
-            record,
-            onExpand: options.onTriggerExpand,
-          })
+          const expandIcon = unref(options.expandIcon)
+          const icon = expandIcon
+            ? expandIcon({
+                prefixCls,
+                expanded,
+                expandable: recordExpandable,
+                record,
+                onExpand: options.onTriggerExpand,
+              })
+            : null
 
           if (unref(options.expandRowByClick)) {
             return <span onClick={e => e.stopPropagation()}>{icon}</span>

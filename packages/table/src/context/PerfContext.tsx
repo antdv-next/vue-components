@@ -11,11 +11,11 @@ const defaultPerfRecord: PerfRecord = {
 
 const PerfContextKey: InjectionKey<PerfRecord> = Symbol('TablePerfContext')
 
-export const useProvidePerfContext = (record = reactive({ ...defaultPerfRecord })) => {
+export function useProvidePerfContext(record = reactive({ ...defaultPerfRecord })) {
   provide(PerfContextKey, record)
   return record
 }
 
-export const useInjectPerfContext = () => {
+export function useInjectPerfContext() {
   return inject(PerfContextKey, defaultPerfRecord)
 }

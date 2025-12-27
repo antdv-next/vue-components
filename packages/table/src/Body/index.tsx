@@ -1,5 +1,5 @@
-import { defineComponent, computed } from 'vue'
 import { clsx } from '@v-c/util'
+import { computed, defineComponent } from 'vue'
 import { useProvidePerfContext } from '../context/PerfContext'
 import { useInjectTableContext } from '../context/TableContext'
 import useFlattenRecords from '../hooks/useFlattenRecords'
@@ -74,20 +74,21 @@ const Body = defineComponent<BodyProps<any>>({
             />
           )
         })
-      } else {
+      }
+      else {
         rows = (
-            <ExpandedRow
-              expanded
-              className={`${context.prefixCls}-placeholder`}
-              prefixCls={context.prefixCls}
-              component={trComponent}
-              cellComponent={tdComponent}
-              colSpan={context.flattenColumns.length}
-              isEmpty
-            >
-              {context.emptyNode}
-            </ExpandedRow>
-          )
+          <ExpandedRow
+            expanded
+            className={`${context.prefixCls}-placeholder`}
+            prefixCls={context.prefixCls}
+            component={trComponent}
+            cellComponent={tdComponent}
+            colSpan={context.flattenColumns.length}
+            isEmpty
+          >
+            {context.emptyNode}
+          </ExpandedRow>
+        )
       }
 
       const columnsKey = getColumnsKey(context.flattenColumns)

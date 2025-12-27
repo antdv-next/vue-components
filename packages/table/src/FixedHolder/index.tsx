@@ -1,11 +1,10 @@
 import type { CSSProperties } from 'vue'
-import { computed, defineComponent, onBeforeUnmount, onMounted, ref } from 'vue'
-import { clsx } from '@v-c/util'
-import { fillRef } from '@v-c/util/dist/createRef'
-import ColGroup from '../ColGroup'
-import { useInjectTableContext } from '../context/TableContext'
 import type { HeaderProps } from '../Header/Header'
 import type { ColumnsType, ColumnType, Direction, TableLayout } from '../interface'
+import { clsx } from '@v-c/util'
+import { computed, defineComponent, onBeforeUnmount, onMounted, ref } from 'vue'
+import ColGroup from '../ColGroup'
+import { useInjectTableContext } from '../context/TableContext'
 
 function useColumnWidth(colWidths: readonly number[], columnCount: number) {
   return computed(() => {
@@ -14,7 +13,8 @@ function useColumnWidth(colWidths: readonly number[], columnCount: number) {
       const val = colWidths[i]
       if (val !== undefined) {
         cloneColumns[i] = val
-      } else {
+      }
+      else {
         return null
       }
     }
@@ -36,7 +36,7 @@ export interface FixedHeaderProps<RecordType> extends HeaderProps<RecordType> {
   stickyClassName?: string
   scrollX?: number | string | true
   tableLayout?: TableLayout
-  onScroll: (info: { currentTarget: HTMLDivElement; scrollLeft?: number }) => void
+  onScroll: (info: { currentTarget: HTMLDivElement, scrollLeft?: number }) => void
   colGroup?: any
 }
 
@@ -86,10 +86,10 @@ const FixedHolder = defineComponent<FixedHeaderProps<any>>({
     const columnsWithScrollbar = computed<ColumnsType<unknown>>(() => {
       const lastColumn = props.flattenColumns[props.flattenColumns.length - 1]
       const ScrollBarColumn: ColumnType<unknown> & { scrollbar: true } = {
-        fixed: lastColumn ? lastColumn.fixed : null,
+        fixed: lastColumn?.fixed,
         scrollbar: true,
         onHeaderCell: () => ({
-          className: `${context.prefixCls}-cell-scrollbar`,
+          class: `${context.prefixCls}-cell-scrollbar`,
         }),
       }
       return combinationScrollBarSize.value ? [...props.columns, ScrollBarColumn] : props.columns
@@ -98,10 +98,10 @@ const FixedHolder = defineComponent<FixedHeaderProps<any>>({
     const flattenColumnsWithScrollbar = computed(() => {
       const lastColumn = props.flattenColumns[props.flattenColumns.length - 1]
       const ScrollBarColumn: ColumnType<unknown> & { scrollbar: true } = {
-        fixed: lastColumn ? lastColumn.fixed : null,
+        fixed: lastColumn?.fixed,
         scrollbar: true,
         onHeaderCell: () => ({
-          className: `${context.prefixCls}-cell-scrollbar`,
+          class: `${context.prefixCls}-cell-scrollbar`,
         }),
       }
       return combinationScrollBarSize.value
@@ -119,10 +119,6 @@ const FixedHolder = defineComponent<FixedHeaderProps<any>>({
       }
     })
 
-    const setScrollRef = (element: HTMLElement | null) => {
-      fillRef(scrollRef, element)
-    }
-
     const onWheel = (event: WheelEvent) => {
       const currentTarget = event.currentTarget as HTMLDivElement
       const { deltaX } = event
@@ -134,7 +130,8 @@ const FixedHolder = defineComponent<FixedHeaderProps<any>>({
         if (props.direction === 'rtl') {
           nextScroll = Math.max(-maxScrollWidth, nextScroll)
           nextScroll = Math.min(0, nextScroll)
-        } else {
+        }
+        else {
           nextScroll = Math.min(maxScrollWidth, nextScroll)
           nextScroll = Math.max(0, nextScroll)
         }
@@ -171,7 +168,7 @@ const FixedHolder = defineComponent<FixedHeaderProps<any>>({
             ...(context.isSticky ? { top: props.stickyTopOffset, bottom: props.stickyBottomOffset } : {}),
             ...props.style,
           }}
-          ref={setScrollRef}
+          ref={scrollRef}
           class={clsx(props.className, {
             [props.stickyClassName as string]: !!props.stickyClassName,
           })}
@@ -183,15 +180,17 @@ const FixedHolder = defineComponent<FixedHeaderProps<any>>({
               width: typeof props.scrollX === 'number' ? `${props.scrollX}px` : props.scrollX,
             }}
           >
-            {isColGroupEmpty.value ? (
-              props.colGroup
-            ) : (
-              <ColGroup
-                colWidths={[...(mergedColumnWidth.value || []), combinationScrollBarSize.value]}
-                columCount={props.columCount + 1}
-                columns={flattenColumnsWithScrollbar.value}
-              />
-            )}
+            {isColGroupEmpty.value
+              ? (
+                  props.colGroup
+                )
+              : (
+                  <ColGroup
+                    colWidths={[...(mergedColumnWidth.value || []), combinationScrollBarSize.value]}
+                    columCount={props.columCount + 1}
+                    columns={flattenColumnsWithScrollbar.value}
+                  />
+                )}
             {slots.default?.(slotProps.value)}
           </TableComp>
         </div>

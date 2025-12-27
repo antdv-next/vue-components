@@ -1,6 +1,6 @@
 import type { Ref } from 'vue'
-import { computed, unref } from 'vue'
 import type { ColumnsType } from '../../interface'
+import { computed, unref } from 'vue'
 
 function parseColWidth(totalWidth: number, width: string | number = '') {
   if (typeof width === 'number') {
@@ -31,7 +31,8 @@ export default function useWidthColumns(
         const colWidth = parseColWidth(mergedScrollWidth, col.width)
         if (colWidth) {
           totalWidth += colWidth
-        } else {
+        }
+        else {
           missWidthCount += 1
         }
       })
@@ -48,7 +49,8 @@ export default function useWidthColumns(
 
         if (colWidth) {
           clone.width = colWidth
-        } else {
+        }
+        else {
           const colAvgWidth = Math.floor(avgWidth)
           clone.width = restCount === 1 ? restWidth : colAvgWidth
           restWidth -= colAvgWidth
@@ -73,6 +75,6 @@ export default function useWidthColumns(
       return [filledColumns, Math.max(realTotal, maxFitWidth)]
     }
 
-    return [mergedColumns, mergedScrollWidth]
+    return [mergedColumns, mergedScrollWidth ?? undefined]
   })
 }

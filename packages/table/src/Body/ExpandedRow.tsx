@@ -42,7 +42,7 @@ const ExpandedRow = defineComponent<ExpandedRowProps>({
         stickyOffset = 0,
       } = props
 
-      let contentNode = slots.default?.()
+      let contentNode: any = slots.default?.()
 
       if (isEmpty ? context.horizonScroll && context.componentWidth : context.fixColumn) {
         contentNode = (

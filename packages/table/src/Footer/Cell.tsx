@@ -1,7 +1,7 @@
-import { defineComponent, computed } from 'vue'
+import type { AlignType } from '../interface'
+import { computed, defineComponent } from 'vue'
 import Cell from '../Cell'
 import { useInjectTableContext } from '../context/TableContext'
-import type { AlignType } from '../interface'
 import { getCellFixedInfo } from '../utils/fixUtil'
 import { useInjectSummaryContext } from './SummaryContext'
 

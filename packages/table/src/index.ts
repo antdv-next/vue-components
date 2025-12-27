@@ -1,31 +1,31 @@
+import type { ColumnsType, ColumnType, Reference } from './interface'
+import type { TableProps } from './Table'
+import type { VirtualTableProps } from './VirtualTable'
 import { EXPAND_COLUMN, INTERNAL_HOOKS } from './constant'
 import { FooterComponents as Summary, SummaryCell, SummaryRow } from './Footer'
-import type { ColumnType, ColumnsType, Reference } from './interface'
 import Column from './sugar/Column'
 import ColumnGroup from './sugar/ColumnGroup'
-import type { TableProps } from './Table'
 import Table, { genTable } from './Table'
 import { INTERNAL_COL_DEFINE } from './utils/legacyUtil'
-import type { VirtualTableProps } from './VirtualTable'
 import VirtualTable, { genVirtualTable } from './VirtualTable'
 
 export {
-  genTable,
-  Summary,
   Column,
   ColumnGroup,
+  type ColumnsType,
+  type ColumnType,
+  EXPAND_COLUMN,
+  genTable,
+  genVirtualTable,
+  INTERNAL_COL_DEFINE,
+  INTERNAL_HOOKS,
+  type Reference,
+  Summary,
   SummaryCell,
   SummaryRow,
   type TableProps,
-  INTERNAL_COL_DEFINE,
-  EXPAND_COLUMN,
-  INTERNAL_HOOKS,
   VirtualTable,
-  genVirtualTable,
   type VirtualTableProps,
-  type Reference,
-  type ColumnType,
-  type ColumnsType,
 }
 
 export default Table

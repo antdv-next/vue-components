@@ -162,6 +162,13 @@ const BodyRow = defineComponent<BodyRowProps<any>>({
         indent,
       )
 
+      const rowPropsStyle = rowProps.value?.style
+      const mergedRowStyle = {
+        ...(style || {}),
+        ...(typeof rowPropsStyle === 'object' ? rowPropsStyle : {}),
+        ...(styles?.row || {}),
+      }
+
       const baseRowNode = (
         <RowComponent
           {...rowProps.value}
@@ -175,11 +182,7 @@ const BodyRow = defineComponent<BodyRowProps<any>>({
             classNames?.row,
             { [expandedClsName]: indent >= 1 },
           )}
-          style={{
-            ...(style || {}),
-            ...(rowProps.value?.style || {}),
-            ...(styles?.row || {}),
-          }}
+          style={mergedRowStyle}
         >
           {flattenColumns.map((column: ColumnType<any>, colIndex) => {
             const { render, dataIndex, className: columnClassName } = column

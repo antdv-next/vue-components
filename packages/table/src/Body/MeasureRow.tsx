@@ -1,9 +1,9 @@
-import { defineComponent, ref } from 'vue'
+import type { ColumnType, Key } from '../interface'
 import ResizeObserver from '@v-c/resize-observer'
 import isVisible from '@v-c/util/dist/Dom/isVisible'
-import MeasureCell from './MeasureCell'
+import { defineComponent, ref } from 'vue'
 import { useInjectTableContext } from '../context/TableContext'
-import type { ColumnType, Key } from '../interface'
+import MeasureCell from './MeasureCell'
 
 export interface MeasureRowProps {
   prefixCls: string

@@ -1,6 +1,6 @@
 import type { InjectionKey } from 'vue'
-import { inject, provide } from 'vue'
 import type { ColumnType, StickyOffsets } from '../interface'
+import { inject, provide } from 'vue'
 
 type FlattenColumns<RecordType> = readonly (ColumnType<RecordType> & { scrollbar?: boolean })[]
 
@@ -12,10 +12,10 @@ export interface SummaryContextProps<RecordType = any> {
 
 const SummaryContextKey: InjectionKey<SummaryContextProps> = Symbol('TableSummaryContext')
 
-export const useProvideSummaryContext = (value: SummaryContextProps) => {
+export function useProvideSummaryContext(value: SummaryContextProps) {
   provide(SummaryContextKey, value)
 }
 
-export const useInjectSummaryContext = <RecordType = any>() => {
+export function useInjectSummaryContext<RecordType = any>() {
   return inject(SummaryContextKey, {} as SummaryContextProps<RecordType>)
 }

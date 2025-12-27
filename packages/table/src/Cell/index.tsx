@@ -1,8 +1,4 @@
 import type { CSSProperties } from 'vue'
-import { isVNode } from 'vue'
-import { clsx } from '@v-c/util'
-import { filterEmpty } from '@v-c/util/dist/props-util'
-import { useInjectTableContext } from '../context/TableContext'
 import type {
   AlignType,
   CellEllipsisType,
@@ -12,6 +8,10 @@ import type {
   DefaultRecordType,
   ScopeType,
 } from '../interface'
+import { clsx } from '@v-c/util'
+import { filterEmpty, getStylePxValue } from '@v-c/util/dist/props-util'
+import { isVNode } from 'vue'
+import { useInjectTableContext } from '../context/TableContext'
 import useCellRender from './useCellRender'
 import useHoverState from './useHoverState'
 
@@ -28,6 +28,7 @@ export interface CellProps<RecordType extends DefaultRecordType> {
   render?: ColumnType<RecordType>['render']
   component?: CustomizeComponent
   // children?: any
+  children?: any
   colSpan?: number
   rowSpan?: number
   scope?: ScopeType
@@ -64,8 +65,9 @@ function getTitleFromCellRenderChildren({
   rowType,
   children,
 }: Pick<CellProps<any>, 'ellipsis' | 'rowType' | 'children'>) {
-  const ellipsisConfig: CellEllipsisType = ellipsis === true ? { showTitle: true } : ellipsis
-  if (ellipsisConfig && (ellipsisConfig.showTitle || rowType === 'header')) {
+  const ellipsisConfig = ellipsis === true ? { showTitle: true } : ellipsis
+  const showTitle = !!(ellipsisConfig && typeof ellipsisConfig === 'object' && ellipsisConfig.showTitle)
+  if (ellipsisConfig && (showTitle || rowType === 'header')) {
     if (typeof children === 'string' || typeof children === 'number') {
       return children.toString()
     }
@@ -85,7 +87,7 @@ function getTitleFromCellRenderChildren({
   return undefined
 }
 
-const Cell = <RecordType extends DefaultRecordType>(props: CellProps<RecordType>, { slots }: any) => {
+function Cell<RecordType extends DefaultRecordType>(props: CellProps<RecordType>, { slots }: any) {
   const {
     component: Component = 'td',
     ellipsis,
@@ -122,7 +124,7 @@ const Cell = <RecordType extends DefaultRecordType>(props: CellProps<RecordType>
 
   const mergedRenderIndex = renderIndex ?? index ?? 0
   const cellRender = useCellRender(
-    record,
+    record as RecordType,
     dataIndex,
     mergedRenderIndex,
     slots?.default?.(),
@@ -135,31 +137,28 @@ const Cell = <RecordType extends DefaultRecordType>(props: CellProps<RecordType>
   const isFixStart = typeof fixStart === 'number' && !tableContext.allColumnsFixedLeft
   const isFixEnd = typeof fixEnd === 'number' && !tableContext.allColumnsFixedLeft
 
+  const [absScroll = 0, scrollWidth = 0] = tableContext.scrollInfo || []
   const [showFixStartShadow, showFixEndShadow] = (() => {
     if (!isFixStart && !isFixEnd) {
       return [false, false]
     }
-
-    const [absScroll, scrollWidth] = tableContext.scrollInfo
-    const showStartShadow
-      = (isFixStart && fixedStartShadow && absScroll)
-        - (offsetFixedStartShadow as number)
-      >= 1
-    const showEndShadow
-      = (isFixEnd && fixedEndShadow && scrollWidth - absScroll)
-        - (offsetFixedEndShadow as number)
-      > 1
+    const showStartShadow = isFixStart && fixedStartShadow
+      ? absScroll - (offsetFixedStartShadow || 0) >= 1
+      : false
+    const showEndShadow = isFixEnd && fixedEndShadow
+      ? scrollWidth - absScroll - (offsetFixedEndShadow || 0) > 1
+      : false
 
     return [showStartShadow, showEndShadow]
   })()
 
   if (isFixStart) {
-    fixedStyle.insetInlineStart = fixStart as number
+    fixedStyle.insetInlineStart = getStylePxValue(fixStart as number)
     fixedStyle['--z-offset' as any] = zIndex
     fixedStyle['--z-offset-reverse' as any] = zIndexReverse
   }
   if (isFixEnd) {
-    fixedStyle.insetInlineEnd = fixEnd as number
+    fixedStyle.insetInlineEnd = getStylePxValue(fixEnd as number)
     fixedStyle['--z-offset' as any] = zIndex
     fixedStyle['--z-offset-reverse' as any] = zIndexReverse
   }

@@ -1,9 +1,9 @@
+import type { ColumnType, StickyOffsets } from '../interface'
 import { defineComponent, reactive, watchEffect } from 'vue'
 import { useInjectTableContext } from '../context/TableContext'
-import type { ColumnType, StickyOffsets } from '../interface'
-import Summary from './Summary'
-import SummaryRow from './Row'
 import SummaryCell from './Cell'
+import SummaryRow from './Row'
+import Summary from './Summary'
 import { useProvideSummaryContext } from './SummaryContext'
 
 type FlattenColumns<RecordType> = readonly (ColumnType<RecordType> & { scrollbar?: boolean })[]
@@ -19,7 +19,7 @@ const Footer = defineComponent<FooterProps<any>>({
   setup(props, { slots }) {
     const { prefixCls } = useInjectTableContext()
 
-    const summaryContext = reactive({
+    const summaryContext = reactive<any>({
       stickyOffsets: props.stickyOffsets,
       flattenColumns: props.flattenColumns,
       scrollColumnIndex: null as number | null,
@@ -32,7 +32,7 @@ const Footer = defineComponent<FooterProps<any>>({
       summaryContext.scrollColumnIndex = scrollColumn?.scrollbar ? lastColumnIndex : null
     })
 
-    useProvideSummaryContext(summaryContext)
+    useProvideSummaryContext(summaryContext as any)
 
     return () => (
       <tfoot class={`${prefixCls}-summary`}>
@@ -45,4 +45,4 @@ const Footer = defineComponent<FooterProps<any>>({
 export default Footer
 
 export const FooterComponents = Summary
-export { SummaryRow, SummaryCell }
+export { SummaryCell, SummaryRow }

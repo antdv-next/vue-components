@@ -221,7 +221,7 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
       ),
       clientWidth: componentWidth,
     },
-    computed(() => (useInternalHooks.value ? props.transformColumns : null)),
+    computed(() => (useInternalHooks.value ? (props.transformColumns || null) : null)),
   )
 
   const mergedScrollX = computed(() => flattenScrollX.value ?? props.scroll?.x)
@@ -349,7 +349,7 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
       target(scrollLeft)
       return
     }
-    const element = getDOM(target)
+    const element = getDOM(target) as HTMLElement | null
     if (element && element.scrollLeft !== scrollLeft) {
       element.scrollLeft = scrollLeft
       if (element.scrollLeft !== scrollLeft) {
@@ -433,7 +433,7 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
     if (horizonScroll.value) {
       onFullTableResize()
     }
-  }, [horizonScroll])
+  }, [horizonScroll as any])
 
   const mounted = ref(false)
   watch(
@@ -453,7 +453,7 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
   useLayoutEffect(() => {
     if (!props.tailor || !useInternalHooks.value) {
       if (scrollBodyRef.value instanceof Element) {
-        scrollbarSize.value = getTargetScrollBarSize(scrollBodyRef.value).width
+        scrollbarSize.value = getTargetScrollBarSize(scrollBodyRef.value as HTMLElement).width
       }
       else {
         scrollbarSize.value = getTargetScrollBarSize(scrollBodyContainerRef.value as any).width
@@ -597,7 +597,10 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
     )
 
     const bodyColGroupNode = (
-      <ColGroup colWidths={flattenColumns.value.map(({ width }) => width)} columns={flattenColumns.value} />
+      <ColGroup
+        colWidths={flattenColumns.value.map(({ width }) => width!)}
+        columns={flattenColumns.value}
+      />
     )
 
     const captionElement = props.caption !== null && props.caption !== undefined
@@ -705,7 +708,7 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
         <div
           style={{ ...scrollXStyle.value, ...scrollYStyle.value, ...props.styles?.content }}
           class={clsx(`${mergedPrefixCls.value}-content`, props.classNames?.content)}
-          onScroll={onInternalScroll}
+          onScroll={onBodyScroll}
           ref={scrollBodyRef}
         >
           <TableComp style={{ ...scrollTableStyle.value, tableLayout: mergedTableLayout.value }} {...ariaProps}>
@@ -791,7 +794,7 @@ export type ForwardGenericTable = (<RecordType extends DefaultRecordType = any>(
   props: TableProps<RecordType> & { ref?: any },
 ) => any) & { displayName?: string }
 
-const RefTable = Table as ForwardGenericTable
+const RefTable = Table as unknown as ForwardGenericTable
 
 export function genTable(_shouldTriggerRender?: any) {
   return RefTable

@@ -1,5 +1,5 @@
+import type { VueNode } from '@v-c/util'
 import type { InjectionKey, Ref } from 'vue'
-import { inject, provide, ref } from 'vue'
 import type {
   ColumnsType,
   ColumnType,
@@ -15,9 +15,9 @@ import type {
   TableLayout,
   TriggerEventHandler,
 } from '../interface'
-import type { FixedInfo } from '../utils/fixUtil'
 import type { TableProps } from '../Table'
-import type { VueNode } from '@v-c/util'
+import type { FixedInfo } from '../utils/fixUtil'
+import { inject, provide, ref } from 'vue'
 
 export type ScrollInfoType = [scrollLeft: number, scrollRange: number]
 
@@ -83,11 +83,11 @@ export interface TableContextProps<RecordType = any> {
 
 export const TableContextKey: InjectionKey<TableContextProps> = Symbol('TableContextProps')
 
-export const useProvideTableContext = (props: TableContextProps) => {
+export function useProvideTableContext(props: TableContextProps) {
   provide(TableContextKey, props)
 }
 
-export const useInjectTableContext = <RecordType = any>() => {
+export function useInjectTableContext<RecordType = any>() {
   return inject(TableContextKey, {} as TableContextProps<RecordType>)
 }
 

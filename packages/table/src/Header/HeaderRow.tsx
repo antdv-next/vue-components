@@ -1,7 +1,3 @@
-import { defineComponent } from 'vue'
-import { clsx } from '@v-c/util'
-import Cell from '../Cell'
-import { useInjectTableContext } from '../context/TableContext'
 import type {
   CellType,
   ColumnType,
@@ -9,9 +5,13 @@ import type {
   GetComponentProps,
   StickyOffsets,
 } from '../interface'
+import type { TableProps } from '../Table'
+import { clsx } from '@v-c/util'
+import { defineComponent } from 'vue'
+import Cell from '../Cell'
+import { useInjectTableContext } from '../context/TableContext'
 import { getCellFixedInfo } from '../utils/fixUtil'
 import { getColumnsKey } from '../utils/valueUtil'
-import type { TableProps } from '../Table'
 
 export interface RowProps<RecordType> {
   cells: readonly CellType<RecordType>[]
@@ -19,10 +19,10 @@ export interface RowProps<RecordType> {
   flattenColumns: readonly ColumnType<RecordType>[]
   rowComponent: CustomizeComponent
   cellComponent: CustomizeComponent
-  onHeaderRow: GetComponentProps<readonly ColumnType<RecordType>[]>
+  onHeaderRow?: GetComponentProps<readonly ColumnType<RecordType>[]>
   index: number
-  classNames: TableProps['classNames']['header']
-  styles: TableProps['styles']['header']
+  classNames: NonNullable<TableProps['classNames']>['header']
+  styles: NonNullable<TableProps['styles']>['header']
 }
 
 const HeaderRow = defineComponent<RowProps<any>>({
@@ -54,14 +54,12 @@ const HeaderRow = defineComponent<RowProps<any>>({
       } = props
 
       let rowProps: Record<string, any> | undefined
+      const rowColumns = cells.map(cell => cell.column).filter(Boolean) as ColumnType<any>[]
       if (onHeaderRow) {
-        rowProps = onHeaderRow(
-          cells.map(cell => cell.column),
-          index,
-        )
+        rowProps = onHeaderRow(rowColumns, index)
       }
 
-      const columnsKey = getColumnsKey(cells.map(cell => cell.column))
+      const columnsKey = getColumnsKey(rowColumns)
 
       const mergedRowClass = clsx(classNames?.row, rowProps?.className, rowProps?.class)
       const mergedRowStyle = {
