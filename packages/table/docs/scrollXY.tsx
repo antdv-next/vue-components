@@ -1,6 +1,7 @@
 import type { TableProps } from '../src'
 import { defineComponent, ref } from 'vue'
 import Table from '../src'
+import './assets/index.less'
 
 const columns: TableProps['columns'] = [
   { title: 'title1', dataIndex: 'a', key: 'a', width: 60, fixed: 'start' },

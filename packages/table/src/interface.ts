@@ -15,7 +15,7 @@ import type { VueNode } from '@v-c/util'
  * - onFilter
  * - onFilterDropdownVisibleChange
  */
-import type { CSSProperties, HTMLAttributes, TdHTMLAttributes } from 'vue'
+import type { CSSProperties, HTMLAttributes, Ref, TdHTMLAttributes } from 'vue'
 import type { DeepNamePath } from './namePathType'
 
 export type Key = string | number
@@ -166,7 +166,7 @@ export type CustomizeScrollBody<RecordType> = (
   data: readonly RecordType[],
   info: {
     scrollbarSize: number
-    // ref: React.Ref<{ scrollLeft: number; scrollTo?: (scrollConfig: ScrollConfig) => void }>;
+    ref: Ref<{ scrollLeft: number; scrollTo?: (scrollConfig: ScrollConfig) => void } | null>
     onScroll: OnCustomizeScroll
   },
 ) => any

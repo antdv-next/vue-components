@@ -32,7 +32,11 @@ export default defineComponent(() => {
           count.value += 1
         }}
       >
-        Click {count.value} times
+        Click
+        {' '}
+        {count.value}
+        {' '}
+        times
       </button>
       <Table<RecordType> columns={columns} data={data} />
     </>

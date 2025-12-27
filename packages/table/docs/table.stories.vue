@@ -35,11 +35,13 @@
 // import RowAndCellClick from './rowAndCellClick.tsx'
 // import ScopeCol from './scopeCol.tsx'
 // import ScopeRow from './scopeRow.tsx'
-// import ScrollX from './scrollX.tsx'
-// import ScrollXY from './scrollXY.tsx'
-// import ScrollY from './scrollY.tsx'
+import ScrollX from './scrollX.tsx'
+
+import ScrollXY from './scrollXY.tsx'
+import ScrollY from './scrollY.tsx'
 // import Shadow from './shadow.tsx'
-// import Simple from './simple.tsx'
+import Simple from './simple.tsx'
+import './assets/index.less'
 // import StickyHeader from './stickyHeader.tsx'
 // import StickyHeaderAndSummary from './stickyHeaderAndSummary.tsx'
 // import StyledComponents from './styled-components.tsx'
@@ -54,16 +56,16 @@
 <template>
   <Story title="Table">
     <Variant title="simple">
-      <!--      <Simple /> -->
+      <Simple />
     </Variant>
     <Variant title="scroll-x">
-      <!--      <ScrollX /> -->
+      <ScrollX />
     </Variant>
     <Variant title="scroll-y">
-      <!--      <ScrollY /> -->
+      <ScrollY />
     </Variant>
     <Variant title="scroll-xy">
-      <!--      <ScrollXY /> -->
+      <ScrollXY />
     </Variant>
     <Variant title="fixed-columns">
       <!--      <FixedColumns /> -->
