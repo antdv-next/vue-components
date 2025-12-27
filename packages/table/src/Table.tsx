@@ -49,7 +49,6 @@ import ResizeObserver from '@v-c/resize-observer'
 import { clsx, get, warning } from '@v-c/util'
 import { getDOM } from '@v-c/util/dist/Dom/findDOMNode'
 import { getTargetScrollBarSize } from '@v-c/util/dist/getScrollBarSize'
-import { useLayoutEffect } from '@v-c/util/dist/hooks/useLayoutEffect'
 import isEqual from '@v-c/util/dist/isEqual'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
 import { computed, defineComponent, isVNode, nextTick, onMounted, reactive, ref, watch, watchEffect } from 'vue'
@@ -268,9 +267,6 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
 
   const colsKeys = computed(() => getColumnsKey(flattenColumns.value))
   const colWidths = computed(() => colsKeys.value.map(columnKey => colsWidths.value.get(columnKey)))
-  watch(colWidths, () => {
-    console.log(colWidths.value)
-  }, { immediate: true })
   const stickyRef = ref<any>(null)
   const stickyConfig = useSticky(computed(() => props.sticky), mergedPrefixCls)
 
@@ -431,11 +427,11 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
     }
   }
 
-  useLayoutEffect(() => {
+  watch(horizonScroll, () => {
     if (horizonScroll.value) {
       onFullTableResize()
     }
-  }, [horizonScroll as any])
+  }, { immediate: true, flush: 'post' })
 
   const mounted = ref(false)
   watch(
@@ -452,7 +448,7 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
   })
 
   const scrollbarSize = ref(0)
-  useLayoutEffect(() => {
+  onMounted(() => {
     if (!props.tailor || !useInternalHooks.value) {
       if (scrollBodyRef.value instanceof Element) {
         scrollbarSize.value = getTargetScrollBarSize(scrollBodyRef.value as HTMLElement).width
@@ -461,26 +457,13 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
         scrollbarSize.value = getTargetScrollBarSize(scrollBodyContainerRef.value as any).width
       }
     }
-  }, [])
+  })
 
   watchEffect(() => {
     if (useInternalHooks.value && props.internalRefs?.body) {
       props.internalRefs.body.value = getDOM(scrollBodyRef.value) as HTMLDivElement
     }
   })
-
-  const renderFixedHeaderTable = (fixedHolderPassProps: FixedHeaderProps<any>) => (
-    <>
-      <Header {...fixedHolderPassProps} />
-      {fixFooter.value === 'top' && (
-        <Footer {...fixedHolderPassProps}>{summaryNode.value}</Footer>
-      )}
-    </>
-  )
-
-  const renderFixedFooterTable = (fixedHolderPassProps: FixedHeaderProps<any>) => (
-    <Footer {...fixedHolderPassProps}>{summaryNode.value}</Footer>
-  )
 
   const TableComponent = computed(() => getComponent(['table'], 'table'))
 
@@ -570,6 +553,18 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
   })
 
   return () => {
+    const renderFixedHeaderTable = (fixedHolderPassProps: FixedHeaderProps<any>) => (
+      <>
+        <Header {...fixedHolderPassProps} />
+        {fixFooter.value === 'top' && (
+          <Footer {...fixedHolderPassProps}>{summaryNode.value}</Footer>
+        )}
+      </>
+    )
+
+    const renderFixedFooterTable = (fixedHolderPassProps: FixedHeaderProps<any>) => (
+      <Footer {...fixedHolderPassProps}>{summaryNode.value}</Footer>
+    )
     const bodyTableNode = (
       <Body
         data={mergedData.value}

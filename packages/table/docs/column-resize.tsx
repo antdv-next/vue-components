@@ -1,5 +1,5 @@
-import type { ColumnType } from '../src'
 import type { PropType } from 'vue'
+import type { ColumnType } from '../src'
 import { defineComponent, ref } from 'vue'
 import Table from '../src'
 
@@ -52,7 +52,7 @@ const ResizableTitle = defineComponent({
       }
 
       return (
-        <th {...attrs} style={[attrs.style, { position: 'relative', width: `${props.width}px` }]}> 
+        <th {...attrs} style={[attrs.style, { position: 'relative', width: `${props.width}px` }]}>
           {slots.default?.()}
           <div class="table-resize-handle" onMousedown={onMouseDown} />
         </th>

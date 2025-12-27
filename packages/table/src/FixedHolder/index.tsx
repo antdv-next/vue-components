@@ -2,6 +2,7 @@ import type { CSSProperties } from 'vue'
 import type { HeaderProps } from '../Header/Header'
 import type { ColumnsType, ColumnType, Direction, TableLayout } from '../interface'
 import { clsx } from '@v-c/util'
+import { getStylePxValue } from '@v-c/util/dist/props-util'
 import { computed, defineComponent, onBeforeUnmount, onMounted, ref } from 'vue'
 import ColGroup from '../ColGroup'
 import { useInjectTableContext } from '../context/TableContext'
@@ -165,7 +166,7 @@ const FixedHolder = defineComponent<FixedHeaderProps<any>>({
         <div
           style={{
             overflow: 'hidden',
-            ...(context.isSticky ? { top: props.stickyTopOffset, bottom: props.stickyBottomOffset } : {}),
+            ...(context.isSticky ? { top: getStylePxValue(props.stickyTopOffset), bottom: getStylePxValue(props.stickyBottomOffset) } : {}),
             ...props.style,
           }}
           ref={scrollRef}

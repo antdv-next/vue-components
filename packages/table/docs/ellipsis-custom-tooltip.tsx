@@ -1,9 +1,12 @@
 import type { TableProps } from '../src'
+import Tooltip from '@v-c/tooltip'
 import { defineComponent } from 'vue'
 import Table from '../src'
+import './assets/index.less'
+import '../../tooltip/docs/assets/bootstrap.less'
 
-const createColumns = (length: number) =>
-  Array.from({ length }, (_, i) => ({
+function createColumns(length: number) {
+  return Array.from({ length }, (_, i) => ({
     title: 'description',
     dataIndex: 'description',
     key: `description ${i + 1}`,
@@ -12,9 +15,14 @@ const createColumns = (length: number) =>
     },
     ...(i === 0 ? { width: 50 } : null),
     render(description: string) {
-      return <span title={description}>{description}</span>
+      return (
+        <Tooltip placement="topLeft" overlay={description}>
+          <span title={description}>{description}</span>
+        </Tooltip>
+      )
     },
   }))
+}
 
 const columns: TableProps['columns'] = [
   {
