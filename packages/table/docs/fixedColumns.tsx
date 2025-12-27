@@ -1,6 +1,7 @@
 import type { ColumnType } from '../src'
 import { defineComponent, ref } from 'vue'
 import Table, { Summary, SummaryCell, SummaryRow } from '../src'
+import './assets/index.less'
 
 interface RecordType {
   a: string

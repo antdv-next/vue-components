@@ -10,7 +10,7 @@ import type {
 } from '../interface'
 import { clsx } from '@v-c/util'
 import { filterEmpty, getStylePxValue } from '@v-c/util/dist/props-util'
-import { computed, defineComponent, isVNode, onBeforeUpdate, ref, toRef } from 'vue'
+import { computed, defineComponent, isVNode, toRef } from 'vue'
 import { useInjectTableContext } from '../context/TableContext'
 import useCellRender from './useCellRender'
 import useHoverState from './useHoverState'
@@ -123,11 +123,7 @@ const Cell = defineComponent<CellProps<any>>({
   ] as any,
   setup(props, { slots }) {
     const tableContext = useInjectTableContext()
-    const getSlotChildren = () => props.children ?? slots?.default?.()
-    const slotChildren = ref<any>(getSlotChildren())
-    onBeforeUpdate(() => {
-      slotChildren.value = getSlotChildren()
-    })
+    const slotChildren = computed(() => props.children ?? slots?.default?.())
 
     const recordRef = toRef(props, 'record')
     const dataIndexRef = toRef(props, 'dataIndex')

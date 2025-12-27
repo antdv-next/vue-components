@@ -16,9 +16,9 @@
 // import ExpandedRowRender from './expandedRowRender.tsx'
 // import ExpandedSticky from './expandedSticky.tsx'
 // import ExpandIcon from './expandIcon.tsx'
-// import FixedColumnsAutoHeight from './fixedColumns-auto-height.tsx'
-// import FixedColumnsResize from './fixedColumns-resize.tsx'
-// import FixedColumns from './fixedColumns.tsx'
+import FixedColumnsAutoHeight from './fixedColumns-auto-height.tsx'
+import FixedColumnsResize from './fixedColumns-resize.tsx'
+import FixedColumns from './fixedColumns.tsx'
 // import FixedColumnsAndHeader from './fixedColumnsAndHeader.tsx'
 // import FixedColumnsAndHeaderRtl from './fixedColumnsAndHeaderRtl.tsx'
 // import GroupingColumnsHidden from './grouping-columns-hidden.tsx'
@@ -68,13 +68,13 @@ import './assets/index.less'
       <ScrollXY />
     </Variant>
     <Variant title="fixed-columns">
-      <!--      <FixedColumns /> -->
+      <FixedColumns />
     </Variant>
     <Variant title="fixed-columns-auto-height">
-      <!--      <FixedColumnsAutoHeight /> -->
+      <FixedColumnsAutoHeight />
     </Variant>
     <Variant title="fixed-columns-resize">
-      <!--      <FixedColumnsResize /> -->
+      <FixedColumnsResize />
     </Variant>
     <Variant title="fixed-columns-and-header">
       <!--      <FixedColumnsAndHeader /> -->
