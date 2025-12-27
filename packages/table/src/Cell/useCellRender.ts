@@ -1,13 +1,13 @@
 import type { Ref } from 'vue'
-import { isVNode } from 'vue'
+import type { CellType, ColumnType, DataIndex, RenderedCell } from '../interface'
+import { warning } from '@v-c/util'
 import useMemo from '@v-c/util/dist/hooks/useMemo'
 import isEqual from '@v-c/util/dist/isEqual'
 import getValue from '@v-c/util/dist/utils/get'
-import { warning } from '@v-c/util'
-import type { CellType, ColumnType, DataIndex, RenderedCell } from '../interface'
-import { validateValue } from '../utils/valueUtil'
+import { isVNode } from 'vue'
 import { useInjectPerfContext } from '../context/PerfContext'
 import { useImmutableMark } from '../context/TableContext'
+import { validateValue } from '../utils/valueUtil'
 
 function isRenderCell<RecordType>(
   data: any,
@@ -32,8 +32,8 @@ export default function useCellRender<RecordType>(
         return [children]
       }
 
-      const path =
-        dataIndex === null || dataIndex === undefined || dataIndex === ''
+      const path
+        = dataIndex === null || dataIndex === undefined || dataIndex === ''
           ? []
           : Array.isArray(dataIndex)
             ? dataIndex
@@ -56,7 +56,8 @@ export default function useCellRender<RecordType>(
           returnChildNode = renderData.props?.children ?? renderData.children
           returnCellProps = renderData.props
           perfRecord.renderWithProps = true
-        } else {
+        }
+        else {
           returnChildNode = renderData
         }
       }

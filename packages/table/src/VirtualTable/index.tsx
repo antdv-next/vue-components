@@ -1,7 +1,6 @@
 import type { CustomizeScrollBody, GetComponent, Reference } from '../interface'
 import type { TableProps } from '../Table'
 import { clsx, get, warning } from '@v-c/util'
-import useEvent from '@v-c/util/dist/hooks/useEvent'
 import { computed, defineComponent, reactive, ref, watchEffect } from 'vue'
 import { INTERNAL_HOOKS } from '../constant'
 import { makeImmutable } from '../context/TableContext'
@@ -39,13 +38,13 @@ const VirtualTable = defineComponent<VirtualTableProps<any>>((props, { expose, s
     return scrollY
   })
 
-  const getComponent = useEvent<GetComponent>((path, defaultComponent) => {
+  const getComponent: GetComponent = (path, defaultComponent) => {
     return get(props.components, path as any) || defaultComponent
-  })
+  }
 
-  const onTablePropScroll = useEvent((event: Event) => {
+  const onTablePropScroll = (event: Event) => {
     props.onScroll?.(event)
-  })
+  }
 
   const staticContext = reactive({
     scrollY: mergedScrollY.value,

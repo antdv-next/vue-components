@@ -49,7 +49,6 @@ import ResizeObserver from '@v-c/resize-observer'
 import { clsx, get, warning } from '@v-c/util'
 import { getDOM } from '@v-c/util/dist/Dom/findDOMNode'
 import { getTargetScrollBarSize } from '@v-c/util/dist/getScrollBarSize'
-import useEvent from '@v-c/util/dist/hooks/useEvent'
 import { useLayoutEffect } from '@v-c/util/dist/hooks/useLayoutEffect'
 import isEqual from '@v-c/util/dist/isEqual'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
@@ -160,9 +159,9 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
   const mergedEmptyText = computed(() => props.emptyText ?? defaultEmpty)
   const mergedDirection = computed<Direction>(() => props.direction || 'ltr')
 
-  const getComponent = useEvent<GetComponent>((path, defaultComponent) => {
+  const getComponent: GetComponent = (path, defaultComponent) => {
     return get(props.components, path as any) || defaultComponent
-  })
+  }
 
   const getRowKey = computed<GetRowKey<any>>(() => {
     if (typeof props.rowKey === 'function') {
@@ -362,7 +361,7 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
 
   const scrollInfo = ref<ScrollInfoType>([0, 0])
 
-  const onInternalScroll = useEvent((info: { currentTarget?: HTMLElement, scrollLeft?: number }) => {
+  const onInternalScroll = (info: { currentTarget?: HTMLElement, scrollLeft?: number }) => {
     const currentTarget = info.currentTarget || (scrollBodyRef.value as HTMLElement)
     const mergedScrollLeft = typeof info.scrollLeft === 'number'
       ? info.scrollLeft
@@ -396,12 +395,12 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
       shadowStart.value = absScrollStart > 0
       shadowEnd.value = absScrollStart < scrollWidth - clientWidth - 1
     }
-  })
+  }
 
-  const onBodyScroll = useEvent((event: Event) => {
+  const onBodyScroll = (event: Event) => {
     onInternalScroll({ currentTarget: event.currentTarget as HTMLElement })
     props.onScroll?.(event)
-  })
+  }
 
   const triggerOnScroll = () => {
     if (horizonScroll.value && scrollBodyRef.value) {
