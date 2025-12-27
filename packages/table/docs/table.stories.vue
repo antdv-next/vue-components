@@ -30,7 +30,6 @@ import Key from './key.tsx'
 import MeasureRowRender from './measureRowRender.tsx'
 import Nested from './nested.tsx'
 import NoData from './no-data.tsx'
-// import ReactDnd from './react-dnd.tsx'
 import RowHoverable from './row-hoverable.tsx'
 import RowAndCellClick from './rowAndCellClick.tsx'
 import ScopeCol from './scopeCol.tsx'
@@ -42,14 +41,13 @@ import Shadow from './shadow.tsx'
 import Simple from './simple.tsx'
 import StickyHeader from './stickyHeader.tsx'
 import StickyHeaderAndSummary from './stickyHeaderAndSummary.tsx'
-// import StyledComponents from './styled-components.tsx'
 import SubTable from './subTable.tsx'
 import TitleAndFooter from './title-and-footer.tsx'
-import './assets/index.less'
 // import VirtualColumns from './virtual-columns.tsx'
 // import VirtualListGrid from './virtual-list-grid.tsx'
 // import VirtualList from './virtual-list.tsx'
-// import Virtual from './virtual.tsx'
+import Virtual from './virtual.tsx'
+import './assets/index.less'
 </script>
 
 <template>
@@ -177,9 +175,6 @@ import './assets/index.less'
     <Variant title="sticky-header-and-summary">
       <StickyHeaderAndSummary />
     </Variant>
-    <Variant title="styled-components">
-      <!--      <StyledComponents /> -->
-    </Variant>
     <Variant title="sub-table">
       <SubTable />
     </Variant>
@@ -189,11 +184,8 @@ import './assets/index.less'
     <Variant title="animation">
       <Animation />
     </Variant>
-    <Variant title="react-dnd">
-      <!--      <ReactDnd /> -->
-    </Variant>
     <Variant title="virtual">
-      <!--      <Virtual /> -->
+      <Virtual />
     </Variant>
     <Variant title="virtual-columns">
       <!--      <VirtualColumns /> -->

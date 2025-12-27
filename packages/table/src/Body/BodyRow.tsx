@@ -258,13 +258,16 @@ const BodyRow = defineComponent<BodyRowProps<any>>({
           </ExpandedRow>
         )
       }
-
-      return (
-        <>
-          {baseRowNode}
-          {expandRowNode}
-        </>
-      )
+      const childArr = [
+        baseRowNode,
+      ]
+      if (expandRowNode) {
+        childArr.push(expandRowNode)
+      }
+      if (childArr.length === 1) {
+        return childArr[0]
+      }
+      return childArr
     }
   },
 })

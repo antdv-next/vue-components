@@ -1,4 +1,6 @@
 import type { TableProps } from '../src'
+import { filterEmpty } from '@v-c/util/dist/props-util'
+import { getTransitionGroupProps } from '@v-c/util/dist/utils/transition'
 import { defineComponent, ref, TransitionGroup } from 'vue'
 import Table from '../src'
 import './animation.less'
@@ -7,11 +9,15 @@ const MotionBody = defineComponent({
   name: 'MotionBody',
   inheritAttrs: false,
   setup(_props, { attrs, slots }) {
-    return () => (
-      <TransitionGroup tag="tbody" name="move" {...attrs}>
-        {slots.default?.()}
-      </TransitionGroup>
-    )
+    const transitionGroupProps = getTransitionGroupProps('move')
+    return () => {
+      const childNode = filterEmpty(slots.default?.())
+      return (
+        <TransitionGroup tag="tbody" name="move" {...transitionGroupProps} {...attrs}>
+          {childNode}
+        </TransitionGroup>
+      )
+    }
   },
 })
 

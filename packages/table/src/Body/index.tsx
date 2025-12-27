@@ -92,7 +92,6 @@ const Body = defineComponent<BodyProps<any>>({
       }
 
       const columnsKey = getColumnsKey(context.flattenColumns)
-
       return (
         <WrapperComponent
           style={bodyStyles.value.wrapper}

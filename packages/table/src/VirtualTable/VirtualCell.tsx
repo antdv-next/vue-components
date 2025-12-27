@@ -1,10 +1,10 @@
 import type { CSSProperties } from 'vue'
-import { defineComponent } from 'vue'
-import { clsx } from '@v-c/util'
-import { getCellProps } from '../Body/BodyRow'
-import Cell from '../Cell'
 import type useRowInfo from '../hooks/useRowInfo'
 import type { ColumnType, CustomizeComponent } from '../interface'
+import { clsx } from '@v-c/util'
+import { defineComponent } from 'vue'
+import { getCellProps } from '../Body/BodyRow'
+import Cell from '../Cell'
 import { useInjectGridContext } from './context'
 
 export interface VirtualCellProps<RecordType> {
@@ -101,7 +101,8 @@ const VirtualCell = defineComponent<VirtualCellProps<any>>({
 
       if (needHide) {
         mergedStyle.visibility = 'hidden'
-      } else if (inverse) {
+      }
+      else if (inverse) {
         mergedStyle.height = getHeight?.(rowSpan)
       }
       const mergedRender = needHide ? () => null : render
