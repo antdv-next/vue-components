@@ -1,7 +1,7 @@
 import type { CustomizeScrollBody, GetComponent, Reference } from '../interface'
 import type { TableProps } from '../Table'
 import { clsx, get, warning } from '@v-c/util'
-import { computed, defineComponent, reactive, ref, watchEffect } from 'vue'
+import { computed, defineComponent, isRef, reactive, ref, watchEffect } from 'vue'
 import { INTERNAL_HOOKS } from '../constant'
 import Table, { DEFAULT_PREFIX } from '../Table'
 import BodyGrid from './BodyGrid'
@@ -15,6 +15,7 @@ export interface VirtualTableProps<RecordType> extends Omit<TableProps<RecordTyp
 const VirtualTable = defineComponent<VirtualTableProps<any>>(
   (props, { expose, slots, attrs }) => {
     const tableRef = ref<Reference | null>(null)
+    const bodyRef = ref<any>()
 
     const mergedScrollX = computed(() => {
       const scrollX = props.scroll?.x
@@ -66,20 +67,36 @@ const VirtualTable = defineComponent<VirtualTableProps<any>>(
       get nativeElement() {
         return tableRef.value?.nativeElement
       },
-      scrollTo: (config: any) => tableRef.value?.scrollTo?.(config),
+      scrollTo: (config: any) => {
+        bodyRef.value?.scrollTo?.(config)
+      },
     })
 
     return () => {
       const { scroll, listItemHeight, components, ...restProps } = props
       const mergedClassName = clsx(restProps.className, `${props.prefixCls || DEFAULT_PREFIX}-virtual`)
       void listItemHeight
-      const renderBody: CustomizeScrollBody<any> = (rawData, info) => (
-        <BodyGrid ref={info.ref} data={rawData as any} onScroll={info.onScroll} />
-      )
+      const renderBody: CustomizeScrollBody<any> = (rawData, info) => {
+        return (
+          <BodyGrid
+            ref={(el: any) => {
+              bodyRef.value = el
+              if (typeof info.ref === 'function') {
+                (info as any).ref(el)
+              }
+              else if (isRef(info.ref)) {
+                info.ref.value = el
+              }
+            }}
+            data={rawData as any}
+            onScroll={info.onScroll}
+          />
+        )
+      }
       return (
         <Table
           {...attrs}
-          {...restProps}
+          {...restProps as any}
           className={mergedClassName}
           scroll={{ ...scroll, x: mergedScrollX.value, y: mergedScrollY.value }}
           components={{

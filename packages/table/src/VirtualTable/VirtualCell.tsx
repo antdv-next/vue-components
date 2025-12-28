@@ -64,7 +64,6 @@ const VirtualCell = defineComponent<VirtualCellProps<any>>({
         inverse,
         getHeight,
       } = props
-
       const { render, dataIndex, className: columnClassName, width: colWidth } = column
       const columnsOffset = gridContext.columnsOffset || []
 

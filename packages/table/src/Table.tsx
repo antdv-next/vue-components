@@ -362,6 +362,10 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
       target(scrollLeft)
       return
     }
+    if (target.scrollTo) {
+      target.scrollTo({ left: scrollLeft })
+      return
+    }
     const element = getDOM(target) as HTMLElement | null
     if (element && element.scrollLeft !== scrollLeft) {
       element.scrollLeft = scrollLeft
@@ -380,7 +384,6 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
     const mergedScrollLeft = typeof info.scrollLeft === 'number'
       ? info.scrollLeft
       : currentTarget?.scrollLeft || 0
-
     const compareTarget = currentTarget || EMPTY_SCROLL_TARGET
     if (!getScrollTarget() || getScrollTarget() === compareTarget) {
       setScrollTarget(compareTarget)
@@ -568,7 +571,9 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
     tableContext.headerCell = props.headerCell
     tableContext.bodyCell = props.bodyCell
   })
-
+  const setScrollBodyRef = (el: any) => {
+    scrollBodyRef.value = el
+  }
   return () => {
     slotChildren.value = slots.default?.()
     const renderFixedHeaderTable = (fixedHolderPassProps: FixedHeaderProps<any>) => (
@@ -607,7 +612,7 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
       if (typeof customizeScrollBody.value === 'function') {
         bodyContent = customizeScrollBody.value(mergedData.value, {
           scrollbarSize: scrollbarSize.value,
-          ref: scrollBodyRef,
+          ref: setScrollBodyRef as any,
           onScroll: onInternalScroll,
         })
       }
@@ -620,7 +625,7 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
               ...scrollYStyle.value,
             }}
             onScroll={onBodyScroll}
-            ref={scrollBodyRef}
+            ref={setScrollBodyRef}
             class={`${mergedPrefixCls.value}-body`}
           >
             <TableComp
@@ -783,17 +788,7 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
   }
 })
 
-export type ForwardGenericTable = (<RecordType extends DefaultRecordType = any>(
-  props: TableProps<RecordType> & { ref?: any },
-) => any) & { displayName?: string }
-
-const RefTable = Table as unknown as ForwardGenericTable
-
-export function genTable(_shouldTriggerRender?: any) {
-  return RefTable
-}
-
-const ImmutableTable = genTable()
+const ImmutableTable = Table
 
 type ImmutableTableType = typeof ImmutableTable & {
   EXPAND_COLUMN: typeof EXPAND_COLUMN

@@ -13,7 +13,7 @@ import type {
 import { clsx, warning } from '@v-c/util'
 import { filterEmpty, getStylePxValue } from '@v-c/util/dist/props-util'
 import getValue from '@v-c/util/dist/utils/get'
-import { defineComponent, isVNode } from 'vue'
+import { computed, defineComponent, isVNode } from 'vue'
 import { useInjectPerfContext } from '../context/PerfContext'
 import { useInjectTableContext } from '../context/TableContext'
 import { validateValue } from '../utils/valueUtil'
@@ -189,6 +189,31 @@ const Cell = defineComponent<CellProps<any>>({
     const tableContext = useInjectTableContext()
     const perfRecord = useInjectPerfContext()
 
+    const isFixStart = computed(() => {
+      return typeof props.fixStart === 'number' && !tableContext.allColumnsFixedLeft
+    })
+
+    const isFixEnd = computed(() => {
+      return typeof props.fixEnd === 'number' && !tableContext.allColumnsFixedLeft
+    })
+
+    const shadowInfo = computed(() => {
+      const { fixedEndShadow, offsetFixedStartShadow, offsetFixedEndShadow, fixedStartShadow } = props
+      const [absScroll = 0, scrollWidth = 0] = tableContext.scrollInfo || []
+
+      if (!isFixStart.value && !isFixEnd.value) {
+        return [false, false]
+      }
+      const showStartShadow = isFixStart.value && fixedStartShadow
+        ? absScroll - (offsetFixedStartShadow || 0) >= 1
+        : false
+      const showEndShadow = isFixEnd && fixedEndShadow
+        ? scrollWidth - absScroll - (offsetFixedEndShadow || 0) > 1
+        : false
+
+      return [showStartShadow, showEndShadow]
+    })
+
     return () => {
       const {
         component: Component = 'td',
@@ -212,15 +237,12 @@ const Cell = defineComponent<CellProps<any>>({
         fixEnd,
         fixedStartShadow,
         fixedEndShadow,
-        offsetFixedStartShadow,
-        offsetFixedEndShadow,
         zIndex,
         zIndexReverse,
         additionalProps = {},
         isSticky,
         appendNode,
       } = props
-
       const cellPrefixCls = `${prefixCls}-cell`
       const mergedAppendNode = appendNode ?? slots?.appendNode?.()
       const mergedRenderIndex = renderIndex ?? index ?? 0
@@ -234,30 +256,13 @@ const Cell = defineComponent<CellProps<any>>({
         perfRecord,
       })
       const fixedStyle: CSSProperties = {}
-      const isFixStart = typeof fixStart === 'number' && !tableContext.allColumnsFixedLeft
-      const isFixEnd = typeof fixEnd === 'number' && !tableContext.allColumnsFixedLeft
-
-      const [absScroll = 0, scrollWidth = 0] = tableContext.scrollInfo || []
-      const [showFixStartShadow, showFixEndShadow] = (() => {
-        if (!isFixStart && !isFixEnd) {
-          return [false, false]
-        }
-        const showStartShadow = isFixStart && fixedStartShadow
-          ? absScroll - (offsetFixedStartShadow || 0) >= 1
-          : false
-        const showEndShadow = isFixEnd && fixedEndShadow
-          ? scrollWidth - absScroll - (offsetFixedEndShadow || 0) > 1
-          : false
-
-        return [showStartShadow, showEndShadow]
-      })()
-
-      if (isFixStart) {
+      const [showFixStartShadow, showFixEndShadow] = shadowInfo.value
+      if (isFixStart.value) {
         fixedStyle.insetInlineStart = getStylePxValue(fixStart as number)
         fixedStyle['--z-offset' as any] = zIndex
         fixedStyle['--z-offset-reverse' as any] = zIndexReverse
       }
-      if (isFixEnd) {
+      if (isFixEnd.value) {
         fixedStyle.insetInlineEnd = getStylePxValue(fixEnd as number)
         fixedStyle['--z-offset' as any] = zIndex
         fixedStyle['--z-offset-reverse' as any] = zIndexReverse
@@ -322,16 +327,16 @@ const Cell = defineComponent<CellProps<any>>({
         cellPrefixCls,
         className,
         {
-          [`${cellPrefixCls}-fix`]: isFixStart || isFixEnd,
-          [`${cellPrefixCls}-fix-start`]: isFixStart,
-          [`${cellPrefixCls}-fix-end`]: isFixEnd,
+          [`${cellPrefixCls}-fix`]: isFixStart.value || isFixEnd.value,
+          [`${cellPrefixCls}-fix-start`]: isFixStart.value,
+          [`${cellPrefixCls}-fix-end`]: isFixEnd.value,
           [`${cellPrefixCls}-fix-start-shadow`]: fixedStartShadow,
           [`${cellPrefixCls}-fix-start-shadow-show`]: fixedStartShadow && showFixStartShadow,
           [`${cellPrefixCls}-fix-end-shadow`]: fixedEndShadow,
           [`${cellPrefixCls}-fix-end-shadow-show`]: fixedEndShadow && showFixEndShadow,
           [`${cellPrefixCls}-ellipsis`]: ellipsis,
           [`${cellPrefixCls}-with-append`]: mergedAppendNode,
-          [`${cellPrefixCls}-fix-sticky`]: (isFixStart || isFixEnd) && isSticky,
+          [`${cellPrefixCls}-fix-sticky`]: (isFixStart.value || isFixEnd.value) && isSticky,
           [`${cellPrefixCls}-row-hover`]: !legacyCellProps && hovering.value,
         },
         additionalClassName,

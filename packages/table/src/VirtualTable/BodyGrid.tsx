@@ -1,8 +1,9 @@
 import type { ListRef } from '@v-c/virtual-list'
 import type { CSSProperties } from 'vue'
 import type { ColumnType, Key, OnCustomizeScroll, ScrollConfig } from '../interface'
+import { getStylePxValue } from '@v-c/util/dist/props-util'
 import VirtualList from '@v-c/virtual-list'
-import { computed, defineComponent, reactive, ref, watch, watchEffect } from 'vue'
+import { computed, defineComponent, reactive, ref, toRaw, watch, watchEffect } from 'vue'
 import { useInjectTableContext } from '../context/TableContext'
 import useFlattenRecords from '../hooks/useFlattenRecords'
 import BodyLine from './BodyLine'
@@ -19,7 +20,7 @@ export interface GridRef {
   scrollTo: (scrollConfig: ScrollConfig) => void
 }
 
-const BodyGrid = defineComponent<GridProps<any>>({
+const BodyGrid = defineComponent<GridProps>({
   name: 'TableBodyGrid',
   props: ['data', 'onScroll'] as any,
   setup(props, { expose }) {
@@ -63,8 +64,9 @@ const BodyGrid = defineComponent<GridProps<any>>({
     })
     useProvideGridContext(gridContext)
 
-    const getRowSpan = (column: ColumnType<any>, index: number): number => {
-      const record = flattenData.value[index]?.record
+    const getRowSpan = (column: ColumnType<any>, index: number, data?: any): number => {
+      const rawData = data ?? toRaw(flattenData.value)
+      const record = rawData[index]?.record
       const { onCell } = column
 
       if (onCell) {
@@ -76,18 +78,19 @@ const BodyGrid = defineComponent<GridProps<any>>({
 
     const extraRender = (info: any) => {
       const { start, end, getSize, offsetY } = info
+      const { flattenColumns } = toRaw(tableContext)
 
       if (end < 0) {
         return null
       }
-
-      let firstRowSpanColumns = tableContext.flattenColumns.filter(
-        column => getRowSpan(column, start) === 0,
+      const rawData = toRaw(flattenData.value)
+      let firstRowSpanColumns = flattenColumns.filter(
+        column => getRowSpan(column, start, rawData) === 0,
       )
 
       let startIndex = start
       for (let i = start; i >= 0; i -= 1) {
-        firstRowSpanColumns = firstRowSpanColumns.filter(column => getRowSpan(column, i) === 0)
+        firstRowSpanColumns = firstRowSpanColumns.filter(column => getRowSpan(column, i, rawData) === 0)
 
         if (!firstRowSpanColumns.length) {
           startIndex = i
@@ -95,13 +98,13 @@ const BodyGrid = defineComponent<GridProps<any>>({
         }
       }
 
-      let lastRowSpanColumns = tableContext.flattenColumns.filter(
-        column => getRowSpan(column, end) !== 1,
+      let lastRowSpanColumns = flattenColumns.filter(
+        column => getRowSpan(column, end, rawData) !== 1,
       )
 
       let endIndex = end
-      for (let i = end; i < flattenData.value.length; i += 1) {
-        lastRowSpanColumns = lastRowSpanColumns.filter(column => getRowSpan(column, i) !== 1)
+      for (let i = end; i < rawData.length; i += 1) {
+        lastRowSpanColumns = lastRowSpanColumns.filter(column => getRowSpan(column, i, rawData) !== 1)
 
         if (!lastRowSpanColumns.length) {
           endIndex = Math.max(i - 1, end)
@@ -111,12 +114,12 @@ const BodyGrid = defineComponent<GridProps<any>>({
 
       const spanLines: number[] = []
       for (let i = startIndex; i <= endIndex; i += 1) {
-        const item = flattenData.value[i]
+        const item = rawData[i]
         if (!item) {
           continue
         }
 
-        if (tableContext.flattenColumns.some(column => getRowSpan(column, i) > 1)) {
+        if (flattenColumns.some(column => getRowSpan(column, i, rawData) > 1)) {
           spanLines.push(i)
         }
       }
@@ -126,7 +129,7 @@ const BodyGrid = defineComponent<GridProps<any>>({
       }
 
       return spanLines.map((index) => {
-        const item = flattenData.value[index]
+        const item = rawData[index]
         if (!item) {
           return null
         }
@@ -135,7 +138,7 @@ const BodyGrid = defineComponent<GridProps<any>>({
 
         const getHeight = (rowSpan: number) => {
           const endItemIndex = index + rowSpan - 1
-          const endItem = flattenData.value[endItemIndex]
+          const endItem = rawData[endItemIndex]
           if (!endItem) {
             return 0
           }
@@ -152,7 +155,7 @@ const BodyGrid = defineComponent<GridProps<any>>({
             rowKey={rowKey}
             index={index}
             style={{
-              top: -offsetY + sizeInfo.top,
+              top: getStylePxValue(-offsetY + sizeInfo.top),
             }}
             extra
             getHeight={getHeight}
