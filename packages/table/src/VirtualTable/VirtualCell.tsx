@@ -2,6 +2,7 @@ import type { CSSProperties } from 'vue'
 import type useRowInfo from '../hooks/useRowInfo'
 import type { ColumnType, CustomizeComponent } from '../interface'
 import { clsx } from '@v-c/util'
+import { getStylePxValue } from '@v-c/util/dist/props-util'
 import { defineComponent } from 'vue'
 import { getCellProps } from '../Body/BodyRow'
 import Cell from '../Cell'
@@ -103,7 +104,7 @@ const VirtualCell = defineComponent<VirtualCellProps<any>>({
         mergedStyle.visibility = 'hidden'
       }
       else if (inverse) {
-        mergedStyle.height = getHeight?.(rowSpan)
+        mergedStyle.height = getStylePxValue(getHeight?.(rowSpan))
       }
       const mergedRender = needHide ? () => null : render
 
