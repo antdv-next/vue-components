@@ -76,6 +76,7 @@ const HeaderRow = defineComponent<RowProps<any>>({
             return (
               <Cell
                 {...cell}
+                colIndex={colStart ?? cellIndex}
                 scope={column.title ? (colSpan > 1 ? 'colgroup' : 'col') : null}
                 ellipsis={column.ellipsis}
                 align={column.align}

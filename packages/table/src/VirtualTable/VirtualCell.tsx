@@ -127,6 +127,8 @@ const VirtualCell = defineComponent<VirtualCellProps<any>>({
           renderIndex={renderIndex}
           dataIndex={dataIndex}
           render={mergedRender}
+          column={column}
+          rowType="body"
           shouldCellUpdate={column.shouldCellUpdate}
           {...fixedInfo}
           appendNode={appendCellNode}

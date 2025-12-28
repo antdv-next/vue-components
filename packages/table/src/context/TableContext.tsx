@@ -79,6 +79,10 @@ export interface TableContextProps<RecordType = any> {
 
   // Measure Row
   measureRowRender?: (measureRow: VueNode) => VueNode
+
+  // Cell Render
+  headerCell?: TableProps<RecordType>['headerCell']
+  bodyCell?: TableProps<RecordType>['bodyCell']
 }
 
 export const TableContextKey: InjectionKey<TableContextProps> = Symbol('TableContextProps')

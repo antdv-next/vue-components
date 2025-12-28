@@ -26,6 +26,8 @@ export interface CellProps<RecordType extends DefaultRecordType> {
   record?: RecordType
   /** `column` index is the real show rowIndex */
   index?: number
+  /** `colIndex` is for column position, mainly for header cells */
+  colIndex?: number
   /** the index of the record. For the render(value, record, renderIndex) */
   renderIndex?: number
   dataIndex?: DataIndex<RecordType>
@@ -156,6 +158,7 @@ const Cell = defineComponent<CellProps<any>>({
     'style',
     'record',
     'index',
+    'colIndex',
     'renderIndex',
     'dataIndex',
     'render',
@@ -197,9 +200,11 @@ const Cell = defineComponent<CellProps<any>>({
         align,
         record,
         index,
+        colIndex,
         renderIndex,
         dataIndex,
         render,
+        column,
         rowType,
         colSpan,
         rowSpan,
@@ -283,10 +288,33 @@ const Cell = defineComponent<CellProps<any>>({
         return null
       }
 
+      let mergedChildNode: any = childNode
+      const renderCell = rowType === 'header'
+        ? tableContext.headerCell
+        : rowType === 'body'
+          ? tableContext.bodyCell
+          : undefined
+
+      if (renderCell && column) {
+        const ctxIndex = rowType === 'header' ? (colIndex ?? 0) : mergedRenderIndex
+        const renderCellNode = rowType === 'body'
+          ? renderCell({ column, index: ctxIndex, text: childNode, record })
+          : renderCell({ column, index: ctxIndex, text: childNode } as any)
+        if (Array.isArray(renderCellNode)) {
+          const filteredNodes = filterEmpty(renderCellNode)
+          if (filteredNodes.length > 0) {
+            mergedChildNode = filteredNodes
+          }
+        }
+        else if (renderCellNode !== null && renderCellNode !== undefined) {
+          mergedChildNode = renderCellNode
+        }
+      }
+
       const title = additionalProps.title ?? getTitleFromCellRenderChildren({
         rowType,
         ellipsis,
-        children: childNode,
+        children: mergedChildNode,
       })
 
       const additionalClassName = additionalProps.className || additionalProps.class
@@ -323,7 +351,6 @@ const Cell = defineComponent<CellProps<any>>({
         ...style,
       }
 
-      let mergedChildNode: any = childNode
       if (typeof mergedChildNode === 'object' && !Array.isArray(mergedChildNode) && !isVNode(mergedChildNode)) {
         mergedChildNode = null
       }

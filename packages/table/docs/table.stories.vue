@@ -23,6 +23,7 @@ import FixedColumnsAndHeader from './fixedColumnsAndHeader.tsx'
 import FixedColumnsAndHeaderRtl from './fixedColumnsAndHeaderRtl.tsx'
 import GroupingColumnsHidden from './grouping-columns-hidden.tsx'
 import GroupingColumns from './grouping-columns.tsx'
+import HeaderBodyCell from './header-body-cell.tsx'
 import HideHeader from './hide-header.tsx'
 import HoverPerf from './hover-perf.tsx'
 import Jsx from './jsx.tsx'
@@ -83,6 +84,9 @@ import './assets/index.less'
     </Variant>
     <Variant title="grouping-columns-hidden">
       <GroupingColumnsHidden />
+    </Variant>
+    <Variant title="header-body-cell">
+      <HeaderBodyCell />
     </Variant>
     <Variant title="column-hidden">
       <ColumnHidden />

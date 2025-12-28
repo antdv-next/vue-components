@@ -565,6 +565,8 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
     tableContext.childrenColumnName = mergedChildrenColumnName.value
     tableContext.rowHoverable = mergedRowHoverable.value
     tableContext.measureRowRender = props.measureRowRender
+    tableContext.headerCell = props.headerCell
+    tableContext.bodyCell = props.bodyCell
   })
 
   return () => {

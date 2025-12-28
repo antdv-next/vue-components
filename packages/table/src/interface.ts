@@ -156,10 +156,10 @@ export type CellAttributes = HTMLAttributes & TdHTMLAttributes & {
   className?: string
 }
 
-export type GetComponentProps<DataType> = (
+export type GetComponentProps<DataType = any> = (
   data: DataType,
   index?: number,
-) => CellAttributes
+) => Partial<CellAttributes>
 
 type Component = any
 
@@ -174,7 +174,7 @@ export type CustomizeScrollBody<RecordType> = (
   data: readonly RecordType[],
   info: {
     scrollbarSize: number
-    ref: Ref<{ scrollLeft: number; scrollTo?: (scrollConfig: ScrollConfig) => void } | null>
+    ref: Ref<{ scrollLeft: number, scrollTo?: (scrollConfig: ScrollConfig) => void } | null>
     onScroll: OnCustomizeScroll
   },
 ) => any
