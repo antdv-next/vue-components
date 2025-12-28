@@ -163,7 +163,7 @@ const defaults = {
 
 const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, { attrs, slots, expose }) => {
   const mergedData = shallowRef(props.data || EMPTY_DATA)
-  watch(props.data, () => {
+  watch(() => props.data, () => {
     mergedData.value = props.data || EMPTY_DATA
   })
   const hasData = computed(() => !!mergedData.value.length)
