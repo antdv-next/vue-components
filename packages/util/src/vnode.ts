@@ -100,6 +100,11 @@ export function resolveToElement(node: any) {
   if (isDOM(exposed?.$el)) {
     return exposed.$el
   }
+  else if (exposed.$el) {
+    const dom = exposed.$el
+    if (dom && (dom.nodeType === 3 || dom.nodeType === 8) && (dom as any).nextElementSibling)
+      return (dom as any).nextElementSibling as HTMLElement
+  }
   const nativeEl = exposed?.nativeElement
   if (isDOM(nativeEl?.value)) {
     return nativeEl.value

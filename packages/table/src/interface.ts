@@ -115,7 +115,7 @@ export interface ColumnGroupType<RecordType> extends ColumnSharedType<RecordType
 
 export type AlignType = 'start' | 'end' | 'left' | 'right' | 'center' | 'justify' | 'match-parent'
 
-export interface ColumnType<RecordType> extends ColumnSharedType<RecordType> {
+export interface ColumnType<RecordType = Record<string, any>> extends ColumnSharedType<RecordType> {
   colSpan?: number
   dataIndex?: DataIndex<RecordType>
   render?: (
@@ -132,12 +132,12 @@ export interface ColumnType<RecordType> extends ColumnSharedType<RecordType> {
   onCellClick?: (record: RecordType, e: MouseEvent) => void
 }
 
-export type ColumnsType<RecordType = unknown> = readonly (
+export type ColumnsType<RecordType = Record<string, any>> = readonly (
   | ColumnGroupType<RecordType>
   | ColumnType<RecordType>
 )[]
 
-export type GetRowKey<RecordType> = (record: RecordType, index?: number) => Key
+export type GetRowKey<RecordType = Record<string, any>> = (record: RecordType, index?: number) => Key
 
 // ================= Fix Column =================
 export interface StickyOffsets {
@@ -156,10 +156,10 @@ export type CellAttributes = HTMLAttributes & TdHTMLAttributes & {
   className?: string
 }
 
-export type GetComponentProps<DataType = any> = (
-  data: DataType,
-  index?: number,
-) => Partial<CellAttributes>
+// Bivariant to allow narrower record types in callbacks like onCell/onRow.
+export type GetComponentProps<DataType = Record<string, any>> = {
+  bivarianceHack: (data: DataType, index?: number) => Partial<CellAttributes>
+}['bivarianceHack']
 
 type Component = any
 
@@ -170,7 +170,7 @@ export type OnCustomizeScroll = (info: {
   scrollLeft?: number
 }) => void
 
-export type CustomizeScrollBody<RecordType> = (
+export type CustomizeScrollBody<RecordType = Record<string, any>> = (
   data: readonly RecordType[],
   info: {
     scrollbarSize: number
