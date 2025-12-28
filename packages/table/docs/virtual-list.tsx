@@ -1,7 +1,7 @@
 import type { ListRef } from '@v-c/virtual-list'
 import type { PropType } from 'vue'
-import { defineComponent, ref, watchEffect } from 'vue'
 import VirtualList from '@v-c/virtual-list'
+import { defineComponent, ref, watchEffect } from 'vue'
 import Table from '../src'
 import './virtual-list.less'
 
@@ -24,7 +24,7 @@ const VirtualBody = defineComponent({
     data: { type: Array as PropType<any[]>, required: true },
     scrollbarSize: { type: Number, required: true },
     bodyRef: { type: Object as PropType<{ value: any }>, required: true },
-    onScroll: { type: Function as PropType<(info: { currentTarget?: HTMLElement; scrollLeft?: number }) => void> },
+    onScroll: { type: Function as PropType<(info: { currentTarget?: HTMLElement, scrollLeft?: number }) => void> },
   },
   setup(props) {
     const listRef = ref<ListRef | null>(null)
@@ -52,9 +52,8 @@ const VirtualBody = defineComponent({
             props.onScroll?.({ currentTarget: event.currentTarget as HTMLElement })
           }}
         >
-          {({ index, style }: { index: number; style: any }) => (
-            <div style={[style, { display: 'flex' }]}
-              >
+          {({ index, style }: { index: number, style: any }) => (
+            <div style={[style, { display: 'flex' }]}>
               {columnWidths.map((width, columnIndex) => (
                 <div
                   key={columnIndex}
@@ -64,7 +63,10 @@ const VirtualBody = defineComponent({
                   ]}
                   style={{ width: `${width}px`, height: '50px', lineHeight: '50px' }}
                 >
-                  r{index}, c{columnIndex}
+                  r
+                  {index}
+                  , c
+                  {columnIndex}
                 </div>
               ))}
             </div>

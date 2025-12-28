@@ -110,6 +110,7 @@ const columns: ColumnsType = [
     title: 'title8',
     dataIndex: 'b',
     onCell: (_record, index) => {
+      console.log(index)
       if (index % 2 === 0) {
         return {
           rowSpan: 2,
