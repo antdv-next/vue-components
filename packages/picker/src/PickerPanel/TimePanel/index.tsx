@@ -32,6 +32,7 @@ export default defineComponent({
     superPrevIcon: Object as PropType<any>,
     superNextIcon: Object as PropType<any>,
     value: Object as PropType<any>,
+    use12Hours: { type: Boolean as PropType<boolean>, default: undefined },
   },
   setup(props) {
     const panelContext = computed(() => {
@@ -43,6 +44,7 @@ export default defineComponent({
 
     return () => {
       const { prefixCls, value, locale, generateConfig, showTime } = props
+
       const format = typeof showTime === 'object' ? showTime.format : undefined
       const panelPrefixCls = `${prefixCls}-time-panel`
 

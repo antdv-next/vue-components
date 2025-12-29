@@ -103,7 +103,9 @@ export interface PickerProps<DateType extends object = any>
   /** @vue-ignore */
   extends
   BasePickerProps<DateType>,
-  Omit<SharedTimeProps<DateType>, 'format' | 'defaultValue'> {}
+  Omit<SharedTimeProps<DateType>, 'format' | 'defaultValue'> {
+  use12Hours?: boolean
+}
 
 export default defineComponent(
   <DateType extends object = any>(
@@ -814,6 +816,7 @@ export default defineComponent(
         PickerProps<any>['monthCellRender']
       >,
       panelRender: Function as PropType<PickerProps<any>['panelRender']>,
+      use12Hours: { type: Boolean, default: undefined },
 
       // ... other props like showTime, etc.
       showTime: { type: [Boolean, Object], default: undefined },

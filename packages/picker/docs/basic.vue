@@ -39,6 +39,10 @@ function weekFocus() {
     weekRef.value.focus()
   }
 }
+function keyDown(e: KeyboardEvent, preventDefault: () => void) {
+  if (e.keyCode === 13)
+    preventDefault()
+}
 </script>
 
 <template>
@@ -124,6 +128,67 @@ function weekFocus() {
         <button type="button" @click="weekFocus">
           Focus
         </button>
+      </div>
+
+      <div style="margin: 0 8px">
+        <h3>Week</h3>
+        <Picker
+          :locale="enUS"
+          picker="week"
+          :generate-config="momentGenerateConfig"
+        />
+      </div>
+
+      <div style="margin: 0 8px">
+        <h3>Quarter</h3>
+        <Picker
+          :locale="zhCN"
+          picker="quarter"
+          :generate-config="momentGenerateConfig"
+        />
+      </div>
+
+      <div style="margin: 0 8px;">
+        <h3>Time</h3>
+        <Picker
+          v-bind="sharedProps"
+          :locale="enUS"
+          picker="time"
+        />
+      </div>
+
+      <div style="margin: 0 8px;">
+        <h3>Time 12</h3>
+        <Picker
+          v-bind="sharedProps"
+          :locale="enUS"
+          picker="time"
+          :use12-hours="true"
+        />
+      </div>
+
+      <div style="margin: 0 8px;">
+        <h3>Year</h3>
+        <Picker
+          v-bind="sharedProps"
+          :locale="zhCN"
+          picker="year"
+        />
+      </div>
+
+      <div style="margin: 0 8px;">
+        <h3>Keyboard navigation (Tab key) disabled</h3>
+        <Picker v-bind="sharedProps" :locale="enUS" tab-index="{-1}" />
+      </div>
+
+      <div style="margin: 0 8px;">
+        <h3>Keyboard event with prevent default behaviors</h3>
+        <Picker v-bind="sharedProps" :locale="enUS" @keydown="keyDown" />
+      </div>
+
+      <div style="margin: 0 8px;">
+        <h3>PreviewValue is false</h3>
+        <Picker v-bind="sharedProps" :locale="enUS" :preview-value="false" @keydown="keyDown" />
       </div>
     </div>
   </div>

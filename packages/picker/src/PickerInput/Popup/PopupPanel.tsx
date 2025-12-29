@@ -1,4 +1,4 @@
-import type { PropType } from 'vue'
+import type { PropType, SetupContext } from 'vue'
 import type { PanelMode } from '../../interface'
 import type { PickerPanelProps } from '../../PickerPanel'
 import type { PickerHackContextProps } from '../../PickerPanel/context'
@@ -44,7 +44,7 @@ const PickerPanelProvider = defineComponent({
   },
 })
 
-export default defineComponent(<DateType extends object = any>(props: PopupPanelProps<DateType>) => {
+export default defineComponent(<DateType extends object = any>(props: PopupPanelProps<DateType>, { attrs }: SetupContext) => {
   const ctx = usePickerContext()
 
   const {
@@ -87,6 +87,7 @@ export default defineComponent(<DateType extends object = any>(props: PopupPanel
   const pickerProps = computed(() => {
     const baseProps = {
       ...props,
+      ...attrs,
       hoverValue: null as DateType[] | undefined | null,
       hoverRangeValue: null as DateType[] | undefined | null,
       hideHeader: hideHeader.value,

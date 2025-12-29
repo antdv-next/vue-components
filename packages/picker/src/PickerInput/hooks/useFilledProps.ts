@@ -106,7 +106,7 @@ export default function useFilledProps<
   // Default Values
   const mergedPicker = computed(() => props.value.picker || 'date')
   const mergedPrefixCls = computed(() => props.value.prefixCls || 'vc-picker')
-  const mergedPreviewValue = computed(() => props.value.previewValue || 'hover')
+  const mergedPreviewValue = computed(() => props.value.previewValue ?? 'hover')
   const mergedStyles = computed(() => props.value.styles || {})
   const mergedClassNames = computed(() => props.value.classNames || {})
   const mergedOrder = computed(() => props.value.order ?? true)
