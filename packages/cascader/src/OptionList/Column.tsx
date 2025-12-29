@@ -2,7 +2,7 @@ import type { CSSProperties } from 'vue'
 import type { DefaultOptionType, LegacyKey, SingleValueType } from '../Cascader'
 import { clsx } from '@v-c/util'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
-import { computed, defineComponent, nextTick, ref, watch } from 'vue'
+import { computed, defineComponent, ref, watch } from 'vue'
 import { useCascaderContext } from '../context'
 import { SEARCH_MARK } from '../hooks/useSearchOptions'
 import { isLeaf, scrollIntoParentView, toPathKey } from '../utils/commonUtil'
@@ -100,19 +100,17 @@ const Column = defineComponent<ColumnProps>((props = columnDefaults) => {
 
   watch(
     () => props.activeValue,
-    () => {
-      nextTick(() => {
-        if (menuRef.value) {
-          const selector = `.${menuItemPrefixCls.value}-active`
-          const activeElement = menuRef.value.querySelector<HTMLElement>(selector)
+    async () => {
+      if (menuRef.value) {
+        const selector = `.${menuItemPrefixCls.value}-active`
+        const activeElement = menuRef.value.querySelector<HTMLElement>(selector)
 
-          if (activeElement) {
-            scrollIntoParentView(activeElement)
-          }
+        if (activeElement) {
+          scrollIntoParentView(activeElement)
         }
-      })
+      }
     },
-    { immediate: true },
+    { immediate: true, flush: 'post' },
   )
 
   // ============================ Render ============================
