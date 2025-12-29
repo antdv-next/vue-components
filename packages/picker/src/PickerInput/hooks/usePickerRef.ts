@@ -5,8 +5,8 @@ export default function usePickerRef(expose: (exposed: PickerRef) => void) {
   const selectorRef = ref<PickerRef>()
 
   expose({
-    get nativeElement() {
-      return selectorRef.value?.nativeElement
+    nativeElement() {
+      return selectorRef.value?.nativeElement()
     },
     focus: (options?: FocusOptions) => {
       selectorRef.value?.focus(options)

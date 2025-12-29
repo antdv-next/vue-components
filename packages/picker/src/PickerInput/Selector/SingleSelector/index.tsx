@@ -56,8 +56,9 @@ export default defineComponent(<DateType extends object = any>(props: SingleSele
   const inputRef = ref<InputRef>()
 
   expose({
-    nativeElement: rootRef.value,
+    nativeElement: () => rootRef.value,
     focus: (options?: FocusOptions) => {
+      // FIXME: focus panel is destroy
       inputRef.value?.focus(options)
     },
     blur: () => {
@@ -134,7 +135,7 @@ export default defineComponent(<DateType extends object = any>(props: SingleSele
       ? (
           <>
             <MultipleDates
-              prefixCls={prefixCls.value}
+              prefixCls={prefixCls.value!}
               value={value as any[]}
               onRemove={onMultipleRemove}
               formatDate={getText}

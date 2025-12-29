@@ -398,7 +398,7 @@ export default defineComponent(
     const onSelectorClick = (event: MouseEvent) => {
       if (
         !disabled.value
-        && !selectorRef.value?.nativeElement?.contains(document.activeElement)
+        && !selectorRef.value?.nativeElement()?.contains(document.activeElement)
       ) {
         // Click to focus the enabled input
         selectorRef.value?.focus()

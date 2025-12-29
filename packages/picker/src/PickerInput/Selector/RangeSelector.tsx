@@ -106,7 +106,7 @@ export default defineComponent({
     const getInput = (index: number) => [inputStartRef, inputEndRef][index]?.value
 
     expose({
-      nativeElement: rootRef.value,
+      nativeElement: () => rootRef.value,
       focus: (options?: any) => {
         if (typeof options === 'object') {
           const { index = 0, ...rest } = options || {}

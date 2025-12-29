@@ -489,7 +489,7 @@ export default defineComponent({
     const onSelectorClick = (event: MouseEvent) => {
       const rootNode = (event.target as HTMLElement).getRootNode()
       if (
-        !selectorRef.value?.nativeElement?.contains(
+        !selectorRef.value?.nativeElement()?.contains(
           ((rootNode as Document | ShadowRoot).activeElement ?? document.activeElement) as Node,
         )
       ) {
