@@ -115,14 +115,15 @@ function weekFocus() {
         <Picker
           ref="weekRef"
           v-bind="sharedProps"
-          format="YYYY-MM-DD HH:mm:ss"
           :locale="zhCN"
           allow-clear
           picker="week"
-          :render-extra-footer="() => 'i am footer'"
+          :render-extra-footer="() => 'i am footer!!!'"
         />
 
-        <button type="button" @click="weekFocus">Focus</button>
+        <button type="button" @click="weekFocus">
+          Focus
+        </button>
       </div>
     </div>
   </div>

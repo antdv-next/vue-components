@@ -644,53 +644,88 @@ export default defineComponent(
 
     return () => {
       const [mergedClassNames, mergedStyles] = semanticCtx.value
+
+      const popupProps = computed(() => ({
+        ...panelProps.value,
+        showNow: mergedShowNow.value,
+        showTime: showTime.value,
+        disabledDate: disabledDate.value!,
+        onFocus: onPanelFocus,
+        onBlur: onSharedBlur,
+        picker: picker.value as any,
+        mode: mergedMode.value,
+        internalMode: internalMode.value,
+        onPanelChange: triggerModeChange,
+        format: maskFormat.value,
+        value: calendarValue.value,
+        isInvalid: isInvalidateDate,
+        onChange: null as any,
+        onSelect: onPanelSelect,
+        pickerValue: currentPickerValue.value,
+        defaultOpenValue: showTime.value?.defaultOpenValue,
+        onPickerValueChange: setCurrentPickerValue,
+        hoverValue: hoverValues.value,
+        onHover: onPanelHover,
+        needConfirm: needConfirm.value!,
+        onSubmit: triggerConfirm,
+        onOk: triggerOk,
+        presets: presetList.value,
+        onPresetHover,
+        onPresetSubmit,
+        onNow,
+        cellRender: onInternalCellRender,
+        classNames: mergedClassNames,
+        styles: mergedStyles,
+      }))
       // >>> Render
       const panel = (
         <Popup
-          // MISC
-          {...panelProps.value as any}
-          showNow={mergedShowNow.value}
-          showTime={showTime.value}
-          // Disabled
-          disabledDate={disabledDate.value!}
-          // Focus
-          onFocus={onPanelFocus}
-          onBlur={onSharedBlur}
-          // Mode
-          picker={picker.value as any}
-          mode={mergedMode.value}
-          internalMode={internalMode.value}
-          onPanelChange={triggerModeChange}
-          // Value
-          format={maskFormat.value}
-          value={calendarValue.value}
-          isInvalid={isInvalidateDate}
-          onChange={null as any}
-          onSelect={onPanelSelect}
-          // PickerValue
-          pickerValue={currentPickerValue.value}
-          defaultOpenValue={showTime.value?.defaultOpenValue}
-          onPickerValueChange={setCurrentPickerValue}
-          // Hover
-          hoverValue={hoverValues.value}
-          onHover={onPanelHover}
-          // Submit
-          needConfirm={needConfirm.value!}
-          onSubmit={triggerConfirm}
-          onOk={triggerOk}
-          // Preset
-          presets={presetList.value}
-          onPresetHover={onPresetHover}
-          onPresetSubmit={onPresetSubmit}
-          onNow={onNow}
-          // Render
-          cellRender={onInternalCellRender}
-          // Styles
-          classNames={mergedClassNames}
-          styles={mergedStyles}
+          {...popupProps.value as any}
         />
       )
 
+      const singleSelectorProps = {
+        ...fp.value,
+        class: clsx(
+          fp.value.className,
+          rootClassName.value,
+          mergedClassNames.root,
+        ),
+        style: { ...mergedStyles.root, ...fp.value.style },
+        suffixIcon: suffixIcon.value,
+        removeIcon: removeIcon.value,
+        activeHelp: !!internalHoverValue.value,
+        allHelp:
+          !!internalHoverValue.value && hoverSource.value === 'preset',
+        focused: focused.value,
+        onFocus: onSelectorFocus,
+        onBlur: onSelectorBlur,
+        onKeyDown: onSelectorKeyDown,
+        onSubmit: triggerConfirm,
+        value: selectorValues.value,
+        maskFormat: maskFormat.value,
+        onChange: onSelectorChange,
+        onInputChange: onSelectorInputChange,
+        // internalPicker={internalPicker.value} // Not in props of SingleSelector? Check SingleSelector.tsx
+        // Format
+        format: formatList.value,
+        inputReadOnly: inputReadOnly.value,
+        // Disabled
+        disabled: disabled.value,
+        // Open
+        open: mergedOpen.value,
+        onOpenChange: triggerOpen,
+        // Click
+        onClick: onSelectorClick,
+        onClear: onSelectorClear,
+        // Invalid
+        invalid: submitInvalidate.value,
+        onInvalid: (invalid: boolean) => {
+          // Only `single` mode support type date.
+          // `multiple` mode can not typing.
+          onSelectorInvalid(invalid, 0)
+        },
+      }
       return (
         <PickerTrigger
           {...pickTriggerProps(fp.value)}
@@ -706,53 +741,9 @@ export default defineComponent(
         >
           <SingleSelector
             // Shared
-            {...fp.value as any}
+            {...singleSelectorProps as any}
             // Ref
             ref={selectorRef} // Selector ref is handled via expose in usePickerRef
-            // Style
-            class={clsx(
-              fp.value.className,
-              rootClassName.value,
-              mergedClassNames.root,
-            )}
-            style={{ ...mergedStyles.root, ...fp.value.style }}
-            // Icon
-            suffixIcon={suffixIcon.value}
-            removeIcon={removeIcon.value}
-            // Active
-            activeHelp={!!internalHoverValue.value}
-            allHelp={
-              !!internalHoverValue.value && hoverSource.value === 'preset'
-            }
-            focused={focused.value}
-            onFocus={onSelectorFocus}
-            onBlur={onSelectorBlur}
-            onKeyDown={onSelectorKeyDown}
-            onSubmit={triggerConfirm}
-            // Change
-            value={selectorValues.value}
-            maskFormat={maskFormat.value}
-            onChange={onSelectorChange}
-            onInputChange={onSelectorInputChange}
-            // internalPicker={internalPicker.value} // Not in props of SingleSelector? Check SingleSelector.tsx
-            // Format
-            format={formatList.value}
-            inputReadOnly={inputReadOnly.value}
-            // Disabled
-            disabled={disabled.value}
-            // Open
-            open={mergedOpen.value}
-            onOpenChange={triggerOpen}
-            // Click
-            onClick={onSelectorClick}
-            onClear={onSelectorClear}
-            // Invalid
-            invalid={submitInvalidate.value}
-            onInvalid={(invalid: boolean) => {
-              // Only `single` mode support type date.
-              // `multiple` mode can not typing.
-              onSelectorInvalid(invalid, 0)
-            }}
           />
         </PickerTrigger>
       )
