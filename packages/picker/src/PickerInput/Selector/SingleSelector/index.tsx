@@ -59,7 +59,8 @@ export default defineComponent(<DateType extends object = any>(props: SingleSele
     nativeElement: () => rootRef.value,
     focus: (options?: FocusOptions) => {
       // FIXME: focus panel is destroy
-      inputRef.value?.focus(options)
+      // inputRef.value?.focus(options)
+      console.log(options)
     },
     blur: () => {
       inputRef.value?.blur()
