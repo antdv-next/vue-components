@@ -1,6 +1,6 @@
 import type { PropType } from 'vue'
 import { clsx } from '@v-c/util'
-import { computed, defineComponent, onBeforeUnmount, ref, toRef, watch } from 'vue'
+import { computed, defineComponent, onBeforeUnmount, ref, toRef, toRefs, watch } from 'vue'
 import { leftPad } from '../../utils/miscUtil'
 import { usePickerContext } from '../context'
 import useLockEffect from '../hooks/useLockEffect'
@@ -42,14 +42,15 @@ export default defineComponent({
     autofocus: { type: Boolean, default: undefined },
   },
   setup(props, { attrs, expose }) {
+    const pickerCtx = usePickerContext()
+
     const {
       prefixCls,
-      input: Component = 'input',
       classNames,
       styles,
-    } = usePickerContext().value
+    } = toRefs(pickerCtx.value)
 
-    const inputPrefixCls = `${prefixCls}-input`
+    const inputPrefixCls = computed(() => `${prefixCls.value}-input`)
 
     // ======================== Value =========================
     const focused = ref(false)
@@ -372,14 +373,16 @@ export default defineComponent({
           }
         : {}
 
+      const Component = pickerCtx.value.input ?? 'input'
+
       return (
         <div
           ref={holderRef}
           class={clsx(
-            inputPrefixCls,
+            inputPrefixCls.value,
             {
-              [`${inputPrefixCls}-active`]: props.active && props.showActiveCls,
-              [`${inputPrefixCls}-placeholder`]: props.helped,
+              [`${inputPrefixCls.value}-active`]: props.active && props.showActiveCls,
+              [`${inputPrefixCls.value}-placeholder`]: props.helped,
             },
             attrs.class as string,
           )}
@@ -398,8 +401,8 @@ export default defineComponent({
             // Value
             value={inputValue.value}
             onInput={onInternalChange}
-            class={classNames.input}
-            style={styles.input}
+            class={classNames.value.input}
+            style={styles.value.input}
             readonly={props.inputReadOnly}
           />
           <Icon type="suffix" icon={props.suffixIcon} />

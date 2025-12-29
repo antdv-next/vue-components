@@ -32,7 +32,13 @@ const sharedProps = computed(() => {
   }
 })
 
-// const weekRef = ref()
+const weekRef = ref<HTMLButtonElement>()
+
+function weekFocus() {
+  if (weekRef.value) {
+    weekRef.value.focus()
+  }
+}
 </script>
 
 <template>
@@ -40,33 +46,34 @@ const sharedProps = computed(() => {
     <h1>Value: {{ value ? value.format('YYYY-MM-DD HH:mm:ss') : 'null' }}</h1>
 
     <div style="display: flex; flex-wrap: wrap">
-      <div style="margin: 0 8px">
-        <h3>Basic</h3>
-        <Picker
-          v-bind="sharedProps"
-          :locale="zhCN"
-          suffix-icon="SUFFIX"
-          root-class-name="bamboo"
-          class="little"
-          :class-names="{ root: 'light', popup: { container: 'popup-c' } }"
-          open
-          :styles="{ popup: { container: { backgroundColor: 'red' } } }"
-        />
-        <Picker v-bind="sharedProps" :locale="enUS" />
+      <div style="display: flex; height: 300px">
+        <div style="margin: 0 8px">
+          <h3>Basic</h3>
+          <Picker
+            v-bind="sharedProps"
+            :locale="zhCN"
+            suffix-icon="SUFFIX"
+            root-class-name="bamboo"
+            class="little"
+            :class-names="{ root: 'light', popup: { container: 'popup-c' } }"
+            open
+            :styles="{ popup: { container: { backgroundColor: 'red' } } }"
+          />
+          <Picker v-bind="sharedProps" :locale="enUS" />
+        </div>
+
+        <div style="margin: 0 8px">
+          <h3>Uncontrolled</h3>
+          <Picker
+            :generate-config="momentGenerateConfig"
+            :locale="zhCN"
+            allow-clear
+            show-today
+            :render-extra-footer="() => 'extra'"
+          />
+        </div>
       </div>
 
-      <div style="margin: 0 8px">
-        <h3>Uncontrolled</h3>
-        <Picker
-          :generate-config="momentGenerateConfig"
-          :locale="zhCN"
-          allow-clear
-          show-today
-          :render-extra-footer="() => 'extra'"
-        />
-      </div>
-
-      <br>
       <div style="margin: 0 8px">
         <h3>Datetime</h3>
         <Picker
@@ -93,7 +100,7 @@ const sharedProps = computed(() => {
         />
       </div>
 
-      <div style="margin: 200px 8px">
+      <div style="margin: 0 8px">
         <h3>Uncontrolled Datetime</h3>
         <Picker
           format="YYYY-MM-DD HH:mm:ss"
@@ -101,6 +108,21 @@ const sharedProps = computed(() => {
           show-time
           :generate-config="momentGenerateConfig"
         />
+      </div>
+
+      <div style="margin: 0 8px">
+        <h3>Week</h3>
+        <Picker
+          ref="weekRef"
+          v-bind="sharedProps"
+          format="YYYY-MM-DD HH:mm:ss"
+          :locale="zhCN"
+          allow-clear
+          picker="week"
+          :render-extra-footer="() => 'i am footer'"
+        />
+
+        <button type="button" @click="weekFocus">Focus</button>
       </div>
     </div>
   </div>
