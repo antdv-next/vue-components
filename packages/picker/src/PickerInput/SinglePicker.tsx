@@ -708,7 +708,7 @@ export default defineComponent(
             // Shared
             {...fp.value as any}
             // Ref
-            // ref={selectorRef} // Selector ref is handled via expose in usePickerRef
+            ref={selectorRef} // Selector ref is handled via expose in usePickerRef
             // Style
             class={clsx(
               fp.value.className,
