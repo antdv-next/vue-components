@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import type { Dayjs } from 'dayjs'
-import dayjs from 'dayjs'
+import type { Moment } from 'moment'
 import { h } from 'vue'
-import dayjsGenerateConfig from '../src/generate/dayjs'
+import momentGenerateConfig from '../src/generate/moment'
 import { Picker, PickerPanel } from '../src/index'
 import zhCN from '../src/locale/zh_CN'
 
-function dateRender(date: Dayjs) {
+function dateRender(date: Moment, today: Moment) {
   return h(
     'div',
     {
@@ -14,7 +13,7 @@ function dateRender(date: Dayjs) {
         width: '80px',
         height: '80px',
         borderTop: '3px solid #CCC',
-        borderTopColor: date.isSame(dayjs(), 'date') ? 'blue' : '#CCC',
+        borderTopColor: date.isSame(today, 'date') ? 'blue' : '#CCC',
       },
     },
     date.date(),
@@ -22,18 +21,19 @@ function dateRender(date: Dayjs) {
 }
 
 const disabledProps = {
-  disabledDate: (date: Dayjs) => date.date() === 10,
-  onSelect: (d: Dayjs) => console.log('Select:', d.format('YYYY-MM-DD')),
-  onChange: (d: Dayjs) => console.log('Change:', d.format('YYYY-MM-DD')),
+  disabledDate: (date: Moment) => date.date() === 10,
+  onSelect: (d: Moment) => console.log('Select:', d.format('YYYY-MM-DD')),
+  onChange: (d: Moment) => console.log('Change:', d.format('YYYY-MM-DD')),
 }
 </script>
 
 <template>
   <div style="display: flex; flex-wrap: wrap">
     <div>
+      123
       <PickerPanel
         :locale="zhCN"
-        :generate-config="dayjsGenerateConfig"
+        :generate-config="momentGenerateConfig"
         :date-render="dateRender"
         v-bind="disabledProps"
       />
@@ -41,7 +41,7 @@ const disabledProps = {
     <div>
       <Picker
         :locale="zhCN"
-        :generate-config="dayjsGenerateConfig"
+        :generate-config="momentGenerateConfig"
         :date-render="dateRender"
         v-bind="disabledProps"
       />

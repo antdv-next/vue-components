@@ -137,13 +137,16 @@ export default defineComponent({
     )
 
     // ======================== Inputs ========================
-    const inputPropsArgs = reactive({
-      ...toRefs(props),
-      id: ids,
-      placeholder: mergedPlaceholder,
-    }) as any
+    const inputPropsArgs = computed(() => {
+      return {
+        ...props,
+        ...attrs,
+        id: ids.value,
+        placeholder: mergedPlaceholder.value,
+      }
+    })
 
-    const [getInputProps] = useInputProps(inputPropsArgs)
+    const [getInputProps] = useInputProps(inputPropsArgs as any)
 
     // ====================== ActiveBar =======================
     const activeBarStyle = ref<any>({
@@ -193,35 +196,41 @@ export default defineComponent({
         tabindex,
       } = props
 
+      const rootDivProps = {
+        ...rootProps.value,
+        class: clsx(prefixCls, `${prefixCls}-range`, {
+          [`${prefixCls}-focused`]: props.focused,
+          [`${prefixCls}-disabled`]: disabled?.every(i => i),
+          [`${prefixCls}-invalid`]: invalid?.some(i => i),
+          [`${prefixCls}-rtl`]: rtl.value,
+        }, attrs.class as string),
+        style: attrs.style as any,
+        onClick: (...rest: unknown[]) => {
+          if (Array.isArray(onClick)) {
+            onClick.forEach(fn => fn(...rest))
+
+            return
+          }
+
+          onClick?.(...rest)
+        },
+        onmousedown: (e: MouseEvent) => {
+          const target = e.target as HTMLElement
+          if (
+            target !== inputStartRef.value?.inputElement
+            && target !== inputEndRef.value?.inputElement
+          ) {
+            e.preventDefault()
+          }
+
+          (attrs.onMousedown as any)?.(e)
+        },
+      }
+
       return (
         <ResizeObserver onResize={syncActiveOffset}>
           <div
-            {...rootProps.value}
-            class={clsx(
-              prefixCls,
-              `${prefixCls}-range`,
-              {
-                [`${prefixCls}-focused`]: props.focused,
-                [`${prefixCls}-disabled`]: disabled?.every(i => i),
-                [`${prefixCls}-invalid`]: invalid?.some(i => i),
-                [`${prefixCls}-rtl`]: rtl.value,
-              },
-              attrs.class as string,
-            )}
-            style={attrs.style as any}
-            ref={rootRef}
-            onClick={onClick}
-            onMousedown={(e) => {
-              const target = e.target as HTMLElement
-              if (
-                target !== inputStartRef.value?.inputElement
-                && target !== inputEndRef.value?.inputElement
-              ) {
-                e.preventDefault()
-              }
-
-              (attrs.onMousedown as any)?.(e)
-            }}
+            {...rootDivProps}
           >
             {prefix && (
               <div class={clsx(`${prefixCls}-prefix`, classNames.prefix)} style={styles.prefix}>
@@ -233,6 +242,7 @@ export default defineComponent({
               {...getInputProps(0)}
               class={`${prefixCls}-input-start`}
               autofocus={startAutoFocus.value}
+              // @ts-expect-error: Native Error
               tabindex={tabindex}
               data-range="start"
             />

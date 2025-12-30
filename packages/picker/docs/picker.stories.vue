@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Basic from './basic.vue'
-// import Calendar from './calendar.vue'
-// import Range from './range.vue'
+import Calendar from './calendar.vue'
+import CellRender from './cellRender.vue'
 </script>
 
 <template>
@@ -9,11 +9,11 @@ import Basic from './basic.vue'
     <Variant title="Basic">
       <Basic />
     </Variant>
-    <Variant title="Range">
-      <!-- <Range /> -->
-    </Variant>
     <Variant title="Calendar">
-      <!-- <Calendar /> -->
+      <Calendar />
+    </Variant>
+    <Variant title="CellRender">
+      <CellRender />
     </Variant>
   </Story>
 </template>

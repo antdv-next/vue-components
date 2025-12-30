@@ -1,4 +1,4 @@
-import type { PropType } from 'vue'
+import type { PropType, SetupContext } from 'vue'
 import type { InternalMode, SelectorProps } from '../../../interface'
 import type { InputRef } from '../Input'
 import { clsx } from '@v-c/util'
@@ -42,7 +42,7 @@ export interface SingleSelectorProps<DateType extends object = any>
   tabIndex: number | string
 }
 
-export default defineComponent(<DateType extends object = any>(props: SingleSelectorProps<DateType>, { attrs, expose }: { attrs: Record<string, any>, expose: (expose: Record<string, any>) => void }) => {
+export default defineComponent(<DateType extends object = any>(props: SingleSelectorProps<DateType>, { attrs, expose }: SetupContext) => {
   const rtl = computed(() => props.direction === 'rtl')
 
   // ======================== Prefix ========================
@@ -95,12 +95,18 @@ export default defineComponent(<DateType extends object = any>(props: SingleSele
       props.onSubmit?.()
     }
   }
+  const allProps = computed(() => {
+    return {
+      ...props,
+      ...attrs,
+    }
+  })
 
   // ======================== Inputs ========================
   const [getInputProps, getText] = useInputProps(
     computed(() => ({
-      ...props,
-      'aria-required': !!props['aria-required'],
+      ...allProps.value,
+      'aria-required': !!allProps.value['aria-required'],
       'onChange': onSingleChange,
     })) as any,
     ({ valueTexts }) => ({

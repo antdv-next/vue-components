@@ -1,6 +1,6 @@
 import type { VueNode } from '@v-c/util/dist/type'
-import type { PropType } from 'vue'
-import type { BaseInfo, InternalMode, OpenConfig, PanelMode, RangeTimeProps, SharedPickerProps, ValueDate } from '../interface'
+import type { ComputedRef, PropType } from 'vue'
+import type { BaseInfo, InternalMode, OpenConfig, PanelMode, RangeTimeProps, SelectorProps, SharedPickerProps, ValueDate } from '../interface'
 import type { PopupShowTimeConfig } from './Popup'
 import type { SelectorIdType } from './Selector/RangeSelector'
 import { clsx } from '@v-c/util'
@@ -203,11 +203,17 @@ export default defineComponent({
     defaultOpenValue: Array,
     inputRender: Function,
   },
-  setup(props, { expose }) {
+  setup(props, { expose, attrs }) {
+    const allProps = computed(() => {
+      return {
+        ...props,
+        ...attrs,
+      }
+    })
     // ========================= Prop =========================
     const [filledProps, internalPicker, complexPicker, formatList, maskFormat, isInvalidateDate]
-      = useFilledProps(props as any, () => {
-        const { disabled, allowEmpty } = props
+      = useFilledProps(allProps as any, () => {
+        const { disabled, allowEmpty } = allProps.value
 
         const mergedDisabled = separateConfig(disabled, false)
         const mergedAllowEmpty = separateConfig(allowEmpty, false)
@@ -266,7 +272,7 @@ export default defineComponent({
     const selectorRef = usePickerRef(expose)
 
     // ======================= Semantic =======================
-    const [mergedClassNames, mergedStyles] = useSemantic(classNames, styles).value
+    const semantic = useSemantic(classNames, styles)
 
     // ========================= Open =========================
     const [mergedOpen, setMergeOpen] = useOpen(open, defaultOpen, disabled, onOpenChange.value)
@@ -387,7 +393,7 @@ export default defineComponent({
       triggerSubmitChange,
     ] = useRangeValue<RangeValueType<any>, any>(
       fp.value as any,
-      mergedValue,
+      mergedValue as ComputedRef<any>,
       setInnerValue,
       () => getCalendarValue.value,
       triggerCalendarChange,
@@ -512,7 +518,7 @@ export default defineComponent({
 
     // ======================== Hover =========================
     const hoverSource = ref<'cell' | 'preset' | null>(null)
-    const internalHoverValues = ref<RangeValueType<any>>(null)
+    const internalHoverValues = ref<RangeValueType<any> | null>(null)
 
     const hoverValues = computed(() => {
       return internalHoverValues.value || calendarValue.value
@@ -576,6 +582,38 @@ export default defineComponent({
     const onPanelMouseDown = () => {
       lastOperation('panel')
     }
+    // ========================================================
+    // ==                      Selector                      ==
+    // ========================================================
+
+    // ======================== Change ========================
+    const onSelectorChange = (date: any, index: number) => {
+      const clone = fillCalendarValue(date, index)
+
+      triggerCalendarChange(clone)
+    }
+
+    const onSelectorInputChange = () => {
+      lastOperation('input')
+    }
+
+    const onSelectorBlur: SelectorProps['onBlur'] = (event, index) => {
+      triggerOpen(false)
+      if (!needConfirm.value && lastOperation() === 'input') {
+        const nextIndex = nextActiveIndex(calendarValue.value as any)
+        flushSubmit(activeIndex.value, nextIndex === null)
+      }
+
+      onSharedBlur(event, index)
+    }
+
+    const onSelectorKeyDown: SelectorProps['onKeyDown'] = (event, preventDefault) => {
+      if (event.key === 'Tab') {
+        triggerPartConfirm(null, true)
+      }
+
+      onKeyDown.value?.(event, preventDefault)
+    }
 
     // >>> Calendar
     const onPanelSelect = (date: any) => {
@@ -632,15 +670,19 @@ export default defineComponent({
     })
 
     // ======================= Context ========================
-    const context = computed(() => ({
-      prefixCls: prefixCls.value,
-      locale: locale.value,
-      generateConfig: generateConfig.value,
-      button: components.value.button,
-      input: components.value.input,
-      classNames: mergedClassNames.value,
-      styles: mergedStyles.value,
-    }))
+    const context = computed(() => {
+      const [mergedClassNames, mergedStyles] = semantic.value
+
+      return {
+        prefixCls: prefixCls.value,
+        locale: locale.value,
+        generateConfig: generateConfig.value,
+        button: components.value?.button,
+        input: components.value?.input,
+        classNames: mergedClassNames,
+        styles: mergedStyles,
+      }
+    })
 
     providePickerContext(context)
 
@@ -670,7 +712,41 @@ export default defineComponent({
         triggerPartConfirm()
       }
     }, { flush: 'post' })
+    // ======================= Selector =======================
+    const onSelectorFocus: SelectorProps['onFocus'] = (event, index) => {
+    // Check if `needConfirm` but user not submit yet
+      const activeListLen = activeIndexList.value.length
+      const lastActiveIndex = activeIndexList.value[activeListLen - 1]
+      if (
+        activeListLen
+        && lastActiveIndex !== index
+        && needConfirm
+        // Not change index if is not filled
+        && !allowEmpty.value[lastActiveIndex]
+        && !hasActiveSubmitValue(lastActiveIndex)
+        && calendarValue.value[lastActiveIndex]
+      ) {
+        selectorRef.value?.focus({ index: lastActiveIndex })
+        return
+      }
 
+      lastOperation('input')
+
+      triggerOpen(true, {
+        inherit: true,
+      })
+
+      // When click input to switch the field, it will not trigger close.
+      // Which means it will lose the part confirm and we need fill back.
+      // ref: https://github.com/ant-design/ant-design/issues/49512
+      if (activeIndex.value !== index && mergedOpen.value && !needConfirm.value && complexPicker.value) {
+        triggerPartConfirm(null, true)
+      }
+
+      setActiveIndex(index!)
+
+      onSharedFocus(event, index)
+    }
     // ====================== DevWarning ======================
     if (process.env.NODE_ENV !== 'production') {
       const isIndexEmpty = (index: number) => {
@@ -695,56 +771,88 @@ export default defineComponent({
     }
 
     return () => {
+      const [mergedClassNames, mergedStyles] = semantic.value
+
+      const rangePickerProps = {
+        ...fp.value,
+        // Style
+        class: clsx(fp.value.className, rootClassName.value, mergedClassNames?.root),
+        style: { ...mergedStyles?.root, ...fp.value.style },
+        // Icon
+        suffixIcon: suffixIcon.value,
+        // Active
+        activeIndex: focused.value || mergedOpen.value ? activeIndex.value : null,
+        activeHelp: internalHoverValues.value,
+        allHelp: !!internalHoverValues.value && hoverSource.value === 'preset',
+        focused: focused.value,
+        onFocus: onSelectorFocus,
+        onBlur: onSelectorBlur,
+        onKeyDown: onSelectorKeyDown,
+        onSubmit: triggerPartConfirm,
+        value: hoverValues.value,
+        maskFormat: maskFormat.value,
+        onChange: onSelectorChange,
+        onInputChange: onSelectorInputChange,
+        format: formatList.value,
+        inputReadOnly: inputReadOnly.value,
+        // Disabled
+        disabled: disabled.value,
+        // open
+        open: mergedOpen.value,
+        onOpenChange: triggerOpen,
+        // Click
+        onClick: onSelectorClick,
+        onClear: onSelectorClear,
+        // Invalid
+        invalid: submitInvalidates.value,
+        oninvalid: onSelectorInvalid,
+        // Offset
+        onActiveInfo: (info) => {
+          activeInfo.value = info
+        },
+      }
+
+      const popupProps = {
+        ...panelProps.value,
+        showNow: mergedShowNow.value,
+        showTime: mergedShowTime.value,
+        range: true,
+        multiplePanel: multiplePanel.value,
+        activeInfo: activeInfo.value,
+        disabledDate: mergedDisabledDate,
+        onFocus: onPanelFocus,
+        onBlur: onSharedBlur,
+        onPanelMouseDown,
+        picker: picker.value as any,
+        mode: mergedMode.value,
+        internalMode: internalMode.value,
+        onPanelChange: triggerModeChange,
+        format: maskFormat.value,
+        value: panelValue.value,
+        isInvalid: isPopupInvalidateDate,
+        onChange: null as any,
+        onSelect: onPanelSelect,
+        pickerValue: currentPickerValue.value,
+        defaultOpenValue: toArray(showTime.value?.defaultOpenValue)[activeIndex.value],
+        onPickerValueChange: setCurrentPickerValue,
+        hoverValue: hoverValues.value,
+        onHover: onPanelHover,
+        needConfirm: needConfirm.value!,
+        onSubmit: triggerPartConfirm,
+        onOk: triggerOk,
+        presets: presetList.value,
+        onPresetHover,
+        onPresetSubmit,
+        onNow,
+        cellRender: onInternalCellRender,
+        classNames: mergedClassNames,
+        styles: mergedStyles,
+      }
       // >>> Render
       const panel = (
         <Popup
           // MISC
-          {...panelProps.value}
-          showNow={mergedShowNow.value}
-          showTime={mergedShowTime.value}
-          // Range
-          range
-          multiplePanel={multiplePanel.value}
-          activeInfo={activeInfo.value}
-          // Disabled
-          disabledDate={mergedDisabledDate}
-          // Focus
-          onFocus={onPanelFocus}
-          onBlur={onSharedBlur}
-          onPanelMouseDown={onPanelMouseDown}
-          // Mode
-          picker={picker.value as any}
-          mode={mergedMode.value}
-          internalMode={internalMode.value}
-          onPanelChange={triggerModeChange}
-          // Value
-          format={maskFormat.value}
-          value={panelValue.value}
-          isInvalid={isPopupInvalidateDate}
-          onChange={null as any}
-          onSelect={onPanelSelect}
-          // PickerValue
-          pickerValue={currentPickerValue.value}
-          defaultOpenValue={toArray(showTime.value?.defaultOpenValue)[activeIndex.value]}
-          onPickerValueChange={setCurrentPickerValue}
-          // Hover
-          hoverValue={hoverValues.value}
-          onHover={onPanelHover}
-          // Submit
-          needConfirm={needConfirm.value}
-          onSubmit={triggerPartConfirm}
-          onOk={triggerOk}
-          // Preset
-          presets={presetList.value}
-          onPresetHover={onPresetHover}
-          onPresetSubmit={onPresetSubmit}
-          // Now
-          onNow={onNow}
-          // Render
-          cellRender={onInternalCellRender}
-          // Styles
-          classNames={mergedClassNames.value}
-          styles={mergedStyles.value}
+          {...popupProps as any}
         />
       )
 
@@ -752,8 +860,8 @@ export default defineComponent({
         <PickerTrigger
           {...pickTriggerProps(fp.value)}
           popupElement={panel}
-          popupStyle={mergedStyles.value.popup?.root}
-          popupClassName={clsx(rootClassName.value, mergedClassNames.value.popup?.root)}
+          popupStyle={mergedStyles?.popup?.root}
+          popupClassName={clsx(rootClassName.value, mergedClassNames?.popup?.root)}
           // Visible
           visible={mergedOpen.value}
           onClose={onPopupClose}
@@ -762,46 +870,9 @@ export default defineComponent({
         >
           <RangeSelector
             // Shared
-            {...fp.value}
+            {...rangePickerProps as any}
             // Ref
-            // ref={selectorRef} // handled by expose
-            // Style
-            class={clsx(fp.value.className, rootClassName.value, mergedClassNames.value.root)}
-            style={{ ...mergedStyles.value.root, ...fp.value.style }}
-            // Icon
-            suffixIcon={suffixIcon.value}
-            // Active
-            activeIndex={focused.value || mergedOpen.value ? activeIndex.value : null}
-            activeHelp={!!internalHoverValues.value}
-            allHelp={!!internalHoverValues.value && hoverSource.value === 'preset'}
-            focused={focused.value}
-            onFocus={onSelectorFocus}
-            onBlur={onSelectorBlur}
-            onKeyDown={onSelectorKeyDown}
-            onSubmit={triggerPartConfirm}
-            // Change
-            value={hoverValues.value}
-            maskFormat={maskFormat.value}
-            onChange={onSelectorChange}
-            onInputChange={onSelectorInputChange}
-            // Format
-            format={formatList.value}
-            inputReadOnly={inputReadOnly.value}
-            // Disabled
-            disabled={disabled.value}
-            // Open
-            open={mergedOpen.value}
-            onOpenChange={triggerOpen}
-            // Click
-            onClick={onSelectorClick}
-            onClear={onSelectorClear}
-            // Invalid
-            invalid={submitInvalidates.value}
-            onInvalid={onSelectorInvalid}
-            // Offset
-            onActiveInfo={(info) => {
-              activeInfo.value = info
-            }}
+            ref={selectorRef} // handled by expose
           />
         </PickerTrigger>
       )

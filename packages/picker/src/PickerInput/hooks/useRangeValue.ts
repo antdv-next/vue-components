@@ -140,7 +140,7 @@ export default function useRangeValue<ValueType extends DateType[], DateType ext
     order: boolean
     onChange?: (dates: ValueType | null, dateStrings: [string, string] | null) => void
   }>,
-  mergedValue: Ref<ValueType>,
+  mergedValue: Ref<ValueType> | ComputedRef<ValueType>,
   setInnerValue: (nextValue: ValueType) => void,
   getCalendarValue: () => ValueType,
   triggerCalendarChange: TriggerCalendarChange<ValueType>,

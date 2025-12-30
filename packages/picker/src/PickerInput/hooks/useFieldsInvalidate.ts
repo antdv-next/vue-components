@@ -1,4 +1,4 @@
-import type { Ref } from 'vue'
+import type { ComputedRef, Ref } from 'vue'
 import type useInvalidate from './useInvalidate'
 import { computed, ref } from 'vue'
 import { fillIndex } from '../../utils/miscUtil'
@@ -9,7 +9,7 @@ import { fillIndex } from '../../utils/miscUtil'
 export default function useFieldsInvalidate<DateType extends object, ValueType extends DateType[]>(
   calendarValue: Ref<ValueType>,
   isInvalidateDate: ReturnType<typeof useInvalidate<DateType>>,
-  allowEmpty: Ref<boolean[] | undefined> = ref([]),
+  allowEmpty: Ref<boolean[] | undefined> | ComputedRef<boolean[] | undefined> = ref([]),
 ) {
   const fieldsInvalidates = ref<[boolean, boolean]>([false, false])
 
