@@ -2,6 +2,7 @@
 import Basic from './basic.vue'
 import Calendar from './calendar.vue'
 import CellRender from './cellRender.vue'
+import Range from './range.vue'
 </script>
 
 <template>
@@ -14,6 +15,9 @@ import CellRender from './cellRender.vue'
     </Variant>
     <Variant title="CellRender">
       <CellRender />
+    </Variant>
+    <Variant title="Range">
+      <Range />
     </Variant>
   </Story>
 </template>
