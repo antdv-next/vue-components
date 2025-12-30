@@ -1,17 +1,17 @@
-import type { CSSProperties } from 'vue'
+import type { CSSProperties, Ref } from 'vue'
 import type { HeaderProps } from '../Header/Header'
 import type { ColumnsType, ColumnType, Direction, TableLayout } from '../interface'
 import { clsx } from '@v-c/util'
-import { getStylePxValue } from '@v-c/util/dist/props-util'
+import { getStylePxValue, toPropsRefs } from '@v-c/util/dist/props-util'
 import { computed, defineComponent, onBeforeUnmount, onMounted, ref } from 'vue'
 import ColGroup from '../ColGroup'
 import { useInjectTableContext } from '../context/TableContext'
 
-function useColumnWidth(colWidths: readonly number[], columnCount: number) {
+function useColumnWidth(colWidths: Ref<number[]>, columnCount: Ref<number>) {
   return computed(() => {
     const cloneColumns: number[] = []
-    for (let i = 0; i < columnCount; i += 1) {
-      const val = colWidths[i]
+    for (let i = 0; i < columnCount.value; i += 1) {
+      const val = colWidths.value[i]
       if (val !== undefined) {
         cloneColumns[i] = val
       }
@@ -66,6 +66,7 @@ const FixedHolder = defineComponent<FixedHeaderProps<any>>({
   setup(props, { slots, expose }) {
     const context = useInjectTableContext()
     const scrollRef = ref<HTMLDivElement | null>(null)
+    const { colWidths, columCount } = toPropsRefs(props, 'colWidths', 'columCount')
 
     expose({
       nativeElement: scrollRef,
@@ -75,8 +76,7 @@ const FixedHolder = defineComponent<FixedHeaderProps<any>>({
     const combinationScrollBarSize = computed(() => {
       return context.isSticky && !props.fixHeader ? 0 : context.scrollbarSize
     })
-
-    const mergedColumnWidth = useColumnWidth(props.colWidths, props.columCount)
+    const mergedColumnWidth = useColumnWidth(colWidths as any, columCount as any)
 
     const isColGroupEmpty = computed(() => {
       const widths = mergedColumnWidth.value

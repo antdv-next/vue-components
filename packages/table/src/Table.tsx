@@ -500,7 +500,6 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
     }
     return 'auto'
   })
-
   const headerProps = computed(() => ({
     colWidths: colWidths.value,
     columCount: flattenColumns.value.length,
