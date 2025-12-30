@@ -20,16 +20,7 @@ import { classNames } from '@v-c/util'
 import useId from '@v-c/util/dist/hooks/useId'
 import isEqual from '@v-c/util/dist/isEqual'
 import { filterEmpty } from '@v-c/util/dist/props-util'
-import {
-  computed,
-  defineComponent,
-  nextTick,
-  onMounted,
-  onUnmounted,
-  ref,
-  shallowRef,
-  watch,
-} from 'vue'
+import { computed, defineComponent, nextTick, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
 import { useIdContextProvide } from './context/IdContext'
 import InheritableContextProvider, { useMenuContextProvider } from './context/MenuContext'
 import { MeasureProvider, PathUserProvider } from './context/PathContext'
@@ -181,7 +172,7 @@ const defaults = {
 const Menu = defineComponent<MenuProps>(
   (props = defaults, { slots, expose, attrs: _attrs }) => {
     const containerRef = shallowRef<HTMLUListElement>()
-    const uuid = useId(props?.id ? `rc-menu-uuid-${props.id}` : 'rc-menu-uuid')
+    const uuid = useId(props?.id ? `vc-menu-uuid-${props.id}` : 'vc-menu-uuid')
     const isRtl = computed(() => props?.direction === 'rtl')
     const childList = shallowRef<any[]>([])
     const mergedOverflowIndicator = computed(
@@ -551,8 +542,7 @@ const Menu = defineComponent<MenuProps>(
       // 在 render 函数中获取 slots
       const children = filterEmpty(slots.default?.())
 
-      // 解析 items 或 children 为节点列表
-      const parsedChildList = parseItems(
+      childList.value = parseItems(
         children,
         props?.items,
         EMPTY_LIST,
@@ -563,17 +553,6 @@ const Menu = defineComponent<MenuProps>(
           extraRender: props?.extraRender,
         },
       )
-
-      // 只有在列表真正改变时才更新，避免不必要的响应式触发
-      const shouldUpdate = childList.value.length !== parsedChildList.length
-        || !isEqual(
-          childList.value.map(n => (n as any)?.key),
-          parsedChildList.map(n => (n as any)?.key),
-        )
-
-      if (shouldUpdate) {
-        childList.value = parsedChildList
-      }
 
       // Measure child list for path registration
       const measureChildList = parseItems(
