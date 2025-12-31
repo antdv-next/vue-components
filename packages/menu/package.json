@@ -1,7 +1,7 @@
 {
   "name": "@v-c/menu",
   "type": "module",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "menu ui component for vue",
   "exports": {
     ".": {
