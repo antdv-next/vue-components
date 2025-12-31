@@ -72,7 +72,6 @@ const FixedHolder = defineComponent<FixedHeaderProps<any>>({
       nativeElement: scrollRef,
     })
 
-    const TableComponent = computed(() => context.getComponent(['header', 'table'], 'table'))
     const combinationScrollBarSize = computed(() => {
       return context.isSticky && !props.fixHeader ? 0 : context.scrollbarSize
     })
@@ -153,15 +152,15 @@ const FixedHolder = defineComponent<FixedHeaderProps<any>>({
       scrollRef.value?.removeEventListener('wheel', onWheel)
     })
 
-    const slotProps = computed(() => ({
-      ...props,
-      columns: columnsWithScrollbar.value,
-      flattenColumns: flattenColumnsWithScrollbar.value,
-      stickyOffsets: headerStickyOffsets.value,
-    }))
-
     return () => {
-      const TableComp = TableComponent.value
+      const TableComp = context.getComponent(['header', 'table'], 'table')
+
+      const slotsProps = {
+        ...props,
+        columns: columnsWithScrollbar.value,
+        flattenColumns: flattenColumnsWithScrollbar.value,
+        stickyOffsets: headerStickyOffsets.value,
+      }
       return (
         <div
           style={{
@@ -192,7 +191,7 @@ const FixedHolder = defineComponent<FixedHeaderProps<any>>({
                     columns={flattenColumnsWithScrollbar.value}
                   />
                 )}
-            {slots.default?.(slotProps.value)}
+            {slots.default?.(slotsProps)}
           </TableComp>
         </div>
       )

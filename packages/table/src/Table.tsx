@@ -578,14 +578,16 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
   }
   return () => {
     slotChildren.value = slots.default?.()
-    const renderFixedHeaderTable = (fixedHolderPassProps: FixedHeaderProps<any>) => (
-      <>
-        <Header {...fixedHolderPassProps} />
-        {fixFooter.value === 'top' && (
-          <Footer {...fixedHolderPassProps}>{summaryNode.value}</Footer>
-        )}
-      </>
-    )
+    const renderFixedHeaderTable = (fixedHolderPassProps: FixedHeaderProps<any>) => {
+      return (
+        <>
+          <Header {...fixedHolderPassProps} />
+          {fixFooter.value === 'top' && (
+            <Footer {...fixedHolderPassProps}>{summaryNode.value}</Footer>
+          )}
+        </>
+      )
+    }
 
     const renderFixedFooterTable = (fixedHolderPassProps: FixedHeaderProps<any>) => (
       <Footer {...fixedHolderPassProps}>{summaryNode.value}</Footer>

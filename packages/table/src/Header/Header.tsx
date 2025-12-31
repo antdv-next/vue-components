@@ -97,34 +97,33 @@ const Header = defineComponent({
     const headerCls = computed(() => context.classNames?.header || {})
     const headerStyles = computed(() => context.styles?.header || {})
 
-    const rows = computed(() => {
-      return parseHeaderRows(props.columns, headerCls.value, headerStyles.value)
-    })
-
     return () => {
       const WrapperComponent = context.getComponent(['header', 'wrapper'], 'thead')
       const trComponent = context.getComponent(['header', 'row'], 'tr')
       const thComponent = context.getComponent(['header', 'cell'], 'th')
+      const rows = parseHeaderRows(props.columns, headerCls.value, headerStyles.value)
 
       return (
         <WrapperComponent
           class={clsx(`${context.prefixCls}-thead`, headerCls.value.wrapper)}
           style={headerStyles.value.wrapper}
         >
-          {rows.value.map((row, rowIndex) => (
-            <HeaderRow
-              classNames={headerCls.value}
-              styles={headerStyles.value}
-              key={rowIndex}
-              flattenColumns={props.flattenColumns}
-              cells={row}
-              stickyOffsets={props.stickyOffsets}
-              rowComponent={trComponent}
-              cellComponent={thComponent}
-              onHeaderRow={props.onHeaderRow}
-              index={rowIndex}
-            />
-          ))}
+          {rows.map((row, rowIndex) => {
+            return (
+              <HeaderRow
+                classNames={headerCls.value}
+                styles={headerStyles.value}
+                key={rowIndex}
+                flattenColumns={props.flattenColumns}
+                cells={row}
+                stickyOffsets={props.stickyOffsets}
+                rowComponent={trComponent}
+                cellComponent={thComponent}
+                onHeaderRow={props.onHeaderRow}
+                index={rowIndex}
+              />
+            )
+          })}
         </WrapperComponent>
       )
     }

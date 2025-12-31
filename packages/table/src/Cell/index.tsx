@@ -363,7 +363,6 @@ const Cell = defineComponent<CellProps<any>>({
       if (ellipsis && (fixedStartShadow || fixedEndShadow)) {
         mergedChildNode = <span class={`${cellPrefixCls}-content`}>{mergedChildNode}</span>
       }
-
       return (
         <Component
           {...legacyCellProps}

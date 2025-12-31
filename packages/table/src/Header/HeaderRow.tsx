@@ -87,7 +87,7 @@ const HeaderRow = defineComponent<RowProps<any>>({
                 additionalProps={additionalProps}
                 rowType="header"
               >
-                {cell.children}
+                { cell.children }
               </Cell>
             )
           })}
