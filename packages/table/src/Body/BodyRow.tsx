@@ -173,6 +173,7 @@ const BodyRow = defineComponent<BodyRowProps<any>>({
         <RowComponent
           {...rowProps.value}
           data-row-key={rowKey}
+          key={`row-${rowKey}`}
           class={clsx(
             className,
             `${prefixCls}-row`,
@@ -248,6 +249,7 @@ const BodyRow = defineComponent<BodyRowProps<any>>({
               `${prefixCls}-expanded-row-level-${indent + 1}`,
               computedExpandedRowClassName,
             )}
+            key={`expanded-row-${rowKey}`}
             prefixCls={prefixCls}
             component={RowComponent}
             cellComponent={BodyCellComponent}
@@ -259,16 +261,17 @@ const BodyRow = defineComponent<BodyRowProps<any>>({
           </ExpandedRow>
         )
       }
-      const childArr = [
-        baseRowNode,
-      ]
+
       if (expandRowNode) {
-        childArr.push(expandRowNode)
+        return (
+          <>
+            {baseRowNode}
+            {expandRowNode}
+          </>
+        )
       }
-      if (childArr.length === 1) {
-        return childArr[0]
-      }
-      return childArr
+
+      return <>{baseRowNode}</>
     }
   },
 })
