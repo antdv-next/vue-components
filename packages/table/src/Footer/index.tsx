@@ -16,8 +16,9 @@ export interface FooterProps<RecordType> {
 const Footer = defineComponent<FooterProps<any>>({
   name: 'TableFooter',
   props: ['stickyOffsets', 'flattenColumns'] as any,
+  inheritAttrs: false,
   setup(props, { slots }) {
-    const { prefixCls } = useInjectTableContext()
+    const context = useInjectTableContext()
 
     const summaryContext = reactive<any>({
       stickyOffsets: props.stickyOffsets,
@@ -35,7 +36,7 @@ const Footer = defineComponent<FooterProps<any>>({
     useProvideSummaryContext(summaryContext as any)
 
     return () => (
-      <tfoot class={`${prefixCls}-summary`}>
+      <tfoot class={`${context.prefixCls}-summary`}>
         {slots.default?.()}
       </tfoot>
     )

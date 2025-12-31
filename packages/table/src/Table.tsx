@@ -45,12 +45,14 @@ import type {
   TableLayout,
   TableSticky,
 } from './interface'
+
 import ResizeObserver from '@v-c/resize-observer'
 import { clsx, get, warning } from '@v-c/util'
 import { getDOM } from '@v-c/util/dist/Dom/findDOMNode'
 import { getTargetScrollBarSize } from '@v-c/util/dist/getScrollBarSize'
 import isEqual from '@v-c/util/dist/isEqual'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
+import { filterEmpty } from '@v-c/util/dist/props-util'
 import {
   computed,
   defineComponent,
@@ -69,7 +71,6 @@ import { EXPAND_COLUMN, INTERNAL_HOOKS } from './constant'
 import { useProvideTableContext } from './context/TableContext'
 import FixedHolder from './FixedHolder'
 import Footer, { FooterComponents } from './Footer'
-import Summary from './Footer/Summary'
 import Header from './Header/Header'
 import useColumns from './hooks/useColumns'
 import useExpand from './hooks/useExpand'
@@ -301,14 +302,15 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
 
   const summaryNode = computed(() => props.summary?.(mergedData.value))
   const fixFooter = computed(() => {
-    const node = summaryNode.value
-    if (!node || Array.isArray(node) || !isVNode(node)) {
+    const node = Array.isArray(summaryNode.value) ? filterEmpty(summaryNode.value)?.[0] : summaryNode.value
+    if (!node || !isVNode(node)) {
       return false
     }
+    const fixed: any = (node.props as SummaryProps)?.fixed
     return (
       (fixHeader.value || stickyConfig.value.isSticky)
-      && node.type === Summary
-      && (node.props as SummaryProps).fixed
+      && (node as any)?.type?.name === 'TableSummary'
+      && (fixed || fixed === '')
     )
   })
 
@@ -720,7 +722,7 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
               <Header {...headerProps.value} columns={columns.value} flattenColumns={flattenColumns.value} />
             )}
             {bodyTableNode}
-            {summaryNode.value && (
+            {!fixFooter.value && summaryNode.value && (
               <Footer stickyOffsets={mergedStickyOffsets.value} flattenColumns={flattenColumns.value}>
                 {summaryNode.value}
               </Footer>
