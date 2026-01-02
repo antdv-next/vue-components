@@ -181,7 +181,7 @@ const PickerPanel = defineComponent<PickerPanelProps<any>>((props, { attrs }) =>
     filledLocale.value,
   ))
 
-  const now = computed(() => mergedGenerateConfig.value.getNow())
+  const now = computed(() => mergedGenerateConfig.value?.getNow?.())
 
   // Mode
   const internalModeState = ref<PanelMode>(props.picker || 'date')

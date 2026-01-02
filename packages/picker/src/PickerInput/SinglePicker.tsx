@@ -107,9 +107,9 @@ export interface PickerProps<DateType extends object = any>
   use12Hours?: boolean
 }
 
-const SinglePicker = defineComponent(
-  <DateType extends object = any>(
-    props: PickerProps<DateType>,
+const SinglePicker = defineComponent<PickerProps>(
+  (
+    props,
     { expose }: SetupContext,
   ) => {
     // ========================= Prop =========================
@@ -120,7 +120,7 @@ const SinglePicker = defineComponent(
       formatList,
       maskFormat,
       isInvalidateDate,
-    ] = useFilledProps<PickerProps<DateType>, DateType, object>(
+    ] = useFilledProps<PickerProps, any, object>(
       computed(() => props) as any,
     )
 
@@ -482,6 +482,7 @@ const SinglePicker = defineComponent(
 
     // ======================== Panel =========================
     const onPanelHover = (date: any | null) => {
+      console.log(date)
       onSetHover(date, 'cell')
     }
 
@@ -645,11 +646,10 @@ const SinglePicker = defineComponent(
       },
       { flush: 'post' },
     )
-
-    return () => {
+    const popupProps = computed(() => {
       const [mergedClassNames, mergedStyles] = semanticCtx.value
 
-      const popupProps = computed(() => ({
+      return {
         ...panelProps.value,
         showNow: mergedShowNow.value,
         showTime: showTime.value,
@@ -680,7 +680,12 @@ const SinglePicker = defineComponent(
         cellRender: onInternalCellRender,
         classNames: mergedClassNames,
         styles: mergedStyles,
-      }))
+      }
+    })
+
+    return () => {
+      const [mergedClassNames, mergedStyles] = semanticCtx.value
+
       // >>> Render
       const panel = (
         <Popup

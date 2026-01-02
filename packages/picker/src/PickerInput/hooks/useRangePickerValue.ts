@@ -55,7 +55,11 @@ export default function useRangePickerValue<DateType extends object, ValueType e
   const mergedActiveIndex = computed(() => activeIndex.value || 0)
 
   const getDefaultPickerValue = (index: number) => {
-    let now = generateConfig.value.getNow()
+    let now = generateConfig.value?.getNow?.()
+    if (!now) {
+      return
+    }
+
     if (isTimePicker.value) {
       now = fillTime(generateConfig.value, now)
     }
