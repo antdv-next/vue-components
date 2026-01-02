@@ -71,8 +71,12 @@ export default defineComponent({
     const inputRef = ref<HTMLInputElement>()
 
     expose({
-      nativeElement: holderRef.value,
-      inputElement: inputRef.value,
+      get nativeElement() {
+        return holderRef.value
+      },
+      get inputElement() {
+        return inputRef.value
+      },
       focus: (options?: FocusOptions) => {
         inputRef.value?.focus(options)
       },

@@ -28,18 +28,18 @@
  */
 
 import type { PickerRef, SharedTimeProps } from './interface'
-import RangePicker from './PickerInput/RangePicker'
-import Picker from './PickerInput/SinglePicker'
-import PickerPanel from './PickerPanel'
-
-// Define types for Props if they are not already exported or if needed.
-// For now, exporting the components.
-// Note: In Vue, we typically export components directly.
-// If type definitions are needed, they can be exported from interface.ts or specific files.
+import RangePicker, { type RangePickerProps } from './PickerInput/RangePicker'
+import Picker, { type BasePickerProps, type PickerProps } from './PickerInput/SinglePicker'
+import PickerPanel, { type BasePickerPanelProps, type PickerPanelProps } from './PickerPanel'
 
 export { Picker, PickerPanel, RangePicker }
 export type {
+  RangePickerProps,
+  PickerProps,
+  PickerPanelProps,
   PickerRef,
+  BasePickerProps,
+  BasePickerPanelProps,
   SharedTimeProps,
 }
 export default Picker

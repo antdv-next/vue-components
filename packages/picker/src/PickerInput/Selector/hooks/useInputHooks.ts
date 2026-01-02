@@ -156,7 +156,7 @@ export default function useInputProps<DateType extends object = any>(
       return index !== undefined ? (propValue as T[])[index] : (propValue as T)
     }
 
-    const pickedAttrs = pickAttrs(props, { aria: true, data: true })
+    const pickedAttrs = pickAttrs(props.value, { aria: true, data: true })
 
     const {
       maskFormat,

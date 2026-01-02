@@ -720,7 +720,7 @@ export default defineComponent({
       if (
         activeListLen
         && lastActiveIndex !== index
-        && needConfirm
+        && needConfirm.value
         // Not change index if is not filled
         && !allowEmpty.value[lastActiveIndex]
         && !hasActiveSubmitValue(lastActiveIndex)
@@ -805,7 +805,7 @@ export default defineComponent({
         onClear: onSelectorClear,
         // Invalid
         invalid: submitInvalidates.value,
-        oninvalid: onSelectorInvalid,
+        onInvalid: onSelectorInvalid,
         // Offset
         onActiveInfo: (info) => {
           activeInfo.value = info

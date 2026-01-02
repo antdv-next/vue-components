@@ -122,7 +122,7 @@ export function isSameTimestamp<DateType>(
     () =>
       isSameDate(generateConfig, time1, time2)
       && isSameTime(generateConfig, time1, time2)
-      && generateConfig.getMillisecond(time1) === generateConfig.getMillisecond(time2),
+      && generateConfig.getMillisecond(time1 as any) === generateConfig.getMillisecond(time2 as any),
   )
 }
 
@@ -202,7 +202,7 @@ export function isSameOrAfter<DateType>(
     return true
   }
 
-  return generateConfig.isAfter(date1, date2)
+  return generateConfig.isAfter(date1 as any, date2 as any)
 }
 
 export function getWeekStartDate<DateType>(
@@ -214,7 +214,7 @@ export function getWeekStartDate<DateType>(
   const monthStartDate = generateConfig.setDate(value, 1)
   const startDateWeekDay = generateConfig.getWeekDay(monthStartDate)
 
-  let alignStartDate = generateConfig.addDate(monthStartDate, weekFirstDay - startDateWeekDay)
+  let alignStartDate = generateConfig.addDate(monthStartDate, weekFirstDay! - startDateWeekDay)
 
   if (
     generateConfig.getMonth(alignStartDate) === generateConfig.getMonth(value)

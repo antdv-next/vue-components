@@ -1,4 +1,4 @@
-import type { PropType, SetupContext } from 'vue'
+import type { SetupContext } from 'vue'
 import type { InternalMode, SelectorProps } from '../../../interface'
 import type { InputRef } from '../Input'
 import { clsx } from '@v-c/util'
@@ -11,8 +11,7 @@ import Icon, { ClearIcon } from '../Icon'
 import Input from '../Input'
 import MultipleDates from './MultipleDates'
 
-export interface SingleSelectorProps<DateType extends object = any>
-  extends /** @vue-ignore */ SelectorProps<DateType> {
+export interface SingleSelectorProps<DateType extends object = any> extends SelectorProps<DateType> {
   id?: string
   value?: DateType[]
   onChange: (date: DateType[]) => void
@@ -56,11 +55,9 @@ export default defineComponent(<DateType extends object = any>(props: SingleSele
   const inputRef = ref<InputRef>()
 
   expose({
-    nativeElement: () => rootRef.value,
+    nativeElement: rootRef,
     focus: (options?: FocusOptions) => {
-      // FIXME: focus panel is destroy
-      // inputRef.value?.focus(options)
-      console.log(options)
+      inputRef.value?.focus(options)
     },
     blur: () => {
       inputRef.value?.blur()
@@ -69,7 +66,7 @@ export default defineComponent(<DateType extends object = any>(props: SingleSele
 
   // ======================== Props =========================
   // Filter props for root
-  const rootProps = useRootProps(props)
+  const rootProps = useRootProps(attrs as any)
 
   // ======================== Change ========================
   const onSingleChange = (date: any) => {
@@ -218,50 +215,4 @@ export default defineComponent(<DateType extends object = any>(props: SingleSele
 }, {
   name: 'SingleSelector',
   inheritAttrs: false,
-  props: {
-    // ...SelectorProps
-    'picker': String as PropType<SingleSelectorProps<any>['picker']>,
-    'prefix': Object as PropType<SingleSelectorProps<any>['prefix']>,
-    'clearIcon': Object as PropType<SingleSelectorProps<any>['clearIcon']>,
-    'suffixIcon': Object as PropType<SingleSelectorProps<any>['suffixIcon']>,
-    'focused': { type: Boolean as PropType<SingleSelectorProps<any>['focused']>, default: undefined },
-    'onFocus': Function as PropType<SingleSelectorProps<any>['onFocus']>,
-    'onBlur': Function as PropType<SingleSelectorProps<any>['onBlur']>,
-    'onSubmit': Function as PropType<SingleSelectorProps<any>['onSubmit']>,
-    'onKeyDown': Function as PropType<SingleSelectorProps<any>['onKeyDown']>,
-    'locale': { type: Object as PropType<SingleSelectorProps<any>['locale']> },
-    'generateConfig': { type: Object as PropType<SingleSelectorProps<any>['generateConfig']> },
-    'direction': String as PropType<SingleSelectorProps<any>['direction']>,
-    'onClick': Function as PropType<SingleSelectorProps<any>['onClick']>,
-    'onClear': Function as PropType<SingleSelectorProps<any>['onClear']>,
-    'format': Array as PropType<SingleSelectorProps<any>['format']>,
-    'maskFormat': String as PropType<SingleSelectorProps<any>['maskFormat']>,
-    'onInputChange': Function as PropType<SingleSelectorProps<any>['onInputChange']>,
-    'onInvalid': Function as PropType<SingleSelectorProps<any>['onInvalid']>,
-    'preserveInvalidOnBlur': { type: Boolean as PropType<SingleSelectorProps<any>['preserveInvalidOnBlur']>, default: undefined },
-    'onOpenChange': Function as PropType<SingleSelectorProps<any>['onOpenChange']>,
-    'inputReadOnly': { type: Boolean as PropType<SingleSelectorProps<any>['inputReadOnly']>, default: undefined },
-    'activeHelp': { type: Boolean as PropType<SingleSelectorProps<any>['activeHelp']>, default: undefined },
-    'open': { type: Boolean as PropType<SingleSelectorProps<any>['open']>, default: undefined },
-
-    // SingleSelectorProps specific
-    'id': String as PropType<SingleSelectorProps<any>['id']>,
-    'value': Array as PropType<SingleSelectorProps<any>['value']>,
-    'onChange': Function as PropType<SingleSelectorProps<any>['onChange']>,
-    'internalPicker': String as PropType<SingleSelectorProps<any>['internalPicker']>,
-    'disabled': { type: Boolean as PropType<SingleSelectorProps<any>['disabled']>, default: undefined },
-    'allHelp': { type: Boolean as PropType<SingleSelectorProps<any>['allHelp']>, default: undefined },
-    'placeholder': String as PropType<SingleSelectorProps<any>['placeholder']>,
-    'invalid': { type: Boolean as PropType<SingleSelectorProps<any>['invalid']>, default: undefined },
-    'removeIcon': Object as PropType<SingleSelectorProps<any>['removeIcon']>,
-    'maxTagCount': [Number, String] as PropType<number | 'responsive'>,
-    'multiple': { type: Boolean as PropType<SingleSelectorProps<any>['multiple']>, default: undefined },
-
-    // Native Input
-    'required': { type: Boolean as PropType<boolean>, default: undefined },
-    'aria-required': { type: Boolean as PropType<boolean | undefined>, default: undefined },
-    'autoFocus': { type: Boolean as PropType<boolean>, default: undefined },
-    'tabIndex': [Number, String] as PropType<number | string>,
-    'onMouseDown': Function as PropType<(e: MouseEvent) => void>,
-  },
 })
