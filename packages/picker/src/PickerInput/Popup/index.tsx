@@ -1,7 +1,7 @@
 import type { ResizeObserverProps } from '@v-c/resize-observer'
 import type { MouseEventHandler } from '@v-c/util/dist/EventInterface'
 import type { VueNode } from '@v-c/util/dist/type'
-import type { InputHTMLAttributes, SetupContext } from 'vue'
+import type { InputHTMLAttributes } from 'vue'
 import type { RangeTimeProps, SharedPickerProps, SharedTimeProps, ValueDate } from '../../interface'
 
 import type { FooterProps } from './Footer'
@@ -49,17 +49,8 @@ export type PopupProps<DateType extends object = any, PresetValue = DateType>
 
 //
 const Popup = defineComponent(<DateType extends object = any>(
-  rawProps: PopupProps<DateType>,
-  { attrs }: SetupContext,
+  props: PopupProps<DateType>,
 ) => {
-  const props = new Proxy(rawProps as Record<string, any>, {
-    get(target, key) {
-      if (key in target) {
-        return target[key as keyof typeof target]
-      }
-      return (attrs as Record<string, any>)[key as string]
-    },
-  }) as PopupProps<DateType>
   const activeInfo = computed(() => props.activeInfo || [0, 0, 0])
 
   const ctx = usePickerContext()
@@ -242,9 +233,9 @@ const Popup = defineComponent(<DateType extends object = any>(
 
     return renderNode
   }
+}, {
+  name: 'Popup',
+  inheritAttrs: false,
 })
-
-Popup.name = 'Popup'
-Popup.inheritAttrs = false
 
 export default Popup

@@ -42,12 +42,11 @@ export interface SingleSelectorProps<DateType extends object = any> extends Sele
 }
 
 const SingleSelector = defineComponent(
-  (rawProps: SingleSelectorProps, { attrs, expose }: SetupContext) => {
-    const props = computed(() => ({
-      ...rawProps,
-      ...attrs,
-    }))
-    const rtl = computed(() => props.value.direction === 'rtl')
+  <DateType extends object = any>(
+    props: SingleSelectorProps<DateType>,
+    { attrs, expose }: SetupContext,
+  ) => {
+    const rtl = computed(() => props.direction === 'rtl')
 
     // ======================== Prefix ========================
     const ctx = usePickerContext()
@@ -71,49 +70,43 @@ const SingleSelector = defineComponent(
 
     // ======================== Props =========================
     // Filter props for root
-    const rootProps = useRootProps(props.value as any)
+    const rootProps = useRootProps(props as any)
 
     // ======================== Change ========================
     const onSingleChange = (date: any) => {
-      props.value.onChange?.([date])
+      props.onChange?.([date])
     }
 
     const onMultipleRemove = (date: any) => {
-      const nextValues = (props.value.value || []).filter(
+      const nextValues = (props.value || []).filter(
         oriDate =>
           oriDate
           && !isSame(
-          props.value.generateConfig!,
-          props.value.locale!,
+            props.generateConfig!,
+            props.locale!,
             oriDate,
             date,
-          props.value.internalPicker as InternalMode,
+            props.internalPicker as InternalMode,
           ),
       )
-      props.value.onChange?.(nextValues)
+      props.onChange?.(nextValues)
 
       // When `open`, it means user is operating the
-      if (!props.value.open) {
-        props.value.onSubmit?.()
+      if (!props.open) {
+        props.onSubmit?.()
       }
     }
-    const allProps = computed(() => {
-      return {
-        ...props.value,
-        ...attrs,
-      }
-    })
 
     // ======================== Inputs ========================
     const [getInputProps, getText] = useInputProps(
       computed(() => ({
-        ...allProps.value,
-        'aria-required': !!allProps.value['aria-required'],
+        ...props,
+        'aria-required': !!(props as any)['aria-required'],
         'onChange': onSingleChange,
       })) as any,
       ({ valueTexts }) => ({
         value: valueTexts[0] || '',
-        active: props.value.focused,
+        active: props.focused,
       }),
     )
 
@@ -135,7 +128,7 @@ const SingleSelector = defineComponent(
         invalid,
         autoFocus,
         tabIndex,
-    } = props.value
+    } = props
 
       const showClear = !!(clearIcon && value && value.length && !disabled)
 
@@ -185,7 +178,7 @@ const SingleSelector = defineComponent(
             prefixCls.value,
             {
               [`${prefixCls.value}-multiple`]: multiple,
-            [`${prefixCls.value}-focused`]: props.value.focused,
+              [`${prefixCls.value}-focused`]: props.focused,
               [`${prefixCls.value}-disabled`]: disabled,
               [`${prefixCls.value}-invalid`]: invalid,
               [`${prefixCls.value}-rtl`]: rtl.value,
@@ -218,9 +211,10 @@ const SingleSelector = defineComponent(
       )
     }
   },
+  {
+    name: 'SingleSelector',
+    inheritAttrs: false,
+  },
 )
-
-SingleSelector.name = 'SingleSelector'
-SingleSelector.inheritAttrs = false
 
 export default SingleSelector

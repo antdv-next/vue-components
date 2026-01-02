@@ -9,15 +9,7 @@ export interface IconProps {
   type: 'suffix' | 'clear'
 }
 
-const Icon = defineComponent<IconProps>((rawProps, { attrs }) => {
-  const props = new Proxy(rawProps as Record<string, any>, {
-    get(target, key) {
-      if (key in target) {
-        return target[key as keyof typeof target]
-      }
-      return (attrs as Record<string, any>)[key as string]
-    },
-  }) as IconProps
+const Icon = defineComponent<IconProps>((props, { attrs }) => {
   const ctx = usePickerContext()
 
   return () => {
@@ -45,10 +37,10 @@ const Icon = defineComponent<IconProps>((rawProps, { attrs }) => {
       </span>
     )
   }
+}, {
+  name: 'Icon',
+  inheritAttrs: false,
 })
-
-Icon.name = 'Icon'
-Icon.inheritAttrs = false
 
 export default Icon
 
@@ -56,16 +48,7 @@ export interface ClearIconProps extends Omit<IconProps, 'type'> {
   onClear: VoidFunction
 }
 
-export const ClearIcon = defineComponent<ClearIconProps>((rawProps, { attrs }) => {
-  const props = new Proxy(rawProps as Record<string, any>, {
-    get(target, key) {
-      if (key in target) {
-        return target[key as keyof typeof target]
-      }
-      return (attrs as Record<string, any>)[key as string]
-    },
-  }) as ClearIconProps
-
+export const ClearIcon = defineComponent<ClearIconProps>((props, { attrs }) => {
   return () => {
     return (
       <Icon
@@ -83,7 +66,7 @@ export const ClearIcon = defineComponent<ClearIconProps>((rawProps, { attrs }) =
       />
     )
   }
+}, {
+  name: 'ClearIcon',
+  inheritAttrs: false,
 })
-
-ClearIcon.name = 'ClearIcon'
-ClearIcon.inheritAttrs = false

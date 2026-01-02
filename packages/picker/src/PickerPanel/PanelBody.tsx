@@ -1,27 +1,27 @@
-import type { PropType, VNode } from 'vue'
+import type { VNode } from 'vue'
 import type { DisabledDate } from '../interface'
 import { clsx } from '@v-c/util'
 import { defineComponent } from 'vue'
 import { formatValue, isInRange, isSame } from '../utils/dateUtil'
 import { usePanelContext, usePickerHackContext } from './context'
 
-export default defineComponent({
-  name: 'PanelBody',
-  props: {
-    rowNum: { type: Number, required: true },
-    colNum: { type: Number, required: true },
-    baseDate: { type: Object as PropType<any>, required: true },
-    getCellDate: { type: Function as PropType<(date: any, offset: number) => any>, required: true },
-    getCellText: { type: Function as PropType<(date: any) => any>, required: true },
-    getCellClassName: { type: Function as PropType<(date: any) => Record<string, any>>, required: true },
-    disabledDate: { type: Function as PropType<DisabledDate<any>> },
-    titleFormat: { type: String },
-    headerCells: { type: Array as PropType<any[]> },
-    prefixColumn: { type: Function as PropType<(date: any) => any> },
-    rowClassName: { type: Function as PropType<(date: any) => string> },
-    cellSelection: { type: Boolean, default: true },
-  },
-  setup(props) {
+export interface PanelBodyProps<DateType = any> {
+  rowNum: number
+  colNum: number
+  baseDate: DateType
+  titleFormat?: string
+  getCellDate: (date: DateType, offset: number) => DateType
+  getCellText: (date: DateType) => any
+  getCellClassName: (date: DateType) => Record<string, any>
+  disabledDate?: DisabledDate<DateType>
+  headerCells?: any[]
+  prefixColumn?: (date: DateType) => any
+  rowClassName?: (date: DateType) => string
+  cellSelection?: boolean
+}
+
+const PanelBody = defineComponent<PanelBodyProps<any>>(
+  <DateType extends object = any>(props: PanelBodyProps<DateType>) => {
     const context = usePanelContext()!
     const pickerHackContext = usePickerHackContext()
 
@@ -54,7 +54,7 @@ export default defineComponent({
         getCellText,
         getCellClassName,
         headerCells,
-        cellSelection,
+        cellSelection = true,
         disabledDate,
       } = props
 
@@ -188,4 +188,9 @@ export default defineComponent({
       )
     }
   },
-})
+  {
+    name: 'PanelBody',
+  },
+)
+
+export default PanelBody

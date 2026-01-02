@@ -1,4 +1,3 @@
-import type { ComputedRef } from 'vue'
 import type { InputProps } from './hooks/useInputHooks.ts'
 import { clsx } from '@v-c/util'
 import { computed, defineComponent, onBeforeUnmount, ref, toRef, watch } from 'vue'
@@ -17,11 +16,7 @@ export interface InputRef {
 }
 
 const Input = defineComponent<InputProps>(
-  (rawProps, { attrs, expose }) => {
-    const props = computed(() => ({
-      ...rawProps,
-      ...attrs,
-    })) as ComputedRef<InputProps>
+  (props, { attrs, expose }) => {
     const pickerCtx = usePickerContext()
 
     const prefixCls = computed(() => pickerCtx.value.prefixCls)
@@ -32,7 +27,7 @@ const Input = defineComponent<InputProps>(
 
     // ======================== Value =========================
     const focused = ref(false)
-    const internalInputValue = ref(props.value.value)
+    const internalInputValue = ref(props.value)
     const focusCellText = ref('')
     const focusCellIndex = ref<number | null>(null)
     const forceSelectionSyncMark = ref<object | null>(null)
@@ -40,7 +35,7 @@ const Input = defineComponent<InputProps>(
     const inputValue = computed(() => internalInputValue.value || '')
 
     // Sync value if needed
-    watch(() => props.value.value, (val) => {
+    watch(() => props.value, (val) => {
       internalInputValue.value = val
     })
 
@@ -49,8 +44,12 @@ const Input = defineComponent<InputProps>(
     const inputRef = ref<HTMLInputElement>()
 
     expose({
-      nativeElement: holderRef,
-      inputElement: inputRef,
+      get nativeElement() {
+        return holderRef.value
+      },
+      get inputElement() {
+        return inputRef.value
+      },
       focus: (options?: FocusOptions) => {
         inputRef.value?.focus(options)
       },
@@ -60,10 +59,10 @@ const Input = defineComponent<InputProps>(
     })
 
     // ======================== Format ========================
-    const maskFormat = computed(() => new MaskFormat(props.value.format || ''))
+    const maskFormat = computed(() => new MaskFormat(props.format || ''))
 
     const selectionRange = computed(() => {
-      if (props.value.helped) {
+      if (props.helped) {
         return [0, 0]
       }
       return maskFormat.value.getSelection(focusCellIndex.value!)
@@ -75,8 +74,8 @@ const Input = defineComponent<InputProps>(
     // ======================== Modify ========================
     // When input modify content, trigger `onHelp` if is not the format
     const onModify = (text: string) => {
-      if (text && text !== props.value.format && text !== props.value.value) {
-        props.value.onHelp()
+      if (text && text !== props.format && text !== props.value) {
+        props?.onHelp?.()
       }
     }
 
@@ -85,8 +84,8 @@ const Input = defineComponent<InputProps>(
      * Triggered by paste, keyDown and focus to show format
      */
     const triggerInputChange = (text: string) => {
-      if (props.value.validateFormat(text)) {
-        props.value.onChange(text)
+      if (props.validateFormat?.(text)) {
+        props?.onChange?.(text)
       }
       internalInputValue.value = text
       onModify(text)
@@ -96,12 +95,12 @@ const Input = defineComponent<InputProps>(
     const onInternalChange = (event: Event) => {
       const target = event.target as HTMLInputElement
       // Hack `onChange` with format to do nothing
-      if (!props.value.format) {
+      if (!props.format) {
         const text = target.value
 
         onModify(text)
         internalInputValue.value = text
-        props.value.onChange(text)
+        props?.onChange?.(text)
       }
     }
 
@@ -109,7 +108,7 @@ const Input = defineComponent<InputProps>(
     // Get paste text
       const pasteText = event.clipboardData?.getData('text') || ''
 
-      if (props.value.validateFormat(pasteText)) {
+      if (props?.validateFormat?.(pasteText)) {
         triggerInputChange(pasteText)
       }
     }
@@ -132,7 +131,7 @@ const Input = defineComponent<InputProps>(
       // Force update the selection
       forceSelectionSyncMark.value = {}
 
-      props.value.onMouseUp?.(event)
+      props.onMouseUp?.(event)
 
       mouseDownRef.value = false
     }
@@ -143,11 +142,11 @@ const Input = defineComponent<InputProps>(
       focusCellIndex.value = 0
       focusCellText.value = ''
 
-      props.value.onFocus?.(event)
+      props.onFocus?.(event)
     }
 
     const onSharedBlur = (event: FocusEvent) => {
-      props.value.onBlur?.(event)
+      props.onBlur?.(event)
     }
 
     const onFormatBlur = (event: FocusEvent) => {
@@ -159,18 +158,18 @@ const Input = defineComponent<InputProps>(
     // ======================== Active ========================
     // Check if blur need reset input value
     useLockEffect(toRef(props, 'active'), () => {
-      if (!props.value.active && !props.value.preserveInvalidOnBlur) {
-        internalInputValue.value = props.value.value
+      if (!props.active && !props.preserveInvalidOnBlur) {
+        internalInputValue.value = props.value
       }
     })
 
     // ======================= Keyboard =======================
     const onSharedKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Enter' && props.value.validateFormat(inputValue.value)) {
-        props.value.onSubmit()
+      if (event.key === 'Enter' && props?.validateFormat?.(inputValue.value)) {
+        props?.onSubmit?.()
       }
 
-      props.value.onKeyDown?.(event)
+      props.onKeyDown?.(event)
     }
 
     const onFormatKeyDown = (event: KeyboardEvent) => {
@@ -185,7 +184,7 @@ const Input = defineComponent<InputProps>(
       let nextFillText: string | null = null
 
       const maskCellLen = selectionEnd.value - selectionStart.value
-      const cellFormat = props.value.format!.slice(selectionStart.value, selectionEnd.value)
+      const cellFormat = props.format!.slice(selectionStart.value, selectionEnd.value)
 
       // Cell Index
       const offsetCellIndex = (offset: number) => {
@@ -275,7 +274,7 @@ const Input = defineComponent<InputProps>(
             + leftPad(nextFillText, maskCellLen)
           // after
             + inputValue.value.slice(selectionEnd.value)
-        triggerInputChange(nextFocusValue.slice(0, props.value.format!.length))
+        triggerInputChange(nextFocusValue.slice(0, props.format!.length))
       }
 
       // Always trigger selection sync after key down
@@ -287,7 +286,7 @@ const Input = defineComponent<InputProps>(
 
     watch([
       maskFormat,
-      () => props.value.format,
+      () => props.format,
       focused,
       inputValue,
       focusCellIndex,
@@ -295,13 +294,13 @@ const Input = defineComponent<InputProps>(
       selectionEnd,
       forceSelectionSyncMark,
     ], () => {
-      if (!focused.value || !props.value.format || mouseDownRef.value) {
+      if (!focused.value || !props.format || mouseDownRef.value) {
         return
       }
 
       // Reset with format if not match
       if (!maskFormat.value.match(inputValue.value)) {
-        triggerInputChange(props.value.format)
+        triggerInputChange(props.format)
         return
       }
 
@@ -337,10 +336,10 @@ const Input = defineComponent<InputProps>(
         clearIcon, // unused in render
         // Pass to input
         ...restProps
-      } = props.value as any
+      } = props as any
 
       // Input props for format
-      const inputProps = props.value.format
+      const inputProps = props.format
         ? {
             onFocus: onFormatFocus,
             onBlur: onFormatBlur,
@@ -359,8 +358,8 @@ const Input = defineComponent<InputProps>(
           class={clsx(
             inputPrefixCls.value,
             {
-              [`${inputPrefixCls.value}-active`]: props.value.active && props.value.showActiveCls,
-              [`${inputPrefixCls.value}-placeholder`]: props.value.helped,
+              [`${inputPrefixCls.value}-active`]: props.active && props.showActiveCls,
+              [`${inputPrefixCls.value}-placeholder`]: props.helped,
             },
             attrs.class as string,
           )}
@@ -368,7 +367,7 @@ const Input = defineComponent<InputProps>(
         >
           <Component
             ref={inputRef}
-            aria-invalid={props.value.invalid}
+            aria-invalid={props.invalid}
             autoComplete="off"
             {...attrs}
             {...restProps}
@@ -381,17 +380,18 @@ const Input = defineComponent<InputProps>(
             onInput={onInternalChange}
             class={classNames.value.input}
             style={styles.value.input}
-            readonly={props.value.inputReadOnly}
+            readonly={props.inputReadOnly}
           />
-          <Icon type="suffix" icon={props.value.suffixIcon} />
-          {props.value.clearIcon}
+          <Icon type="suffix" icon={props.suffixIcon} />
+          {props.clearIcon}
         </div>
       )
     }
   },
+  {
+    name: 'Input',
+    inheritAttrs: false,
+  },
 )
-
-Input.name = 'Input'
-Input.inheritAttrs = false
 
 export default Input

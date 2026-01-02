@@ -1,4 +1,3 @@
-import type { SetupContext } from 'vue'
 import type { PanelMode } from '../../interface'
 import type { PickerPanelProps } from '../../PickerPanel'
 import type { PickerHackContextProps } from '../../PickerPanel/context'
@@ -27,16 +26,7 @@ export interface PopupPanelProps<DateType extends object = any>
 
 // provider components
 const PickerPanelProvider = defineComponent<{ value: PickerHackContextProps }>(
-  (rawProps, { attrs, slots }) => {
-    const props = new Proxy(rawProps as Record<string, any>, {
-      get(target, key) {
-        if (key in target) {
-          return target[key as keyof typeof target]
-        }
-        return (attrs as Record<string, any>)[key as string]
-      },
-    }) as { value: PickerHackContextProps }
-
+  (props, { slots }) => {
     providePickerHackContext(computed(() => props.value) as any)
     return () => {
       return (
@@ -44,22 +34,14 @@ const PickerPanelProvider = defineComponent<{ value: PickerHackContextProps }>(
       )
     }
   },
+  {
+    name: 'PickerPanelProvider',
+  },
 )
 
-PickerPanelProvider.name = 'PickerPanelProvider'
-
 const PopupPanel = defineComponent(<DateType extends object = any>(
-  rawProps: PopupPanelProps<DateType>,
-  { attrs }: SetupContext,
+  props: PopupPanelProps<DateType>,
 ) => {
-  const props = new Proxy(rawProps as Record<string, any>, {
-    get(target, key) {
-      if (key in target) {
-        return target[key as keyof typeof target]
-      }
-      return (attrs as Record<string, any>)[key as string]
-    },
-  }) as PopupPanelProps<DateType>
   const ctx = usePickerContext()
 
   const picker = computed(() => props.picker)
@@ -100,7 +82,6 @@ const PopupPanel = defineComponent(<DateType extends object = any>(
   const pickerProps = computed(() => {
     const baseProps = {
       ...props,
-      ...attrs,
       hoverValue: null as DateType[] | undefined | null,
       hoverRangeValue: null as DateType[] | undefined | null,
       hideHeader: hideHeader.value,
@@ -158,9 +139,9 @@ const PopupPanel = defineComponent(<DateType extends object = any>(
       </PickerPanelProvider>
     )
   }
+}, {
+  name: 'PopupPanel',
+  inheritAttrs: false,
 })
-
-PopupPanel.name = 'PopupPanel'
-PopupPanel.inheritAttrs = false
 
 export default PopupPanel

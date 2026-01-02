@@ -1,5 +1,4 @@
-import type { PropType } from 'vue'
-import type { PanelMode } from '../../interface'
+import type { PanelMode, SharedPanelProps } from '../../interface'
 import { clsx } from '@v-c/util'
 import { computed, defineComponent } from 'vue'
 import {
@@ -13,41 +12,18 @@ import { providePanelContext, useInfo } from '../context'
 import PanelBody from '../PanelBody'
 import PanelHeader from '../PanelHeader'
 
-export default defineComponent({
-  name: 'DatePanel',
-  inheritAttrs: false,
-  props: {
-    prefixCls: String,
-    locale: Object as PropType<any>,
-    generateConfig: Object as PropType<any>,
-    pickerValue: Object as PropType<any>,
-    onPickerValueChange: Function as PropType<(date: any) => void>,
-    onModeChange: Function as PropType<(mode: PanelMode, date?: any) => void>,
-    disabledDate: Function as PropType<any>,
-    onSelect: Function as PropType<(date: any) => void>,
-    onHover: Function as PropType<(date: any) => void>,
-    showWeek: { type: Boolean, default: undefined },
-    panelName: { type: String, default: 'date' },
-    rowClassName: Function as PropType<(date: any) => string>,
-    mode: { type: String as PropType<PanelMode>, default: 'date' },
-    cellSelection: { type: Boolean, default: true },
+export interface DatePanelProps<DateType extends object = any> extends SharedPanelProps<DateType> {
+  panelName?: PanelMode
+  rowClassName?: (date: DateType) => string
+  mode?: PanelMode
+  cellSelection?: boolean
+}
 
-    // Other SharedPanelProps
-    minDate: Object as PropType<any>,
-    maxDate: Object as PropType<any>,
-    cellRender: Function as PropType<any>,
-    hoverRangeValue: Array as PropType<any>,
-    hoverValue: Array as PropType<any>,
-    values: Array as PropType<any>,
-    showTime: { type: [Boolean, Object] as PropType<any>, default: undefined },
-    prevIcon: Object as PropType<any>,
-    nextIcon: Object as PropType<any>,
-    superPrevIcon: Object as PropType<any>,
-    superNextIcon: Object as PropType<any>,
-  },
-  setup(props) {
+const DatePanel = defineComponent<DatePanelProps<any>>(
+  <DateType extends object = any>(props: DatePanelProps<DateType>) => {
     const panelContext = computed(() => {
-      const [info] = useInfo(props as any, props.mode)
+      const panelMode = props.mode || 'date'
+      const [info] = useInfo(props as any, panelMode)
       return info
     })
     providePanelContext(panelContext)
@@ -241,4 +217,10 @@ export default defineComponent({
       )
     }
   },
-})
+  {
+    name: 'DatePanel',
+    inheritAttrs: false,
+  },
+)
+
+export default DatePanel

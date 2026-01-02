@@ -14,16 +14,7 @@ export interface MultipleDatesProps<DateType extends object = any> {
   maxTagCount?: number | 'responsive'
 }
 
-const MultipleDates = defineComponent<MultipleDatesProps>((rawProps, { attrs }) => {
-  const props = new Proxy(rawProps as Record<string, any>, {
-    get(target, key) {
-      if (key in target) {
-        return target[key as keyof typeof target]
-      }
-      return (attrs as Record<string, any>)[key as string]
-    },
-  }) as MultipleDatesProps
-
+const MultipleDates = defineComponent<MultipleDatesProps>((props) => {
   return () => {
     const {
       prefixCls,
@@ -99,8 +90,8 @@ const MultipleDates = defineComponent<MultipleDatesProps>((rawProps, { attrs }) 
         </div>
       )
   }
+}, {
+  name: 'MultipleDates',
 })
-
-MultipleDates.name = 'MultipleDates'
 
 export default MultipleDates

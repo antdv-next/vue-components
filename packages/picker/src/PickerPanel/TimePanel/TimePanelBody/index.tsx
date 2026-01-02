@@ -2,6 +2,7 @@ import type { Unit } from './TimeColumn'
 import { clsx } from '@v-c/util'
 import { computed, defineComponent } from 'vue'
 import useTimeInfo from '../../../hooks/useTimeInfo'
+import type { SharedTimeProps } from '../../../interface'
 import { formatValue } from '../../../utils/dateUtil'
 import { usePanelContext, usePickerHackContext } from '../../context'
 import TimeColumn from './TimeColumn'
@@ -10,31 +11,8 @@ function isAM(hour: number) {
   return hour < 12
 }
 
-export default defineComponent({
-  name: 'TimePanelBody',
-  inheritAttrs: false,
-  props: {
-    showHour: { type: Boolean, default: undefined },
-    showMinute: { type: Boolean, default: undefined },
-    showSecond: { type: Boolean, default: undefined },
-    showMillisecond: { type: Boolean, default: undefined },
-    use12Hours: { type: Boolean, default: undefined },
-    changeOnScroll: { type: Boolean, default: undefined },
-    format: String,
-    showNow: { type: Boolean, default: undefined },
-    hourStep: Number,
-    minuteStep: Number,
-    secondStep: Number,
-    millisecondStep: Number,
-    hideDisabledOptions: { type: Boolean, default: undefined },
-    defaultValue: Object,
-    defaultOpenValue: Object,
-    disabledHours: Function,
-    disabledMinutes: Function,
-    disabledSeconds: Function,
-    disabledTime: Function,
-  },
-  setup(props) {
+const TimePanelBody = defineComponent<SharedTimeProps<any>>(
+  <DateType extends object = any>(props: SharedTimeProps<DateType>) => {
     const context = usePanelContext()!
     const pickerHackContext = usePickerHackContext()
 
@@ -292,4 +270,10 @@ export default defineComponent({
       )
     }
   },
-})
+  {
+    name: 'TimePanelBody',
+    inheritAttrs: false,
+  },
+)
+
+export default TimePanelBody

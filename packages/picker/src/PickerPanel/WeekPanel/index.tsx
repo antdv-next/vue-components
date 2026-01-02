@@ -1,21 +1,11 @@
-import type { PropType } from 'vue'
+import type { SharedPanelProps } from '../../interface'
 import { clsx } from '@v-c/util'
 import { defineComponent } from 'vue'
 import { isInRange, isSameWeek } from '../../utils/dateUtil'
 import DatePanel from '../DatePanel'
 
-export default defineComponent({
-  name: 'WeekPanel',
-  inheritAttrs: false,
-  props: {
-    prefixCls: String,
-    generateConfig: Object as PropType<any>,
-    locale: Object as PropType<any>,
-    value: Object as PropType<any>,
-    hoverValue: Array as PropType<any>,
-    hoverRangeValue: Array as PropType<any>,
-  },
-  setup(props, { attrs }) {
+const WeekPanel = defineComponent<SharedPanelProps<any>>(
+  <DateType extends object = any>(props: SharedPanelProps<DateType>) => {
     return () => {
       const { prefixCls, generateConfig, locale, value, hoverValue, hoverRangeValue } = props
       const localeName = locale.locale
@@ -56,7 +46,6 @@ export default defineComponent({
       return (
         <DatePanel
           {...props}
-          {...attrs}
           mode="week"
           panelName="week"
           rowClassName={rowClassName}
@@ -64,4 +53,10 @@ export default defineComponent({
       )
     }
   },
-})
+  {
+    name: 'WeekPanel',
+    inheritAttrs: false,
+  },
+)
+
+export default WeekPanel

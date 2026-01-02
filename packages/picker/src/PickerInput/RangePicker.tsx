@@ -130,18 +130,12 @@ function getActiveRange(activeIndex: number) {
 const RangePicker = defineComponent(
   <DateType extends object = any>(
     props: RangePickerProps<DateType>,
-    { expose, attrs }: SetupContext,
+    { expose }: SetupContext,
   ) => {
-    const allProps = computed(() => {
-      return {
-        ...props,
-        ...attrs,
-      }
-    })
     // ========================= Prop =========================
     const [filledProps, internalPicker, complexPicker, formatList, maskFormat, isInvalidateDate]
-      = useFilledProps(allProps as any, () => {
-        const { disabled, allowEmpty } = allProps.value
+      = useFilledProps(computed(() => props) as any, () => {
+        const { disabled, allowEmpty } = props
 
         const mergedDisabled = separateConfig(disabled, false)
         const mergedAllowEmpty = separateConfig(allowEmpty, false)
@@ -152,7 +146,7 @@ const RangePicker = defineComponent(
         }
       })
 
-    const fp = computed(() => filledProps.value)
+    const fp = computed(() => filledProps.value ?? {})
 
     const prefixCls = computed(() => fp.value.prefixCls)
     const rootClassName = computed(() => fp.value.rootClassName)
@@ -320,10 +314,10 @@ const RangePicker = defineComponent(
       /** Trigger `onChange` directly without check `disabledDate` */
       triggerSubmitChange,
     ] = useRangeValue<RangeValueType<any>, any>(
-      fp.value as any,
+      fp as any,
       mergedValue as ComputedRef<any>,
       setInnerValue,
-      () => getCalendarValue.value,
+      () => getCalendarValue.value as any,
       triggerCalendarChange,
       disabled,
       formatList,
@@ -334,7 +328,7 @@ const RangePicker = defineComponent(
 
     // ===================== DisabledDate =====================
     const mergedDisabledDate = useRangeDisabledDate(
-      calendarValue,
+      calendarValue as any,
       disabled,
       activeIndexList,
       generateConfig,
@@ -806,9 +800,10 @@ const RangePicker = defineComponent(
       )
     }
   },
+  {
+    name: 'RangePicker',
+    inheritAttrs: false,
+  },
 )
-
-RangePicker.name = 'RangePicker'
-RangePicker.inheritAttrs = false
 
 export default RangePicker

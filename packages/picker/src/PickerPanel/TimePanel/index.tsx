@@ -1,5 +1,4 @@
-import type { PropType } from 'vue'
-import type { PanelMode } from '../../interface'
+import type { SharedPanelProps } from '../../interface'
 import { clsx } from '@v-c/util'
 import { computed, defineComponent } from 'vue'
 import { formatValue } from '../../utils/dateUtil'
@@ -7,34 +6,8 @@ import { providePanelContext, useInfo } from '../context'
 import PanelHeader from '../PanelHeader'
 import TimePanelBody from './TimePanelBody'
 
-export default defineComponent({
-  name: 'TimePanel',
-  inheritAttrs: false,
-  props: {
-    prefixCls: String,
-    locale: Object as PropType<any>,
-    generateConfig: Object as PropType<any>,
-    pickerValue: Object as PropType<any>,
-    onPickerValueChange: Function as PropType<(date: any) => void>,
-    onModeChange: Function as PropType<(mode: PanelMode, date?: any) => void>,
-    disabledDate: Function as PropType<any>,
-    onSelect: Function as PropType<(date: any) => void>,
-    onHover: Function as PropType<(date: any) => void>,
-    minDate: Object as PropType<any>,
-    maxDate: Object as PropType<any>,
-    cellRender: Function as PropType<any>,
-    hoverRangeValue: Array as PropType<any>,
-    hoverValue: Array as PropType<any>,
-    values: Array as PropType<any>,
-    showTime: { type: [Boolean, Object] as PropType<any>, default: undefined },
-    prevIcon: Object as PropType<any>,
-    nextIcon: Object as PropType<any>,
-    superPrevIcon: Object as PropType<any>,
-    superNextIcon: Object as PropType<any>,
-    value: Object as PropType<any>,
-    use12Hours: { type: Boolean as PropType<boolean>, default: undefined },
-  },
-  setup(props) {
+const TimePanel = defineComponent<SharedPanelProps<any>>(
+  <DateType extends object = any>(props: SharedPanelProps<DateType>) => {
     const panelContext = computed(() => {
       const [info] = useInfo(props as any, 'time')
       return info
@@ -58,4 +31,10 @@ export default defineComponent({
       )
     }
   },
-})
+  {
+    name: 'TimePanel',
+    inheritAttrs: false,
+  },
+)
+
+export default TimePanel

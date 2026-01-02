@@ -1,4 +1,3 @@
-import type { PropType } from 'vue'
 import { clsx } from '@v-c/util'
 import { computed, defineComponent } from 'vue'
 import { isSameOrAfter } from '../utils/dateUtil'
@@ -8,16 +7,19 @@ const HIDDEN_STYLE: any = {
   visibility: 'hidden',
 }
 
-export default defineComponent({
-  name: 'PanelHeader',
-  props: {
-    offset: { type: Function as PropType<(distance: number, date: any) => any> },
-    superOffset: { type: Function as PropType<(distance: number, date: any) => any> },
-    onChange: { type: Function as PropType<(date: any) => void> },
-    getStart: { type: Function as PropType<(date: any) => any> },
-    getEnd: { type: Function as PropType<(date: any) => any> },
-  },
-  setup(props, { slots }) {
+export interface PanelHeaderProps<DateType extends object = any> {
+  offset?: (distance: number, date: DateType) => DateType
+  superOffset?: (distance: number, date: DateType) => DateType
+  onChange?: (date: DateType) => void
+  getStart?: (date: DateType) => DateType
+  getEnd?: (date: DateType) => DateType
+}
+
+const PanelHeader = defineComponent<PanelHeaderProps<any>>(
+  <DateType extends object = any>(
+    props: PanelHeaderProps<DateType>,
+    { slots },
+  ) => {
     const context = usePanelContext()!
     const pickerHackContext = usePickerHackContext()
 
@@ -180,4 +182,9 @@ export default defineComponent({
       )
     }
   },
-})
+  {
+    name: 'PanelHeader',
+  },
+)
+
+export default PanelHeader

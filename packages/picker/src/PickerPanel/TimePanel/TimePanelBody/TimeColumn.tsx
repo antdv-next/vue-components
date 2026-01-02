@@ -1,4 +1,3 @@
-import type { PropType } from 'vue'
 import { clsx } from '@v-c/util'
 import { defineComponent, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { usePanelContext } from '../../context'
@@ -16,19 +15,19 @@ function flattenUnits(units: Unit<string | number>[]) {
   return units.map(({ value, label, disabled }) => [value, label, disabled].join(',')).join(';')
 }
 
-export default defineComponent({
-  name: 'TimeColumn',
-  props: {
-    units: { type: Array as PropType<Unit[]>, required: true },
-    value: { type: [Number, String] },
-    optionalValue: { type: [Number, String] },
-    type: { type: String as PropType<'hour' | 'minute' | 'second' | 'millisecond' | 'meridiem'>, required: true },
-    onChange: { type: Function as PropType<(value: number | string) => void>, required: true },
-    onHover: { type: Function as PropType<(value: number | string) => void>, required: true },
-    onDblClick: { type: Function as PropType<() => void> },
-    changeOnScroll: { type: Boolean, default: undefined },
-  },
-  setup(props) {
+export interface TimeColumnProps {
+  units: Unit[]
+  value?: number | string
+  optionalValue?: number | string
+  type: 'hour' | 'minute' | 'second' | 'millisecond' | 'meridiem'
+  onChange: (value: number | string) => void
+  onHover: (value: number | string) => void
+  onDblClick?: VoidFunction
+  changeOnScroll?: boolean
+}
+
+const TimeColumn = defineComponent<TimeColumnProps>(
+  (props: TimeColumnProps) => {
     const context = usePanelContext()
     const ulRef = ref<HTMLUListElement>()
     const checkDelayRef = ref<any>()
@@ -146,4 +145,9 @@ export default defineComponent({
       )
     }
   },
-})
+  {
+    name: 'TimeColumn',
+  },
+)
+
+export default TimeColumn

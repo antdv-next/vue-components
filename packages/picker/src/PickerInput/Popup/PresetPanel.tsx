@@ -13,18 +13,8 @@ function executeValue<DateType extends object>(value: ValueDate<DateType>['value
 }
 
 const PresetPanel = defineComponent(<DateType extends object = any>(
-  rawProps: PresetPanelProps<DateType>,
-  { attrs }: { attrs: Record<string, any> },
+  props: PresetPanelProps<DateType>,
 ) => {
-  const props = new Proxy(rawProps as Record<string, any>, {
-    get(target, key) {
-      if (key in target) {
-        return target[key as keyof typeof target]
-      }
-      return (attrs as Record<string, any>)[key as string]
-    },
-  }) as PresetPanelProps<DateType>
-
   return () => {
     const { prefixCls, presets, onClick, onHover } = props
 
@@ -54,9 +44,9 @@ const PresetPanel = defineComponent(<DateType extends object = any>(
       </div>
     )
   }
+}, {
+  name: 'PresetPanel',
+  inheritAttrs: false,
 })
-
-PresetPanel.name = 'PresetPanel'
-PresetPanel.inheritAttrs = false
 
 export default PresetPanel

@@ -110,15 +110,8 @@ export interface PickerProps<DateType extends object = any>
 const SinglePicker = defineComponent(
   <DateType extends object = any>(
     props: PickerProps<DateType>,
-    { attrs, expose }: SetupContext,
+    { expose }: SetupContext,
   ) => {
-    const allProps = computed(() => {
-      return {
-        ...props,
-        ...attrs,
-      }
-    })
-
     // ========================= Prop =========================
     const [
       filledProps,
@@ -127,7 +120,7 @@ const SinglePicker = defineComponent(
       formatList,
       maskFormat,
       isInvalidateDate,
-    ] = useFilledProps(allProps as any)
+    ] = useFilledProps(computed(() => props) as any)
 
     // Destructure filledProps using toRefs to keep reactivity?
     // filledProps is a ComputedRef. We can access .value.
@@ -778,9 +771,10 @@ const SinglePicker = defineComponent(
       )
     }
   },
+  {
+    name: 'SinglePicker',
+    inheritAttrs: false,
+  },
 )
-
-SinglePicker.name = 'SinglePicker'
-SinglePicker.inheritAttrs = false
 
 export default SinglePicker
