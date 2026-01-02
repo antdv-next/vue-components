@@ -167,7 +167,7 @@ export default defineComponent({
     onPanelChange: Function,
     format: [String, Array, Function],
     inputReadOnly: { type: Boolean, default: undefined },
-    suffixIcon: Object,
+    suffixIcon: [Object, String] as PropType<VueNode>,
     separator: Object,
     removeIcon: Object,
     onFocus: Function,
@@ -190,7 +190,7 @@ export default defineComponent({
     style: Object,
     styles: Object,
     classNames: Object,
-    previewValue: String,
+    previewValue: [String, Boolean],
     order: { type: Boolean, default: undefined },
     needConfirm: { type: Boolean, default: undefined },
     allowClear: { type: [Boolean, Object], default: undefined },
@@ -261,7 +261,7 @@ export default defineComponent({
     const onFocus = computed(() => fp.value.onFocus)
     const onBlur = computed(() => fp.value.onBlur)
     const presets = computed(() => fp.value.presets)
-    const ranges = computed(() => fp.value.ranges)
+    const ranges = computed(() => fp.value?.ranges)
     const components = computed(() => fp.value.components)
     const cellRender = computed(() => fp.value.cellRender)
     const dateRender = computed(() => fp.value.dateRender)

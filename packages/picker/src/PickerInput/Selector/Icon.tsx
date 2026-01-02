@@ -9,13 +9,9 @@ export interface IconProps {
   type: 'suffix' | 'clear'
 }
 
-const Icon = defineComponent({
+const Icon = defineComponent<IconProps>({
   name: 'Icon',
   inheritAttrs: false,
-  props: {
-    icon: { type: [Object, String] as PropType<VueNode> },
-    type: { type: String as PropType<IconProps['type']>, required: true },
-  },
   setup(props, { attrs }) {
     const ctx = usePickerContext()
 

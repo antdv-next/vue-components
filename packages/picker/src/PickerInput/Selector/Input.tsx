@@ -1,6 +1,6 @@
 import type { PropType } from 'vue'
 import { clsx } from '@v-c/util'
-import { computed, defineComponent, onBeforeUnmount, ref, toRef, toRefs, watch } from 'vue'
+import { computed, defineComponent, onBeforeUnmount, ref, toRef, watch } from 'vue'
 import { leftPad } from '../../utils/miscUtil'
 import { usePickerContext } from '../context'
 import useLockEffect from '../hooks/useLockEffect'
@@ -23,7 +23,7 @@ export default defineComponent({
     validateFormat: { type: Function as PropType<(value: string) => boolean>, required: true },
     active: { type: Boolean, default: undefined },
     showActiveCls: { type: Boolean, default: true },
-    suffixIcon: [Object, String] as PropType<any>,
+    suffixIcon: [Object, String, Boolean] as PropType<any>,
     value: String,
     onChange: { type: Function as PropType<(value: string) => void>, required: true },
     onSubmit: { type: Function as PropType<() => void>, required: true },
@@ -31,7 +31,7 @@ export default defineComponent({
     onHelp: { type: Function as PropType<() => void>, required: true },
     preserveInvalidOnBlur: { type: Boolean, default: undefined },
     invalid: { type: Boolean, default: undefined },
-    clearIcon: [Object, String] as PropType<any>,
+    clearIcon: [Object, String, Boolean] as PropType<any>,
 
     // HTML Input props
     onFocus: Function as PropType<(e: FocusEvent) => void>,
@@ -44,11 +44,9 @@ export default defineComponent({
   setup(props, { attrs, expose }) {
     const pickerCtx = usePickerContext()
 
-    const {
-      prefixCls,
-      classNames,
-      styles,
-    } = toRefs(pickerCtx.value)
+    const prefixCls = computed(() => pickerCtx.value.prefixCls)
+    const classNames = computed(() => pickerCtx.value.classNames)
+    const styles = computed(() => pickerCtx.value.styles)
 
     const inputPrefixCls = computed(() => `${prefixCls.value}-input`)
 

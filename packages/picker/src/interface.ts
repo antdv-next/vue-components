@@ -493,7 +493,7 @@ export interface OpenConfig {
 }
 
 export type OnOpenChange = (open: boolean, config?: OpenConfig) => void
-export interface SelectorProps<DateType = any> extends SharedHTMLAttrs {
+export interface SelectorProps<DateType = any> extends Omit<SharedHTMLAttrs, 'onClick'> {
   picker: PickerMode
 
   prefix?: VueNode
@@ -517,7 +517,7 @@ export interface SelectorProps<DateType = any> extends SharedHTMLAttrs {
   direction?: 'ltr' | 'rtl'
 
   // Click
-  onClick: (e: MouseEvent) => void
+  onClick: ((e: MouseEvent) => void) | Array<(e: MouseEvent) => void>
 
   // Clear
   onClear: VoidFunction

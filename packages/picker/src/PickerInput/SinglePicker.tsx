@@ -183,7 +183,20 @@ export default defineComponent(
     const cellRender = computed(() => fp.value.cellRender)
     const dateRender = computed(() => fp.value.dateRender)
     const monthCellRender = computed(() => fp.value.monthCellRender)
-    const onClick = computed(() => fp.value.onClick)
+    const onClick = computed(() => {
+      const handler = fp.value.onClick as any
+      if (Array.isArray(handler)) {
+        return (event: MouseEvent) => {
+          handler.forEach((fn: any) => fn?.(event))
+        }
+      }
+      return handler
+    })
+    const autoFocus = computed(() => (fp.value as any).autoFocus ?? (fp.value as any).autofocus)
+    const tabIndex = computed(() => (fp.value as any).tabIndex ?? (fp.value as any).tabindex)
+    const onMouseDown = computed(
+      () => (fp.value as any).onMouseDown ?? (fp.value as any).onMousedown ?? (() => {}),
+    )
 
     // ========================= Refs =========================
     const selectorRef = usePickerRef(expose)
@@ -686,8 +699,16 @@ export default defineComponent(
         />
       )
 
-      const singleSelectorProps = {
-        ...fp.value,
+      const singleSelectorProps: Record<string, any> = {
+        ...omit(fp.value, [
+          'autoFocus',
+          'autofocus',
+          'tabIndex',
+          'tabindex',
+          'onClick',
+          'onMouseDown',
+          'onMousedown',
+        ]),
         class: clsx(
           fp.value.className,
           rootClassName.value,
@@ -708,7 +729,8 @@ export default defineComponent(
         maskFormat: maskFormat.value,
         onChange: onSelectorChange,
         onInputChange: onSelectorInputChange,
-        // internalPicker={internalPicker.value} // Not in props of SingleSelector? Check SingleSelector.tsx
+        internalPicker: internalPicker.value,
+        onMouseDown: onMouseDown.value,
         // Format
         format: formatList.value,
         inputReadOnly: inputReadOnly.value,
@@ -728,6 +750,17 @@ export default defineComponent(
           onSelectorInvalid(invalid, 0)
         },
       }
+      if (autoFocus.value !== undefined) {
+        singleSelectorProps.autoFocus = autoFocus.value
+      }
+      if (tabIndex.value !== undefined) {
+        singleSelectorProps.tabIndex = tabIndex.value
+      }
+      Object.keys(singleSelectorProps).forEach((key) => {
+        if (singleSelectorProps[key] === undefined) {
+          delete singleSelectorProps[key]
+        }
+      })
       return (
         <PickerTrigger
           {...pickTriggerProps(fp.value)}
@@ -804,7 +837,7 @@ export default defineComponent(
       onPanelChange: Function as PropType<PickerProps<any>['onPanelChange']>,
       format: [String, Array, Function] as PropType<PickerProps<any>['format']>,
       inputReadOnly: { type: Boolean as PropType<PickerProps<any>['inputReadOnly']>, default: undefined },
-      suffixIcon: Object as PropType<PickerProps<any>['suffixIcon']>,
+      suffixIcon: [Object, String] as PropType<PickerProps<any>['suffixIcon']>,
       removeIcon: Object as PropType<PickerProps<any>['removeIcon']>,
       onFocus: Function as PropType<PickerProps<any>['onFocus']>,
       onBlur: Function as PropType<PickerProps<any>['onBlur']>,
