@@ -17,8 +17,8 @@ export interface PanelHeaderProps<DateType extends object = any> {
 }
 
 const PanelHeader = defineComponent<PanelHeaderProps<any>>(
-  <DateType extends object = any>(
-    props: PanelHeaderProps<DateType>,
+  (
+    props,
     { slots }: SetupContext,
   ) => {
     const context = usePanelContext()!
@@ -34,7 +34,7 @@ const PanelHeader = defineComponent<PanelHeaderProps<any>>(
 
       const prevPanelLimitDate = getEnd(offset(-1, pickerValue))
 
-      return !isSameOrAfter(generateConfig, locale, prevPanelLimitDate, minDate, panelType)
+      return !isSameOrAfter(generateConfig!, locale!, prevPanelLimitDate, minDate, panelType)
     })
 
     const disabledSuperOffsetPrev = computed(() => {
@@ -47,7 +47,7 @@ const PanelHeader = defineComponent<PanelHeaderProps<any>>(
 
       const prevPanelLimitDate = getEnd(superOffset(-1, pickerValue))
 
-      return !isSameOrAfter(generateConfig, locale, prevPanelLimitDate, minDate, panelType)
+      return !isSameOrAfter(generateConfig!, locale!, prevPanelLimitDate, minDate, panelType)
     })
 
     const disabledOffsetNext = computed(() => {
@@ -60,7 +60,7 @@ const PanelHeader = defineComponent<PanelHeaderProps<any>>(
 
       const nextPanelLimitDate = getStart(offset(1, pickerValue))
 
-      return !isSameOrAfter(generateConfig, locale, maxDate, nextPanelLimitDate, panelType)
+      return !isSameOrAfter(generateConfig!, locale!, maxDate, nextPanelLimitDate, panelType)
     })
 
     const disabledSuperOffsetNext = computed(() => {
@@ -73,7 +73,7 @@ const PanelHeader = defineComponent<PanelHeaderProps<any>>(
 
       const nextPanelLimitDate = getStart(superOffset(1, pickerValue))
 
-      return !isSameOrAfter(generateConfig, locale, maxDate, nextPanelLimitDate, panelType)
+      return !isSameOrAfter(generateConfig!, locale!, maxDate, nextPanelLimitDate, panelType)
     })
 
     const onOffset = (distance: number) => {
@@ -123,7 +123,7 @@ const PanelHeader = defineComponent<PanelHeaderProps<any>>(
           {superOffset && (
             <button
               type="button"
-              aria-label={locale.previousYear}
+              aria-label={locale?.previousYear}
               onClick={() => onSuperOffset(-1)}
               tabindex={-1}
               class={clsx(
@@ -139,7 +139,7 @@ const PanelHeader = defineComponent<PanelHeaderProps<any>>(
           {offset && (
             <button
               type="button"
-              aria-label={locale.previousMonth}
+              aria-label={locale?.previousMonth}
               onClick={() => onOffset(-1)}
               tabindex={-1}
               class={clsx(prevBtnCls, disabledOffsetPrev.value && `${prevBtnCls}-disabled`)}
@@ -153,7 +153,7 @@ const PanelHeader = defineComponent<PanelHeaderProps<any>>(
           {offset && (
             <button
               type="button"
-              aria-label={locale.nextMonth}
+              aria-label={locale?.nextMonth}
               onClick={() => onOffset(1)}
               tabindex={-1}
               class={clsx(nextBtnCls, disabledOffsetNext.value && `${nextBtnCls}-disabled`)}
@@ -166,7 +166,7 @@ const PanelHeader = defineComponent<PanelHeaderProps<any>>(
           {superOffset && (
             <button
               type="button"
-              aria-label={locale.nextYear}
+              aria-label={locale?.nextYear}
               onClick={() => onSuperOffset(1)}
               tabindex={-1}
               class={clsx(

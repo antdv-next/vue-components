@@ -48,12 +48,12 @@ const DatePanel = defineComponent<DatePanelProps<any>>(
       const cellPrefixCls = `${prefixCls}-cell`
       const isWeek = mode === 'week'
 
-      const weekFirstDay = generateConfig.locale.getWeekFirstDay(locale.locale) ?? 0
-      const monthStartDate = generateConfig.setDate(pickerValue, 1)
-      const baseDate = getWeekStartDate(locale.locale, generateConfig, monthStartDate)
-      const month = generateConfig.getMonth(pickerValue)
-      const cellDateFormat = locale.cellDateFormat || locale.dayFormat || 'D'
-      const yearFormat = locale.yearFormat || 'YYYY'
+      const weekFirstDay = generateConfig?.locale?.getWeekFirstDay?.(locale!.locale!) ?? 0
+      const monthStartDate = generateConfig?.setDate(pickerValue, 1)
+      const baseDate = getWeekStartDate(locale!.locale, generateConfig as any, monthStartDate)
+      const month = generateConfig?.getMonth?.(pickerValue)
+      const cellDateFormat = locale?.cellDateFormat || locale?.dayFormat || 'D'
+      const yearFormat = locale?.yearFormat || 'YYYY'
 
       // =========================== PrefixColumn ===========================
       const showPrefixColumn = showWeek === undefined ? isWeek : showWeek
@@ -84,7 +84,7 @@ const DatePanel = defineComponent<DatePanelProps<any>>(
                 }}
               >
                 <div class={`${cellPrefixCls}-inner`}>
-                  {generateConfig.locale.getWeek(locale.locale, date)}
+                  {generateConfig?.locale.getWeek?.(locale!.locale, date)}
                 </div>
               </td>
             )
@@ -94,16 +94,16 @@ const DatePanel = defineComponent<DatePanelProps<any>>(
       // ========================= Cells ==========================
       const headerCells: any[] = []
       const weekDaysLocale: string[]
-        = locale.shortWeekDays
-          || (generateConfig.locale.getShortWeekDays
-            ? generateConfig.locale.getShortWeekDays(locale.locale)
+        = locale?.shortWeekDays
+          || (generateConfig?.locale?.getShortWeekDays
+            ? generateConfig.locale.getShortWeekDays(locale!.locale)
             : [])
 
       if (prefixColumn) {
         headerCells.push(
           <th key="empty">
             <span style={{ width: 0, height: 0, position: 'absolute', overflow: 'hidden', opacity: 0 }}>
-              {locale.week}
+              {locale!.week}
             </span>
           </th>,
         )
@@ -113,14 +113,14 @@ const DatePanel = defineComponent<DatePanelProps<any>>(
       }
 
       const getCellDate = (date: any, offset: number) => {
-        return generateConfig.addDate(date, offset)
+        return generateConfig?.addDate?.(date, offset)
       }
 
       const getCellText = (date: any) => {
         return formatValue(date, {
-          locale,
+          locale: locale!,
           format: cellDateFormat,
-          generateConfig,
+          generateConfig: generateConfig!,
         })
       }
 
@@ -128,22 +128,22 @@ const DatePanel = defineComponent<DatePanelProps<any>>(
         const nowVal = panelContext.value.now
 
         return {
-          [`${prefixCls}-cell-in-view`]: isSameMonth(generateConfig, date, pickerValue),
-          [`${prefixCls}-cell-today`]: isSameDate(generateConfig, date, nowVal),
+          [`${prefixCls}-cell-in-view`]: isSameMonth(generateConfig!, date, pickerValue),
+          [`${prefixCls}-cell-today`]: isSameDate(generateConfig!, date, nowVal),
         }
       }
 
       // ========================= Header =========================
       const monthsLocale: string[]
-        = locale.shortMonths
-          || (generateConfig.locale.getShortMonths
-            ? generateConfig.locale.getShortMonths(locale.locale)
+        = locale?.shortMonths
+          || (generateConfig?.locale?.getShortMonths
+            ? generateConfig.locale.getShortMonths?.(locale!.locale)
             : [])
 
       const yearNode = (
         <button
           type="button"
-          aria-label={locale.yearSelect}
+          aria-label={locale?.yearSelect}
           key="year"
           onClick={() => {
             onModeChange?.('year', pickerValue)
@@ -152,16 +152,16 @@ const DatePanel = defineComponent<DatePanelProps<any>>(
           class={`${prefixCls}-year-btn`}
         >
           {formatValue(pickerValue, {
-            locale,
+            locale: locale!,
             format: yearFormat,
-            generateConfig,
+            generateConfig: generateConfig!,
           })}
         </button>
       )
       const monthNode = (
         <button
           type="button"
-          aria-label={locale.monthSelect}
+          aria-label={locale?.monthSelect}
           key="month"
           onClick={() => {
             onModeChange?.('month', pickerValue)
@@ -169,29 +169,29 @@ const DatePanel = defineComponent<DatePanelProps<any>>(
           tabindex={-1}
           class={`${prefixCls}-month-btn`}
         >
-          {locale.monthFormat
+          {locale?.monthFormat
             ? formatValue(pickerValue, {
                 locale,
                 format: locale.monthFormat,
-                generateConfig,
+                generateConfig: generateConfig!,
               })
-            : monthsLocale[month]}
+            : monthsLocale[month!]}
         </button>
       )
 
-      const monthYearNodes = locale.monthBeforeYear ? [monthNode, yearNode] : [yearNode, monthNode]
+      const monthYearNodes = locale?.monthBeforeYear ? [monthNode, yearNode] : [yearNode, monthNode]
 
       return (
         <div class={clsx(panelPrefixCls, showWeek && `${panelPrefixCls}-show-week`)}>
           <PanelHeader
-            offset={(distance: number, date: any) => generateConfig.addMonth(date, distance)}
-            superOffset={(distance: number, date: any) => generateConfig.addYear(date, distance)}
+            offset={(distance: number, date: any) => generateConfig?.addMonth?.(date, distance)}
+            superOffset={(distance: number, date: any) => generateConfig?.addYear?.(date, distance)}
             onChange={onPickerValueChange}
-            getStart={(date: any) => generateConfig.setDate(date, 1)}
+            getStart={(date: any) => generateConfig?.setDate?.(date, 1)}
             getEnd={(date: any) => {
-              let clone = generateConfig.setDate(date, 1)
-              clone = generateConfig.addMonth(clone, 1)
-              return generateConfig.addDate(clone, -1)
+              let clone = generateConfig?.setDate?.(date, 1)
+              clone = generateConfig?.addMonth(clone!, 1)
+              return generateConfig?.addDate(clone!, -1)
             }}
           >
             {monthYearNodes}
@@ -199,7 +199,7 @@ const DatePanel = defineComponent<DatePanelProps<any>>(
 
           <PanelBody
             {...props}
-            titleFormat={locale.fieldDateFormat}
+            titleFormat={locale?.fieldDateFormat}
             colNum={WEEK_DAY_COUNT}
             rowNum={6}
             baseDate={baseDate}

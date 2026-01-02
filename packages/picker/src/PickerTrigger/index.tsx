@@ -56,42 +56,45 @@ export interface PickerTriggerProps {
   onClose?: () => void
 }
 
-const PickerTrigger = defineComponent<PickerTriggerProps>((props, { slots }) => {
-  const ctx = usePickerContext()
-  const dropdownPrefixCls = computed(() => `${ctx.value.prefixCls}-dropdown`)
+const PickerTrigger = defineComponent<PickerTriggerProps>(
+  (props, { slots }) => {
+    const ctx = usePickerContext()
+    const dropdownPrefixCls = computed(() => `${ctx.value.prefixCls}-dropdown`)
 
-  const realPlacement = computed(() => getRealPlacement(props.placement, props.direction === 'rtl'))
+    const realPlacement = computed(() => getRealPlacement(props.placement, props.direction === 'rtl'))
 
-  return () => (
-    <Trigger
-      showAction={[]}
-      hideAction={['click']}
-      popupPlacement={realPlacement.value}
-      builtinPlacements={props.builtinPlacements || BUILT_IN_PLACEMENTS}
-      prefixCls={dropdownPrefixCls.value}
-      popupMotion={props.transitionName ? ({ motionName: props.transitionName } as any) : undefined}
-      popup={props.popupElement}
-      popupAlign={props.popupAlign}
-      popupVisible={props.visible}
-      popupClassName={clsx(props.popupClassName, {
-        [`${dropdownPrefixCls.value}-range`]: props.range,
-        [`${dropdownPrefixCls.value}-rtl`]: props.direction === 'rtl',
-      })}
-      popupStyle={props.popupStyle}
-      stretch="minWidth"
-      getPopupContainer={props.getPopupContainer}
-      onPopupVisibleChange={(nextVisible: boolean) => {
-        if (!nextVisible) {
-          props.onClose?.()
-        }
-      }}
-    >
-      {slots.default?.()}
-    </Trigger>
-  )
-}, {
-  name: 'PickerTrigger',
-  inheritAttrs: false,
-})
+    return () => (
+      <Trigger
+        showAction={[]}
+        hideAction={['click']}
+        popupPlacement={realPlacement.value}
+        builtinPlacements={props.builtinPlacements || BUILT_IN_PLACEMENTS}
+        prefixCls={dropdownPrefixCls.value}
+        popupMotion={props.transitionName ? ({ motionName: props.transitionName } as any) : undefined}
+        popup={props.popupElement}
+        popupAlign={props.popupAlign}
+        popupVisible={props.visible}
+        popupClassName={clsx(props.popupClassName, {
+          [`${dropdownPrefixCls.value}-range`]: props.range,
+          [`${dropdownPrefixCls.value}-rtl`]: props.direction === 'rtl',
+        })}
+        popupStyle={props.popupStyle}
+        stretch="minWidth"
+        getPopupContainer={props.getPopupContainer}
+        onPopupVisibleChange={(nextVisible: boolean) => {
+          if (!nextVisible) {
+            props.onClose?.()
+          }
+        }}
+      >
+        {slots.default?.()}
+      </Trigger>
+    )
+  },
+  {
+    name: 'PickerTrigger',
+    inheritAttrs: false,
+  },
+)
 
 export default PickerTrigger

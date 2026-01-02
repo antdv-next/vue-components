@@ -6,12 +6,12 @@ import { fillTime } from '../../utils/dateUtil'
 import DatePanel from '../DatePanel'
 import TimePanel from '../TimePanel'
 
-const DateTimePanel = defineComponent<SharedPanelProps<any>>(
-  <DateType extends object = any>(props: SharedPanelProps<DateType>) => {
-    const generateConfig = computed(() => props.generateConfig)
+const DateTimePanel = defineComponent<SharedPanelProps>(
+  (props) => {
+    const generateConfig = computed(() => props.generateConfig!)
     const showTime = computed(() => (typeof props.showTime === 'object' ? props.showTime : {}))
 
-    const [getValidTime] = useTimeInfo(generateConfig, showTime)
+    const [getValidTime] = useTimeInfo(generateConfig as any, showTime)
 
     return () => {
       const { prefixCls, generateConfig, onSelect, value, pickerValue, onHover } = props
@@ -19,9 +19,9 @@ const DateTimePanel = defineComponent<SharedPanelProps<any>>(
 
       const mergeTime = (date: any) => {
         if (value) {
-          return fillTime(generateConfig, date, value)
+          return fillTime(generateConfig as any, date, value)
         }
-        return fillTime(generateConfig, date, pickerValue)
+        return fillTime(generateConfig as any, date, pickerValue)
       }
 
       const onDateHover = (date: any) => {

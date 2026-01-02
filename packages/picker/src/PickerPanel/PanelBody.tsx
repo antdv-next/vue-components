@@ -1,4 +1,5 @@
 import type { VNode } from 'vue'
+import type { GenerateConfig } from '../generate'
 import type { DisabledDate } from '../interface'
 import { clsx } from '@v-c/util'
 import { defineComponent } from 'vue'
@@ -21,7 +22,7 @@ export interface PanelBodyProps<DateType = any> {
 }
 
 const PanelBody = defineComponent<PanelBodyProps<any>>(
-  <DateType extends object = any>(props: PanelBodyProps<DateType>) => {
+  (props) => {
     const context = usePanelContext()!
     const pickerHackContext = usePickerHackContext()
 
@@ -37,9 +38,9 @@ const PanelBody = defineComponent<PanelBodyProps<any>>(
         onHover,
         hoverValue,
         hoverRangeValue,
-        generateConfig,
+        generateConfig = {} as GenerateConfig<any>,
         values,
-        locale,
+        locale = {} as any,
         onSelect,
       } = context.value
 

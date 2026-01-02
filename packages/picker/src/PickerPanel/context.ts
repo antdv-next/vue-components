@@ -87,7 +87,7 @@ export function useInfo<DateType extends object = any>(
     superNextIcon,
   } = props
 
-  const now = generateConfig.getNow()
+  const now = generateConfig!.getNow()
 
   const info: PanelContextProps<DateType> = {
     now,

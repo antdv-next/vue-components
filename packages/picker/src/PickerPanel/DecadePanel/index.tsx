@@ -1,3 +1,4 @@
+import type { GenerateConfig } from '../../generate'
 import type { DisabledDate, SharedPanelProps } from '../../interface'
 import { computed, defineComponent } from 'vue'
 import { formatValue, isInRange, isSameDecade } from '../../utils/dateUtil'
@@ -5,8 +6,8 @@ import { providePanelContext, useInfo } from '../context'
 import PanelBody from '../PanelBody'
 import PanelHeader from '../PanelHeader'
 
-const DecadePanel = defineComponent<SharedPanelProps<any>>(
-  <DateType extends object = any>(props: SharedPanelProps<DateType>) => {
+const DecadePanel = defineComponent<SharedPanelProps>(
+  (props: SharedPanelProps) => {
     const panelContext = computed(() => {
       const [info] = useInfo(props as any, 'decade')
       return info
@@ -17,19 +18,19 @@ const DecadePanel = defineComponent<SharedPanelProps<any>>(
     return () => {
       const {
         prefixCls,
-        locale,
-        generateConfig,
+        locale = {} as any,
+        generateConfig = {} as GenerateConfig<any>,
         pickerValue,
         disabledDate,
         onPickerValueChange,
       } = props
       const panelPrefixCls = `${prefixCls}-decade-panel`
-      const cellYearFormat = locale.cellYearFormat || 'YYYY'
-      const yearFormat = locale.yearFormat || 'YYYY'
+      const cellYearFormat = locale?.cellYearFormat || 'YYYY'
+      const yearFormat = locale?.yearFormat || 'YYYY'
 
       const getStartYear = (date: any) => {
-        const startYear = Math.floor(generateConfig.getYear(date) / 100) * 100
-        return generateConfig.setYear(date, startYear)
+        const startYear = Math.floor(generateConfig!.getYear(date) / 100) * 100
+        return generateConfig!.setYear(date, startYear)
       }
       const getEndYear = (date: any) => {
         const startYear = getStartYear(date)

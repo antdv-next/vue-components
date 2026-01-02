@@ -7,7 +7,7 @@ import PanelHeader from '../PanelHeader'
 import TimePanelBody from './TimePanelBody'
 
 const TimePanel = defineComponent<SharedPanelProps<any>>(
-  <DateType extends object = any>(props: SharedPanelProps<DateType>) => {
+  (props) => {
     const panelContext = computed(() => {
       const [info] = useInfo(props as any, 'time')
       return info
@@ -20,13 +20,13 @@ const TimePanel = defineComponent<SharedPanelProps<any>>(
 
       const format = typeof showTime === 'object' && showTime.format
         ? showTime.format
-        : (locale.fieldTimeFormat || 'HH:mm:ss')
+        : (locale?.fieldTimeFormat || 'HH:mm:ss')
       const panelPrefixCls = `${prefixCls}-time-panel`
 
       return (
         <div class={clsx(panelPrefixCls)}>
           <PanelHeader>
-            {value ? formatValue(value, { locale, format, generateConfig }) : '\u00A0'}
+            {value ? formatValue(value, { locale: locale!, format, generateConfig: generateConfig! }) : '\u00A0'}
           </PanelHeader>
           <TimePanelBody {...(typeof showTime === 'object' ? showTime : {})} />
         </div>

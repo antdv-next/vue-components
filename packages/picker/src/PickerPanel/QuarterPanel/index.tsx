@@ -1,3 +1,4 @@
+import type { GenerateConfig } from '../../generate'
 import type { SharedPanelProps } from '../../interface'
 import { computed, defineComponent } from 'vue'
 import { formatValue } from '../../utils/dateUtil'
@@ -17,8 +18,8 @@ const QuarterPanel = defineComponent<SharedPanelProps<any>>(
     return () => {
       const {
         prefixCls,
-        locale,
-        generateConfig,
+        locale = {} as any,
+        generateConfig = {} as GenerateConfig<any>,
         pickerValue,
         onPickerValueChange,
         onModeChange,

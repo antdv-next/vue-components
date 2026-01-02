@@ -1,3 +1,4 @@
+import type { GenerateConfig } from '../../generate'
 import type { DisabledDate, SharedPanelProps } from '../../interface'
 import { computed, defineComponent } from 'vue'
 import { formatValue, isInRange, isSameYear } from '../../utils/dateUtil'
@@ -6,7 +7,7 @@ import PanelBody from '../PanelBody'
 import PanelHeader from '../PanelHeader'
 
 const YearPanel = defineComponent<SharedPanelProps<any>>(
-  <DateType extends object = any>(props: SharedPanelProps<DateType>) => {
+  (props) => {
     const panelContext = computed(() => {
       const [info] = useInfo(props, 'year')
       return info
@@ -17,8 +18,8 @@ const YearPanel = defineComponent<SharedPanelProps<any>>(
     return () => {
       const {
         prefixCls,
-        locale,
-        generateConfig,
+        locale = {} as any,
+        generateConfig = {} as GenerateConfig<any>,
         pickerValue,
         disabledDate,
         onPickerValueChange,

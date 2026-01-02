@@ -17,7 +17,7 @@ const TimePanelBody = defineComponent<SharedTimeProps<any>>(
     const pickerHackContext = usePickerHackContext()
 
     const value = computed(() => context.value.values?.[0] || null)
-    const generateConfig = computed(() => context.value.generateConfig)
+    const generateConfig = computed(() => context.value.generateConfig!)
 
     const [getValidTime, rowHourUnits, getMinuteUnits, getSecondUnits, getMillisecondUnits] = useTimeInfo(
       generateConfig,
@@ -91,11 +91,11 @@ const TimePanelBody = defineComponent<SharedTimeProps<any>>(
         const pmDate = generateConfig.value.setHour(base, 18)
 
         const formatMeridiem = (date: any, defaultLabel: string) => {
-          const { cellMeridiemFormat } = locale
+          const { cellMeridiemFormat } = locale ?? {} as any
           return cellMeridiemFormat
             ? formatValue(date, {
                 generateConfig: generateConfig.value,
-                locale,
+                locale: locale!,
                 format: cellMeridiemFormat,
               })
             : defaultLabel

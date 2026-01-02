@@ -1,3 +1,4 @@
+import type { GenerateConfig } from '../../generate'
 import type { SharedPanelProps } from '../../interface'
 import { clsx } from '@v-c/util'
 import { defineComponent } from 'vue'
@@ -5,9 +6,16 @@ import { isInRange, isSameWeek } from '../../utils/dateUtil'
 import DatePanel from '../DatePanel'
 
 const WeekPanel = defineComponent<SharedPanelProps<any>>(
-  <DateType extends object = any>(props: SharedPanelProps<DateType>) => {
+  (props) => {
     return () => {
-      const { prefixCls, generateConfig, locale, value, hoverValue, hoverRangeValue } = props
+      const {
+        prefixCls,
+        generateConfig = {} as GenerateConfig<any>,
+        locale = {} as any,
+        value,
+        hoverValue,
+        hoverRangeValue,
+      } = props
       const localeName = locale.locale
       const rowPrefixCls = `${prefixCls}-week-panel-row`
 
