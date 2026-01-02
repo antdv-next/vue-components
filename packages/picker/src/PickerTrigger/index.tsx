@@ -1,5 +1,5 @@
 import type { AlignType, BuildInPlacements } from '@v-c/trigger'
-import type { CSSProperties, PropType } from 'vue'
+import type { CSSProperties } from 'vue'
 import Trigger from '@v-c/trigger'
 import { clsx } from '@v-c/util'
 import { computed, defineComponent } from 'vue'
@@ -41,59 +41,61 @@ const BUILT_IN_PLACEMENTS = {
   },
 }
 
-export default defineComponent({
-  name: 'PickerTrigger',
-  inheritAttrs: false,
-  props: {
-    popupElement: { type: Object as PropType<any> },
-    popupStyle: { type: Object as PropType<CSSProperties> },
-    transitionName: { type: String },
-    getPopupContainer: { type: Function as PropType<(node: HTMLElement) => HTMLElement> },
-    popupAlign: { type: Object as PropType<AlignType> },
-    range: { type: Boolean, default: undefined },
+export interface PickerTriggerProps {
+  popupElement?: any
+  popupStyle?: CSSProperties
+  transitionName?: string
+  getPopupContainer?: (node: HTMLElement) => HTMLElement
+  popupAlign?: AlignType
+  range?: boolean
+  popupClassName?: string
+  placement?: string
+  builtinPlacements?: BuildInPlacements
+  direction?: 'ltr' | 'rtl'
+  visible?: boolean
+  onClose?: () => void
+}
 
-    // Placement
-    popupClassName: { type: String },
-    placement: { type: String },
-    builtinPlacements: { type: Object as PropType<BuildInPlacements> },
-    direction: { type: String as PropType<'ltr' | 'rtl'> },
+const PickerTrigger = defineComponent<PickerTriggerProps>((rawProps, { attrs, slots }) => {
+  const props = computed(() => ({
+    ...rawProps,
+    ...attrs,
+  }))
+  const ctx = usePickerContext()
+  const dropdownPrefixCls = computed(() => `${ctx.value.prefixCls}-dropdown`)
 
-    // Visible
-    visible: { type: Boolean, default: undefined },
-    onClose: { type: Function as PropType<() => void> },
-  },
-  setup(props, { slots }) {
-    const ctx = usePickerContext()
-    const dropdownPrefixCls = computed(() => `${ctx.value.prefixCls}-dropdown`)
+  const realPlacement = computed(() => getRealPlacement(props.value.placement, props.value.direction === 'rtl'))
 
-    const realPlacement = computed(() => getRealPlacement(props.placement, props.direction === 'rtl'))
-
-    return () => (
-      <Trigger
-        showAction={[]}
-        hideAction={['click']}
-        popupPlacement={realPlacement.value}
-        builtinPlacements={props.builtinPlacements || BUILT_IN_PLACEMENTS}
-        prefixCls={dropdownPrefixCls.value}
-        popupMotion={{ motionName: props.transitionName }}
-        popup={props.popupElement}
-        popupAlign={props.popupAlign}
-        popupVisible={props.visible}
-        popupClassName={clsx(props.popupClassName, {
-          [`${dropdownPrefixCls.value}-range`]: props.range,
-          [`${dropdownPrefixCls.value}-rtl`]: props.direction === 'rtl',
-        })}
-        popupStyle={props.popupStyle}
-        stretch="minWidth"
-        getPopupContainer={props.getPopupContainer}
-        onPopupVisibleChange={(nextVisible: boolean) => {
-          if (!nextVisible) {
-            props.onClose?.()
-          }
-        }}
-      >
-        {slots.default?.()}
-      </Trigger>
-    )
-  },
+  return () => (
+    <Trigger
+      showAction={[]}
+      hideAction={['click']}
+      popupPlacement={realPlacement.value}
+      builtinPlacements={props.value.builtinPlacements || BUILT_IN_PLACEMENTS}
+      prefixCls={dropdownPrefixCls.value}
+      popupMotion={{ motionName: props.value.transitionName }}
+      popup={props.value.popupElement}
+      popupAlign={props.value.popupAlign}
+      popupVisible={props.value.visible}
+      popupClassName={clsx(props.value.popupClassName, {
+        [`${dropdownPrefixCls.value}-range`]: props.value.range,
+        [`${dropdownPrefixCls.value}-rtl`]: props.value.direction === 'rtl',
+      })}
+      popupStyle={props.value.popupStyle}
+      stretch="minWidth"
+      getPopupContainer={props.value.getPopupContainer}
+      onPopupVisibleChange={(nextVisible: boolean) => {
+        if (!nextVisible) {
+          props.value.onClose?.()
+        }
+      }}
+    >
+      {slots.default?.()}
+    </Trigger>
+  )
 })
+
+PickerTrigger.name = 'PickerTrigger'
+PickerTrigger.inheritAttrs = false
+
+export default PickerTrigger

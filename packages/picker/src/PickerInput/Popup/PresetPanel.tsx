@@ -1,4 +1,3 @@
-import type { PropType } from 'vue'
 import type { ValueDate } from '../../interface'
 import { defineComponent } from 'vue'
 
@@ -13,7 +12,19 @@ function executeValue<DateType extends object>(value: ValueDate<DateType>['value
   return typeof value === 'function' ? value() : value
 }
 
-export default defineComponent(<DateType extends object = any>(props: PresetPanelProps<DateType>) => {
+const PresetPanel = defineComponent(<DateType extends object = any>(
+  rawProps: PresetPanelProps<DateType>,
+  { attrs }: { attrs: Record<string, any> },
+) => {
+  const props = new Proxy(rawProps as Record<string, any>, {
+    get(target, key) {
+      if (key in target) {
+        return target[key as keyof typeof target]
+      }
+      return (attrs as Record<string, any>)[key as string]
+    },
+  }) as PresetPanelProps<DateType>
+
   return () => {
     const { prefixCls, presets, onClick, onHover } = props
 
@@ -43,13 +54,9 @@ export default defineComponent(<DateType extends object = any>(props: PresetPane
       </div>
     )
   }
-}, {
-  name: 'PresetPanel',
-  inheritAttrs: false,
-  props: {
-    prefixCls: { type: String as PropType<PresetPanelProps['prefixCls']>, required: true },
-    presets: { type: Array as PropType<PresetPanelProps['presets']>, required: true },
-    onClick: { type: Function as PropType<PresetPanelProps['onClick']>, required: true },
-    onHover: { type: Function as PropType<PresetPanelProps['onHover']>, required: true },
-  },
 })
+
+PresetPanel.name = 'PresetPanel'
+PresetPanel.inheritAttrs = false
+
+export default PresetPanel

@@ -1,9 +1,9 @@
-import type { PropType, SetupContext } from 'vue'
+import type { SetupContext } from 'vue'
 import type { PanelMode } from '../../interface'
 import type { PickerPanelProps } from '../../PickerPanel'
 import type { PickerHackContextProps } from '../../PickerPanel/context'
 import type { FooterProps } from './Footer'
-import { computed, defineComponent, toRef, toRefs } from 'vue'
+import { computed, defineComponent } from 'vue'
 import PickerPanel from '../../PickerPanel'
 import { providePickerHackContext } from '../../PickerPanel/context'
 import { usePickerContext } from '../context'
@@ -26,37 +26,50 @@ export interface PopupPanelProps<DateType extends object = any>
 }
 
 // provider components
-const PickerPanelProvider = defineComponent({
-  name: 'PickerPanelProvider',
-  props: {
-    value: {
-      type: Object as PropType<PickerHackContextProps>,
-      required: true,
-    },
-  },
-  setup(props, { slots }) {
-    providePickerHackContext(toRef(props, 'value'))
+const PickerPanelProvider = defineComponent<{ value: PickerHackContextProps }>(
+  (rawProps, { attrs, slots }) => {
+    const props = new Proxy(rawProps as Record<string, any>, {
+      get(target, key) {
+        if (key in target) {
+          return target[key as keyof typeof target]
+        }
+        return (attrs as Record<string, any>)[key as string]
+      },
+    }) as { value: PickerHackContextProps }
+
+    providePickerHackContext(computed(() => props.value) as any)
     return () => {
       return (
         slots.default?.() || null
       )
     }
   },
-})
+)
 
-export default defineComponent(<DateType extends object = any>(props: PopupPanelProps<DateType>, { attrs }: SetupContext) => {
+PickerPanelProvider.name = 'PickerPanelProvider'
+
+const PopupPanel = defineComponent(<DateType extends object = any>(
+  rawProps: PopupPanelProps<DateType>,
+  { attrs }: SetupContext,
+) => {
+  const props = new Proxy(rawProps as Record<string, any>, {
+    get(target, key) {
+      if (key in target) {
+        return target[key as keyof typeof target]
+      }
+      return (attrs as Record<string, any>)[key as string]
+    },
+  }) as PopupPanelProps<DateType>
   const ctx = usePickerContext()
 
-  const {
-    picker,
-    pickerValue,
-    needConfirm,
-    onSubmit,
-    range,
-    hoverValue,
-    multiplePanel,
-    onPickerValueChange,
-  } = toRefs(props)
+  const picker = computed(() => props.picker)
+  const pickerValue = computed(() => props.pickerValue)
+  const needConfirm = computed(() => props.needConfirm)
+  const onSubmit = computed(() => props.onSubmit)
+  const range = computed(() => props.range)
+  const hoverValue = computed(() => props.hoverValue)
+  const multiplePanel = computed(() => props.multiplePanel)
+  const onPickerValueChange = computed(() => props.onPickerValueChange)
 
   // ======================== Offset ========================
   const internalOffsetDate = (date: DateType, offset: number) => {
@@ -145,98 +158,9 @@ export default defineComponent(<DateType extends object = any>(props: PopupPanel
       </PickerPanelProvider>
     )
   }
-}, {
-  name: 'PopupPanel',
-  inheritAttrs: false,
-  props: {
-    // Panel control
-    mode: { type: String as PropType<PopupPanelProps['mode']>, required: true },
-    onPanelChange: { type: Function as PropType<PopupPanelProps['onPanelChange']>, required: true },
-    value: { type: Object as PropType<PopupPanelProps['value']> },
-
-    picker: { type: String as PropType<PopupPanelProps['picker']> },
-    direction: { type: String as PropType<PopupPanelProps['direction']> },
-    defaultPickerValue: { type: Object as PropType<PopupPanelProps['defaultPickerValue']> },
-    pickerValue: { type: Object as PropType<PopupPanelProps['pickerValue']> },
-
-    // Value change
-    onSelect: { type: Function as PropType<PopupPanelProps['onSelect']> },
-    onChange: { type: Function as PropType<PopupPanelProps['onChange']> },
-
-    // Render
-    cellRender: { type: Function as PropType<PopupPanelProps['cellRender']> },
-    dateRender: { type: Function as PropType<PopupPanelProps['dateRender']> },
-    monthCellRender: { type: Function as PropType<PopupPanelProps['monthCellRender']> },
-
-    // Hover
-    hoverValue: { type: Array as PropType<PopupPanelProps['hoverValue']> },
-    hoverRangeValue: { type: Array as PropType<any> },
-    onHover: { type: Function as PropType<PopupPanelProps['onHover']> },
-
-    // Week
-    showWeek: { type: Boolean as PropType<PopupPanelProps['showWeek']>, default: undefined },
-
-    // Components & icons
-    components: { type: Object as PropType<PopupPanelProps['components']> },
-    prevIcon: { type: [Object, String] as PropType<PopupPanelProps['prevIcon']> },
-    nextIcon: { type: [Object, String] as PropType<PopupPanelProps['nextIcon']> },
-    superPrevIcon: { type: [Object, String] as PropType<PopupPanelProps['superPrevIcon']> },
-    superNextIcon: { type: [Object, String] as PropType<PopupPanelProps['superNextIcon']> },
-
-    // Limitation
-    disabledDate: { type: Function as PropType<PopupPanelProps['disabledDate']> },
-    minDate: { type: Object as PropType<PopupPanelProps['minDate']> },
-    maxDate: { type: Object as PropType<PopupPanelProps['maxDate']> },
-
-    // Time related (from SharedTimeProps)
-    format: { type: String as PropType<PopupPanelProps['format']> },
-    showHour: { type: Boolean as PropType<PopupPanelProps['showHour']>, default: undefined },
-    showMinute: { type: Boolean as PropType<PopupPanelProps['showMinute']>, default: undefined },
-    showSecond: { type: Boolean as PropType<PopupPanelProps['showSecond']>, default: undefined },
-    showMillisecond: { type: Boolean as PropType<PopupPanelProps['showMillisecond']>, default: undefined },
-    use12Hours: { type: Boolean as PropType<PopupPanelProps['use12Hours']>, default: undefined },
-    hourStep: { type: Number as PropType<PopupPanelProps['hourStep']> },
-    minuteStep: { type: Number as PropType<PopupPanelProps['minuteStep']> },
-    secondStep: { type: Number as PropType<PopupPanelProps['secondStep']> },
-    millisecondStep: { type: Number as PropType<PopupPanelProps['millisecondStep']> },
-    hideDisabledOptions: { type: Boolean as PropType<PopupPanelProps['hideDisabledOptions']>, default: undefined },
-    defaultValue: { type: Object as PropType<PopupPanelProps['defaultValue']> },
-    defaultOpenValue: { type: Object as PropType<PopupPanelProps['defaultOpenValue']> },
-    disabledHours: { type: Function as PropType<PopupPanelProps['disabledHours']> },
-    disabledMinutes: { type: Function as PropType<PopupPanelProps['disabledMinutes']> },
-    disabledSeconds: { type: Function as PropType<PopupPanelProps['disabledSeconds']> },
-    disabledTime: { type: Function as PropType<PopupPanelProps['disabledTime']> },
-    changeOnScroll: { type: Boolean as PropType<PopupPanelProps['changeOnScroll']>, default: undefined },
-
-    // Attrs
-    tabindex: { type: Number as PropType<PopupPanelProps['tabindex']> },
-
-    // Footer props
-    internalMode: { type: String as PropType<PopupPanelProps['internalMode']>, required: true },
-    renderExtraFooter: { type: Function as PropType<PopupPanelProps['renderExtraFooter']> },
-    showNow: { type: Boolean as PropType<PopupPanelProps['showNow']>, required: true },
-    needConfirm: { type: Boolean as PropType<PopupPanelProps['needConfirm']>, required: true },
-    invalid: { type: Boolean as PropType<PopupPanelProps['invalid']>, default: undefined },
-    onSubmit: { type: Function as PropType<PopupPanelProps['onSubmit']>, required: true },
-    onNow: { type: Function as PropType<PopupPanelProps['onNow']>, required: true },
-    showTime: { type: Object as PropType<PopupPanelProps['showTime']> },
-
-    // Context
-    locale: { type: Object as PropType<PopupPanelProps['locale']>, required: true },
-    generateConfig: { type: Object as PropType<PopupPanelProps['generateConfig']>, required: true },
-
-    // Multiple panel control
-    multiplePanel: { type: Boolean as PropType<PopupPanelProps['multiplePanel']>, default: undefined },
-    range: { type: Boolean as PropType<PopupPanelProps['range']>, default: undefined },
-
-    // Picker value change (handled by PopupPanel)
-    onPickerValueChange: { type: Function as PropType<PopupPanelProps['onPickerValueChange']>, required: true },
-
-    // Styling pass-through
-    styles: { type: Object as PropType<PopupPanelProps['styles']> },
-    classNames: { type: Object as PropType<PopupPanelProps['classNames']> },
-
-    // Internal
-    hideHeader: { type: Boolean as PropType<PopupPanelProps['hideHeader']>, default: undefined },
-  },
 })
+
+PopupPanel.name = 'PopupPanel'
+PopupPanel.inheritAttrs = false
+
+export default PopupPanel

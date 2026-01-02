@@ -1,5 +1,5 @@
 import type { VueNode } from '@v-c/util/dist/type'
-import type { CSSProperties, PropType } from 'vue'
+import type { CSSProperties } from 'vue'
 import { clsx } from '@v-c/util'
 import { defineComponent } from 'vue'
 import { usePickerContext } from '../context'
@@ -9,14 +9,19 @@ export interface IconProps {
   type: 'suffix' | 'clear'
 }
 
-const Icon = defineComponent<IconProps>({
-  name: 'Icon',
-  inheritAttrs: false,
-  setup(props, { attrs }) {
-    const ctx = usePickerContext()
+const Icon = defineComponent<IconProps>((rawProps, { attrs }) => {
+  const props = new Proxy(rawProps as Record<string, any>, {
+    get(target, key) {
+      if (key in target) {
+        return target[key as keyof typeof target]
+      }
+      return (attrs as Record<string, any>)[key as string]
+    },
+  }) as IconProps
+  const ctx = usePickerContext()
 
-    return () => {
-      const { icon, type } = props
+  return () => {
+    const { icon, type } = props
 
       if (!icon) {
         return null
@@ -30,18 +35,20 @@ const Icon = defineComponent<IconProps>({
           ? attrStyle as CSSProperties
           : {}
 
-      return (
-        <span
-          {...restAttrs}
-          class={clsx(`${prefixCls}-${type}`, classNames.suffix, attrClass)}
-          style={{ ...(styles.suffix || {}), ...mergedAttrStyle }}
-        >
-          {icon}
-        </span>
-      )
-    }
-  },
+    return (
+      <span
+        {...restAttrs}
+        class={clsx(`${prefixCls}-${type}`, classNames.suffix, attrClass)}
+        style={{ ...(styles.suffix || {}), ...mergedAttrStyle }}
+      >
+        {icon}
+      </span>
+    )
+  }
 })
+
+Icon.name = 'Icon'
+Icon.inheritAttrs = false
 
 export default Icon
 
@@ -49,30 +56,34 @@ export interface ClearIconProps extends Omit<IconProps, 'type'> {
   onClear: VoidFunction
 }
 
-export const ClearIcon = defineComponent({
-  name: 'ClearIcon',
-  inheritAttrs: false,
-  props: {
-    icon: { type: [Object, String] as PropType<VueNode> },
-    onClear: { type: Function as PropType<VoidFunction>, required: true },
-  },
-  setup(props, { attrs }) {
-    return () => {
-      return (
-        <Icon
-          {...(attrs as any)}
-          icon={props.icon}
-          type="clear"
-          role="button"
-          onMousedown={(e: MouseEvent) => {
-            e.preventDefault()
-          }}
-          onClick={(e: MouseEvent) => {
-            e.stopPropagation()
-            props.onClear()
-          }}
-        />
-      )
-    }
-  },
+export const ClearIcon = defineComponent<ClearIconProps>((rawProps, { attrs }) => {
+  const props = new Proxy(rawProps as Record<string, any>, {
+    get(target, key) {
+      if (key in target) {
+        return target[key as keyof typeof target]
+      }
+      return (attrs as Record<string, any>)[key as string]
+    },
+  }) as ClearIconProps
+
+  return () => {
+    return (
+      <Icon
+        {...(attrs as any)}
+        icon={props.icon}
+        type="clear"
+        role="button"
+        onMousedown={(e: MouseEvent) => {
+          e.preventDefault()
+        }}
+        onClick={(e: MouseEvent) => {
+          e.stopPropagation()
+          props.onClear()
+        }}
+      />
+    )
+  }
 })
+
+ClearIcon.name = 'ClearIcon'
+ClearIcon.inheritAttrs = false

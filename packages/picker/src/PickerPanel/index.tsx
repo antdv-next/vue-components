@@ -1,5 +1,5 @@
 import type { VueNode } from '@v-c/util/dist/type'
-import type { CSSProperties, HTMLAttributes, PropType } from 'vue'
+import type { CSSProperties, HTMLAttributes } from 'vue'
 import type {
   CellRender,
   Components,
@@ -141,57 +141,24 @@ export type PickerPanelProps<DateType extends object = any> = BasePickerPanelPro
   classNames?: Partial<Record<PanelSemanticName, string>>
 }
 
-export default defineComponent({
-  name: 'PickerPanel',
-  inheritAttrs: false,
-  props: {
-    prefixCls: String,
-    locale: Object as PropType<Locale>,
-    generateConfig: { type: Object as PropType<any>, required: true },
-    direction: String as PropType<'ltr' | 'rtl'>,
-    onSelect: Function as PropType<(date: any) => void>,
-    defaultPickerValue: Object as PropType<any>,
-    pickerValue: Object as PropType<any>,
-    onPickerValueChange: Function as PropType<(date: any) => void>,
-    mode: String as PropType<PanelMode>,
-    onPanelChange: Function as PropType<OnPanelChange<any>>,
-    picker: { type: String as PropType<PickerMode>, default: 'date' },
-    showTime: { type: [Boolean, Object] as PropType<boolean | SharedTimeProps<any>>, default: undefined },
-    showWeek: { type: Boolean, default: undefined },
-    cellRender: Function as PropType<CellRender<any>>,
-    hoverValue: Array as PropType<any[]>,
-    hoverRangeValue: Array as PropType<any[]>,
-    onHover: Function as PropType<(date: any) => void>,
-    components: Object as PropType<Components>,
-    hideHeader: { type: Boolean, default: undefined },
-    multiple: { type: Boolean, default: undefined },
-    defaultValue: [Object, Array] as PropType<any | any[]>,
-    value: [Object, Array] as PropType<any | any[]>,
-    onChange: Function as PropType<(date: any | any[]) => void>,
-    styles: Object as PropType<Partial<Record<PanelSemanticName, any>>>,
-    classNames: Object as PropType<Partial<Record<PanelSemanticName, string>>>,
-    tabindex: { type: [Number, String], default: 0 },
-    // Deprecated props
-    dateRender: Function,
-    monthCellRender: Function,
-    minDate: Object as PropType<any>,
-    maxDate: Object as PropType<any>,
-    prevIcon: Object,
-    nextIcon: Object,
-    superPrevIcon: Object,
-    superNextIcon: Object,
-    disabledDate: Function as PropType<any>,
-  },
-  setup(props, { attrs }) {
-    const pickerContext = usePickerContext()
-    const rootRef = ref<HTMLDivElement>()
-
-    const allProps = computed(() => {
-      return {
-        ...props,
-        ...attrs,
+const PickerPanel = defineComponent<PickerPanelProps<any>>((rawProps, { attrs }) => {
+  const props = new Proxy(rawProps as Record<string, any>, {
+    get(target, key) {
+      if (key in target) {
+        return target[key as keyof typeof target]
       }
-    })
+      return (attrs as Record<string, any>)[key as string]
+    },
+  }) as PickerPanelProps<any>
+  const pickerContext = usePickerContext()
+  const rootRef = ref<HTMLDivElement>()
+
+  const allProps = computed(() => {
+    return {
+      ...props,
+      ...attrs,
+    }
+  })
     const mergedPrefixCls = computed(() => pickerContext.value.prefixCls || props.prefixCls || 'vc-picker')
 
     // Time
@@ -416,5 +383,10 @@ export default defineComponent({
         </div>
       )
     }
-  },
+  }
 })
+
+PickerPanel.name = 'PickerPanel'
+PickerPanel.inheritAttrs = false
+
+export default PickerPanel

@@ -1,5 +1,5 @@
 import type { VueNode } from '@v-c/util/dist/type'
-import type { ComputedRef, PropType } from 'vue'
+import type { ComputedRef, SetupContext } from 'vue'
 import type { BaseInfo, InternalMode, OpenConfig, PanelMode, RangeTimeProps, SelectorProps, SharedPickerProps, ValueDate } from '../interface'
 import type { PopupShowTimeConfig } from './Popup'
 import type { SelectorIdType } from './Selector/RangeSelector'
@@ -127,83 +127,11 @@ function getActiveRange(activeIndex: number) {
   return activeIndex === 1 ? 'end' : 'start'
 }
 
-export default defineComponent({
-  name: 'RangePicker',
-  inheritAttrs: false,
-  props: {
-    prefixCls: String,
-    id: [String, Object] as PropType<SelectorIdType>,
-    popupElement: Object,
-    popupStyle: Object,
-    transitionName: String,
-    getPopupContainer: Function,
-    popupAlign: Object,
-    range: { type: Boolean, default: undefined },
-    popupClassName: String,
-    placement: String,
-    builtinPlacements: Object,
-    direction: String,
-    visible: { type: Boolean, default: undefined },
-    onClose: Function,
-
-    // SharedPickerProps
-    locale: Object,
-    generateConfig: Object,
-    picker: String,
-    value: Array,
-    defaultValue: Array,
-    onChange: Function,
-    onCalendarChange: Function,
-    onOk: Function,
-    placeholder: [String, Array],
-    defaultPickerValue: [Object, Array],
-    pickerValue: [Object, Array],
-    onPickerValueChange: Function,
-    presets: Array,
-    ranges: Object,
-    disabled: { type: [Boolean, Array], default: undefined },
-    allowEmpty: { type: [Boolean, Array], default: undefined },
-    mode: Array,
-    onPanelChange: Function,
-    format: [String, Array, Function],
-    inputReadOnly: { type: Boolean, default: undefined },
-    suffixIcon: [Object, String] as PropType<VueNode>,
-    separator: Object,
-    removeIcon: Object,
-    onFocus: Function,
-    onBlur: Function,
-    onClick: Function,
-    components: Object,
-    cellRender: Function,
-    dateRender: Function,
-    monthCellRender: Function,
-    panelRender: Function,
-
-    // ... other props like showTime, etc.
-    showTime: { type: [Boolean, Object], default: undefined },
-    showNow: { type: Boolean, default: undefined },
-    showToday: { type: Boolean, default: undefined },
-    defaultOpen: { type: Boolean, default: undefined },
-    open: { type: Boolean, default: undefined },
-    onOpenChange: Function,
-    className: String,
-    style: Object,
-    styles: Object,
-    classNames: Object,
-    previewValue: [String, Boolean],
-    order: { type: Boolean, default: undefined },
-    needConfirm: { type: Boolean, default: undefined },
-    allowClear: { type: [Boolean, Object], default: undefined },
-    clearIcon: Object,
-    multiple: { type: Boolean, default: undefined },
-    maxTagCount: [Number, String],
-    disabledDate: Function,
-    minDate: Object,
-    maxDate: Object,
-    defaultOpenValue: Array,
-    inputRender: Function,
-  },
-  setup(props, { expose, attrs }) {
+const RangePicker = defineComponent(
+  <DateType extends object = any>(
+    props: RangePickerProps<DateType>,
+    { expose, attrs }: SetupContext,
+  ) => {
     const allProps = computed(() => {
       return {
         ...props,
@@ -878,4 +806,9 @@ export default defineComponent({
       )
     }
   },
-})
+)
+
+RangePicker.name = 'RangePicker'
+RangePicker.inheritAttrs = false
+
+export default RangePicker

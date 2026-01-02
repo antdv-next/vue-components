@@ -7,7 +7,7 @@ import type {
   SharedPickerProps,
 } from '../../interface'
 import { clsx } from '@v-c/util'
-import { computed, defineComponent, toRefs } from 'vue'
+import { computed, defineComponent } from 'vue'
 import useTimeInfo from '../../hooks/useTimeInfo'
 import { usePickerContext } from '../context'
 
@@ -53,23 +53,26 @@ export interface FooterProps<DateType extends object = any> {
   onNow: (now: DateType) => void
 }
 
-export default defineComponent<FooterProps>({
-  name: 'Footer',
-  inheritAttrs: false,
-  setup(props) {
-    const {
-      mode,
-      internalMode,
-      renderExtraFooter,
-      showNow,
-      showTime,
-      onSubmit,
-      onNow,
-      invalid,
-      needConfirm,
-      generateConfig,
-      disabledDate,
-    } = toRefs(props)
+const Footer = defineComponent<FooterProps>((rawProps, { attrs }) => {
+  const props = new Proxy(rawProps as Record<string, any>, {
+    get(target, key) {
+      if (key in target) {
+        return target[key as keyof typeof target]
+      }
+      return (attrs as Record<string, any>)[key as string]
+    },
+  }) as FooterProps
+  const mode = computed(() => props.mode)
+  const internalMode = computed(() => props.internalMode)
+  const renderExtraFooter = computed(() => props.renderExtraFooter)
+  const showNow = computed(() => props.showNow)
+  const showTime = computed(() => props.showTime)
+  const onSubmit = computed(() => props.onSubmit)
+  const onNow = computed(() => props.onNow)
+  const invalid = computed(() => props.invalid)
+  const needConfirm = computed(() => props.needConfirm)
+  const generateConfig = computed(() => props.generateConfig)
+  const disabledDate = computed(() => props.disabledDate)
 
     const pickerCtx = usePickerContext()
 
@@ -152,5 +155,10 @@ export default defineComponent<FooterProps>({
         </div>
       )
     }
-  },
+  }
 })
+
+Footer.name = 'Footer'
+Footer.inheritAttrs = false
+
+export default Footer

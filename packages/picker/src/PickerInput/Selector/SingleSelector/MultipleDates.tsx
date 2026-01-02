@@ -1,5 +1,4 @@
 import type { VueNode } from '@v-c/util/dist/type'
-import type { PropType } from 'vue'
 import Overflow from '@v-c/overflow'
 import { clsx } from '@v-c/util'
 import { defineComponent } from 'vue'
@@ -15,30 +14,27 @@ export interface MultipleDatesProps<DateType extends object = any> {
   maxTagCount?: number | 'responsive'
 }
 
-export default defineComponent({
-  name: 'MultipleDates',
-  props: {
-    prefixCls: { type: String, required: true },
-    value: { type: Array as PropType<any[]>, required: true },
-    onRemove: { type: Function as PropType<(value: any) => void>, required: true },
-    removeIcon: { type: [Object, String] as PropType<VueNode> },
-    formatDate: { type: Function as PropType<(date: any) => string>, required: true },
-    disabled: { type: Boolean, default: false },
-    placeholder: { type: [Object, String] as PropType<VueNode> },
-    maxTagCount: { type: [Number, String] as PropType<number | 'responsive'> },
-  },
-  setup(props) {
-    return () => {
-      const {
-        prefixCls,
-        value,
-        onRemove,
-        removeIcon = '×',
-        formatDate,
-        disabled,
-        maxTagCount,
-        placeholder,
-      } = props
+const MultipleDates = defineComponent<MultipleDatesProps>((rawProps, { attrs }) => {
+  const props = new Proxy(rawProps as Record<string, any>, {
+    get(target, key) {
+      if (key in target) {
+        return target[key as keyof typeof target]
+      }
+      return (attrs as Record<string, any>)[key as string]
+    },
+  }) as MultipleDatesProps
+
+  return () => {
+    const {
+      prefixCls,
+      value,
+      onRemove,
+      removeIcon = '×',
+      formatDate,
+      disabled,
+      maxTagCount,
+      placeholder,
+    } = props
 
       const selectorCls = `${prefixCls}-selector`
       const selectionCls = `${prefixCls}-selection`
@@ -102,6 +98,9 @@ export default defineComponent({
           {!value.length && <span class={`${prefixCls}-selection-placeholder`}>{placeholder}</span>}
         </div>
       )
-    }
-  },
+  }
 })
+
+MultipleDates.name = 'MultipleDates'
+
+export default MultipleDates

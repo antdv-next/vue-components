@@ -41,9 +41,13 @@ export interface SingleSelectorProps<DateType extends object = any> extends Sele
   tabIndex?: number | string
 }
 
-export default defineComponent(
-  (props: SingleSelectorProps, { attrs, expose }: SetupContext) => {
-    const rtl = computed(() => props.direction === 'rtl')
+const SingleSelector = defineComponent(
+  (rawProps: SingleSelectorProps, { attrs, expose }: SetupContext) => {
+    const props = computed(() => ({
+      ...rawProps,
+      ...attrs,
+    }))
+    const rtl = computed(() => props.value.direction === 'rtl')
 
     // ======================== Prefix ========================
     const ctx = usePickerContext()
@@ -67,35 +71,35 @@ export default defineComponent(
 
     // ======================== Props =========================
     // Filter props for root
-    const rootProps = useRootProps(attrs as any)
+    const rootProps = useRootProps(props.value as any)
 
     // ======================== Change ========================
     const onSingleChange = (date: any) => {
-      props.onChange?.([date])
+      props.value.onChange?.([date])
     }
 
     const onMultipleRemove = (date: any) => {
-      const nextValues = (props.value || []).filter(
+      const nextValues = (props.value.value || []).filter(
         oriDate =>
           oriDate
           && !isSame(
-            props.generateConfig!,
-            props.locale!,
+          props.value.generateConfig!,
+          props.value.locale!,
             oriDate,
             date,
-            props.internalPicker as InternalMode,
+          props.value.internalPicker as InternalMode,
           ),
       )
-      props.onChange?.(nextValues)
+      props.value.onChange?.(nextValues)
 
       // When `open`, it means user is operating the
-      if (!props.open) {
-        props.onSubmit?.()
+      if (!props.value.open) {
+        props.value.onSubmit?.()
       }
     }
     const allProps = computed(() => {
       return {
-        ...props,
+        ...props.value,
         ...attrs,
       }
     })
@@ -109,7 +113,7 @@ export default defineComponent(
       })) as any,
       ({ valueTexts }) => ({
         value: valueTexts[0] || '',
-        active: props.focused,
+        active: props.value.focused,
       }),
     )
 
@@ -131,7 +135,7 @@ export default defineComponent(
         invalid,
         autoFocus,
         tabIndex,
-      } = props
+    } = props.value
 
       const showClear = !!(clearIcon && value && value.length && !disabled)
 
@@ -181,7 +185,7 @@ export default defineComponent(
             prefixCls.value,
             {
               [`${prefixCls.value}-multiple`]: multiple,
-              [`${prefixCls.value}-focused`]: props.focused,
+            [`${prefixCls.value}-focused`]: props.value.focused,
               [`${prefixCls.value}-disabled`]: disabled,
               [`${prefixCls.value}-invalid`]: invalid,
               [`${prefixCls.value}-rtl`]: rtl.value,
@@ -214,8 +218,9 @@ export default defineComponent(
       )
     }
   },
-  {
-    name: 'SingleSelector',
-    inheritAttrs: false,
-  },
 )
+
+SingleSelector.name = 'SingleSelector'
+SingleSelector.inheritAttrs = false
+
+export default SingleSelector

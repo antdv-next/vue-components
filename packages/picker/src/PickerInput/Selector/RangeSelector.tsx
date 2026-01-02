@@ -1,5 +1,5 @@
 import type { VueNode } from '@v-c/util/dist/type'
-import type { PropType } from 'vue'
+import type { SetupContext } from 'vue'
 import type { SelectorProps } from '../../interface'
 import type { InputRef } from './Input'
 import ResizeObserver from '@v-c/resize-observer'
@@ -34,67 +34,25 @@ export interface RangeSelectorProps<DateType = any> extends SelectorProps<DateTy
   ) => void
 }
 
-export default defineComponent({
-  name: 'RangeSelector',
-  inheritAttrs: false,
-  props: {
-    // SelectorProps
-    picker: { type: String as PropType<any> },
-    prefix: { type: [Object, String] as PropType<VueNode> },
-    clearIcon: { type: [Object, String] as PropType<VueNode> },
-    suffixIcon: { type: [Object, String] as PropType<VueNode> },
-    focused: { type: Boolean, default: undefined },
-    onFocus: { type: Function as PropType<(e: FocusEvent) => void> },
-    onBlur: { type: Function as PropType<(e: FocusEvent) => void> },
-    onSubmit: { type: Function as PropType<() => void> },
-    onKeyDown: { type: Function as PropType<(e: KeyboardEvent) => void> },
-    locale: { type: Object as PropType<any> },
-    generateConfig: { type: Object as PropType<any> },
-    direction: { type: String as PropType<'ltr' | 'rtl'> },
-    onClick: { type: Function as PropType<(e: MouseEvent) => void> },
-    onClear: { type: Function as PropType<() => void> },
-    format: { type: Array as PropType<any[]> },
-    maskFormat: { type: String },
-    onInputChange: { type: Function as PropType<() => void> },
-    onInvalid: { type: Function as PropType<(valid: boolean, index?: number) => void> },
-    preserveInvalidOnBlur: { type: Boolean, default: undefined },
-    onOpenChange: { type: Function as PropType<(open: boolean) => void> },
-    inputReadOnly: { type: Boolean, default: undefined },
-    activeHelp: { type: Boolean, default: undefined },
-    open: { type: Boolean, default: undefined },
-
-    // RangeSelectorProps
-    id: { type: [String, Object] as PropType<SelectorIdType> },
-    activeIndex: { type: Number as PropType<number | null> },
-    separator: { type: [Object, String] as PropType<VueNode>, default: '~' },
-    value: { type: Array as PropType<any[]> },
-    onChange: { type: Function as PropType<(date: any, index?: number) => void> },
-    disabled: { type: Array as PropType<any[]> },
-    allHelp: { type: Boolean, default: undefined },
-    placeholder: { type: [String, Array] as PropType<string | [string, string]> },
-    invalid: { type: Array as PropType<any[]> },
-    placement: { type: String },
-    onActiveInfo: { type: Function as PropType<(info: any) => void> },
-
-    // HTML Props
-    autoFocus: { type: Boolean, default: undefined },
-    tabindex: Number,
-  },
-  setup(props, { attrs, expose }) {
+const RangeSelector = defineComponent(
+  <DateType extends object = any>(
+    rawProps: RangeSelectorProps<DateType>,
+    { attrs, expose }: SetupContext,
+  ) => {
     const {
       prefixCls,
       classNames,
       styles,
     } = usePickerContext().value
 
-    const rtl = computed(() => props.direction === 'rtl')
+    const rtl = computed(() => props.value.direction === 'rtl')
 
     // ========================== Id ==========================
     const ids = computed(() => {
-      if (typeof props.id === 'string') {
-        return [props.id]
+      if (typeof props.value.id === 'string') {
+        return [props.value.id]
       }
-      const mergedId = props.id || {}
+      const mergedId = props.value.id || {}
       return [mergedId.start, mergedId.end]
     })
 
@@ -122,24 +80,29 @@ export default defineComponent({
       },
     })
 
+    const props = computed(() => ({
+      ...rawProps,
+      ...attrs,
+    }))
+
     // ======================== Props =========================
     // We need to pass rest props to root div, but props in setup contains declared props.
     // attrs contains non-declared props.
     // useRootProps extracts events like onMouseEnter etc.
     // In Vue, attrs includes event listeners if not declared in emits/props.
-    const rootProps = useRootProps(attrs as any)
+    const rootProps = useRootProps(props.value as any)
 
     // ===================== Placeholder ======================
     const mergedPlaceholder = computed(() =>
-      Array.isArray(props.placeholder)
-        ? props.placeholder
-        : [props.placeholder, props.placeholder],
+      Array.isArray(props.value.placeholder)
+        ? props.value.placeholder
+        : [props.value.placeholder, props.value.placeholder],
     )
 
     // ======================== Inputs ========================
     const inputPropsArgs = computed(() => {
       return {
-        ...props,
+        ...props.value,
         ...attrs,
         id: ids.value,
         placeholder: mergedPlaceholder.value,
@@ -155,7 +118,7 @@ export default defineComponent({
     })
 
     const syncActiveOffset = () => {
-      const input = getInput(props.activeIndex!)
+      const input = getInput(props.value.activeIndex!)
       if (input && rootRef.value && input.nativeElement) {
         // Input component exposes nativeElement
         const inputRect = input.nativeElement.getBoundingClientRect()
@@ -167,21 +130,21 @@ export default defineComponent({
           width: `${inputRect.width}px`,
           left: `${rectOffset}px`,
         }
-        props.onActiveInfo?.([inputRect.left, inputRect.right, parentRect.width])
+        props.value.onActiveInfo?.([inputRect.left, inputRect.right, parentRect.width])
       }
     }
 
-    watch(() => props.activeIndex, syncActiveOffset, { flush: 'post' })
+    watch(() => props.value.activeIndex, syncActiveOffset, { flush: 'post' })
 
     // ======================== Clear =========================
     const showClear = computed(() =>
-      props.clearIcon
-      && ((props.value?.[0] && !props.disabled?.[0]) || (props.value?.[1] && !props.disabled?.[1])),
+      props.value.clearIcon
+      && ((props.value.value?.[0] && !props.value.disabled?.[0]) || (props.value.value?.[1] && !props.value.disabled?.[1])),
     )
 
     // ======================= Disabled =======================
-    const startAutoFocus = computed(() => props.autoFocus && !props.disabled?.[0])
-    const endAutoFocus = computed(() => props.autoFocus && !startAutoFocus.value && !props.disabled?.[1])
+    const startAutoFocus = computed(() => props.value.autoFocus && !props.value.disabled?.[0])
+    const endAutoFocus = computed(() => props.value.autoFocus && !startAutoFocus.value && !props.value.disabled?.[1])
 
     return () => {
       const {
@@ -194,12 +157,12 @@ export default defineComponent({
         onClick,
         onClear,
         tabindex,
-      } = props
+      } = props.value
 
       const rootDivProps = {
         ...rootProps.value,
         class: clsx(prefixCls, `${prefixCls}-range`, {
-          [`${prefixCls}-focused`]: props.focused,
+          [`${prefixCls}-focused`]: props.value.focused,
           [`${prefixCls}-disabled`]: disabled?.every(i => i),
           [`${prefixCls}-invalid`]: invalid?.some(i => i),
           [`${prefixCls}-rtl`]: rtl.value,
@@ -263,4 +226,9 @@ export default defineComponent({
       )
     }
   },
-})
+)
+
+RangeSelector.name = 'RangeSelector'
+RangeSelector.inheritAttrs = false
+
+export default RangeSelector

@@ -1,4 +1,3 @@
-import type { PropType } from 'vue'
 import type {
   BaseInfo,
   PanelMode,
@@ -7,6 +6,7 @@ import type {
   SharedTimeProps,
   ValueDate,
 } from '../interface'
+import type { SetupContext } from 'vue'
 import { clsx } from '@v-c/util'
 import omit from '@v-c/util/dist/omit'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
@@ -107,16 +107,10 @@ export interface PickerProps<DateType extends object = any>
   use12Hours?: boolean
 }
 
-export default defineComponent(
+const SinglePicker = defineComponent(
   <DateType extends object = any>(
     props: PickerProps<DateType>,
-    {
-      attrs,
-      expose,
-    }: {
-      attrs: Record<string, any>
-      expose: (props: Record<string, any>) => void
-    },
+    { attrs, expose }: SetupContext,
   ) => {
     const allProps = computed(() => {
       return {
@@ -784,109 +778,9 @@ export default defineComponent(
       )
     }
   },
-  {
-    name: 'SinglePicker',
-
-    inheritAttrs: false,
-    props: {
-      // ... all props from PickerProps
-      // Need to list them explicitly for Vue props
-      prefixCls: String as PropType<PickerProps<any>['prefixCls']>,
-      id: String as PropType<PickerProps<any>['id']>,
-      popupElement: Object,
-      popupStyle: Object,
-      transitionName: String as PropType<PickerProps<any>['transitionName']>,
-      getPopupContainer: Function as PropType<
-        PickerProps<any>['getPopupContainer']
-      >,
-      popupAlign: Object as PropType<PickerProps<any>['popupAlign']>,
-      range: { type: Boolean, default: undefined },
-      popupClassName: String,
-      placement: String as PropType<PickerProps<any>['placement']>,
-      builtinPlacements: Object as PropType<
-        PickerProps<any>['builtinPlacements']
-      >,
-      direction: String as PropType<PickerProps<any>['direction']>,
-      visible: { type: Boolean, default: undefined },
-      onClose: Function,
-
-      // SharedPickerProps
-      locale: Object as PropType<PickerProps<any>['locale']>,
-      generateConfig: Object as PropType<PickerProps<any>['generateConfig']>,
-      picker: String as PropType<PickerProps<any>['picker']>,
-      value: [Object, Array] as PropType<PickerProps<any>['value']>,
-      defaultValue: [Object, Array] as PropType<
-        PickerProps<any>['defaultValue']
-      >,
-      onChange: Function as PropType<PickerProps<any>['onChange']>,
-      onCalendarChange: Function as PropType<
-        PickerProps<any>['onCalendarChange']
-      >,
-      onOk: Function as PropType<PickerProps<any>['onOk']>,
-      placeholder: String as PropType<PickerProps<any>['placeholder']>,
-      defaultPickerValue: Object as PropType<
-        PickerProps<any>['defaultPickerValue']
-      >,
-      pickerValue: Object as PropType<PickerProps<any>['pickerValue']>,
-      onPickerValueChange: Function as PropType<
-        PickerProps<any>['onPickerValueChange']
-      >,
-      presets: Array as PropType<PickerProps<any>['presets']>,
-      disabled: { type: Boolean as PropType<PickerProps<any>['disabled']>, default: undefined },
-      mode: String as PropType<PickerProps<any>['mode']>,
-      onPanelChange: Function as PropType<PickerProps<any>['onPanelChange']>,
-      format: [String, Array, Function] as PropType<PickerProps<any>['format']>,
-      inputReadOnly: { type: Boolean as PropType<PickerProps<any>['inputReadOnly']>, default: undefined },
-      suffixIcon: [Object, String] as PropType<PickerProps<any>['suffixIcon']>,
-      removeIcon: Object as PropType<PickerProps<any>['removeIcon']>,
-      onFocus: Function as PropType<PickerProps<any>['onFocus']>,
-      onBlur: Function as PropType<PickerProps<any>['onBlur']>,
-      onClick: Function as PropType<PickerProps<any>['onClick']>,
-      components: Object as PropType<PickerProps<any>['components']>,
-      cellRender: Function as PropType<PickerProps<any>['cellRender']>,
-      dateRender: Function as PropType<PickerProps<any>['dateRender']>,
-      monthCellRender: Function as PropType<
-        PickerProps<any>['monthCellRender']
-      >,
-      panelRender: Function as PropType<PickerProps<any>['panelRender']>,
-      use12Hours: { type: Boolean, default: undefined },
-
-      // ... other props like showTime, etc.
-      showTime: { type: [Boolean, Object], default: undefined },
-      showNow: {
-        type: Boolean,
-        default: undefined,
-      },
-      showToday: {
-        type: Boolean,
-        default: undefined,
-      },
-      defaultOpen: {
-        type: Boolean,
-        default: undefined,
-      },
-      open: { type: Boolean, default: undefined },
-      onOpenChange: Function as PropType<PickerProps<any>['onOpenChange']>,
-      className: String,
-      style: Object,
-      styles: Object,
-      classNames: Object as PropType<PickerProps<any>['classNames']>,
-      previewValue: String as PropType<PickerProps<any>['previewValue']>,
-      order: { type: Boolean as PropType<PickerProps<any>['order']>, default: undefined },
-      needConfirm: { type: Boolean as PropType<PickerProps<any>['needConfirm']>, default: undefined },
-      allowClear: { type: [Boolean, Object] as PropType<PickerProps<any>['allowClear']>, default: undefined },
-      clearIcon: Object as PropType<PickerProps<any>['clearIcon']>,
-      multiple: { type: Boolean as PropType<PickerProps<any>['multiple']>, default: undefined },
-      maxTagCount: [Number, String] as PropType<
-        PickerProps<any>['maxTagCount']
-      >,
-      disabledDate: Function as PropType<PickerProps<any>['disabledDate']>,
-      minDate: Object as PropType<PickerProps<any>['minDate']>,
-      maxDate: Object as PropType<PickerProps<any>['maxDate']>,
-      defaultOpenValue: Object as PropType<
-        PickerProps<any>['defaultOpenValue']
-      >,
-      inputRender: Function as PropType<PickerProps<any>['inputRender']>,
-    },
-  },
 )
+
+SinglePicker.name = 'SinglePicker'
+SinglePicker.inheritAttrs = false
+
+export default SinglePicker

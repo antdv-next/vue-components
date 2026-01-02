@@ -1,4 +1,5 @@
-import type { PropType } from 'vue'
+import type { ComputedRef } from 'vue'
+import type { InputProps } from './hooks/useInputHooks.ts'
 import { clsx } from '@v-c/util'
 import { computed, defineComponent, onBeforeUnmount, ref, toRef, watch } from 'vue'
 import { leftPad } from '../../utils/miscUtil'
@@ -15,33 +16,12 @@ export interface InputRef {
   blur: () => void
 }
 
-export default defineComponent({
-  name: 'Input',
-  inheritAttrs: false,
-  props: {
-    format: String,
-    validateFormat: { type: Function as PropType<(value: string) => boolean>, required: true },
-    active: { type: Boolean, default: undefined },
-    showActiveCls: { type: Boolean, default: true },
-    suffixIcon: [Object, String, Boolean] as PropType<any>,
-    value: String,
-    onChange: { type: Function as PropType<(value: string) => void>, required: true },
-    onSubmit: { type: Function as PropType<() => void>, required: true },
-    helped: { type: Boolean, default: undefined },
-    onHelp: { type: Function as PropType<() => void>, required: true },
-    preserveInvalidOnBlur: { type: Boolean, default: undefined },
-    invalid: { type: Boolean, default: undefined },
-    clearIcon: [Object, String, Boolean] as PropType<any>,
-
-    // HTML Input props
-    onFocus: Function as PropType<(e: FocusEvent) => void>,
-    onBlur: Function as PropType<(e: FocusEvent) => void>,
-    onMouseUp: Function as PropType<(e: MouseEvent) => void>,
-    onKeyDown: Function as PropType<(e: KeyboardEvent) => void>,
-    inputReadOnly: { type: Boolean, default: undefined },
-    autofocus: { type: Boolean, default: undefined },
-  },
-  setup(props, { attrs, expose }) {
+const Input = defineComponent<InputProps>(
+  (rawProps, { attrs, expose }) => {
+    const props = computed(() => ({
+      ...rawProps,
+      ...attrs,
+    })) as ComputedRef<InputProps>
     const pickerCtx = usePickerContext()
 
     const prefixCls = computed(() => pickerCtx.value.prefixCls)
@@ -52,7 +32,7 @@ export default defineComponent({
 
     // ======================== Value =========================
     const focused = ref(false)
-    const internalInputValue = ref(props.value)
+    const internalInputValue = ref(props.value.value)
     const focusCellText = ref('')
     const focusCellIndex = ref<number | null>(null)
     const forceSelectionSyncMark = ref<object | null>(null)
@@ -60,7 +40,7 @@ export default defineComponent({
     const inputValue = computed(() => internalInputValue.value || '')
 
     // Sync value if needed
-    watch(() => props.value, (val) => {
+    watch(() => props.value.value, (val) => {
       internalInputValue.value = val
     })
 
@@ -69,12 +49,8 @@ export default defineComponent({
     const inputRef = ref<HTMLInputElement>()
 
     expose({
-      get nativeElement() {
-        return holderRef.value
-      },
-      get inputElement() {
-        return inputRef.value
-      },
+      nativeElement: holderRef,
+      inputElement: inputRef,
       focus: (options?: FocusOptions) => {
         inputRef.value?.focus(options)
       },
@@ -84,10 +60,10 @@ export default defineComponent({
     })
 
     // ======================== Format ========================
-    const maskFormat = computed(() => new MaskFormat(props.format || ''))
+    const maskFormat = computed(() => new MaskFormat(props.value.format || ''))
 
     const selectionRange = computed(() => {
-      if (props.helped) {
+      if (props.value.helped) {
         return [0, 0]
       }
       return maskFormat.value.getSelection(focusCellIndex.value!)
@@ -99,8 +75,8 @@ export default defineComponent({
     // ======================== Modify ========================
     // When input modify content, trigger `onHelp` if is not the format
     const onModify = (text: string) => {
-      if (text && text !== props.format && text !== props.value) {
-        props.onHelp()
+      if (text && text !== props.value.format && text !== props.value.value) {
+        props.value.onHelp()
       }
     }
 
@@ -109,8 +85,8 @@ export default defineComponent({
      * Triggered by paste, keyDown and focus to show format
      */
     const triggerInputChange = (text: string) => {
-      if (props.validateFormat(text)) {
-        props.onChange(text)
+      if (props.value.validateFormat(text)) {
+        props.value.onChange(text)
       }
       internalInputValue.value = text
       onModify(text)
@@ -120,20 +96,20 @@ export default defineComponent({
     const onInternalChange = (event: Event) => {
       const target = event.target as HTMLInputElement
       // Hack `onChange` with format to do nothing
-      if (!props.format) {
+      if (!props.value.format) {
         const text = target.value
 
         onModify(text)
         internalInputValue.value = text
-        props.onChange(text)
+        props.value.onChange(text)
       }
     }
 
     const onFormatPaste = (event: ClipboardEvent) => {
-      // Get paste text
+    // Get paste text
       const pasteText = event.clipboardData?.getData('text') || ''
 
-      if (props.validateFormat(pasteText)) {
+      if (props.value.validateFormat(pasteText)) {
         triggerInputChange(pasteText)
       }
     }
@@ -156,7 +132,7 @@ export default defineComponent({
       // Force update the selection
       forceSelectionSyncMark.value = {}
 
-      props.onMouseUp?.(event)
+      props.value.onMouseUp?.(event)
 
       mouseDownRef.value = false
     }
@@ -167,11 +143,11 @@ export default defineComponent({
       focusCellIndex.value = 0
       focusCellText.value = ''
 
-      props.onFocus?.(event)
+      props.value.onFocus?.(event)
     }
 
     const onSharedBlur = (event: FocusEvent) => {
-      props.onBlur?.(event)
+      props.value.onBlur?.(event)
     }
 
     const onFormatBlur = (event: FocusEvent) => {
@@ -183,18 +159,18 @@ export default defineComponent({
     // ======================== Active ========================
     // Check if blur need reset input value
     useLockEffect(toRef(props, 'active'), () => {
-      if (!props.active && !props.preserveInvalidOnBlur) {
-        internalInputValue.value = props.value
+      if (!props.value.active && !props.value.preserveInvalidOnBlur) {
+        internalInputValue.value = props.value.value
       }
     })
 
     // ======================= Keyboard =======================
     const onSharedKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Enter' && props.validateFormat(inputValue.value)) {
-        props.onSubmit()
+      if (event.key === 'Enter' && props.value.validateFormat(inputValue.value)) {
+        props.value.onSubmit()
       }
 
-      props.onKeyDown?.(event)
+      props.value.onKeyDown?.(event)
     }
 
     const onFormatKeyDown = (event: KeyboardEvent) => {
@@ -209,7 +185,7 @@ export default defineComponent({
       let nextFillText: string | null = null
 
       const maskCellLen = selectionEnd.value - selectionStart.value
-      const cellFormat = props.format!.slice(selectionStart.value, selectionEnd.value)
+      const cellFormat = props.value.format!.slice(selectionStart.value, selectionEnd.value)
 
       // Cell Index
       const offsetCellIndex = (offset: number) => {
@@ -237,7 +213,7 @@ export default defineComponent({
       }
 
       switch (key) {
-        // =============== Remove ===============
+      // =============== Remove ===============
         case 'Backspace':
         case 'Delete':
           nextCellText = ''
@@ -283,7 +259,7 @@ export default defineComponent({
         focusCellText.value = nextCellText
 
         if (nextCellText.length >= maskCellLen) {
-          // Go to next cell
+        // Go to next cell
           offsetCellIndex(1)
           focusCellText.value = ''
         }
@@ -291,15 +267,15 @@ export default defineComponent({
 
       // Update the input text
       if (nextFillText !== null) {
-        // Replace selection range with `nextCellText`
+      // Replace selection range with `nextCellText`
         const nextFocusValue
-          // before
+        // before
           = inputValue.value.slice(0, selectionStart.value)
           // replace
             + leftPad(nextFillText, maskCellLen)
           // after
             + inputValue.value.slice(selectionEnd.value)
-        triggerInputChange(nextFocusValue.slice(0, props.format!.length))
+        triggerInputChange(nextFocusValue.slice(0, props.value.format!.length))
       }
 
       // Always trigger selection sync after key down
@@ -311,7 +287,7 @@ export default defineComponent({
 
     watch([
       maskFormat,
-      () => props.format,
+      () => props.value.format,
       focused,
       inputValue,
       focusCellIndex,
@@ -319,13 +295,13 @@ export default defineComponent({
       selectionEnd,
       forceSelectionSyncMark,
     ], () => {
-      if (!focused.value || !props.format || mouseDownRef.value) {
+      if (!focused.value || !props.value.format || mouseDownRef.value) {
         return
       }
 
       // Reset with format if not match
       if (!maskFormat.value.match(inputValue.value)) {
-        triggerInputChange(props.format)
+        triggerInputChange(props.value.format)
         return
       }
 
@@ -361,10 +337,10 @@ export default defineComponent({
         clearIcon, // unused in render
         // Pass to input
         ...restProps
-      } = props as any
+      } = props.value as any
 
       // Input props for format
-      const inputProps = props.format
+      const inputProps = props.value.format
         ? {
             onFocus: onFormatFocus,
             onBlur: onFormatBlur,
@@ -383,8 +359,8 @@ export default defineComponent({
           class={clsx(
             inputPrefixCls.value,
             {
-              [`${inputPrefixCls.value}-active`]: props.active && props.showActiveCls,
-              [`${inputPrefixCls.value}-placeholder`]: props.helped,
+              [`${inputPrefixCls.value}-active`]: props.value.active && props.value.showActiveCls,
+              [`${inputPrefixCls.value}-placeholder`]: props.value.helped,
             },
             attrs.class as string,
           )}
@@ -392,7 +368,7 @@ export default defineComponent({
         >
           <Component
             ref={inputRef}
-            aria-invalid={props.invalid}
+            aria-invalid={props.value.invalid}
             autoComplete="off"
             {...attrs}
             {...restProps}
@@ -405,12 +381,17 @@ export default defineComponent({
             onInput={onInternalChange}
             class={classNames.value.input}
             style={styles.value.input}
-            readonly={props.inputReadOnly}
+            readonly={props.value.inputReadOnly}
           />
-          <Icon type="suffix" icon={props.suffixIcon} />
-          {props.clearIcon}
+          <Icon type="suffix" icon={props.value.suffixIcon} />
+          {props.value.clearIcon}
         </div>
       )
     }
   },
-})
+)
+
+Input.name = 'Input'
+Input.inheritAttrs = false
+
+export default Input
