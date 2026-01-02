@@ -1,3 +1,4 @@
+import type { SetupContext } from 'vue'
 import { clsx } from '@v-c/util'
 import { computed, defineComponent } from 'vue'
 import { isSameOrAfter } from '../utils/dateUtil'
@@ -18,7 +19,7 @@ export interface PanelHeaderProps<DateType extends object = any> {
 const PanelHeader = defineComponent<PanelHeaderProps<any>>(
   <DateType extends object = any>(
     props: PanelHeaderProps<DateType>,
-    { slots },
+    { slots }: SetupContext,
   ) => {
     const context = usePanelContext()!
     const pickerHackContext = usePickerHackContext()

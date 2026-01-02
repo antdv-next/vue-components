@@ -28,18 +28,21 @@
  */
 
 import type { PickerRef, SharedTimeProps } from './interface'
-import RangePicker, { type RangePickerProps } from './PickerInput/RangePicker'
-import Picker, { type BasePickerProps, type PickerProps } from './PickerInput/SinglePicker'
-import PickerPanel, { type BasePickerPanelProps, type PickerPanelProps } from './PickerPanel'
+import type { RangePickerProps } from './PickerInput/RangePicker'
+import type { BasePickerProps, PickerProps } from './PickerInput/SinglePicker'
+import type { BasePickerPanelProps, PickerPanelProps } from './PickerPanel'
+import RangePicker from './PickerInput/RangePicker'
+import Picker from './PickerInput/SinglePicker'
+import PickerPanel from './PickerPanel'
 
 export { Picker, PickerPanel, RangePicker }
 export type {
-  RangePickerProps,
-  PickerProps,
-  PickerPanelProps,
-  PickerRef,
-  BasePickerProps,
   BasePickerPanelProps,
+  BasePickerProps,
+  PickerPanelProps,
+  PickerProps,
+  PickerRef,
+  RangePickerProps,
   SharedTimeProps,
 }
 export default Picker

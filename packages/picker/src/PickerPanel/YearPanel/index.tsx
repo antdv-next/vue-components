@@ -25,6 +25,8 @@ const YearPanel = defineComponent<SharedPanelProps<any>>(
         onModeChange,
       } = props
       const panelPrefixCls = `${prefixCls}-year-panel`
+      const cellYearFormat = locale.cellYearFormat || 'YYYY'
+      const yearFormat = locale.yearFormat || 'YYYY'
 
       const getStartYear = (date: any) => {
         const startYear = Math.floor(generateConfig.getYear(date) / 10) * 10
@@ -47,7 +49,7 @@ const YearPanel = defineComponent<SharedPanelProps<any>>(
       const getCellText = (date: any) => {
         return formatValue(date, {
           locale,
-          format: locale.cellYearFormat,
+          format: cellYearFormat,
           generateConfig,
         })
       }
@@ -84,13 +86,13 @@ const YearPanel = defineComponent<SharedPanelProps<any>>(
         >
           {formatValue(startYearDate, {
             locale,
-            format: locale.yearFormat,
+            format: yearFormat,
             generateConfig,
           })}
           -
           {formatValue(endYearDate, {
             locale,
-            format: locale.yearFormat,
+            format: yearFormat,
             generateConfig,
           })}
         </button>

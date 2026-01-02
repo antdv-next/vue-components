@@ -7,7 +7,7 @@ import type { RangeTimeProps, SharedPickerProps, SharedTimeProps, ValueDate } fr
 import type { FooterProps } from './Footer'
 import type { PopupPanelProps } from './PopupPanel'
 import ResizeObserver from '@v-c/resize-observer'
-import { clsx } from '@v-c/util'
+import { clsx, omit } from '@v-c/util'
 import { computed, defineComponent, onMounted, ref, watch } from 'vue'
 import { toArray } from '../../utils/miscUtil'
 import { usePickerContext } from '../context'
@@ -28,8 +28,8 @@ export type PopupProps<DateType extends object = any, PresetValue = DateType>
     & {
       panelRender?: SharedPickerProps['panelRender']
 
-      presets: ValueDate<DateType>[]
-      onPresetHover: (presetValue: PresetValue) => void
+      presets: ValueDate<PresetValue>[]
+      onPresetHover: (presetValue: PresetValue | null) => void
       onPresetSubmit: (presetValue: PresetValue) => void
 
       activeInfo?: [activeInputLeft: number, activeInputRight: number, selectorWidth: number]
@@ -48,8 +48,8 @@ export type PopupProps<DateType extends object = any, PresetValue = DateType>
     }
 
 //
-const Popup = defineComponent(<DateType extends object = any>(
-  props: PopupProps<DateType>,
+const Popup = defineComponent(<DateType extends object = any, PresetValue extends object = DateType>(
+  props: PopupProps<DateType, PresetValue>,
 ) => {
   const activeInfo = computed(() => props.activeInfo || [0, 0, 0])
 
@@ -171,7 +171,7 @@ const Popup = defineComponent(<DateType extends object = any>(
           {/* @ts-expect-error: FIXME */}
           <PopupPanel {...props} value={popupPanelValue.value} />
           <Footer
-            {...props}
+            {...omit(props, ['onSubmit'])}
             showNow={multiple ? false : showNow}
             invalid={disableSubmit.value}
             onSubmit={onFooterSubmit}

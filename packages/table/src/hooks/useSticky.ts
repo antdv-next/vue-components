@@ -1,7 +1,7 @@
 import type { Ref } from 'vue'
-import { computed, unref } from 'vue'
-import canUseDom from '@v-c/util/dist/Dom/canUseDom'
 import type { TableSticky } from '../interface'
+import canUseDom from '@v-c/util/dist/Dom/canUseDom'
+import { computed, unref } from 'vue'
 
 const defaultContainer = canUseDom() ? window : null
 

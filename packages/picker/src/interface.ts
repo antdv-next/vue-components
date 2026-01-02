@@ -218,8 +218,8 @@ export interface SharedPanelProps<DateType extends object = any> {
   prefixCls: string
 
   // Date Library
-  locale: Locale
-  generateConfig: GenerateConfig<DateType>
+  locale?: Locale
+  generateConfig?: GenerateConfig<DateType>
 
   // Value
   pickerValue: DateType
@@ -253,7 +253,7 @@ export interface SharedPanelProps<DateType extends object = any> {
   /** @private Only used for RangePicker passing. */
   hoverRangeValue: [start: DateType, end: DateType] | null
   /** @private Only used for SinglePicker passing. */
-  hoverValue: DateType[] | null
+  hoverValue?: DateType[] | null
   onHover?: (value: DateType | null) => void
 
   // Time

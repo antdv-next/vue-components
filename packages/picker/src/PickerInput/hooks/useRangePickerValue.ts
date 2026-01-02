@@ -63,10 +63,10 @@ export default function useRangePickerValue<DateType extends object, ValueType e
     return defaultPickerValue.value?.[index] || calendarValue.value?.[index] || now
   }
 
-  const [getStartPickerValue, setStartPickerValue, mergedStartPickerValue]
+  const [getStartPickerValue, setStartPickerValue]
     = useSyncState(getDefaultPickerValue(0), () => pickerValue.value?.[0])
 
-  const [getEndPickerValue, setEndPickerValue, mergedEndPickerValue]
+  const [getEndPickerValue, setEndPickerValue]
     = useSyncState(getDefaultPickerValue(1), () => pickerValue.value?.[1])
 
   const currentPickerValue = computed(() => {

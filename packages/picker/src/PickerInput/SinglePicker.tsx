@@ -1,3 +1,4 @@
+import type { SetupContext } from 'vue'
 import type {
   BaseInfo,
   PanelMode,
@@ -6,7 +7,6 @@ import type {
   SharedTimeProps,
   ValueDate,
 } from '../interface'
-import type { SetupContext } from 'vue'
 import { clsx } from '@v-c/util'
 import omit from '@v-c/util/dist/omit'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
@@ -120,7 +120,9 @@ const SinglePicker = defineComponent(
       formatList,
       maskFormat,
       isInvalidateDate,
-    ] = useFilledProps(computed(() => props) as any)
+    ] = useFilledProps<PickerProps<DateType>, DateType, object>(
+      computed(() => props) as any,
+    )
 
     // Destructure filledProps using toRefs to keep reactivity?
     // filledProps is a ComputedRef. We can access .value.
@@ -687,7 +689,7 @@ const SinglePicker = defineComponent(
       )
 
       const singleSelectorProps: Record<string, any> = {
-        ...omit(fp.value, [
+        ...omit(fp.value as any, [
           'autoFocus',
           'autofocus',
           'tabIndex',
@@ -695,7 +697,7 @@ const SinglePicker = defineComponent(
           'onClick',
           'onMouseDown',
           'onMousedown',
-        ]),
+        ] as any),
         class: clsx(
           fp.value.className,
           rootClassName.value,
@@ -750,7 +752,7 @@ const SinglePicker = defineComponent(
       })
       return (
         <PickerTrigger
-          {...pickTriggerProps(fp.value)}
+          {...pickTriggerProps(fp.value as any)}
           popupElement={panel}
           popupStyle={mergedStyles?.popup?.root}
           popupClassName={clsx(

@@ -16,36 +16,9 @@ import useInvalidate from './useInvalidate'
 type UseInvalidate<DateType extends object = any>
   = typeof useInvalidate<DateType>
 
-type PickedProps<DateType extends object = any> = Pick<
-  RangePickerProps<DateType>,
-  | 'generateConfig'
-  | 'locale'
-  | 'picker'
-  | 'prefixCls'
-  | 'styles'
-  | 'classNames'
-  | 'order'
-  | 'components'
-  | 'inputRender'
-  | 'clearIcon'
-  | 'allowClear'
-  | 'needConfirm'
-  | 'format'
-  | 'inputReadOnly'
-  | 'disabledDate'
-  | 'minDate'
-  | 'maxDate'
-  | 'defaultOpenValue'
-  | 'previewValue'
-> & {
-  multiple?: boolean
-  // RangePicker showTime definition is different with Picker
-  showTime?: any
-  value?: any
-  defaultValue?: any
-  pickerValue?: any
-  defaultPickerValue?: any
-}
+type PickedProps<DateType extends object = any>
+  = | RangePickerProps<DateType>
+    | PickerProps<DateType>
 
 type ExcludeBooleanType<T> = T extends boolean ? never : T
 
@@ -89,7 +62,7 @@ type FilledProps<
  * - handle the legacy props fill like `clearIcon` + `allowClear` = `clearIcon`
  */
 export default function useFilledProps<
-  InProps extends PickerProps,
+  InProps extends PickedProps,
   DateType extends GetGeneric<InProps>,
   UpdaterProps extends object,
 >(
@@ -136,7 +109,7 @@ export default function useFilledProps<
       internalPicker.value === 'time' || internalPicker.value === 'datetime',
   )
   const complexPicker = computed(
-    () => multipleInteractivePicker.value || props.value.multiple,
+    () => multipleInteractivePicker.value || (props.value as any).multiple,
   )
 
   const mergedNeedConfirm = computed(
@@ -148,7 +121,7 @@ export default function useFilledProps<
   // ========================== Time ==========================
   // Auto `format` need to check `showTime.showXXX` first.
   // And then merge the `locale` into `mergedShowTime`.
-  const timePropsInfo = computed(() => getTimeProps(props.value))
+  const timePropsInfo = computed(() => getTimeProps(props.value as any))
 
   // [timeProps, localeTimeProps, showTimeFormat, propFormat]
   const timeProps = computed(() => timePropsInfo.value[0])
@@ -225,7 +198,7 @@ export default function useFilledProps<
   const mergedInputReadOnly = useInputReadOnly(
     formatList,
     computed(() => props.value.inputReadOnly),
-    computed(() => props.value.multiple),
+    computed(() => (props.value as any).multiple),
   )
 
   // ======================= Boundary =======================

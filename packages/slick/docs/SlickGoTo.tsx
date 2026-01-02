@@ -29,7 +29,10 @@ export default defineComponent(() => {
 
   return () => (
     <div class="slider-container">
-      <p>Total updates: {updateCount.value}</p>
+      <p>
+        Total updates:
+        {updateCount.value}
+      </p>
       <input
         type="range"
         min={0}

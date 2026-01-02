@@ -128,7 +128,7 @@ const SingleSelector = defineComponent(
         invalid,
         autoFocus,
         tabIndex,
-    } = props
+      } = props
 
       const showClear = !!(clearIcon && value && value.length && !disabled)
 
@@ -163,7 +163,6 @@ const SingleSelector = defineComponent(
               ref={inputRef}
               {...getInputProps()}
               autofocus={autoFocus}
-              // @ts-expect-error: Native
               tabindex={tabIndex}
               suffixIcon={suffixIcon}
               clearIcon={showClear && <ClearIcon icon={clearIcon} onClear={onClear as any} />}

@@ -3,6 +3,7 @@ import type { CSSProperties, HTMLAttributes } from 'vue'
 import type {
   CellRender,
   Components,
+  InternalMode,
   Locale,
   OnPanelChange,
   PanelMode,
@@ -16,9 +17,9 @@ import { computed, defineComponent, ref, toRef, watch } from 'vue'
 import useLocale from '../hooks/useLocale'
 import { fillShowTimeConfig, getTimeProps } from '../hooks/useTimeConfig'
 import useToggleDates from '../hooks/useToggleDates'
+import defaultLocale from '../locale/en_US'
 import { usePickerContext } from '../PickerInput/context'
 import useCellRender from '../PickerInput/hooks/useCellRender'
-import defaultLocale from '../locale/en_US'
 import { isSame } from '../utils/dateUtil'
 import { pickProps, toArray } from '../utils/miscUtil'
 
@@ -165,7 +166,12 @@ const PickerPanel = defineComponent<PickerPanelProps<any>>((props, { attrs }) =>
 
   const filledLocale = useLocale(mergedLocale, localeTimeProps)
 
-  const internalPicker = computed(() => props.picker === 'date' && props.showTime ? 'datetime' : props.picker)
+  const internalPicker = computed<InternalMode>(() => {
+    if (props.picker === 'date' && props.showTime) {
+      return 'datetime'
+    }
+    return props.picker || 'date'
+  })
 
   const mergedShowTime = computed(() => fillShowTimeConfig(
     internalPicker.value,
@@ -269,7 +275,7 @@ const PickerPanel = defineComponent<PickerPanelProps<any>>((props, { attrs }) =>
         date: [...decadeYearMonthQueue, 'date'],
       }
 
-      const queue = pickerQueue[props.picker] || decadeYearMonthQueue
+      const queue = pickerQueue[props.picker || 'date'] || decadeYearMonthQueue
       const index = queue.indexOf(mergedMode.value)
       const nextMode = queue[index + 1]
 
@@ -356,7 +362,7 @@ const PickerPanel = defineComponent<PickerPanelProps<any>>((props, { attrs }) =>
           showTime={mergedShowTime.value}
           prefixCls={mergedPrefixCls.value}
           locale={filledLocale.value}
-            generateConfig={mergedGenerateConfig.value}
+          generateConfig={mergedGenerateConfig.value}
           onModeChange={triggerModeChange}
           pickerValue={mergedPickerValue.value}
           onPickerValueChange={(nextPickerValue: any) => {

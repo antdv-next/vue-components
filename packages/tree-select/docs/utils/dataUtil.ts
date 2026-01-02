@@ -1,5 +1,3 @@
-/* eslint-disable no-plusplus, no-mixed-operators, no-underscore-dangle */
-
 export interface DemoDataNode {
   label: string
   value: string
@@ -134,10 +132,10 @@ export function getFilterValue(_val: any, sVal: string[], delVal: string[]) {
   const allPos: string[] = []
   const delPos: string[] = []
   loopData(gData, (item, _index, pos) => {
-    if (sVal.indexOf(item.value) > -1) {
+    if (sVal.includes(item.value)) {
       allPos.push(pos)
     }
-    if (delVal.indexOf(item.value) > -1) {
+    if (delVal.includes(item.value)) {
       delPos.push(pos)
     }
   })
@@ -155,7 +153,7 @@ export function getFilterValue(_val: any, sVal: string[], delVal: string[]) {
   const newVal: string[] = []
   if (newPos.length) {
     loopData(gData, (item, _index, pos) => {
-      if (newPos.indexOf(pos) > -1) {
+      if (newPos.includes(pos)) {
         newVal.push(item.value)
       }
     })

@@ -36,7 +36,8 @@ export default defineComponent({
         <h2>big data generator</h2>
         <form onSubmit={onGen}>
           <span style={{ marginRight: '10px' }}>
-            x:{' '}
+            x:
+            {' '}
             <input
               type="number"
               min="1"
@@ -49,7 +50,8 @@ export default defineComponent({
             />
           </span>
           <span style={{ marginRight: '10px' }}>
-            y:{' '}
+            y:
+            {' '}
             <input
               type="number"
               min="1"
@@ -62,7 +64,8 @@ export default defineComponent({
             />
           </span>
           <span style={{ marginRight: '10px' }}>
-            z:{' '}
+            z:
+            {' '}
             <input
               type="number"
               min="1"
@@ -76,7 +79,9 @@ export default defineComponent({
           </span>
           <button type="submit">Generate</button>
           <p>
-            total nodes: {nums.value ?? calcTotal(x.value, y.value, z.value)}
+            total nodes:
+            {' '}
+            {nums.value ?? calcTotal(x.value, y.value, z.value)}
           </p>
         </form>
         <p style={{ fontSize: '12px' }}>
@@ -86,4 +91,3 @@ export default defineComponent({
     )
   },
 })
-

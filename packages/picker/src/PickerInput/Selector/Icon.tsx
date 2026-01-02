@@ -15,17 +15,17 @@ const Icon = defineComponent<IconProps>((props, { attrs }) => {
   return () => {
     const { icon, type } = props
 
-      if (!icon) {
-        return null
-      }
+    if (!icon) {
+      return null
+    }
 
-      const { prefixCls, classNames, styles } = ctx.value
+    const { prefixCls, classNames, styles } = ctx.value
 
-      const { class: attrClass, style: attrStyle, ...restAttrs } = attrs as any
-      const mergedAttrStyle
-        = attrStyle && typeof attrStyle === 'object'
-          ? attrStyle as CSSProperties
-          : {}
+    const { class: attrClass, style: attrStyle, ...restAttrs } = attrs as any
+    const mergedAttrStyle
+      = attrStyle && typeof attrStyle === 'object'
+        ? attrStyle as CSSProperties
+        : {}
 
     return (
       <span

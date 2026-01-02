@@ -24,6 +24,8 @@ const DecadePanel = defineComponent<SharedPanelProps<any>>(
         onPickerValueChange,
       } = props
       const panelPrefixCls = `${prefixCls}-decade-panel`
+      const cellYearFormat = locale.cellYearFormat || 'YYYY'
+      const yearFormat = locale.yearFormat || 'YYYY'
 
       const getStartYear = (date: any) => {
         const startYear = Math.floor(generateConfig.getYear(date) / 100) * 100
@@ -44,7 +46,6 @@ const DecadePanel = defineComponent<SharedPanelProps<any>>(
       }
 
       const getCellText = (date: any) => {
-        const cellYearFormat = locale.cellYearFormat
         const startYearStr = formatValue(date, {
           locale,
           format: cellYearFormat,
@@ -83,11 +84,11 @@ const DecadePanel = defineComponent<SharedPanelProps<any>>(
 
       const yearNode = `${formatValue(startYearDate, {
         locale,
-        format: locale.yearFormat,
+        format: yearFormat,
         generateConfig,
       })}-${formatValue(endYearDate, {
         locale,
-        format: locale.yearFormat,
+        format: yearFormat,
         generateConfig,
       })}`
 

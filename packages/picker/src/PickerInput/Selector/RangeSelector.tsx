@@ -155,7 +155,7 @@ const RangeSelector = defineComponent(
         invalid,
         onClick,
         onClear,
-    } = props
+      } = props
 
       const rootDivProps = {
         ...rootProps.value,
@@ -166,14 +166,13 @@ const RangeSelector = defineComponent(
           [`${prefixCls.value}-rtl`]: rtl.value,
         }, attrs.class as string),
         style: attrs.style as any,
-        onClick: (...rest: unknown[]) => {
+        onClick: (event: MouseEvent) => {
           if (Array.isArray(onClick)) {
-            onClick.forEach(fn => fn(...rest))
-
+            onClick.forEach(fn => fn(event))
             return
           }
 
-          onClick?.(...rest)
+          onClick?.(event)
         },
         onmousedown: (e: MouseEvent) => {
           const target = e.target as HTMLElement
@@ -203,7 +202,6 @@ const RangeSelector = defineComponent(
               {...getInputProps(0)}
               class={`${prefixCls.value}-input-start`}
               autofocus={startAutoFocus.value}
-              // @ts-expect-error: Native Error
               tabindex={tabIndex.value}
               data-range="start"
             />

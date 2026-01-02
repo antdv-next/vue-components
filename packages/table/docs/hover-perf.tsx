@@ -1,7 +1,7 @@
 import { defineComponent } from 'vue'
 import Table from '../src'
 
-const CellExample = (props: { data: { index: number }; count: string }) => {
+function CellExample(props: { data: { index: number }, count: string }) {
   console.log(`rerender ${Date.now()}`)
   return <>{`${props.count} ${props.data.index}`}</>
 }
@@ -15,7 +15,9 @@ export default defineComponent(() => {
       onCell: (_record: any, index: number) => ({ rowSpan: index % 10 === 0 ? 10 : 0 }),
       render: (_: any, record: { index: number }) => (
         <span>
-          {record.index}-{record.index + 10}
+          {record.index}
+          -
+          {record.index + 10}
         </span>
       ),
     },

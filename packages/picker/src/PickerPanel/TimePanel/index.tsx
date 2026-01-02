@@ -18,7 +18,9 @@ const TimePanel = defineComponent<SharedPanelProps<any>>(
     return () => {
       const { prefixCls, value, locale, generateConfig, showTime } = props
 
-      const format = typeof showTime === 'object' ? showTime.format : undefined
+      const format = typeof showTime === 'object' && showTime.format
+        ? showTime.format
+        : (locale.fieldTimeFormat || 'HH:mm:ss')
       const panelPrefixCls = `${prefixCls}-time-panel`
 
       return (

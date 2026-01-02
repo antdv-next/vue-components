@@ -13,7 +13,9 @@ export default defineComponent(() => {
           current.value = 0
         }}
       >
-        Current: {current.value}
+        Current:
+        {' '}
+        {current.value}
       </button>
 
       <br />
@@ -51,4 +53,3 @@ export default defineComponent(() => {
     </>
   )
 })
-

@@ -2,7 +2,7 @@
 import type { Moment } from 'moment'
 import moment from 'moment'
 import { computed, h, ref } from 'vue'
-import { Picker, RangePicker } from '../src'
+import { RangePicker } from '../src'
 import momentGenerateConfig from '../src/generate/moment'
 import zhCN from '../src/locale/zh_CN'
 import '../assets/index.less'

@@ -36,8 +36,8 @@
     "vue": "^3.0.0"
   },
   "dependencies": {
-    "@v-c/util": "workspace:^",
+    "@v-c/select": "workspace:^",
     "@v-c/tree": "workspace:^",
-    "@v-c/select": "workspace:^"
+    "@v-c/util": "workspace:^"
   }
 }

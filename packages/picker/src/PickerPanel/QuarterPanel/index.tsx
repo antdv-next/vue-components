@@ -26,6 +26,8 @@ const QuarterPanel = defineComponent<SharedPanelProps<any>>(
       const panelPrefixCls = `${prefixCls}-quarter-panel`
 
       const baseDate = generateConfig.setMonth(pickerValue, 0)
+      const cellQuarterFormat = locale.cellQuarterFormat || '[Q]Q'
+      const yearFormat = locale.yearFormat || 'YYYY'
 
       const getCellDate = (date: any, offset: number) => {
         return generateConfig.addMonth(date, offset * 3)
@@ -34,7 +36,7 @@ const QuarterPanel = defineComponent<SharedPanelProps<any>>(
       const getCellText = (date: any) => {
         return formatValue(date, {
           locale,
-          format: locale.cellQuarterFormat,
+          format: cellQuarterFormat,
           generateConfig,
         })
       }
@@ -56,7 +58,7 @@ const QuarterPanel = defineComponent<SharedPanelProps<any>>(
         >
           {formatValue(pickerValue, {
             locale,
-            format: locale.yearFormat,
+            format: yearFormat,
             generateConfig,
           })}
         </button>

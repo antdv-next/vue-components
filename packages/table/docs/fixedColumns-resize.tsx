@@ -84,7 +84,12 @@ export default defineComponent(() => {
         <button onClick={onToggleFixed}>切换固定列</button>
         <button onClick={onRemoveColumn}>删除列</button>
         <button onClick={onAddColumn}>增加列</button>
-        <p>更新用时：{renderTime.value} ms</p>
+        <p>
+          更新用时：
+          {renderTime.value}
+          {' '}
+          ms
+        </p>
       </div>
       <div
         style={{

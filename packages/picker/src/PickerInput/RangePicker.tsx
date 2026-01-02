@@ -134,7 +134,11 @@ const RangePicker = defineComponent(
   ) => {
     // ========================= Prop =========================
     const [filledProps, internalPicker, complexPicker, formatList, maskFormat, isInvalidateDate]
-      = useFilledProps(computed(() => props) as any, () => {
+      = useFilledProps<
+        RangePickerProps<DateType>,
+        DateType,
+        { disabled: [boolean, boolean], allowEmpty: [boolean, boolean] }
+      >(computed(() => props) as any, () => {
         const { disabled, allowEmpty } = props
 
         const mergedDisabled = separateConfig(disabled, false)
@@ -146,7 +150,7 @@ const RangePicker = defineComponent(
         }
       })
 
-    const fp = computed(() => filledProps.value ?? {})
+    const fp = computed(() => filledProps.value)
 
     const prefixCls = computed(() => fp.value.prefixCls)
     const rootClassName = computed(() => fp.value.rootClassName)
@@ -183,7 +187,7 @@ const RangePicker = defineComponent(
     const onFocus = computed(() => fp.value.onFocus)
     const onBlur = computed(() => fp.value.onBlur)
     const presets = computed(() => fp.value.presets)
-    const ranges = computed(() => fp.value?.ranges)
+    const ranges = computed(() => props.ranges)
     const components = computed(() => fp.value.components)
     const cellRender = computed(() => fp.value.cellRender)
     const dateRender = computed(() => fp.value.dateRender)
@@ -230,7 +234,7 @@ const RangePicker = defineComponent(
         onInternalOk,
       )
 
-    const calendarValue = computed(() => getCalendarValue.value)
+    const calendarValue = computed(() => getCalendarValue.value) as ComputedRef<RangeValueType<any>>
 
     // ======================== Active ========================
     const [
@@ -363,7 +367,11 @@ const RangePicker = defineComponent(
 
     // >>> Mode need wait for `pickerValue`
     const triggerModeChange = (nextPickerValue: any, nextMode: PanelMode, triggerEvent?: boolean) => {
-      const clone = fillIndex(modes.value, activeIndex.value, nextMode)
+      const clone = fillIndex(
+        modes.value,
+        activeIndex.value,
+        nextMode,
+      ) as [PanelMode, PanelMode]
 
       if (clone[0] !== modes.value[0] || clone[1] !== modes.value[1]) {
         setModes(clone)
@@ -371,7 +379,7 @@ const RangePicker = defineComponent(
 
       // Compatible with `onPanelChange`
       if (onPanelChange.value && triggerEvent !== false) {
-        const clonePickerValue: RangeValueType<any> = [...calendarValue.value]
+        const clonePickerValue = [...calendarValue.value] as RangeValueType<any>
         if (nextPickerValue) {
           clonePickerValue[activeIndex.value] = nextPickerValue
         }
@@ -382,7 +390,7 @@ const RangePicker = defineComponent(
     // ======================== Change ========================
     const fillCalendarValue = (date: any, index: number) =>
       // Trigger change only when date changed
-      fillIndex(calendarValue.value, index, date)
+      fillIndex(calendarValue.value, index, date) as RangeValueType<any>
 
     // ======================== Submit ========================
     /**
@@ -399,7 +407,7 @@ const RangePicker = defineComponent(
       }
       updateSubmitIndex(activeIndex.value)
       // Get next focus index
-      const nextIndex = nextActiveIndex(nextValue)
+      const nextIndex = nextActiveIndex(nextValue as RangeValueType<any>)
 
       // Change calendar value and tell flush it
       triggerCalendarChange(nextValue)
@@ -409,7 +417,7 @@ const RangePicker = defineComponent(
         triggerOpen(false, { force: true })
       }
       else if (!skipFocus) {
-        selectorRef.value?.focus({ index: nextIndex })
+        selectorRef.value?.focus({ index: nextIndex } as any)
       }
     }
 
@@ -424,13 +432,13 @@ const RangePicker = defineComponent(
         // Click to focus the enabled input
         const enabledIndex = disabled.value.findIndex(d => !d)
         if (enabledIndex >= 0) {
-          selectorRef.value?.focus({ index: enabledIndex })
+          selectorRef.value?.focus({ index: enabledIndex } as any)
         }
       }
 
       triggerOpen(true)
 
-      onClick.value?.(event)
+      onClick.value?.(event as any)
     }
 
     const onSelectorClear = () => {
@@ -522,7 +530,7 @@ const RangePicker = defineComponent(
     const onSelectorBlur: SelectorProps['onBlur'] = (event, index) => {
       triggerOpen(false)
       if (!needConfirm.value && lastOperation() === 'input') {
-        const nextIndex = nextActiveIndex(calendarValue.value as any)
+        const nextIndex = nextActiveIndex(calendarValue.value as RangeValueType<any>)
         flushSubmit(activeIndex.value, nextIndex === null)
       }
 
@@ -539,7 +547,11 @@ const RangePicker = defineComponent(
 
     // >>> Calendar
     const onPanelSelect = (date: any) => {
-      const clone: RangeValueType<any> = fillIndex(calendarValue.value, activeIndex.value, date)
+      const clone = fillIndex(
+        calendarValue.value,
+        activeIndex.value,
+        date,
+      ) as RangeValueType<any>
 
       // Only trigger calendar event but not update internal `calendarValue` state
       triggerCalendarChange(clone)
@@ -648,7 +660,7 @@ const RangePicker = defineComponent(
         && !hasActiveSubmitValue(lastActiveIndex)
         && calendarValue.value[lastActiveIndex]
       ) {
-        selectorRef.value?.focus({ index: lastActiveIndex })
+        selectorRef.value?.focus({ index: lastActiveIndex } as any)
         return
       }
 
@@ -729,7 +741,7 @@ const RangePicker = defineComponent(
         invalid: submitInvalidates.value,
         onInvalid: onSelectorInvalid,
         // Offset
-        onActiveInfo: (info) => {
+        onActiveInfo: (info: [number, number, number]) => {
           activeInfo.value = info
         },
       }
@@ -780,7 +792,7 @@ const RangePicker = defineComponent(
 
       return (
         <PickerTrigger
-          {...pickTriggerProps(fp.value)}
+          {...pickTriggerProps(fp.value as any)}
           popupElement={panel}
           popupStyle={mergedStyles?.popup?.root}
           popupClassName={clsx(rootClassName.value, mergedClassNames?.popup?.root)}

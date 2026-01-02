@@ -2,7 +2,7 @@ import type { ColumnType, Key } from '../src'
 import { defineComponent, ref } from 'vue'
 import Table, { EXPAND_COLUMN } from '../src'
 
-export const getRowSpan = (source: (string | number | undefined)[] = []) => {
+export function getRowSpan(source: (string | number | undefined)[] = []) {
   const list: { rowSpan?: number }[] = []
   let span = 0
   source
@@ -13,7 +13,8 @@ export const getRowSpan = (source: (string | number | undefined)[] = []) => {
       if (key !== source.slice().reverse()[index + 1]) {
         list.push({ rowSpan: span })
         span = 0
-      } else {
+      }
+      else {
         list.push({ rowSpan: 0 })
       }
     })
@@ -40,7 +41,8 @@ export default defineComponent(() => {
           return {
             rowSpan: 2,
           }
-        } else if (index === 2) {
+        }
+        else if (index === 2) {
           return {
             rowSpan: 0,
           }
@@ -65,10 +67,15 @@ export default defineComponent(() => {
         expandable={{
           expandedRowOffset: 2,
           expandedRowKeys: expandedRowKeys.value,
-          onExpandedRowsChange: keys => {
+          onExpandedRowsChange: (keys) => {
             expandedRowKeys.value = [...keys]
           },
-          expandedRowRender: record => <p style={{ margin: 0 }}>expandedRowRender: {record.key}</p>,
+          expandedRowRender: record => (
+            <p style={{ margin: 0 }}>
+              expandedRowRender:
+              {record.key}
+            </p>
+          ),
         }}
         className="table"
       />

@@ -42,8 +42,7 @@ const data = [
 ]
 
 const longData = Array.from({ length: 5 }, (_, index) =>
-  data.map(item => ({ ...item, key: `${index}-${item.key}` })),
-).flat()
+  data.map(item => ({ ...item, key: `${index}-${item.key}` }))).flat()
 
 export default defineComponent(() => {
   return () => (
@@ -52,7 +51,12 @@ export default defineComponent(() => {
       <Table
         columns={columns}
         rowClassName={(_record, i) => `row-${i}`}
-        expandedRowRender={record => <p>extra: {record.a}</p>}
+        expandedRowRender={record => (
+          <p>
+            extra:
+            {record.a}
+          </p>
+        )}
         expandedRowClassName={(_record, i) => `ex-row-${i}`}
         data={data}
         className="table"
@@ -63,7 +67,12 @@ export default defineComponent(() => {
       <Table
         columns={columns}
         rowClassName={(_record, i) => `row-${i}`}
-        expandedRowRender={record => <p>extra: {record.a}</p>}
+        expandedRowRender={record => (
+          <p>
+            extra:
+            {record.a}
+          </p>
+        )}
         expandedRowClassName={(_record, i) => `ex-row-${i}`}
         data={longData}
         className="table"

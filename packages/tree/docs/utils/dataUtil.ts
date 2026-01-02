@@ -1,4 +1,3 @@
-/* eslint-disable no-plusplus, no-loop-func */
 export interface DemoDataNode {
   title: string
   key: string
@@ -80,7 +79,7 @@ export function getRadioSelectKeys(data: DemoDataNode[], selectedKeys: string[],
   const selPkObjArr: any[] = []
 
   loopData(data, (item, _index, pos) => {
-    if (selectedKeys.indexOf(item.key) > -1) {
+    if (selectedKeys.includes(item.key)) {
       pkObjArr.push([pos, item.key])
     }
     if (key && key === item.key) {
@@ -115,7 +114,7 @@ export function getRadioSelectKeys(data: DemoDataNode[], selectedKeys: string[],
 
   Object.keys(lenObj).forEach((item) => {
     lenObj[item].forEach((i) => {
-      if (res.indexOf(i[1]) === -1) {
+      if (!res.includes(i[1])) {
         res.push(i[1])
       }
     })
@@ -123,4 +122,3 @@ export function getRadioSelectKeys(data: DemoDataNode[], selectedKeys: string[],
 
   return res
 }
-

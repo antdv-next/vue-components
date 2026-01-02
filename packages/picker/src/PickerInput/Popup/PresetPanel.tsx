@@ -1,19 +1,19 @@
 import type { ValueDate } from '../../interface'
 import { defineComponent } from 'vue'
 
-export interface PresetPanelProps<DateType extends object = any> {
+export interface PresetPanelProps<ValueType extends object = any> {
   prefixCls: string | undefined
-  presets: ValueDate<DateType>[]
-  onClick: (value: DateType) => void
-  onHover: (value: DateType | null) => void
+  presets: ValueDate<ValueType>[]
+  onClick: (value: ValueType) => void
+  onHover: (value: ValueType | null) => void
 }
 
-function executeValue<DateType extends object>(value: ValueDate<DateType>['value']): DateType {
+function executeValue<ValueType extends object>(value: ValueDate<ValueType>['value']): ValueType {
   return typeof value === 'function' ? value() : value
 }
 
-const PresetPanel = defineComponent(<DateType extends object = any>(
-  props: PresetPanelProps<DateType>,
+const PresetPanel = defineComponent(<ValueType extends object = any>(
+  props: PresetPanelProps<ValueType>,
 ) => {
   return () => {
     const { prefixCls, presets, onClick, onHover } = props
@@ -28,10 +28,10 @@ const PresetPanel = defineComponent(<DateType extends object = any>(
             <li
               key={index}
               onClick={() => {
-                onClick(executeValue<DateType>(value))
+                onClick(executeValue<ValueType>(value))
               }}
               onMouseenter={() => {
-                onHover(executeValue<DateType>(value))
+                onHover(executeValue<ValueType>(value))
               }}
               onMouseleave={() => {
                 onHover(null)

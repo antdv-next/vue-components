@@ -15,7 +15,8 @@ export default defineComponent(() => {
   const toggleFilter = (key: string) => {
     if (filters.value.includes(key)) {
       filters.value = filters.value.filter(item => item !== key)
-    } else {
+    }
+    else {
       filters.value = [...filters.value, key]
     }
   }

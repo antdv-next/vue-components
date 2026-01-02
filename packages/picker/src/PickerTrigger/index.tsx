@@ -69,7 +69,7 @@ const PickerTrigger = defineComponent<PickerTriggerProps>((props, { slots }) => 
       popupPlacement={realPlacement.value}
       builtinPlacements={props.builtinPlacements || BUILT_IN_PLACEMENTS}
       prefixCls={dropdownPrefixCls.value}
-      popupMotion={{ motionName: props.transitionName }}
+      popupMotion={props.transitionName ? ({ motionName: props.transitionName } as any) : undefined}
       popup={props.popupElement}
       popupAlign={props.popupAlign}
       popupVisible={props.visible}

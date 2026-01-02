@@ -2,12 +2,14 @@ import type { PropType } from 'vue'
 import { defineComponent, ref } from 'vue'
 import Table from '../src'
 
-const CheckBox = (props: { id: string }) => (
-  <label>
-    <input type="checkbox" />
-    {props.id}
-  </label>
-)
+function CheckBox(props: { id: string }) {
+  return (
+    <label>
+      <input type="checkbox" />
+      {props.id}
+    </label>
+  )
+}
 
 interface RecordType {
   a: string

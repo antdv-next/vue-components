@@ -27,68 +27,68 @@ const MultipleDates = defineComponent<MultipleDatesProps>((props) => {
       placeholder,
     } = props
 
-      const selectorCls = `${prefixCls}-selector`
-      const selectionCls = `${prefixCls}-selection`
-      const overflowCls = `${selectionCls}-overflow`
+    const selectorCls = `${prefixCls}-selector`
+    const selectionCls = `${prefixCls}-selection`
+    const overflowCls = `${selectionCls}-overflow`
 
-      // ========================= Item =========================
-      function renderSelector(content: VueNode, onClose?: (e: MouseEvent) => void) {
-        return (
-          <span
-            class={clsx(`${selectionCls}-item`)}
-            title={typeof content === 'string' ? content : undefined}
-          >
-            <span class={`${selectionCls}-item-content`}>{content}</span>
-            {!disabled && onClose && (
-              <span
-                onMousedown={(e) => {
-                  e.preventDefault()
-                }}
-                onClick={onClose}
-                class={`${selectionCls}-item-remove`}
-              >
-                {removeIcon}
-              </span>
-            )}
-          </span>
-        )
-      }
-
-      function renderItem(date: any) {
-        const displayLabel = formatDate(date)
-
-        const onClose = (event?: MouseEvent) => {
-          if (event)
-            event.stopPropagation()
-          onRemove(date)
-        }
-
-        return renderSelector(displayLabel, onClose)
-      }
-
-      // ========================= Rest =========================
-      function renderRest(omittedValues: any[]) {
-        const content = `+ ${omittedValues.length} ...`
-
-        return renderSelector(content)
-      }
-
-      // ======================== Render ========================
-
+    // ========================= Item =========================
+    function renderSelector(content: VueNode, onClose?: (e: MouseEvent) => void) {
       return (
-        <div class={selectorCls}>
-          <Overflow
-            prefixCls={overflowCls}
-            data={value}
-            renderItem={renderItem}
-            renderRest={renderRest}
-            // suffix={inputNode}
-            itemKey={(date: any) => formatDate(date)}
-            maxCount={maxTagCount}
-          />
-          {!value.length && <span class={`${prefixCls}-selection-placeholder`}>{placeholder}</span>}
-        </div>
+        <span
+          class={clsx(`${selectionCls}-item`)}
+          title={typeof content === 'string' ? content : undefined}
+        >
+          <span class={`${selectionCls}-item-content`}>{content}</span>
+          {!disabled && onClose && (
+            <span
+              onMousedown={(e) => {
+                e.preventDefault()
+              }}
+              onClick={onClose}
+              class={`${selectionCls}-item-remove`}
+            >
+              {removeIcon}
+            </span>
+          )}
+        </span>
       )
+    }
+
+    function renderItem(date: any) {
+      const displayLabel = formatDate(date)
+
+      const onClose = (event?: MouseEvent) => {
+        if (event)
+          event.stopPropagation()
+        onRemove(date)
+      }
+
+      return renderSelector(displayLabel, onClose)
+    }
+
+    // ========================= Rest =========================
+    function renderRest(omittedValues: any[]) {
+      const content = `+ ${omittedValues.length} ...`
+
+      return renderSelector(content)
+    }
+
+    // ======================== Render ========================
+
+    return (
+      <div class={selectorCls}>
+        <Overflow
+          prefixCls={overflowCls}
+          data={value}
+          renderItem={renderItem}
+          renderRest={renderRest}
+          // suffix={inputNode}
+          itemKey={(date: any) => formatDate(date)}
+          maxCount={maxTagCount}
+        />
+        {!value.length && <span class={`${prefixCls}-selection-placeholder`}>{placeholder}</span>}
+      </div>
+    )
   }
 }, {
   name: 'MultipleDates',

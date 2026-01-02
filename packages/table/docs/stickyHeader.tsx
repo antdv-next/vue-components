@@ -1,4 +1,4 @@
-import type { ColumnType, ColumnsType } from '../src'
+import type { ColumnsType, ColumnType } from '../src'
 import { defineComponent, ref } from 'vue'
 import Table from '../src'
 

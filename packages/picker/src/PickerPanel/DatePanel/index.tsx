@@ -48,10 +48,12 @@ const DatePanel = defineComponent<DatePanelProps<any>>(
       const cellPrefixCls = `${prefixCls}-cell`
       const isWeek = mode === 'week'
 
-      const weekFirstDay = generateConfig.locale.getWeekFirstDay(locale.locale)
+      const weekFirstDay = generateConfig.locale.getWeekFirstDay(locale.locale) ?? 0
       const monthStartDate = generateConfig.setDate(pickerValue, 1)
       const baseDate = getWeekStartDate(locale.locale, generateConfig, monthStartDate)
       const month = generateConfig.getMonth(pickerValue)
+      const cellDateFormat = locale.cellDateFormat || locale.dayFormat || 'D'
+      const yearFormat = locale.yearFormat || 'YYYY'
 
       // =========================== PrefixColumn ===========================
       const showPrefixColumn = showWeek === undefined ? isWeek : showWeek
@@ -117,17 +119,12 @@ const DatePanel = defineComponent<DatePanelProps<any>>(
       const getCellText = (date: any) => {
         return formatValue(date, {
           locale,
-          format: locale.cellDateFormat,
+          format: cellDateFormat,
           generateConfig,
         })
       }
 
       const getCellClassName = (date: any) => {
-        const [_, now] = useInfo(props as any, mode) // Re-calling useInfo here to get 'now'.
-        // Note: useInfo logic for 'now' is just generateConfig.getNow().
-        // calling useInfo inside render is fine, but maybe inefficient.
-        // I can just get 'now' from panelContext.value.now
-
         const nowVal = panelContext.value.now
 
         return {
@@ -156,7 +153,7 @@ const DatePanel = defineComponent<DatePanelProps<any>>(
         >
           {formatValue(pickerValue, {
             locale,
-            format: locale.yearFormat,
+            format: yearFormat,
             generateConfig,
           })}
         </button>

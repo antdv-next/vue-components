@@ -27,6 +27,7 @@ const MonthPanel = defineComponent<SharedPanelProps<any>>(
 
       const panelPrefixCls = `${prefixCls}-month-panel`
       const baseDate = generateConfig.setMonth(pickerValue, 0)
+      const yearFormat = locale.yearFormat || 'YYYY'
 
       const monthsLocale
         = locale.shortMonths
@@ -80,7 +81,7 @@ const MonthPanel = defineComponent<SharedPanelProps<any>>(
         >
           {formatValue(pickerValue, {
             locale,
-            format: locale.yearFormat,
+            format: yearFormat,
             generateConfig,
           })}
         </button>
