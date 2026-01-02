@@ -1,7 +1,6 @@
 import type { ComputedRef, Ref, ShallowRef } from 'vue'
 import type { Direction, OnStartMove } from '../interface'
 import type { OffsetValues } from './useOffset'
-import useEvent from '@v-c/util/dist/hooks/useEvent'
 import { computed, inject, onUnmounted, ref, watch } from 'vue'
 import { defaultUnstableContextValue, UnstableContextKey } from '../context'
 
@@ -90,40 +89,38 @@ function useDrag(
     }
   }
 
-  const updateCacheValue = useEvent(
-    (valueIndex: number, offsetPercent: number, deleteMark: boolean) => {
-      if (valueIndex === -1) {
-        // >>>> Dragging on the track
-        const startValue = originValues.value[0]
-        const endValue = originValues.value[originValues.value.length - 1]
-        const maxStartOffset = min.value - startValue
-        const maxEndOffset = max.value - endValue
+  const updateCacheValue = (valueIndex: number, offsetPercent: number, deleteMark: boolean) => {
+    if (valueIndex === -1) {
+      // >>>> Dragging on the track
+      const startValue = originValues.value[0]
+      const endValue = originValues.value[originValues.value.length - 1]
+      const maxStartOffset = min.value - startValue
+      const maxEndOffset = max.value - endValue
 
-        // Get valid offset
-        let offset = offsetPercent * (max.value - min.value)
-        offset = Math.max(offset, maxStartOffset)
-        offset = Math.min(offset, maxEndOffset)
+      // Get valid offset
+      let offset = offsetPercent * (max.value - min.value)
+      offset = Math.max(offset, maxStartOffset)
+      offset = Math.min(offset, maxEndOffset)
 
-        // Use first value to revert back of valid offset (like steps marks)
-        const formatStartValue = formatValue.value(startValue + offset)
-        offset = formatStartValue - startValue
-        const cloneCacheValues = originValues.value.map<number>(val => val + offset)
-        flushValues(cloneCacheValues)
-      }
-      else {
-        // >>>> Dragging on the handle
-        const offsetDist = (max.value - min.value) * offsetPercent
+      // Use first value to revert back of valid offset (like steps marks)
+      const formatStartValue = formatValue.value(startValue + offset)
+      offset = formatStartValue - startValue
+      const cloneCacheValues = originValues.value.map<number>(val => val + offset)
+      flushValues(cloneCacheValues)
+    }
+    else {
+      // >>>> Dragging on the handle
+      const offsetDist = (max.value - min.value) * offsetPercent
 
-        // Always start with the valueIndex origin value
-        const cloneValues = [...cacheValues.value]
-        cloneValues[valueIndex] = originValues.value[valueIndex]
+      // Always start with the valueIndex origin value
+      const cloneValues = [...cacheValues.value]
+      cloneValues[valueIndex] = originValues.value[valueIndex]
 
-        const next = offsetValues.value(cloneValues, offsetDist, valueIndex, 'dist')
+      const next = offsetValues.value(cloneValues, offsetDist, valueIndex, 'dist')
 
-        flushValues(next.values, next.value, deleteMark)
-      }
-    },
-  )
+      flushValues(next.values, next.value, deleteMark)
+    }
+  }
 
   const onStartMove: OnStartMove = (e, valueIndex, startValues?: number[]) => {
     e.stopPropagation()

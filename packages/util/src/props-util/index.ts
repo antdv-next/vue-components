@@ -11,7 +11,10 @@ export function isEmptyElement(c: any) {
       || (c.type === Text && c.children.trim() === ''))
   )
 }
-export function filterEmpty(children: any[] = []) {
+export function filterEmpty(children: any = []) {
+  if (!Array.isArray(children)) {
+    children = [children]
+  }
   const res: any[] = []
   children.forEach((child: any) => {
     if (Array.isArray(child))

@@ -1,4 +1,5 @@
 import type { Key } from '@v-c/util/dist/type'
+import { shallowRef } from 'vue'
 
 // Firefox has low performance of map.
 class CacheMap {
@@ -6,7 +7,7 @@ class CacheMap {
 
   // Used for cache key
   // `useMemo` no need to update if `id` not change
-  id: number = 0
+  id = shallowRef(0)
 
   diffRecords = new Map<Key, number>()
 
@@ -19,7 +20,7 @@ class CacheMap {
     this.diffRecords.set(key, this.maps[key as string])
 
     this.maps[key as string] = value
-    this.id += 1
+    this.id.value += 1
   }
 
   get(key: Key) {

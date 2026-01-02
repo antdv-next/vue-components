@@ -1,45 +1,55 @@
-import type { ComputedRef, Ref } from 'vue'
-import type { GetKey } from '../interface'
+import type { Ref } from 'vue'
+import type { GetKey, GetSize } from '../interface'
 import type CacheMap from '../utils/CacheMap'
-import { computed } from 'vue'
+import { watch } from 'vue'
 
 export function useGetSize<T>(
   mergedData: Ref<T[]>,
   getKey: GetKey<T>,
   heights: CacheMap,
   itemHeight: Ref<number>,
-): ComputedRef<(startKey: any, endKey?: any) => { top: number, bottom: number }> {
-  return computed(() => {
-    return (startKey: any, endKey?: any) => {
-      let topIndex = 0
-      let bottomIndex = mergedData.value.length - 1
+) {
+  let key2Index = new Map()
+  let bottomList: any[] = []
+  watch(
+    [mergedData, () => heights.id.value, itemHeight],
+    () => {
+      key2Index = new Map()
+      bottomList = []
+    },
+  )
+  const getSize: GetSize = (startKey, endKey = startKey) => {
+    // Get from cache first
+    let startIndex = key2Index.get(startKey)
+    let endIndex = key2Index.get(endKey)
 
-      if (startKey !== undefined && startKey !== null) {
-        topIndex = mergedData.value.findIndex(item => getKey(item) === startKey)
-      }
+    // Loop to fill the cache
+    if (startIndex === undefined || endIndex === undefined) {
+      const dataLen = mergedData.value.length
+      for (let i = bottomList.length; i < dataLen; i += 1) {
+        const item = mergedData.value[i]
+        const key = getKey(item)
+        key2Index.set(key, i)
+        const cacheHeight = heights.get(key) ?? itemHeight.value
+        bottomList[i] = (bottomList[i - 1] || 0) + cacheHeight
+        if (key === startKey) {
+          startIndex = i
+        }
+        if (key === endKey) {
+          endIndex = i
+        }
 
-      if (endKey !== undefined && endKey !== null) {
-        bottomIndex = mergedData.value.findIndex(item => getKey(item) === endKey)
-      }
-
-      let top = 0
-      for (let i = 0; i < topIndex; i += 1) {
-        const key = getKey(mergedData.value[i])
-        const cacheHeight = heights.get(key)
-        top += cacheHeight === undefined ? itemHeight.value : cacheHeight
-      }
-
-      let bottom = 0
-      for (let i = mergedData.value.length - 1; i > bottomIndex; i -= 1) {
-        const key = getKey(mergedData.value[i])
-        const cacheHeight = heights.get(key)
-        bottom += cacheHeight === undefined ? itemHeight.value : cacheHeight
-      }
-
-      return {
-        top,
-        bottom,
+        if (startIndex !== undefined && endIndex !== undefined) {
+          break
+        }
       }
     }
-  })
+
+    return {
+      top: bottomList[startIndex - 1] || 0,
+      bottom: bottomList[endIndex],
+    }
+  }
+
+  return getSize
 }

@@ -53,7 +53,7 @@ function convertItemsToNodes(
             // Group
             return (
               <MergedMenuItemGroup key={mergedKey} {...restProps} title={label}>
-                {convertItemsToNodes(children, components, prefixCls)}
+                {convertItemsToNodes(children, components, prefixCls, slots)}
               </MergedMenuItemGroup>
             )
           }
@@ -61,7 +61,7 @@ function convertItemsToNodes(
           // Sub Menu
           return (
             <MergedSubMenu key={mergedKey} {...restProps} title={label}>
-              {convertItemsToNodes(children, components, prefixCls)}
+              {convertItemsToNodes(children, components, prefixCls, slots)}
             </MergedSubMenu>
           )
         }

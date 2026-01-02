@@ -61,7 +61,7 @@ export const Checkbox = defineComponent<
       if (props.disabled)
         return
 
-      if (!('checked' in props))
+      if (props.checked === undefined)
         setRawValue(e.target?.checked)
 
       props?.['onUpdate:checked']?.(e.target.checked)

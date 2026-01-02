@@ -1,0 +1,359 @@
+import type { ColumnType, ColumnsType } from '../src'
+import { defineComponent, ref } from 'vue'
+import Table from '../src'
+
+interface RecordType {
+  a?: string
+  b?: string
+  c?: string
+  d?: number
+  key?: string
+}
+
+const fixedColumns: ColumnType<RecordType>[] = [
+  { title: 'title1', dataIndex: 'a', key: 'a', width: 100, fixed: 'left' },
+  { title: 'title2', dataIndex: 'b', key: 'b', width: 100, fixed: 'left', ellipsis: true },
+  { title: 'title3', dataIndex: 'c', key: 'c' },
+  { title: 'title4', dataIndex: 'b', key: 'd' },
+  { title: 'title5', dataIndex: 'b', key: 'e' },
+  { title: 'title6', dataIndex: 'b', key: 'f' },
+  {
+    title: (
+      <div>
+        title7
+        <br />
+        <br />
+        <br />
+        Hello world!
+      </div>
+    ),
+    dataIndex: 'b',
+    key: 'g',
+  },
+  { title: 'title8', dataIndex: 'b', key: 'h' },
+  { title: 'title9', dataIndex: 'b', key: 'i' },
+  { title: 'title10', dataIndex: 'b', key: 'j' },
+  { title: 'title11', dataIndex: 'b', key: 'k' },
+  { title: 'title12', dataIndex: 'b', key: 'l', width: 100, fixed: 'right' },
+]
+
+const fixedData = [
+  {
+    a: '123',
+    b: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    d: 3,
+    key: '1',
+  },
+  { a: 'cdd', b: 'edd12221', d: 3, key: '2' },
+  { a: '133', c: 'edd12221', d: 2, key: '3' },
+  { a: '133', c: 'edd12221', d: 2, key: '4' },
+  { a: '133', c: 'edd12221', d: 2, key: '5' },
+  { a: '133', c: 'edd12221', d: 2, key: '6' },
+  { a: '133', c: 'edd12221', d: 2, key: '7' },
+  { a: '133', c: 'edd12221', d: 2, key: '8' },
+  { a: '133', c: 'edd12221', d: 2, key: '9' },
+]
+
+const columns: ColumnType<RecordType>[] = [
+  { title: 'title1', dataIndex: 'a', key: 'a', width: 100 },
+  { title: 'title2', dataIndex: 'b', key: 'b', width: 100, align: 'right' },
+  { title: 'title3', dataIndex: 'c', key: 'c', width: 200 },
+  {
+    title: 'Operations',
+    key: 'd',
+    render(_value, record) {
+      return (
+        <a
+          onClick={(event) => {
+            event.preventDefault()
+            console.log('Operate on:', record)
+          }}
+          href="#"
+        >
+          Operations
+        </a>
+      )
+    },
+  },
+]
+
+const columnsWithWidth: ColumnType<RecordType>[] = [
+  { title: 'title1', dataIndex: 'a', key: 'a', width: 100 },
+  { title: 'title2', dataIndex: 'b', key: 'b', width: 100 },
+  { title: 'title3', dataIndex: 'c', key: 'c', width: 200 },
+  { title: 'title4', dataIndex: 'd', key: 'd', width: 100 },
+]
+
+const columnsGrouped: ColumnsType<any> = [
+  {
+    title: '',
+    dataIndex: 'productType',
+    key: 'productType',
+    rowSpan: 2,
+    rowScope: 'row',
+  },
+  {
+    title: 'Mars',
+    dataIndex: 'mars',
+    key: 'mars',
+    children: [
+      { title: 'ProducedProducedProduced', dataIndex: 'producedMars', key: 'producedMars' },
+      { title: 'Sold', dataIndex: 'soldMars', key: 'soldMars' },
+    ],
+  },
+  {
+    title: 'Venus',
+    dataIndex: 'venus',
+    key: 'venus',
+    children: [
+      { title: 'Produced Produced', dataIndex: 'producedVenus', key: 'producedVenus' },
+      { title: 'Sold Sold Sold Sold', dataIndex: 'soldVenus', key: 'soldVenus' },
+    ],
+  },
+]
+
+const data = [
+  { a: '123', key: '1' },
+  { a: 'cdd', b: 'edd', key: '2' },
+  { a: '1333', c: 'eee', d: 2, key: '3' },
+  { a: '1333', c: 'eee', d: 2, key: '4' },
+  { a: '1333', c: 'eee', d: 2, key: '5' },
+  { a: '1333', c: 'eee', d: 2, key: '6' },
+  { a: '1333', c: 'eee', d: 2, key: '7' },
+  { a: '1333', c: 'eee', d: 2, key: '8' },
+  { a: '1333', c: 'eee', d: 2, key: '9' },
+  { a: '1333', c: 'eee', d: 2, key: '10' },
+  { a: '1333', c: 'eee', d: 2, key: '11' },
+  { a: '1333', c: 'eee', d: 2, key: '12' },
+  { a: '1333', c: 'eee', d: 2, key: '13' },
+  { a: '1333', c: 'eee', d: 2, key: '14' },
+  { a: '1333', c: 'eee', d: 2, key: '15' },
+  { a: '1333', c: 'eee', d: 2, key: '16' },
+  { a: '1333', c: 'eee', d: 2, key: '17' },
+  { a: '1333', c: 'eee', d: 2, key: '18' },
+  { a: '1333', c: 'eee', d: 2, key: '19' },
+  { a: '1333', c: 'eee', d: 2, key: '20' },
+]
+
+const columns3: ColumnType<RecordType>[] = [
+  { title: '', dataIndex: 'name', key: '0' },
+  { title: 'First column', dataIndex: 'name', key: '1' },
+  { title: 'Second column', dataIndex: 'address', key: '2' },
+  { title: 'Third column', dataIndex: 'age', key: '3' },
+  { title: 'Another column', dataIndex: 'address', key: '4' },
+  { title: 'Extra column', dataIndex: 'name', key: '5' },
+  { title: 'And yet another column', dataIndex: 'address', key: '6' },
+  {
+    title: 'Column 7 with extraaaaaaaaa long word',
+    dataIndex: 'age',
+    key: '7',
+  },
+  { title: 'Column 8', dataIndex: 'address', key: '8' },
+  { title: 'Column 9', dataIndex: 'name', key: '9' },
+  { title: 'Column 10', dataIndex: 'address', key: '10' },
+  { title: 'Column 11', dataIndex: 'address', key: '11' },
+  { title: 'Column 12', dataIndex: 'age', key: '12' },
+  { title: 'Column 13', dataIndex: 'address', key: '13' },
+  { title: 'Column 14', dataIndex: 'name', key: '14' },
+  { title: 'Column 15', dataIndex: 'address', key: '15' },
+  { title: 'Column 16', dataIndex: 'address', key: '16' },
+  { title: 'Column 17', dataIndex: 'name', key: '17' },
+  { title: 'Column 18', dataIndex: 'address', key: '18' },
+  { title: 'Column 19', dataIndex: 'address', key: '19' },
+  { title: 'Column 20', dataIndex: 'age', key: '20' },
+]
+
+export default defineComponent(() => {
+  const container = ref<HTMLElement | null>(null)
+
+  return () => (
+    <div>
+      <h2>Sticky</h2>
+      <Table<RecordType>
+        columns={columns}
+        data={data}
+        tableLayout="auto"
+        sticky
+        scroll={{
+          x: 10000,
+        }}
+        style={{
+          marginBottom: '100px',
+        }}
+      />
+
+      <h2>Show offset Header</h2>
+      <Table<RecordType>
+        columns={columns}
+        data={data}
+        tableLayout="auto"
+        sticky={{
+          offsetHeader: 100,
+        }}
+        scroll={{
+          x: 10000,
+        }}
+        style={{
+          marginBottom: '100px',
+        }}
+      />
+
+      <h2>Show offset scroll</h2>
+      <Table<RecordType>
+        columns={columns}
+        data={data}
+        tableLayout="auto"
+        sticky={{
+          offsetScroll: 100,
+        }}
+        scroll={{
+          x: 10000,
+        }}
+        style={{
+          marginBottom: '100px',
+        }}
+      />
+
+      <h2>Sticky with fixed columns</h2>
+      <div style={{ width: '800px' }}>
+        <Table<RecordType>
+          columns={fixedColumns}
+          data={fixedData}
+          sticky
+          scroll={{
+            x: 1200,
+          }}
+          style={{
+            marginBottom: '100px',
+          }}
+        />
+      </div>
+
+      <h2>Sticky with fixed columns and scroll.y</h2>
+      <div style={{ width: '800px' }}>
+        <Table<RecordType>
+          columns={fixedColumns}
+          data={fixedData}
+          sticky
+          scroll={{
+            x: 1200,
+            y: 300,
+          }}
+          style={{
+            marginBottom: '100px',
+          }}
+        />
+      </div>
+
+      <h2>Sticky with custom container</h2>
+      <div style={{ height: '500px', overflow: 'scroll' }} ref={container}>
+        <div style={{ height: '700px' }}>
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore aliquid neque accusamus
+          suscipit asperiores, id ullam in iste soluta dignissimos vero incidunt, rem ex consectetur
+          beatae totam aperiam. Sunt, laudantium?
+        </div>
+        <Table<RecordType>
+          columns={fixedColumns}
+          data={fixedData}
+          scroll={{
+            x: 1200,
+          }}
+          sticky={{
+            getContainer: () => container.value as HTMLElement,
+          }}
+          style={{
+            marginBottom: '100px',
+          }}
+        />
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore aliquid neque accusamus, id
+        ullam in iste soluta dignissimos vero incidunt, rem ex consectetur beatae totam aperiam.
+        Sunt, laudantium?
+      </div>
+
+      <h2>Sticky header with empty data</h2>
+      <Table
+        columns={fixedColumns}
+        data={[]}
+        scroll={{
+          x: 'max-content',
+        }}
+        sticky
+      />
+      <br />
+      <Table
+        columns={fixedColumns}
+        data={[]}
+        scroll={{
+          x: 1200,
+        }}
+        sticky
+      />
+      <br />
+      <Table
+        columns={columnsWithWidth}
+        data={[]}
+        scroll={{
+          x: 'max-content',
+        }}
+        sticky
+      />
+      <br />
+      <Table
+        columns={fixedColumns}
+        data={[{ key: '1' }]}
+        scroll={{
+          x: 'max-content',
+        }}
+        sticky
+      />
+      <br />
+      <Table
+        columns={columnsWithWidth}
+        data={[{ key: '1' }]}
+        scroll={{
+          x: 1200,
+        }}
+        sticky
+      />
+      <br />
+      <Table
+        columns={fixedColumns.map(column => ({ ...column, width: undefined }))}
+        data={[]}
+        scroll={{
+          x: 'max-content',
+        }}
+        sticky
+      />
+      <br />
+      <Table
+        columns={fixedColumns.map(column => ({ ...column, width: undefined }))}
+        data={[{ key: '1' }]}
+        scroll={{
+          x: 'max-content',
+        }}
+        sticky
+      />
+      <br />
+      <Table
+        columns={columnsGrouped}
+        data={[{ key: '1' }, { key: '2' }]}
+        scroll={{
+          x: 'max-content',
+        }}
+        sticky
+      />
+      <br />
+      <h3>scroll.x is true</h3>
+      <p>https://github.com/ant-design/ant-design/issues/54894</p>
+      <Table
+        columns={columns3}
+        data={[
+          { key: '1', name: 'Test', age: 1, address: '2' },
+          { key: '2', name: '0', age: 1, address: '2' },
+        ]}
+        sticky
+        scroll={{ x: true }}
+      />
+    </div>
+  )
+})
