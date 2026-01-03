@@ -19,8 +19,8 @@ export interface DatePanelProps<DateType extends object = any> extends SharedPan
   cellSelection?: boolean
 }
 
-const DatePanel = defineComponent<DatePanelProps<any>>(
-  <DateType extends object = any>(props: DatePanelProps<DateType>) => {
+const DatePanel = defineComponent<DatePanelProps>(
+  (props) => {
     const panelContext = computed(() => {
       const panelMode = props.mode || 'date'
       const [info] = useInfo(props as any, panelMode)

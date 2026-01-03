@@ -171,7 +171,6 @@ const Popup = defineComponent<PopupProps>(
       } = props
 
       const prefixCls = ctx.value.prefixCls
-
       let mergedNodes: VueNode = (
         <div class={`${prefixCls}-panel-layout`}>
           {/* `any` here since PresetPanel is reused for both Single & Range Picker which means return type is not stable */}

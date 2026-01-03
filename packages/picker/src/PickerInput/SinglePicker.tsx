@@ -99,9 +99,7 @@ export interface BasePickerProps<
   onPanelChange?: (values: DateType, modes: PanelMode) => void
 }
 
-export interface PickerProps<DateType extends object = any>
-  /** @vue-ignore */
-  extends
+export interface PickerProps<DateType extends object = any> extends
   BasePickerProps<DateType>,
   Omit<SharedTimeProps<DateType>, 'format' | 'defaultValue'> {
   use12Hours?: boolean

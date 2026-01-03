@@ -50,7 +50,6 @@ const WeekPanel = defineComponent<SharedPanelProps<any>>(
           rangeCls,
         )
       }
-
       return (
         <DatePanel
           {...props}

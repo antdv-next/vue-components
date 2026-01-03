@@ -43,7 +43,6 @@ const PanelBody = defineComponent<PanelBodyProps<any>>(
         locale = {} as any,
         onSelect,
       } = context.value
-
       const {
         rowNum,
         colNum,
