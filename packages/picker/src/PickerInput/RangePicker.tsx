@@ -733,7 +733,7 @@ const RangePicker = defineComponent(
         suffixIcon: suffixIcon.value,
         // Active
         activeIndex: focused.value || mergedOpen.value ? activeIndex.value : null,
-        activeHelp: internalHoverValues.value,
+        activeHelp: !!internalHoverValues.value,
         allHelp: !!internalHoverValues.value && hoverSource.value === 'preset',
         focused: focused.value,
         onFocus: onSelectorFocus,

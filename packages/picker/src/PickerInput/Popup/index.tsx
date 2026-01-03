@@ -3,12 +3,11 @@ import type { MouseEventHandler } from '@v-c/util/dist/EventInterface'
 import type { VueNode } from '@v-c/util/dist/type'
 import type { InputHTMLAttributes } from 'vue'
 import type { RangeTimeProps, SharedPickerProps, SharedTimeProps, ValueDate } from '../../interface'
-
 import type { FooterProps } from './Footer'
 import type { PopupPanelProps } from './PopupPanel'
-import ResizeObserver from '@v-c/resize-observer'
+
 import { clsx, omit } from '@v-c/util'
-import { computed, defineComponent, onMounted, ref, watch } from 'vue'
+import { computed, defineComponent, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
 import { toArray } from '../../utils/miscUtil'
 import { usePickerContext } from '../context'
 import Footer from './Footer'
@@ -65,6 +64,7 @@ const Popup = defineComponent<PopupProps>(
     const containerWidth = ref<number>(0)
     const containerOffset = ref<number>(0)
     const arrowOffset = ref<number>(0)
+    const domRef = shallowRef()
 
     const onResize: ResizeObserverProps['onResize'] = (info) => {
       if (info.width) {
@@ -72,47 +72,63 @@ const Popup = defineComponent<PopupProps>(
       }
     }
 
+    onMounted(() => {
+      if (domRef.value) {
+        const observer = new ResizeObserver((entries) => {
+          const entry = entries[0]
+          onResize(entry as any, domRef.value)
+        })
+        observer.observe(domRef.value)
+
+        onUnmounted(() => {
+          observer.disconnect()
+        })
+      }
+    })
+
     const retryTimes = ref(0)
 
-    onMounted(() => {
-      watch(() => activeInfo.value[0], () => {
-        retryTimes.value = 10
-      }, { immediate: true })
+    // onMounted(() => {
+    //
+    // })
 
-      watch(() => [retryTimes.value, rtl.value, activeInfo.value, props.range], () => {
+    watch(() => activeInfo.value[0], () => {
+      retryTimes.value = 10
+    }, { immediate: true, flush: 'post' })
+
+    watch([retryTimes, rtl, activeInfo, () => props.range], () => {
       // `activeOffset` is always align with the active input element
-        // So we need only check container contains the `activeOffset`
-        const [activeInputLeft, activeInputRight, selectorWidth] = activeInfo.value
-        if (props.range && wrapperRef.value) {
-          // Offset in case container has border radius
-          const arrowWidth = arrowRef.value?.offsetWidth || 0
+      // So we need only check container contains the `activeOffset`
+      const [activeInputLeft, activeInputRight, selectorWidth] = activeInfo.value
+      if (props.range && wrapperRef.value) {
+        // Offset in case container has border radius
+        const arrowWidth = arrowRef.value?.offsetWidth || 0
 
-          // Arrow Offset
-          const wrapperRect = wrapperRef.value.getBoundingClientRect()
-          if (!wrapperRect.height || wrapperRect.right < 0) {
-            retryTimes.value = Math.max(0, retryTimes.value - 1)
-            return
-          }
-
-          const nextArrowOffset
-            = (rtl ? activeInputRight - arrowWidth : activeInputLeft) - wrapperRect.left
-          arrowOffset.value = nextArrowOffset
-
-          // Container Offset
-          if (containerWidth && containerWidth.value < selectorWidth) {
-            const offset = rtl
-              ? wrapperRect.right - (activeInputRight - arrowWidth + containerWidth.value)
-              : activeInputLeft + arrowWidth - wrapperRect.left - containerWidth.value
-
-            const safeOffset = Math.max(0, offset)
-            containerOffset.value = safeOffset
-          }
-          else {
-            containerOffset.value = 0
-          }
+        // Arrow Offset
+        const wrapperRect = wrapperRef.value.getBoundingClientRect()
+        if (!wrapperRect.height || wrapperRect.right < 0) {
+          retryTimes.value = Math.max(0, retryTimes.value - 1)
+          return
         }
-      }, { immediate: true })
-    })
+
+        const nextArrowOffset
+          = (rtl ? activeInputRight - arrowWidth : activeInputLeft) - wrapperRect.left
+        arrowOffset.value = nextArrowOffset
+
+        // Container Offset
+        if (containerWidth && containerWidth.value < selectorWidth) {
+          const offset = rtl
+            ? wrapperRect.right - (activeInputRight - arrowWidth + containerWidth.value)
+            : activeInputLeft + arrowWidth - wrapperRect.left - containerWidth.value
+
+          const safeOffset = Math.max(0, offset)
+          containerOffset.value = safeOffset
+        }
+        else {
+          containerOffset.value = 0
+        }
+      }
+    }, { immediate: true, flush: 'post' })
 
     // ======================== Custom ========================
     function filterEmpty<T>(list: T[]) {
@@ -212,6 +228,7 @@ const Popup = defineComponent<PopupProps>(
       // Container
       let renderNode = (
         <div
+          ref={domRef}
           onMousedown={onPanelMouseDown}
           tabindex={-1}
           class={clsx(
@@ -245,7 +262,7 @@ const Popup = defineComponent<PopupProps>(
             <div ref={arrowRef} class={`${ctx.value.prefixCls}-range-arrow`} style={{ left: `${arrowOffset.value}px` }} />
 
             {/* Watch for container size */}
-            <ResizeObserver onResize={onResize}>{renderNode}</ResizeObserver>
+            {renderNode}
           </div>
         )
       }

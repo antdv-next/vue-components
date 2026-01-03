@@ -43,7 +43,6 @@ const ResizeObserver = defineComponent<ResizeObserverProps>({
           warning(false, '`children` of ResizeObserver is empty. Nothing is in observe.')
         }
       }
-      console.log(childNodes)
       return childNodes.map((child, index) => {
         const key = child?.key || `${INTERNAL_PREFIX_KEY}-${index}`
         return (
