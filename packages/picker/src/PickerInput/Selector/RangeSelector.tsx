@@ -116,7 +116,6 @@ const RangeSelector = defineComponent(
         // Input component exposes nativeElement
         const inputRect = input.nativeElement.getBoundingClientRect()
         const parentRect = rootRef.value.getBoundingClientRect()
-
         const rectOffset = inputRect.left - parentRect.left
         activeBarStyle.value = {
           ...activeBarStyle.value,
@@ -191,6 +190,7 @@ const RangeSelector = defineComponent(
         <ResizeObserver onResize={syncActiveOffset}>
           <div
             {...rootDivProps}
+            ref={rootRef}
           >
             {prefix && (
               <div class={clsx(`${prefixCls.value}-prefix`, classNames.value.prefix)} style={styles.value.prefix}>
@@ -205,7 +205,7 @@ const RangeSelector = defineComponent(
               tabindex={tabIndex.value}
               data-range="start"
             />
-            <div class={`${prefixCls.value}-range-separator`}>{separator}</div>
+            <div class={`${prefixCls.value}-range-separator`}>{separator ?? '~'}</div>
             <Input
               ref={inputEndRef}
               {...getInputProps(1)}

@@ -101,7 +101,7 @@ export interface BaseRangePickerProps<DateType extends object>
   ) => void
 }
 
-export interface RangePickerProps<DateType extends object>
+export interface RangePickerProps<DateType extends object = any>
   extends BaseRangePickerProps<DateType>,
   Omit<RangeTimeProps<DateType>, 'format' | 'defaultValue' | 'defaultOpenValue'> {}
 
@@ -127,15 +127,15 @@ function getActiveRange(activeIndex: number) {
 }
 
 const RangePicker = defineComponent(
-  <DateType extends object = any>(
-    props: RangePickerProps<DateType>,
+  (
+    props: RangePickerProps,
     { expose }: SetupContext,
   ) => {
     // ========================= Prop =========================
     const [filledProps, internalPicker, complexPicker, formatList, maskFormat, isInvalidateDate]
       = useFilledProps<
-        RangePickerProps<DateType>,
-        DateType,
+        RangePickerProps,
+        any,
         { disabled: [boolean, boolean], allowEmpty: [boolean, boolean] }
       >(computed(() => props) as any, () => {
         const { disabled, allowEmpty } = props
