@@ -1,5 +1,5 @@
 import { clsx } from '@v-c/util'
-import { defineComponent, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, defineComponent, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { usePanelContext } from '../../context'
 import useScrollTo from './useScrollTo'
 
@@ -27,7 +27,7 @@ export interface TimeColumnProps {
 }
 
 const TimeColumn = defineComponent<TimeColumnProps>(
-  (props: TimeColumnProps) => {
+  (props) => {
     const context = usePanelContext()
     const ulRef = ref<HTMLUListElement>()
     const checkDelayRef = ref<any>()
@@ -36,7 +36,7 @@ const TimeColumn = defineComponent<TimeColumnProps>(
       clearTimeout(checkDelayRef.value)
     }
 
-    const [syncScroll, stopScroll, isScrolling] = useScrollTo(ulRef, () => props.value ?? props.optionalValue)
+    const [syncScroll, stopScroll, isScrolling] = useScrollTo(ulRef, computed(() => props.value ?? props.optionalValue))
 
     watch(
       [() => props.value, () => props.optionalValue, () => flattenUnits(props.units)],

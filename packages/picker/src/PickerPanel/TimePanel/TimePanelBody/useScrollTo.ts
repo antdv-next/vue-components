@@ -24,6 +24,7 @@ export default function useScrollTo(
   const startScroll = () => {
     const ul = unref(ulRef)
     const val = unref(value)
+    console.log(val, 'Ss')
 
     scrollDistRef.value = null
     scrollRafTimesRef.value = 0
