@@ -38,8 +38,8 @@ export interface RangeSelectorProps<DateType = any> extends SelectorProps<DateTy
 }
 
 const RangeSelector = defineComponent(
-  <DateType extends object = any>(
-    props: RangeSelectorProps<DateType>,
+  (
+    props: RangeSelectorProps,
     { attrs, expose }: SetupContext,
   ) => {
     const pickerContext = usePickerContext()
@@ -66,7 +66,7 @@ const RangeSelector = defineComponent(
     const getInput = (index: number) => [inputStartRef, inputEndRef][index]?.value
 
     expose({
-      nativeElement: () => rootRef.value,
+      nativeElement: rootRef,
       focus: (options?: any) => {
         if (typeof options === 'object') {
           const { index = 0, ...rest } = options || {}
@@ -168,13 +168,13 @@ const RangeSelector = defineComponent(
         style: attrs.style as any,
         onClick: (event: MouseEvent) => {
           if (Array.isArray(onClick)) {
-            onClick.forEach(fn => fn(event))
-            return
+            onClick.forEach(fn => fn?.(event))
           }
-
-          onClick?.(event)
+          else {
+            onClick?.(event)
+          }
         },
-        onmousedown: (e: MouseEvent) => {
+        onMousedown: (e: MouseEvent) => {
           const target = e.target as HTMLElement
           if (
             target !== inputStartRef.value?.inputElement

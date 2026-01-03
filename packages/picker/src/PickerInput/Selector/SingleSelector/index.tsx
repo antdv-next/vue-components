@@ -41,9 +41,9 @@ export interface SingleSelectorProps<DateType extends object = any> extends Sele
   tabIndex?: number | string
 }
 
-const SingleSelector = defineComponent(
-  <DateType extends object = any>(
-    props: SingleSelectorProps<DateType>,
+const SingleSelector = defineComponent<SingleSelectorProps>(
+  (
+    props,
     { attrs, expose }: SetupContext,
   ) => {
     const rtl = computed(() => props.direction === 'rtl')
@@ -59,7 +59,7 @@ const SingleSelector = defineComponent(
     const inputRef = ref<InputRef>()
 
     expose({
-      nativeElement: () => rootRef.value,
+      nativeElement: rootRef,
       focus: (options?: FocusOptions) => {
         inputRef.value?.focus(options)
       },

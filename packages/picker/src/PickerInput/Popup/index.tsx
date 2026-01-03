@@ -235,7 +235,6 @@ const Popup = defineComponent<PopupProps>(
           {mergedNodes}
         </div>
       )
-
       if (range) {
         renderNode = (
           <div

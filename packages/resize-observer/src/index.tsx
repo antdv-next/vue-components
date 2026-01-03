@@ -31,7 +31,7 @@ export interface ResizeObserverProps {
 const ResizeObserver = defineComponent<ResizeObserverProps>({
   setup(props, { slots }) {
     return () => {
-      const childNodes = filterEmpty(slots.default?.() ?? [])
+      const childNodes = filterEmpty(slots.default?.() ?? []).filter(Boolean)
       if (process.env.NODE_ENV !== 'production') {
         if (childNodes.length > 1) {
           warning(
@@ -43,6 +43,7 @@ const ResizeObserver = defineComponent<ResizeObserverProps>({
           warning(false, '`children` of ResizeObserver is empty. Nothing is in observe.')
         }
       }
+      console.log(childNodes)
       return childNodes.map((child, index) => {
         const key = child?.key || `${INTERNAL_PREFIX_KEY}-${index}`
         return (

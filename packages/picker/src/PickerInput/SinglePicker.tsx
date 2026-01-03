@@ -10,7 +10,7 @@ import type {
 import { clsx } from '@v-c/util'
 import omit from '@v-c/util/dist/omit'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
-import { computed, defineComponent, ref, watch } from 'vue'
+import { computed, defineComponent, ref, shallowRef, watch } from 'vue'
 import useSemantic from '../hooks/useSemantic'
 import useToggleDates from '../hooks/useToggleDates'
 import PickerTrigger from '../PickerTrigger'
@@ -21,7 +21,6 @@ import useCellRender from './hooks/useCellRender'
 import useFieldsInvalidate from './hooks/useFieldsInvalidate'
 import useFilledProps from './hooks/useFilledProps'
 import useOpen from './hooks/useOpen'
-import usePickerRef from './hooks/usePickerRef'
 import usePresets from './hooks/usePresets'
 import useRangeActive from './hooks/useRangeActive'
 import useRangePickerValue from './hooks/useRangePickerValue'
@@ -186,7 +185,16 @@ const SinglePicker = defineComponent<PickerProps>(
     )
 
     // ========================= Refs =========================
-    const selectorRef = usePickerRef(expose)
+    const selectorRef = shallowRef()
+    expose({
+      nativeElement: computed(() => selectorRef.value?.nativeElement),
+      focus: (options?: FocusOptions) => {
+        selectorRef.value?.focus(options)
+      },
+      blur: () => {
+        selectorRef.value?.blur()
+      },
+    })
 
     // ========================= Util =========================
     function pickerParam<T>(values: T | T[]) {
@@ -400,7 +408,7 @@ const SinglePicker = defineComponent<PickerProps>(
     const onSelectorClick = (event: MouseEvent) => {
       if (
         !disabled.value
-        && !selectorRef.value?.nativeElement()?.contains(document.activeElement)
+        && !selectorRef.value?.nativeElement?.contains(document.activeElement)
       ) {
         // Click to focus the enabled input
         selectorRef.value?.focus()

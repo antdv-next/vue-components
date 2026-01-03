@@ -7,7 +7,7 @@ import { clsx } from '@v-c/util'
 import omit from '@v-c/util/dist/omit'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
 import warning from '@v-c/util/dist/warning'
-import { computed, defineComponent, ref, watch } from 'vue'
+import { computed, defineComponent, ref, shallowRef, watch } from 'vue'
 import useSemantic from '../hooks/useSemantic'
 import PickerTrigger from '../PickerTrigger'
 import { pickTriggerProps } from '../PickerTrigger/util'
@@ -17,7 +17,6 @@ import useCellRender from './hooks/useCellRender'
 import useFieldsInvalidate from './hooks/useFieldsInvalidate'
 import useFilledProps from './hooks/useFilledProps'
 import useOpen from './hooks/useOpen'
-import usePickerRef from './hooks/usePickerRef'
 import usePresets from './hooks/usePresets'
 import useRangeActive from './hooks/useRangeActive'
 import useRangeDisabledDate from './hooks/useRangeDisabledDate'
@@ -195,13 +194,30 @@ const RangePicker = defineComponent(
     const onClick = computed(() => fp.value.onClick)
 
     // ========================= Refs =========================
-    const selectorRef = usePickerRef(expose)
+    const selectorRef = shallowRef()
+
+    expose({
+      nativeElement: computed(() => selectorRef.value?.nativeElement),
+      focus: (options?: FocusOptions) => {
+        selectorRef.value?.focus(options)
+      },
+      blur: () => {
+        selectorRef.value?.blur()
+      },
+    })
 
     // ======================= Semantic =======================
     const semantic = useSemantic(classNames, styles)
 
     // ========================= Open =========================
-    const [mergedOpen, setMergeOpen] = useOpen(open, defaultOpen, disabled, onOpenChange.value)
+    const [mergedOpen, setMergeOpen] = useOpen(
+      open,
+      defaultOpen,
+      disabled,
+      (open) => {
+        onOpenChange.value?.(open)
+      },
+    )
 
     const triggerOpen = (nextOpen: boolean, config?: OpenConfig) => {
       // No need to open if all disabled
@@ -424,8 +440,9 @@ const RangePicker = defineComponent(
     // ======================== Click =========================
     const onSelectorClick = (event: MouseEvent) => {
       const rootNode = (event.target as HTMLElement).getRootNode()
+      console.log(rootNode)
       if (
-        !selectorRef.value?.nativeElement()?.contains(
+        !selectorRef.value?.nativeElement?.contains(
           ((rootNode as Document | ShadowRoot).activeElement ?? document.activeElement) as Node,
         )
       ) {
@@ -789,7 +806,6 @@ const RangePicker = defineComponent(
           {...popupProps as any}
         />
       )
-
       return (
         <PickerTrigger
           {...pickTriggerProps(fp.value as any)}

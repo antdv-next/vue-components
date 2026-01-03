@@ -7,10 +7,10 @@ export default function useDelayState<T>(
   defaultValue: T,
   onChange?: (next: T) => void,
 ) {
-  const internalValue = ref(defaultValue) as Ref<T>
+  const internalValue = ref(defaultValue)
   const state = computed(() => (value.value !== undefined ? value.value : internalValue.value))
 
-  const nextValueRef = ref<T>(state.value) as Ref<T>
+  const nextValueRef = ref(state.value)
   const rafRef = ref<number>()
 
   const cancelRaf = () => {
