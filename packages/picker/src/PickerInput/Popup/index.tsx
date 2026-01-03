@@ -88,47 +88,51 @@ const Popup = defineComponent<PopupProps>(
 
     const retryTimes = ref(0)
 
-    // onMounted(() => {
-    //
-    // })
+    watch(
+      () => activeInfo.value[0],
+      () => {
+        retryTimes.value = 10
+      },
+      { immediate: true, flush: 'post' },
+    )
 
-    watch(() => activeInfo.value[0], () => {
-      retryTimes.value = 10
-    }, { immediate: true, flush: 'post' })
-
-    watch([retryTimes, rtl, activeInfo, () => props.range], () => {
+    watch(
+      [retryTimes, rtl, activeInfo, () => props.range],
+      () => {
       // `activeOffset` is always align with the active input element
       // So we need only check container contains the `activeOffset`
-      const [activeInputLeft, activeInputRight, selectorWidth] = activeInfo.value
-      if (props.range && wrapperRef.value) {
+        const [activeInputLeft, activeInputRight, selectorWidth] = activeInfo.value
+        if (props.range && wrapperRef.value) {
         // Offset in case container has border radius
-        const arrowWidth = arrowRef.value?.offsetWidth || 0
+          const arrowWidth = arrowRef.value?.offsetWidth || 0
 
-        // Arrow Offset
-        const wrapperRect = wrapperRef.value.getBoundingClientRect()
-        if (!wrapperRect.height || wrapperRect.right < 0) {
-          retryTimes.value = Math.max(0, retryTimes.value - 1)
-          return
+          // Arrow Offset
+          const wrapperRect = wrapperRef.value.getBoundingClientRect()
+          if (!wrapperRect.height || wrapperRect.right < 0) {
+            retryTimes.value = Math.max(0, retryTimes.value - 1)
+            return
+          }
+
+          const nextArrowOffset
+            = (rtl ? activeInputRight - arrowWidth : activeInputLeft) - wrapperRect.left
+          arrowOffset.value = nextArrowOffset
+
+          // Container Offset
+          if (containerWidth && containerWidth.value < selectorWidth) {
+            const offset = rtl
+              ? wrapperRect.right - (activeInputRight - arrowWidth + containerWidth.value)
+              : activeInputLeft + arrowWidth - wrapperRect.left - containerWidth.value
+
+            const safeOffset = Math.max(0, offset)
+            containerOffset.value = safeOffset
+          }
+          else {
+            containerOffset.value = 0
+          }
         }
-
-        const nextArrowOffset
-          = (rtl ? activeInputRight - arrowWidth : activeInputLeft) - wrapperRect.left
-        arrowOffset.value = nextArrowOffset
-
-        // Container Offset
-        if (containerWidth && containerWidth.value < selectorWidth) {
-          const offset = rtl
-            ? wrapperRect.right - (activeInputRight - arrowWidth + containerWidth.value)
-            : activeInputLeft + arrowWidth - wrapperRect.left - containerWidth.value
-
-          const safeOffset = Math.max(0, offset)
-          containerOffset.value = safeOffset
-        }
-        else {
-          containerOffset.value = 0
-        }
-      }
-    }, { immediate: true, flush: 'post' })
+      },
+      { immediate: true, flush: 'post' },
+    )
 
     // ======================== Custom ========================
     function filterEmpty<T>(list: T[]) {

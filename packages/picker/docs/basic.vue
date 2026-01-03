@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Moment } from 'moment'
+import type { PickerRef } from '../src'
 import moment from 'moment'
 import { computed, ref } from 'vue'
 import momentGenerateConfig from '../src/generate/moment'
@@ -32,7 +33,7 @@ const sharedProps = computed(() => {
   }
 })
 
-const weekRef = ref<HTMLButtonElement>()
+const weekRef = ref<PickerRef>()
 
 function weekFocus() {
   if (weekRef.value) {
@@ -122,7 +123,7 @@ function keyDown(e: KeyboardEvent, preventDefault: () => void) {
           :locale="zhCN"
           allow-clear
           picker="week"
-          :render-extra-footer="() => 'i am footer!!!'"
+          :render-extra-footer="() => 'I am footer!!!'"
         />
 
         <button type="button" @click="weekFocus">
@@ -142,7 +143,7 @@ function keyDown(e: KeyboardEvent, preventDefault: () => void) {
       <div style="margin: 0 8px">
         <h3>Quarter</h3>
         <Picker
-          :locale="zhCN"
+          :locale="enUS"
           picker="quarter"
           :generate-config="momentGenerateConfig"
         />
@@ -152,7 +153,7 @@ function keyDown(e: KeyboardEvent, preventDefault: () => void) {
         <h3>Time</h3>
         <Picker
           v-bind="sharedProps"
-          :locale="enUS"
+          :locale="zhCN"
           picker="time"
         />
       </div>
@@ -161,7 +162,7 @@ function keyDown(e: KeyboardEvent, preventDefault: () => void) {
         <h3>Time 12</h3>
         <Picker
           v-bind="sharedProps"
-          :locale="enUS"
+          :locale="zhCN"
           picker="time"
           :use12-hours="true"
         />

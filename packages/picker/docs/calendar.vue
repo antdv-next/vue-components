@@ -30,7 +30,6 @@ const disabledProps = {
 <template>
   <div style="display: flex; flex-wrap: wrap">
     <div>
-      123
       <PickerPanel
         :locale="zhCN"
         :generate-config="momentGenerateConfig"

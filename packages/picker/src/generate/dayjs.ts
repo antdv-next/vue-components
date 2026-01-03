@@ -1,13 +1,13 @@
 import type { Dayjs } from 'dayjs'
 import type { GenerateConfig } from '.'
-import dayjs from 'dayjs'
+import dayjs from 'dayjs/esm'
 
-import advancedFormat from 'dayjs/plugin/advancedFormat'
-import customParseFormat from 'dayjs/plugin/customParseFormat'
-import localeData from 'dayjs/plugin/localeData'
-import weekday from 'dayjs/plugin/weekday'
-import weekOfYear from 'dayjs/plugin/weekOfYear'
-import weekYear from 'dayjs/plugin/weekYear'
+import advancedFormat from 'dayjs/esm/plugin/advancedFormat/index'
+import customParseFormat from 'dayjs/esm/plugin/customParseFormat/index'
+import localeData from 'dayjs/esm/plugin/localeData/index'
+import weekday from 'dayjs/esm/plugin/weekday/index'
+import weekOfYear from 'dayjs/esm/plugin/weekOfYear/index'
+import weekYear from 'dayjs/esm/plugin/weekYear/index'
 
 dayjs.extend(customParseFormat)
 dayjs.extend(advancedFormat)
@@ -122,7 +122,7 @@ const generateConfig: GenerateConfig<Dayjs> = {
   getFixedDate: string => dayjs(string, ['YYYY-M-DD', 'YYYY-MM-DD']),
   getEndDate: date => date.endOf('month'),
   getWeekDay: (date) => {
-    const clone = date.locale('en')
+    const clone: any = date.locale('en')
     return clone.weekday() + clone.localeData().firstDayOfWeek()
   },
   getYear: date => date.year(),
@@ -151,8 +151,8 @@ const generateConfig: GenerateConfig<Dayjs> = {
 
   locale: {
     getWeekFirstDay: locale => dayjs().locale(parseLocale(locale)).localeData().firstDayOfWeek(),
-    getWeekFirstDate: (locale, date) => date.locale(parseLocale(locale)).weekday(0),
-    getWeek: (locale, date) => date.locale(parseLocale(locale)).week(),
+    getWeekFirstDate: (locale, date: any) => date.locale(parseLocale(locale)).weekday(0),
+    getWeek: (locale, date: any) => date.locale(parseLocale(locale)).week(),
     getShortWeekDays: locale => dayjs().locale(parseLocale(locale)).localeData().weekdaysMin(),
     getShortMonths: locale => dayjs().locale(parseLocale(locale)).localeData().monthsShort(),
     format: (locale, date, format) => date.locale(parseLocale(locale)).format(format),

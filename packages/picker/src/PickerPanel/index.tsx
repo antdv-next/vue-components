@@ -350,7 +350,6 @@ const PickerPanel = defineComponent<PickerPanelProps>(
         'maxDate',
         'onHover',
       ])
-
       return (
         <div
           ref={rootRef}

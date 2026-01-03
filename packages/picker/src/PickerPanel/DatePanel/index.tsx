@@ -181,7 +181,6 @@ const DatePanel = defineComponent<DatePanelProps>(
       )
 
       const monthYearNodes = locale?.monthBeforeYear ? [monthNode, yearNode] : [yearNode, monthNode]
-
       return (
         <div class={clsx(panelPrefixCls, showWeek && `${panelPrefixCls}-show-week`)}>
           <PanelHeader

@@ -62,7 +62,6 @@ const PanelBody = defineComponent<PanelBodyProps<any>>(
 
       const mergedDisabledDate = disabledDate || contextDisabledDate
       const cellPrefixCls = `${prefixCls}-cell`
-
       const matchValues = (date: any) =>
         (values || []).some(singleValue =>
           singleValue && isSame(generateConfig, locale, date, singleValue, panelType),
@@ -77,7 +76,6 @@ const PanelBody = defineComponent<PanelBodyProps<any>>(
         for (let col = 0; col < colNum; col += 1) {
           const offset = row * colNum + col
           const currentDate = getCellDate(baseDate, offset)
-
           const disabled = mergedDisabledDate?.(currentDate, {
             type: panelType,
           })
@@ -109,7 +107,6 @@ const PanelBody = defineComponent<PanelBodyProps<any>>(
             : undefined
 
           const inner = <div class={`${cellPrefixCls}-inner`}>{getCellText(currentDate)}</div>
-
           rowNode.push(
             <td
               key={col}

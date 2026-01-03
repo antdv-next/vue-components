@@ -19,5 +19,47 @@ import Range from './range.vue'
     <Variant title="Range">
       <Range />
     </Variant>
+    <!--    <Variant title="DisabledDate"> -->
+    <!--      <DisabledDate /> -->
+    <!--    </Variant> -->
+    <!--    <Variant title="Focus"> -->
+    <!--      <Focus /> -->
+    <!--    </Variant> -->
+    <!--    <Variant title="Locale"> -->
+    <!--      <Locale /> -->
+    <!--    </Variant> -->
+    <!--    <Variant title="Modes"> -->
+    <!--      <Modes /> -->
+    <!--    </Variant> -->
+    <!--    <Variant title="Multiple"> -->
+    <!--      <Multiple /> -->
+    <!--    </Variant> -->
+    <!--    <Variant title="Panel"> -->
+    <!--      <Panel /> -->
+    <!--    </Variant> -->
+    <!--    <Variant title="PanelRender"> -->
+    <!--      <PanelRender /> -->
+    <!--    </Variant> -->
+    <!--    <Variant title="Customize"> -->
+    <!--      <Customize /> -->
+    <!--    </Variant> -->
+    <!--    <Variant title="Debug"> -->
+    <!--      <Debug /> -->
+    <!--    </Variant> -->
+    <!--    <Variant title="Limitation"> -->
+    <!--      <Limitation /> -->
+    <!--    </Variant> -->
+    <!--    <Variant title="Rtl"> -->
+    <!--      <Rtl /> -->
+    <!--    </Variant> -->
+    <!--    <Variant title="SwitchType"> -->
+    <!--      <SwitchType /> -->
+    <!--    </Variant> -->
+    <!--    <Variant title="Time"> -->
+    <!--      <Time /> -->
+    <!--    </Variant> -->
+    <!--    <Variant title="Uncontrolled"> -->
+    <!--      <Uncontrolled /> -->
+    <!--    </Variant> -->
   </Story>
 </template>

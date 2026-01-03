@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import type { Moment } from 'moment'
 import moment from 'moment'
-import { computed, h, ref } from 'vue'
-import { RangePicker } from '../src'
+import { cloneVNode, computed, h, ref } from 'vue'
+import { Picker, RangePicker } from '../src'
 import momentGenerateConfig from '../src/generate/moment'
 import zhCN from '../src/locale/zh_CN'
-import '../assets/index.less'
 
 const defaultValue = moment('2019-11-28 01:02:03')
 const defaultStartValue = moment('2019-09-03 05:02:03')
@@ -57,65 +56,76 @@ const rangeSharedProps = computed(() => {
     onChange: onRangeChange,
   }
 })
+
+function renderOrange(content: string | number, info: any, extraProps: Record<string, any> = {}) {
+  return cloneVNode(
+    info.originNode,
+    extraProps,
+    [h('div', { style: { background: 'orange' } }, content)],
+  )
+}
+
+function rangeCellRender(current: Moment | number | string, info: any) {
+  return h(
+    'div',
+    {
+      title: info.type,
+      style: { background: info.type === 'time' ? 'green' : 'yellow' },
+    },
+    info.type === 'time' ? (current as number | string) : (current as Moment).get('date'),
+  )
+}
 </script>
 
 <template>
   <div>
-    <div style="display: flex;flex-wrap: wrap;">
-      <!-- <div style="margin: 0 8px;">
+    <div style="display: flex; flex-wrap: wrap;">
+      <div style="margin: 0 8px;">
         <h3>Basic</h3>
         <h4>Value: {{ value ? value.format('YYYY-MM-DD HH:mm:ss') : 'null' }}</h4>
         <Picker
-          v-bind="sharedProps" :locale="zhCN" :cell-render="(current:Moment, info) => {
-            return h(info.originNode.type, {
-              ...info.originNode.props,
-            }, [h('div', { style: 'background: orange;' }, [current.get('date')])])
-          }"
+          v-bind="sharedProps"
+          :locale="zhCN"
+          :cell-render="(current, info) => renderOrange(current.get('date'), info)"
         />
         <Picker
-          v-bind="sharedProps" :locale="zhCN" :cell-render="(current:Moment, info) => {
-            return h(info.originNode.type, {
-              class: `${info.originNode.props!.class} testWrapper`,
-            }, [h('div', { style: 'background: orange;' }, [current.get('date')])])
-          }"
+          v-bind="sharedProps"
+          :locale="zhCN"
+          :cell-render="(current, info) => renderOrange(current.get('date'), info, {
+            class: [info.originNode.props?.class, 'testWrapper'],
+          })"
         />
         <Picker
-          v-bind="sharedProps" picker="week" :locale="zhCN" :cell-render="(current:Moment, info) => {
-            return h(info.originNode.type, {
-              ...info.originNode.props,
-            }, [h('div', { style: 'background: orange;' }, [current.get('week')])])
-          }"
+          v-bind="sharedProps"
+          picker="week"
+          :locale="zhCN"
+          :cell-render="(current, info) => renderOrange(current.get('week'), info)"
         />
         <Picker
-          v-bind="sharedProps" picker="year" :locale="zhCN" :cell-render="(current:Moment, info) => {
-            return h(info.originNode.type, {
-              ...info.originNode.props,
-            }, [h('div', { style: 'background: orange;' }, [current.get('year')])])
-          }"
+          v-bind="sharedProps"
+          picker="year"
+          :locale="zhCN"
+          :cell-render="(current, info) => renderOrange(current.get('year'), info)"
         />
         <Picker
-          v-bind="sharedProps" picker="month" :locale="zhCN" :cell-render="(current:Moment, info) => {
-            return h(info.originNode.type, {
-              ...info.originNode.props,
-            }, [h('div', { style: 'background: orange;' }, [current.get('month') + 1])])
-          }"
+          v-bind="sharedProps"
+          picker="month"
+          :locale="zhCN"
+          :cell-render="(current, info) => renderOrange(current.get('month') + 1, info)"
         />
         <Picker
-          v-bind="sharedProps" picker="quarter" :locale="zhCN" :cell-render="(current:Moment, info) => {
-            return h(info.originNode.type, {
-              ...info.originNode.props,
-            }, [h('div', { style: 'background: orange;' }, [`Q${current.get('quarter')}`])])
-          }"
+          v-bind="sharedProps"
+          picker="quarter"
+          :locale="zhCN"
+          :cell-render="(current, info) => renderOrange(`Q${current.get('quarter')}`, info)"
         />
-
         <Picker
-          v-bind="sharedProps" picker="time" :locale="zhCN" :cell-render="(current:Moment, info) => {
-            return h(info.originNode.type, {
-              ...info.originNode.props,
-            }, [h('div', { style: 'background: orange;' }, [current])])
-          }"
+          v-bind="sharedProps"
+          picker="time"
+          :locale="zhCN"
+          :cell-render="(current, info) => renderOrange(current, info)"
         />
-      </div> -->
+      </div>
 
       <div style="margin: 0 8px;">
         <h3>Range</h3>
@@ -125,12 +135,12 @@ const rangeSharedProps = computed(() => {
         </h4>
 
         <RangePicker
-          v-bind="rangeSharedProps" :locale="zhCN" allow-clear show-time style="width: 500px" :cell-render="(current, info) => {
-            return h('div', {
-              title: info.type,
-              style: `background: ${info.type === 'time' ? 'green' : 'yellow'};`,
-            }, [info.type === 'time' ? current as number : current.get('date')])
-          }"
+          v-bind="rangeSharedProps"
+          :locale="zhCN"
+          allow-clear
+          show-time
+          style="width: 580px"
+          :cell-render="rangeCellRender"
           :ranges="{
             ranges: [moment(), moment().add(10, 'day')],
           }"

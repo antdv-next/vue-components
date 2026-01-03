@@ -68,7 +68,9 @@ export default defineComponent(() => {
     filterKeys.value = Array.from(expandedSet)
   }
 
-  const filterFn = (key: string) => !!(state.inputValue && key.includes(state.inputValue))
+  function filterFn(key: string) {
+    return !!(state.inputValue && key.includes(state.inputValue))
+  }
 
   const filterTreeNode = (treeNode: any) => filterFn(String(treeNode.key))
 
