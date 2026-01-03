@@ -143,244 +143,247 @@ export type PickerPanelProps<DateType extends object = any> = BasePickerPanelPro
   classNames?: Partial<Record<PanelSemanticName, string>>
 }
 
-const PickerPanel = defineComponent<PickerPanelProps<any>>((props, { attrs }) => {
-  const pickerContext = usePickerContext()
-  const rootRef = ref<HTMLDivElement>()
+const PickerPanel = defineComponent<PickerPanelProps>(
+  (props, { attrs }) => {
+    const pickerContext = usePickerContext()
+    const rootRef = ref<HTMLDivElement>()
 
-  const mergedPrefixCls = computed(() => pickerContext.value.prefixCls || props.prefixCls || 'vc-picker')
-  const mergedGenerateConfig = computed(() => props.generateConfig || pickerContext.value.generateConfig)
-  const mergedLocale = computed(() => props.locale || pickerContext.value.locale || defaultLocale)
+    const mergedPrefixCls = computed(() => pickerContext.value.prefixCls || props.prefixCls || 'vc-picker')
+    const mergedGenerateConfig = computed(() => props.generateConfig || pickerContext.value.generateConfig)
+    const mergedLocale = computed(() => props.locale || pickerContext.value.locale || defaultLocale)
 
-  // Time
-  const timePropsInfo = computed(() => getTimeProps({
-    ...props,
-    locale: mergedLocale.value,
-    format: undefined,
-    picker: props.picker,
-  }))
+    // Time
+    const timePropsInfo = computed(() => getTimeProps({
+      ...props,
+      locale: mergedLocale.value,
+      format: undefined,
+      picker: props.picker,
+    }))
 
-  const localeTimeProps = computed(() => timePropsInfo.value[1])
-  const showTimeFormat = computed(() => timePropsInfo.value[2])
-  const propFormat = computed(() => timePropsInfo.value[3])
-  const timeProps = computed(() => timePropsInfo.value[0])
+    const localeTimeProps = computed(() => timePropsInfo.value[1])
+    const showTimeFormat = computed(() => timePropsInfo.value[2])
+    const propFormat = computed(() => timePropsInfo.value[3])
+    const timeProps = computed(() => timePropsInfo.value[0])
 
-  const filledLocale = useLocale(mergedLocale, localeTimeProps)
+    const filledLocale = useLocale(mergedLocale, localeTimeProps)
 
-  const internalPicker = computed<InternalMode>(() => {
-    if (props.picker === 'date' && props.showTime) {
-      return 'datetime'
-    }
-    return props.picker || 'date'
-  })
-
-  const mergedShowTime = computed(() => fillShowTimeConfig(
-    internalPicker.value,
-    showTimeFormat.value,
-    propFormat.value,
-    timeProps.value,
-    filledLocale.value,
-  ))
-
-  const now = computed(() => mergedGenerateConfig.value?.getNow?.())
-
-  // Mode
-  const internalModeState = ref<PanelMode>(props.picker || 'date')
-  const mergedMode = computed(() => props.mode || internalModeState.value)
-  const setMergedMode = (m: PanelMode) => {
-    internalModeState.value = m
-  }
-
-  const internalMode = computed(() => mergedMode.value === 'date' && mergedShowTime.value ? 'datetime' : mergedMode.value)
-
-  // Toggle
-  const toggleDates = useToggleDates(mergedGenerateConfig as any, filledLocale, internalPicker)
-
-  // Value
-  const internalValueState = ref(props.defaultValue)
-  const innerValue = computed(() => props.value !== undefined ? props.value : internalValueState.value)
-  const setMergedValue = (val: any) => {
-    internalValueState.value = val
-  }
-
-  const mergedValue = computed(() => {
-    const vals = toArray(innerValue.value).filter(val => val)
-    return props.multiple ? vals : vals.slice(0, 1)
-  })
-
-  const triggerChange = (nextValue: any[] | null) => {
-    setMergedValue(nextValue)
-
-    if (props.onChange && (
-      nextValue === null
-      || mergedValue.value.length !== nextValue.length
-      || mergedValue.value.some((ori, index) => !isSame(mergedGenerateConfig.value, filledLocale.value, ori, nextValue[index], internalPicker.value))
-    )) {
-      props.onChange(props.multiple ? nextValue : nextValue?.[0])
-    }
-  }
-
-  const onInternalSelect = (newDate: any) => {
-    props.onSelect?.(newDate)
-
-    if (mergedMode.value === props.picker) {
-      const nextValues = props.multiple ? toggleDates(mergedValue.value, newDate) : [newDate]
-      triggerChange(nextValues)
-    }
-  }
-
-  // PickerValue
-  const internalPickerValueState = ref(props.defaultPickerValue || mergedValue.value[0] || now.value)
-  const mergedPickerValue = computed(() => props.pickerValue !== undefined ? props.pickerValue : internalPickerValueState.value)
-  const setInternalPickerValue = (val: any) => {
-    internalPickerValueState.value = val
-  }
-
-  watch(() => mergedValue.value[0], (val) => {
-    if (val && props.pickerValue === undefined) {
-      setInternalPickerValue(val)
-    }
-  })
-
-  const triggerPanelChange = (viewDate?: any, nextMode?: PanelMode) => {
-    props.onPanelChange?.(viewDate || mergedPickerValue.value, nextMode || mergedMode.value)
-  }
-
-  const setPickerValue = (nextPickerValue: any, triggerPanelEvent = false) => {
-    setInternalPickerValue(nextPickerValue)
-    props.onPickerValueChange?.(nextPickerValue)
-    if (triggerPanelEvent) {
-      triggerPanelChange(nextPickerValue)
-    }
-  }
-
-  const triggerModeChange = (nextMode: PanelMode, viewDate?: any) => {
-    setMergedMode(nextMode)
-    if (viewDate) {
-      setPickerValue(viewDate)
-    }
-    triggerPanelChange(viewDate, nextMode)
-  }
-
-  const onPanelValueSelect = (nextValue: any) => {
-    onInternalSelect(nextValue)
-    setPickerValue(nextValue)
-
-    if (mergedMode.value !== props.picker) {
-      const decadeYearQueue: PanelMode[] = ['decade', 'year']
-      const decadeYearMonthQueue: PanelMode[] = [...decadeYearQueue, 'month']
-
-      const pickerQueue: Partial<Record<PickerMode, PanelMode[]>> = {
-        quarter: [...decadeYearQueue, 'quarter'],
-        week: [...decadeYearMonthQueue, 'week'],
-        date: [...decadeYearMonthQueue, 'date'],
+    const internalPicker = computed<InternalMode>(() => {
+      if (props.picker === 'date' && props.showTime) {
+        return 'datetime'
       }
+      return props.picker || 'date'
+    })
 
-      const queue = pickerQueue[props.picker || 'date'] || decadeYearMonthQueue
-      const index = queue.indexOf(mergedMode.value)
-      const nextMode = queue[index + 1]
+    const mergedShowTime = computed(() => fillShowTimeConfig(
+      internalPicker.value,
+      showTimeFormat.value,
+      propFormat.value,
+      timeProps.value,
+      filledLocale.value,
+    ))
 
-      if (nextMode) {
-        triggerModeChange(nextMode, nextValue)
+    const now = computed(() => mergedGenerateConfig.value?.getNow?.())
+
+    // Mode
+    const internalModeState = ref<PanelMode>(props.picker || 'date')
+    const mergedMode = computed(() => props.mode || internalModeState.value)
+    const setMergedMode = (m: PanelMode) => {
+      internalModeState.value = m
+    }
+
+    const internalMode = computed(() => mergedMode.value === 'date' && mergedShowTime.value ? 'datetime' : mergedMode.value)
+
+    // Toggle
+    const toggleDates = useToggleDates(mergedGenerateConfig as any, filledLocale, internalPicker)
+
+    // Value
+    const internalValueState = ref(props.defaultValue)
+    const innerValue = computed(() => props.value !== undefined ? props.value : internalValueState.value)
+    const setMergedValue = (val: any) => {
+      internalValueState.value = val
+    }
+
+    const mergedValue = computed(() => {
+      const vals = toArray(innerValue.value).filter(val => val)
+      return props.multiple ? vals : vals.slice(0, 1)
+    })
+
+    const triggerChange = (nextValue: any[] | null) => {
+      setMergedValue(nextValue)
+
+      if (props.onChange && (
+        nextValue === null
+        || mergedValue.value.length !== nextValue.length
+        || mergedValue.value.some((ori, index) => !isSame(mergedGenerateConfig.value, filledLocale.value, ori, nextValue[index], internalPicker.value))
+      )) {
+        props.onChange(props.multiple ? nextValue : nextValue?.[0])
       }
     }
-  }
 
-  // Hover Date
-  const hoverRangeDate = computed(() => {
-    let start: any
-    let end: any
+    const onInternalSelect = (newDate: any) => {
+      props.onSelect?.(newDate)
 
-    if (Array.isArray(props.hoverRangeValue)) {
-      [start, end] = props.hoverRangeValue
-    }
-    else {
-      start = props.hoverRangeValue
+      if (mergedMode.value === props.picker) {
+        const nextValues = props.multiple ? toggleDates(mergedValue.value, newDate) : [newDate]
+        triggerChange(nextValues)
+      }
     }
 
-    if (!start && !end) {
-      return null
+    // PickerValue
+    const internalPickerValueState = ref(props.defaultPickerValue || mergedValue.value[0] || now.value)
+    const mergedPickerValue = computed(() => props.pickerValue !== undefined ? props.pickerValue : internalPickerValueState.value)
+    const setInternalPickerValue = (val: any) => {
+      internalPickerValueState.value = val
     }
 
-    start = start || end
-    end = end || start
+    watch(() => mergedValue.value[0], (val) => {
+      if (val && props.pickerValue === undefined) {
+        setInternalPickerValue(val)
+      }
+    })
 
-    return mergedGenerateConfig.value.isAfter(start, end) ? [end, start] : [start, end]
-  })
+    const triggerPanelChange = (viewDate?: any, nextMode?: PanelMode) => {
+      props.onPanelChange?.(viewDate || mergedPickerValue.value, nextMode || mergedMode.value)
+    }
 
-  // CellRender
-  const onInternalCellRender = useCellRender(toRef(props, 'cellRender'), toRef(props, 'dateRender') as any, toRef(props, 'monthCellRender') as any)
+    const setPickerValue = (nextPickerValue: any, triggerPanelEvent = false) => {
+      setInternalPickerValue(nextPickerValue)
+      props.onPickerValueChange?.(nextPickerValue)
+      if (triggerPanelEvent) {
+        triggerPanelChange(nextPickerValue)
+      }
+    }
 
-  // Shared Context
-  const sharedPanelContext = computed(() => ({
-    classNames: pickerContext.value.classNames?.popup ?? props.classNames ?? {},
-    styles: pickerContext.value.styles?.popup ?? props.styles ?? {},
-  }))
+    const triggerModeChange = (nextMode: PanelMode, viewDate?: any) => {
+      setMergedMode(nextMode)
+      if (viewDate) {
+        setPickerValue(viewDate)
+      }
+      triggerPanelChange(viewDate, nextMode)
+    }
 
-  provideSharedPanelContext(sharedPanelContext)
+    const onPanelValueSelect = (nextValue: any) => {
+      onInternalSelect(nextValue)
+      setPickerValue(nextValue)
 
-  const parentHackContext = usePickerHackContext()
-  const pickerPanelContext = computed(() => ({
-    ...(parentHackContext?.value || {}),
-    hideHeader: props.hideHeader,
-  }))
+      if (mergedMode.value !== props.picker) {
+        const decadeYearQueue: PanelMode[] = ['decade', 'year']
+        const decadeYearMonthQueue: PanelMode[] = [...decadeYearQueue, 'month']
 
-  providePickerHackContext(pickerPanelContext)
+        const pickerQueue: Partial<Record<PickerMode, PanelMode[]>> = {
+          quarter: [...decadeYearQueue, 'quarter'],
+          week: [...decadeYearMonthQueue, 'week'],
+          date: [...decadeYearMonthQueue, 'date'],
+        }
 
-  if (process.env.NODE_ENV !== 'production') {
-    warning(
-      !mergedValue.value || mergedValue.value.every(val => mergedGenerateConfig.value.isValidate(val)),
-      'Invalidate date pass to `value` or `defaultValue`.',
-    )
-  }
+        const queue = pickerQueue[props.picker || 'date'] || decadeYearMonthQueue
+        const index = queue.indexOf(mergedMode.value)
+        const nextMode = queue[index + 1]
 
-  return () => {
-    const PanelComponent = (props.components?.[internalMode.value] || DefaultComponents[internalMode.value] || DatePanel) as any
+        if (nextMode) {
+          triggerModeChange(nextMode, nextValue)
+        }
+      }
+    }
 
-    const panelCls = `${mergedPrefixCls.value}-panel`
+    // Hover Date
+    const hoverRangeDate = computed(() => {
+      let start: any
+      let end: any
 
-    const panelProps = pickProps(props, [
-      'showWeek',
-      'prevIcon',
-      'nextIcon',
-      'superPrevIcon',
-      'superNextIcon',
-      'disabledDate',
-      'minDate',
-      'maxDate',
-      'onHover',
-    ])
+      if (Array.isArray(props.hoverRangeValue)) {
+        [start, end] = props.hoverRangeValue
+      }
+      else {
+        start = props.hoverRangeValue
+      }
 
-    return (
-      <div
-        ref={rootRef}
-        tabindex={props.tabindex}
-        class={clsx(panelCls, { [`${panelCls}-rtl`]: props.direction === 'rtl' })}
-        {...attrs}
-      >
-        <PanelComponent
-          {...panelProps}
-          showTime={mergedShowTime.value}
-          prefixCls={mergedPrefixCls.value}
-          locale={filledLocale.value}
-          generateConfig={mergedGenerateConfig.value}
-          onModeChange={triggerModeChange}
-          pickerValue={mergedPickerValue.value}
-          onPickerValueChange={(nextPickerValue: any) => {
-            setPickerValue(nextPickerValue, true)
-          }}
-          value={mergedValue.value[0]}
-          onSelect={onPanelValueSelect}
-          values={mergedValue.value}
-          cellRender={onInternalCellRender}
-          hoverRangeValue={hoverRangeDate.value}
-          hoverValue={props.hoverValue}
-        />
-      </div>
-    )
-  }
-}, {
-  name: 'PickerPanel',
-  inheritAttrs: false,
-})
+      if (!start && !end) {
+        return null
+      }
+
+      start = start || end
+      end = end || start
+
+      return mergedGenerateConfig.value.isAfter(start, end) ? [end, start] : [start, end]
+    })
+
+    // CellRender
+    const onInternalCellRender = useCellRender(toRef(props, 'cellRender'), toRef(props, 'dateRender') as any, toRef(props, 'monthCellRender') as any)
+
+    // Shared Context
+    const sharedPanelContext = computed(() => ({
+      classNames: pickerContext.value.classNames?.popup ?? props.classNames ?? {},
+      styles: pickerContext.value.styles?.popup ?? props.styles ?? {},
+    }))
+
+    provideSharedPanelContext(sharedPanelContext)
+
+    const parentHackContext = usePickerHackContext()
+    const pickerPanelContext = computed(() => ({
+      ...(parentHackContext?.value || {}),
+      hideHeader: props.hideHeader,
+    }))
+
+    providePickerHackContext(pickerPanelContext)
+
+    if (process.env.NODE_ENV !== 'production') {
+      warning(
+        !mergedValue.value || mergedValue.value.every(val => mergedGenerateConfig.value.isValidate(val)),
+        'Invalidate date pass to `value` or `defaultValue`.',
+      )
+    }
+
+    return () => {
+      const PanelComponent = (props.components?.[internalMode.value] || DefaultComponents[internalMode.value] || DatePanel) as any
+
+      const panelCls = `${mergedPrefixCls.value}-panel`
+
+      const panelProps = pickProps(props, [
+        'showWeek',
+        'prevIcon',
+        'nextIcon',
+        'superPrevIcon',
+        'superNextIcon',
+        'disabledDate',
+        'minDate',
+        'maxDate',
+        'onHover',
+      ])
+
+      return (
+        <div
+          ref={rootRef}
+          tabindex={props.tabindex}
+          class={clsx(panelCls, { [`${panelCls}-rtl`]: props.direction === 'rtl' })}
+          {...attrs}
+        >
+          <PanelComponent
+            {...panelProps}
+            showTime={mergedShowTime.value}
+            prefixCls={mergedPrefixCls.value}
+            locale={filledLocale.value}
+            generateConfig={mergedGenerateConfig.value}
+            onModeChange={triggerModeChange}
+            pickerValue={mergedPickerValue.value}
+            onPickerValueChange={(nextPickerValue: any) => {
+              setPickerValue(nextPickerValue, true)
+            }}
+            value={mergedValue.value[0]}
+            onSelect={onPanelValueSelect}
+            values={mergedValue.value}
+            cellRender={onInternalCellRender}
+            hoverRangeValue={hoverRangeDate.value}
+            hoverValue={props.hoverValue}
+          />
+        </div>
+      )
+    }
+  },
+  {
+    name: 'PickerPanel',
+    inheritAttrs: false,
+  },
+)
 
 export default PickerPanel

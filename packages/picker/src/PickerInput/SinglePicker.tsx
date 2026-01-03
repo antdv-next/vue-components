@@ -207,7 +207,9 @@ const SinglePicker = defineComponent<PickerProps>(
       open,
       defaultOpen,
       computed(() => [disabled.value]),
-      onOpenChange.value,
+      (open) => {
+        onOpenChange.value?.(open)
+      },
     )
 
     // ======================= Calendar =======================
@@ -376,7 +378,6 @@ const SinglePicker = defineComponent<PickerProps>(
       triggerEvent?: boolean,
     ) => {
       setMode(nextMode)
-
       // Compatible with `onPanelChange`
       if (onPanelChange.value && triggerEvent !== false) {
         const lastPickerValue
@@ -392,7 +393,6 @@ const SinglePicker = defineComponent<PickerProps>(
      */
     const triggerConfirm = () => {
       triggerSubmitChange(getCalendarValue.value)
-
       triggerOpen(false, { force: true })
     }
 
@@ -682,6 +682,7 @@ const SinglePicker = defineComponent<PickerProps>(
     })
 
     return () => {
+      console.log(mergedOpen.value, ' SinglePicker Render mergedOpen')
       const [mergedClassNames, mergedStyles] = semanticCtx.value
 
       // >>> Render
