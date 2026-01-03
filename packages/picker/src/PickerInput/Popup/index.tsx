@@ -170,6 +170,14 @@ const Popup = defineComponent<PopupProps>(
         onPanelMouseDown,
       } = props
 
+      const onPanelFocusIn = (event: FocusEvent) => {
+        onFocus?.(event)
+      }
+
+      const onPanelFocusOut = (event: FocusEvent) => {
+        onBlur?.(event)
+      }
+
       const prefixCls = ctx.value.prefixCls
       let mergedNodes: VueNode = (
         <div class={`${prefixCls}-panel-layout`}>
@@ -221,8 +229,8 @@ const Popup = defineComponent<PopupProps>(
           // onMouseDown={(e) => {
           //   // e.preventDefault();
           // }}
-          onFocus={onFocus}
-          onBlur={onBlur}
+          onFocusin={onPanelFocusIn}
+          onFocusout={onPanelFocusOut}
         >
           {mergedNodes}
         </div>
