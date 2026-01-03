@@ -2,14 +2,15 @@ import type { GenerateConfig } from '../../generate'
 import type { SharedPanelProps } from '../../interface'
 import { computed, defineComponent } from 'vue'
 import { formatValue } from '../../utils/dateUtil'
-import { providePanelContext, useInfo } from '../context'
+import { providePanelContext, useInfo, useSharedPanelContext } from '../context'
 import PanelBody from '../PanelBody'
 import PanelHeader from '../PanelHeader'
 
 const QuarterPanel = defineComponent<SharedPanelProps<any>>(
   <DateType extends object = any>(props: SharedPanelProps<DateType>) => {
+    const sharedContext = useSharedPanelContext()
     const panelContext = computed(() => {
-      const [info] = useInfo(props as any, 'quarter')
+      const [info] = useInfo(props as any, 'quarter', sharedContext)
       return info
     })
 

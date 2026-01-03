@@ -8,7 +8,7 @@ import {
   isSameMonth,
   WEEK_DAY_COUNT,
 } from '../../utils/dateUtil'
-import { providePanelContext, useInfo } from '../context'
+import { providePanelContext, useInfo, useSharedPanelContext } from '../context'
 import PanelBody from '../PanelBody'
 import PanelHeader from '../PanelHeader'
 
@@ -21,9 +21,10 @@ export interface DatePanelProps<DateType extends object = any> extends SharedPan
 
 const DatePanel = defineComponent<DatePanelProps>(
   (props) => {
+    const sharedContext = useSharedPanelContext()
     const panelContext = computed(() => {
       const panelMode = props.mode || 'date'
-      const [info] = useInfo(props as any, panelMode)
+      const [info] = useInfo(props as any, panelMode, sharedContext)
       return info
     })
     providePanelContext(panelContext)

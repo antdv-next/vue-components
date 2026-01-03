@@ -2,14 +2,15 @@ import type { SharedPanelProps } from '../../interface'
 import { clsx } from '@v-c/util'
 import { computed, defineComponent } from 'vue'
 import { formatValue } from '../../utils/dateUtil'
-import { providePanelContext, useInfo } from '../context'
+import { providePanelContext, useInfo, useSharedPanelContext } from '../context'
 import PanelHeader from '../PanelHeader'
 import TimePanelBody from './TimePanelBody'
 
 const TimePanel = defineComponent<SharedPanelProps<any>>(
   (props) => {
+    const sharedContext = useSharedPanelContext()
     const panelContext = computed(() => {
-      const [info] = useInfo(props as any, 'time')
+      const [info] = useInfo(props as any, 'time', sharedContext)
       return info
     })
 

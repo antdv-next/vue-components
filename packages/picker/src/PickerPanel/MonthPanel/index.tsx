@@ -2,14 +2,15 @@ import type { GenerateConfig } from '../../generate'
 import type { DisabledDate, SharedPanelProps } from '../../interface'
 import { computed, defineComponent } from 'vue'
 import { formatValue } from '../../utils/dateUtil'
-import { providePanelContext, useInfo } from '../context'
+import { providePanelContext, useInfo, useSharedPanelContext } from '../context'
 import PanelBody from '../PanelBody'
 import PanelHeader from '../PanelHeader'
 
 const MonthPanel = defineComponent<SharedPanelProps>(
   (props: SharedPanelProps) => {
+    const sharedContext = useSharedPanelContext()
     const panelContext = computed(() => {
-      const [info] = useInfo(props as any, 'month')
+      const [info] = useInfo(props as any, 'month', sharedContext)
       return info
     })
 

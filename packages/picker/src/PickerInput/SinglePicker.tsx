@@ -682,7 +682,6 @@ const SinglePicker = defineComponent<PickerProps>(
     })
 
     return () => {
-      console.log(mergedOpen.value, ' SinglePicker Render mergedOpen')
       const [mergedClassNames, mergedStyles] = semanticCtx.value
 
       // >>> Render

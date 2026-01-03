@@ -62,8 +62,9 @@ export function usePanelContext<DateType extends object = any>() {
 export function useInfo<DateType extends object = any>(
   props: SharedPanelProps<DateType>,
   panelType: PanelMode,
+  sharedContext?: Ref<SharedPanelContextProps> | null,
 ): [sharedProps: PanelContextProps<DateType>, now: DateType] {
-  const ctx = useSharedPanelContext()
+  const ctx = sharedContext ?? useSharedPanelContext()
   const classNames = ctx?.value.classNames
   const styles = ctx?.value.styles
 
