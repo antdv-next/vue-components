@@ -28,6 +28,11 @@
       "import": "./dist/locale/*.js",
       "require": "./dist/locale/*.cjs"
     },
+    "./generate/*": {
+       "import": "./dist/generate/*.js",
+       "require": "./dist/generate/*.cjs",
+       "types": "./dist/generate/*.d.ts"
+    },
     "./dist/*": {
       "types": "./dist/*.d.ts",
       "import": "./dist/*.js",

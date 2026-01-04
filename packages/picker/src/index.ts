@@ -27,7 +27,7 @@
  *  - [Break] RangePicker go to end field, `pickerValue` will follow the start field if not controlled.
  */
 
-import type { PickerRef, SharedTimeProps } from './interface'
+import type { Components, Locale, PickerMode, PickerRef, SharedTimeProps } from './interface'
 import type { RangePickerProps } from './PickerInput/RangePicker'
 import type { BasePickerProps, PickerProps } from './PickerInput/SinglePicker'
 import type { BasePickerPanelProps, PickerPanelProps } from './PickerPanel'
@@ -39,6 +39,9 @@ export { Picker, PickerPanel, RangePicker }
 export type {
   BasePickerPanelProps,
   BasePickerProps,
+  Components,
+  Locale,
+  PickerMode,
   PickerPanelProps,
   PickerProps,
   PickerRef,
