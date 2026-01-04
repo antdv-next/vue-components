@@ -2,6 +2,8 @@
 import Basic from './basic.vue'
 import Calendar from './calendar.vue'
 import CellRender from './cellRender.vue'
+import DisabledDate from './disabledDate.vue'
+import Focus from './focus.vue'
 import Range from './range.vue'
 </script>
 
@@ -19,12 +21,12 @@ import Range from './range.vue'
     <Variant title="Range">
       <Range />
     </Variant>
-    <!--    <Variant title="DisabledDate"> -->
-    <!--      <DisabledDate /> -->
-    <!--    </Variant> -->
-    <!--    <Variant title="Focus"> -->
-    <!--      <Focus /> -->
-    <!--    </Variant> -->
+    <Variant title="DisabledDate">
+      <DisabledDate />
+    </Variant>
+    <Variant title="Focus">
+      <Focus />
+    </Variant>
     <!--    <Variant title="Locale"> -->
     <!--      <Locale /> -->
     <!--    </Variant> -->

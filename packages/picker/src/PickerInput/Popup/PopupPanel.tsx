@@ -2,6 +2,7 @@ import type { PanelMode } from '../../interface'
 import type { PickerPanelProps } from '../../PickerPanel'
 import type { PickerHackContextProps } from '../../PickerPanel/context'
 import type { FooterProps } from './Footer'
+import { omit } from '@v-c/util'
 import { computed, defineComponent } from 'vue'
 import PickerPanel from '../../PickerPanel'
 import { providePickerHackContext } from '../../PickerPanel/context'
@@ -115,7 +116,7 @@ const PopupPanel = defineComponent<PopupPanelProps>(
               }}
             >
               <PickerPanel
-                {...pickerProps.value as any}
+                {...omit(pickerProps.value, ['onPickerValueChange']) as any}
                 pickerValue={nextPickerValue.value as any}
                 onPickerValueChange={onSecondPickerValueChange}
               />

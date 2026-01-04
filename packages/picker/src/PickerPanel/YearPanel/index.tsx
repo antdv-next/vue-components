@@ -6,7 +6,7 @@ import { providePanelContext, useInfo, useSharedPanelContext } from '../context'
 import PanelBody from '../PanelBody'
 import PanelHeader from '../PanelHeader'
 
-const YearPanel = defineComponent<SharedPanelProps<any>>(
+const YearPanel = defineComponent<SharedPanelProps>(
   (props) => {
     const sharedContext = useSharedPanelContext()
     const panelContext = computed(() => {

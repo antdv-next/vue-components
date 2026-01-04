@@ -150,7 +150,6 @@ const RangePicker = defineComponent(
       })
 
     const fp = computed(() => filledProps.value)
-
     const prefixCls = computed(() => fp.value.prefixCls)
     const rootClassName = computed(() => fp.value.rootClassName)
     const styles = computed(() => fp.value.styles)
