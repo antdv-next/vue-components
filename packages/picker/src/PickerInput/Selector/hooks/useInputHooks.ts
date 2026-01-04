@@ -53,9 +53,13 @@ function formatValue<DateType>(
     format: string | ((value: DateType) => string)
   },
 ): string {
+  if (!value)
+    return ''
+
   if (typeof format === 'function') {
     return format(value)
   }
+
   return generateConfig.locale.format(locale.locale, value, format) || String(value)
 }
 
