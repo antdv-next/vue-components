@@ -1,7 +1,7 @@
 {
   "name": "@v-c/picker",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "description": "picker ui component for vue",
   "publishConfig": {
     "access": "public"
@@ -18,7 +18,21 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
-    "./dist/*": "./dist/*",
+    "./dist/locale/*": {
+        "types": "./dist/locale/*.d.ts",
+        "import": "./dist/locale/*.js",
+        "require": "./dist/locale/*.cjs"
+    },
+    "./locale/*": {
+      "types": "./dist/locale/*.d.ts",
+      "import": "./dist/locale/*.js",
+      "require": "./dist/locale/*.cjs"
+    },
+    "./dist/*": {
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.js",
+      "require": "./dist/*.cjs"
+    },
     "./package.json": "./package.json"
   },
   "main": "index.js",
