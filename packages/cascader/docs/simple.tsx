@@ -1,17 +1,17 @@
 import type { CascaderProps } from '../src'
+import type { Option2 } from './utils'
 import { defineComponent, ref } from 'vue'
 import Cascader from '../src'
-import type { Option2 } from './utils'
 import './assets/index.less'
 
 const addressOptions = [
   {
-    label: '福建',
-    value: 'fj',
+    'label': '福建',
+    'value': 'fj',
     'aria-label': '福建',
     'aria-labelledby': 'fj',
     'data-type': 'fj',
-    children: [
+    'children': [
       {
         label: '福州',
         value: 'fuzhou',

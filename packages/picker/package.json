@@ -1,0 +1,63 @@
+{
+  "name": "@v-c/picker",
+  "type": "module",
+  "version": "0.0.1",
+  "description": "picker ui component for vue",
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": "",
+  "license": "MIT",
+  "keywords": [
+    "picker",
+    "vue-component"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./dist/*": "./dist/*",
+    "./package.json": "./package.json"
+  },
+  "main": "index.js",
+  "files": [
+    "dist",
+    "package.json"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "prepublish": "pnpm build",
+    "test": "vitest run",
+    "bump": "bumpp --release patch"
+  },
+  "peerDependencies": {
+    "date-fns": ">= 2.x",
+    "dayjs": ">= 1.x",
+    "luxon": ">= 3.x",
+    "moment": ">= 2.x",
+    "vue": "^3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "date-fns": {
+      "optional": true
+    },
+    "dayjs": {
+      "optional": true
+    },
+    "luxon": {
+      "optional": true
+    },
+    "moment": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "@v-c/overflow": "workspace:^",
+    "@v-c/util": "workspace:^"
+  },
+  "devDependencies": {
+    "@types/luxon": "^3.7.1"
+  }
+}

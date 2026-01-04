@@ -1,7 +1,7 @@
 import type { ComputedRef } from 'vue'
+import type { OnHover } from '../hooks/useHover'
 import { computed } from 'vue'
 import { useInjectTableContext } from '../context/TableContext'
-import type { OnHover } from '../hooks/useHover'
 
 function inHoverRange(cellStartRow: number, cellRowSpan: number, startRow: number, endRow: number) {
   const cellEndRow = cellStartRow + cellRowSpan - 1

@@ -1,7 +1,7 @@
 import { defineComponent } from 'vue'
 import Table from '../src'
 
-const generateData = () => {
+function generateData() {
   const temp = []
 
   for (let i = 0; i < 100; i += 1) {
@@ -65,7 +65,9 @@ export default defineComponent(() => {
             handleClick(record, event)
           }}
         >
-          click {record.a}
+          click
+          {' '}
+          {record.a}
         </a>
       ),
     },

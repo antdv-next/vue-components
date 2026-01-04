@@ -39,7 +39,12 @@ export default defineComponent(() => {
       data={data}
       expandable={{
         expandRowByClick: true,
-        expandedRowRender: record => <p>extra: {record.a}</p>,
+        expandedRowRender: record => (
+          <p>
+            extra:
+            {record.a}
+          </p>
+        ),
         onExpand,
         expandIcon: CustomExpandIcon,
       }}

@@ -1,6 +1,6 @@
 import type { Ref } from 'vue'
-import { computed, unref } from 'vue'
 import { clsx } from '@v-c/util'
+import { computed, unref } from 'vue'
 import { useInjectTableContext } from '../context/TableContext'
 import { getColumnsKey } from '../utils/valueUtil'
 
@@ -43,7 +43,8 @@ export default function useRowInfo<RecordType>(
     let computeRowClassName = ''
     if (typeof tableContext.rowClassName === 'string') {
       computeRowClassName = tableContext.rowClassName
-    } else if (typeof tableContext.rowClassName === 'function') {
+    }
+    else if (typeof tableContext.rowClassName === 'function') {
       computeRowClassName = tableContext.rowClassName(mergedRecord, mergedRecordIndex, mergedIndent)
     }
 

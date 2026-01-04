@@ -68,8 +68,8 @@ const BodyRow = defineComponent({
 
     return () => {
       const { class: className, style, index, moveRow, ...restAttrs } = attrs as any
-      const hoverClass =
-        hoverPosition.value === 'upward'
+      const hoverClass
+        = hoverPosition.value === 'upward'
           ? 'drag-over-upward'
           : hoverPosition.value === 'downward'
             ? 'drag-over-downward'

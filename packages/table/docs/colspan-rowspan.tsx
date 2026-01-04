@@ -1,5 +1,5 @@
-import type { ColumnsType } from '../src'
 import type { TdHTMLAttributes } from 'vue'
+import type { ColumnsType } from '../src'
 import { defineComponent } from 'vue'
 import Table from '../src'
 

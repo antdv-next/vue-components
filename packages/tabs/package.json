@@ -11,10 +11,6 @@
   "keywords": [
     "decimal"
   ],
-  "files": [
-    "dist",
-    "package.json"
-  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -25,6 +21,10 @@
     "./package.json": "./package.json"
   },
   "main": "index.js",
+  "files": [
+    "dist",
+    "package.json"
+  ],
   "scripts": {
     "build": "vite build",
     "prepublish": "pnpm build",

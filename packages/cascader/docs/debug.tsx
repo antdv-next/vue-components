@@ -1,6 +1,6 @@
+import type { Option2 } from './utils'
 import { defineComponent, ref } from 'vue'
 import Cascader from '../src'
-import type { Option2 } from './utils'
 import './assets/index.less'
 
 const addressOptions: Option2[] = [
@@ -108,24 +108,24 @@ export default defineComponent({
         </label>
         {multiple.value
           ? (
-            <Cascader
-              style={{ width: '200px' }}
-              checkable
-              defaultValue={[['fj'], ['fuzhou']]}
-              showSearch
-            />
-          )
+              <Cascader
+                style={{ width: '200px' }}
+                checkable
+                defaultValue={[['fj'], ['fuzhou']]}
+                showSearch
+              />
+            )
           : (
-            <Cascader
-              style={{ width: '200px' }}
-              options={addressOptions}
-              onChange={onChange}
-              checkable={false}
-              allowClear
-              defaultValue={['fj', 'fuzhou']}
-              showSearch
-            />
-          )}
+              <Cascader
+                style={{ width: '200px' }}
+                options={addressOptions}
+                onChange={onChange}
+                checkable={false}
+                allowClear
+                defaultValue={['fj', 'fuzhou']}
+                showSearch
+              />
+            )}
       </>
     )
   },

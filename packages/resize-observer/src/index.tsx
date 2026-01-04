@@ -31,7 +31,7 @@ export interface ResizeObserverProps {
 const ResizeObserver = defineComponent<ResizeObserverProps>({
   setup(props, { slots }) {
     return () => {
-      const childNodes = filterEmpty(slots.default?.() ?? [])
+      const childNodes = filterEmpty(slots.default?.() ?? []).filter(Boolean)
       if (process.env.NODE_ENV !== 'production') {
         if (childNodes.length > 1) {
           warning(

@@ -235,7 +235,7 @@ export default defineComponent({
           return
         }
 
-        if (heights.id.value === 0) {
+        if (heights.id === 0) {
           const safeItemHeight = itemHeight!
           const safeListHeight = height!
 
@@ -627,7 +627,7 @@ export default defineComponent({
         offsetX: offsetLeft.value,
         offsetY: fillerOffset.value || 0,
         rtl: isRTL.value,
-        getSize,
+        getSize: getSize.value,
       })
 
       const Component = props.component as any

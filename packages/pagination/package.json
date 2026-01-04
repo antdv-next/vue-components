@@ -9,24 +9,24 @@
       "require": "./dist/index.cjs"
     },
     "./dist/locale/*.js": {
-        "import": "./dist/locale/*.js",
-        "require": "./dist/locale/*.cjs",
-        "types": "./dist/locale/*.d.ts"
+      "types": "./dist/locale/*.d.ts",
+      "import": "./dist/locale/*.js",
+      "require": "./dist/locale/*.cjs"
     },
     "./dist/locale/*": {
+      "types": "./dist/locale/*.d.ts",
       "import": "./dist/locale/*.js",
-      "require": "./dist/locale/*.cjs",
-      "types": "./dist/locale/*.d.ts"
+      "require": "./dist/locale/*.cjs"
     },
     "./locale/*.js": {
-        "import": "./dist/locale/*.js",
-        "require": "./dist/locale/*.cjs",
-        "types": "./dist/locale/*.d.ts"
+      "types": "./dist/locale/*.d.ts",
+      "import": "./dist/locale/*.js",
+      "require": "./dist/locale/*.cjs"
     },
     "./locale/*": {
+      "types": "./dist/locale/*.d.ts",
       "import": "./dist/locale/*.js",
-      "require": "./dist/locale/*.cjs",
-      "types": "./dist/locale/*.d.ts"
+      "require": "./dist/locale/*.cjs"
     },
     "./dist/*": "./dist/*",
     "./package.json": "./package.json"

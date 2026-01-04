@@ -1,7 +1,7 @@
 {
   "name": "@v-c/virtual-list",
   "type": "module",
-  "version": "1.0.5",
+  "version": "1.0.4",
   "description": "Vue Virtual List Component",
   "author": "",
   "license": "MIT",

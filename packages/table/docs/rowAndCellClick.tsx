@@ -1,14 +1,14 @@
 import { defineComponent } from 'vue'
 import Table from '../src'
 
-const onRowClick = (record: any, index: number, event: MouseEvent) => {
+function onRowClick(record: any, index: number, event: MouseEvent) {
   console.log(`Click nth(${index}) row of parent, record.name: ${record.name}`)
   if (event.shiftKey) {
     console.log('Shift + mouse click triggered.')
   }
 }
 
-const onRowDoubleClick = (record: any, index: number) => {
+function onRowDoubleClick(record: any, index: number) {
   console.log(`Double click nth(${index}) row of parent, record.name: ${record.name}`)
 }
 
@@ -24,7 +24,13 @@ const columns = [
     dataIndex: 'age',
     key: 'age',
     width: 100,
-    render: (text: string) => <span>{text} (Trigger Cell Click)</span>,
+    render: (text: string) => (
+      <span>
+        {text}
+        {' '}
+        (Trigger Cell Click)
+      </span>
+    ),
     onCell: (record: any, index: number) => ({
       onClick(event: MouseEvent) {
         console.log('Click cell', ` row ${index}`, record, (event.target as HTMLElement))

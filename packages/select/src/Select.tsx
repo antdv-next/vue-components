@@ -324,9 +324,7 @@ const Select = defineComponent<SelectProps>({
     })
 
     const setInternalValue = (val: any) => {
-      if (props.value === undefined) {
-        internalValue.value = val
-      }
+      internalValue.value = val
     }
 
     // Merged value with LabelValueType

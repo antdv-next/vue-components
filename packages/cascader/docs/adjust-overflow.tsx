@@ -1,8 +1,8 @@
 import type { BuildInPlacements } from '@v-c/trigger'
 import type { CascaderProps } from '../src'
+import type { Option2 } from './utils'
 import { defineComponent, ref } from 'vue'
 import Cascader from '../src'
-import type { Option2 } from './utils'
 import './assets/index.less'
 
 const addressOptions = [

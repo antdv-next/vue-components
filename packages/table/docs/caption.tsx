@@ -36,11 +36,13 @@ export default defineComponent(() => {
       <Table
         columns={columns}
         data={data}
-        caption={
+        caption={(
           <div style={{ textAlign: 'right' }}>
-            Users who are <em>old</em>
+            Users who are
+            {' '}
+            <em>old</em>
           </div>
-        }
+        )}
       />
     </div>
   )

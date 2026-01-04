@@ -18,7 +18,7 @@ import TreeNode from './TreeNode'
 export { UnstableContextKey } from './contextTypes'
 
 export { TreeNode }
-export { arrAdd, arrDel, conductExpandParent } from './util.ts'
+export { conductExpandParent } from './util.ts'
 export { conductCheck } from './utils/conductUtil'
 export { convertDataToEntities, convertTreeToData, fillFieldNames, flattenTreeData } from './utils/treeUtil'
 

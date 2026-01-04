@@ -25,7 +25,8 @@ export default defineComponent(() => {
     {
       title: (
         <a onClick={toggleBody} href="#">
-          {showBody.value ? '隐藏' : '显示'}体
+          {showBody.value ? '隐藏' : '显示'}
+          体
         </a>
       ),
       key: 'x',

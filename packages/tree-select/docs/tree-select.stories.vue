@@ -57,4 +57,3 @@ import Width from './width'
     </Variant>
   </Story>
 </template>
-

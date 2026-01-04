@@ -1,7 +1,7 @@
 import type { CascaderProps } from '../src'
+import type { Option2 } from './utils'
 import { defineComponent, ref } from 'vue'
 import Cascader from '../src'
-import type { Option2 } from './utils'
 import { arrayTreeFilter } from './utils'
 import './assets/index.less'
 
