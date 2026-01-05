@@ -81,5 +81,14 @@ export default defineConfig({
   },
   optimizeDeps: {
     // include: ['shiki'],
+    /**
+     * import advancedFormat from 'dayjs/plugin/advancedFormat'
+     * import customParseFormat from 'dayjs/plugin/customParseFormat'
+     * import localeData from 'dayjs/plugin/localeData'
+     * import weekday from 'dayjs/plugin/weekday'
+     * import weekOfYear from 'dayjs/plugin/weekOfYear'
+     * import weekYear from 'dayjs/plugin/weekYear'
+     */
+    include: ['dayjs', 'dayjs/plugin/advancedFormat', 'dayjs/plugin/customParseFormat', 'dayjs/plugin/localeData', 'dayjs/plugin/weekday', 'dayjs/plugin/weekOfYear', 'dayjs/plugin/weekYear'],
   },
 })

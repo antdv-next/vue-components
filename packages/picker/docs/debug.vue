@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import type { Locale } from '../src/interface'
-import dayjs from 'dayjs/esm'
-import buddhistEra from 'dayjs/esm/plugin/buddhistEra'
-import LocalizedFormat from 'dayjs/esm/plugin/localizedFormat'
+import dayjs from 'dayjs'
+import buddhistEra from 'dayjs/plugin/buddhistEra'
+import LocalizedFormat from 'dayjs/plugin/localizedFormat'
 import dayjsGenerateConfig from '../src/generate/dayjs'
 import zhCN from '../src/locale/zh_CN'
 import RangePicker from '../src/PickerInput/RangePicker'
-import 'dayjs/esm/locale/ar'
-import 'dayjs/esm/locale/zh-cn'
+import 'dayjs/locale/ar'
+import 'dayjs/locale/zh-cn'
 
 dayjs.locale('zh-cn')
 dayjs.extend(buddhistEra)

@@ -1,5 +1,5 @@
 import type { Ref } from 'vue'
-import { raf } from '@v-c/util'
+import raf from '@v-c/util/dist/raf'
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 
 export default function useDelayState<T>(

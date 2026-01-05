@@ -19,19 +19,24 @@
       "require": "./dist/index.cjs"
     },
     "./dist/locale/*": {
-        "types": "./dist/locale/*.d.ts",
-        "import": "./dist/locale/*.js",
-        "require": "./dist/locale/*.cjs"
+      "types": "./dist/locale/*.d.ts",
+      "import": "./dist/locale/*.js",
+      "require": "./dist/locale/*.cjs"
     },
     "./locale/*": {
       "types": "./dist/locale/*.d.ts",
       "import": "./dist/locale/*.js",
       "require": "./dist/locale/*.cjs"
     },
+    "./generate": {
+      "types": "./dist/generate/index.d.ts",
+      "import": "./dist/generate/index.js",
+      "require": "./dist/generate/index.cjs"
+    },
     "./generate/*": {
-       "import": "./dist/generate/*.js",
-       "require": "./dist/generate/*.cjs",
-       "types": "./dist/generate/*.d.ts"
+      "types": "./dist/generate/*.d.ts",
+      "import": "./dist/generate/*.js",
+      "require": "./dist/generate/*.cjs"
     },
     "./dist/*": {
       "types": "./dist/*.d.ts",
@@ -74,6 +79,7 @@
   },
   "dependencies": {
     "@v-c/overflow": "workspace:^",
+    "@v-c/trigger": "workspace:^",
     "@v-c/util": "workspace:^"
   },
   "devDependencies": {

@@ -1,4 +1,4 @@
-import { raf } from '@v-c/util'
+import raf from '@v-c/util/dist/raf'
 import { ref, unref } from 'vue'
 
 const SPEED_PTG = 1 / 3

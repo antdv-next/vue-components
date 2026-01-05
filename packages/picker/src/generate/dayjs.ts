@@ -1,13 +1,13 @@
 import type { Dayjs } from 'dayjs'
 import type { GenerateConfig } from '.'
-import dayjs from 'dayjs/esm'
+import dayjs from 'dayjs'
 
-import advancedFormat from 'dayjs/esm/plugin/advancedFormat/index'
-import customParseFormat from 'dayjs/esm/plugin/customParseFormat/index'
-import localeData from 'dayjs/esm/plugin/localeData/index'
-import weekday from 'dayjs/esm/plugin/weekday/index'
-import weekOfYear from 'dayjs/esm/plugin/weekOfYear/index'
-import weekYear from 'dayjs/esm/plugin/weekYear/index'
+import advancedFormat from 'dayjs/plugin/advancedFormat'
+import customParseFormat from 'dayjs/plugin/customParseFormat'
+import localeData from 'dayjs/plugin/localeData'
+import weekday from 'dayjs/plugin/weekday'
+import weekOfYear from 'dayjs/plugin/weekOfYear'
+import weekYear from 'dayjs/plugin/weekYear'
 
 dayjs.extend(customParseFormat)
 dayjs.extend(advancedFormat)
