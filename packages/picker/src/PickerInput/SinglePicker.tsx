@@ -500,7 +500,6 @@ const SinglePicker = defineComponent<PickerProps>(
     // >>> Calendar
     const onPanelSelect = (date: any) => {
       lastOperation('panel')
-      console.log(multiple.value, internalMode.value, picker.value)
 
       // Not change values if multiple and current panel is to match with picker
       if (multiple.value && internalMode.value !== picker.value) {
@@ -513,7 +512,6 @@ const SinglePicker = defineComponent<PickerProps>(
 
       // Only trigger calendar event but not update internal `calendarValue` state
       triggerCalendarChange(nextValues)
-      console.log(needConfirm.value, complexPicker.value, internalPicker.value, internalMode.value)
 
       // >>> Trigger next active if !needConfirm
       // Fully logic check `useRangeValue` hook
