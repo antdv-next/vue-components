@@ -698,7 +698,7 @@ const SinglePicker = defineComponent<PickerProps>(
           {...popupProps.value as any}
         />
       )
-
+      console.log(rootClassName.value)
       const singleSelectorProps: Record<string, any> = {
         ...omit(fp.value as any, [
           'autoFocus',

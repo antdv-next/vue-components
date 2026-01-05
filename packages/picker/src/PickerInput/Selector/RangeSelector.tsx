@@ -163,8 +163,8 @@ const RangeSelector = defineComponent(
           [`${prefixCls.value}-disabled`]: disabled?.every(i => i),
           [`${prefixCls.value}-invalid`]: invalid?.some(i => i),
           [`${prefixCls.value}-rtl`]: rtl.value,
-        }, attrs.class as string),
-        style: attrs.style as any,
+        }, attrs.class as string, props.class),
+        style: { ...(attrs as any).style, ...props.style } as any,
         onClick: (event: MouseEvent) => {
           if (Array.isArray(onClick)) {
             onClick.forEach(fn => fn?.(event))

@@ -439,7 +439,6 @@ const RangePicker = defineComponent(
     // ======================== Click =========================
     const onSelectorClick = (event: MouseEvent) => {
       const rootNode = (event.target as HTMLElement).getRootNode()
-      console.log(rootNode)
       if (
         !selectorRef.value?.nativeElement?.contains(
           ((rootNode as Document | ShadowRoot).activeElement ?? document.activeElement) as Node,

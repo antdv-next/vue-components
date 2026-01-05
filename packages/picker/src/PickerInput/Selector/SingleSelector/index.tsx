@@ -182,9 +182,10 @@ const SingleSelector = defineComponent<SingleSelectorProps>(
               [`${prefixCls.value}-invalid`]: invalid,
               [`${prefixCls.value}-rtl`]: rtl.value,
             },
+            props.class,
             attrs.class as any,
           )}
-          style={{ ...(attrs.style as any) }}
+          style={{ ...(attrs.style as any), ...props.style }}
           ref={rootRef}
           onClick={onClick as any}
           // Not lose current input focus
