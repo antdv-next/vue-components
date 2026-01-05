@@ -136,7 +136,7 @@ const SinglePicker = defineComponent<PickerProps>(
     const defaultValue = computed(() => fp.value.defaultValue)
     const value = computed(() => fp.value.value)
     const needConfirm = computed(() => fp.value.needConfirm)
-    const onChange = computed(() => fp.value.onChange)
+    // const onChange = computed(() => fp.value.onChange)
     const onKeyDown = computed(() => fp.value.onKeyDown)
     const disabled = computed(() => fp.value.disabled)
     const disabledDate = computed(() => fp.value.disabledDate)
@@ -281,12 +281,12 @@ const SinglePicker = defineComponent<PickerProps>(
     }
 
     // ========================= Mode =========================
-    const internalModeState = ref<PanelMode>(picker.value)
-    const mergedMode = computed(() => mode.value || internalModeState.value)
+    const mergedMode = ref<PanelMode>(picker.value ?? mode.value)
+    watch(picker, () => {
+      mergedMode.value = picker.value
+    })
     const setMode = (val: PanelMode) => {
-      if (mode.value === undefined) {
-        internalModeState.value = val
-      }
+      mergedMode.value = val
     }
 
     /** Extends from `mergedMode` to patch `datetime` mode */
@@ -306,8 +306,8 @@ const SinglePicker = defineComponent<PickerProps>(
 
     // ======================== Value =========================
     const onInternalChange = (dates: any[], dateStrings: string[]) => {
-      if (onChange.value) {
-        onChange.value(pickerParam(dates), pickerParam(dateStrings)!)
+      if (props?.onChange) {
+        props?.onChange?.(pickerParam(dates), pickerParam(dateStrings)!)
       }
     }
 
@@ -488,7 +488,6 @@ const SinglePicker = defineComponent<PickerProps>(
 
     // ======================== Panel =========================
     const onPanelHover = (date: any | null) => {
-      console.log(date)
       onSetHover(date, 'cell')
     }
 
@@ -501,6 +500,7 @@ const SinglePicker = defineComponent<PickerProps>(
     // >>> Calendar
     const onPanelSelect = (date: any) => {
       lastOperation('panel')
+      console.log(multiple.value, internalMode.value, picker.value)
 
       // Not change values if multiple and current panel is to match with picker
       if (multiple.value && internalMode.value !== picker.value) {
@@ -513,6 +513,7 @@ const SinglePicker = defineComponent<PickerProps>(
 
       // Only trigger calendar event but not update internal `calendarValue` state
       triggerCalendarChange(nextValues)
+      console.log(needConfirm.value, complexPicker.value, internalPicker.value, internalMode.value)
 
       // >>> Trigger next active if !needConfirm
       // Fully logic check `useRangeValue` hook
@@ -652,6 +653,7 @@ const SinglePicker = defineComponent<PickerProps>(
       },
       { flush: 'post' },
     )
+
     const popupProps = computed(() => {
       const [mergedClassNames, mergedStyles] = semanticCtx.value
 
@@ -691,14 +693,12 @@ const SinglePicker = defineComponent<PickerProps>(
 
     return () => {
       const [mergedClassNames, mergedStyles] = semanticCtx.value
-
       // >>> Render
       const panel = (
         <Popup
           {...popupProps.value as any}
         />
       )
-      console.log(rootClassName.value)
       const singleSelectorProps: Record<string, any> = {
         ...omit(fp.value as any, [
           'autoFocus',

@@ -75,6 +75,9 @@ function keyDown(e: KeyboardEvent, preventDefault: () => void) {
             allow-clear
             show-today
             :render-extra-footer="() => 'extra'"
+            @change="(date) => {
+              console.log('Uncontrolled Change:', date)
+            }"
           />
         </div>
       </div>

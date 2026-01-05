@@ -239,11 +239,11 @@ export default function useRangeValue<ValueType extends DateType[], DateType ext
         || (validateEmptyDateRange && validateOrder && validateDates)
 
     if (allPassed) {
+      const oldValue = mergedValue.value
       // Sync value with submit value
       setInnerValue(clone)
 
-      const [isSameMergedDates] = isSameDates(clone, mergedValue.value)
-
+      const [isSameMergedDates] = isSameDates(clone, oldValue)
       // Trigger `onChange` if needed
       if (onChange && !isSameMergedDates) {
         const everyEmpty = clone.every(val => !val)
