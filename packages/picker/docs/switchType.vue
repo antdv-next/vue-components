@@ -7,9 +7,7 @@ import zhCN from '../src/locale/zh_CN'
 
 const type = ref<PickerMode>('date')
 
-const modelValue = ref()
 function onChange(value: any) {
-  modelValue.value = value
   console.log(value)
 }
 </script>
@@ -23,19 +21,11 @@ function onChange(value: any) {
       <option value="quarter">Quarter</option>
       <option value="year">Year</option>
     </select>
+
     <Picker
-      v-if="type === 'date'"
-      :value="modelValue"
       :generate-config="momentGenerateConfig"
       :locale="zhCN"
-      @change="onChange"
-    />
-    <Picker
-      v-else
-      :value="modelValue"
-      :generate-config="momentGenerateConfig"
-      :locale="zhCN"
-      :picker="type"
+      :picker="type === 'date' ? undefined : type"
       @change="onChange"
     />
   </div>
