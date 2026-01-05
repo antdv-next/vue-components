@@ -5,6 +5,7 @@ import CellRender from './cellRender.vue'
 import DisabledDate from './disabledDate.vue'
 import Focus from './focus.vue'
 import Range from './range.vue'
+import SwitchType from './switchType.vue'
 import Time from './time.vue'
 </script>
 
@@ -55,9 +56,9 @@ import Time from './time.vue'
     <!--    <Variant title="Rtl"> -->
     <!--      <Rtl /> -->
     <!--    </Variant> -->
-    <!--    <Variant title="SwitchType"> -->
-    <!--      <SwitchType /> -->
-    <!--    </Variant> -->
+    <Variant title="SwitchType">
+      <SwitchType />
+    </Variant>
     <Variant title="Time">
       <Time />
     </Variant>
