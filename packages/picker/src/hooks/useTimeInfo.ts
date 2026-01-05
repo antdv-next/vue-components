@@ -45,10 +45,14 @@ function generateUnits(
  */
 export default function useTimeInfo<DateType extends object = any>(
   generateConfig: Ref<GenerateConfig<DateType>>,
-  props?: Ref<SharedTimeProps<DateType> | undefined> | ComputedRef<SharedTimeProps<DateType> | undefined>,
+  props?:
+    | Ref<SharedTimeProps<DateType> | undefined>
+    | ComputedRef<SharedTimeProps<DateType> | undefined>,
   date?: Ref<DateType>,
 ) {
-  const mergedDate = computed(() => date?.value || generateConfig.value.getNow())
+  const mergedDate = computed(
+    () => date?.value || generateConfig.value.getNow(),
+  )
 
   // ======================== Warnings ========================
   if (process.env.NODE_ENV !== 'production') {
@@ -59,15 +63,15 @@ export default function useTimeInfo<DateType extends object = any>(
 
     warning(
       isHourStepValid,
-      `\`hourStep\` ${(p.hourStep ?? 1)} is invalid. It should be a factor of 24.`,
+      `\`hourStep\` ${p.hourStep ?? 1} is invalid. It should be a factor of 24.`,
     )
     warning(
       isMinuteStepValid,
-      `\`minuteStep\` ${(p.minuteStep ?? 1)} is invalid. It should be a factor of 60.`,
+      `\`minuteStep\` ${p.minuteStep ?? 1} is invalid. It should be a factor of 60.`,
     )
     warning(
       isSecondStepValid,
-      `\`secondStep\` ${(p.secondStep ?? 1)} is invalid. It should be a factor of 60.`,
+      `\`secondStep\` ${p.secondStep ?? 1} is invalid. It should be a factor of 60.`,
     )
   }
 
@@ -164,7 +168,8 @@ export default function useTimeInfo<DateType extends object = any>(
   })
 
   const rowHourUnits = computed(() => defaultUnits.value[0])
-  const minuteUnitsGetter = (nextHour: number) => defaultUnits.value[1](nextHour)
+  const minuteUnitsGetter = (nextHour: number) =>
+    defaultUnits.value[1](nextHour)
   const secondUnitsGetter = (nextHour: number, nextMinute: number) =>
     defaultUnits.value[2](nextHour, nextMinute)
   const millisecondUnitsGetter = (
@@ -235,40 +240,69 @@ function findValidateTime<DateType extends object = any>(
   getHourUnits: () => Unit<number>[],
   getMinuteUnits: (hour: number) => Unit<number>[],
   getSecondUnits: (hour: number, minute: number) => Unit<number>[],
-  getMillisecondUnits: (hour: number, minute: number, second: number) => Unit<number>[],
+  getMillisecondUnits: (
+    hour: number,
+    minute: number,
+    second: number,
+  ) => Unit<number>[],
   generateConfig: GenerateConfig<DateType>,
 ) {
-  const curHour = generateConfig.getHour(nextTime)
-  const hourUnits = getHourUnits()
-  const validHour
-    = hourUnits.find(u => u.value === curHour && !u.disabled)?.value
-      ?? hourUnits.find(u => !u.disabled)?.value
-      ?? curHour
-  let ret = generateConfig.setHour(nextTime, validHour)
+  let nextDate = nextTime
 
-  const curMinute = generateConfig.getMinute(ret)
-  const minuteUnits = getMinuteUnits(validHour)
-  const validMinute
-    = minuteUnits.find(u => u.value === curMinute && !u.disabled)?.value
-      ?? minuteUnits.find(u => !u.disabled)?.value
-      ?? curMinute
-  ret = generateConfig.setMinute(ret, validMinute)
+  function alignValidate(
+    getUnitValue: string,
+    setUnitValue: string,
+    units: Unit<number>[],
+  ) {
+    const getUnitValueFn = Reflect.get(generateConfig, getUnitValue) as (
+      date: DateType,
+    ) => number
+    let nextValue = getUnitValueFn(nextDate)
+    const nextUnit = units.find(unit => unit.value === nextValue)
 
-  const curSecond = generateConfig.getSecond(ret)
-  const secondUnits = getSecondUnits(validHour, validMinute)
-  const validSecond
-    = secondUnits.find(u => u.value === curSecond && !u.disabled)?.value
-      ?? secondUnits.find(u => !u.disabled)?.value
-      ?? curSecond
-  ret = generateConfig.setSecond(ret, validSecond)
+    if (!nextUnit || nextUnit.disabled) {
+      // Find most closest unit
+      const validateUnits = units.filter(unit => !unit.disabled)
+      const reverseEnabledUnits = [...validateUnits].reverse()
+      const validateUnit
+        = reverseEnabledUnits.find(unit => unit.value <= nextValue)
+          || validateUnits[0]
 
-  const curMs = generateConfig.getMillisecond(ret)
-  const msUnits = getMillisecondUnits(validHour, validMinute, validSecond)
-  const validMs
-    = msUnits.find(u => u.value === curMs && !u.disabled)?.value
-      ?? msUnits.find(u => !u.disabled)?.value
-      ?? curMs
-  ret = generateConfig.setMillisecond(ret, validMs)
+      if (validateUnit) {
+        nextValue = validateUnit.value
 
-  return ret
+        const setUnitValueFn = Reflect.get(generateConfig, setUnitValue) as (
+          date: DateType,
+          value: number,
+        ) => DateType
+        nextDate = setUnitValueFn(nextDate, nextValue)
+      }
+    }
+
+    return nextValue
+  }
+  // Find validate hour
+  const nextHour = alignValidate('getHour', 'setHour', getHourUnits())
+  // Find validate minute
+  const nextMinute = alignValidate(
+    'getMinute',
+    'setMinute',
+    getMinuteUnits(nextHour),
+  )
+
+  // Find validate second
+  const nextSecond = alignValidate(
+    'getSecond',
+    'setSecond',
+    getSecondUnits(nextHour, nextMinute),
+  )
+
+  // Find validate millisecond
+  alignValidate(
+    'getMillisecond',
+    'setMillisecond',
+    getMillisecondUnits(nextHour, nextMinute, nextSecond),
+  )
+
+  return nextDate
 }
