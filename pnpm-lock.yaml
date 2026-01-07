@@ -83,6 +83,9 @@ importers:
       vite:
         specifier: ^8.0.0-beta.3
         version: 8.0.0-beta.3(@types/node@20.19.24)(esbuild@0.25.9)(jiti@2.6.1)(less@4.4.2)(yaml@2.8.1)
+      vite-plugin-dayjs:
+        specifier: ^0.0.2
+        version: 0.0.2
       vite-plugin-dts:
         specifier: ^5.0.0-beta.6
         version: 5.0.0-beta.6(@microsoft/api-extractor@7.50.0(@types/node@20.19.24))(esbuild@0.25.9)(rolldown@1.0.0-beta.50)(rollup@4.50.0)(typescript@5.9.3)(vite@8.0.0-beta.3(@types/node@20.19.24)(esbuild@0.25.9)(jiti@2.6.1)(less@4.4.2)(yaml@2.8.1))
@@ -4728,6 +4731,9 @@ packages:
     resolution: {integrity: sha512-EbKSKh+bh1E1IFxeO0pg1n4dvoOTt0UDiXMd/qn++r98+jPO1xtJilvXldeuQ8giIB5IkpjCgMleHMNEsGH6pg==}
     engines: {node: ^18.0.0 || ^20.0.0 || >=22.0.0}
     hasBin: true
+
+  vite-plugin-dayjs@0.0.2:
+    resolution: {integrity: sha512-eOaUpN+nBzSHpX7qrPHZ75smXZrZISqeBZI36aA9JchjByg+HW2g+D6GuZks6HHNYhVUuNxpK9dGWSs3cjOeJA==}
 
   vite-plugin-dts@5.0.0-beta.6:
     resolution: {integrity: sha512-FiuXDDFfzWDn5Z190TT+FCC88iXWy94iNExuZ5dcvZG3aaggyMgYoAl+VdS6VX9D9XpKTBcgvpLSpcIwpH4FJA==}
@@ -9737,6 +9743,8 @@ snapshots:
       - terser
       - tsx
       - yaml
+
+  vite-plugin-dayjs@0.0.2: {}
 
   vite-plugin-dts@5.0.0-beta.6(@microsoft/api-extractor@7.50.0(@types/node@20.19.24))(esbuild@0.25.9)(rolldown@1.0.0-beta.50)(rollup@4.50.0)(typescript@5.9.3)(vite@8.0.0-beta.3(@types/node@20.19.24)(esbuild@0.25.9)(jiti@2.6.1)(less@4.4.2)(yaml@2.8.1)):
     dependencies:

@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 import { defineConfig } from 'vite'
+import dayjsPlugin from 'vite-plugin-dayjs'
 import VueJsxAutoProps from 'vite-plugin-tsx-resolve-types'
 
 const base = fileURLToPath(new URL('.', import.meta.url))
@@ -66,6 +67,7 @@ export function genListAlias() {
 
 export default defineConfig({
   plugins: [
+    dayjsPlugin(),
     vue(),
     vueJsx(),
     VueJsxAutoProps({
@@ -78,17 +80,5 @@ export default defineConfig({
       { find: /^vue$/, replacement: resolve(base, 'node_modules/vue/dist/vue.esm-bundler.js') },
       ...genListAlias(),
     ],
-  },
-  optimizeDeps: {
-    // include: ['shiki'],
-    /**
-     * import advancedFormat from 'dayjs/plugin/advancedFormat'
-     * import customParseFormat from 'dayjs/plugin/customParseFormat'
-     * import localeData from 'dayjs/plugin/localeData'
-     * import weekday from 'dayjs/plugin/weekday'
-     * import weekOfYear from 'dayjs/plugin/weekOfYear'
-     * import weekYear from 'dayjs/plugin/weekYear'
-     */
-    include: ['dayjs', 'dayjs/plugin/advancedFormat', 'dayjs/plugin/customParseFormat', 'dayjs/plugin/localeData', 'dayjs/plugin/weekday', 'dayjs/plugin/weekOfYear', 'dayjs/plugin/weekYear'],
   },
 })
