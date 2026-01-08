@@ -1,6 +1,6 @@
 import type { Ref } from 'vue'
 import raf from '@v-c/util/dist/raf'
-import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 
 export default function useDelayState<T>(
   value: Ref<T | undefined>,
@@ -21,7 +21,9 @@ export default function useDelayState<T>(
 
   const doUpdate = () => {
     if (value.value === undefined) {
-      internalValue.value = nextValueRef.value
+      nextTick(() => {
+        internalValue.value = nextValueRef.value
+      })
     }
 
     if (onChange && state.value !== nextValueRef.value) {

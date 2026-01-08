@@ -70,13 +70,7 @@ function monthCellRender(date: Moment) {
 
 <template>
   <div>
-    <div
-      style="
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: space-between;
-      "
-    >
+    <div style="display: flex; flex-wrap: wrap; justify-content: space-between">
       <div>
         <h3>custom icon</h3>
         <Picker

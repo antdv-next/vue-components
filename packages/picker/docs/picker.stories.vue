@@ -2,8 +2,11 @@
 import Basic from './basic.vue'
 import Calendar from './calendar.vue'
 import CellRender from './cellRender.vue'
+import Customize from './customize.vue'
+import Debug from './debug.vue'
 import DisabledDate from './disabledDate.vue'
 import Focus from './focus.vue'
+import Limitation from './limitation.vue'
 import Range from './range.vue'
 import SwitchType from './switchType.vue'
 import Time from './time.vue'
@@ -44,15 +47,15 @@ import Time from './time.vue'
     <!--    <Variant title="PanelRender"> -->
     <!--      <PanelRender /> -->
     <!--    </Variant> -->
-    <!--    <Variant title="Customize"> -->
-    <!--      <Customize /> -->
-    <!--    </Variant> -->
-    <!--    <Variant title="Debug"> -->
-    <!--      <Debug /> -->
-    <!--    </Variant> -->
-    <!--    <Variant title="Limitation"> -->
-    <!--      <Limitation /> -->
-    <!--    </Variant> -->
+    <Variant title="Customize">
+      <Customize />
+    </Variant>
+    <Variant title="Debug">
+      <Debug />
+    </Variant>
+    <Variant title="Limitation">
+      <Limitation />
+    </Variant>
     <!--    <Variant title="Rtl"> -->
     <!--      <Rtl /> -->
     <!--    </Variant> -->
