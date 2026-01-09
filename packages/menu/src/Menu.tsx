@@ -456,13 +456,17 @@ const Menu = defineComponent<MenuProps>(
         || props?.disabledOverflow,
     )
 
-    watch(allVisible, () => {
-      refreshOverflowKeys(
-        allVisible.value
-          ? EMPTY_LIST
-          : childList.value.slice(lastVisibleIndex.value + 1).map(child => (child as any).key as string),
-      )
-    })
+    watch(
+      [lastVisibleIndex, allVisible, childList],
+      () => {
+        refreshOverflowKeys(
+          allVisible.value
+            ? EMPTY_LIST
+            : childList.value.slice(lastVisibleIndex.value + 1).map(child => (child as any).key as string),
+        )
+      },
+      { immediate: true },
+    )
 
     // ======================= Context ========================
     const privateContext = computed(() => ({
