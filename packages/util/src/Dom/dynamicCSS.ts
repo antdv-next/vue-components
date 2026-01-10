@@ -120,6 +120,8 @@ function findExistNode(key: string, option: Options = {}) {
 }
 
 export function removeCSS(key: string, option: Options = {}) {
+  if (!canUseDom())
+    return null
   const existNode = findExistNode(key, option)
   if (existNode) {
     const container = getContainer(option)
@@ -150,6 +152,9 @@ export function clearContainerCache() {
 }
 
 export function updateCSS(css: string, key: string, option: Options = {}) {
+  if (!canUseDom()) {
+    return null
+  }
   const container = getContainer(option)
 
   // Sync real parent
