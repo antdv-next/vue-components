@@ -6,14 +6,14 @@ import Picker from '../src'
 import momentGenerateConfig from '../src/generate/moment'
 import enUS from '../src/locale/en_US'
 import zhCN from '../src/locale/zh_CN'
-import 'moment/locale/zh-cn'
+import 'moment/dist/locale/zh-cn'
 
 const defaultValue = moment('2019-11-28 01:02:03')
 
 const locale = ref(enUS)
 const value = ref<Moment | null>(defaultValue)
 
-function onChange(newValue: Moment | null, formatString?: string) {
+function onChange(newValue: Moment | null, formatString?: string | string[]) {
   console.log('Change:', newValue, formatString)
   value.value = newValue
 }
@@ -37,8 +37,9 @@ const sharedProps = computed(() => {
 })
 
 function toggleLocale() {
-  locale.value = locale.value === zhCN ? enUS : zhCN
-  moment.locale(locale.value.locale === 'zh-cn' ? 'zh-cn' : 'en')
+  console.log(locale.value)
+  locale.value = locale.value.locale === 'zh_CN' ? enUS : zhCN
+  moment.locale(locale.value.locale === 'zh_CN' ? 'zh-cn' : 'en')
 }
 </script>
 

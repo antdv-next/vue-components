@@ -7,7 +7,10 @@ import Debug from './debug.vue'
 import DisabledDate from './disabledDate.vue'
 import Focus from './focus.vue'
 import Limitation from './limitation.vue'
+import Locale from './locale.vue'
+import PanelRender from './panelRender.vue'
 import Range from './range.vue'
+import Rtl from './rtl.vue'
 import SwitchType from './switchType.vue'
 import Time from './time.vue'
 </script>
@@ -32,9 +35,9 @@ import Time from './time.vue'
     <Variant title="Focus">
       <Focus />
     </Variant>
-    <!--    <Variant title="Locale"> -->
-    <!--      <Locale /> -->
-    <!--    </Variant> -->
+    <Variant title="Locale">
+      <Locale />
+    </Variant>
     <!--    <Variant title="Modes"> -->
     <!--      <Modes /> -->
     <!--    </Variant> -->
@@ -44,9 +47,9 @@ import Time from './time.vue'
     <!--    <Variant title="Panel"> -->
     <!--      <Panel /> -->
     <!--    </Variant> -->
-    <!--    <Variant title="PanelRender"> -->
-    <!--      <PanelRender /> -->
-    <!--    </Variant> -->
+    <Variant title="PanelRender">
+      <PanelRender />
+    </Variant>
     <Variant title="Customize">
       <Customize />
     </Variant>
@@ -56,9 +59,9 @@ import Time from './time.vue'
     <Variant title="Limitation">
       <Limitation />
     </Variant>
-    <!--    <Variant title="Rtl"> -->
-    <!--      <Rtl /> -->
-    <!--    </Variant> -->
+    <Variant title="Rtl">
+      <Rtl />
+    </Variant>
     <Variant title="SwitchType">
       <SwitchType />
     </Variant>

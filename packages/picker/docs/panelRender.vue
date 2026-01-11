@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { VueNode } from '@v-c/util/dist/type'
+import type { VueNode } from '@v-c/util'
+import type { VNode } from 'vue'
 import moment from 'moment'
 import { h, ref } from 'vue'
 import { Picker, RangePicker } from '../src'
@@ -16,7 +17,7 @@ const defaultValue: [typeof defaultStartValue, typeof defaultEndValue] = [
 const customizeNode = ref(false)
 
 function panelRender(node: VueNode) {
-  return h('div', [
+  return h('div', {}, [
     h(
       'button',
       {
@@ -26,9 +27,9 @@ function panelRender(node: VueNode) {
           customizeNode.value = !customizeNode.value
         },
       },
-      'Change',
+      ['Change'],
     ),
-    customizeNode.value ? h('span', 'My Panel') : node,
+    customizeNode.value ? h('span', {}, ['My Panel']) : node as VNode,
   ])
 }
 </script>
