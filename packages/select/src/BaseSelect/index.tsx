@@ -364,7 +364,7 @@ export const BaseSelect = defineComponent<
 
     // ============================== Open ==============================
     // Not trigger `open` when `notFoundContent` is empty
-    const emptyListContent = computed(() => !mergedNotFoundContent.value && props.emptyOptions)
+    const emptyListContent = computed(() => !props?.notFoundContent && props.emptyOptions)
     const [mergedOpen, triggerOpen] = useOpen(
       open as any,
       (openVal) => {
