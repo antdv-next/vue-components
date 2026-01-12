@@ -8,6 +8,9 @@ import DisabledDate from './disabledDate.vue'
 import Focus from './focus.vue'
 import Limitation from './limitation.vue'
 import Locale from './locale.vue'
+import Modes from './modes.vue'
+import Multiple from './multiple.vue'
+import Panel from './panel.vue'
 import PanelRender from './panelRender.vue'
 import Range from './range.vue'
 import Rtl from './rtl.vue'
@@ -38,15 +41,15 @@ import Time from './time.vue'
     <Variant title="Locale">
       <Locale />
     </Variant>
-    <!--    <Variant title="Modes"> -->
-    <!--      <Modes /> -->
-    <!--    </Variant> -->
-    <!--    <Variant title="Multiple"> -->
-    <!--      <Multiple /> -->
-    <!--    </Variant> -->
-    <!--    <Variant title="Panel"> -->
-    <!--      <Panel /> -->
-    <!--    </Variant> -->
+    <Variant title="Modes">
+      <Modes />
+    </Variant>
+    <Variant title="Multiple">
+      <Multiple />
+    </Variant>
+    <Variant title="Panel">
+      <Panel />
+    </Variant>
     <Variant title="PanelRender">
       <PanelRender />
     </Variant>
@@ -68,8 +71,8 @@ import Time from './time.vue'
     <Variant title="Time">
       <Time />
     </Variant>
-    <!--    <Variant title="Uncontrolled"> -->
-    <!--      <Uncontrolled /> -->
-    <!--    </Variant> -->
+    <Variant title="Uncontrolled">
+      <Uncontrolled />
+    </Variant>
   </Story>
 </template>

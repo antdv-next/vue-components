@@ -7,7 +7,7 @@ import { clsx } from '@v-c/util'
 import omit from '@v-c/util/dist/omit'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
 import warning from '@v-c/util/dist/warning'
-import { computed, defineComponent, ref, shallowRef, watch } from 'vue'
+import { computed, defineComponent, nextTick, ref, shallowRef, watch } from 'vue'
 import useSemantic from '../hooks/useSemantic'
 import PickerTrigger from '../PickerTrigger'
 import { pickTriggerProps } from '../PickerTrigger/util'
@@ -451,9 +451,12 @@ const RangePicker = defineComponent(
         }
       }
 
-      triggerOpen(true)
+      // Delay to trigger `onPopupClose` after `triggerOpen`
+      nextTick(() => {
+        triggerOpen(true)
 
-      onClick.value?.(event as any)
+        onClick.value?.(event as any)
+      })
     }
 
     const onSelectorClear = () => {

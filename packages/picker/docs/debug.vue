@@ -6,8 +6,8 @@ import LocalizedFormat from 'dayjs/plugin/localizedFormat'
 import dayjsGenerateConfig from '../src/generate/dayjs'
 import zhCN from '../src/locale/zh_CN'
 import RangePicker from '../src/PickerInput/RangePicker'
-// import 'dayjs/locale/ar'
-// import 'dayjs/locale/zh-cn'
+import 'dayjs/esm/locale/ar'
+import 'dayjs/esm/locale/zh-cn'
 
 dayjs.locale('zh-cn')
 dayjs.extend(buddhistEra)
@@ -28,7 +28,7 @@ const sharedLocale = {
 
 <template>
   <div>
-    <input value="2000-01-01" />
+    <input value="2000-01-01">
     <!--
     <RangePicker
       v-bind="sharedLocale"

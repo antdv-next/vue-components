@@ -4,8 +4,8 @@ import LocalizedFormat from 'dayjs/plugin/localizedFormat'
 import dayjsGenerateConfig from '../src/generate/dayjs'
 import zhCN from '../src/locale/zh_CN'
 import SinglePicker from '../src/PickerInput/SinglePicker'
-// import 'dayjs/locale/ar'
-// import 'dayjs/locale/zh-cn'
+import 'dayjs/esm/locale/ar'
+import 'dayjs/esm/locale/zh-cn'
 
 dayjs.locale('zh-cn')
 dayjs.extend(LocalizedFormat)
