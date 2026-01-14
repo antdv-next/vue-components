@@ -72,6 +72,7 @@ watchEffect(() => {
       <button class="btn btn-primary" @click="onClick">
         show dialog
       </button>
+
     &nbsp;
       <label>
         destroy on close:
@@ -89,6 +90,9 @@ watchEffect(() => {
       </label>
       <input placeholder="Useless Input" @click="onClick">
     </p>
+
+    <div style="height: 100vh;width: 200px; background-color: #0a53be" />
+
     <Dialog
       :visible="visible1"
       :wrap-class-name="wrapperClassName"

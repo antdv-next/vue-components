@@ -1,7 +1,7 @@
 import type { ComputedRef, Ref, ShallowRef } from 'vue'
 import { removeCSS, updateCSS } from '@v-c/util/dist/Dom/dynamicCSS'
 import { getTargetScrollBarSize } from '@v-c/util/dist/getScrollBarSize'
-import { computed, nextTick, shallowRef, unref, watch } from 'vue'
+import { computed, shallowRef, unref, watch } from 'vue'
 import { isBodyOverflowing } from './util'
 
 const UNIQUE_ID = `vc-util-locker-${Date.now()}`
@@ -11,8 +11,8 @@ export default function useScrollLocker(lock?: ShallowRef<boolean> | ComputedRef
   const mergedLock = computed(() => unref(lock))
   uuid += 1
   const id = shallowRef(`${UNIQUE_ID}_${uuid}`)
-  watch([id, mergedLock], async () => {
-    await nextTick()
+  watch([id, mergedLock], async (_, _o, onCleanup) => {
+    console.log(mergedLock.value)
     if (mergedLock.value) {
       const scrollbarSize = getTargetScrollBarSize(document.body).width
       const isOverflow = isBodyOverflowing()
@@ -25,6 +25,10 @@ html body {
 }`,
         id.value,
       )
+
+      onCleanup(() => {
+        removeCSS(id.value)
+      })
     }
     else {
       removeCSS(id.value)

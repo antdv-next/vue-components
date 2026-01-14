@@ -31,12 +31,12 @@ function InnterRender() {
       <button type="button" class="btn btn-primary" @click="onClick">
         show dialog
       </button>
-      &nbsp;
-      <label>
-        destroy on close:
-        <input type="checkbox" :checked="destroyOnClose" @change="onDestroyOnCloseChange">
-      </label>
     </p>
+    <div style="height: 100vh;width: 200px; background-color: #0a53be" />
+    <label>
+      destroy on close:
+      <input type="checkbox" :checked="destroyOnClose" @change="onDestroyOnCloseChange">
+    </label>
 
     <Dialog
       style="width: 600px;"

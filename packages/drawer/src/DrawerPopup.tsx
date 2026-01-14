@@ -3,23 +3,15 @@ import type { CSSProperties } from 'vue'
 import type { DrawerPanelEvents } from './DrawerPanel'
 import type { DrawerClassNames, DrawerStyles } from './inter'
 import { clsx } from '@v-c/util'
-import { KeyCodeStr } from '@v-c/util/dist/KeyCode'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
 import { getAttrStyleAndClass, toPropsRefs } from '@v-c/util/dist/props-util'
 import { getTransitionProps } from '@v-c/util/dist/utils/transition'
-import { computed, defineComponent, nextTick, onBeforeUnmount, shallowRef, Transition, watch } from 'vue'
+import { computed, defineComponent, onBeforeUnmount, shallowRef, Transition, watch } from 'vue'
 import { useDrawerContext, useDrawerProvide } from './context'
 import DrawerPanel from './DrawerPanel'
 import useDrag from './hooks/useDrag.ts'
+import useFocusable from './hooks/useFocusable.ts'
 import { parseWidthHeight } from './util'
-
-const sentinelStyle: CSSProperties = {
-  width: 0,
-  height: 0,
-  overflow: 'hidden',
-  outline: 'none',
-  position: 'absolute',
-}
 
 export type Placement = 'left' | 'right' | 'top' | 'bottom'
 
@@ -35,6 +27,7 @@ export interface DrawerPopupProps extends DrawerPanelEvents {
   push?: boolean | PushConfig
   forceRender?: boolean
   autoFocus?: boolean
+  focusTrap?: boolean
   keyboard?: boolean
 
   // Root
@@ -90,8 +83,6 @@ const DrawerPopup = defineComponent<DrawerPopupProps>(
   (props, { expose, attrs, slots }) => {
     // ================================ Refs ================================
     const panelRef = shallowRef<HTMLDivElement>()
-    const sentinelStartRef = shallowRef<HTMLDivElement>()
-    const sentinelEndRef = shallowRef<HTMLDivElement>()
 
     const {
       open,
@@ -99,6 +90,8 @@ const DrawerPopup = defineComponent<DrawerPopupProps>(
       placement,
       push,
       maxSize,
+      focusTrap,
+      mask,
     } = toPropsRefs(
       props,
       'open',
@@ -106,50 +99,16 @@ const DrawerPopup = defineComponent<DrawerPopupProps>(
       'push',
       'placement',
       'maxSize',
+      'focusTrap',
+      'mask',
     )
 
     expose({
       panelRef,
     })
 
-    const onPanelKeyDown = (e: KeyboardEvent) => {
-      const { onClose, keyboard } = props
-      const { key, shiftKey } = e
-      switch (key) {
-        case KeyCodeStr.Tab:{
-          if (key === KeyCodeStr.Tab) {
-            if (!shiftKey && document.activeElement === sentinelEndRef.value) {
-              sentinelStartRef.value?.focus({ preventScroll: true })
-            }
-            else if (shiftKey && document.activeElement === sentinelStartRef.value) {
-              sentinelEndRef.value?.focus({ preventScroll: true })
-            }
-          }
-          break
-        }
-
-        // Close
-        case KeyCodeStr.Escape:{
-          if (onClose && keyboard) {
-            e.stopPropagation()
-            onClose(e)
-          }
-        }
-      }
-    }
-
-    // ========================== Control ===========================
-    // Auto Focus
-    watch([open], async () => {
-      await nextTick()
-      if (open.value && autoFocus.value) {
-        panelRef.value?.focus?.({ preventScroll: true })
-      }
-    }, {
-      immediate: true,
-      flush: 'post',
-    })
-
+    // ========================= Focusable ==========================
+    useFocusable(() => panelRef.value as any, open, autoFocus, focusTrap, mask)
     // ============================ Push ============================
     const pushed = shallowRef(false)
 
@@ -397,24 +356,9 @@ const DrawerPopup = defineComponent<DrawerPopupProps>(
           style={containerStyle}
           tabindex={-1}
           ref={panelRef}
-          onKeydown={onPanelKeyDown}
         >
           {mask && maskNode}
-          <div
-            tabindex={0}
-            ref={sentinelStartRef}
-            style={sentinelStyle}
-            aria-hidden="true"
-            data-sentinel="start"
-          />
           {panelNode}
-          <div
-            tabindex={0}
-            ref={sentinelEndRef}
-            style={sentinelStyle}
-            aria-hidden="true"
-            data-sentinel="end"
-          />
         </div>
       )
     }

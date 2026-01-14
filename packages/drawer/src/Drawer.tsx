@@ -4,7 +4,7 @@ import type { DrawerPopupProps } from './DrawerPopup'
 import type { DrawerClassNames, DrawerStyles } from './inter'
 import Portal from '@v-c/portal'
 import { omit } from '@v-c/util/dist/utils/omit'
-import { computed, defineComponent, shallowRef, watch } from 'vue'
+import { computed, defineComponent, nextTick, shallowRef, watch } from 'vue'
 import { useRefProvide } from './context'
 import DrawerPopup from './DrawerPopup'
 import { warnCheck } from './util'
@@ -21,6 +21,7 @@ export interface DrawerProps extends Omit<DrawerPopupProps, 'prefixCls' | 'inlin
   wrapperClassName?: string
   classNames?: DrawerClassNames
   styles?: DrawerStyles
+  focusTriggerAfterClose?: boolean
 }
 
 const defaults = {
@@ -81,24 +82,17 @@ const Drawer = defineComponent<DrawerProps>({
           animatedVisible.value = true
           lastActiveRef.value = document.activeElement as HTMLElement
         }
-        // else if (mergedProps.value.destroyOnHidden) {
-        //   animatedVisible.value = false
-        // }
       },
       { immediate: true },
     )
 
     const internalAfterOpenChange = (nextVisible: boolean) => {
-      if (nextVisible && nextVisible !== animatedVisible.value) {
-        animatedVisible.value = true
-      }
-      else if (mergedProps.value.destroyOnHidden) {
-        animatedVisible.value = false
-      }
-
+      nextTick(() => {
+        animatedVisible.value = nextVisible
+      })
       mergedProps.value.afterOpenChange?.(nextVisible)
 
-      if (!nextVisible && lastActiveRef.value) {
+      if (!nextVisible && mergedProps.value?.focusTriggerAfterClose !== false && lastActiveRef.value) {
         const panelEl = popupRef.value?.panelRef?.value as HTMLDivElement | undefined
         if (panelEl && !panelEl.contains(lastActiveRef.value)) {
           try {
