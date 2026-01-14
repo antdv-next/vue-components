@@ -28,17 +28,7 @@ const defaults = {
 const DialogWrap = defineComponent<IDialogPropTypes>(
   (props = defaults, { slots }) => {
     const animatedVisible = shallowRef(false)
-    const { setPanelRef } = useRefProvide()
-
-    watch(
-      () => props.panelRef,
-      () => {
-        setPanelRef(props.panelRef)
-      },
-      {
-        immediate: true,
-      },
-    )
+    useRefProvide(props)
 
     watch(
       () => props.visible,

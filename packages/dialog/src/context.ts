@@ -1,4 +1,5 @@
 import type { InjectionKey, ShallowRef } from 'vue'
+import type { IDialogPropTypes } from './IDialogPropTypes.ts'
 import { inject, provide, shallowRef } from 'vue'
 
 export interface RefContextProps {
@@ -8,9 +9,12 @@ export interface RefContextProps {
 
 const RefContext: InjectionKey<RefContextProps> = Symbol('RefContext')
 
-export function useRefProvide() {
+export function useRefProvide(props: IDialogPropTypes) {
   const panel = shallowRef<HTMLDivElement>()
   const setPanelRef = (el: HTMLDivElement) => {
+    if (typeof props.panelRef === 'function') {
+      props.panelRef(el)
+    }
     panel.value = el
   }
   provide(RefContext, {
