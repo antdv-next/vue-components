@@ -1,34 +1,55 @@
 import type { BaseInputProps, InputProps } from '../interface'
 import { triggerFocus as rcTriggerFocus } from '@v-c/util/dist/Dom/focus'
 
-// TODO: It's better to use `Proxy` replace the `element.value`. But we still need support old browsers.
-function cloneEvent<
-  EventType extends Event,
-  Element extends HTMLInputElement | HTMLTextAreaElement,
->(event: EventType, target: Element, value: any) {
-  const currentTarget = target.cloneNode(true) as Element
-  currentTarget.value = value
+function createPatchedTarget<
+  E extends HTMLInputElement | HTMLTextAreaElement,
+>(target: E, value: any): E {
+  const patched = target.cloneNode(true) as E
+  patched.value = value
 
   if (typeof target.selectionStart === 'number' && typeof target.selectionEnd === 'number') {
-    currentTarget.selectionStart = target.selectionStart
-    currentTarget.selectionEnd = target.selectionEnd
+    patched.selectionStart = target.selectionStart
+    patched.selectionEnd = target.selectionEnd
   }
 
-  // 让外部 setSelectionRange 仍然作用在真实 target 上（你原逻辑保留）
-  currentTarget.setSelectionRange = (start, end, direction) => {
+  // 保持外部 setSelectionRange 仍然作用在真实 target 上
+  patched.setSelectionRange = (start, end, direction) => {
     target.setSelectionRange(start, end, direction as any)
   }
 
-  const wrapped = new Proxy(event as any, {
-    get(obj, key) {
-      if (key === 'target' || key === 'currentTarget')
-        return currentTarget
-      // 关键：用原 event 作为 receiver，保证 getter 的 this 正确
-      return Reflect.get(obj, key, obj)
-    },
-  })
+  return patched
+}
 
-  return wrapped as EventType
+function cloneEvent<
+  EventType extends Event,
+  Element extends HTMLInputElement | HTMLTextAreaElement,
+>(event: EventType, target: Element, value: any): EventType {
+  const patchedTarget = createPatchedTarget(target, value)
+
+  const safeEvent: any = {
+    type: (event as any)?.type,
+    timeStamp: (event as any)?.timeStamp,
+    bubbles: (event as any)?.bubbles,
+    cancelable: (event as any)?.cancelable,
+    composed: (event as any)?.composed,
+
+    target: patchedTarget,
+    currentTarget: patchedTarget,
+
+    preventDefault: (event as any)?.preventDefault
+      ? (event as any).preventDefault.bind(event)
+      : undefined,
+    stopPropagation: (event as any)?.stopPropagation
+      ? (event as any).stopPropagation.bind(event)
+      : undefined,
+    stopImmediatePropagation: (event as any)?.stopImmediatePropagation
+      ? (event as any).stopImmediatePropagation.bind(event)
+      : undefined,
+
+    nativeEvent: event,
+  }
+
+  return safeEvent as EventType
 }
 
 export function hasAddon(props: BaseInputProps | InputProps) {
@@ -45,25 +66,20 @@ export function resolveOnChange<E extends HTMLInputElement | HTMLTextAreaElement
   onChange: undefined | ((event: Event) => void),
   targetValue?: string,
 ) {
-  if (!onChange) {
+  if (!onChange)
     return
-  }
 
-  let event = e
-
-  if (e.type === 'click') {
-    event = cloneEvent(e, target, '')
-    onChange(event)
+  if ((e as any)?.type === 'click') {
+    onChange(cloneEvent(e as any, target, ''))
     return
   }
 
   if (target.type !== 'file' && targetValue !== undefined) {
-    event = cloneEvent(e, target, targetValue)
-    onChange(event)
+    onChange(cloneEvent(e as any, target, targetValue))
     return
   }
 
-  onChange(event)
+  onChange(e)
 }
 
 export const triggerFocus = rcTriggerFocus
