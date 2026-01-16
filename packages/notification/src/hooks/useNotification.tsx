@@ -1,8 +1,8 @@
 import type { VueNode } from '@v-c/util/dist/type'
-import type { CSSProperties, TransitionGroupProps } from 'vue'
+import type { CSSProperties, MaybeRef, TransitionGroupProps } from 'vue'
 import type { Key, OpenConfig, Placement, StackConfig } from '../interface'
 import type { NotificationsProps, NotificationsRef } from '../Notifications'
-import { onMounted, shallowRef, watch } from 'vue'
+import { computed, onMounted, shallowRef, unref, watch } from 'vue'
 import Notifications from '../Notifications'
 
 const defaultGetContainer = () => document.body
@@ -75,35 +75,45 @@ function mergeConfig<T>(...objList: Partial<T>[]): T {
   return clone
 }
 
-export default function useNotification(rootConfig: NotificationConfig = {}) {
-  const {
-    getContainer = defaultGetContainer,
-    motion,
-    prefixCls,
-    maxCount,
-    className,
-    style,
-    onAllRemoved,
-    stack,
-    renderNotifications,
-    ...shareConfig
-  } = rootConfig
+export default function useNotification(rootConfig: MaybeRef<NotificationConfig> = {}) {
+  const configRef = computed(() => unref(rootConfig) || {})
   const container = shallowRef<HTMLElement | ShadowRoot>()
 
   const notificationRef = shallowRef<NotificationsRef>()
+
+  const shareConfig = computed(() => {
+    const {
+      getContainer,
+      motion,
+      prefixCls,
+      maxCount,
+      className,
+      style,
+      onAllRemoved,
+      stack,
+      renderNotifications,
+      ...restConfig
+    } = configRef.value
+    return restConfig
+  })
+
+  const resolveContainer = () => {
+    const getContainer = configRef.value.getContainer || defaultGetContainer
+    return getContainer()
+  }
 
   const contextHolder = () => (
     <Notifications
       container={container.value}
       ref={notificationRef}
-      prefixCls={prefixCls}
-      motion={motion}
-      maxCount={maxCount}
-      className={className}
-      style={style}
-      onAllRemoved={onAllRemoved}
-      stack={stack}
-      renderNotifications={renderNotifications}
+      prefixCls={configRef.value.prefixCls}
+      motion={configRef.value.motion}
+      maxCount={configRef.value.maxCount}
+      className={configRef.value.className}
+      style={configRef.value.style}
+      onAllRemoved={configRef.value.onAllRemoved}
+      stack={configRef.value.stack}
+      renderNotifications={configRef.value.renderNotifications}
     />
   )
 
@@ -113,7 +123,7 @@ export default function useNotification(rootConfig: NotificationConfig = {}) {
 
   const api: NotificationAPI = {
     open(config) {
-      const mergedConfig = mergeConfig(shareConfig, config)
+      const mergedConfig = mergeConfig(shareConfig.value, config)
       if (mergedConfig.key === null || mergedConfig.key === undefined) {
         mergedConfig.key = `vc-notification-${uniqueKey}`
         uniqueKey += 1
@@ -134,7 +144,13 @@ export default function useNotification(rootConfig: NotificationConfig = {}) {
   // Which means getContainer should be stable.
   onMounted(
     () => {
-      container.value = getContainer()
+      container.value = resolveContainer()
+    },
+  )
+  watch(
+    () => configRef.value.getContainer,
+    () => {
+      container.value = resolveContainer()
     },
   )
   watch(taskQueue, () => {

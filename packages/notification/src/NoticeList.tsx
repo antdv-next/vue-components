@@ -34,11 +34,16 @@ const NoticeList = defineComponent<NoticeListProps>((props, { attrs }) => {
 
   const stackConfig = toRef(props, 'stack')
   const [stackEnabled, stackOptions] = useStack(stackConfig)
-  const expanded = computed(
-    () =>
-      stackEnabled.value
-      && (hoverKeys.value.length > 0 || keys.value.length <= stackOptions.threshold!.value!),
-  )
+  const stackActive = computed(() => stackEnabled.value || stackConfig.value === false)
+  const expanded = computed(() => {
+    if (!stackActive.value) {
+      return false
+    }
+    if (!stackEnabled.value) {
+      return true
+    }
+    return hoverKeys.value.length > 0 || keys.value.length <= stackOptions.threshold!.value!
+  })
   const placementMotion = computed(() => {
     if (typeof props.motion === 'function') {
       return props.placement ? props.motion(props.placement) : undefined
@@ -54,11 +59,16 @@ const NoticeList = defineComponent<NoticeListProps>((props, { attrs }) => {
       )
     }
   })
+  watch(stackEnabled, (enabled) => {
+    if (!enabled && hoverKeys.value.length) {
+      hoverKeys.value = []
+    }
+  })
 
   // Sync latest notice after DOM updates so collapsed stack uses accurate height
   watchEffect(
     () => {
-      if (!stackEnabled.value) {
+      if (!stackActive.value) {
         latestNotice.value = null
         return
       }
@@ -95,7 +105,7 @@ const NoticeList = defineComponent<NoticeListProps>((props, { attrs }) => {
         const dataIndex = keys.value.findIndex(item => item.key === strKey)
         const stackStyle: CSSProperties = {}
 
-        if (stackEnabled.value) {
+        if (stackActive.value) {
           const index = keys.value.length - 1 - (dataIndex > -1 ? dataIndex : motionIndex - 1)
           const transformX = placement === 'top' || placement === 'bottom' ? '-50%' : '0'
           if (index > 0) {
@@ -137,11 +147,17 @@ const NoticeList = defineComponent<NoticeListProps>((props, { attrs }) => {
               ...configStyles?.wrapper,
             }}
             onMouseenter={() => {
+              if (!stackEnabled.value) {
+                return
+              }
               hoverKeys.value = hoverKeys.value.includes(strKey)
                 ? hoverKeys.value
                 : [...hoverKeys.value, strKey]
             }}
             onMouseleave={() => {
+              if (!stackEnabled.value) {
+                return
+              }
               hoverKeys.value = hoverKeys.value.filter(k => k !== strKey)
             }}
           >
@@ -186,7 +202,7 @@ const NoticeList = defineComponent<NoticeListProps>((props, { attrs }) => {
             (attrs as any).class,
             {
               [`${prefixCls}-stack-expanded`]: expanded.value,
-              [`${prefixCls}-stack`]: stackEnabled.value,
+              [`${prefixCls}-stack`]: stackActive.value,
             },
           ),
           style: (attrs as any).style,
