@@ -11,7 +11,7 @@ export interface MarkProps {
   onClick?: Function
 }
 
-const Mark = defineComponent<MarkProps>((props, { attrs, slots }) => {
+const Mark = defineComponent<MarkProps>((props, { slots }) => {
   const sliderContext = useInjectSlider()
   return () => {
     const { prefixCls, value } = props
@@ -27,7 +27,7 @@ const Mark = defineComponent<MarkProps>((props, { attrs, slots }) => {
         class={classNames(textCls, {
           [`${textCls}-active`]: included && includedStart <= value && value <= includedEnd,
         })}
-        style={{ ...positionStyle, ...attrs.style as CSSProperties }}
+        style={{ ...positionStyle, ...(props.style || {}) as CSSProperties }}
         onMousedown={(e: MouseEvent) => {
           e.stopPropagation()
         }}
