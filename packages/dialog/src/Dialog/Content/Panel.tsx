@@ -14,6 +14,8 @@ export interface PanelProps extends Omit<IDialogPropTypes, 'getOpenCount'> {
   onMouseDown?: (e: MouseEvent) => void
   onMouseUp?: MouseEventHandler
   holderRef?: (el: HTMLDivElement) => void
+  /** Used for focus lock. When true and open, focus will lock into the panel */
+  isFixedPos?: boolean
 }
 
 export interface ContentRef {
@@ -24,18 +26,20 @@ const Panel = defineComponent<PanelProps & { animationVisible: boolean }>(
   (props, { expose, slots }) => {
     // ================================= Refs =================================
     const { setPanel } = useGetRefContext()
-    const mergedRef = shallowRef<HTMLDivElement>()
+    const internalRef = shallowRef<HTMLDivElement>()
     const mergeRefFun = (el: HTMLDivElement) => {
-      mergedRef.value = el
+      internalRef.value = el
       setPanel?.(el)
       props?.holderRef?.(el)
     }
-    useLockFocus(computed(() => !!props.visible), () => mergedRef.value!)
+    useLockFocus(
+      computed(() => !!props.visible && !!props.isFixedPos && props.focusTrap !== false),
+      () => internalRef.value!,
+    )
     expose({
       focus: () => {
-        mergedRef.value?.focus?.({ preventScroll: true })
+        internalRef.value?.focus?.({ preventScroll: true })
       },
-
     })
     return () => {
       const {

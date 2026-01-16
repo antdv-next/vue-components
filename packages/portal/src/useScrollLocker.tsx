@@ -11,30 +11,33 @@ export default function useScrollLocker(lock?: ShallowRef<boolean> | ComputedRef
   const mergedLock = computed(() => unref(lock))
   uuid += 1
   const id = shallowRef(`${UNIQUE_ID}_${uuid}`)
-  watch([id, mergedLock], async (_, _o, onCleanup) => {
-    console.log(mergedLock.value)
-    if (mergedLock.value) {
-      const scrollbarSize = getTargetScrollBarSize(document.body).width
-      const isOverflow = isBodyOverflowing()
+  watch(
+    [id, mergedLock],
+    async (_, _o, onCleanup) => {
+      if (mergedLock.value) {
+        const scrollbarSize = getTargetScrollBarSize(document.body).width
+        const isOverflow = isBodyOverflowing()
 
-      updateCSS(
-        `
+        updateCSS(
+          `
 html body {
   overflow-y: hidden;
   ${isOverflow ? `width: calc(100% - ${scrollbarSize}px);` : ''}
 }`,
-        id.value,
-      )
+          id.value,
+        )
 
-      onCleanup(() => {
+        onCleanup(() => {
+          removeCSS(id.value)
+        })
+      }
+      else {
         removeCSS(id.value)
-      })
-    }
-    else {
-      removeCSS(id.value)
-    }
-  }, {
-    flush: 'post',
-    immediate: true,
-  })
+      }
+    },
+    {
+      flush: 'post',
+      immediate: true,
+    },
+  )
 }

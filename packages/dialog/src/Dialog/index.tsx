@@ -3,7 +3,6 @@ import type { IDialogPropTypes } from '../IDialogPropTypes'
 import type { ContentRef } from './Content/Panel'
 import { warning } from '@v-c/util'
 import contains from '@v-c/util/dist/Dom/contains'
-import KeyCode from '@v-c/util/dist/KeyCode'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
 import { defineComponent, onUnmounted, shallowRef, useId, watch } from 'vue'
 import { getMotionName } from '../util'
@@ -12,8 +11,8 @@ import Mask from './Mask'
 
 const defaults = {
   prefixCls: 'vc-dialog',
-  visible: true,
-  keyboard: true,
+  visible: false,
+  // keyboard: true,
   focusTriggerAfterClose: true,
   closable: true,
   mask: true,
@@ -119,12 +118,12 @@ const Dialog = defineComponent<IDialogPropTypes>(
         immediate: true,
       },
     )
-    function onWrapperKeyDown(e: any) {
-      if (props.keyboard && e === KeyCode.ESC) {
-        e.stopPropagation()
-        onInternalClose(e)
-      }
-    }
+    // function onWrapperKeyDown(e: any) {
+    //   if (props.keyboard && e === KeyCode.ESC) {
+    //     e.stopPropagation()
+    //     onInternalClose(e)
+    //   }
+    // }
 
     // ========================= Effect =========================
     watch(
@@ -188,7 +187,6 @@ const Dialog = defineComponent<IDialogPropTypes>(
             className={modalClassNames?.mask}
           />
           <div
-            onKeydown={onWrapperKeyDown}
             class={[`${prefixCls}-wrap`, wrapClassName, modalClassNames?.wrapper]}
             ref={wrapperRef}
             onClick={onWrapperClick}

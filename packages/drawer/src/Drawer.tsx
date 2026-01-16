@@ -110,6 +110,14 @@ const Drawer = defineComponent<DrawerProps>({
       popupRef,
     })
 
+    const onEsc: PortalProps['onEsc'] = ({ top, event }) => {
+      const { keyboard } = rawProps
+      if (top && keyboard) {
+        event.stopPropagation()
+        rawProps?.onClose?.(event)
+      }
+    }
+
     return () => {
       mergedOpen.value = !!rawProps.open
       const mp = mergedProps.value
@@ -156,6 +164,7 @@ const Drawer = defineComponent<DrawerProps>({
         <Portal
           open={mergedOpen.value || mp.forceRender || animatedVisible.value}
           autoDestroy={false}
+          onEsc={onEsc}
           getContainer={mp.getContainer}
           autoLock={mp.mask !== false && (mergedOpen.value || animatedVisible.value)}
         >

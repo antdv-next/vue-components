@@ -4,6 +4,7 @@ import { filterEmpty } from '@v-c/util/dist/props-util'
 import { computed, createVNode, defineComponent, isVNode, onMounted, shallowRef, Teleport, watch } from 'vue'
 import { useContextProvider } from './Context.tsx'
 import useDom from './useDom.tsx'
+import useEscKeyDown from './useEscKeyDown.ts'
 import useScrollLocker from './useScrollLocker.tsx'
 
 export type ContainerType = Element | DocumentFragment
@@ -13,7 +14,13 @@ export type GetContainer
     | ContainerType
     | (() => ContainerType)
     | false
-
+export type EscCallback = ({
+  top,
+  event,
+}: {
+  top: boolean
+  event: KeyboardEvent
+}) => void
 export interface PortalProps {
   /** Customize container element. Default will create a div in document.body when `open` */
   getContainer?: GetContainer
@@ -24,6 +31,7 @@ export interface PortalProps {
   autoDestroy?: boolean
   /** Lock screen scroll when open */
   autoLock?: boolean
+  onEsc?: EscCallback
 
   /** @private debug name. Do not use in prod */
   debug?: string
@@ -101,6 +109,12 @@ const Portal = defineComponent<PortalProps>(
         && (mergedContainer.value === defaultContainer
           || mergedContainer.value === document.body))),
     )
+
+    // ========================= Esc Keydown ==========================
+    useEscKeyDown(computed(() => !!props.open), (...args) => {
+      props.onEsc?.(...args)
+    })
+
     const elementEl = shallowRef()
     const setRef = (el: any) => {
       elementEl.value = el

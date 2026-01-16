@@ -1,3 +1,4 @@
+import type { PortalProps } from '@v-c/portal'
 import type { IDialogPropTypes } from './IDialogPropTypes'
 import Portal from '@v-c/portal'
 import { defineComponent, shallowRef, watch } from 'vue'
@@ -17,19 +18,26 @@ const defaults = {
   getContainer: undefined,
   closeIcon: undefined,
   prefixCls: 'vc-dialog',
-  visible: true,
+  // visible: true,
   keyboard: true,
   focusTriggerAfterClose: true,
   closable: true,
   mask: true,
   maskClosable: true,
+  destroyOnHidden: false,
   forceRender: false,
 } as IDialogPropTypes
 const DialogWrap = defineComponent<IDialogPropTypes>(
   (props = defaults, { slots }) => {
     const animatedVisible = shallowRef(false)
     useRefProvide(props)
-
+    const onEsc: PortalProps['onEsc'] = ({ top, event }) => {
+      const { keyboard = true } = props
+      if (top && keyboard) {
+        event.stopPropagation()
+        props?.onClose?.(event)
+      }
+    }
     watch(
       () => props.visible,
       () => {
@@ -58,6 +66,7 @@ const DialogWrap = defineComponent<IDialogPropTypes>(
         <Portal
           open={(visible || forceRender || animatedVisible.value)}
           autoDestroy={false}
+          onEsc={onEsc}
           getContainer={getContainer}
           autoLock={(visible || animatedVisible.value)}
         >
