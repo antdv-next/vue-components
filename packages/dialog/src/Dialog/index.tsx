@@ -25,7 +25,6 @@ const Dialog = defineComponent<IDialogPropTypes>(
   (props = defaults, { expose, slots }) => {
     if (process.env.NODE_ENV !== 'production') {
       ['wrapStyle', 'bodyStyle', 'maskStyle'].forEach((prop) => {
-        // (prop in props) && console.error(`Warning: ${prop} is deprecated, please use styles instead.`)
         warning(!(prop in props && (props as any)[prop]), `${prop} is deprecated, please use styles instead.`)
       })
       if ('wrapClassName' in props && props.wrapClassName) {
@@ -125,11 +124,6 @@ const Dialog = defineComponent<IDialogPropTypes>(
         e.stopPropagation()
         onInternalClose(e)
       }
-
-      // keep focus inside dialog
-      if (props.visible && e.keyCode === KeyCode.TAB) {
-        contentRef.value?.changeActive?.(!e.shiftKey)
-      }
     }
 
     // ========================= Effect =========================
@@ -194,7 +188,6 @@ const Dialog = defineComponent<IDialogPropTypes>(
             className={modalClassNames?.mask}
           />
           <div
-            tabindex={-1}
             onKeydown={onWrapperKeyDown}
             class={[`${prefixCls}-wrap`, wrapClassName, modalClassNames?.wrapper]}
             ref={wrapperRef}

@@ -2,13 +2,11 @@ import type { MouseEventHandler } from '@v-c/util/dist/EventInterface'
 import type { CSSProperties } from 'vue'
 import type { IDialogPropTypes } from '../../IDialogPropTypes'
 import { classNames, clsx } from '@v-c/util'
+import { useLockFocus } from '@v-c/util/dist/Dom/focus'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
 import { getStylePxValue } from '@v-c/util/dist/props-util'
-import { defineComponent, shallowRef } from 'vue'
+import { computed, defineComponent, shallowRef } from 'vue'
 import { useGetRefContext } from '../../context'
-
-const sentinelStyle = { width: 0, height: 0, overflow: 'hidden', outline: 'none' }
-const entityStyle = { outline: 'none' }
 
 export interface PanelProps extends Omit<IDialogPropTypes, 'getOpenCount'> {
   prefixCls: string
@@ -20,7 +18,6 @@ export interface PanelProps extends Omit<IDialogPropTypes, 'getOpenCount'> {
 
 export interface ContentRef {
   focus: () => void
-  changeActive: (next: boolean) => void
 }
 
 const Panel = defineComponent<PanelProps & { animationVisible: boolean }>(
@@ -30,24 +27,15 @@ const Panel = defineComponent<PanelProps & { animationVisible: boolean }>(
     const mergedRef = shallowRef<HTMLDivElement>()
     const mergeRefFun = (el: HTMLDivElement) => {
       mergedRef.value = el
-      setPanel(el)
+      setPanel?.(el)
       props?.holderRef?.(el)
     }
-    const sentinelStartRef = shallowRef<HTMLDivElement>()
-    const sentinelEndRef = shallowRef<HTMLDivElement>()
+    useLockFocus(computed(() => !!props.visible), () => mergedRef.value!)
     expose({
       focus: () => {
-        sentinelStartRef.value?.focus?.({ preventScroll: true })
+        mergedRef.value?.focus?.({ preventScroll: true })
       },
-      changeActive: (next: boolean) => {
-        const { activeElement } = document
-        if (next && activeElement === sentinelEndRef.value) {
-          sentinelStartRef.value?.focus?.({ preventScroll: true })
-        }
-        else if (!next && activeElement === sentinelStartRef.value) {
-          sentinelEndRef.value?.focus?.({ preventScroll: true })
-        }
-      },
+
     })
     return () => {
       const {
@@ -180,11 +168,9 @@ const Panel = defineComponent<PanelProps & { animationVisible: boolean }>(
           class={[prefixCls, className]}
           onMousedown={onMouseDown}
           onMouseup={onMouseUp}
+          tabindex={-1}
         >
-          <div ref={sentinelStartRef} tabindex={0} style={entityStyle}>
-            {renderContent()}
-          </div>
-          <div tabindex={0} ref={sentinelEndRef} style={sentinelStyle} />
+          {renderContent()}
         </div>
       )
     }
