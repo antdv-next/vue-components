@@ -1,4 +1,5 @@
 export { default as classNames, clsx } from './classnames'
+export { useControlledState } from './hooks/useControlledState'
 export { default as useId } from './hooks/useId'
 export { default as useMergedState } from './hooks/useMergedState'
 export { default as KeyCode } from './KeyCode'
@@ -8,5 +9,4 @@ export { default as RenderComponent } from './RenderComponent'
 export type { VueNode } from './type'
 export { default as get } from './utils/get'
 export { default as set } from './utils/set'
-
 export { default as warning } from './warning'

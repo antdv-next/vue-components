@@ -1,11 +1,12 @@
 import type { Ref } from 'vue'
 import { nextTick, shallowRef, toValue, watch } from 'vue'
 
-export function useController<T = any>(
+export function useControlledState<T = any>(
   state: Ref<T | undefined>,
   emit?: any,
   updateKey: string = 'value',
   defaultState?: T,
+  props?: any,
 ) {
   const mergedState = shallowRef<T>(defaultState ?? state.value)
   function setState(nextState: T) {
@@ -13,8 +14,11 @@ export function useController<T = any>(
     if (emit) {
       emit(`update:${updateKey}`, nextState)
     }
+    if (props && props?.[`onUpdate:${updateKey}`]) {
+      props?.[`onUpdate:${updateKey}`](nextState)
+    }
     nextTick(() => {
-      if (state.value === undefined) {
+      if (state.value === undefined && state.value !== nextState) {
         mergedState.value = nextState
       }
     })
@@ -30,5 +34,5 @@ export function useController<T = any>(
       }
     },
   )
-  return [state, setState]
+  return [state, setState] as const
 }
