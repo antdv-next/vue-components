@@ -10,8 +10,8 @@ export default function useWatch(
   onScroll: VoidFunction,
 ) {
   watch([open, target, popup], async (_n, _o, onCleanup) => {
-    await nextTick()
     if (open.value && target.value && popup.value) {
+      await nextTick()
       const targetElement = target.value
       const popupElement = popup.value
       const targetScrollList = collectScroller(targetElement)
@@ -45,5 +45,5 @@ export default function useWatch(
         })
       })
     }
-  })
+  }, { flush: 'post' })
 }

@@ -123,7 +123,6 @@ const Popup = defineComponent<PopupProps>(
           const nextArrowOffset
             = (rtl.value ? activeInputRight - arrowWidth : activeInputLeft) - wrapperRect.left
           arrowOffset.value = nextArrowOffset
-          console.log('nextArrowOffset:', nextArrowOffset, 'arrowOffset.value:', arrowOffset.value)
 
           // Container Offset
           if (containerWidth.value && containerWidth.value < selectorWidth) {
@@ -133,15 +132,10 @@ const Popup = defineComponent<PopupProps>(
 
             const safeOffset = Math.max(0, offset)
             containerOffset.value = safeOffset
-            console.log('containerOffset calculated:', safeOffset, 'containerWidth:', containerWidth.value, 'selectorWidth:', selectorWidth)
           }
           else {
             containerOffset.value = 0
-            console.log('containerOffset set to 0, containerWidth:', containerWidth.value, 'selectorWidth:', selectorWidth)
           }
-        }
-        else {
-          console.log('skip calculation, range:', props.range, 'wrapperRef:', wrapperRef.value)
         }
       },
       { immediate: true, flush: 'post' },
@@ -245,6 +239,7 @@ const Popup = defineComponent<PopupProps>(
       // Container
       let renderNode = (
         <div
+          ref={range ? containerRef : undefined}
           onMousedown={onPanelMouseDown}
           tabindex={-1}
           class={clsx(
@@ -276,11 +271,7 @@ const Popup = defineComponent<PopupProps>(
             class={clsx(`${ctx.value.prefixCls}-range-wrapper`, `${ctx.value.prefixCls}-${picker}-range-wrapper`)}
           >
             <div ref={arrowRef} class={`${ctx.value.prefixCls}-range-arrow`} style={{ left: `${arrowOffset.value}px` }} />
-
-            {/* Container with ref for ResizeObserver hook */}
-            <div ref={containerRef}>
-              {renderNode}
-            </div>
+            {renderNode}
           </div>
         )
       }

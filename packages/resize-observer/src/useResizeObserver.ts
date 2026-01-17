@@ -65,7 +65,8 @@ export default function useResizeObserver(
     [enabled, getTarget],
     (_, _o, onCleanup) => {
       const target = typeof getTarget === 'function' ? getTarget() : unref(getTarget)
-      if (target && enabled) {
+      const isEnabled = unref(enabled)
+      if (target && isEnabled) {
         observe(target, onInternalResize as any)
         onCleanup(() => {
           if (target) {
