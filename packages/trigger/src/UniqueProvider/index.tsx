@@ -216,6 +216,7 @@ const UniqueProvider = defineComponent<UniqueProviderProps>(
                 portal={Portal}
                 prefixCls={prefixCls!}
                 popup={mergedOptions.value?.popup}
+                onEsc={mergedOptions.value?.onEsc}
                 className={classNames(
                   mergedOptions.value?.popupClassName,
                   alignedClassName.value,

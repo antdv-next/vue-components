@@ -1,3 +1,4 @@
+import type { PortalProps } from '@v-c/portal'
 import type { VueNode } from '@v-c/util/dist/type'
 import type { CSSMotionProps } from '@v-c/util/dist/utils/transition'
 import type { CSSProperties } from 'vue'
@@ -236,11 +237,6 @@ export function generateTrigger(PortalComponent: any = Portal) {
         return props?.popupVisible ?? internalOpen.value
       })
 
-      const setMergedOpen = (nextOpen: boolean) => {
-        if (openUncontrolled.value) {
-          internalOpen.value = nextOpen
-        }
-      }
       const isOpen = () => mergedOpen.value
 
       watch(
@@ -275,6 +271,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
           getPopupContainer: props.getPopupContainer,
           getPopupClassNameFromAlign: props.getPopupClassNameFromAlign,
           id,
+          onEsc,
         }
       }
 
@@ -296,22 +293,9 @@ export function generateTrigger(PortalComponent: any = Portal) {
 
       const openRef = shallowRef(mergedOpen.value)
 
-      const lastTriggerRef = shallowRef<boolean[]>([])
-      lastTriggerRef.value = []
-      watchEffect(() => {
-        openRef.value = mergedOpen.value
-        if (!mergedOpen.value) {
-          lastTriggerRef.value = []
-        }
-      })
-
       const internalTriggerOpen = (nextOpen: boolean) => {
-        setMergedOpen(nextOpen)
-        // Enter or Pointer will both trigger open state change
-        // We only need take one to avoid duplicated change event trigger
-        // Use `lastTriggerRef` to record last open type
-        if ((lastTriggerRef.value[lastTriggerRef.value.length - 1] ?? mergedOpen.value) !== nextOpen) {
-          lastTriggerRef.value.push(nextOpen)
+        if (mergedOpen.value !== nextOpen) {
+          internalOpen.value = nextOpen
           props?.onOpenChange?.(nextOpen)
           props?.onPopupVisibleChange?.(nextOpen)
         }
@@ -345,6 +329,12 @@ export function generateTrigger(PortalComponent: any = Portal) {
         delayInvoke(() => {
           internalTriggerOpen(nextOpen)
         }, delay)
+      }
+
+      function onEsc({ top }: Parameters<NonNullable<PortalProps['onEsc']>>[0]) {
+        if (top) {
+          triggerOpen(false)
+        }
       }
 
       // ========================== Motion ============================
@@ -782,6 +772,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
                   fresh={fresh}
                   // Click
                   onClick={onPopupClick}
+                  onEsc={onEsc}
                   onPointerDownCapture={onPopupPointerDown}
                   // Mask
                   mask={mask}

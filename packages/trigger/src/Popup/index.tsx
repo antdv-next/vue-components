@@ -1,3 +1,4 @@
+import type { PortalProps } from '@v-c/portal'
 import type { ResizeObserverProps } from '@v-c/resize-observer'
 import type { CSSMotionProps } from '@v-c/util/dist/utils/transition'
 import type { CSSProperties } from 'vue'
@@ -22,6 +23,7 @@ export interface MobileConfig {
 }
 
 export interface PopupProps {
+  onEsc?: PortalProps['onEsc']
   prefixCls: string
   className?: string
   style?: CSSProperties
@@ -169,6 +171,7 @@ const Popup = defineComponent<PopupProps>(
         return null
       }
       const {
+        onEsc,
         stretch,
         targetHeight,
         targetWidth,
@@ -257,6 +260,7 @@ const Popup = defineComponent<PopupProps>(
           open={forceRender || isNodeVisible.value}
           getContainer={getPopupContainer && (() => getPopupContainer!(target))}
           autoDestroy={autoDestroy}
+          onEsc={onEsc}
         >
           <Mask
             prefixCls={prefixCls}

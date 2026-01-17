@@ -24,10 +24,10 @@ export default function useOffsetStyle(
           bottom: AUTO,
         }
 
-    const offsetShow = offsetX.value > 0 || offsetY.value > 0 || offsetR.value > 0 || offsetB.value > 0
-    if (!offsetShow) {
-      return {
-      }
+    // 首次打开时 ready 为 false，返回空对象避免从 -1000vw 位置飘过来
+    // 只有当 ready 为 true 或者关闭状态时才设置位置样式
+    if (!ready.value && open.value) {
+      return {}
     }
     // Set align style
     if (!isMobile.value && (ready.value || !open.value)) {

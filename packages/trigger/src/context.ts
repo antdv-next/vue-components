@@ -1,3 +1,4 @@
+import type { PortalProps } from '@v-c/portal'
 import type { CSSMotionProps } from '@v-c/util/dist/utils/transition'
 import type { CSSProperties, InjectionKey, Ref } from 'vue'
 import type { TriggerProps } from './index'
@@ -52,6 +53,7 @@ export interface UniqueShowOptions {
   arrow?: ArrowTypeOuter
   getPopupContainer?: TriggerProps['getPopupContainer']
   getPopupClassNameFromAlign?: (align: AlignType) => string
+  onEsc?: PortalProps['onEsc']
 }
 
 export interface UniqueContextProps {

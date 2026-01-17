@@ -72,7 +72,7 @@ function getAlignPoint(rect: Rect, points: Points) {
   return { x, y }
 }
 
-function reversePoints(points: Points, index: number): string {
+function reversePoints(points: Points, index: number): Points {
   const reverseMap = {
     t: 'b',
     b: 't',
@@ -80,14 +80,13 @@ function reversePoints(points: Points, index: number): string {
     r: 'l',
   }
 
-  return points
-    .map((point, i) => {
-      if (i === index) {
-        return (reverseMap as any)[point] || 'c'
-      }
-      return point
-    })
-    .join('')
+  const clone = [...points] as Points
+  clone[index] = (reverseMap as any)[points[index]] || 'c'
+  return clone
+}
+
+function flatPoints(points: Points): string {
+  return points.join('')
 }
 
 function shouldSwitchPlacement(
@@ -308,10 +307,10 @@ export default function useAlign(
 
       // Calculate scale (same as React version)
       const scaleX = toNum(
-        Math.round((popupWidth / parseFloat(width)) * 1000) / 1000,
+        Math.floor((popupWidth / parseFloat(width)) * 1000) / 1000,
       )
       const scaleY = toNum(
-        Math.round((popupHeight / parseFloat(height)) * 1000) / 1000,
+        Math.floor((popupHeight / parseFloat(height)) * 1000) / 1000,
       )
 
       // No need to align since it's not visible in view
@@ -346,6 +345,7 @@ export default function useAlign(
         ...placementInfo,
       }
 
+      let nextPoints = [popupPoints,targetPoints]
       // Next Offset
       let nextOffsetX = targetAlignPoint.x - popupAlignPoint.x + popupOffsetX
       let nextOffsetY = targetAlignPoint.y - popupAlignPoint.y + popupOffsetY
@@ -458,9 +458,9 @@ export default function useAlign(
           nextOffsetY = tmpNextOffsetY
           popupOffsetY = -popupOffsetY
 
-          nextAlignInfo.points = [
-            reversePoints(popupPoints, 0),
-            reversePoints(targetPoints, 0),
+          nextPoints=[
+              reversePoints(nextPoints[0],0)
+              reversePoints(nextPoints[1],0)
           ]
         }
         else {
@@ -705,13 +705,13 @@ export default function useAlign(
       let offsetY4Bottom = popupMirrorRect.bottom - popupRect.y - (nextOffsetY + popupRect.height)
 
       if (scaleX === 1) {
-        nextOffsetX = Math.round(nextOffsetX)
-        offsetX4Right = Math.round(offsetX4Right)
+        nextOffsetX = Math.floor(nextOffsetX)
+        offsetX4Right = Math.floor(offsetX4Right)
       }
 
       if (scaleY === 1) {
-        nextOffsetY = Math.round(nextOffsetY)
-        offsetY4Bottom = Math.round(offsetY4Bottom)
+        nextOffsetY = Math.floor(nextOffsetY)
+        offsetY4Bottom = Math.floor(offsetY4Bottom)
       }
       // Divide by scale (same as React version)
       const nextOffsetInfo = {
