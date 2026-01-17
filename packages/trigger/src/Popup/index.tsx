@@ -4,7 +4,7 @@ import type { CSSMotionProps } from '@v-c/util/dist/utils/transition'
 import type { CSSProperties } from 'vue'
 import type { TriggerProps } from '../index.tsx'
 import type { AlignType, ArrowPos, ArrowTypeOuter } from '../interface.ts'
-import ResizeObserver from '@v-c/resize-observer'
+import { useResizeObserver } from '@v-c/resize-observer'
 import { classNames } from '@v-c/util'
 import { toPropsRefs } from '@v-c/util/dist/props-util'
 import { getTransitionProps } from '@v-c/util/dist/utils/transition'
@@ -165,6 +165,7 @@ const Popup = defineComponent<PopupProps>(
       getElement: () => popupElementRef.value,
       nativeElement: popupElementRef,
     })
+    useResizeObserver(open, popupElementRef, onInternalResize)
     return () => {
       // ========================= Render =========================
       if (!show.value) {
@@ -270,55 +271,51 @@ const Popup = defineComponent<PopupProps>(
             motion={mergedMaskMotion!}
             mobile={isMobile.value!}
           />
-          <ResizeObserver
-            onResize={onInternalResize}
-            disabled={!open.value}
-          >
-            <Transition
-              {...mergedTransitionProps}
-            >
-              <div
-                ref={popupElementRef}
-                v-show={open.value}
-                class={cls}
-                style={[
-                  {
-                    '--arrow-x': `${arrowPos.x || 0}px`,
-                    '--arrow-y': `${arrowPos.y || 0}px`,
-                  },
-                  offsetStyle.value,
-                  miscStyle,
-                  {
-                    boxSizing: 'border-box',
-                    zIndex,
-                  },
-                  props.style,
-                ]}
-                onMouseenter={onMouseEnter}
-                onMouseleave={onMouseLeave}
-                onPointerenter={onPointerEnter}
-                onClick={onClick}
-                {
-                  ...{
-                    onPointerdownCapture: onPointerDownCapture,
-                  }
-                }
-              >
-                {!!arrow && (
-                  <Arrow
-                    prefixCls={prefixCls}
-                    arrow={arrow === true ? {} : arrow}
-                    arrowPos={arrowPos}
-                    align={align!}
-                  />
-                )}
 
-                <PopupContent cache={!open.value && !fresh}>
-                  {popupContent.value}
-                </PopupContent>
-              </div>
-            </Transition>
-          </ResizeObserver>
+          <Transition
+            {...mergedTransitionProps}
+          >
+            <div
+              ref={popupElementRef}
+              v-show={open.value}
+              class={cls}
+              style={[
+                {
+                  '--arrow-x': `${arrowPos.x || 0}px`,
+                  '--arrow-y': `${arrowPos.y || 0}px`,
+                },
+                offsetStyle.value,
+                miscStyle,
+                {
+                  boxSizing: 'border-box',
+                  zIndex,
+                },
+                props.style,
+              ]}
+              onMouseenter={onMouseEnter}
+              onMouseleave={onMouseLeave}
+              onPointerenter={onPointerEnter}
+              onClick={onClick}
+              {
+                ...{
+                  onPointerdownCapture: onPointerDownCapture,
+                }
+              }
+            >
+              {!!arrow && (
+                <Arrow
+                  prefixCls={prefixCls}
+                  arrow={arrow === true ? {} : arrow}
+                  arrowPos={arrowPos}
+                  align={align!}
+                />
+              )}
+
+              <PopupContent cache={!open.value && !fresh}>
+                {popupContent.value}
+              </PopupContent>
+            </div>
+          </Transition>
           {slots?.default?.()}
         </Portal>
       )
