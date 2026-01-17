@@ -1,13 +1,13 @@
-import type { ResizeObserverProps } from '@v-c/resize-observer'
+import type { OnResize } from '@v-c/resize-observer'
 import type { MouseEventHandler } from '@v-c/util/dist/EventInterface'
 import type { VueNode } from '@v-c/util/dist/type'
 import type { InputHTMLAttributes } from 'vue'
 import type { RangeTimeProps, SharedPickerProps, SharedTimeProps, ValueDate } from '../../interface'
 import type { FooterProps } from './Footer'
 import type { PopupPanelProps } from './PopupPanel'
-
+import { useResizeObserver } from '@v-c/resize-observer'
 import { clsx, omit } from '@v-c/util'
-import { computed, defineComponent, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
+import { computed, defineComponent, ref, watch } from 'vue'
 import { toArray } from '../../utils/miscUtil'
 import { usePickerContext } from '../context'
 import Footer from './Footer'
@@ -59,48 +59,55 @@ const Popup = defineComponent<PopupProps>(
     // ========================= Refs =========================
     const arrowRef = ref<HTMLDivElement>()
     const wrapperRef = ref<HTMLDivElement>()
+    const containerRef = ref<HTMLDivElement>()
 
     // ======================== Offset ========================
     const containerWidth = ref<number>(0)
     const containerOffset = ref<number>(0)
     const arrowOffset = ref<number>(0)
-    const domRef = shallowRef()
+    const activeInputLeft = computed(() => activeInfo.value[0])
+    const activeInputRight = computed(() => activeInfo.value[1])
+    const selectorWidth = computed(() => activeInfo.value[2])
 
-    const onResize: ResizeObserverProps['onResize'] = (info) => {
+    const onResize: OnResize = (info) => {
       if (info.width) {
         containerWidth.value = info.width
       }
     }
 
-    onMounted(() => {
-      if (domRef.value) {
-        const observer = new ResizeObserver((entries) => {
-          const entry = entries[0]
-          onResize(entry as any, domRef.value)
-        })
-        observer.observe(domRef.value)
-
-        onUnmounted(() => {
-          observer.disconnect()
-        })
-      }
+    // Use ResizeObserver hook to observe container size changes
+    const rangeEnabled = ref(props.range)
+    watch(() => props.range, (val) => {
+      rangeEnabled.value = val
     })
+    useResizeObserver(rangeEnabled as any, containerRef as any, onResize)
 
     const retryTimes = ref(0)
 
+    // Reset retryTimes when activeInputLeft changes
     watch(
-      () => activeInfo.value[0],
+      activeInputLeft,
       () => {
         retryTimes.value = 10
       },
-      { immediate: true, flush: 'post' },
+      { immediate: true },
     )
 
+    // Watch for all dependencies that should trigger recalculation
+    // This matches React's useEffect dependencies: [retryTimes, rtl, containerWidth, activeInputLeft, activeInputRight, selectorWidth, range]
     watch(
-      [retryTimes, rtl, activeInfo, () => props.range],
+      [
+        retryTimes,
+        rtl,
+        containerWidth,
+        activeInputLeft,
+        activeInputRight,
+        selectorWidth,
+        () => props.range,
+      ],
       () => {
-      // `activeOffset` is always align with the active input element
-      // So we need only check container contains the `activeOffset`
+        // `activeOffset` is always align with the active input element
+        // So we need only check container contains the `activeOffset`
         const [activeInputLeft, activeInputRight, selectorWidth] = activeInfo.value
         if (props.range && wrapperRef.value) {
         // Offset in case container has border radius
@@ -114,21 +121,27 @@ const Popup = defineComponent<PopupProps>(
           }
 
           const nextArrowOffset
-            = (rtl ? activeInputRight - arrowWidth : activeInputLeft) - wrapperRect.left
+            = (rtl.value ? activeInputRight - arrowWidth : activeInputLeft) - wrapperRect.left
           arrowOffset.value = nextArrowOffset
+          console.log('nextArrowOffset:', nextArrowOffset, 'arrowOffset.value:', arrowOffset.value)
 
           // Container Offset
-          if (containerWidth && containerWidth.value < selectorWidth) {
-            const offset = rtl
+          if (containerWidth.value && containerWidth.value < selectorWidth) {
+            const offset = rtl.value
               ? wrapperRect.right - (activeInputRight - arrowWidth + containerWidth.value)
               : activeInputLeft + arrowWidth - wrapperRect.left - containerWidth.value
 
             const safeOffset = Math.max(0, offset)
             containerOffset.value = safeOffset
+            console.log('containerOffset calculated:', safeOffset, 'containerWidth:', containerWidth.value, 'selectorWidth:', selectorWidth)
           }
           else {
             containerOffset.value = 0
+            console.log('containerOffset set to 0, containerWidth:', containerWidth.value, 'selectorWidth:', selectorWidth)
           }
+        }
+        else {
+          console.log('skip calculation, range:', props.range, 'wrapperRef:', wrapperRef.value)
         }
       },
       { immediate: true, flush: 'post' },
@@ -232,7 +245,6 @@ const Popup = defineComponent<PopupProps>(
       // Container
       let renderNode = (
         <div
-          ref={domRef}
           onMousedown={onPanelMouseDown}
           tabindex={-1}
           class={clsx(
@@ -242,8 +254,8 @@ const Popup = defineComponent<PopupProps>(
             classNames?.popup?.container,
           )}
           style={{
-            [rtl ? marginRight : marginLeft]: containerOffset,
-            [rtl ? marginLeft : marginRight]: 'auto',
+            [rtl.value ? marginRight : marginLeft]: `${containerOffset.value}px`,
+            [rtl.value ? marginLeft : marginRight]: 'auto',
             ...styles?.popup?.container,
           }}
           // Still wish not to lose focus on mouse down
@@ -265,8 +277,10 @@ const Popup = defineComponent<PopupProps>(
           >
             <div ref={arrowRef} class={`${ctx.value.prefixCls}-range-arrow`} style={{ left: `${arrowOffset.value}px` }} />
 
-            {/* Watch for container size */}
-            {renderNode}
+            {/* Container with ref for ResizeObserver hook */}
+            <div ref={containerRef}>
+              {renderNode}
+            </div>
           </div>
         )
       }

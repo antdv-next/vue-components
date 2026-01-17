@@ -12,7 +12,6 @@ import { computed, defineComponent, nextTick, shallowRef, Transition, watchEffec
 import useOffsetStyle from '../hooks/useOffsetStyle.ts'
 import { Arrow } from './Arrow.tsx'
 import Mask from './Mask.tsx'
-import PopupContent from './PopupContent.tsx'
 
 export interface MobileConfig {
   mask?: boolean
@@ -91,10 +90,6 @@ const defaults = {
 
 const Popup = defineComponent<PopupProps>(
   (props = defaults, { attrs, slots, expose }) => {
-    const popupContent = computed(
-      () => typeof props.popup === 'function' ? (props as any).popup() : props.popup,
-    )
-
     const {
       offsetX,
       offsetR,
@@ -194,7 +189,6 @@ const Popup = defineComponent<PopupProps>(
         onPointerEnter,
         onPointerDownCapture,
         onClick,
-        fresh,
 
         onPrepare,
         onVisibleChanged,
@@ -311,9 +305,7 @@ const Popup = defineComponent<PopupProps>(
                 />
               )}
 
-              <PopupContent cache={!open.value && !fresh}>
-                {popupContent.value}
-              </PopupContent>
+              {typeof props?.popup === 'function' ? (props as any).popup() : props.popup}
             </div>
           </Transition>
           {slots?.default?.()}
