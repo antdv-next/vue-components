@@ -8,7 +8,7 @@ export function useControlledState<T = any>(
   defaultState?: T,
   props?: any,
 ) {
-  const mergedState = shallowRef<T>(defaultState ?? state.value)
+  const mergedState = shallowRef<T>((defaultState ?? state.value) as T)
   function setState(nextState: T) {
     // 非受控模式下，可以直接赋值
     if (emit) {
