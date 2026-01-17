@@ -731,7 +731,6 @@ export default function useAlign(
         scaleY,
         align: nextAlignInfo,
       }
-      console.log(nextOffsetInfo, 'Sdsd')
       Object.assign(offsetInfo, nextOffsetInfo)
     }
   }

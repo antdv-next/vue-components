@@ -23,7 +23,6 @@ export default function useOffsetStyle(
           right: AUTO,
           bottom: AUTO,
         }
-    console.log(ready.value, open.value)
     // Set align style
     if (!isMobile.value && (ready.value || !open.value)) {
       const { points } = align.value ?? {}

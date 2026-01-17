@@ -3,7 +3,7 @@ import type { CSSProperties } from 'vue'
 import type { AlignType, ArrowPos } from '../interface.ts'
 import { toPropsRefs } from '@v-c/util/dist/props-util'
 import { getTransitionProps } from '@v-c/util/dist/utils/transition'
-import { defineComponent, shallowRef, Transition, watch, watchEffect } from 'vue'
+import { computed, defineComponent, shallowRef, Transition, watchEffect } from 'vue'
 import useOffsetStyle from '../hooks/useOffsetStyle'
 
 export interface UniqueContainerProps {
@@ -25,7 +25,10 @@ export interface UniqueContainerProps {
 
 const UniqueContainer = defineComponent<UniqueContainerProps>(
   (props) => {
+    // motionVisible tracks the actual visibility state after animation completes
+    // Similar to React CSSMotion's onVisibleChanged callback
     const motionVisible = shallowRef(false)
+
     const {
       open,
       isMobile,
@@ -46,6 +49,7 @@ const UniqueContainer = defineComponent<UniqueContainerProps>(
       'offsetX',
       'offsetY',
     )
+
     // ========================= Styles =========================
     const offsetStyle = useOffsetStyle(
       isMobile,
@@ -57,22 +61,29 @@ const UniqueContainer = defineComponent<UniqueContainerProps>(
       offsetX,
       offsetY,
     )
+
     // Cache for offsetStyle when ready is true
-    const cachedOffsetStyleRef = shallowRef(offsetStyle.value)
+    // Initialize with hidden position to prevent "fly in" on first render
+    const cachedOffsetStyleRef = shallowRef<CSSProperties>(offsetStyle.value)
+
     watchEffect(() => {
-    // Update cached offset style when ready is true
+      // Update cached offset style when ready is true
       if (ready.value) {
         cachedOffsetStyleRef.value = offsetStyle.value
       }
     })
-    watch(
-      open,
-      (nextVisible) => {
-        if (nextVisible) {
-          motionVisible.value = true
-        }
-      },
-    )
+
+    // Compute the actual style to use
+    // When not ready and opening, use hidden position to prevent flash
+    const mergedOffsetStyle = computed(() => {
+      // If we have cached style (from previous ready state or current ready), use it
+      if (cachedOffsetStyleRef.value && Object.keys(cachedOffsetStyleRef.value).length > 0) {
+        return cachedOffsetStyleRef.value
+      }
+      // Fallback to current offsetStyle (which has hidden position when not ready)
+      return offsetStyle.value
+    })
+
     return () => {
       const { popupSize, motion, prefixCls, uniqueContainerClassName, arrowPos, uniqueContainerStyle } = props
       // Apply popup size if available
@@ -81,26 +92,30 @@ const UniqueContainer = defineComponent<UniqueContainerProps>(
         sizeStyle.width = `${popupSize.width}px`
         sizeStyle.height = `${popupSize.height}px`
       }
+
       const baseTransitionProps = getTransitionProps(motion?.name, motion) as any
+      const containerCls = `${prefixCls}-unique-container`
+
       const mergedTransitionProps = {
         ...baseTransitionProps,
         onBeforeEnter: (element: Element) => {
-          motionVisible.value = true
           baseTransitionProps.onBeforeEnter?.(element)
         },
         onAfterEnter: (element: Element) => {
+          // Mark as visible after enter animation completes
           motionVisible.value = true
           baseTransitionProps.onAfterEnter?.(element)
         },
+        onBeforeLeave: (element: Element) => {
+          baseTransitionProps.onBeforeLeave?.(element)
+        },
         onAfterLeave: (element: Element) => {
+          // Mark as hidden after leave animation completes
+          // This is equivalent to React's leavedClassName behavior
           motionVisible.value = false
-          // Clear cached position after leave animation completes
-          // This ensures next open starts from new position instead of old cached position
-          cachedOffsetStyleRef.value = {}
           baseTransitionProps.onAfterLeave?.(element)
         },
       }
-      const containerCls = `${prefixCls}-unique-container`
 
       return (
         <Transition
@@ -113,7 +128,9 @@ const UniqueContainer = defineComponent<UniqueContainerProps>(
               uniqueContainerClassName,
               {
                 [`${containerCls}-visible`]: motionVisible.value,
-                // [`${containerCls}-hidden`]: !motionVisible.value,
+                // hidden class acts like React CSSMotion's leavedClassName
+                // It's applied when animation has completed and element should be hidden
+                [`${containerCls}-hidden`]: !motionVisible.value && !open.value,
               },
             ]}
             style={[
@@ -121,7 +138,7 @@ const UniqueContainer = defineComponent<UniqueContainerProps>(
                 '--arrow-x': `${arrowPos?.x || 0}px`,
                 '--arrow-y': `${arrowPos?.y || 0}px`,
               },
-              cachedOffsetStyleRef.value,
+              mergedOffsetStyle.value,
               sizeStyle,
               uniqueContainerStyle,
             ]}
