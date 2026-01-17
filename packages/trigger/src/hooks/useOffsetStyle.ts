@@ -23,12 +23,7 @@ export default function useOffsetStyle(
           right: AUTO,
           bottom: AUTO,
         }
-
-    // 首次打开时 ready 为 false，返回空对象避免从 -1000vw 位置飘过来
-    // 只有当 ready 为 true 或者关闭状态时才设置位置样式
-    if (!ready.value && open.value) {
-      return {}
-    }
+    console.log(ready.value, open.value)
     // Set align style
     if (!isMobile.value && (ready.value || !open.value)) {
       const { points } = align.value ?? {}

@@ -305,12 +305,12 @@ export default function useAlign(
 
       const popupMirrorRect = rawPopupMirrorRect
 
-      // Calculate scale (same as React version)
+      // Calculate scale
       const scaleX = toNum(
-        Math.floor((popupWidth / parseFloat(width)) * 1000) / 1000,
+        Math.round((popupWidth / parseFloat(width)) * 1000) / 1000,
       )
       const scaleY = toNum(
-        Math.floor((popupHeight / parseFloat(height)) * 1000) / 1000,
+        Math.round((popupHeight / parseFloat(height)) * 1000) / 1000,
       )
 
       // No need to align since it's not visible in view
@@ -731,6 +731,7 @@ export default function useAlign(
         scaleY,
         align: nextAlignInfo,
       }
+      console.log(nextOffsetInfo, 'Sdsd')
       Object.assign(offsetInfo, nextOffsetInfo)
     }
   }
