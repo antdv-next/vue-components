@@ -6,7 +6,7 @@ import type { TriggerContextProps } from './context.ts'
 import type { ActionType, AlignType, AnimationType, ArrowPos, ArrowTypeOuter, BuildInPlacements } from './interface'
 import type { MobileConfig } from './Popup'
 import Portal from '@v-c/portal'
-import ResizeObserver from '@v-c/resize-observer'
+import { useResizeObserver } from '@v-c/resize-observer'
 import { classNames } from '@v-c/util'
 import { getShadowRoot } from '@v-c/util/dist/Dom/shadow'
 import { filterEmpty } from '@v-c/util/dist/props-util'
@@ -177,7 +177,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
 
       // =========================== Target ===========================
       // Use state to control here since `useRef` update not trigger render
-      const targetEle = shallowRef<HTMLElement | null>(null)
+      const targetEle = shallowRef<HTMLElement>()
       // Used for forwardRef target. Not use internal
       const externalForwardRef = shallowRef<HTMLElement | null>(null)
       const setTargetRef = (node: any) => {
@@ -187,7 +187,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
           externalForwardRef.value = element as HTMLElement
         }
         else if (!element) {
-          targetEle.value = null
+          targetEle.value = undefined
           externalForwardRef.value = null
         }
       }
@@ -687,6 +687,10 @@ export function generateTrigger(PortalComponent: any = Portal) {
       watchEffect(() => {
         rendedRef.value ||= props.forceRender || mergedOpen.value || inMotion.value
       })
+      // =================== Resize Observer ===================
+      // Use hook to observe target element resize
+      // Pass targetEle directly instead of a function so the hook will re-observe when target changes
+      useResizeObserver(mergedOpen, targetEle, onTargetResize)
       return () => {
         // ========================== Children ==========================
         const child = filterEmpty(slots?.default?.() ?? [])?.[0]
@@ -745,12 +749,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
         } = props
         return (
           <>
-            <ResizeObserver
-              disabled={!mergedOpen.value}
-              onResize={onTargetResize}
-            >
-              {triggerNode}
-            </ResizeObserver>
+            {triggerNode}
             {rendedRef.value && targetEle.value && (!uniqueContext || !unique) && (
               <TriggerContextProvider {...context.value}>
                 <Popup

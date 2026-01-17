@@ -5,6 +5,7 @@ import { Collection } from './Collection.tsx'
 import SingleObserver from './SingleObserver'
 import { _rs } from './utils/observerUtil'
 
+export { default as useResizeObserver } from './useResizeObserver'
 const INTERNAL_PREFIX_KEY = 'vc-observer-key'
 export {
   /** @private Test only for mock trigger resize event */

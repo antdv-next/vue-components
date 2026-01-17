@@ -345,7 +345,7 @@ export default function useAlign(
         ...placementInfo,
       }
 
-      let nextPoints = [popupPoints,targetPoints]
+      let nextPoints = [popupPoints, targetPoints]
       // Next Offset
       let nextOffsetX = targetAlignPoint.x - popupAlignPoint.x + popupOffsetX
       let nextOffsetY = targetAlignPoint.y - popupAlignPoint.y + popupOffsetY
@@ -458,9 +458,9 @@ export default function useAlign(
           nextOffsetY = tmpNextOffsetY
           popupOffsetY = -popupOffsetY
 
-          nextPoints=[
-              reversePoints(nextPoints[0],0)
-              reversePoints(nextPoints[1],0)
+          nextPoints = [
+            reversePoints(nextPoints[0], 0),
+            reversePoints(nextPoints[1], 0),
           ]
         }
         else {
@@ -508,9 +508,9 @@ export default function useAlign(
           nextOffsetY = tmpNextOffsetY
           popupOffsetY = -popupOffsetY
 
-          nextAlignInfo.points = [
-            reversePoints(popupPoints, 0),
-            reversePoints(targetPoints, 0),
+          nextPoints = [
+            reversePoints(nextPoints[0], 0),
+            reversePoints(nextPoints[1], 0),
           ]
         }
         else {
@@ -564,9 +564,9 @@ export default function useAlign(
           nextOffsetX = tmpNextOffsetX
           popupOffsetX = -popupOffsetX
 
-          nextAlignInfo.points = [
-            reversePoints(popupPoints, 1),
-            reversePoints(targetPoints, 1),
+          nextPoints = [
+            reversePoints(nextPoints[0], 1),
+            reversePoints(nextPoints[1], 1),
           ]
         }
         else {
@@ -614,15 +614,20 @@ export default function useAlign(
           nextOffsetX = tmpNextOffsetX
           popupOffsetX = -popupOffsetX
 
-          nextAlignInfo.points = [
-            reversePoints(popupPoints, 1),
-            reversePoints(targetPoints, 1),
+          nextPoints = [
+            reversePoints(nextPoints[0], 1),
+            reversePoints(nextPoints[1], 1),
           ]
         }
         else {
           prevFlipRef.value.lr = false
         }
       }
+
+      nextAlignInfo.points = [
+        flatPoints(nextPoints[0]),
+        flatPoints(nextPoints[1]),
+      ]
 
       // ============================ Shift ============================
       syncNextPopupPosition()
