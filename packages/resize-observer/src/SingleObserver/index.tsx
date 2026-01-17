@@ -27,17 +27,15 @@ const SingleObserver = defineComponent<ResizeObserverProps>({
       return dom
     }
     const setWrapperRef = (el: any) => {
-      const _wrapper = el
+      let _wrapper = el
       if (el?.elementEl && typeof el.elementEl === 'object') {
-        _wrapper.value = el.elementEl
+        _wrapper = el.elementEl
       }
       else if (el?.__$el && typeof el.__$el === 'object') {
-        _wrapper.value = el.__$el
+        _wrapper = el.__$el
       }
-      else {
-        _wrapper.value = el
-      }
-      wrapperRef.value = getDom(el)
+
+      wrapperRef.value = getDom(_wrapper)
     }
     const onCollectionResize = inject(CollectionContext, () => {})
 
