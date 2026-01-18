@@ -7,7 +7,7 @@ import type { FooterProps } from './Footer'
 import type { PopupPanelProps } from './PopupPanel'
 import { useResizeObserver } from '@v-c/resize-observer'
 import { clsx, omit } from '@v-c/util'
-import { computed, defineComponent, ref, watch } from 'vue'
+import { computed, defineComponent, nextTick, ref, watch } from 'vue'
 import { toArray } from '../../utils/miscUtil'
 import { usePickerContext } from '../context'
 import Footer from './Footer'
@@ -84,61 +84,65 @@ const Popup = defineComponent<PopupProps>(
 
     const retryTimes = ref(0)
 
-    // Reset retryTimes when activeInputLeft changes
+    // Function to calculate and update offsets
+    const calculateOffsets = () => {
+      const [activeInputLeft, activeInputRight, selectorWidth] = activeInfo.value
+      if (props.range && wrapperRef.value) {
+        const arrowWidth = arrowRef.value?.offsetWidth || 0
+        const wrapperRect = wrapperRef.value.getBoundingClientRect()
+
+        // If wrapper is not ready (height is 0 or off-screen), retry
+        if (!wrapperRect.height || wrapperRect.right < 0) {
+          if (retryTimes.value > 0) {
+            retryTimes.value--
+            // Use requestAnimationFrame to retry in next frame
+            requestAnimationFrame(() => {
+              calculateOffsets()
+            })
+          }
+          return
+        }
+
+        // Arrow Offset
+        const nextArrowOffset
+          = (rtl.value ? activeInputRight - arrowWidth : activeInputLeft) - wrapperRect.left
+        arrowOffset.value = nextArrowOffset
+
+        // Container Offset
+        if (containerWidth.value && containerWidth.value < selectorWidth) {
+          const offset = rtl.value
+            ? wrapperRect.right - (activeInputRight - arrowWidth + containerWidth.value)
+            : activeInputLeft + arrowWidth - wrapperRect.left - containerWidth.value
+
+          const safeOffset = Math.max(0, offset)
+          containerOffset.value = safeOffset
+        }
+        else {
+          containerOffset.value = 0
+        }
+      }
+    }
+
+    // Watch for activeInfo changes and trigger recalculation
     watch(
-      activeInputLeft,
-      () => {
+      () => props.activeInfo,
+      async () => {
         retryTimes.value = 10
+        // Wait for DOM update then calculate
+        await nextTick()
+        calculateOffsets()
       },
       { immediate: true },
     )
 
-    // Watch for all dependencies that should trigger recalculation
-    // This matches React's useEffect dependencies: [retryTimes, rtl, containerWidth, activeInputLeft, activeInputRight, selectorWidth, range]
+    // Also watch for other dependencies that should trigger recalculation
     watch(
-      [
-        retryTimes,
-        rtl,
-        containerWidth,
-        activeInputLeft,
-        activeInputRight,
-        selectorWidth,
-        () => props.range,
-      ],
-      () => {
-        // `activeOffset` is always align with the active input element
-        // So we need only check container contains the `activeOffset`
-        const [activeInputLeft, activeInputRight, selectorWidth] = activeInfo.value
-        if (props.range && wrapperRef.value) {
-        // Offset in case container has border radius
-          const arrowWidth = arrowRef.value?.offsetWidth || 0
-
-          // Arrow Offset
-          const wrapperRect = wrapperRef.value.getBoundingClientRect()
-          if (!wrapperRect.height || wrapperRect.right < 0) {
-            retryTimes.value = Math.max(0, retryTimes.value - 1)
-            return
-          }
-
-          const nextArrowOffset
-            = (rtl.value ? activeInputRight - arrowWidth : activeInputLeft) - wrapperRect.left
-          arrowOffset.value = nextArrowOffset
-
-          // Container Offset
-          if (containerWidth.value && containerWidth.value < selectorWidth) {
-            const offset = rtl.value
-              ? wrapperRect.right - (activeInputRight - arrowWidth + containerWidth.value)
-              : activeInputLeft + arrowWidth - wrapperRect.left - containerWidth.value
-
-            const safeOffset = Math.max(0, offset)
-            containerOffset.value = safeOffset
-          }
-          else {
-            containerOffset.value = 0
-          }
-        }
+      [rtl, containerWidth, () => props.range],
+      async () => {
+        await nextTick()
+        calculateOffsets()
       },
-      { immediate: true, flush: 'post' },
+      { flush: 'post' },
     )
 
     // ======================== Custom ========================
