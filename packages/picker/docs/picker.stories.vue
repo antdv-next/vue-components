@@ -71,8 +71,8 @@ import Time from './time.vue'
     <Variant title="Time">
       <Time />
     </Variant>
-    <Variant title="Uncontrolled">
-      <Uncontrolled />
-    </Variant>
+    <!--    <Variant title="Uncontrolled"> -->
+    <!--      <Uncontrolled /> -->
+    <!--    </Variant> -->
   </Story>
 </template>

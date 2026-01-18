@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { PickerRef } from '../src/interface'
+import type { PickerRef } from '../src'
 import dayjs from 'dayjs'
 import LocalizedFormat from 'dayjs/plugin/localizedFormat'
 import { ref } from 'vue'
@@ -12,9 +12,6 @@ import 'dayjs/esm/locale/zh-cn'
 dayjs.locale('zh-cn')
 dayjs.extend(LocalizedFormat)
 
-console.clear()
-;(window as any).dayjs = dayjs
-
 const sharedLocale = {
   locale: zhCN,
   generateConfig: dayjsGenerateConfig,
@@ -24,13 +21,20 @@ const sharedLocale = {
 const singleRef = ref<PickerRef>()
 
 function onOpenChange(open: boolean) {
-  console.error(open)
+  console.log(open)
+}
+function handleChange(value: any, dateString: string[]) {
+  console.log('Selected Time: ', value)
+  console.log('Formatted Selected Time: ', dateString)
 }
 </script>
 
 <template>
   <div>
-    <SinglePicker v-bind="sharedLocale" ref="singleRef" multiple @open-change="onOpenChange" />
+    <SinglePicker
+      v-bind="sharedLocale"
+      ref="singleRef" max-tag-count="responsive" multiple @change="handleChange" @open-change="onOpenChange"
+    />
     <SinglePicker v-bind="sharedLocale" ref="singleRef" multiple need-confirm />
     <SinglePicker
       v-bind="sharedLocale"

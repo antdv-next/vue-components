@@ -39,9 +39,9 @@ const SingleObserver = defineComponent<ResizeObserverProps>({
     }
     const onCollectionResize = inject(CollectionContext, () => {})
 
-    const disabled = computed(() => props.disabled)
+    const enabled = computed(() => !props.disabled)
     useResizeObserver(
-      disabled,
+      enabled,
       wrapperRef,
       (...args) => props?.onResize?.(...args),
       (size, element) => {

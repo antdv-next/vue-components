@@ -65,9 +65,6 @@ const Popup = defineComponent<PopupProps>(
     const containerWidth = ref<number>(0)
     const containerOffset = ref<number>(0)
     const arrowOffset = ref<number>(0)
-    const activeInputLeft = computed(() => activeInfo.value[0])
-    const activeInputRight = computed(() => activeInfo.value[1])
-    const selectorWidth = computed(() => activeInfo.value[2])
 
     const onResize: OnResize = (info) => {
       if (info.width) {
