@@ -66,6 +66,9 @@ export default function useOpen(
     if (onOpen && mergedOpen.value !== nextOpen) {
       onOpen(nextOpen)
     }
+    if (propOpen.value !== undefined) {
+      return
+    }
     stateOpen.value = nextOpen
   }
 
