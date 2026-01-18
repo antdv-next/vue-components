@@ -98,16 +98,10 @@ const UniqueContainer = defineComponent<UniqueContainerProps>(
 
       const mergedTransitionProps = {
         ...baseTransitionProps,
-        onBeforeEnter: (element: Element) => {
-          baseTransitionProps.onBeforeEnter?.(element)
-        },
         onAfterEnter: (element: Element) => {
           // Mark as visible after enter animation completes
           motionVisible.value = true
           baseTransitionProps.onAfterEnter?.(element)
-        },
-        onBeforeLeave: (element: Element) => {
-          baseTransitionProps.onBeforeLeave?.(element)
         },
         onAfterLeave: (element: Element) => {
           // Mark as hidden after leave animation completes
@@ -130,7 +124,7 @@ const UniqueContainer = defineComponent<UniqueContainerProps>(
                 [`${containerCls}-visible`]: motionVisible.value,
                 // hidden class acts like React CSSMotion's leavedClassName
                 // It's applied when animation has completed and element should be hidden
-                [`${containerCls}-hidden`]: !motionVisible.value && !open.value,
+                [`${containerCls}-hidden`]: !open.value,
               },
             ]}
             style={[

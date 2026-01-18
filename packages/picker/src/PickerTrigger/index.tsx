@@ -63,33 +63,35 @@ const PickerTrigger = defineComponent<PickerTriggerProps>(
 
     const realPlacement = computed(() => getRealPlacement(props.placement, props.direction === 'rtl'))
 
-    return () => (
-      <Trigger
-        showAction={[]}
-        hideAction={['click']}
-        popupPlacement={realPlacement.value}
-        builtinPlacements={props.builtinPlacements || BUILT_IN_PLACEMENTS}
-        prefixCls={dropdownPrefixCls.value}
-        popupMotion={props.transitionName ? ({ motionName: props.transitionName } as any) : undefined}
-        popup={props.popupElement}
-        popupAlign={props.popupAlign}
-        popupVisible={props.visible}
-        popupClassName={clsx(props.popupClassName, {
-          [`${dropdownPrefixCls.value}-range`]: props.range,
-          [`${dropdownPrefixCls.value}-rtl`]: props.direction === 'rtl',
-        })}
-        popupStyle={props.popupStyle}
-        stretch="minWidth"
-        getPopupContainer={props.getPopupContainer}
-        onPopupVisibleChange={(nextVisible: boolean) => {
-          if (!nextVisible) {
-            props.onClose?.()
-          }
-        }}
-      >
-        {slots.default?.()}
-      </Trigger>
-    )
+    return () => {
+      return (
+        <Trigger
+          showAction={[]}
+          hideAction={['click']}
+          popupPlacement={realPlacement.value}
+          builtinPlacements={props.builtinPlacements || BUILT_IN_PLACEMENTS}
+          prefixCls={dropdownPrefixCls.value}
+          popupMotion={props.transitionName ? ({ motionName: props.transitionName } as any) : undefined}
+          popup={props.popupElement}
+          popupAlign={props.popupAlign}
+          popupVisible={props.visible}
+          popupClassName={clsx(props.popupClassName, {
+            [`${dropdownPrefixCls.value}-range`]: props.range,
+            [`${dropdownPrefixCls.value}-rtl`]: props.direction === 'rtl',
+          })}
+          popupStyle={props.popupStyle}
+          stretch="minWidth"
+          getPopupContainer={props.getPopupContainer}
+          onPopupVisibleChange={(nextVisible: boolean) => {
+            if (!nextVisible) {
+              props.onClose?.()
+            }
+          }}
+        >
+          {slots.default?.()}
+        </Trigger>
+      )
+    }
   },
   {
     name: 'PickerTrigger',
