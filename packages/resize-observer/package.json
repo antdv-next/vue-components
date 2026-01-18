@@ -1,7 +1,7 @@
 {
   "name": "@v-c/resize-observer",
   "type": "module",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
