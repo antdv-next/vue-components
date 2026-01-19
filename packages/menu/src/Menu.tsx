@@ -322,9 +322,7 @@ const Menu = defineComponent<MenuProps>(
     watch(
       () => props.selectedKeys,
       () => {
-        if (props.selectedKeys) {
-          innerSelectKeys.value = props.selectedKeys
-        }
+        innerSelectKeys.value = props.selectedKeys ?? EMPTY_LIST
       },
     )
 
@@ -358,8 +356,9 @@ const Menu = defineComponent<MenuProps>(
         else {
           newSelectKeys = [targetKey]
         }
-
-        innerSelectKeys.value = newSelectKeys
+        if (props.selectedKeys === undefined) {
+          innerSelectKeys.value = newSelectKeys
+        }
 
         // Trigger event
         const selectInfo: SelectInfo = {
