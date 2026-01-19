@@ -323,6 +323,9 @@ importers:
       '@v-c/overflow':
         specifier: workspace:^
         version: link:../overflow
+      '@v-c/resize-observer':
+        specifier: workspace:^
+        version: link:../resize-observer
       '@v-c/trigger':
         specifier: workspace:^
         version: link:../trigger
