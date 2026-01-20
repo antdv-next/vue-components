@@ -152,7 +152,7 @@ const defaults = {
 } as any
 
 const Preview = defineComponent<PreviewProps>(
-  (props = defaults, { attrs }) => {
+  (props = defaults, { attrs, slots }) => {
     const imgEl = shallowRef<HTMLImageElement>()
     const groupContext = usePreviewGroupContext()
 
@@ -343,7 +343,7 @@ const Preview = defineComponent<PreviewProps>(
         motionName = 'fade',
         imageRender,
         imgCommonProps,
-        actionsRender,
+        actionsRender = slots?.actionsRender,
         classNames = {},
         styles = {},
         mousePosition,

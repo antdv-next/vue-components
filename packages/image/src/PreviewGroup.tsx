@@ -162,6 +162,7 @@ const PreviewGroup = defineComponent<PreviewGroupProps>(
             countRender={countRender}
             classNames={props.classNames?.popup}
             styles={props.styles?.popup}
+            v-slots={slots}
           />
         </>
       )

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import ActionsRender from './actionsRender'
+import ActionsRenderSlot from './actionsRenderSlot'
 import Album from './album'
 import Basic from './basic'
 import Controlled from './controlled'
@@ -18,6 +19,9 @@ import './assets/index.less'
   <Story title="Image">
     <Variant title="actionsRender">
       <ActionsRender />
+    </Variant>
+    <Variant title="actionsRenderSlot">
+      <ActionsRenderSlot />
     </Variant>
     <Variant title="album">
       <Album />
