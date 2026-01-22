@@ -1,13 +1,20 @@
 import type { ComponentPublicInstance, MaybeRef } from 'vue'
 import { unref } from 'vue'
+import canUseDom from './canUseDom'
 
 export function isDOM(node: any): node is HTMLElement | SVGElement {
+  if (!canUseDom()) {
+    return node
+  }
   // https://developer.mozilla.org/en-US/docs/Web/API/Element
   // Since XULElement is also subclass of Element, we only need HTMLElement and SVGElement
   return node instanceof HTMLElement || node instanceof SVGElement
 }
 
 export function getDOM(elementRef: MaybeRef) {
+  if (!canUseDom()) {
+    return elementRef
+  }
   const unrefElementRef = unref(elementRef)
   const dom = findDOMNode(unrefElementRef) || (unrefElementRef && typeof unrefElementRef === 'object' ? findDOMNode((unrefElementRef as any).nativeElement) : null)
 
@@ -25,6 +32,9 @@ export function getDOM(elementRef: MaybeRef) {
 export default function findDOMNode<T = Element | Text>(
   _node: MaybeRef<ComponentPublicInstance | HTMLElement | SVGElement>,
 ): T | null {
+  if (!canUseDom()) {
+    return
+  }
   const node = unref(_node)
   if (isDOM(node))
     return (node as unknown) as T

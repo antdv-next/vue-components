@@ -1,4 +1,5 @@
 import type { Ref } from 'vue'
+import canUseDom from '@v-c/util/dist/Dom/canUseDom'
 import { ref, watchEffect } from 'vue'
 
 const defaultOptions: Ref<MutationObserverInit> = ref({
@@ -13,6 +14,9 @@ export default function useMutateObserver(
   options: Ref<MutationObserverInit | undefined> = defaultOptions,
 ) {
   watchEffect((onCleanup) => {
+    if (!canUseDom()) {
+      return
+    }
     if (!nodeOrList.value) {
       return
     }

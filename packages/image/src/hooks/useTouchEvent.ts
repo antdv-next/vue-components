@@ -1,5 +1,6 @@
 import type { Ref } from 'vue'
 import type { DispatchZoomChangeFunc, TransformType, UpdateTransformFunc } from './useImageTransform.ts'
+import canUseDom from '@v-c/util/dist/Dom/canUseDom'
 import { shallowRef, watchEffect } from 'vue'
 import getFixScaleEleTransPosition from '../getFixScaleEleTransPosition.ts'
 
@@ -177,6 +178,9 @@ export default function useTouchEvent(
     }
 
     onCleanup(() => {
+      if (!canUseDom()) {
+        return
+      }
       window.removeEventListener('touchmove', preventDefault)
     })
   })

@@ -1,5 +1,6 @@
 import type { Ref } from 'vue'
 import type { TourStepInfo } from '../interface.ts'
+import canUseDom from '@v-c/util/dist/Dom/canUseDom'
 import { resolveToElement } from '@v-c/util/dist/vnode'
 import { computed, nextTick, onMounted, shallowRef, watch } from 'vue'
 import { isInViewPort } from '../util.ts'
@@ -40,6 +41,9 @@ export default function useTarget(
   watch(
     target,
     () => {
+      if (!canUseDom()) {
+        return
+      }
       syncTargetElement()
     },
     {
@@ -93,6 +97,9 @@ export default function useTarget(
   watch(
     [targetElement, open],
     async (_n, _o, onCleanup) => {
+      if (!canUseDom()) {
+        return
+      }
       await nextTick()
       updatePos()
       // update when window resize

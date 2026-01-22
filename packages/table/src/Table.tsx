@@ -48,6 +48,7 @@ import type {
 
 import ResizeObserver from '@v-c/resize-observer'
 import { clsx, get, warning } from '@v-c/util'
+import canUseDom from '@v-c/util/dist/Dom/canUseDom'
 import { getDOM } from '@v-c/util/dist/Dom/findDOMNode'
 import { getTargetScrollBarSize } from '@v-c/util/dist/getScrollBarSize'
 import isEqual from '@v-c/util/dist/isEqual'
@@ -483,6 +484,9 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
   })
 
   watchEffect(() => {
+    if (!canUseDom()) {
+      return
+    }
     if (useInternalHooks.value && props.internalRefs?.body) {
       props.internalRefs.body.value = getDOM(scrollBodyRef.value) as HTMLDivElement
     }

@@ -65,7 +65,7 @@ const Portal = defineComponent<PortalProps>(
     // ========================= Warning =========================
     if (process.env.NODE_ENV !== 'production') {
       warning(
-        canUseDom() || !open,
+        canUseDom() || !props.open,
         `Portal only work in client side. Please call 'useEffect' to show Portal instead default render in SSR.`,
       )
     }

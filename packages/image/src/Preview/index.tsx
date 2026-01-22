@@ -6,6 +6,7 @@ import type { ImgInfo } from '../Image'
 import type { FooterSemanticName } from './Footer'
 import Portal from '@v-c/portal'
 import { clsx } from '@v-c/util'
+import canUseDom from '@v-c/util/dist/Dom/canUseDom'
 import { KeyCodeStr } from '@v-c/util/dist/KeyCode'
 import { getTransitionProps } from '@v-c/util/dist/utils/transition'
 import { computed, defineComponent, nextTick, shallowRef, Transition, watch, watchEffect } from 'vue'
@@ -285,6 +286,9 @@ const Preview = defineComponent<PreviewProps>(
     }
 
     watchEffect((onCleanup) => {
+      if (!canUseDom()) {
+        return
+      }
       if (props.open) {
         window.addEventListener('keydown', onKeyDown)
       }
