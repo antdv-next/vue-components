@@ -17,7 +17,8 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "vite build",
-    "prepublish": "pnpm build"
+    "prepublish": "pnpm build",
+    "bump": "bumpp"
   },
   "peerDependencies": {
     "vue": "^3.0.0"
