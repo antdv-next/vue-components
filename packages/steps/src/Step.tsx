@@ -33,7 +33,7 @@ export interface StepProps {
   itemWrapperRender?: StepsProps['itemWrapperRender']
 
   // Event
-  onClick: (index: number) => void
+  onClick?: (index: number) => void
 }
 
 const Step = defineComponent<StepProps>(
@@ -108,15 +108,15 @@ const Step = defineComponent<StepProps>(
       if (clickable) {
         accessibilityProps.role = 'button'
         accessibilityProps.tabindex = 0
-        accessibilityProps.onClick = (e) => {
+        accessibilityProps.onClick = (e: MouseEvent) => {
           onItemClick?.(e)
-          onClick(index)
+          onClick?.(index)
         }
 
-        accessibilityProps.onKeydown = (e) => {
+        accessibilityProps.onKeydown = (e: KeyboardEvent) => {
           const { which } = e
           if (which === KeyCode.ENTER || which === KeyCode.SPACE) {
-            onClick(index)
+            onClick?.(index)
           }
         }
       }

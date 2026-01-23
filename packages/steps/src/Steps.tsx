@@ -199,7 +199,7 @@ const Steps = defineComponent<StepsProps>(
           iconRender={iconRender}
           itemRender={itemRender}
           itemWrapperRender={itemWrapperRender}
-          onClick={onStepClick}
+          onClick={props.onChange ? onStepClick : undefined}
         />
       )
     }
