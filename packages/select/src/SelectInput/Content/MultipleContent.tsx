@@ -205,7 +205,7 @@ const MultipleContent = defineComponent<SharedContentProps>(
       const { inputProps } = props
 
       // ======================= Render =======================
-      const prefixNode = !displayValues.value.length && (!searchValue.value || !triggerOpen.value)
+      const prefixNode = !displayValues.value.length && !inputValue.value
         ? () => <Placeholder />
         : null
 

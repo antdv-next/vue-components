@@ -40,7 +40,7 @@ export default function useSearchConfig(
 
   const searchConfig = computed<SearchConfig>(() => {
     const isObject = typeof showSearch.value === 'object'
-    return {
+    const config = {
       filterOption: filterOption?.value,
       searchValue: searchValue?.value,
       optionFilterProp: optionFilterProp?.value,
@@ -49,6 +49,10 @@ export default function useSearchConfig(
       autoClearSearchValue: autoClearSearchValue?.value,
       ...(isObject ? showSearch.value as SearchConfig : {}),
     }
+    if (config.autoClearSearchValue === undefined) {
+      config.autoClearSearchValue = true
+    }
+    return config
   })
 
   return [mergedShowSearch, searchConfig]
