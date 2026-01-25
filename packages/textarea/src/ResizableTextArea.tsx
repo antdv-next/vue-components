@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'vue'
 import type { TextAreaProps } from './interface'
-import ResizeObserver from '@v-c/resize-observer'
+import { useResizeObserver } from '@v-c/resize-observer'
 import { clsx } from '@v-c/util'
 import omit from '@v-c/util/dist/omit'
 import { getAttrStyleAndClass } from '@v-c/util/dist/props-util'
@@ -81,11 +81,12 @@ const ResizableTextArea = defineComponent<
       },
       {
         immediate: true,
+        flush: 'post',
       },
     )
 
     watch(
-      resizeState,
+      [resizeState, textareaRef],
       () => {
         if (!textareaRef.value) {
           return
@@ -142,10 +143,12 @@ const ResizableTextArea = defineComponent<
       cleanRaf()
     })
 
+    useResizeObserver(computed(() => {
+      return !!(props.autoSize || props.onResize)
+    }), textareaRef, onInternalResize)
+
     return () => {
       const {
-        autoSize,
-        onResize,
         prefixCls,
         disabled,
         readOnly,
@@ -167,43 +170,38 @@ const ResizableTextArea = defineComponent<
       }
 
       return (
-        <ResizeObserver
-          onResize={onInternalResize}
-          disabled={!(autoSize || onResize)}
-        >
-          <textarea
-            {...omit(restAttrs, ['readonly'])}
-            {...omit(props, [
-              'suffix',
-              'classNames',
-              'styles',
-              'prefixCls',
-              'allowClear',
-              'autoSize',
-              'showCount',
-              'disabled',
-              'hidden',
-              'readOnly',
-              'onClear',
-              'maxLength',
-              'onResize',
-              'onChange',
-            ]) as any}
-            readonly={restAttrs?.readonly ?? readOnly}
-            ref={textareaRef}
-            style={mergedStyle}
-            class={clsx(
-              prefixCls,
-              className,
-              {
-                [`${prefixCls}-disabled`]: disabled,
-              },
-            )}
-            disabled={disabled}
-            value={mergedValue.value as string}
-            onInput={onInternalChange}
-          />
-        </ResizeObserver>
+        <textarea
+          {...omit(restAttrs, ['readonly'])}
+          {...omit(props, [
+            'suffix',
+            'classNames',
+            'styles',
+            'prefixCls',
+            'allowClear',
+            'autoSize',
+            'showCount',
+            'disabled',
+            'hidden',
+            'readOnly',
+            'onClear',
+            'maxLength',
+            'onResize',
+            'onChange',
+          ]) as any}
+          readonly={restAttrs?.readonly ?? readOnly}
+          ref={textareaRef}
+          style={mergedStyle}
+          class={clsx(
+            prefixCls,
+            className,
+            {
+              [`${prefixCls}-disabled`]: disabled,
+            },
+          )}
+          disabled={disabled}
+          value={mergedValue.value as string}
+          onInput={onInternalChange}
+        />
       )
     }
   },
