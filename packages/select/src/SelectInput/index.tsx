@@ -196,6 +196,8 @@ const SelectInput = defineComponent<SelectInputProps>(
         ...attrs,
         onFocus: props.onFocus,
         onBlur: props.onBlur,
+        onFocusin: props.onFocus,
+        onFocusout: props.onBlur,
         onKeydown: props.onKeyDown,
         onKeyup: props.onKeyUp,
         onMousedown: props.onMouseDown,
@@ -225,8 +227,8 @@ const SelectInput = defineComponent<SelectInputProps>(
           // Keyboard & Focus Events
           onKeydown={props.onKeyDown}
           onKeyup={props.onKeyUp}
-          onFocus={props.onFocus}
-          onBlur={onInternalBlur}
+          onFocusin={props.onFocus}
+          onFocusout={onInternalBlur}
         >
           {/* Prefix */}
           <Affix class={clsx(`${prefixCls.value}-prefix`, classNamesConfig.value?.prefix)} style={stylesConfig.value?.prefix}>
