@@ -128,7 +128,8 @@ const SelectInput = defineComponent<SelectInputProps>(
       }
 
       // Open dropdown when a valid open key is pressed
-      if (isValidateOpenKey(keyCode)) {
+      const isModifier = event.ctrlKey || event.altKey || event.metaKey
+      if (!isModifier && isValidateOpenKey(keyCode)) {
         toggleOpen.value?.(true)
       }
     }
@@ -148,7 +149,15 @@ const SelectInput = defineComponent<SelectInputProps>(
     // ====================== Open ======================
     const onInternalMouseDown = (event: MouseEvent) => {
       if (!disabled.value) {
-        if (event.target !== getDOM(inputRef.value?.input)) {
+        const inputDOM = getDOM(inputRef.value?.input)
+
+        // https://github.com/ant-design/ant-design/issues/56002
+        // Tell `useSelectTriggerControl` to ignore this event
+        // When icon is dynamic render, the parentNode will miss
+        // so we need to mark the event directly
+        ;(event as any)._ori_target = inputDOM
+
+        if (inputDOM && event.target !== inputDOM && !(inputDOM as HTMLElement).contains(event.target as Node)) {
           event.preventDefault()
         }
 
@@ -171,11 +180,6 @@ const SelectInput = defineComponent<SelectInputProps>(
       }
 
       props?.onMouseDown?.(event)
-    }
-
-    const onInternalBlur = (event: FocusEvent) => {
-      toggleOpen.value?.(false)
-      props?.onBlur?.(event)
     }
 
     // =================== Context ===================
@@ -228,7 +232,7 @@ const SelectInput = defineComponent<SelectInputProps>(
           onKeydown={props.onKeyDown}
           onKeyup={props.onKeyUp}
           onFocusin={props.onFocus}
-          onFocusout={onInternalBlur}
+          onFocusout={props.onBlur}
         >
           {/* Prefix */}
           <Affix class={clsx(`${prefixCls.value}-prefix`, classNamesConfig.value?.prefix)} style={stylesConfig.value?.prefix}>

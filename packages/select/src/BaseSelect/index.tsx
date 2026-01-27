@@ -21,7 +21,7 @@ import { useAllowClear, useBaseSelectProvider } from '../hooks'
 import useComponents from '../hooks/useComponents'
 import useLock from '../hooks/useLock'
 import useOpen, { macroTask } from '../hooks/useOpen'
-import useSelectTriggerControl from '../hooks/useSelectTriggerControl'
+import useSelectTriggerControl, { isInside } from '../hooks/useSelectTriggerControl'
 import SelectInput from '../SelectInput'
 import SelectTrigger from '../SelectTrigger'
 import { getSeparatedContent, isValidCount } from '../utils/valueUtil'
@@ -549,9 +549,22 @@ export const BaseSelect = defineComponent<
     }
 
     // ========================== Focus / Blur ==========================
-    const internalMouseDownRef = shallowRef(false)
+    const getSelectElements = () => [
+      getDOM(containerRef),
+      triggerRef.value?.getPopupElement?.(),
+    ]
+
+    // Close when click on non-select element
+    useSelectTriggerControl(
+      getSelectElements,
+      mergedOpen,
+      triggerOpen,
+      computed(() => !!mergedComponents.value.root),
+    )
 
     // ========================== Focus / Blur ==========================
+    const internalMouseDownRef = shallowRef(false)
+
     const onInternalFocus = (event: FocusEvent) => {
       focused.value = true
       if (!disabled.value) {
@@ -561,6 +574,15 @@ export const BaseSelect = defineComponent<
         }
 
         props?.onFocus?.(event)
+      }
+    }
+
+    const onRootBlur = () => {
+      // Delay close should check the activeElement
+      if (mergedOpen.value && !internalMouseDownRef.value) {
+        triggerOpen(false, {
+          cancelFun: () => isInside(getSelectElements(), document.activeElement as HTMLElement),
+        })
       }
     }
 
@@ -576,10 +598,10 @@ export const BaseSelect = defineComponent<
           props?.onSearch?.('', { source: 'blur' })
         }
       }
+
+      onRootBlur()
+
       if (!disabled.value) {
-        triggerOpen(false, {
-          lazy: true,
-        })
         props?.onBlur?.(event)
       }
     }
@@ -605,13 +627,6 @@ export const BaseSelect = defineComponent<
     function onPopupMouseEnter() {
       forceState.value = {}
     }
-
-    useSelectTriggerControl(
-      () => [getDOM(containerRef) as any, triggerRef.value?.getPopupElement?.()],
-      mergedOpen,
-      triggerOpen,
-      computed(() => !!mergedComponents.value.root),
-    )
 
     // ============================ Context =============================
     const baseSelectContext = computed(() => {
@@ -780,6 +795,7 @@ export const BaseSelect = defineComponent<
           onPopupVisibleChange={onTriggerVisibleChange}
           onPopupMouseEnter={onPopupMouseEnter}
           onPopupMouseDown={onInternalMouseDown}
+          onPopupBlur={onRootBlur}
         >
           {renderNode}
         </SelectTrigger>

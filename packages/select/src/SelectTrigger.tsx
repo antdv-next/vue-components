@@ -71,6 +71,7 @@ export interface SelectTriggerProps {
 
   onPopupMouseEnter: () => void
   onPopupMouseDown: (event: MouseEvent) => void
+  onPopupBlur?: (event: FocusEvent) => void
 }
 
 const defaults = {
@@ -115,6 +116,7 @@ const SelectTrigger = defineComponent<
         builtinPlacements,
         onPopupMouseEnter,
         onPopupMouseDown,
+        onPopupBlur,
         popupAlign,
         visible,
         getPopupContainer,
@@ -145,7 +147,7 @@ const SelectTrigger = defineComponent<
           popupPlacement={placement || (direction === 'rtl' ? 'bottomRight' : 'bottomLeft')}
           builtinPlacements={mergedBuiltinPlacements.value}
           prefixCls={popupPrefixCls}
-          popup={<div onMousedown={onPopupMouseDown} onMouseenter={onPopupMouseEnter}>{popupNode}</div>}
+          popup={<div onMouseenter={onPopupMouseEnter} onMousedown={onPopupMouseDown} onBlur={onPopupBlur}>{popupNode}</div>}
           ref={triggerPopupRef as any}
           stretch={stretch.value!}
           popupMotion={{
