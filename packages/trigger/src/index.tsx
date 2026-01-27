@@ -693,7 +693,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
       useResizeObserver(mergedOpen, targetEle, onTargetResize)
       return () => {
         // ========================== Children ==========================
-        const child = filterEmpty(slots?.default?.() ?? [])?.[0]
+        const child = filterEmpty(slots?.default?.({ open: mergedOpen.value }) ?? [])?.[0]
         // =========================== Render ===========================
         const mergedChildrenProps = {
           ...originChildProps,

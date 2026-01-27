@@ -127,15 +127,13 @@ const Tooltip = defineComponent<TooltipProps>(
         ...restProps
       } = props
       const mergedPlacements = builtinPlacements ?? placements
-      const children = filterEmpty(slots?.default?.())
-      const getChildren = () => {
+      const getChildren = ({ open }: any) => {
+        const children = filterEmpty(slots?.default?.({ open }))
         const child = children?.[0]
-        const originalProps = child?.props || {}
-        const childProps = {
-          ...originalProps,
-          'aria-describedby': overlay ? mergedId : null,
+        const ariaProps = {
+          'aria-describedby': overlay && open ? mergedId : undefined,
         }
-        return createVNode(child, childProps)
+        return createVNode(child, ariaProps)
       }
       const extraProps: Partial<TooltipProps & TriggerProps> = { ...restProps }
       if ('visible' in props) {
@@ -175,9 +173,8 @@ const Tooltip = defineComponent<TooltipProps>(
           arrow={mergedArrow.value!}
           uniqueContainerClassName={classNames?.uniqueContainer}
           uniqueContainerStyle={styles?.uniqueContainer}
-        >
-          {getChildren()}
-        </Trigger>
+          v-slots={getChildren}
+        />
       )
     }
   },
