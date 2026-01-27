@@ -20,7 +20,7 @@ import { computed, defineComponent, shallowRef, watch } from 'vue'
 import { useAllowClear, useBaseSelectProvider } from '../hooks'
 import useComponents from '../hooks/useComponents'
 import useLock from '../hooks/useLock'
-import useOpen from '../hooks/useOpen'
+import useOpen, { macroTask } from '../hooks/useOpen'
 import useSelectTriggerControl from '../hooks/useSelectTriggerControl'
 import SelectInput from '../SelectInput'
 import SelectTrigger from '../SelectTrigger'
@@ -365,7 +365,7 @@ export const BaseSelect = defineComponent<
     // ============================== Open ==============================
     // Not trigger `open` when `notFoundContent` is empty
     const emptyListContent = computed(() => !props?.notFoundContent && props.emptyOptions)
-    const [mergedOpen, triggerOpen] = useOpen(
+    const [mergedOpen, triggerOpen, lockOptions] = useOpen(
       open as any,
       (openVal) => {
         props.onPopupVisibleChange?.(openVal)
@@ -549,6 +549,9 @@ export const BaseSelect = defineComponent<
     }
 
     // ========================== Focus / Blur ==========================
+    const internalMouseDownRef = shallowRef(false)
+
+    // ========================== Focus / Blur ==========================
     const onInternalFocus = (event: FocusEvent) => {
       focused.value = true
       if (!disabled.value) {
@@ -587,11 +590,13 @@ export const BaseSelect = defineComponent<
       const popupElement: HTMLDivElement = triggerRef?.value?.getPopupElement?.()
       // We should give focus back to selector if clicked item is not focusable
       if (popupElement?.contains?.(target as HTMLElement) && triggerOpen) {
-        triggerOpen(true, {
-          ignoreNext: true,
-        })
+        triggerOpen(true)
       }
       props?.onMouseDown?.(event)
+      internalMouseDownRef.value = true
+      macroTask(() => {
+        internalMouseDownRef.value = false
+      })
     }
 
     // ============================ Dropdown ============================
@@ -617,6 +622,7 @@ export const BaseSelect = defineComponent<
         triggerOpen: mergedOpen.value,
         toggleOpen: triggerOpen,
         multiple: multiple.value,
+        lockOptions: lockOptions.value,
       }
     })
 

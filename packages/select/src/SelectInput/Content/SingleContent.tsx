@@ -31,9 +31,11 @@ const SingleContent = defineComponent<SharedContentProps>(
     const optionProps = computed(() => {
       let restProps: Record<string, any> = {
         class: `${selectInputContext.value?.prefixCls}-content-value`,
-        style: {
-          visibility: mergedSearchValue.value ? 'hidden' : 'visible',
-        },
+        style: mergedSearchValue.value
+          ? {
+              visibility: 'hidden',
+            }
+          : {},
       }
       if (displayValue.value && selectContext.value?.flattenOptions) {
         const option = selectContext.value.flattenOptions.find(opt => opt.value === displayValue.value?.value)

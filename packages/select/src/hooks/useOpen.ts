@@ -7,7 +7,7 @@ function internalMacroTask(fn: VoidFunction) {
   channel.port2.postMessage(null)
 }
 
-function macroTask(fn: VoidFunction, times = 1) {
+export function macroTask(fn: VoidFunction, times = 1) {
   if (times <= 0) {
     fn()
     return
@@ -25,8 +25,7 @@ function macroTask(fn: VoidFunction, times = 1) {
 export type TriggerOpenType = (
   nextOpen?: boolean,
   config?: {
-    ignoreNext?: boolean
-    lazy?: boolean
+    cancelFun?: () => boolean
   },
 ) => void
 
@@ -55,12 +54,14 @@ export default function useOpen(
     stateOpen.value = propOpen.value
   })
 
+  // Lock for options update
+  const lock = shallowRef(false)
+
   // During SSR, always return false for open state
   const ssrSafeOpen = computed(() => rendered.value ? stateOpen.value : false)
   const mergedOpen = computed(() => postOpen(ssrSafeOpen.value))
 
   const taskIdRef = shallowRef(0)
-  const taskLockRef = shallowRef(false)
 
   const triggerEvent = (nextOpen: boolean) => {
     if (onOpen && mergedOpen.value !== nextOpen) {
@@ -73,33 +74,35 @@ export default function useOpen(
   }
 
   const toggleOpen: TriggerOpenType = (nextOpen, config = {}) => {
-    const { ignoreNext = false, lazy = false } = config
+    const { cancelFun } = config
+
     taskIdRef.value += 1
     const id = taskIdRef.value
 
     const nextOpenVal = typeof nextOpen === 'boolean' ? nextOpen : !mergedOpen.value
-    // Since `mergedOpen` is post-processed, we need to check if the value really changed
-    if (nextOpenVal !== lazy) {
-      if (!taskLockRef.value) {
+    lock.value = !nextOpenVal
+
+    function triggerUpdate() {
+      if (
+      // Always check if id is match
+        id === taskIdRef.value
+        // Check if need to cancel
+        && !cancelFun?.()
+      ) {
         triggerEvent(nextOpenVal)
-
-        // Lock if needed
-        if (ignoreNext) {
-          taskLockRef.value = ignoreNext
-
-          macroTask(() => {
-            taskLockRef.value = false
-          }, 2)
-        }
+        lock.value = false
       }
-      return
     }
-    macroTask(() => {
-      if (id === taskIdRef.value && !taskLockRef.value) {
-        triggerEvent(nextOpenVal)
-      }
-    })
+    // Weak update can be ignored
+    if (nextOpenVal) {
+      triggerUpdate()
+    }
+    else {
+      macroTask(() => {
+        triggerUpdate()
+      })
+    }
   }
 
-  return [mergedOpen, toggleOpen] as const
+  return [mergedOpen, toggleOpen, lock] as const
 }

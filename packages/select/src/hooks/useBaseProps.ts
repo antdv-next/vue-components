@@ -7,6 +7,7 @@ export interface BaseSelectContextProps extends BaseSelectProps {
   multiple: boolean
   toggleOpen: (open?: boolean) => void
   role?: string
+  lockOptions: boolean
 }
 
 const BaseSelectContext: InjectionKey<Ref<BaseSelectContextProps>> = Symbol('BaseSelectContext')
