@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'vue'
 import type { VueNode } from '@v-c/util/dist/type'
 import type {
   RendererElement,
@@ -12,9 +13,47 @@ import type {
   Key,
 } from '../interface'
 import { toArray } from '@v-c/util/dist/Children/toArray'
+import { clsx } from '@v-c/util'
 import { isEmptyElement } from '@v-c/util/dist/props-util'
 import { cloneElement } from '@v-c/util/dist/vnode'
 import CollapsePanel from '../Panel'
+
+function mergeSemantic<T>(
+  source: Partial<Record<string, T>> | undefined,
+  target: Partial<Record<string, T>> | undefined,
+  mergeFunc: (sourceValue: T | undefined, targetValue: T | undefined) => T | undefined,
+): Partial<Record<string, T>> | undefined {
+  if (!source && !target) return undefined
+  const keys = new Set([
+    ...Object.keys(source || {}),
+    ...Object.keys(target || {}),
+  ])
+  const result: Partial<Record<string, T>> = {}
+  keys.forEach((key) => {
+    const merged = mergeFunc(source?.[key], target?.[key])
+    if (merged !== undefined) {
+      result[key] = merged
+    }
+  })
+  return result
+}
+
+function mergeSemanticClassNames(
+  source: Partial<Record<string, string>> | undefined,
+  target: Partial<Record<string, string>> | undefined,
+) {
+  return mergeSemantic(source, target, (s, t) => clsx(s, t) || undefined)
+}
+
+function mergeSemanticStyles(
+  source: Partial<Record<string, CSSProperties>> | undefined,
+  target: Partial<Record<string, CSSProperties>> | undefined,
+) {
+  return mergeSemantic(source, target, (s, t) => {
+    if (!s && !t) return undefined
+    return { ...s, ...t }
+  })
+}
 
 type Props = Pick<
   CollapsePanelProps,
@@ -44,7 +83,7 @@ function convertItemsToNodes(items: ItemType[], props: Props) {
     expandIcon,
     destroyOnHidden,
     classNames: collapseClassNames,
-    styles,
+    styles: collapseStyles,
   } = props
 
   return items.map((item, index) => {
@@ -81,8 +120,8 @@ function convertItemsToNodes(items: ItemType[], props: Props) {
     return (
       <CollapsePanel
         {...restProps}
-        classNames={collapseClassNames}
-        styles={styles}
+        classNames={mergeSemanticClassNames(collapseClassNames, restProps.classNames)}
+        styles={mergeSemanticStyles(collapseStyles, restProps.styles) as any}
         prefixCls={prefixCls}
         key={key}
         panelKey={key}
@@ -127,7 +166,7 @@ function getNewChild(
     openMotion,
     expandIcon,
     classNames: collapseClassNames,
-    styles,
+    styles: collapseStyles,
     destroyOnHidden,
   } = props
 
@@ -139,6 +178,8 @@ function getNewChild(
     collapsible: childCollapsible,
     onItemClick: childOnItemClick,
     destroyOnHidden: childDestroyOnHidden,
+    classNames: childClassNames,
+    styles: childStyles,
   } = child.props || {}
 
   let isActive = false
@@ -163,8 +204,8 @@ function getNewChild(
     panelKey: key,
     header,
     headerClass,
-    classNames: collapseClassNames,
-    styles,
+    classNames: mergeSemanticClassNames(collapseClassNames, childClassNames),
+    styles: mergeSemanticStyles(collapseStyles, childStyles),
     isActive,
     prefixCls,
     destroyOnHidden: childDestroyOnHidden ?? destroyOnHidden,
