@@ -1,7 +1,7 @@
 {
   "name": "@v-c/fast-color",
   "type": "module",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "fast and small color class",
   "author": "",
   "license": "MIT",

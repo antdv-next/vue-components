@@ -1,7 +1,7 @@
 {
   "name": "@v-c/segmented",
   "type": "module",
-  "version": "0.0.8",
+  "version": "1.0.0",
   "description": "segmented",
   "publishConfig": {
     "access": "public"

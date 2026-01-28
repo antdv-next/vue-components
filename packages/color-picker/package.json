@@ -1,7 +1,7 @@
 {
   "name": "@v-c/color-picker",
   "type": "module",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "vue color picker",
   "author": "",
   "license": "MIT",

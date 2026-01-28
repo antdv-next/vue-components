@@ -1,7 +1,7 @@
 {
   "name": "@v-c/drawer",
   "type": "module",
-  "version": "0.0.4",
+  "version": "1.0.0",
   "description": "drawer component for vue",
   "author": "",
   "license": "MIT",
@@ -22,7 +22,6 @@
     "./package.json": "./package.json"
   },
   "main": "index.js",
-
   "files": [
     "dist",
     "package.json"
