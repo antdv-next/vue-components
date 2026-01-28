@@ -34,6 +34,7 @@ export interface SubMenuType extends ItemSharedProps {
   popupClassName?: string
   popupOffset?: number[]
   popupStyle?: CSSProperties
+  popupRender?: PopupRender
 
   // >>>>> Events
   onClick?: MenuClickEventHandler

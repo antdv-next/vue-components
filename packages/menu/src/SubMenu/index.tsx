@@ -1,6 +1,6 @@
+import type { MenuInfo, SubMenuType } from '../interface'
 import type { VueNode } from '@v-c/util/dist/type'
 import type { CSSProperties } from 'vue'
-import type { PopupRender, SubMenuType } from '../interface'
 import Overflow from '@v-c/overflow'
 import { classNames } from '@v-c/util'
 import warning from '@v-c/util/dist/warning'
@@ -11,8 +11,10 @@ import { PathTrackerContext, useFullPath, useMeasure, usePathUserContext } from 
 import { usePrivateContext } from '../context/PrivateContext'
 import useActive from '../hooks/useActive'
 import useDirectionStyle from '../hooks/useDirectionStyle'
+import useMemoCallback from '../hooks/useMemoCallback'
 import Icon from '../Icon'
 import { parseChildren } from '../utils/commonUtil'
+import { warnItemProp } from '../utils/warnUtil'
 import InlineSubMenuList from './InlineSubMenuList'
 import PopupTrigger from './PopupTrigger'
 import SubMenuList from './SubMenuList'
@@ -31,7 +33,6 @@ export interface SubMenuProps extends Omit<SubMenuType, 'key' | 'children' | 'la
 
   /** @private Do not use. Private warning empty usage */
   warnKey?: boolean
-  popupRender?: PopupRender
 }
 
 const InternalSubMenu = defineComponent<SubMenuProps>(
@@ -74,6 +75,7 @@ const InternalSubMenu = defineComponent<SubMenuProps>(
     }
 
     // ================================ Icon ================================
+    const mergedItemIcon = computed(() => props?.itemIcon ?? menuContext?.value?.itemIcon)
     const mergedExpandIcon = computed(() => props?.expandIcon ?? contextExpandIcon.value)
 
     // ================================ Open ================================
@@ -155,6 +157,12 @@ const InternalSubMenu = defineComponent<SubMenuProps>(
         onOpenChange(key, !originOpen.value)
       }
     }
+
+    // >>>> Context for children click
+    const onMergedItemClick = useMemoCallback((info: MenuInfo) => {
+      props?.onClick?.(warnItemProp(info))
+      menuContext?.value?.onItemClick?.(info)
+    })
 
     const onPopupVisibleChange = (newVisible: boolean) => {
       const key = props?.eventKey
@@ -330,7 +338,19 @@ const InternalSubMenu = defineComponent<SubMenuProps>(
         })
       }
 
-      return listNode
+      // >>>>> Render
+      return (
+        <MenuContextProvider
+          classes={classes}
+          styles={styles}
+          onItemClick={onMergedItemClick}
+          mode={mode.value === 'horizontal' ? 'vertical' : mode.value}
+          itemIcon={mergedItemIcon.value}
+          expandIcon={mergedExpandIcon.value}
+        >
+          {listNode}
+        </MenuContextProvider>
+      )
     }
   },
   {

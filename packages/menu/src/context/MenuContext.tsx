@@ -70,7 +70,7 @@ function mergeProps(origin: MenuContextProps, target: Partial<MenuContextProps>)
   Object.keys(target).forEach((key) => {
     const value = (target as any)[key]
     if (value !== undefined) {
-      (target as any)[key] = value
+      (clone as any)[key] = value
     }
   })
 

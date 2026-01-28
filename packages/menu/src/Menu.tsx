@@ -601,6 +601,11 @@ const Menu = defineComponent<MenuProps>(
           )}
           style={_attrs.style as CSSProperties}
           data={wrappedChildList}
+          {...{
+            dir: props.direction,
+            role: 'menu',
+            tabindex: (_attrs.tabindex as number) ?? 0,
+          }}
           renderRawItem={(node: any) => {
             return node
           }}
