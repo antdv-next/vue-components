@@ -3,7 +3,7 @@ import type { CSSProperties } from 'vue'
 import type { TourProps, TourStepInfo } from './interface'
 import { Trigger } from '@v-c/trigger'
 import { clsx } from '@v-c/util'
-import { computed, defineComponent, nextTick, shallowRef, unref, watch } from 'vue'
+import { computed, defineComponent, nextTick, onBeforeUnmount, shallowRef, unref, watch } from 'vue'
 import { useClosable } from './hooks/useClosable'
 import useTarget from './hooks/useTarget'
 import Mask from './Mask'
@@ -173,6 +173,59 @@ const Tour = defineComponent<TourProps>(
       props?.onClose?.(mergedCurrent.value)
     }
 
+    // ====================== Keyboard ======================
+    const mergedKeyboard = computed(() => props?.keyboard ?? true)
+
+    const handleEscClose = ({ event }: { top: boolean, event: KeyboardEvent }) => {
+      if (mergedKeyboard.value && mergedClosable.value !== null) {
+        event.preventDefault()
+        handleClose()
+      }
+    }
+
+    const isEditableTarget = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement
+      if (!target)
+        return false
+      const tagName = target.tagName.toLowerCase()
+      return tagName === 'input' || tagName === 'textarea' || target.isContentEditable
+    }
+
+    const keyboardHandler = (e: KeyboardEvent) => {
+      if (isEditableTarget(e))
+        return
+
+      if (mergedKeyboard.value && e.key === 'ArrowLeft' && mergedCurrent.value > 0) {
+        e.preventDefault()
+        onInternalChange(mergedCurrent.value - 1)
+      }
+
+      if (mergedKeyboard.value && e.key === 'ArrowRight' && mergedCurrent.value < steps.value.length - 1) {
+        e.preventDefault()
+        onInternalChange(mergedCurrent.value + 1)
+      }
+    }
+
+    watch(
+      mergedOpen,
+      (open, _, onCleanup) => {
+        if (open) {
+          window.addEventListener('keydown', keyboardHandler)
+          onCleanup(() => {
+            window.removeEventListener('keydown', keyboardHandler)
+          })
+        }
+        else {
+          window.removeEventListener('keydown', keyboardHandler)
+        }
+      },
+      { immediate: true },
+    )
+
+    onBeforeUnmount(() => {
+      window.removeEventListener('keydown', keyboardHandler)
+    })
+
     // when targetElement is not exist, use body as triggerDOMNode
     const fallbackDOM = () => {
       return targetElement.value || (typeof document !== 'undefined' ? document.body : null)
@@ -274,6 +327,7 @@ const Tour = defineComponent<TourProps>(
             animated={animated}
             rootClassName={rootClassName}
             disabledInteraction={disabledInteraction}
+            onEsc={handleEscClose}
           />
           <Trigger
             {...restAttrs}

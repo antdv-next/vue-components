@@ -147,8 +147,6 @@ const InternalSegmentedOption = defineComponent<{
           <div
             class={clsx(`${prefixCls}-item-label`, segmentedClassNames?.label)}
             title={title}
-            role="radio"
-            aria-checked={checked}
             style={styles?.label}
           >
             {typeof label === 'function' ? (label as any)?.() : label}
@@ -287,6 +285,7 @@ const Segmented = defineComponent<SegmentedProps>(
           aria-label="segmented control"
           tabindex={disabled ? undefined : 0}
           style={attrStyle}
+          aria-orientation={vertical ? 'vertical' : 'horizontal'}
           {...divProps}
           class={clsx(
             prefixCls,

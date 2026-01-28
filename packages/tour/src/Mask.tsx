@@ -24,6 +24,7 @@ export interface MaskProps {
   classNames?: Partial<Record<SemanticName, string>>
   styles?: Partial<Record<SemanticName, CSSProperties>>
   getPopupContainer?: TourProps['getPopupContainer']
+  onEsc?: (info: { top: boolean, event: KeyboardEvent }) => void
 }
 
 const Mask = defineComponent<MaskProps>(
@@ -44,6 +45,7 @@ const Mask = defineComponent<MaskProps>(
         styles,
         classNames: tourClassNames,
         getPopupContainer,
+        onEsc,
       } = props
       const maskId = `${prefixCls}-mask-${id}`
       const mergedAnimated = typeof animated === 'object' ? animated?.placeholder : animated
@@ -55,7 +57,7 @@ const Mask = defineComponent<MaskProps>(
       const inlineMode = getPopupContainer === false
 
       return (
-        <Portal open={open} autoLock={!inlineMode} getContainer={getPopupContainer as any}>
+        <Portal open={open} autoLock={!inlineMode} getContainer={getPopupContainer as any} onEsc={onEsc}>
           <div
             class={clsx(`${prefixCls}-mask`, rootClassName, tourClassNames?.mask)}
             style={{
