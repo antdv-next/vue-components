@@ -20,6 +20,7 @@ export interface TreeNodeProps<TreeDataType extends BasicDataNode = DataNode> {
   className?: string
   style?: CSSProperties
   id?: Key
+  treeId?: string
 
   // By parent
   expanded?: boolean

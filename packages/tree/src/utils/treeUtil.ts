@@ -403,3 +403,19 @@ export function convertNodePropsToEventData<TreeDataType extends BasicDataNode =
 
   return eventData as EventDataNode<TreeDataType>
 }
+
+export function isLeafNode<TreeDataType extends BasicDataNode = DataNode>(
+  isLeaf: boolean | undefined,
+  loadData: ((node: EventDataNode<TreeDataType>) => Promise<any>) | undefined,
+  hasChildren: boolean,
+  loaded: boolean | undefined,
+): boolean {
+  if (isLeaf === false) {
+    return false
+  }
+  return !!isLeaf || (!loadData && !hasChildren) || !!(loadData && loaded && !hasChildren)
+}
+
+export function getTreeNodeId(treeId: string, key: Key): string {
+  return `${treeId}-${key}`
+}

@@ -1191,7 +1191,6 @@ const Tree = defineComponent<TreeProps>(
             itemHeight={props.itemHeight}
             virtual={mergedVirtual.value}
             focusable={mergedFocusable.value}
-            focused={focused.value}
             tabIndex={mergedTabIndex.value}
             activeItem={getActiveItem.value as any}
             onFocus={onFocus}

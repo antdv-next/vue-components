@@ -2,40 +2,16 @@ import type { CSSMotionProps } from '@v-c/util/dist/utils/transition'
 import type { ListRef } from '@v-c/virtual-list'
 import type { DataEntity, DataNode, FlattenNode, Key, KeyEntities, ScrollTo } from './interface'
 import { toPropsRefs } from '@v-c/util/dist/props-util'
+import useId from '@v-c/util/dist/hooks/useId'
 import VirtualList from '@v-c/virtual-list'
 import { computed, defineComponent, ref, shallowRef, watch } from 'vue'
 import MotionTreeNode from './MotionTreeNode'
 import { findExpandedKeys, getExpandRange } from './utils/diffUtil'
-import { getKey, getTreeNodeProps } from './utils/treeUtil'
-
-const HIDDEN_STYLE = {
-  width: 0,
-  height: 0,
-  display: 'flex',
-  overflow: 'hidden',
-  opacity: 0,
-  border: 0,
-  padding: 0,
-  margin: 0,
-}
-
-function noop() {}
+import { getKey, getTreeNodeId, getTreeNodeProps } from './utils/treeUtil'
 
 function itemKey(item: FlattenNode) {
   const { key, pos } = item
   return String(getKey(key, pos))
-}
-
-function getAccessibilityPath(item: FlattenNode): string {
-  let path = String(item.data.key)
-  let current = item
-
-  while (current.parent) {
-    current = current.parent
-    path = `${current.data.key} > ${path}`
-  }
-
-  return path
 }
 
 export interface NodeListRef {
@@ -87,7 +63,6 @@ export interface NodeListProps {
   style?: any
   data?: FlattenNode[]
   focusable?: boolean
-  focused?: boolean
   tabIndex?: number
   selectable?: boolean
   checkable?: boolean
@@ -128,6 +103,7 @@ export interface NodeListProps {
 
 const NodeList = defineComponent<NodeListProps>(
   (props, { attrs, expose }) => {
+    const treeId = useId()
     const listRef = ref<ListRef>()
     const indentMeasurerRef = ref<HTMLDivElement>()
     const { expandedKeys, data } = toPropsRefs(props, 'expandedKeys', 'data')
@@ -243,7 +219,6 @@ const NodeList = defineComponent<NodeListProps>(
     return () => {
       const {
         motion,
-        focused,
         activeItem,
         focusable,
         disabled,
@@ -263,26 +238,6 @@ const NodeList = defineComponent<NodeListProps>(
       } = props
       return (
         <>
-          {focused && activeItem && (
-            <span style={HIDDEN_STYLE} aria-live="assertive">
-              {getAccessibilityPath(activeItem)}
-            </span>
-          )}
-
-          <div>
-            <input
-              style={HIDDEN_STYLE}
-              disabled={focusable === false || disabled}
-              tabindex={focusable !== false ? tabIndex : undefined}
-              onKeydown={onKeyDown}
-              onFocus={onFocus}
-              onBlur={onBlur}
-              value=""
-              onInput={noop}
-              aria-label="for screen reader"
-            />
-          </div>
-
           <div
             class={`${prefixCls}-treenode`}
             aria-hidden
@@ -313,9 +268,14 @@ const NodeList = defineComponent<NodeListProps>(
             prefixCls={`${prefixCls}-list`}
             ref={listRef}
             role="tree"
+            tabindex={focusable !== false && !disabled ? tabIndex : undefined}
+            aria-activedescendant={activeItem ? getTreeNodeId(treeId, activeItem.key) : undefined}
             style={props.style}
             onContextmenu={onContextmenu}
             onScroll={onScroll}
+            onKeydown={onKeyDown}
+            onFocus={onFocus}
+            onBlur={onBlur}
             onVisibleChange={(originList: FlattenNode[]) => {
               // The best match is using `fullList` - `originList` = `restList`
               // and check the `restList` to see if has the MOTION_KEY node
@@ -351,6 +311,7 @@ const NodeList = defineComponent<NodeListProps>(
                   onMotionStart={onListChangeStart}
                   onMotionEnd={onMotionEnd}
                   treeNodeRequiredProps={treeNodeRequiredProps.value}
+                  treeId={treeId}
                   onMouseMove={() => onActiveChange?.(null)}
                 />
               )

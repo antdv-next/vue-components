@@ -6,7 +6,7 @@ import { computed, defineComponent, inject, ref, watchEffect } from 'vue'
 import { TreeContextKey, UnstableContextKey } from './contextTypes'
 import Indent from './Indent'
 import getEntity from './utils/keyUtil'
-import { convertNodePropsToEventData } from './utils/treeUtil'
+import { convertNodePropsToEventData, getTreeNodeId, isLeafNode } from './utils/treeUtil'
 
 const ICON_OPEN = 'open'
 const ICON_CLOSE = 'close'
@@ -16,6 +16,8 @@ const TreeNode = defineComponent<TreeNodeProps>(
   (props, { attrs }) => {
     const context = inject(TreeContextKey, null as any)
     const unstableContext = inject(UnstableContextKey, {} as any)
+
+    const nodeId = computed(() => getTreeNodeId(props.treeId || '', props.eventKey!))
 
     const dragNodeHighlight = ref(false)
 
@@ -41,11 +43,7 @@ const TreeNode = defineComponent<TreeNodeProps>(
     })
 
     const memoizedIsLeaf = computed(() => {
-      if (props.isLeaf === false)
-        return false
-      return props.isLeaf
-        || (!context.loadData && !hasChildren.value)
-        || (context.loadData && props.loaded && !hasChildren.value)
+      return isLeafNode(props.isLeaf, context.loadData, hasChildren.value, props.loaded)
     })
 
     watchEffect(() => {
@@ -217,7 +215,7 @@ const TreeNode = defineComponent<TreeNodeProps>(
     const checkboxNode = computed(() => {
       if (!isCheckable.value)
         return null
-      const { checked, halfChecked, disableCheckbox, title } = props
+      const { checked, halfChecked, disableCheckbox } = props
       const prefixCls = context.prefixCls
 
       const custom = typeof isCheckable.value !== 'boolean' ? isCheckable.value : null
@@ -233,7 +231,7 @@ const TreeNode = defineComponent<TreeNodeProps>(
           role="checkbox"
           aria-checked={halfChecked ? 'mixed' : checked}
           aria-disabled={isDisabled.value || disableCheckbox}
-          aria-label={`Select ${typeof title === 'string' ? title : 'tree node'}`}
+          aria-labelledby={nodeId.value}
         >
           {custom}
         </span>
@@ -320,9 +318,11 @@ const TreeNode = defineComponent<TreeNodeProps>(
       return (
         <div
           role="treeitem"
+          id={nodeId.value}
           aria-expanded={memoizedIsLeaf.value ? undefined : props.expanded}
-          aria-selected={context.selectable ? props.selected : undefined}
-          data-selectable={props.selectable === false ? 'false' : undefined}
+          aria-selected={isSelectable.value && !isDisabled.value ? props.selected : undefined}
+          aria-checked={isCheckable.value && !isDisabled.value ? (props.halfChecked ? 'mixed' : props.checked) : undefined}
+          aria-disabled={isDisabled.value}
           class={clsx(props.className, `${context.prefixCls}-treenode`, context.classNames?.item, {
             [`${context.prefixCls}-treenode-disabled`]: isDisabled.value,
             [`${context.prefixCls}-treenode-switcher-${props.expanded ? 'open' : 'close'}`]: !memoizedIsLeaf.value,

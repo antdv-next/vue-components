@@ -17,6 +17,7 @@ export interface MotionTreeNodeProps extends Omit<TreeNodeProps, 'domRef'> {
   onMotionStart?: () => void
   onMotionEnd?: () => void
   treeNodeRequiredProps: TreeNodeRequiredProps
+  treeId?: string
 }
 
 const MotionTreeNode = defineComponent<MotionTreeNodeProps>(
@@ -104,7 +105,7 @@ const MotionTreeNode = defineComponent<MotionTreeNodeProps>(
       }
     }
     return () => {
-      const { motionNodes, treeNodeRequiredProps, active, motion, motionType } = props
+      const { motionNodes, treeNodeRequiredProps, active, motion, motionType, treeId } = props
       if (motionNodes) {
         const _motionNodes = motionNodes ?? []
         const requiredProps = treeNodeRequiredProps
@@ -151,6 +152,7 @@ const MotionTreeNode = defineComponent<MotionTreeNodeProps>(
                       key={key}
                       isStart={isStart}
                       isEnd={isEnd}
+                      treeId={treeId}
                     />
                   )
                 })}
