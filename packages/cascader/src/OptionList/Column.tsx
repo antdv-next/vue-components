@@ -234,7 +234,7 @@ const Column = defineComponent<ColumnProps>((props = columnDefaults) => {
                 />
               )}
               <div class={`${menuItemPrefixCls.value}-content`}>
-                {optionRender ? optionRender(option) : label}
+                {optionRender && value !== '__EMPTY__' ? optionRender(option) : label}
               </div>
               {!isLoading && expandIcon && !isMergedLeaf && (
                 <div class={`${menuItemPrefixCls.value}-expand-icon`}>{expandIcon}</div>
