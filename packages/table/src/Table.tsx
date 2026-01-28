@@ -368,11 +368,9 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
       target(scrollLeft)
       return
     }
-    if (target.scrollTo) {
-      target.scrollTo({ left: scrollLeft })
-      return
-    }
-    const element = getDOM(target) as HTMLElement | null
+    // Try to get native element first (for VirtualList refs that expose nativeElement)
+    // This avoids calling scrollTo which can cause race conditions with momentum scrolling on Mac
+    const element = (target.nativeElement ? getDOM(target.nativeElement) : getDOM(target)) as HTMLElement | null
     if (element && element.scrollLeft !== scrollLeft) {
       element.scrollLeft = scrollLeft
       if (element.scrollLeft !== scrollLeft) {
