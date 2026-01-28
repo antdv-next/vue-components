@@ -139,9 +139,17 @@ const BodyGrid = defineComponent<GridProps>({
         const getHeight = (rowSpan: number) => {
           const endItemIndex = index + rowSpan - 1
           const endItem = rawData[endItemIndex]
-          if (!endItem) {
-            return 0
+
+          if (!endItem || !endItem.record) {
+            // clamp to the last available row, or fallback to default height
+            const safeEndIndex = Math.min(endItemIndex, rawData.length - 1)
+            const safeEndItem = rawData[safeEndIndex]
+
+            const endItemKey = safeEndItem.rowKey
+            const sizeInfo = getSize(rowKey, endItemKey)
+            return sizeInfo.bottom - sizeInfo.top
           }
+
           const endItemKey = endItem.rowKey
           const sizeInfo = getSize(rowKey, endItemKey)
           return sizeInfo.bottom - sizeInfo.top
