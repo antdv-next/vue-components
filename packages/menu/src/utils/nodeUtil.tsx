@@ -35,9 +35,9 @@ function convertItemsToNodes(
         const _labelRender = slots?.labelRender ? slots.labelRender(opt) : null
         const _extraRender = slots?.extraRender ? slots.extraRender(opt) : null
         const _iconRender = slots?.iconRender ? slots.iconRender(opt) : null
-        const labelArr = filterEmpty(Array.isArray(_labelRender) ? _labelRender : [_labelRender]).filter(item => item !== undefined || item !== null)
-        const extraArr = filterEmpty(Array.isArray(_extraRender) ? _extraRender : [_extraRender]).filter(item => item !== undefined || item !== null)
-        const iconArr = filterEmpty(Array.isArray(_iconRender) ? _iconRender : [_iconRender]).filter(item => item !== undefined || item !== null)
+        const labelArr = filterEmpty(Array.isArray(_labelRender) ? _labelRender : [_labelRender]).filter(item => item !== undefined && item !== null)
+        const extraArr = filterEmpty(Array.isArray(_extraRender) ? _extraRender : [_extraRender]).filter(item => item !== undefined && item !== null)
+        const iconArr = filterEmpty(Array.isArray(_iconRender) ? _iconRender : [_iconRender]).filter(item => item !== undefined && item !== null)
         // Icon
         if (iconArr.length) {
           icon = iconArr?.[0]
