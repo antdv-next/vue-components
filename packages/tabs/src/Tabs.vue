@@ -13,7 +13,6 @@ import { getUUid, setUUid } from './utils'
 
 defineOptions({
   name: 'Tabs',
-  inheritAttrs: false,
 })
 
 const props = withDefaults(defineProps<TabsProps>(), {
@@ -155,15 +154,17 @@ provideTabContext(memoizedValue)
   <div
     :id="id!"
     ref="tabRef"
-    :class="
-      [prefixCls,
-       `${prefixCls}-${tabPosition}`,
-       {
-         [`${prefixCls}-mobile`]: mobile,
-         [`${prefixCls}-editable`]: editable,
-         [`${prefixCls}-rtl`]: rtl,
-       },
-       className]" v-bind="restProps"
+    :class="[
+      prefixCls,
+      `${prefixCls}-${tabPosition}`,
+      {
+        [`${prefixCls}-mobile`]: mobile,
+        [`${prefixCls}-editable`]: editable,
+        [`${prefixCls}-rtl`]: rtl,
+      },
+      className,
+    ]"
+    v-bind="restProps"
   >
     <TabNavListWrapper
       v-bind="tabNavBarProps"
