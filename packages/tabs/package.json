@@ -9,12 +9,16 @@
   "author": "",
   "license": "MIT",
   "keywords": [
-    "decimal"
+    "tabs",
+    "vue-components",
+    "vc-components",
+    "vue3"
   ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
     },
     "./dist/*": "./dist/*",
     "./package.json": "./package.json"
