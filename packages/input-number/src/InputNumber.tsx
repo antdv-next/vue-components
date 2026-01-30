@@ -279,12 +279,12 @@ const InputNumber = defineComponent<InputNumberProps>(
         if (!updateValue.equals(decimalValue.value)) {
           setUncontrolledDecimalValue(updateValue)
           const outValue = updateValue.isEmpty() ? null : getDecimalValue(props.stringMode, updateValue)
+          emit('update:value', outValue as any)
           props.onChange?.(outValue as any)
 
           if (props.value === undefined) {
             setInputValue(updateValue, userTyping)
           }
-          emit('update:value', outValue as any)
         }
 
         return updateValue

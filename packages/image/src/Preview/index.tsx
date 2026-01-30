@@ -307,7 +307,7 @@ const Preview = defineComponent<PreviewProps>(
     })
 
     // ========================== Portal ==========================
-    const portalRender = shallowRef(false)
+    const portalRender = shallowRef(props?.open ?? false)
     watch(() => props.open, (open) => {
       if (open) {
         portalRender.value = true
