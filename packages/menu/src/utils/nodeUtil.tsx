@@ -31,15 +31,16 @@ function convertItemsToNodes(
         const mergedKey = key ?? `tmp-${index}`
         let label
         let extra
+        let icon
         const _labelRender = slots?.labelRender ? slots.labelRender(opt) : null
         const _extraRender = slots?.extraRender ? slots.extraRender(opt) : null
         const _iconRender = slots?.iconRender ? slots.iconRender(opt) : null
-        const labelArr = filterEmpty(Array.isArray(_labelRender) ? _labelRender : [_labelRender])
-        const extraArr = filterEmpty(Array.isArray(_extraRender) ? _extraRender : [_extraRender])
-        const iconArr = filterEmpty(Array.isArray(_iconRender) ? _iconRender : [_iconRender])
+        const labelArr = filterEmpty(Array.isArray(_labelRender) ? _labelRender : [_labelRender]).filter(item => item !== undefined || item !== null)
+        const extraArr = filterEmpty(Array.isArray(_extraRender) ? _extraRender : [_extraRender]).filter(item => item !== undefined || item !== null)
+        const iconArr = filterEmpty(Array.isArray(_iconRender) ? _iconRender : [_iconRender]).filter(item => item !== undefined || item !== null)
         // Icon
         if (iconArr.length) {
-          restProps.icon = iconArr?.[0]
+          icon = iconArr?.[0]
         }
         if (labelArr.length) {
           label = labelArr?.[0]
@@ -53,13 +54,16 @@ function convertItemsToNodes(
         if (!extra) {
           extra = (opt as any).extra
         }
+        if (!icon) {
+          icon = (opt as any).icon
+        }
 
         // MenuItemGroup & SubMenuItem
         if (children || type === 'group') {
           if (type === 'group') {
             // Group
             return (
-              <MergedMenuItemGroup key={mergedKey} {...restProps} title={label}>
+              <MergedMenuItemGroup key={mergedKey} {...restProps} title={label} icon={icon}>
                 {convertItemsToNodes(children, components, prefixCls, slots)}
               </MergedMenuItemGroup>
             )
@@ -67,7 +71,7 @@ function convertItemsToNodes(
 
           // Sub Menu
           return (
-            <MergedSubMenu key={mergedKey} {...restProps} title={label}>
+            <MergedSubMenu key={mergedKey} {...restProps} title={label} icon={icon}>
               {convertItemsToNodes(children, components, prefixCls, slots)}
             </MergedSubMenu>
           )
@@ -79,7 +83,7 @@ function convertItemsToNodes(
         }
 
         return (
-          <MergedMenuItem key={mergedKey} {...restProps} extra={extra}>
+          <MergedMenuItem key={mergedKey} {...restProps} extra={extra} icon={icon}>
             {label}
             {(!!extra || extra === 0) && (
               <span class={`${prefixCls}-item-extra`}>{extra}</span>
