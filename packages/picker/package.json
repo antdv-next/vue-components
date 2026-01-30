@@ -16,32 +16,32 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "default": "./dist/index.js"
     },
     "./dist/locale/*": {
       "types": "./dist/locale/*.d.ts",
       "import": "./dist/locale/*.js",
-      "require": "./dist/locale/*.cjs"
+      "default": "./dist/locale/*.js"
     },
     "./locale/*": {
       "types": "./dist/locale/*.d.ts",
       "import": "./dist/locale/*.js",
-      "require": "./dist/locale/*.cjs"
+      "default": "./dist/locale/*.js"
     },
     "./generate": {
       "types": "./dist/generate/index.d.ts",
       "import": "./dist/generate/index.js",
-      "require": "./dist/generate/index.cjs"
+      "default": "./dist/generate/index.js"
     },
     "./generate/*": {
       "types": "./dist/generate/*.d.ts",
       "import": "./dist/generate/*.js",
-      "require": "./dist/generate/*.cjs"
+      "default": "./dist/generate/*.js"
     },
     "./dist/*": {
       "types": "./dist/*.d.ts",
       "import": "./dist/*.js",
-      "require": "./dist/*.cjs"
+      "default": "./dist/*.js"
     },
     "./package.json": "./package.json"
   },

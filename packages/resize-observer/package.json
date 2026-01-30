@@ -6,17 +6,17 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "default": "./dist/index.js"
     },
     "./dist/*": {
       "types": "./dist/*.d.ts",
       "import": "./dist/*.js",
-      "require": "./dist/*.cjs"
+      "default": "./dist/*.js"
     },
     "./dist/utils/*": {
       "types": "./dist/utils/*.d.ts",
       "import": "./dist/utils/*.js",
-      "require": "./dist/utils/*.cjs"
+      "default": "./dist/utils/*.js"
     },
     "./package.json": "./package.json"
   },

@@ -6,27 +6,27 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "default": "./dist/index.js"
     },
     "./dist/locale/*.js": {
       "types": "./dist/locale/*.d.ts",
       "import": "./dist/locale/*.js",
-      "require": "./dist/locale/*.cjs"
+      "default": "./dist/locale/*.js"
     },
     "./dist/locale/*": {
       "types": "./dist/locale/*.d.ts",
       "import": "./dist/locale/*.js",
-      "require": "./dist/locale/*.cjs"
+      "default": "./dist/locale/*.js"
     },
     "./locale/*.js": {
       "types": "./dist/locale/*.d.ts",
       "import": "./dist/locale/*.js",
-      "require": "./dist/locale/*.cjs"
+      "default": "./dist/locale/*.js"
     },
     "./locale/*": {
       "types": "./dist/locale/*.d.ts",
       "import": "./dist/locale/*.js",
-      "require": "./dist/locale/*.cjs"
+      "default": "./dist/locale/*.js"
     },
     "./dist/*": "./dist/*",
     "./package.json": "./package.json"
