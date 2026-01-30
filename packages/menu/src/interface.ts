@@ -140,5 +140,5 @@ export type Components = Partial<Record<ComponentType, any>>
 
 export type PopupRender = (
   node: any,
-  info: { item: SubMenuProps, keys: string[] },
+  info: { item: SubMenuProps & { key?: any }, keys: string[] },
 ) => VueNode

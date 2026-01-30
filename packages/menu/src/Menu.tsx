@@ -155,6 +155,7 @@ export interface MenuProps {
 
   labelRender?: (item: ItemType) => any
   extraRender?: (item: ItemType) => any
+  iconRender?: (item: ItemType) => any
 }
 
 const defaults = {
@@ -475,7 +476,7 @@ const Menu = defineComponent<MenuProps>(
 
     const menuContext = computed(() => {
       return {
-        prefixCls: props.prefixCls || defaults.prefixCls,
+        prefixCls: props.prefixCls!,
         rootClass: props.rootClass,
         classes: props.classes,
         styles: props.styles,
@@ -542,6 +543,7 @@ const Menu = defineComponent<MenuProps>(
     })
 
     return () => {
+      const { prefixCls, rootClass } = props
       // 在 render 函数中获取 slots
       const children = filterEmpty(slots.default?.())
 
@@ -554,6 +556,7 @@ const Menu = defineComponent<MenuProps>(
         {
           labelRender: props?.labelRender,
           extraRender: props?.extraRender,
+          iconRender: props?.iconRender,
         },
       )
 
@@ -585,19 +588,19 @@ const Menu = defineComponent<MenuProps>(
       const container = (
         <Overflow
           ref={containerRef}
-          prefixCls={`${props.prefixCls || defaults.prefixCls}-overflow`}
+          prefixCls={`${prefixCls}-overflow`}
           component="ul"
           itemComponent={MenuItem}
           class={classNames(
-            props.prefixCls || defaults.prefixCls,
-            `${props.prefixCls || defaults.prefixCls}-root`,
-            `${props.prefixCls || defaults.prefixCls}-${internalMode.value}`,
+            prefixCls,
+            `${prefixCls}-root`,
+            `${prefixCls}-${internalMode.value}`,
             (_attrs.class as any) || '',
             {
-              [`${props.prefixCls || defaults.prefixCls}-inline-collapsed`]: internalInlineCollapsed.value,
-              [`${props.prefixCls || defaults.prefixCls}-rtl`]: isRtl.value,
+              [`${prefixCls}-inline-collapsed`]: internalInlineCollapsed.value,
+              [`${prefixCls}-rtl`]: isRtl.value,
             },
-            props.rootClass,
+            rootClass,
           )}
           style={_attrs.style as CSSProperties}
           data={wrappedChildList}

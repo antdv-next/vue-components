@@ -14,6 +14,7 @@ function convertItemsToNodes(
   slots?: {
     labelRender?: (item: ItemType) => any
     extraRender?: (item: ItemType) => any
+    iconRender?: (item: ItemType) => any
   },
 ): VueNode[] {
   const {
@@ -32,8 +33,14 @@ function convertItemsToNodes(
         let extra
         const _labelRender = slots?.labelRender ? slots.labelRender(opt) : null
         const _extraRender = slots?.extraRender ? slots.extraRender(opt) : null
+        const _iconRender = slots?.iconRender ? slots.iconRender(opt) : null
         const labelArr = filterEmpty(Array.isArray(_labelRender) ? _labelRender : [_labelRender])
         const extraArr = filterEmpty(Array.isArray(_extraRender) ? _extraRender : [_extraRender])
+        const iconArr = filterEmpty(Array.isArray(_iconRender) ? _iconRender : [_iconRender])
+        // Icon
+        if (iconArr.length) {
+          restProps.icon = iconArr?.[0]
+        }
         if (labelArr.length) {
           label = labelArr?.[0]
         }
@@ -95,6 +102,7 @@ export function parseItems(
   slots?: {
     labelRender?: (item: ItemType) => any
     extraRender?: (item: ItemType) => any
+    iconRender?: (item: ItemType) => any
   },
 ) {
   let childNodes = children

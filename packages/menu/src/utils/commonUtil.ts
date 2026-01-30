@@ -1,5 +1,5 @@
 import { toArray } from '@v-c/util/dist/Children/toArray'
-import { isVNode } from 'vue'
+import { cloneVNode, isVNode } from 'vue'
 
 export function parseChildren(children: any | undefined, keyPath: string[]): any[] {
   return toArray(children).map((child, index) => {
@@ -16,13 +16,9 @@ export function parseChildren(children: any | undefined, keyPath: string[]): any
         cloneProps.warnKey = true
       }
 
-      return {
-        ...child,
-        props: {
-          ...child.props,
-          ...cloneProps,
-        },
-      }
+      return cloneVNode(child, {
+        ...cloneProps,
+      })
     }
     return child
   })
