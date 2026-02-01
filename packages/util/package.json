@@ -6,6 +6,54 @@
   "publishConfig": {
     "access": "public"
   },
+  "exports": {
+    ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js",
+        "default": "./dist/index.js"
+    },
+    "./dist/*": {
+        "types": "./dist/*.d.ts",
+        "import": "./dist/*.js",
+        "default": "./dist/*.js"
+    },
+    "./dist/Children/*": {
+        "types": "./dist/Children/*.d.ts",
+        "import": "./dist/Children/*.js",
+        "default": "./dist/Children/*.js"
+    },
+    "./dist/Dom/*": {
+        "types": "./dist/Dom/*.d.ts",
+        "import": "./dist/Dom/*.js",
+        "default": "./dist/Dom/*.js"
+    },
+    "./dist/hooks/*": {
+        "types": "./dist/hooks/*.d.ts",
+        "import": "./dist/hooks/*.js",
+        "default": "./dist/hooks/*.js"
+    },
+    "./dist/props-util/*": {
+        "types": "./dist/props-util/*.d.ts",
+        "import": "./dist/props-util/*.js",
+        "default": "./dist/props-util/*.js"
+    },
+    "./dist/utils/*": {
+        "types": "./dist/utils/*.d.ts",
+        "import": "./dist/utils/*.js",
+        "default": "./dist/utils/*.js"
+    },
+    "./dist/vueuse/*": {
+        "types": "./dist/vueuse/*.d.ts",
+        "import": "./dist/vueuse/*.js",
+        "default": "./dist/vueuse/*.js"
+    },
+    "./dist/debug/*": {
+        "types": "./dist/debug/*.d.ts",
+        "import": "./dist/debug/*.js",
+        "default": "./dist/debug/*.js"
+    },
+    "./package.json": "./package.json"
+  },
   "author": {
     "name": "aibayanyu20",
     "email": "aibayanyu@qq.com",
