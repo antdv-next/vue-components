@@ -32,10 +32,15 @@
         "import": "./dist/hooks/*.js",
         "default": "./dist/hooks/*.js"
     },
-    "./dist/props-util/*": {
-        "types": "./dist/props-util/*.d.ts",
-        "import": "./dist/props-util/*.js",
-        "default": "./dist/props-util/*.js"
+    "./dist/props-util": {
+        "types": "./dist/props-util/index.d.ts",
+        "import": "./dist/props-util/index.js",
+        "default": "./dist/props-util/index.js"
+    },
+    "./dist/props-util/index.js": {
+        "types": "./dist/props-util/index.d.ts",
+        "import": "./dist/props-util/index.js",
+        "default": "./dist/props-util/index.js"
     },
     "./dist/utils/*": {
         "types": "./dist/utils/*.d.ts",
