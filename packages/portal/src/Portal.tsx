@@ -1,5 +1,6 @@
 import { warning } from '@v-c/util'
 import canUseDom from '@v-c/util/dist/Dom/canUseDom'
+import { getDOM } from '@v-c/util/dist/Dom/findDOMNode'
 import { filterEmpty } from '@v-c/util/dist/props-util'
 import { computed, createVNode, defineComponent, isVNode, onMounted, shallowRef, Teleport, watch } from 'vue'
 import { useContextProvider } from './Context.tsx'
@@ -48,9 +49,9 @@ function getPortalContainer(getContainer: GetContainer) {
     return document.querySelector(getContainer)
 
   if (typeof getContainer === 'function')
-    return getContainer()
+    return getDOM(getContainer()) as ContainerType
 
-  return getContainer
+  return (typeof getContainer === 'object' ? getDOM(getContainer) : getContainer) as ContainerType
 }
 
 const defaults = {
