@@ -110,7 +110,7 @@ export function mergeWith<T extends object>(
           }
 
           keys(value).forEach((key) => {
-            if (Object.getOwnPropertyDescriptor(value, key).enumerable) {
+            if ((Object as any)?.getOwnPropertyDescriptor?.(value, key)?.enumerable) {
               internalMerge([...path, key], loopSet)
             }
           })
