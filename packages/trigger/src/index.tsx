@@ -65,7 +65,7 @@ export interface TriggerProps {
   afterPopupVisibleChange?: (visible: boolean) => void
 
   // =================== Portal ====================
-  getPopupContainer?: (node: HTMLElement) => HTMLElement | false
+  getPopupContainer?: ((node: HTMLElement) => HTMLElement) | false
   forceRender?: boolean
   autoDestroy?: boolean
 
