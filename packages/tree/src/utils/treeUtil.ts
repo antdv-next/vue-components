@@ -272,7 +272,11 @@ export function convertDataToEntities(
     childrenPropName?: string
     fieldNames?: FieldNames
   } = {},
+  /** @deprecated Use `config.externalGetKey` instead */
+  legacyExternalGetKey?: ExternalGetKey,
 ) {
+  const mergedExternalGetKey = externalGetKey || legacyExternalGetKey
+
   const posEntities: Record<string, DataEntity> = {}
   const keyEntities: KeyEntities = {}
   let wrapper: Wrapper = {
@@ -303,7 +307,7 @@ export function convertDataToEntities(
 
       processEntity?.(entity, wrapper)
     },
-    { externalGetKey, childrenPropName, fieldNames },
+    { externalGetKey: mergedExternalGetKey, childrenPropName, fieldNames },
   )
 
   onProcessFinished?.(wrapper)

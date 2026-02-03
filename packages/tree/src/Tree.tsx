@@ -44,6 +44,7 @@ import {
   fillFieldNames,
   flattenTreeData,
   getTreeNodeProps,
+  isLeafNode,
   warningWithoutKey,
 } from './utils/treeUtil'
 
@@ -369,7 +370,6 @@ const Tree = defineComponent<TreeProps>(
     })
     const loadingKeys = ref<Key[]>([])
 
-    const focused = ref(false)
     const listChanging = ref(false)
     const [activeKey, setActiveKey] = useMergedState<Key | null>(null, {
       value: computed(() => props.activeKey === undefined ? undefined : props.activeKey) as any,
@@ -458,12 +458,22 @@ const Tree = defineComponent<TreeProps>(
     }
 
     function onFocus(e: FocusEvent) {
-      focused.value = true
+      if (!mergedDisabled.value && activeKey.value === null) {
+        const visibleSelectedKey = selectedKeys.value.find((key) => {
+          return flattenNodes.value.some(nodeItem => nodeItem.key === key)
+        })
+
+        if (visibleSelectedKey !== undefined) {
+          onActiveChange(visibleSelectedKey)
+        }
+        else {
+          onActiveChange(flattenNodes.value?.[0]?.key || null)
+        }
+      }
       props.onFocus?.(e)
     }
 
     function onBlur(e: FocusEvent) {
-      focused.value = false
       onActiveChange(null)
       props.onBlur?.(e)
     }
@@ -989,6 +999,10 @@ const Tree = defineComponent<TreeProps>(
     }
 
     function onKeyDown(e: KeyboardEvent) {
+      if (mergedDisabled.value)
+        return
+
+      const nodes = flattenNodes.value
       switch ((e as any).which || (e as any).keyCode) {
         case KeyCode.UP:
           offsetActiveKey(-1)
@@ -998,21 +1012,38 @@ const Tree = defineComponent<TreeProps>(
           offsetActiveKey(1)
           e.preventDefault()
           break
+        case KeyCode.HOME:
+          onActiveChange(nodes[0]?.key ?? null)
+          e.preventDefault()
+          break
+        case KeyCode.END:
+          onActiveChange(nodes[nodes.length - 1]?.key ?? null)
+          e.preventDefault()
+          break
       }
 
       const activeItem = getActiveItem.value
       if (activeItem && activeItem.data) {
         const required = getTreeNodeRequiredProps.value
 
-        const expandable
-          = activeItem.data.isLeaf === false
-            || !!((activeItem.data as any)[mergedFieldNames.value.children] || []).length
-
         const eventNode = convertNodePropsToEventData({
           ...getTreeNodeProps(activeKey.value!, required),
           data: activeItem.data,
           active: true,
         } as any)
+
+        const entity = getEntity(keyEntities.value, activeKey.value!)
+        const hasChildren = !!entity?.children?.length
+        const expandable = !isLeafNode(activeItem.data.isLeaf, props.loadData, hasChildren, eventNode.loaded)
+
+        const canCheck = mergedCheckable.value
+          && !eventNode.disabled
+          && eventNode.checkable !== false
+          && !eventNode.disableCheckbox
+        const canSelect = !mergedCheckable.value
+          && mergedSelectable.value
+          && !eventNode.disabled
+          && eventNode.selectable !== false
 
         switch ((e as any).which || (e as any).keyCode) {
           case KeyCode.LEFT:
@@ -1035,20 +1066,10 @@ const Tree = defineComponent<TreeProps>(
             break
           case KeyCode.ENTER:
           case KeyCode.SPACE:
-            if (
-              mergedCheckable.value
-              && !eventNode.disabled
-              && eventNode.checkable !== false
-              && !eventNode.disableCheckbox
-            ) {
+            if (canCheck) {
               onNodeCheck({} as any, eventNode, !mergedChecked.value.checkedKeys.includes(activeKey.value!))
             }
-            else if (
-              !mergedCheckable.value
-              && mergedSelectable.value
-              && !eventNode.disabled
-              && eventNode.selectable !== false
-            ) {
+            else if (canSelect) {
               onNodeSelect({} as any, eventNode)
             }
             break
@@ -1171,8 +1192,6 @@ const Tree = defineComponent<TreeProps>(
             props.rootClassName,
             {
               [`${mergedPrefixCls.value}-show-line`]: mergedShowLine.value,
-              [`${mergedPrefixCls.value}-focused`]: focused.value,
-              [`${mergedPrefixCls.value}-active-focused`]: activeKey.value !== null,
             },
           )}
           style={props.rootStyle}
