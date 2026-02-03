@@ -405,6 +405,7 @@ const Tree = defineComponent<TreeProps>(
     const loadingRetryTimes: Record<string, number> = {}
 
     const listRef = ref<NodeListRef>()
+    let focusFromMouse = false
 
     const getTreeNodeRequiredProps = computed(() => ({
       expandedKeys: expandedKeys.value || [],
@@ -458,6 +459,11 @@ const Tree = defineComponent<TreeProps>(
     }
 
     function onFocus(e: FocusEvent) {
+      if (focusFromMouse) {
+        focusFromMouse = false
+        props.onFocus?.(e)
+        return
+      }
       if (!mergedDisabled.value && activeKey.value === null) {
         const visibleSelectedKey = selectedKeys.value.find((key) => {
           return flattenNodes.value.some(nodeItem => nodeItem.key === key)
@@ -474,6 +480,7 @@ const Tree = defineComponent<TreeProps>(
     }
 
     function onBlur(e: FocusEvent) {
+      focusFromMouse = false
       onActiveChange(null)
       props.onBlur?.(e)
     }
@@ -1186,6 +1193,12 @@ const Tree = defineComponent<TreeProps>(
       const domProps = pickAttrs(attrs, { aria: true, data: true })
       return (
         <div
+          onMousedown={() => {
+            focusFromMouse = true
+          }}
+          onMouseup={() => {
+            focusFromMouse = false
+          }}
           class={clsx(
             mergedPrefixCls.value,
             props.className,
