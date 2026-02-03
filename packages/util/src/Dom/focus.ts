@@ -176,13 +176,17 @@ export function useLockFocus(
   lock: Ref<boolean>,
   getElement: () => HTMLElement | null,
 ) {
-  watch(lock, (_, _o, onCleanup) => {
-    if (lock.value) {
-      const element = getElement()
-      if (element) {
+  watch(
+    [lock, () => getElement()],
+    ([nextLock, element], _o, onCleanup) => {
+      if (nextLock && element) {
         const fn = lockFocus(element)
         onCleanup(fn)
       }
-    }
-  })
+    },
+    {
+      flush: 'post',
+      immediate: true,
+    },
+  )
 }

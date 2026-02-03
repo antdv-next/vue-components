@@ -4,7 +4,7 @@ import type { ContentRef } from './Content/Panel'
 import { warning } from '@v-c/util'
 import contains from '@v-c/util/dist/Dom/contains'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
-import { defineComponent, onUnmounted, shallowRef, useId, watch } from 'vue'
+import { defineComponent, nextTick, onUnmounted, shallowRef, useId, watch } from 'vue'
 import { getMotionName } from '../util'
 import Content from './Content'
 import Mask from './Mask'
@@ -35,6 +35,7 @@ const Dialog = defineComponent<IDialogPropTypes>(
     const wrapperRef = shallowRef<HTMLDivElement>()
     const contentRef = shallowRef<ContentRef>()
     const animatedVisible = shallowRef(props.visible)
+    const isFixedPos = shallowRef(false)
     // ========================== Init ==========================
     const ariaId = useId()
 
@@ -132,6 +133,13 @@ const Dialog = defineComponent<IDialogPropTypes>(
         if (props.visible) {
           animatedVisible.value = true
           saveLastOutSideActiveElementRef()
+          nextTick(() => {
+            const wrapEl = wrapperRef.value
+            if (wrapEl) {
+              const computedStyle = getComputedStyle(wrapEl)
+              isFixedPos.value = computedStyle.position === 'fixed'
+            }
+          })
         }
       },
       {
@@ -208,6 +216,7 @@ const Dialog = defineComponent<IDialogPropTypes>(
               ariaId={ariaId}
               prefixCls={prefixCls!}
               visible={!!visible}
+              isFixedPos={isFixedPos.value}
               motionName={getMotionName(prefixCls!, transitionName, animation)!}
               v-slots={slots}
             />
