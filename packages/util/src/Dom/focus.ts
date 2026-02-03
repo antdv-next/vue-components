@@ -1,4 +1,5 @@
 import type { Ref } from 'vue'
+import { getDOM } from '@v-c/util/dist/Dom/findDOMNode'
 import { watch } from 'vue'
 import isVisible from './isVisible'
 
@@ -179,6 +180,7 @@ export function useLockFocus(
   watch(
     [lock, () => getElement()],
     ([nextLock, element], _o, onCleanup) => {
+      element = getDOM(element) as HTMLElement
       if (nextLock && element) {
         const fn = lockFocus(element)
         onCleanup(fn)
