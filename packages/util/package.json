@@ -1,7 +1,7 @@
 {
   "name": "@v-c/util",
   "type": "module",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "Vue3 components utils",
   "publishConfig": {
     "access": "public"
