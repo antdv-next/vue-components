@@ -243,6 +243,10 @@ export default function useRangeValue<ValueType extends DateType[], DateType ext
       // Sync value with submit value
       setInnerValue(clone)
 
+      // submitValue.value is old value, setInnerValue is new value,
+      // so we need to sync submitValue.value to new value.
+      submitValue.value = clone
+
       const [isSameMergedDates] = isSameDates(clone, oldValue)
       // Trigger `onChange` if needed
       if (onChange && !isSameMergedDates) {
