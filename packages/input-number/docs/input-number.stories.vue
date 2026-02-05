@@ -3,6 +3,7 @@ import CombinationKeyFormat from './combination-key-format'
 import Custom from './custom'
 import Debug from './debug'
 import Decimal from './decimal'
+import DynamicMinMax from './dynamic-min-max'
 import Focus from './focus'
 import Formatter from './formatter'
 import InputControl from './input-control'
@@ -60,6 +61,9 @@ import './assets/index.less'
     </Variant>
     <Variant title="spinner">
       <Spinner />
+    </Variant>
+    <Variant title="dynamic-min-max">
+      <DynamicMinMax />
     </Variant>
   </Story>
 </template>
