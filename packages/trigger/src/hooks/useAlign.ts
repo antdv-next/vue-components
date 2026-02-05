@@ -160,6 +160,8 @@ export default function useAlign(
 
   let cacheTargetRect: any = null
 
+  let cacheScale: any = null
+
   // ========================= Align =========================
   const _onAlign = (cache = false) => {
     if (cache && !cacheTargetRect) {
@@ -306,12 +308,20 @@ export default function useAlign(
       const popupMirrorRect = rawPopupMirrorRect
 
       // Calculate scale
-      const scaleX = toNum(
-        Math.round((popupWidth / parseFloat(width)) * 1000) / 1000,
-      )
-      const scaleY = toNum(
-        Math.round((popupHeight / parseFloat(height)) * 1000) / 1000,
-      )
+      const scaleX = (cache && cacheScale)
+        ? cacheScale?.scaleX
+        : toNum(
+            Math.round((popupWidth / parseFloat(width)) * 1000) / 1000,
+          )
+      const scaleY = (cache && cacheScale)
+        ? cacheScale?.scaleY
+        : toNum(Math.round((popupHeight / parseFloat(height)) * 1000) / 1000)
+      if (!cache) {
+        cacheScale = {
+          scaleX,
+          scaleY,
+        }
+      }
 
       // No need to align since it's not visible in view
       if (
