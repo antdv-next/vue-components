@@ -79,9 +79,9 @@
   },
   "dependencies": {
     "@v-c/overflow": "workspace:^",
+    "@v-c/resize-observer": "workspace:^",
     "@v-c/trigger": "workspace:^",
-    "@v-c/util": "workspace:^",
-    "@v-c/resize-observer": "workspace:^"
+    "@v-c/util": "workspace:^"
   },
   "devDependencies": {
     "@types/luxon": "^3.7.1"
