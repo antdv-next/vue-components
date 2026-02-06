@@ -41,6 +41,46 @@ const Panel = defineComponent<PanelProps & { animationVisible: boolean }>(
         internalRef.value?.focus?.({ preventScroll: true })
       },
     })
+
+    let titleEle: HTMLElement
+    let startX = 0
+    let startY = 0
+    const onTitleMouseMove = (e: MouseEvent) => {
+      const parentEle = titleEle?.parentNode?.parentNode as HTMLElement
+      if (parentEle) {
+        let left = +(parentEle.getAttribute('data-left') || '0')
+        let top = +(parentEle.getAttribute('data-top') || '0')
+        const offsetX = e.clientX - startX
+        const offsetY = e.clientY - startY
+
+        left = left + offsetX
+        top = top + offsetY
+        startX = e.clientX
+        startY = e.clientY
+        parentEle.style.left = `${left}px`
+        parentEle.style.top = `${top}px`
+        parentEle.setAttribute('data-left', left.toString())
+        parentEle.setAttribute('data-top', top.toString())
+      }
+    }
+    const onTitleMouseUp = () => {
+      document.body.removeEventListener('mousemove', onTitleMouseMove, false)
+      document.body.removeEventListener('mouseup', onTitleMouseUp, false)
+    }
+    const onTitleMousedown = (e: MouseEvent) => {
+      titleEle = e.target as HTMLElement
+      document.body.addEventListener('mousemove', onTitleMouseMove, false)
+      document.body.addEventListener('mouseup', onTitleMouseUp, false)
+
+      const parentEle = titleEle?.parentNode?.parentNode as HTMLElement
+      const left = +(parentEle.getAttribute('data-left') || getComputedStyle(parentEle).getPropertyValue('left').replace('px', '') || 0)
+      const top = +(parentEle.getAttribute('data-top') || getComputedStyle(parentEle).getPropertyValue('top').replace('px', '') || 0)
+      parentEle.setAttribute('data-left', left.toString())
+      parentEle.setAttribute('data-top', top.toString())
+      startX = e.clientX
+      startY = e.clientY
+    }
+
     return () => {
       const {
         width,
@@ -87,7 +127,7 @@ const Panel = defineComponent<PanelProps & { animationVisible: boolean }>(
 
       const headerNode = title
         ? (
-            <div class={classNames(`${prefixCls}-header`, modalClassNames?.header)} style={{ ...modalStyles?.header }}>
+            <div class={classNames(`${prefixCls}-header`, modalClassNames?.header)} style={{ ...modalStyles?.header }} onMousedown={onTitleMousedown}>
               <div
                 class={clsx(`${prefixCls}-title`, modalClassNames?.title)}
                 id={ariaId}
