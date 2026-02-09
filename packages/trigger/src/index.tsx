@@ -292,6 +292,9 @@ export function generateTrigger(PortalComponent: any = Portal) {
       })
 
       const openRef = shallowRef(mergedOpen.value)
+      watch(mergedOpen, () => {
+        openRef.value = mergedOpen.value
+      })
 
       const internalTriggerOpen = (nextOpen: boolean) => {
         if (mergedOpen.value !== nextOpen) {
