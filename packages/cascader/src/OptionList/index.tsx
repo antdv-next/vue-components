@@ -15,6 +15,7 @@ const OptionList = defineComponent((_, { expose }) => {
   return () => (
     <RawOptionList
       {...(baseProps.value || {}) as any}
+      lockOptions={baseProps.value?.lockOptions}
       ref={(el: any) => {
         listRef.value = el
       }}

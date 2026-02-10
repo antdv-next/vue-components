@@ -1,7 +1,7 @@
 import type { ComputedRef } from 'vue'
 import type { DefaultOptionType, LegacyKey, SingleValueType } from '../Cascader'
 import { clsx } from '@v-c/util'
-import { computed, defineComponent, nextTick, ref, watch, watchEffect } from 'vue'
+import { computed, defineComponent, nextTick, ref, shallowRef, watch, watchEffect } from 'vue'
 import { useCascaderContext } from '../context'
 import {
   getFullPathKeys,
@@ -12,7 +12,6 @@ import {
   toPathValueStr,
 } from '../utils/commonUtil'
 import { toPathOptions } from '../utils/treeUtil'
-import CacheContent from './CacheContent'
 import Column, { FIX_LABEL } from './Column'
 import useActive from './useActive'
 import useKeyboard from './useKeyboard'
@@ -26,6 +25,7 @@ export interface RawOptionListProps {
   direction?: 'ltr' | 'rtl'
   open?: boolean
   disabled?: boolean
+  lockOptions?: boolean
 }
 
 const rawOptionListDefaults: RawOptionListProps = {
@@ -36,6 +36,7 @@ const rawOptionListDefaults: RawOptionListProps = {
   open: false,
   direction: 'ltr',
   disabled: false,
+  lockOptions: false,
 }
 
 const RawOptionList = defineComponent<RawOptionListProps>(
@@ -146,12 +147,18 @@ const RawOptionList = defineComponent<RawOptionListProps>(
     }
 
     // ========================== Option ==========================
-    const mergedOptions = computed(() => {
+    const filteredOptions = computed(() => {
       if (props.searchValue) {
         return context.value?.searchOptions || []
       }
 
       return context.value?.options || []
+    })
+
+    // Update only when open or lockOptions
+    const mergedOptions = shallowRef(filteredOptions.value)
+    watch([() => props.open, () => props.lockOptions], () => {
+      mergedOptions.value = filteredOptions.value
     })
 
     // ========================== Column ==========================
@@ -282,17 +289,15 @@ const RawOptionList = defineComponent<RawOptionListProps>(
       })
 
       return (
-        <CacheContent open={props.open}>
-          <div
-            class={clsx(`${mergedPrefixCls.value}-menus`, {
-              [`${mergedPrefixCls.value}-menu-empty`]: isEmpty,
-              [`${mergedPrefixCls.value}-rtl`]: rtl.value,
-            })}
-            ref={containerRef}
-          >
-            {columnNodes}
-          </div>
-        </CacheContent>
+        <div
+          class={clsx(`${mergedPrefixCls.value}-menus`, {
+            [`${mergedPrefixCls.value}-menu-empty`]: isEmpty,
+            [`${mergedPrefixCls.value}-rtl`]: rtl.value,
+          })}
+          ref={containerRef}
+        >
+          {columnNodes}
+        </div>
       )
     }
   },

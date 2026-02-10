@@ -84,6 +84,9 @@ const SingleContent = defineComponent<SharedContentProps>(
         <div
           class={clsx(
             `${prefixCls}-content`,
+            displayValue.value && `${prefixCls}-content-has-value`,
+            mergedSearchValue.value && `${prefixCls}-content-has-search-value`,
+
             classNames?.content,
           )}
           style={styles?.content}

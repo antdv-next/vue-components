@@ -39,6 +39,7 @@ export type TriggerOpenType = (
  * On client-side hydration, it syncs with the actual open state.
  */
 export default function useOpen(
+  defaultOpen: boolean,
   propOpen: Ref<boolean>,
   onOpen: (nextOpen: boolean) => void,
   postOpen: (nextOpen: boolean) => boolean,
@@ -49,7 +50,7 @@ export default function useOpen(
     rendered.value = true
   })
 
-  const stateOpen = shallowRef(propOpen.value ?? false)
+  const stateOpen = shallowRef(propOpen.value ?? defaultOpen ?? false)
   watch(propOpen, () => {
     stateOpen.value = propOpen.value
   })
@@ -104,5 +105,5 @@ export default function useOpen(
     }
   }
 
-  return [mergedOpen, toggleOpen, lock] as const
+  return [ssrSafeOpen, mergedOpen, toggleOpen, lock] as const
 }

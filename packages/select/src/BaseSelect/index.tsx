@@ -365,7 +365,8 @@ export const BaseSelect = defineComponent<
     // ============================== Open ==============================
     // Not trigger `open` when `notFoundContent` is empty
     const emptyListContent = computed(() => !props?.notFoundContent && props.emptyOptions)
-    const [mergedOpen, triggerOpen, lockOptions] = useOpen(
+    const [rawOpen, mergedOpen, triggerOpen, lockOptions] = useOpen(
+      props?.defaultOpen || false,
       open as any,
       (openVal) => {
         props.onPopupVisibleChange?.(openVal)
@@ -445,6 +446,22 @@ export const BaseSelect = defineComponent<
       },
     )
 
+    // Clean up search value when the dropdown is closed.
+    // We use `rawOpen` here to avoid clearing the search input when the dropdown is
+    // programmatically closed due to `notFoundContent={null}` and no matching options.
+    // This allows the user to continue typing their search query.
+    watch(
+      rawOpen,
+      () => {
+        if (!rawOpen.value && !multiple.value && mode.value === 'combobox') {
+          onInternalSearch('', false, false)
+        }
+      },
+      {
+        immediate: true,
+      },
+    )
+
     // ============================ Disabled ============================
     // Close dropdown & remove focus state when disabled change
     watch([disabled, mergedOpen], () => {
@@ -471,13 +488,14 @@ export const BaseSelect = defineComponent<
       const clearLock = getClearLock()
       const { key } = event
       const isEnterKey = key === KeyCodeStr.Enter
+      const isSpaceKey = key === KeyCodeStr.Space
 
-      if (isEnterKey) {
-        // Do not submit form when type in the input
+      // Enter or Space opens dropdown (ARIA combobox: spacebar should open)
+      if (isEnterKey || isSpaceKey) {
+        // Do not submit form when type in the input; prevent Space from scrolling page
         if (mode.value !== 'combobox') {
           event.preventDefault()
         }
-
         // We only manage open state here, close logic should handle by list component
         if (!mergedOpen.value) {
           triggerOpen(true)
@@ -513,7 +531,7 @@ export const BaseSelect = defineComponent<
       }
 
       // Lock other operations until key up
-      if (mergedOpen.value && (!isEnterKey || !keyLockRef.value)) {
+      if (mergedOpen.value && (!isEnterKey || !keyLockRef.value) && !isSpaceKey) {
         // Lock the Enter key after it is pressed to avoid repeated triggering of the onChange event.
         if (isEnterKey) {
           keyLockRef.value = true
@@ -638,6 +656,7 @@ export const BaseSelect = defineComponent<
         toggleOpen: triggerOpen,
         multiple: multiple.value,
         lockOptions: lockOptions.value,
+        rawOpen: rawOpen.value,
       }
     })
 
