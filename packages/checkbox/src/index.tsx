@@ -103,7 +103,6 @@ export const Checkbox = defineComponent<
             checked={!!rawValue.value}
             type={type}
           />
-          <span class={`${prefixCls}-inner`} />
         </span>
       )
     }
