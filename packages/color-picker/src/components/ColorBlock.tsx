@@ -1,14 +1,19 @@
 import type { CSSProperties } from 'vue'
-import { classNames } from '@v-c/util'
+import { clsx } from '@v-c/util'
+import { getAttrStyleAndClass } from '@v-c/util/dist/props-util'
 import { defineComponent } from 'vue'
 
 export interface ColorBlockProps {
   color: string
   prefixCls?: string
+  /** Internal usage. Only used in antd ColorPicker semantic structure only */
+  innerClassName?: string
+  /** Internal usage. Only used in antd ColorPicker semantic structure only */
+  innerStyle?: CSSProperties
 }
 
 export default defineComponent({
-  props: ['color', 'prefixCls'],
+  props: ['color', 'prefixCls', 'innerClassName', 'innerStyle'],
   inheritAttrs: false,
   setup(props, { attrs, emit }) {
     const handleClickChange = (e: Event) => {
@@ -19,20 +24,24 @@ export default defineComponent({
       const {
         color,
         prefixCls,
+        innerClassName,
+        innerStyle,
       } = props
 
+      const { className, style } = getAttrStyleAndClass(attrs)
       const colorBlockCls = `${prefixCls}-color-block`
 
       return (
         <div
-          class={classNames(colorBlockCls, [attrs.class])}
-          style={{ ...attrs.style as CSSProperties }}
+          class={clsx(colorBlockCls, className)}
+          style={style}
           onClick={handleClickChange}
         >
           <div
-            class={`${colorBlockCls}-inner`}
+            class={clsx(`${colorBlockCls}-inner`, innerClassName)}
             style={{
               background: color,
+              ...innerStyle,
             }}
           />
         </div>
