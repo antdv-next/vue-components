@@ -27,42 +27,51 @@ const SingleContent = defineComponent<SharedContentProps>(
       return baseProps.value?.showSearch ? selectInputContext.value?.searchValue : ''
     })
 
-    // Extract option props, excluding label and value, and handle className/style merging
-    const optionProps = computed(() => {
-      let restProps: Record<string, any> = {
-        class: `${selectInputContext.value?.prefixCls}-content-value`,
-        style: mergedSearchValue.value
-          ? {
-              visibility: 'hidden',
-            }
-          : {},
-      }
+    const optionClassName = computed(() => {
       if (displayValue.value && selectContext.value?.flattenOptions) {
         const option = selectContext.value.flattenOptions.find(opt => opt.value === displayValue.value?.value)
         if (option?.data) {
-          // Exclude children to avoid Vue warning about setting readonly DOM property
-          const { label, value, className, style, key, children, ...rest } = option.data
-          restProps = {
-            ...restProps,
-            ...rest,
-            title: getTitle(option.data),
-            class: clsx(restProps.class, className),
-            style: { ...restProps.style, ...style },
-          }
+          return option.data.className || option.data.class
+        }
+      }
+      return undefined
+    })
+
+    const optionStyle = computed(() => {
+      if (displayValue.value && selectContext.value?.flattenOptions) {
+        const option = selectContext.value.flattenOptions.find(opt => opt.value === displayValue.value?.value)
+        if (option?.data) {
+          return option.data.style
+        }
+      }
+      return undefined
+    })
+
+    const optionTitle = computed(() => {
+      let titleValue: string | undefined
+
+      if (displayValue.value && selectContext.value?.flattenOptions) {
+        const option = selectContext.value.flattenOptions.find(opt => opt.value === displayValue.value?.value)
+        if (option?.data) {
+          titleValue = getTitle(option.data)
         }
       }
 
-      if (displayValue.value && !restProps.title) {
-        restProps.title = getTitle(displayValue.value)
+      if (displayValue.value && !titleValue) {
+        titleValue = getTitle(displayValue.value)
       }
+
       if (baseProps.value?.title !== undefined) {
-        restProps.title = baseProps.value.title
+        titleValue = baseProps.value.title
       }
-      return restProps
+
+      return titleValue
     })
 
+    const hasOptionStyle = computed(() => !!optionClassName.value || !!optionStyle.value)
+
     watch(
-      [combobox, () => selectInputContext.value?.displayValues],
+      [combobox, () => selectInputContext.value?.activeValue],
       () => {
         if (combobox.value) {
           inputChanged.value = false
@@ -80,21 +89,38 @@ const SingleContent = defineComponent<SharedContentProps>(
       const { prefixCls, mode, maxLength } = selectInputContext.value ?? {}
       const { classNames, styles } = baseProps.value ?? {}
       const { inputProps } = props
+
+      // Render value
+      const renderValue = displayValue.value
+        ? (hasOptionStyle.value
+            ? (
+                <div
+                  class={clsx(`${prefixCls}-content-value`, optionClassName.value)}
+                  style={{
+                    ...(mergedSearchValue.value ? { visibility: 'hidden' as const } : {}),
+                    ...optionStyle.value,
+                  }}
+                  title={optionTitle.value}
+                >
+                  {displayValue.value.label}
+                </div>
+              )
+            : displayValue.value.label)
+        : (<Placeholder show={!mergedSearchValue.value} />)
+
       return (
         <div
           class={clsx(
             `${prefixCls}-content`,
             displayValue.value && `${prefixCls}-content-has-value`,
             mergedSearchValue.value && `${prefixCls}-content-has-search-value`,
-
+            hasOptionStyle.value && `${prefixCls}-content-has-option-style`,
             classNames?.content,
           )}
           style={styles?.content}
+          title={hasOptionStyle.value ? undefined : optionTitle.value}
         >
-          {displayValue.value
-            ? (<div {...optionProps.value}>{displayValue.value.label}</div>)
-            : (<Placeholder show={!mergedSearchValue.value} />)}
-
+          {renderValue}
           <Input
             {...inputProps as any}
             value={mergedSearchValue.value}
@@ -102,7 +128,6 @@ const SingleContent = defineComponent<SharedContentProps>(
             onChange={(e: any) => {
               inputChanged.value = true
               inputProps.onChange?.(e)
-              inputProps.onInput?.(e)
             }}
             ref={inputRef}
           />
