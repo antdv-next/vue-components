@@ -1,12 +1,13 @@
 import type { TreeNodeProps } from './interface'
 import { clsx } from '@v-c/util'
+import { getId } from '@v-c/util/dist/hooks/useId'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
 import { filterEmpty } from '@v-c/util/dist/props-util'
 import { computed, defineComponent, inject, ref, watchEffect } from 'vue'
 import { TreeContextKey, UnstableContextKey } from './contextTypes'
 import Indent from './Indent'
 import getEntity from './utils/keyUtil'
-import { convertNodePropsToEventData, getTreeNodeId, isLeafNode } from './utils/treeUtil'
+import { convertNodePropsToEventData, isLeafNode } from './utils/treeUtil'
 
 const ICON_OPEN = 'open'
 const ICON_CLOSE = 'close'
@@ -17,7 +18,7 @@ const TreeNode = defineComponent<TreeNodeProps>(
     const context = inject(TreeContextKey, null as any)
     const unstableContext = inject(UnstableContextKey, {} as any)
 
-    const nodeId = computed(() => getTreeNodeId(props.treeId || '', props.eventKey!))
+    const nodeId = computed(() => getId(props.treeId || '', `${props.eventKey!}`))
 
     const dragNodeHighlight = ref(false)
 
