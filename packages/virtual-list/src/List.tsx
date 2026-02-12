@@ -6,7 +6,7 @@ import type { ExtraRenderInfo } from './interface'
 import type { ScrollBarDirectionType, ScrollBarRef } from './ScrollBar'
 import ResizeObserver from '@v-c/resize-observer'
 import { pureAttrs } from '@v-c/util/dist/props-util'
-import { computed, defineComponent, ref, shallowRef, toRaw, watch } from 'vue'
+import { computed, defineComponent, ref, shallowRef, toRaw, unref, watch } from 'vue'
 import Filler from './Filler'
 import useChildren from './hooks/useChildren'
 import useDiffItem from './hooks/useDiffItem'
@@ -235,7 +235,7 @@ export default defineComponent({
           return
         }
 
-        if (heights.id === 0) {
+        if (unref(heights.id) === 0) {
           const safeItemHeight = itemHeight!
           const safeListHeight = height!
 
@@ -627,7 +627,7 @@ export default defineComponent({
         offsetX: offsetLeft.value,
         offsetY: fillerOffset.value || 0,
         rtl: isRTL.value,
-        getSize: getSize.value,
+        getSize,
       })
 
       const Component = props.component as any
