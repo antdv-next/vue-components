@@ -29,6 +29,12 @@ export type ColorGenInput<T = Color>
     | HSBA
     | T
 
+export type ColorValueType<T = Color>
+  = | T
+    | string
+
+export type ColorFormatType = 'hex' | 'rgb' | 'hsb'
+
 export type HsbaColorType = 'hue' | 'alpha'
 
 export interface TransformOffset {
@@ -41,11 +47,11 @@ export interface BaseColorPickerProps {
   prefixCls?: string
   disabled?: boolean
   onChange?: (
-    color: Color,
+    color: ColorValueType,
     info?: { type?: HsbaColorType, value?: number },
   ) => void
   onChangeComplete?: (
-    value: Color,
+    value: ColorValueType,
     info?: { type?: HsbaColorType, value?: number },
   ) => void
 }

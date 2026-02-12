@@ -1,6 +1,8 @@
 import type { Ref } from 'vue'
 import type {
+  ColorFormatType,
   ColorGenInput,
+  ColorValueType,
   HsbaColorType,
   TransformOffset,
 } from './interface'
@@ -16,6 +18,29 @@ export function generateColor(color: ColorGenInput): Color {
 }
 
 export const defaultColor = generateColor('#1677ff')
+
+export function formatColorValue(
+  color: Color,
+  valueFormat?: ColorFormatType | ((value: Color) => string),
+): ColorValueType {
+  if (!valueFormat) {
+    return color
+  }
+
+  if (typeof valueFormat === 'function') {
+    return valueFormat(color)
+  }
+
+  switch (valueFormat) {
+    case 'hex':
+      return color.toHexString()
+    case 'hsb':
+      return color.toHsbString()
+    case 'rgb':
+    default:
+      return color.toRgbString()
+  }
+}
 
 // export function calculateColor(props: {
 //   offset: TransformOffset

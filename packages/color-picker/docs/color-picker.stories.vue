@@ -4,6 +4,7 @@ import Block from './block.vue'
 import CustomRender from './customRender.vue'
 import Disabled from './disabled.vue'
 import DisabledAlpha from './disabledAlpha.vue'
+import ValueFormat from './valueFormat.vue'
 import './assets/index.less'
 </script>
 
@@ -23,6 +24,9 @@ import './assets/index.less'
     </Variant>
     <Variant title="Block">
       <Block />
+    </Variant>
+    <Variant title="ValueFormat">
+      <ValueFormat />
     </Variant>
   </Story>
 </template>

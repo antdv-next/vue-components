@@ -1,6 +1,6 @@
 import type { CSSProperties, PropType, VNode } from 'vue'
 import type { Components } from './hooks/useComponent'
-import type { BaseColorPickerProps, ColorGenInput } from './interface'
+import type { BaseColorPickerProps, ColorFormatType, ColorGenInput, ColorValueType, HsbaColorType } from './interface'
 import { classNames } from '@v-c/util'
 
 import { toPropsRefs } from '@v-c/util/dist/props-util'
@@ -11,7 +11,7 @@ import ColorBlock from './components/ColorBlock'
 import Picker from './components/Picker'
 import useColorState from './hooks/useColorState'
 import useComponent from './hooks/useComponent'
-import { ColorPickerPrefixCls, defaultColor } from './util'
+import { ColorPickerPrefixCls, defaultColor, formatColorValue } from './util'
 
 const HUE_COLORS = [
   {
@@ -47,6 +47,7 @@ const HUE_COLORS = [
 export interface ColorPickerProps extends Omit<BaseColorPickerProps, 'color'> {
   value?: ColorGenInput
   defaultValue?: ColorGenInput
+  valueFormat?: ColorFormatType | ((value: Color) => string)
   class?: string
   style?: CSSProperties
   /** Get panel element  */
@@ -63,6 +64,9 @@ function colorPickerProps() {
     },
     defaultValue: {
       type: [String, Number, Object] as PropType<ColorGenInput>,
+    },
+    valueFormat: {
+      type: [String, Function] as PropType<ColorPickerProps['valueFormat']>,
     },
     prefixCls: {
       type: String,
@@ -98,13 +102,20 @@ const ColorPicker = defineComponent({
 
     const alphaColor = computed(() => colorValue.value.setA(1).toRgbString())
 
+    const formatOutput = (nextColor: Color): ColorValueType =>
+      formatColorValue(nextColor, props.valueFormat)
+
     // ============================ Events ============================
-    const handleChange: BaseColorPickerProps['onChange'] = (data, type) => {
+    const handleChange = (
+      data: Color,
+      type?: { type?: HsbaColorType, value?: number },
+    ) => {
       if (!value.value) {
         setColorValue(data)
       }
-      emit('change', data, type)
-      emit('update:value', data)
+      const formattedValue = formatOutput(data)
+      emit('change', formattedValue, type)
+      emit('update:value', formattedValue)
     }
 
     // Convert
@@ -122,18 +133,28 @@ const ColorPicker = defineComponent({
     }
 
     // Complete
+    const triggerChangeComplete = (
+      nextColor: Color,
+      info?: { type?: 'hue' | 'alpha', value?: number },
+    ) => {
+      emit('changeComplete', formatOutput(nextColor), info)
+    }
+
     const onHueChangeComplete = (hue: number) => {
-      emit('changeComplete', getHueColor(hue))
+      triggerChangeComplete(getHueColor(hue), { type: 'hue', value: hue })
     }
 
     const onAlphaChangeComplete = (alpha: number) => {
-      emit('changeComplete', getAlphaColor(alpha))
+      triggerChangeComplete(getAlphaColor(alpha), { type: 'alpha', value: alpha })
+    }
+
+    const onPickerChangeComplete = (nextColor: Color) => {
+      triggerChangeComplete(nextColor)
     }
 
     return () => {
       const {
         prefixCls = ColorPickerPrefixCls,
-        onChangeComplete,
         panelRender,
         disabledAlpha = false,
         disabled = false,
@@ -155,7 +176,7 @@ const ColorPicker = defineComponent({
           <Picker
             onChange={handleChange}
             {...sharedSliderProps}
-            onChangeComplete={onChangeComplete}
+            onChangeComplete={onPickerChangeComplete}
           />
           <div class={`${prefixCls}-slider-container`}>
             <div
