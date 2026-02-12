@@ -26,6 +26,7 @@ import useRangeActive from './hooks/useRangeActive'
 import useRangePickerValue from './hooks/useRangePickerValue'
 import useRangeValue, { useInnerValue } from './hooks/useRangeValue'
 import useShowNow from './hooks/useShowNow'
+import { formatValue as formatByValueFormat, formatValues as formatValuesByValueFormat } from '../utils/valueUtil'
 import Popup from './Popup'
 import SingleSelector from './Selector/SingleSelector'
 
@@ -44,19 +45,19 @@ export interface BasePickerProps<
   maxTagCount?: number | 'responsive'
 
   // Value
-  value?: DateType | DateType[] | null
-  defaultValue?: DateType | DateType[]
+  value?: DateType | DateType[] | string | string[] | null
+  defaultValue?: DateType | DateType[] | string | string[]
   onChange?: (
-    date: DateType | DateType[] | null,
+    date: DateType | DateType[] | string | string[] | null,
     dateString: string | string[],
   ) => void
   onCalendarChange?: (
-    date: DateType | DateType[],
+    date: DateType | DateType[] | string | string[],
     dateString: string | string[],
     info: BaseInfo,
   ) => void
   /**  */
-  onOk?: (value?: DateType | DateType[]) => void
+  onOk?: (value?: DateType | DateType[] | string | string[]) => void
 
   // Placeholder
   placeholder?: string
@@ -68,12 +69,12 @@ export interface BasePickerProps<
    *
    * Note: `defaultPickerValue` priority is higher than `value` for the first open.
    */
-  defaultPickerValue?: DateType | null
+  defaultPickerValue?: DateType | string | null
   /**
    * Config each start & end field popup panel date.
    * When config `pickerValue`, you must also provide `onPickerValueChange` to handle changes.
    */
-  pickerValue?: DateType | null
+  pickerValue?: DateType | string | null
   /**
    * Each popup panel `pickerValue` change will trigger the callback.
    * @param date The changed picker value
@@ -155,6 +156,7 @@ const SinglePicker = defineComponent<PickerProps>(
     const onPanelChange = computed(() => fp.value.onPanelChange)
     const onCalendarChange = computed(() => fp.value.onCalendarChange)
     const onOk = computed(() => fp.value.onOk)
+    const valueFormat = computed(() => fp.value.valueFormat)
     const multiple = computed(() => fp.value.multiple)
     const defaultPickerValue = computed(() => fp.value.defaultPickerValue)
     const pickerValue = computed(() => fp.value.pickerValue)
@@ -205,6 +207,21 @@ const SinglePicker = defineComponent<PickerProps>(
       return multiple.value ? values : (values as T[])[0]
     }
 
+    const toValueByFormat = (values: any[] | null) => {
+      const parsed = pickerParam(values as any)
+      const config = {
+        generateConfig: generateConfig.value,
+        locale: locale.value,
+        valueFormat: valueFormat.value,
+      }
+
+      if (Array.isArray(parsed)) {
+        return formatValuesByValueFormat(parsed, config)
+      }
+
+      return formatByValueFormat(parsed, config)
+    }
+
     const toggleDates = useToggleDates(generateConfig, locale, internalPicker)
 
     // ======================= Semantic =======================
@@ -232,7 +249,7 @@ const SinglePicker = defineComponent<PickerProps>(
         }
         delete filteredInfo.range
         onCalendarChange.value(
-          pickerParam(dates),
+          toValueByFormat(dates),
           pickerParam(dateStrings)!,
           filteredInfo,
         )
@@ -240,7 +257,7 @@ const SinglePicker = defineComponent<PickerProps>(
     }
 
     const onInternalOk = (dates: any[]) => {
-      onOk.value?.(pickerParam(dates))
+      onOk.value?.(toValueByFormat(dates))
     }
 
     // ======================== Values ========================
@@ -305,9 +322,9 @@ const SinglePicker = defineComponent<PickerProps>(
     )
 
     // ======================== Value =========================
-    const onInternalChange = (dates: any[], dateStrings: string[]) => {
+    const onInternalChange = (dates: any[] | null, dateStrings: string[] | null) => {
       if (props?.onChange) {
-        props?.onChange?.(pickerParam(dates), pickerParam(dateStrings)!)
+        props?.onChange?.(toValueByFormat(dates), pickerParam(dateStrings as any)!)
       }
     }
 

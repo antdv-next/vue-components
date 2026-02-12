@@ -372,6 +372,11 @@ export interface SharedPickerProps<DateType extends object = any>
       format: string
       type?: 'mask'
     }
+  /**
+   * Use this format to parse incoming string value and format outgoing callback value.
+   * This only affects the first argument in `onChange` / `onCalendarChange` / `onOk`.
+   */
+  valueFormat?: string
 
   // Icons
   prefix?: VueNode

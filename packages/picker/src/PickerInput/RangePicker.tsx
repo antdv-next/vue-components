@@ -23,6 +23,7 @@ import useRangeDisabledDate from './hooks/useRangeDisabledDate'
 import useRangePickerValue from './hooks/useRangePickerValue'
 import useRangeValue, { useInnerValue } from './hooks/useRangeValue'
 import useShowNow from './hooks/useShowNow'
+import { formatValues as formatValuesByValueFormat } from '../utils/valueUtil'
 import Popup from './Popup'
 import RangeSelector from './Selector/RangeSelector'
 
@@ -34,18 +35,18 @@ export interface BaseRangePickerProps<DateType extends object>
   separator?: VueNode
 
   // Value
-  value?: RangeValueType<DateType> | null
-  defaultValue?: RangeValueType<DateType>
+  value?: RangeValueType<DateType | string> | null
+  defaultValue?: RangeValueType<DateType | string>
   onChange?: (
-    dates: NoUndefinedRangeValueType<DateType> | null,
+    dates: NoUndefinedRangeValueType<DateType | string> | null,
     dateStrings: [string, string],
   ) => void
   onCalendarChange?: (
-    dates: NoUndefinedRangeValueType<DateType>,
+    dates: NoUndefinedRangeValueType<DateType | string>,
     dateStrings: [string, string],
     info: BaseInfo,
   ) => void
-  onOk?: (values: NoUndefinedRangeValueType<DateType>) => void
+  onOk?: (values: NoUndefinedRangeValueType<DateType | string>) => void
 
   // Placeholder
   placeholder?: [string, string]
@@ -57,12 +58,12 @@ export interface BaseRangePickerProps<DateType extends object>
    *
    * Note: `defaultPickerValue` priority is higher than `value` for the first open.
    */
-  defaultPickerValue?: [DateType, DateType] | DateType | null
+  defaultPickerValue?: [DateType | string, DateType | string] | DateType | string | null
   /**
    * Config each start & end field popup panel date.
    * When config `pickerValue`, you must also provide `onPickerValueChange` to handle changes.
    */
-  pickerValue?: [DateType, DateType] | DateType | null
+  pickerValue?: [DateType | string, DateType | string] | DateType | string | null
   /**
    * Each popup panel `pickerValue` includes `mode` change will trigger the callback.
    * @param date The changed picker value
@@ -177,6 +178,7 @@ const RangePicker = defineComponent(
     const onPanelChange = computed(() => fp.value.onPanelChange)
     const onCalendarChange = computed(() => fp.value.onCalendarChange)
     const onOk = computed(() => fp.value.onOk)
+    const valueFormat = computed(() => fp.value.valueFormat)
     const defaultPickerValue = computed(() => fp.value.defaultPickerValue)
     const pickerValue = computed(() => fp.value.pickerValue)
     const onPickerValueChange = computed(() => fp.value.onPickerValueChange)
@@ -228,12 +230,20 @@ const RangePicker = defineComponent(
     // ======================== Values ========================
     const onInternalCalendarChange = (dates: any[], dateStrings: string[], info: BaseInfo) => {
       if (onCalendarChange.value) {
-        onCalendarChange.value(dates as any, dateStrings as any, info)
+        onCalendarChange.value(formatValuesByValueFormat(dates, {
+          generateConfig: generateConfig.value,
+          locale: locale.value,
+          valueFormat: valueFormat.value,
+        }) as any, dateStrings as any, info)
       }
     }
 
     const onInternalOk = (dates: any[]) => {
-      onOk.value?.(dates as any)
+      onOk.value?.(formatValuesByValueFormat(dates, {
+        generateConfig: generateConfig.value,
+        locale: locale.value,
+        valueFormat: valueFormat.value,
+      }) as any)
     }
 
     const [mergedValue, setInnerValue, getCalendarValue, triggerCalendarChange, triggerOk]
@@ -333,7 +343,19 @@ const RangePicker = defineComponent(
       /** Trigger `onChange` directly without check `disabledDate` */
       triggerSubmitChange,
     ] = useRangeValue<RangeValueType<any>, any>(
-      fp as any,
+      computed(() => ({
+        ...fp.value,
+        onChange: (dates: any, dateStrings: any) => {
+          fp.value.onChange?.(
+            formatValuesByValueFormat(dates, {
+              generateConfig: generateConfig.value,
+              locale: locale.value,
+              valueFormat: valueFormat.value,
+            }) as any,
+            dateStrings,
+          )
+        },
+      })) as any,
       mergedValue as ComputedRef<any>,
       setInnerValue,
       () => getCalendarValue.value as any,

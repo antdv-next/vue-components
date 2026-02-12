@@ -7,6 +7,7 @@ import { computed } from 'vue'
 import useLocale from '../../hooks/useLocale'
 import { fillShowTimeConfig, getTimeProps } from '../../hooks/useTimeConfig'
 import { toArray } from '../../utils/miscUtil'
+import { parseValue } from '../../utils/valueUtil'
 import { fillClearIcon } from '../Selector/hooks/useClearIcon'
 import useDisabledBoundary from './useDisabledBoundary'
 import { useFieldFormat } from './useFieldFormat'
@@ -26,10 +27,17 @@ type GetGeneric<T> = T extends PickedProps<infer U> ? U : never
 
 type ToArrayType<T, DateType> = T extends any[] ? T : DateType[]
 
-function useList<T>(value: Ref<T | T[] | undefined>, fillMode = false) {
+function useList<T, M = T>(
+  value: Ref<T | T[] | undefined>,
+  fillMode = false,
+  transform?: (item: T) => M,
+) {
   return computed(() => {
     const val = value.value
-    const list = val ? toArray(val) : val
+    const list
+      = val === null || val === undefined
+        ? val
+        : toArray(val).map(item => (transform ? transform(item) : item))
 
     if (fillMode && list && Array.isArray(list)) {
       const clone = [...list]
@@ -88,13 +96,6 @@ export default function useFilledProps<
     ...props.value.components,
   }))
 
-  const values = useList(computed(() => props.value.value))
-  const defaultValues = useList(computed(() => props.value.defaultValue))
-  const pickerValues = useList(computed(() => props.value.pickerValue))
-  const defaultPickerValues = useList(
-    computed(() => props.value.defaultPickerValue),
-  )
-
   // ======================== Picker ========================
   /** Almost same as `picker`, but add `datetime` for `date` with `showTime` */
   const internalPicker = computed<InternalMode>(() =>
@@ -134,6 +135,14 @@ export default function useFilledProps<
     computed(() => props.value.locale),
     localeTimeProps,
   )
+  const valueFormat = computed(() => (props.value as any).valueFormat)
+
+  const parseByValueFormat = (val: any) =>
+    parseValue(val, {
+      generateConfig: props.value.generateConfig,
+      locale: mergedLocale.value,
+      valueFormat: valueFormat.value,
+    })
 
   const mergedShowTime = computed(() =>
     fillShowTimeConfig(
@@ -143,6 +152,15 @@ export default function useFilledProps<
       timeProps.value,
       mergedLocale.value,
     ),
+  )
+
+  const values = useList(computed(() => props.value.value), false, parseByValueFormat)
+  const defaultValues = useList(computed(() => props.value.defaultValue), false, parseByValueFormat)
+  const pickerValues = useList(computed(() => props.value.pickerValue), false, parseByValueFormat)
+  const defaultPickerValues = useList(
+    computed(() => props.value.defaultPickerValue),
+    false,
+    parseByValueFormat,
   )
 
   // ======================= Warning ========================
