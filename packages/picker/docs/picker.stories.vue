@@ -16,6 +16,7 @@ import Range from './range.vue'
 import Rtl from './rtl.vue'
 import SwitchType from './switchType.vue'
 import Time from './time.vue'
+import ValueFormat from './valueFormat.vue'
 </script>
 
 <template>
@@ -70,6 +71,9 @@ import Time from './time.vue'
     </Variant>
     <Variant title="Time">
       <Time />
+    </Variant>
+    <Variant title="ValueFormat">
+      <ValueFormat />
     </Variant>
     <!--    <Variant title="Uncontrolled"> -->
     <!--      <Uncontrolled /> -->
