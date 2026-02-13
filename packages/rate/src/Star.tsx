@@ -1,6 +1,6 @@
 import type { VueNode } from '@v-c/util/dist/type'
 import KeyCode from '@v-c/util/dist/KeyCode'
-import { computed, defineComponent } from 'vue'
+import { cloneVNode, computed, defineComponent, isVNode } from 'vue'
 
 export interface StarProps {
   value?: number
@@ -14,6 +14,14 @@ export interface StarProps {
   onHover?: (e: MouseEvent, index: number) => void
   focused?: boolean
   count?: number
+}
+
+function cloneCharacterNode(node: any): any {
+  if (Array.isArray(node)) {
+    return node.map(item => isVNode(item) ? cloneVNode(item) : item)
+  }
+
+  return isVNode(node) ? cloneVNode(node) : node
 }
 
 export default defineComponent<StarProps>(
@@ -79,6 +87,8 @@ export default defineComponent<StarProps>(
             value,
           })
         : character
+      const firstCharacterNode = cloneCharacterNode(characterNode)
+      const secondCharacterNode = cloneCharacterNode(characterNode)
       let star = (
         <li class={cls.value}>
           <div
@@ -91,8 +101,8 @@ export default defineComponent<StarProps>(
             aria-setsize={count}
             tabindex={disabled ? -1 : 0}
           >
-            <div class={`${prefixCls}-first`}>{characterNode}</div>
-            <div class={`${prefixCls}-second`}>{characterNode}</div>
+            <div class={`${prefixCls}-first`}>{firstCharacterNode}</div>
+            <div class={`${prefixCls}-second`}>{secondCharacterNode}</div>
           </div>
         </li>
       )
