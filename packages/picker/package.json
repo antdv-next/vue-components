@@ -1,7 +1,7 @@
 {
   "name": "@v-c/picker",
   "type": "module",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "picker ui component for vue",
   "publishConfig": {
     "access": "public"
