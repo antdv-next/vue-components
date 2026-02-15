@@ -109,13 +109,21 @@ function parseNoMatchNotice() {
   // noteOnce(false, 'Not match any format. Please help to fire a issue about this.');
 }
 
+function supportTz(date: Dayjs) {
+  return 'tz' in date && typeof date.tz === 'function'
+}
+
+interface TzDayjs extends Dayjs {
+  tz: () => TzDayjs
+}
+
 const generateConfig: GenerateConfig<Dayjs> = {
   // get
   getNow: () => {
     const now = dayjs()
     // https://github.com/ant-design/ant-design/discussions/50934
-    if ('tz' in now && typeof now.tz === 'function') {
-      return now.tz() // use default timezone
+    if (supportTz(now)) {
+      return (now as TzDayjs).tz()
     }
     return now
   },
@@ -128,7 +136,12 @@ const generateConfig: GenerateConfig<Dayjs> = {
   getYear: date => date.year(),
   getMonth: date => date.month(),
   getDate: date => date.date(),
-  getHour: date => date.hour(),
+  getHour: (date: Dayjs) => {
+    if (supportTz(date)) {
+      return (date as TzDayjs).tz().hour()
+    }
+    return date.hour()
+  },
   getMinute: date => date.minute(),
   getSecond: date => date.second(),
   getMillisecond: date => date.millisecond(),
@@ -140,7 +153,12 @@ const generateConfig: GenerateConfig<Dayjs> = {
   setYear: (date, year) => date.year(year),
   setMonth: (date, month) => date.month(month),
   setDate: (date, num) => date.date(num),
-  setHour: (date, hour) => date.hour(hour),
+  setHour: (date: Dayjs, hour: number) => {
+    if (supportTz(date)) {
+      return (date as TzDayjs).tz().hour(hour)
+    }
+    return date.hour(hour)
+  },
   setMinute: (date, minute) => date.minute(minute),
   setSecond: (date, second) => date.second(second),
   setMillisecond: (date, milliseconds) => date.millisecond(milliseconds),
@@ -155,7 +173,12 @@ const generateConfig: GenerateConfig<Dayjs> = {
     getWeek: (locale, date: any) => date.locale(parseLocale(locale)).week(),
     getShortWeekDays: locale => dayjs().locale(parseLocale(locale)).localeData().weekdaysMin(),
     getShortMonths: locale => dayjs().locale(parseLocale(locale)).localeData().monthsShort(),
-    format: (locale, date, format) => date.locale(parseLocale(locale)).format(format),
+    format: (locale: string, date: Dayjs, format: string) => {
+      if (supportTz(date)) {
+        return (date as TzDayjs).tz().locale(parseLocale(locale)).format(format)
+      }
+      return date.locale(parseLocale(locale)).format(format)
+    },
     parse: (locale, text, formats) => {
       const localeStr = parseLocale(locale)
       for (let i = 0; i < formats.length; i += 1) {
