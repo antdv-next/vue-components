@@ -417,7 +417,7 @@ const Select = defineComponent<SelectProps>({
       mergedFieldNames,
       mergedSearchValue,
       mergedFilterOption,
-      toRef(props, 'optionFilterProp'),
+      computed(() => searchConfig.value.optionFilterProp),
     )
 
     // Fill options with search value if needed
@@ -426,7 +426,7 @@ const Select = defineComponent<SelectProps>({
         props.mode !== 'tags'
         || !mergedSearchValue.value
         || filteredOptions.value.some(
-          item => item[props.optionFilterProp || 'value'] === mergedSearchValue.value,
+          item => item[searchConfig.value?.optionFilterProp || 'value'] === mergedSearchValue.value,
         )
       ) {
         return filteredOptions.value
