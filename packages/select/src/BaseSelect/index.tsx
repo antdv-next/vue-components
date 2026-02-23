@@ -433,19 +433,6 @@ export const BaseSelect = defineComponent<
       props?.onSearch?.(searchText, { source: 'submit' })
     }
 
-    // Close will clean up single mode search text
-    watch(
-      mergedOpen,
-      () => {
-        if (!mergedOpen.value && !multiple.value && mode.value !== 'combobox') {
-          onInternalSearch('', false, false)
-        }
-      },
-      {
-        immediate: true,
-      },
-    )
-
     // Clean up search value when the dropdown is closed.
     // We use `rawOpen` here to avoid clearing the search input when the dropdown is
     // programmatically closed due to `notFoundContent={null}` and no matching options.
