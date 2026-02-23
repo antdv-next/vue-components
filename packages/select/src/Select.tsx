@@ -232,6 +232,10 @@ const Select = defineComponent<SelectProps>({
       toRef(props, 'mode'),
     )
 
+    const normalizedOptionFilterProps = computed(() => {
+      return searchConfig.value?.optionFilterProp
+    })
+
     const mergedFilterOption = computed(() => {
       if (searchConfig.value.filterOption === undefined && props.mode === 'combobox') {
         return false
@@ -266,7 +270,7 @@ const Select = defineComponent<SelectProps>({
       toRef(props, 'options'),
       childrenOptionsRef,
       mergedFieldNames,
-      toRef(props, 'optionFilterProp'),
+      normalizedOptionFilterProps,
       toRef(props, 'optionLabelProp'),
     )
 
@@ -417,7 +421,7 @@ const Select = defineComponent<SelectProps>({
       mergedFieldNames,
       mergedSearchValue,
       mergedFilterOption,
-      toRef(props, 'optionFilterProp'),
+      normalizedOptionFilterProps,
     )
 
     // Fill options with search value if needed
