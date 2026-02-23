@@ -453,7 +453,7 @@ export const BaseSelect = defineComponent<
     watch(
       rawOpen,
       () => {
-        if (!rawOpen.value && !multiple.value && mode.value === 'combobox') {
+        if (!rawOpen.value && !multiple.value && mode.value !== 'combobox') {
           onInternalSearch('', false, false)
         }
       },
