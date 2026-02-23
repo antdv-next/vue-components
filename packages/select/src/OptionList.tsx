@@ -107,12 +107,27 @@ const OptionList = defineComponent({
       context.value?.onActiveValue?.(flattenItem.value!, index, info)
     }
 
+    const getActiveIndexByRawValue = (): number => {
+      const rawValues = context.value?.rawValues
+      if (baseProps.value?.multiple || rawValues?.size !== 1) {
+        return -1
+      }
+
+      const value: RawValueType = Array.from(rawValues)[0]
+      const searchValue = baseProps.value?.searchValue
+
+      return memoFlattenOptions.value.findIndex(({ data }) =>
+        searchValue ? String(data?.value).startsWith(searchValue) : data?.value === value,
+      )
+    }
+
     // Auto active first item when list length or searchValue changed
     watch(
       [() => memoFlattenOptions.value.length, () => baseProps.value?.searchValue],
       () => {
         const defaultFirst = context.value?.defaultActiveFirstOption !== false
-        setActive(defaultFirst ? getEnabledActiveIndex(0) : -1)
+        const activeIndexByRawValue = getActiveIndexByRawValue()
+        setActive(activeIndexByRawValue !== -1 ? activeIndexByRawValue : defaultFirst ? getEnabledActiveIndex(0) : -1)
       },
       { immediate: true },
     )
@@ -127,18 +142,18 @@ const OptionList = defineComponent({
 
     // Auto scroll to item position in single mode
     watch(
-      [() => baseProps.value?.open, () => baseProps.value?.searchValue],
-      () => {
+      [
+        () => baseProps.value?.open,
+        () => baseProps.value?.searchValue,
+        () => memoFlattenOptions.value.length,
+      ],
+      (_, __, onCleanup) => {
         let timeoutId: ReturnType<typeof setTimeout> | undefined
 
         const rawValues = context.value?.rawValues
         if (!baseProps.value?.multiple && baseProps.value?.open && rawValues?.size === 1) {
-          const value: RawValueType = Array.from(rawValues)[0]
-          const searchValue = baseProps.value?.searchValue
           // Scroll to the option closest to the searchValue if searching.
-          const index = memoFlattenOptions.value.findIndex(({ data }) =>
-            searchValue ? String(data.value).startsWith(searchValue) : data.value === value,
-          )
+          const index = getActiveIndexByRawValue()
 
           if (index !== -1) {
             setActive(index)
@@ -153,12 +168,13 @@ const OptionList = defineComponent({
           listRef.value?.scrollTo(undefined as any)
         }
 
-        return () => {
+        onCleanup(() => {
           if (timeoutId) {
             clearTimeout(timeoutId)
           }
-        }
+        })
       },
+      { immediate: true, flush: 'post' },
     )
 
     // ========================== Values ==========================
