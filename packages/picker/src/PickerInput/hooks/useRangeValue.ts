@@ -1,7 +1,7 @@
 import type { ComputedRef, Ref } from 'vue'
 import type { GenerateConfig } from '../../generate'
 import type { BaseInfo, FormatType, Locale } from '../../interface'
-import { computed, ref, watch } from 'vue'
+import { computed, ref, shallowRef, watch } from 'vue'
 import { formatValue, isSame, isSameTimestamp } from '../../utils/dateUtil'
 import { fillIndex } from '../../utils/miscUtil'
 import useLockEffect from './useLockEffect'
@@ -71,16 +71,15 @@ export function useInnerValue<ValueType extends DateType[], DateType extends obj
   ) => void,
   onOk?: (dates: ValueType) => void,
 ) {
-  // This is the root value which will sync with controlled or uncontrolled value
-  const internalValue = ref(defaultValue.value) as Ref<ValueType>
-  const mergedValue = computed(() => {
-    const val = value.value !== undefined ? value.value : internalValue.value
-    return val || (EMPTY_VALUE as ValueType)
+  const mergedValue = shallowRef((value.value === undefined ? defaultValue.value : value.value) || (EMPTY_VALUE as ValueType))
+
+  watch(value, (value) => {
+    mergedValue.value = value || (EMPTY_VALUE as ValueType)
   })
 
   const setInnerValue = (val: ValueType) => {
     if (value.value === undefined) {
-      internalValue.value = val
+      mergedValue.value = val
     }
   }
 
