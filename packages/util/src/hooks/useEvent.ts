@@ -1,3 +1,5 @@
-export default function useEvent<T extends Function>(callback: T): T {
+const useEvent = <T extends Function>(callback: T): T => {
   return callback
 }
+
+export default useEvent

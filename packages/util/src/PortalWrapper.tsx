@@ -1,4 +1,4 @@
-import type { SlotsType } from 'vue'
+import type { CSSProperties, SlotsType } from 'vue'
 import type { PortalRef } from './Portal'
 import { defineComponent, onBeforeUnmount, onMounted, onUpdated, shallowRef } from 'vue'
 import canUseDom from './Dom/canUseDom'
@@ -21,7 +21,7 @@ export function getOpenCount() {
 
 // https://github.com/ant-design/ant-design/issues/19340
 // https://github.com/ant-design/ant-design/issues/19332
-let cacheOverflow = {}
+let cacheOverflow: CSSProperties = {}
 
 function getParent(getContainer: GetContainer) {
   if (!supportDom)

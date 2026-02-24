@@ -2,6 +2,7 @@ import type { Ref } from 'vue'
 import { getDOM } from '@v-c/util/dist/Dom/findDOMNode'
 import { watch } from 'vue'
 import isVisible from './isVisible'
+import useId from '../hooks/useId'
 
 type DisabledElement
   = | HTMLLinkElement
@@ -95,9 +96,35 @@ export function triggerFocus(
 // ======================================================
 let lastFocusElement: HTMLElement | null = null
 let focusElements: HTMLElement[] = []
+// Map stable ID to lock element
+const idToElementMap = new Map<string, HTMLElement>()
+// Map stable ID to ignored element
+const ignoredElementMap = new Map<string, HTMLElement | null>()
 
 function getLastElement() {
   return focusElements[focusElements.length - 1]
+}
+
+function isIgnoredElement(element: Element | null): boolean {
+  const lastElement = getLastElement()
+
+  if (element && lastElement) {
+    let lockId: string | undefined
+    for (const [id, ele] of idToElementMap.entries()) {
+      if (ele === lastElement) {
+        lockId = id
+        break
+      }
+    }
+
+    if (!lockId)
+      return false
+
+    const ignoredEle = ignoredElementMap.get(lockId)
+    return !!ignoredEle && (ignoredEle === element || ignoredEle.contains(element))
+  }
+
+  return false
 }
 
 function hasFocus(element: HTMLElement) {
@@ -109,6 +136,10 @@ function syncFocus() {
   const lastElement = getLastElement()
   const { activeElement } = document
 
+  // If current focus is on an ignored element, don't force it back
+  if (isIgnoredElement(activeElement))
+    return
+
   if (lastElement && !hasFocus(lastElement)) {
     const focusableList = getFocusNodeList(lastElement)
 
@@ -116,7 +147,7 @@ function syncFocus() {
       ? lastFocusElement
       : focusableList[0]
 
-    matchElement?.focus()
+    matchElement?.focus({ preventScroll: true })
   }
   else {
     lastFocusElement = activeElement as HTMLElement
@@ -144,9 +175,12 @@ function onWindowKeyDown(e: KeyboardEvent) {
 /**
  * Lock focus in the element.
  * It will force back to the first focusable element when focus leaves the element.
+ * @param id - A stable ID for this lock instance
  */
-export function lockFocus(element: HTMLElement): VoidFunction {
+export function lockFocus(element: HTMLElement, id: string): VoidFunction {
   if (element) {
+    idToElementMap.set(id, element)
+
     // Refresh focus elements
     focusElements = focusElements.filter(ele => ele !== element)
     focusElements.push(element)
@@ -161,6 +195,8 @@ export function lockFocus(element: HTMLElement): VoidFunction {
   return () => {
     lastFocusElement = null
     focusElements = focusElements.filter(ele => ele !== element)
+    idToElementMap.delete(id)
+    ignoredElementMap.delete(id)
     if (focusElements.length === 0) {
       window.removeEventListener('focusin', syncFocus)
       window.removeEventListener('keydown', onWindowKeyDown, true)
@@ -172,17 +208,20 @@ export function lockFocus(element: HTMLElement): VoidFunction {
  * Lock focus within an element.
  * When locked, focus will be restricted to focusable elements within the specified element.
  * If multiple elements are locked, only the last locked element will be effective.
+ * @returns A function to mark an element as ignored, which will temporarily allow focus on that element even if it's outside the locked area.
  */
 export function useLockFocus(
   lock: Ref<boolean>,
   getElement: () => HTMLElement | null,
-) {
+): [ignoreElement: (ele: HTMLElement) => void] {
+  const id = useId()
+
   watch(
     [lock, () => getElement()],
     ([nextLock, element], _o, onCleanup) => {
       element = getDOM(element) as HTMLElement
       if (nextLock && element) {
-        const fn = lockFocus(element)
+        const fn = lockFocus(element, id)
         onCleanup(fn)
       }
     },
@@ -191,4 +230,11 @@ export function useLockFocus(
       immediate: true,
     },
   )
+
+  const ignoreElement = (ele: HTMLElement) => {
+    if (ele)
+      ignoredElementMap.set(id, ele)
+  }
+
+  return [ignoreElement]
 }

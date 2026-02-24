@@ -1,4 +1,4 @@
-export default () => {
+const getIsMobile = () => {
   if (typeof navigator === 'undefined' || typeof window === 'undefined')
     return false
 
@@ -13,3 +13,5 @@ export default () => {
     )
   )
 }
+
+export default getIsMobile
