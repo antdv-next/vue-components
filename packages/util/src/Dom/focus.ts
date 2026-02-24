@@ -1,5 +1,5 @@
 import type { Ref } from 'vue'
-import { getDOM } from '@v-c/util/dist/Dom/findDOMNode'
+import { getDOM } from './findDOMNode'
 import { watch } from 'vue'
 import isVisible from './isVisible'
 import useId from '../hooks/useId'
