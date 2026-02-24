@@ -10,7 +10,7 @@ type ExtendCSSStyleDeclaration = CSSStyleDeclaration & {
 let cached: ScrollBarSize
 
 function measureScrollbarSize(ele?: HTMLElement): ScrollBarSize {
-  const randomId = `rc-scrollbar-measure-${Math.random()
+  const randomId = `vc-scrollbar-measure-${Math.random()
     .toString(36)
     .substring(7)}`
   const measureEle = document.createElement('div')
