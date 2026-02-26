@@ -195,9 +195,10 @@ const Image = defineComponent<ImageProps>(
           : 'center'
 
       const coverNode
-        = typeof cover.value === 'object' && cover.value && (cover.value as any).coverNode
-          ? (cover.value as CoverConfig).coverNode
-          : (cover.value as VueNode)
+        = slots.cover?.()
+          || (typeof cover.value === 'object' && cover.value && (cover.value as any).coverNode
+            ? (cover.value as CoverConfig).coverNode
+            : (cover.value as VueNode))
 
       const imgStyle = [
         height ? { height: getStylePxValue(height) } : null,
