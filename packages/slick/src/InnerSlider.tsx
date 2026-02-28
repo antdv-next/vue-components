@@ -8,6 +8,7 @@ import type {
 } from './interface'
 import { clsx } from '@v-c/util'
 import { toArray } from '@v-c/util/dist/Children/toArray'
+import { getStylePxValue } from '@v-c/util/dist/props-util'
 import { filterEmpty } from '@v-c/util/dist/props-util'
 import { debounce } from 'es-toolkit'
 import {
@@ -875,7 +876,7 @@ const InnerSlider = defineComponent<SlickProps>(
 
       let verticalHeightStyle: Record<string, any> | null = null
       if (mergedProps.value.vertical) {
-        verticalHeightStyle = { height: state.listHeight }
+        verticalHeightStyle = { height: getStylePxValue(state.listHeight) }
       }
 
       let centerPaddingStyle: Record<string, any> | null = null
