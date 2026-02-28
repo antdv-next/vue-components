@@ -119,15 +119,14 @@ const InnerSlider = defineComponent<SlickProps>(
       setState(updatedState, callback)
     }
 
-    const ssrInit = () => {
-      if (latestChildrenCount === 0) {
+    const getSsrState = (children: any[], slideCount: number) => {
+      if (slideCount === 0) {
         return {}
       }
       if (mergedProps.value.variableWidth) {
         let trackWidth = 0
         let trackLeft = 0
         const childrenWidths: number[] = []
-        const slideCount = latestChildrenCount
         const preClones = getPreClones({
           ...mergedProps.value,
           ...state,
@@ -139,7 +138,7 @@ const InnerSlider = defineComponent<SlickProps>(
           slideCount,
         })
 
-        latestChildren.forEach((child: any) => {
+        children.forEach((child: any) => {
           const width = child?.props?.style?.width
           const widthValue = typeof width === 'number'
             ? width
@@ -169,7 +168,6 @@ const InnerSlider = defineComponent<SlickProps>(
         return { trackStyle }
       }
 
-      const slideCount = latestChildrenCount
       const spec = { ...mergedProps.value, ...state, slideCount }
       const totalSlideCount = getPreClones(spec) + getPostClones(spec) + slideCount
       const trackWidth = (100 / mergedProps.value.slidesToShow) * totalSlideCount
@@ -186,6 +184,10 @@ const InnerSlider = defineComponent<SlickProps>(
         slideWidth: `${slideWidth}%`,
         trackStyle,
       }
+    }
+
+    const ssrInit = () => {
+      return getSsrState(latestChildren, latestChildrenCount)
     }
 
     Object.assign(state, ssrInit())
@@ -779,6 +781,9 @@ const InnerSlider = defineComponent<SlickProps>(
       const renderChildren = resolveChildren()
       latestChildren = renderChildren
       latestChildrenCount = renderChildren.length
+      const fallbackSsrState = state.trackStyle
+        ? null
+        : getSsrState(renderChildren, latestChildrenCount)
       const className = clsx('slick-slider', mergedProps.value.className, {
         'slick-vertical': mergedProps.value.vertical,
         'slick-initialized': true,
@@ -786,6 +791,7 @@ const InnerSlider = defineComponent<SlickProps>(
       const spec = {
         ...mergedProps.value,
         ...state,
+        ...(fallbackSsrState || {}),
         slideCount: latestChildrenCount,
         children: renderChildren,
       }
