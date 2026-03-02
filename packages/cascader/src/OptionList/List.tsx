@@ -1,7 +1,7 @@
 import type { ComputedRef } from 'vue'
 import type { DefaultOptionType, LegacyKey, SingleValueType } from '../Cascader'
 import { clsx } from '@v-c/util'
-import { computed, defineComponent, nextTick, ref, shallowRef, watch, watchEffect } from 'vue'
+import { computed, defineComponent, nextTick, onUpdated, ref, shallowRef, watch, watchEffect } from 'vue'
 import { useCascaderContext } from '../context'
 import {
   getFullPathKeys,
@@ -157,8 +157,10 @@ const RawOptionList = defineComponent<RawOptionListProps>(
 
     // Update only when open or lockOptions
     const mergedOptions = shallowRef(filteredOptions.value)
-    watch([() => props.open, () => props.lockOptions], () => {
-      mergedOptions.value = filteredOptions.value
+    onUpdated(() => {
+      if (!!props.open && !props.lockOptions && mergedOptions.value !== filteredOptions.value) {
+        mergedOptions.value = filteredOptions.value
+      }
     })
 
     // ========================== Column ==========================
