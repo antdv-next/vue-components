@@ -1,7 +1,7 @@
 import type { ComputedRef } from 'vue'
 import type { DefaultOptionType, LegacyKey, SingleValueType } from '../Cascader'
 import { clsx } from '@v-c/util'
-import { computed, defineComponent, nextTick, ref, shallowRef, watch, watchEffect } from 'vue'
+import { computed, defineComponent, nextTick, onBeforeUpdate, ref, shallowRef, watch, watchEffect } from 'vue'
 import { useCascaderContext } from '../context'
 import {
   getFullPathKeys,
@@ -54,7 +54,7 @@ const RawOptionList = defineComponent<RawOptionListProps>(
     const loadingKeys = ref<LegacyKey[]>([])
 
     const internalLoadData = (valueCells: LegacyKey[]) => {
-    // Do not load when search
+      // Do not load when search
       if (!context.value?.loadData || props.searchValue) {
         return
       }
@@ -97,7 +97,7 @@ const RawOptionList = defineComponent<RawOptionListProps>(
 
       const isSame
         = nextLoadingKeys.length === loadingKeys.value.length
-          && nextLoadingKeys.every((key, index) => key === loadingKeys.value[index])
+        && nextLoadingKeys.every((key, index) => key === loadingKeys.value[index])
 
       if (!isSame) {
         loadingKeys.value = nextLoadingKeys
@@ -157,8 +157,10 @@ const RawOptionList = defineComponent<RawOptionListProps>(
 
     // Update only when open or lockOptions
     const mergedOptions = shallowRef(filteredOptions.value)
-    watch([() => props.open, () => props.lockOptions], () => {
-      mergedOptions.value = filteredOptions.value
+    onBeforeUpdate(() => {
+      if (!!props.open && !props.lockOptions && mergedOptions.value !== filteredOptions.value) {
+        mergedOptions.value = filteredOptions.value
+      }
     })
 
     // ========================== Column ==========================
