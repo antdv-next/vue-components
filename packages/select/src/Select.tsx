@@ -356,7 +356,7 @@ const Select = defineComponent<SelectProps>({
       if (!props.mode && mergedValues.value.length === 1) {
         const firstValue = mergedValues.value[0]
         if (
-          firstValue.value === null
+          (firstValue.value === null || firstValue.value === '')
           && (firstValue.label === null || firstValue.label === undefined)
         ) {
           return []
