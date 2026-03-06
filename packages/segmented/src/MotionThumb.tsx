@@ -76,6 +76,18 @@ const defaults = {
 const MotionThumb = defineComponent<MotionThumbInterface>(
   (props = defaults) => {
     const preValue = shallowRef(props.value)
+    const prevStyle = shallowRef<ThumbReact>(null)
+    const nextStyle = shallowRef<ThumbReact>(null)
+    const motionKey = shallowRef(0)
+    let asyncId: ReturnType<typeof setTimeout> | null = null
+
+    const clearAsync = () => {
+      if (asyncId) {
+        clearTimeout(asyncId)
+        asyncId = null
+      }
+    }
+
     // =========================== Effect ===========================
     const findValueElement = (val: SegmentedValue) => {
       const getValueIndex = props.getValueIndex
@@ -88,19 +100,11 @@ const MotionThumb = defineComponent<MotionThumbInterface>(
       return ele?.offsetParent && ele
     }
 
-    const prevStyle = shallowRef<ThumbReact>(null)
-    const nextStyle = shallowRef<ThumbReact>(null)
-    let asyncId: ReturnType<typeof setTimeout> | null = null
-    const clearAsync = () => {
-      if (asyncId) {
-        clearTimeout(asyncId)
-        asyncId = null
-      }
-    }
     watch(
       () => props.value,
       () => {
         if (preValue.value !== props.value) {
+          clearAsync()
           const prev = findValueElement(preValue.value)
           const next = findValueElement(props.value)
 
@@ -109,6 +113,7 @@ const MotionThumb = defineComponent<MotionThumbInterface>(
           preValue.value = props.value
           prevStyle.value = calcPrevStyle
           nextStyle.value = calcNextStyle
+          motionKey.value += 1
           if (prev && next) {
             props.onMotionStart?.()
           }
@@ -143,10 +148,17 @@ const MotionThumb = defineComponent<MotionThumbInterface>(
       return toPX(nextStyle.value?.left as number)
     })
 
+    const isLatestMotion = (el: Element) => {
+      return Number((el as HTMLElement).dataset.motionKey ?? -1) === motionKey.value
+    }
+
     // =========================== Motion ===========================
     const onAppearStart = (_el: Element) => {
       clearAsync()
       const el = _el as HTMLElement
+      if (!isLatestMotion(el)) {
+        return
+      }
       if (props.vertical) {
         el.style.transform = 'translateY(var(--thumb-start-top))'
         el.style.height = 'var(--thumb-start-height)'
@@ -158,8 +170,14 @@ const MotionThumb = defineComponent<MotionThumbInterface>(
 
     const onAppearActive = (_el: Element) => {
       const el = _el as HTMLElement
+      if (!isLatestMotion(el)) {
+        return
+      }
       clearAsync()
       asyncId = setTimeout(() => {
+        if (!isLatestMotion(el)) {
+          return
+        }
         if (props.vertical) {
           el.style.transform = 'translateY(var(--thumb-active-top))'
           el.style.height = 'var(--thumb-active-height)'
@@ -170,7 +188,10 @@ const MotionThumb = defineComponent<MotionThumbInterface>(
       })
     }
 
-    const onVisibleChanged = () => {
+    const onVisibleChanged = (_el?: Element) => {
+      if (_el && !isLatestMotion(_el)) {
+        return
+      }
       clearAsync()
       prevStyle.value = null
       nextStyle.value = null
@@ -189,7 +210,7 @@ const MotionThumb = defineComponent<MotionThumbInterface>(
       const transitionProps = getTransitionProps(props?.motionName, {
         onBeforeEnter: onAppearStart,
         onEnter: onAppearActive,
-        onAfterEnter: () => onVisibleChanged(),
+        onAfterEnter: onVisibleChanged,
       })
       const visible = true
       const mergedStyle = {
@@ -204,7 +225,7 @@ const MotionThumb = defineComponent<MotionThumbInterface>(
       } as CSSProperties
       return (
         <Transition {...transitionProps}>
-          {visible ? <div style={mergedStyle} class={clsx(`${prefixCls}-thumb`)} /> : null}
+          {visible ? <div key={motionKey.value} data-motion-key={motionKey.value} style={mergedStyle} class={clsx(`${prefixCls}-thumb`)} /> : null}
         </Transition>
       )
     }
