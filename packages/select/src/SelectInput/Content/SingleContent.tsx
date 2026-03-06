@@ -86,27 +86,39 @@ const SingleContent = defineComponent<SharedContentProps>(
       input: computed(() => inputRef.value?.input),
     })
     return () => {
-      const { prefixCls, mode, maxLength } = selectInputContext.value ?? {}
+      const { prefixCls, mode, maxLength, components } = selectInputContext.value ?? {}
       const { classNames, styles } = baseProps.value ?? {}
       const { inputProps } = props
 
       // Render value
-      const renderValue = displayValue.value
-        ? (hasOptionStyle.value
-            ? (
-                <div
-                  class={clsx(`${prefixCls}-content-value`, optionClassName.value)}
-                  style={{
-                    ...(mergedSearchValue.value ? { visibility: 'hidden' as const } : {}),
-                    ...optionStyle.value,
-                  }}
-                  title={optionTitle.value}
-                >
-                  {displayValue.value.label}
-                </div>
-              )
-            : displayValue.value.label)
-        : (<Placeholder show={!mergedSearchValue.value} />)
+      // Only render value when not using custom input in combobox mode
+      const shouldRenderValue = !(combobox && components?.input)
+      const renderValue = shouldRenderValue
+        ? (
+            displayValue.value
+              ? (
+                  hasOptionStyle.value
+                    ? (
+                        <div
+                          class={clsx(`${prefixCls}-content-value`, optionClassName.value)}
+                          style={{
+                            ...(mergedSearchValue.value ? { visibility: 'hidden' } : {}),
+                            ...optionStyle.value,
+                          }}
+                          title={optionTitle.value}
+                        >
+                          {displayValue.value?.label}
+                        </div>
+                      )
+                    : (
+                        displayValue.value?.label
+                      )
+                )
+              : (
+                  <Placeholder show={!mergedSearchValue.value} />
+                )
+          )
+        : null
 
       return (
         <div

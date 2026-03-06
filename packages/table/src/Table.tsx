@@ -173,7 +173,7 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
 
   const mergedPrefixCls = computed(() => props.prefixCls || DEFAULT_PREFIX)
   const mergedRowHoverable = computed(() => props.rowHoverable !== undefined ? props.rowHoverable : true)
-  const mergedEmptyText = computed(() => props.emptyText ?? defaultEmpty)
+  const mergedEmptyText = computed(() => props.emptyText === undefined ? defaultEmpty : props.emptyText)
   const mergedDirection = computed<Direction>(() => props.direction || 'ltr')
 
   const getComponent: GetComponent = (path, defaultComponent) => {

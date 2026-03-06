@@ -93,8 +93,7 @@ const InternalMenuItem = defineComponent<MenuItemProps>(
     const getEventInfo = (e: MouseEvent | KeyboardEvent) => {
       return {
         key: eventKey.value,
-        // Note: For legacy code is reversed which not like other antd component
-        keyPath: [...connectedKeys.value].reverse(),
+        keyPath: connectedKeys.value,
         item: legacyMenuItemRef.value,
         domEvent: e,
       }
