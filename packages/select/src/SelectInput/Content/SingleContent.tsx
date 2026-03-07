@@ -89,6 +89,10 @@ const SingleContent = defineComponent<SharedContentProps>(
       const { prefixCls, mode, maxLength, components } = selectInputContext.value ?? {}
       const { classNames, styles } = baseProps.value ?? {}
       const { inputProps } = props
+      const showHasValueCls = displayValue.value
+        && displayValue.value.label !== null
+        && displayValue.value.label !== undefined
+        && String(displayValue.value.label).trim() !== ''
 
       // Render value
       // Only render value when not using custom input in combobox mode
@@ -124,7 +128,7 @@ const SingleContent = defineComponent<SharedContentProps>(
         <div
           class={clsx(
             `${prefixCls}-content`,
-            displayValue.value && `${prefixCls}-content-has-value`,
+            showHasValueCls && `${prefixCls}-content-has-value`,
             mergedSearchValue.value && `${prefixCls}-content-has-search-value`,
             hasOptionStyle.value && `${prefixCls}-content-has-option-style`,
             classNames?.content,

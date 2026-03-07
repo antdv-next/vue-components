@@ -7,7 +7,7 @@ import { clsx } from '@v-c/util'
 import { getDOM } from '@v-c/util/dist/Dom/findDOMNode'
 import KeyCode from '@v-c/util/dist/KeyCode'
 import omit from '@v-c/util/dist/omit'
-import { computed, createVNode, defineComponent, isVNode, shallowRef } from 'vue'
+import { cloneVNode, computed, defineComponent, isVNode, shallowRef } from 'vue'
 import useBaseProps from '../hooks/useBaseProps'
 import { isValidateOpenKey } from '../utils/keyUtil'
 import Affix from './Affix'
@@ -72,6 +72,24 @@ const DEFAULT_OMIT_PROPS = [
   'onSelectorRemove',
   'focused',
 ] as const
+
+function mergeVNodeProps(originProps: Record<string, any>, nextProps: Record<string, any>) {
+  const mergedProps = { ...originProps, ...nextProps }
+
+  Object.keys(originProps).forEach((key) => {
+    const originVal = originProps[key]
+    const nextVal = nextProps[key]
+
+    if (typeof originVal === 'function' && typeof nextVal === 'function') {
+      mergedProps[key] = (...args: any[]) => {
+        nextVal(...args)
+        originVal(...args)
+      }
+    }
+  })
+
+  return mergedProps
+}
 
 const SelectInput = defineComponent<SelectInputProps>(
   (props, { attrs, expose, slots }) => {
@@ -143,7 +161,7 @@ const SelectInput = defineComponent<SelectInputProps>(
       blur: () => {
         (inputRef.value?.input || rootRef.value)?.blur?.()
       },
-      nativeElement: rootRef,
+      nativeElement: computed(() => getDOM(rootRef.value) as HTMLDivElement | undefined),
     })
 
     // ====================== Open ======================
@@ -157,13 +175,18 @@ const SelectInput = defineComponent<SelectInputProps>(
         // so we need to mark the event directly
         ;(event as any)._ori_target = inputDOM
 
-        if (inputDOM && event.target !== inputDOM && !(inputDOM as HTMLElement).contains(event.target as Node)) {
+        const isClickOnInput = inputDOM === event.target || (inputDOM as HTMLElement | undefined)?.contains(event.target as Node)
+
+        if (inputDOM && !isClickOnInput) {
           event.preventDefault()
         }
 
         // Check if we should prevent closing when clicking on selector
         // Don't close if: open && not multiple && (combobox mode || showSearch)
-        const shouldPreventClose = triggerOpen.value && !multiple.value && (mode.value === 'combobox' || showSearch.value)
+        const shouldPreventCloseOnSingle
+          = triggerOpen.value && !multiple.value && (mode.value === 'combobox' || showSearch.value)
+        const shouldPreventCloseOnMultipleInput = triggerOpen.value && multiple.value && isClickOnInput
+        const shouldPreventClose = shouldPreventCloseOnSingle || shouldPreventCloseOnMultipleInput
 
         if (!(event as any)._select_lazy) {
           inputRef.value?.input?.focus()
@@ -208,15 +231,18 @@ const SelectInput = defineComponent<SelectInputProps>(
       } as any, DEFAULT_OMIT_PROPS as any)
 
       if (RootComponent) {
+        const originProps = (RootComponent as any).props || {}
+        const mergedProps = mergeVNodeProps(originProps, domProps)
+
         if (isVNode(RootComponent)) {
-          return createVNode(RootComponent as VNode, {
-            ...domProps,
+          return cloneVNode(RootComponent as VNode, {
+            ...mergedProps,
             ref: rootRef,
           })
         }
 
         const Component = RootComponent as any
-        return <Component {...domProps} ref={rootRef} />
+        return <Component {...mergedProps} ref={rootRef} />
       }
 
       return (

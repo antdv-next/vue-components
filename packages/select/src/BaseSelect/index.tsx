@@ -479,8 +479,10 @@ export const BaseSelect = defineComponent<
 
       // Enter or Space opens dropdown (ARIA combobox: spacebar should open)
       if (isEnterKey || isSpaceKey) {
-        // Do not submit form when type in the input; prevent Space from scrolling page
-        if (mode.value !== 'combobox') {
+        // Do not submit form when type in the input; prevent Space from scrolling page.
+        const isCombobox = mode.value === 'combobox'
+        const isEditable = isCombobox || !!props.showSearch
+        if ((isSpaceKey && !isEditable) || (isEnterKey && !isCombobox)) {
           event.preventDefault()
         }
         // We only manage open state here, close logic should handle by list component
