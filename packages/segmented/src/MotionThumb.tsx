@@ -211,6 +211,13 @@ const MotionThumb = defineComponent<MotionThumbInterface>(
         onBeforeEnter: onAppearStart,
         onEnter: onAppearActive,
         onAfterEnter: onVisibleChanged,
+        // key 变化时旧元素会触发 leave，需要立即隐藏防止出现两个 thumb
+        onBeforeLeave: (el) => {
+          (el as HTMLElement).style.display = 'none'
+        },
+        onLeave: (_el, done) => {
+          done()
+        },
       })
       const visible = true
       const mergedStyle = {
