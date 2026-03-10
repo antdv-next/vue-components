@@ -72,9 +72,16 @@ const Input = defineComponent<InputProps>(
       const { mode, onSearchSubmit } = selectInputContext.value ?? {}
       const { key } = event
       const { value: nextVal } = event.currentTarget as any
+      const isOpen = !!baseProps.value?.open
       // Handle Enter key submission - referencing Selector implementation
 
-      if (key === KeyCodeStr.Enter && mode === 'tags' && !compositionStatusRef.value && onSearchSubmit) {
+      if (
+        key === KeyCodeStr.Enter
+        && mode === 'tags'
+        && !isOpen
+        && !compositionStatusRef.value
+        && onSearchSubmit
+      ) {
         onSearchSubmit(nextVal)
       }
       // Call original onKeyDown callback
