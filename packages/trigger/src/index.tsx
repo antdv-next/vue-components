@@ -10,8 +10,8 @@ import { useResizeObserver } from '@v-c/resize-observer'
 import { classNames } from '@v-c/util'
 import { getShadowRoot } from '@v-c/util/dist/Dom/shadow'
 import { filterEmpty } from '@v-c/util/dist/props-util'
-import { resolveToElement } from '@v-c/util/dist/vnode'
-import { computed, createVNode, defineComponent, nextTick, reactive, ref, shallowRef, useId, watch, watchEffect } from 'vue'
+import { cloneElement, resolveToElement } from '@v-c/util/dist/vnode'
+import { computed, defineComponent, nextTick, reactive, ref, shallowRef, useId, watch, watchEffect } from 'vue'
 import { TriggerContextProvider, useTriggerContext, useUniqueContext } from './context.ts'
 import useAction from './hooks/useAction.ts'
 import useAlign from './hooks/useAlign.ts'
@@ -728,11 +728,16 @@ export function generateTrigger(PortalComponent: any = Portal) {
           y: arrowY.value,
         }
         // Child Node
-        const triggerNode = createVNode(child, {
-          ...mergedChildrenProps,
-          ...passedProps,
-          ref: setTargetRef,
-        })
+        const triggerNode = cloneElement(
+          child as any,
+          {
+            ...mergedChildrenProps,
+            ...passedProps,
+            ref: setTargetRef,
+          },
+          true,
+          true,
+        )
         const {
           unique,
           prefixCls,
@@ -753,7 +758,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
         return (
           <>
             {triggerNode}
-            {rendedRef.value && targetEle.value && (!uniqueContext || !unique) && (
+            {rendedRef.value && (!uniqueContext || !unique) && (
               <TriggerContextProvider {...context.value}>
                 <Popup
                   portal={PortalComponent}
@@ -762,7 +767,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
                   popup={popup!}
                   className={classNames(popupClassName, !isMobile.value && alignedClassName.value)}
                   style={popupStyle}
-                  target={targetEle.value!}
+                  target={targetEle.value as any}
                   onMouseEnter={onPopupMouseEnter}
                   onMouseLeave={onPopupMouseLeave}
                   // https://github.com/ant-design/ant-design/issues/43924

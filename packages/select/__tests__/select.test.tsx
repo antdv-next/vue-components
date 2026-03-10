@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { nextTick } from 'vue'
+import { defineComponent, nextTick, ref } from 'vue'
 import Option from '../src/Option'
 import Select from '../src/Select'
 
@@ -137,6 +137,37 @@ describe('select react sync', () => {
     wrapper.unmount()
   })
 
+  it('keeps the same popup node when maxTagCount collapses selected values', async () => {
+    const wrapper = mount(Select, {
+      attachTo: document.body,
+      props: {
+        mode: 'multiple',
+        defaultOpen: true,
+        maxTagCount: 2,
+        value: ['a', 'b'],
+        options: [
+          { value: 'a', label: 'A' },
+          { value: 'b', label: 'B' },
+          { value: 'c', label: 'C' },
+        ],
+      },
+    })
+
+    await flushSelect()
+
+    const popupBefore = document.body.querySelector('.vc-select-dropdown')
+    expect(popupBefore).toBeTruthy()
+
+    await wrapper.setProps({ value: ['a', 'b', 'c'] })
+    await flushSelect()
+
+    const popupAfter = document.body.querySelector('.vc-select-dropdown')
+    expect(popupAfter).toBe(popupBefore)
+    expect(document.body.textContent).toContain('+ 1')
+
+    wrapper.unmount()
+  })
+
   it('does not render content value in combobox mode with custom input', async () => {
     const wrapper = mount(Select, {
       attachTo: document.body,
@@ -185,6 +216,62 @@ describe('select react sync', () => {
 
     expect(onFocus).toHaveBeenCalled()
     expect(onBlur).toHaveBeenCalled()
+
+    wrapper.unmount()
+  })
+
+  it('does not select the first option when submitting a custom tag with enter while open', async () => {
+    const changes: string[][] = []
+    const selects: string[] = []
+
+    const App = defineComponent(() => {
+      const value = ref<string[]>([])
+
+      return () => (
+        <Select
+          open
+          mode="tags"
+          value={value.value}
+          options={[
+            { value: 'a', label: 'A' },
+            { value: 'b', label: 'B' },
+          ]}
+          onChange={(nextValue) => {
+            const mergedValue = Array.isArray(nextValue) ? nextValue : [nextValue]
+            changes.push(mergedValue)
+            value.value = mergedValue
+          }}
+          onSelect={(nextValue) => {
+            selects.push(nextValue as string)
+          }}
+        />
+      )
+    })
+
+    const wrapper = mount(App, {
+      attachTo: document.body,
+    })
+
+    await flushSelect()
+
+    const input = wrapper.get('input')
+    await input.setValue('foo')
+    await flushSelect()
+
+    const event = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })
+    Object.defineProperty(event, 'which', { value: 13 })
+    Object.defineProperty(event, 'keyCode', { value: 13 })
+    input.element.dispatchEvent(event)
+
+    await flushSelect()
+
+    expect(changes).toEqual([['foo']])
+    expect(selects).toEqual(['foo'])
+
+    const selectedItems = Array.from(
+      document.body.querySelectorAll('.vc-select-selection-item-content'),
+    ).map(item => item.textContent?.trim())
+    expect(selectedItems).toEqual(['foo'])
 
     wrapper.unmount()
   })
