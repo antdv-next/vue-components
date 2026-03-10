@@ -485,11 +485,17 @@ const InputNumber = defineComponent<InputNumberProps>(
     })
 
     // ============================ Cursor ============================
-    watch(() => inputValue.value, () => {
-      if (props.formatter) {
-        restoreCursor()
-      }
-    })
+    watch(
+      () => inputValue.value,
+      () => {
+        if (props.formatter) {
+          restoreCursor()
+        }
+      },
+      {
+        flush: 'post',
+      },
+    )
 
     return () => {
       const {
