@@ -14,6 +14,9 @@ export default function useWatch(
       await nextTick()
       const targetElement = target.value
       const popupElement = popup.value
+      if (!targetElement || !popupElement) {
+        return
+      }
       const targetScrollList = collectScroller(targetElement)
       const popupScrollList = collectScroller(popupElement)
 
