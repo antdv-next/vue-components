@@ -105,6 +105,13 @@ export function resolveToElement(node: any) {
   if (isDOM(nativeEl)) {
     return nativeEl
   }
+  const exposedEl = exposed?.el
+  if (isDOM(exposedEl?.value)) {
+    return exposedEl.value
+  }
+  if (isDOM(exposedEl)) {
+    return exposedEl
+  }
   if (typeof exposed?.getElement === 'function') {
     const el = exposed.getElement()
     if (isDOM(el)) {

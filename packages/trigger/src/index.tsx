@@ -10,8 +10,8 @@ import { useResizeObserver } from '@v-c/resize-observer'
 import { classNames } from '@v-c/util'
 import { getShadowRoot } from '@v-c/util/dist/Dom/shadow'
 import { filterEmpty } from '@v-c/util/dist/props-util'
-import { cloneElement, resolveToElement } from '@v-c/util/dist/vnode'
-import { computed, defineComponent, nextTick, reactive, ref, shallowRef, useId, watch, watchEffect } from 'vue'
+import { resolveToElement } from '@v-c/util/dist/vnode'
+import { computed, createVNode, defineComponent, nextTick, reactive, ref, shallowRef, useId, watch, watchEffect } from 'vue'
 import { TriggerContextProvider, useTriggerContext, useUniqueContext } from './context.ts'
 import useAction from './hooks/useAction.ts'
 import useAlign from './hooks/useAlign.ts'
@@ -178,15 +178,12 @@ export function generateTrigger(PortalComponent: any = Portal) {
       // =========================== Target ===========================
       // Use state to control here since `useRef` update not trigger render
       const targetEle = shallowRef<HTMLElement>()
-      const persistTargetEle = shallowRef<HTMLElement>()
-      const mergedTargetEle = computed(() => targetEle.value ?? persistTargetEle.value)
       // Used for forwardRef target. Not use internal
       const externalForwardRef = shallowRef<HTMLElement | null>(null)
       const setTargetRef = (node: any) => {
         const element = resolveToElement(node)
         if (element && targetEle.value !== element) {
           targetEle.value = element as HTMLElement
-          persistTargetEle.value = element as HTMLElement
           externalForwardRef.value = element as HTMLElement
         }
         else if (!element) {
@@ -204,7 +201,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
       }))
 
       const inPopupOrChild = (ele: EventTarget) => {
-        const childDOM = mergedTargetEle.value
+        const childDOM = targetEle.value
         return (
           childDOM?.contains(ele as HTMLElement)
           || (childDOM && getShadowRoot(childDOM)?.host === ele)
@@ -255,7 +252,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
       const getUniqueOptions = (delay: number = 0) => {
         return {
           popup: props.popup,
-          target: mergedTargetEle.value,
+          target: targetEle.value,
           delay,
           prefixCls: props.prefixCls,
           popupClassName: props.popupClassName,
@@ -282,8 +279,8 @@ export function generateTrigger(PortalComponent: any = Portal) {
       // Only sync to UniqueProvider when it's controlled mode
       // If there is a parentContext, don't call uniqueContext methods
 
-      watch([mergedOpen, mergedTargetEle], () => {
-        if (uniqueContext && props.unique && mergedTargetEle.value && !openUncontrolled.value && !parentContext?.value) {
+      watch([mergedOpen, targetEle], () => {
+        if (uniqueContext && props.unique && targetEle.value && !openUncontrolled.value && !parentContext?.value) {
           if (mergedOpen.value) {
             const enterDelay = props.mouseEnterDelay ?? 0
             uniqueContext?.show(getUniqueOptions(enterDelay) as any, isOpen)
@@ -373,7 +370,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
       ] = useAlign(
         mergedOpen,
         popupEle as any,
-        computed(() => props?.alignPoint && mousePos.value !== null ? mousePos.value : mergedTargetEle.value) as any,
+        computed(() => props?.alignPoint && mousePos.value !== null ? mousePos.value : targetEle.value) as any,
         computed(() => props?.popupPlacement) as any,
         computed(() => props?.builtinPlacements) as any,
         computed(() => props?.popupAlign) as any,
@@ -403,7 +400,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
         }
       }
 
-      useWatch(mergedOpen, mergedTargetEle as any, popupEle as any, triggerAlign, onScroll)
+      useWatch(mergedOpen, targetEle as any, popupEle as any, triggerAlign, onScroll)
       watch(
         [mousePos, () => props.popupPlacement],
         async () => {
@@ -441,8 +438,8 @@ export function generateTrigger(PortalComponent: any = Portal) {
       const targetHeight = shallowRef(0)
 
       const syncTargetSize = () => {
-        if (props.stretch && mergedTargetEle.value) {
-          const rect = mergedTargetEle.value.getBoundingClientRect()
+        if (props.stretch && targetEle.value) {
+          const rect = targetEle.value.getBoundingClientRect()
           targetWidth.value = rect.width
           targetHeight.value = rect.height
         }
@@ -731,16 +728,11 @@ export function generateTrigger(PortalComponent: any = Portal) {
           y: arrowY.value,
         }
         // Child Node
-        const triggerNode = cloneElement(
-          child as any,
-          {
-            ...mergedChildrenProps,
-            ...passedProps,
-            ref: setTargetRef,
-          },
-          true,
-          true,
-        )
+        const triggerNode = createVNode(child as any, {
+          ...mergedChildrenProps,
+          ...passedProps,
+          ref: setTargetRef,
+        })
         const {
           unique,
           prefixCls,
@@ -761,7 +753,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
         return (
           <>
             {triggerNode}
-            {rendedRef.value && mergedTargetEle.value && (!uniqueContext || !unique) && (
+            {rendedRef.value && targetEle.value && (!uniqueContext || !unique) && (
               <TriggerContextProvider {...context.value}>
                 <Popup
                   portal={PortalComponent}
@@ -770,7 +762,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
                   popup={popup!}
                   className={classNames(popupClassName, !isMobile.value && alignedClassName.value)}
                   style={popupStyle}
-                  target={mergedTargetEle.value as any}
+                  target={targetEle.value as any}
                   onMouseEnter={onPopupMouseEnter}
                   onMouseLeave={onPopupMouseLeave}
                   // https://github.com/ant-design/ant-design/issues/43924
