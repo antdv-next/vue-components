@@ -127,4 +127,22 @@ describe('messages', () => {
       },
     )
   })
+
+  it('null message falls back to default error', () => {
+    new Schema({
+      v: {
+        type: 'string',
+        required: true,
+        message: null as any,
+      },
+    }).validate(
+      {
+        v: '',
+      },
+      (errors) => {
+        expect(errors?.length).toBe(1)
+        expect(errors?.[0].message).toBe('v is required')
+      },
+    )
+  })
 })

@@ -30,7 +30,7 @@ class Schema {
   // ========================= Static =========================
   static register = function register(type: string, validator: any) {
     if (typeof validator !== 'function') {
-      throw new TypeError('Cannot register a validator by type, validator is not a function')
+      throw new Error('Cannot register a validator by type, validator is not a function')
     }
     ;(validators as any)[type] = validator
   }
@@ -54,7 +54,7 @@ class Schema {
       throw new Error('Cannot configure a schema with no rules')
     }
     if (typeof rules !== 'object' || Array.isArray(rules)) {
-      throw new TypeError('Rules must be an object')
+      throw new Error('Rules must be an object')
     }
     this.rules = {}
 
@@ -200,7 +200,7 @@ class Schema {
           if (!options.suppressWarning && errorList.length) {
             Schema.warning('async-validator:', errorList)
           }
-          if (errorList.length && rule.message !== undefined) {
+          if (errorList.length && rule.message !== undefined && rule.message !== null) {
             errorList = [].concat(rule.message as any)
           }
 

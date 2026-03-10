@@ -484,4 +484,14 @@ describe('validator', () => {
         expect(errors?.[0].message).toBe('something wrong')
       })
   })
+
+  it('throws Error for invalid registration and invalid rules', () => {
+    expect(() => {
+      Schema.register('broken', null as any)
+    }).toThrowError(new Error('Cannot register a validator by type, validator is not a function'))
+
+    expect(() => {
+      new Schema([] as any)
+    }).toThrowError(new Error('Rules must be an object'))
+  })
 })
