@@ -95,6 +95,7 @@ function isNativeStringType(type: string) {
     || type === 'email'
     || type === 'date'
     || type === 'pattern'
+    || type === 'tel'
   )
 }
 

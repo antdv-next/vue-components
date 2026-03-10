@@ -12,6 +12,13 @@ const pattern = {
   //   '^(?!mailto:)(?:(?:http|https|ftp)://|//)(?:\\S+(?::\\S*)?@)?(?:(?:(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}(?:\\.(?:[0-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))|(?:(?:[a-z\\u00a1-\\uffff0-9]+-*)*[a-z\\u00a1-\\uffff0-9]+)(?:\\.(?:[a-z\\u00a1-\\uffff0-9]+-*)*[a-z\\u00a1-\\uffff0-9]+)*(?:\\.(?:[a-z\\u00a1-\\uffff]{2,})))|localhost)(?::\\d{2,5})?(?:(/|\\?|#)[^\\s]*)?$',
   //   'i',
   // ),
+  /**
+   * Phone number regex, support country code, brackets, spaces, and dashes (or non-breaking hyphen \u2011).
+   * @see https://regexr.com/3c53v
+   * @see https://ihateregex.io/expr/phone/
+   * @see https://developers.google.com/style/phone-numbers using non-breaking hyphen \u2011
+   */
+  tel: /^(\+[0-9]{1,3}[-\s\u2011]?)?(\([0-9]{1,4}\)[-\s\u2011]?)?([0-9]+[-\s\u2011]?)*[0-9]+$/,
   hex: /^#?([a-f0-9]{6}|[a-f0-9]{3})$/i,
 }
 
@@ -59,6 +66,9 @@ const types = {
   email(value: Value) {
     return typeof value === 'string' && value.length <= 320 && !!value.match(pattern.email)
   },
+  tel(value: Value) {
+    return typeof value === 'string' && value.length <= 32 && !!value.match(pattern.tel)
+  },
   url(value: Value) {
     return typeof value === 'string' && value.length <= 2048 && !!value.match(getUrlRegex())
   },
@@ -80,6 +90,7 @@ const type: ExecuteRule = (rule, value, source, errors, options) => {
     'object',
     'method',
     'email',
+    'tel',
     'number',
     'date',
     'url',

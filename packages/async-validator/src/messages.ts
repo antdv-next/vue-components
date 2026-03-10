@@ -23,6 +23,7 @@ export function newMessages(): InternalValidateMessages {
       float: '%s is not a %s',
       regexp: '%s is not a valid %s',
       email: '%s is not a valid %s',
+      tel: '%s is not a valid %s',
       url: '%s is not a valid %s',
       hex: '%s is not a valid %s',
     },

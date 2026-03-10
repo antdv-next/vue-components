@@ -15,6 +15,7 @@ export type RuleType
     | 'url'
     | 'hex'
     | 'email'
+    | 'tel'
     | 'pattern'
     | 'any'
 
@@ -146,6 +147,7 @@ export interface ValidateMessages {
     float?: ValidateMessage<[FullField, Type]>
     regexp?: ValidateMessage<[FullField, Type]>
     email?: ValidateMessage<[FullField, Type]>
+    tel?: ValidateMessage<[FullField, Type]>
     url?: ValidateMessage<[FullField, Type]>
     hex?: ValidateMessage<[FullField, Type]>
   }

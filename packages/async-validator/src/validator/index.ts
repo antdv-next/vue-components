@@ -30,6 +30,7 @@ export default {
   url: type,
   hex: type,
   email: type,
+  tel: type,
   required,
   any,
 }
