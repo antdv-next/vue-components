@@ -266,7 +266,7 @@ const OverflowImpl = defineComponent({
               // Only one means `totalWidth` is the final width
               (lastIndex === 0 && totalWidth <= container)
               // Last two width will be the final width
-              || (i === lastIndex - 1 && totalWidth + (getItemWidth(lastIndex) || 0) <= container)
+              || (i === lastIndex - 1 && totalWidth + getItemWidth(lastIndex)! <= container)
             ) {
               // Additional check if match the end
               updateDisplayCount(lastIndex, null)
