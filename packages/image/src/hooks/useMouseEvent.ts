@@ -1,6 +1,7 @@
 import type { Ref } from 'vue'
 import type { DispatchZoomChangeFunc, TransformType, UpdateTransformFunc } from './useImageTransform.ts'
 import { warning } from '@v-c/util'
+import canUseDom from '@v-c/util/dist/Dom/canUseDom'
 import { shallowRef, watch } from 'vue'
 import getFixScaleEleTransPosition from '../getFixScaleEleTransPosition.ts'
 import { BASE_SCALE_RATIO, WHEEL_MAX_SCALE_RATIO } from '../previewConfig.ts'
@@ -100,20 +101,21 @@ export default function useMouseEvent(
   }
 
   watch([open, isMoving, transform, movable], (_n, _o, onCleanup) => {
-    if (movable.value) {
-      window.addEventListener('mouseup', onMouseUp, false)
-      window.addEventListener('mousemove', onMouseMove, false)
-      try {
-        // Resolve if in iframe lost event
-        /* istanbul ignore next */
-        if (window.top !== window.self) {
-          window?.top?.addEventListener('mouseup', onMouseUp, false)
-          window?.top?.addEventListener('mousemove', onMouseMove, false)
-        }
+    if (!canUseDom() || !movable.value)
+      return
+
+    window.addEventListener('mouseup', onMouseUp, false)
+    window.addEventListener('mousemove', onMouseMove, false)
+    try {
+      // Resolve if in iframe lost event
+      /* istanbul ignore next */
+      if (window.top !== window.self) {
+        window?.top?.addEventListener('mouseup', onMouseUp, false)
+        window?.top?.addEventListener('mousemove', onMouseMove, false)
       }
-      catch (e) {
-        warning(false, `[vc-image] ${e}`)
-      }
+    }
+    catch (e) {
+      warning(false, `[vc-image] ${e}`)
     }
     onCleanup(() => {
       window.removeEventListener('mouseup', onMouseUp)

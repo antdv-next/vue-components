@@ -1,5 +1,6 @@
 import type { Ref } from 'vue'
 import type { EscCallback } from './Portal.tsx'
+import canUseDom from '@v-c/util/dist/Dom/canUseDom'
 import { useId, watch } from 'vue'
 
 let stack: { id: string, onEsc?: EscCallback }[] = []
@@ -41,15 +42,19 @@ function onGlobalCompositionEnd() {
 }
 
 function attachGlobalEventListeners() {
+  if (!canUseDom())
+    return
+
   window.addEventListener('keydown', onGlobalKeyDown)
   window.addEventListener('compositionend', onGlobalCompositionEnd)
 }
 
 function detachGlobalEventListeners() {
-  if (stack.length === 0) {
-    window.removeEventListener('keydown', onGlobalKeyDown)
-    window.removeEventListener('compositionend', onGlobalCompositionEnd)
-  }
+  if (!canUseDom() || stack.length !== 0)
+    return
+
+  window.removeEventListener('keydown', onGlobalKeyDown)
+  window.removeEventListener('compositionend', onGlobalCompositionEnd)
 }
 
 export default function useEscKeyDown(open: Ref<boolean>, onEsc: EscCallback = () => {}) {
@@ -68,6 +73,9 @@ export default function useEscKeyDown(open: Ref<boolean>, onEsc: EscCallback = (
   watch(
     open,
     (_, _o, onCleanup) => {
+      if (!canUseDom())
+        return
+
       if (open.value) {
         ensure()
         // Attach global event listeners

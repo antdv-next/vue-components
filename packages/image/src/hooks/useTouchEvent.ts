@@ -167,6 +167,10 @@ export default function useTouchEvent(
   }
 
   watchEffect((onCleanup) => {
+    if (!canUseDom()) {
+      return
+    }
+
     const preventDefault = (e: TouchEvent) => {
       e.preventDefault()
     }
@@ -178,9 +182,6 @@ export default function useTouchEvent(
     }
 
     onCleanup(() => {
-      if (!canUseDom()) {
-        return
-      }
       window.removeEventListener('touchmove', preventDefault)
     })
   })

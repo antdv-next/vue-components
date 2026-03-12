@@ -9,7 +9,8 @@ export function isImageValid(src: string) {
     // Use a heuristic to avoid hanging tests.
     const isTestEnv = typeof process !== 'undefined' && process.env?.NODE_ENV === 'test'
     const isJSDomUA = typeof navigator !== 'undefined' && /jsdom/i.test(navigator.userAgent)
-    if (isTestEnv || isJSDomUA) {
+    const canUseDom = typeof document !== 'undefined' && typeof window !== 'undefined'
+    if (isTestEnv || isJSDomUA || !canUseDom) {
       const isLikelyValid
         = /^(https?:)?\/\//.test(src)
           || /^(data|blob):/.test(src)
@@ -29,6 +30,13 @@ export function isImageValid(src: string) {
 
 // ============================= Legacy =============================
 export function getClientSize() {
+  if (typeof document === 'undefined' || typeof window === 'undefined') {
+    return {
+      width: 0,
+      height: 0,
+    }
+  }
+
   const width = document.documentElement.clientWidth
   const height = window.innerHeight || document.documentElement.clientHeight
   return {

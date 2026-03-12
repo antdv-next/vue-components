@@ -40,18 +40,26 @@ export default function useDom(
 
   // =========================== DOM ===========================
   function append() {
+    if (!ele || !canUseDom())
+      return
+
     if (!ele?.parentElement)
-      document.body.appendChild(ele!)
+      document.body.appendChild(ele)
     appendedRef.value = true
   }
 
   function cleanup() {
+    if (!ele || !canUseDom()) {
+      appendedRef.value = false
+      return
+    }
+
     if (ele?.parentElement) {
       ele?.parentElement?.removeChild(ele)
     }
     else {
-      if (ele && appendedRef.value) {
-        document.body?.removeChild?.(ele!)
+      if (appendedRef.value) {
+        document.body?.removeChild?.(ele)
       }
     }
 
