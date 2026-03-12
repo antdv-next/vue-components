@@ -472,7 +472,7 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
   const scrollbarSize = ref(0)
   onMounted(() => {
     if (!props.tailor || !useInternalHooks.value) {
-      if (scrollBodyRef.value instanceof Element) {
+      if (scrollBodyRef.value?.nodeType === 1) {
         scrollbarSize.value = getTargetScrollBarSize(scrollBodyRef.value as HTMLElement).width
       }
       else {
@@ -695,7 +695,7 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
             />
           )}
 
-          {stickyConfig.value.isSticky && scrollBodyRef.value instanceof Element && (
+          {stickyConfig.value.isSticky && scrollBodyRef.value?.nodeType === 1 && (
             <StickyScrollBar
               ref={stickyRef}
               offsetScroll={stickyConfig.value.offsetScroll}

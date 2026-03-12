@@ -3,6 +3,7 @@ import type { DrawerPanelEvents } from './DrawerPanel'
 import type { DrawerPopupProps } from './DrawerPopup'
 import type { DrawerClassNames, DrawerStyles } from './inter'
 import Portal from '@v-c/portal'
+import canUseDom from '@v-c/util/dist/Dom/canUseDom'
 import { omit } from '@v-c/util/dist/utils/omit'
 import { computed, defineComponent, nextTick, shallowRef, watch } from 'vue'
 import { useRefProvide } from './context'
@@ -80,7 +81,7 @@ const Drawer = defineComponent<DrawerProps>({
       (visible) => {
         if (visible) {
           animatedVisible.value = true
-          lastActiveRef.value = document.activeElement as HTMLElement
+          lastActiveRef.value = canUseDom() ? document.activeElement as HTMLElement : null
         }
       },
       { immediate: true },
