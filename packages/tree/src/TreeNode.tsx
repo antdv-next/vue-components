@@ -160,7 +160,14 @@ const TreeNode = defineComponent<TreeNodeProps>(
         const switcherIconDom = renderSwitcherIconDom(true)
         return switcherIconDom !== false
           ? (
-              <span class={clsx(`${context.prefixCls}-switcher`, `${context.prefixCls}-switcher-noop`)}>
+              <span
+                class={clsx(
+                  `${context.prefixCls}-switcher`,
+                  `${context.prefixCls}-switcher-noop`,
+                  context.classNames?.itemSwitcher,
+                )}
+                style={context.styles?.itemSwitcher}
+              >
                 {switcherIconDom}
               </span>
             )
@@ -175,7 +182,9 @@ const TreeNode = defineComponent<TreeNodeProps>(
               class={clsx(
                 `${context.prefixCls}-switcher`,
                 `${context.prefixCls}-switcher_${props.expanded ? ICON_OPEN : ICON_CLOSE}`,
+                context.classNames?.itemSwitcher,
               )}
+              style={context.styles?.itemSwitcher}
             >
               {switcherIconDom}
             </span>

@@ -419,7 +419,3 @@ export function isLeafNode<TreeDataType extends BasicDataNode = DataNode>(
   }
   return !!isLeaf || (!loadData && !hasChildren) || !!(loadData && loaded && !hasChildren)
 }
-
-export function getTreeNodeId(treeId: string, key: Key): string {
-  return `${treeId}-${key}`
-}

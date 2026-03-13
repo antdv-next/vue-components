@@ -1,13 +1,13 @@
 import type { CSSMotionProps } from '@v-c/util/dist/utils/transition'
 import type { ListRef } from '@v-c/virtual-list'
 import type { DataEntity, DataNode, FlattenNode, Key, KeyEntities, ScrollTo } from './interface'
-import useId from '@v-c/util/dist/hooks/useId'
+import useId, { getId } from '@v-c/util/dist/hooks/useId'
 import { toPropsRefs } from '@v-c/util/dist/props-util'
 import VirtualList from '@v-c/virtual-list'
 import { computed, defineComponent, ref, shallowRef, watch } from 'vue'
 import MotionTreeNode from './MotionTreeNode'
 import { findExpandedKeys, getExpandRange } from './utils/diffUtil'
-import { getKey, getTreeNodeId, getTreeNodeProps } from './utils/treeUtil'
+import { getKey, getTreeNodeProps } from './utils/treeUtil'
 
 function itemKey(item: FlattenNode) {
   const { key, pos } = item
@@ -92,6 +92,8 @@ export interface NodeListProps {
   onKeyDown?: (e: KeyboardEvent) => void
   onFocus?: (e: FocusEvent) => void
   onBlur?: (e: FocusEvent) => void
+  onMouseDown?: (e: MouseEvent) => void
+  onMouseUp?: (e: MouseEvent) => void
   onActiveChange?: (key: Key | null) => void
 
   onListChangeStart?: () => void
@@ -233,6 +235,8 @@ const NodeList = defineComponent<NodeListProps>(
         onKeyDown,
         onFocus,
         onBlur,
+        onMouseDown,
+        onMouseUp,
         onListChangeStart,
         onActiveChange,
       } = props
@@ -269,13 +273,15 @@ const NodeList = defineComponent<NodeListProps>(
             ref={listRef}
             role="tree"
             tabindex={focusable !== false && !disabled ? tabIndex : undefined}
-            aria-activedescendant={activeItem ? getTreeNodeId(treeId, activeItem.key) : undefined}
+            aria-activedescendant={activeItem ? getId(treeId, activeItem.key) : undefined}
             style={props.style}
             onContextmenu={onContextmenu}
             onScroll={onScroll}
             onKeydown={onKeyDown}
             onFocus={onFocus}
             onBlur={onBlur}
+            onMousedown={onMouseDown}
+            onMouseup={onMouseUp}
             onVisibleChange={(originList: FlattenNode[]) => {
               // The best match is using `fullList` - `originList` = `restList`
               // and check the `restList` to see if has the MOTION_KEY node

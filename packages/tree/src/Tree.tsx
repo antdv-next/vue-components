@@ -1,7 +1,7 @@
 import type { VueNode } from '@v-c/util/dist/type'
 import type { CSSMotionProps } from '@v-c/util/dist/utils/transition'
 import type { CSSProperties } from 'vue'
-import type { DraggableConfig, NodeDragEventParams, NodeMouseEventHandler, NodeMouseEventParams } from './contextTypes'
+import type { DraggableConfig, NodeDragEventParams, NodeMouseEventHandler, NodeMouseEventParams, SemanticName } from './contextTypes'
 import type {
   BasicDataNode,
   DataNode,
@@ -64,13 +64,14 @@ export type DraggableFn = (node: DataNode) => boolean
 export type DraggableUnion = DraggableFn | boolean | DraggableConfig
 
 export type ExpandAction = false | 'click' | 'doubleClick'
+export type { SemanticName } from './contextTypes'
 
 export interface TreeProps<TreeDataType extends BasicDataNode = DataNode> {
   prefixCls?: string
   className?: string
   style?: CSSProperties
-  styles?: Partial<Record<'itemIcon' | 'item' | 'itemTitle', CSSProperties>>
-  classNames?: Partial<Record<'itemIcon' | 'item' | 'itemTitle', string>>
+  styles?: Partial<Record<SemanticName, CSSProperties>>
+  classNames?: Partial<Record<SemanticName, string>>
   focusable?: boolean
   activeKey?: Key | null
   tabIndex?: number
@@ -104,6 +105,8 @@ export interface TreeProps<TreeDataType extends BasicDataNode = DataNode> {
     prefixCls: string
     direction: Direction
   }) => any
+  onMouseDown?: (e: MouseEvent) => void
+  onMouseUp?: (e: MouseEvent) => void
   onFocus?: (e: FocusEvent) => void
   onBlur?: (e: FocusEvent) => void
   onKeyDown?: (e: KeyboardEvent) => void
@@ -405,7 +408,7 @@ const Tree = defineComponent<TreeProps>(
     const loadingRetryTimes: Record<string, number> = {}
 
     const listRef = ref<NodeListRef>()
-    let focusFromMouse = false
+    let focusedByMouse = false
 
     const getTreeNodeRequiredProps = computed(() => ({
       expandedKeys: expandedKeys.value || [],
@@ -459,12 +462,7 @@ const Tree = defineComponent<TreeProps>(
     }
 
     function onFocus(e: FocusEvent) {
-      if (focusFromMouse) {
-        focusFromMouse = false
-        props.onFocus?.(e)
-        return
-      }
-      if (!mergedDisabled.value && activeKey.value === null) {
+      if (!focusedByMouse && !mergedDisabled.value && activeKey.value === null) {
         const visibleSelectedKey = selectedKeys.value.find((key) => {
           return flattenNodes.value.some(nodeItem => nodeItem.key === key)
         })
@@ -480,9 +478,19 @@ const Tree = defineComponent<TreeProps>(
     }
 
     function onBlur(e: FocusEvent) {
-      focusFromMouse = false
+      focusedByMouse = false
       onActiveChange(null)
       props.onBlur?.(e)
+    }
+
+    function onMouseDown(e: MouseEvent) {
+      focusedByMouse = true
+      props.onMouseDown?.(e)
+    }
+
+    function onMouseUp(e: MouseEvent) {
+      focusedByMouse = false
+      props.onMouseUp?.(e)
     }
 
     function onNodeLoad(treeNode: EventDataNode<any>) {
@@ -1193,12 +1201,6 @@ const Tree = defineComponent<TreeProps>(
       const domProps = pickAttrs(attrs, { aria: true, data: true })
       return (
         <div
-          onMousedown={() => {
-            focusFromMouse = true
-          }}
-          onMouseup={() => {
-            focusFromMouse = false
-          }}
           class={clsx(
             mergedPrefixCls.value,
             props.className,
@@ -1226,6 +1228,8 @@ const Tree = defineComponent<TreeProps>(
             tabIndex={mergedTabIndex.value}
             activeItem={getActiveItem.value as any}
             onFocus={onFocus}
+            onMouseDown={onMouseDown}
+            onMouseUp={onMouseUp}
             onBlur={onBlur}
             onKeyDown={onKeyDown}
             onActiveChange={onActiveChange}

@@ -225,7 +225,7 @@ const OptionList = defineComponent({
     const activeEntity = computed(() => legacyContext.value?.keyEntities?.[String(activeKey.value)] as DataEntity | undefined)
 
     watch(
-      () => [baseProps.value?.open, baseProps.value?.searchValue],
+      [() => baseProps.value?.open, () => baseProps.value?.searchValue],
       ([open]) => {
         if (!open) {
           return
@@ -238,13 +238,17 @@ const OptionList = defineComponent({
           return firstNode ? (firstNode as any)[fieldNames?.value as any] : null
         }
 
+        let nextActiveKey: Key | null = null
+
         // single mode active first checked node
         if (!baseProps.value?.multiple && legacyContext.value?.checkedKeys?.length && !baseProps.value?.searchValue) {
-          activeKey.value = legacyContext.value.checkedKeys[0]
+          nextActiveKey = legacyContext.value.checkedKeys[0]
         }
         else {
-          activeKey.value = getFirstNode()
+          nextActiveKey = getFirstNode()
         }
+
+        activeKey.value = nextActiveKey
       },
       { immediate: true },
     )

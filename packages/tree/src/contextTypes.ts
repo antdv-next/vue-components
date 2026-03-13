@@ -46,7 +46,7 @@ export interface DropIndicatorRenderProps {
   direction: Direction
 }
 
-export type SemanticName = 'itemIcon' | 'item' | 'itemTitle'
+export type SemanticName = 'itemIcon' | 'item' | 'itemTitle' | 'itemSwitcher'
 
 export interface TreeContextProps<TreeDataType extends BasicDataNode = DataNode> {
   styles?: Partial<Record<SemanticName, CSSProperties>>
