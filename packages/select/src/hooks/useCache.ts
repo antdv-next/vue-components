@@ -1,7 +1,7 @@
 import type { Ref } from 'vue'
 import type { RawValueType } from '../interface'
 import type { DefaultOptionType, LabelInValueType } from '../Select'
-import { computed, shallowRef } from 'vue'
+import { computed } from 'vue'
 
 /**
  * Cache `value` related LabeledValue & options.
@@ -10,16 +10,16 @@ export default function useCache(
   labeledValues: Ref<LabelInValueType[]>,
   valueOptions: Ref<Map<RawValueType, DefaultOptionType>>,
 ): [Ref<LabelInValueType[]>, (val: RawValueType) => DefaultOptionType | undefined] {
-  const cacheRef = shallowRef<{
+  const cache: {
     values: Map<RawValueType, LabelInValueType>
     options: Map<RawValueType, DefaultOptionType>
-  }>({
+  } = {
     values: new Map<RawValueType, LabelInValueType>(),
     options: new Map<RawValueType, DefaultOptionType>(),
-  })
+  }
 
   const filledLabeledValues = computed<LabelInValueType[]>(() => {
-    const { values: prevValueCache, options: prevOptionCache } = cacheRef.value
+    const { values: prevValueCache, options: prevOptionCache } = cache
 
     // Fill label by cache
     const patchedValues = labeledValues.value.map((item) => {
@@ -45,16 +45,14 @@ export default function useCache(
       }
     })
 
-    cacheRef.value = {
-      values: valueCache,
-      options: optionCache,
-    }
+    cache.values = valueCache
+    cache.options = optionCache
 
     return patchedValues
   })
 
   const getOption = (val: RawValueType): DefaultOptionType | undefined => {
-    return valueOptions.value.get(val) || cacheRef.value.options.get(val)
+    return valueOptions.value.get(val) || cache.options.get(val)
   }
 
   return [filledLabeledValues, getOption]
