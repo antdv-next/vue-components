@@ -299,10 +299,10 @@ const Preview = defineComponent<PreviewProps>(
     })
 
     // ======================= Lock Scroll ========================
-    const lockScroll = shallowRef(false)
+    const animatedVisible = shallowRef(props?.open ?? false)
     watch(() => props.open, (open) => {
       if (open) {
-        lockScroll.value = true
+        animatedVisible.value = true
       }
     })
 
@@ -316,7 +316,7 @@ const Preview = defineComponent<PreviewProps>(
 
     const onVisibleChanged = (nextVisible: boolean) => {
       if (!nextVisible) {
-        lockScroll.value = false
+        animatedVisible.value = false
         portalRender.value = false
       }
       props.afterOpenChange?.(nextVisible)
@@ -417,7 +417,11 @@ const Preview = defineComponent<PreviewProps>(
       const transitionProps = getTransitionProps(motionName)
 
       return (
-        <Portal open={portalRender.value} getContainer={getContainer} autoLock={lockScroll.value}>
+        <Portal
+          open={open || animatedVisible.value || portalRender.value}
+          getContainer={getContainer}
+          autoLock={open || animatedVisible.value}
+        >
           <Transition
             {...transitionProps}
             onAfterEnter={() => onVisibleChanged(true)}
