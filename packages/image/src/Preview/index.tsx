@@ -299,10 +299,10 @@ const Preview = defineComponent<PreviewProps>(
     })
 
     // ======================= Lock Scroll ========================
-    const lockScroll = shallowRef(false)
+    const animatedVisible = shallowRef(props?.open ?? false)
     watch(() => props.open, (open) => {
       if (open) {
-        lockScroll.value = true
+        animatedVisible.value = true
       }
     })
 
@@ -316,7 +316,7 @@ const Preview = defineComponent<PreviewProps>(
 
     const onVisibleChanged = (nextVisible: boolean) => {
       if (!nextVisible) {
-        lockScroll.value = false
+        animatedVisible.value = false
         portalRender.value = false
       }
       props.afterOpenChange?.(nextVisible)
@@ -382,9 +382,8 @@ const Preview = defineComponent<PreviewProps>(
           alt={alt}
           onLoad={(srcAndOnload.value as any).onLoad}
           style={{
-            transform: `translate3d(${transform.value.x}px, ${transform.value.y}px, 0) scale3d(${
-              transform.value.flipX ? '-' : ''
-            }${transform.value.scale}, ${transform.value.flipY ? '-' : ''}${transform.value.scale}, 1) rotate(${transform.value.rotate}deg)`,
+            transform: `translate3d(${transform.value.x}px, ${transform.value.y}px, 0) scale3d(${transform.value.flipX ? '-' : ''
+              }${transform.value.scale}, ${transform.value.flipY ? '-' : ''}${transform.value.scale}, 1) rotate(${transform.value.rotate}deg)`,
             transitionDuration: (!enableTransition.value || isTouching.value) ? '0s' : undefined,
           }}
           onWheel={onWheel}
@@ -417,7 +416,11 @@ const Preview = defineComponent<PreviewProps>(
       const transitionProps = getTransitionProps(motionName)
 
       return (
-        <Portal open={portalRender.value} getContainer={getContainer} autoLock={lockScroll.value}>
+        <Portal
+          open={open || animatedVisible.value || portalRender.value}
+          getContainer={getContainer}
+          autoLock={open || animatedVisible.value}
+        >
           <Transition
             {...transitionProps}
             onAfterEnter={() => onVisibleChanged(true)}
@@ -441,9 +444,9 @@ const Preview = defineComponent<PreviewProps>(
                   <div class={clsx(`${prefixCls}-body`, classNames.body)} style={bodyStyle}>
                     {imageRender
                       ? imageRender(
-                          imgNode,
-                          { transform: transform.value, image, ...(groupContext ? { current } : {}) },
-                        )
+                        imgNode,
+                        { transform: transform.value, image, ...(groupContext ? { current } : {}) },
+                      )
                       : imgNode}
                   </div>
 
