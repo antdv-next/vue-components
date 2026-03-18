@@ -67,6 +67,7 @@ export interface InputNumberProps<T extends ValueType = ValueType> {
   onCompositionEnd?: (event: CompositionEvent) => void
   onBeforeInput?: (event: InputEvent) => void
   stringMode?: boolean
+  placeholder?: string
 }
 
 export interface InputNumberRef extends HTMLInputElement {
@@ -507,6 +508,7 @@ const InputNumber = defineComponent<InputNumberProps>(
         readOnly,
         controls = defaults.controls,
         mode = defaults.mode,
+        placeholder
       } = props
 
       const mergedPrefixCls = prefixCls || defaults.prefixCls!
@@ -655,6 +657,7 @@ const InputNumber = defineComponent<InputNumberProps>(
             onInput={onInternalInput}
             disabled={disabled}
             readonly={readOnly}
+            placeholder={placeholder}
             onFocus={onFocus}
             onBlur={onBlur}
             onKeydown={onKeyDown}

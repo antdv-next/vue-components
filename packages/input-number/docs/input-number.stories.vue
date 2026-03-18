@@ -4,6 +4,7 @@ import Custom from './custom'
 import Debug from './debug'
 import Decimal from './decimal'
 import DynamicMinMax from './dynamic-min-max'
+import DynamicPlaceholder from './dynamic-placeholder'
 import Focus from './focus'
 import Formatter from './formatter'
 import InputControl from './input-control'
@@ -64,6 +65,9 @@ import './assets/index.less'
     </Variant>
     <Variant title="dynamic-min-max">
       <DynamicMinMax />
+    </Variant>
+    <Variant title="dynamic-placeholder">
+      <DynamicPlaceholder />
     </Variant>
   </Story>
 </template>
