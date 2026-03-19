@@ -3,6 +3,7 @@ import type { CSSProperties } from 'vue'
 import type { IDialogPropTypes } from '../../IDialogPropTypes'
 import { classNames, clsx } from '@v-c/util'
 import { useLockFocus } from '@v-c/util/dist/Dom/focus'
+import { useFocusBoundaryProvider } from '@v-c/util/dist/Dom/focusBoundary'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
 import { getStylePxValue } from '@v-c/util/dist/props-util'
 import { computed, defineComponent, shallowRef } from 'vue'
@@ -32,10 +33,13 @@ const Panel = defineComponent<PanelProps & { animationVisible: boolean }>(
       setPanel?.(el)
       props?.holderRef?.(el)
     }
-    useLockFocus(
+    const [, registerAllowedElement] = useLockFocus(
       computed(() => !!props.visible && !!props.isFixedPos && props.focusTrap !== false),
       () => internalRef.value!,
     )
+    useFocusBoundaryProvider({
+      registerAllowedElement,
+    })
     expose({
       focus: () => {
         internalRef.value?.focus?.({ preventScroll: true })

@@ -6,6 +6,7 @@ import type { TriggerProps } from '../index.tsx'
 import type { AlignType, ArrowPos, ArrowTypeOuter } from '../interface.ts'
 import { useResizeObserver } from '@v-c/resize-observer'
 import { classNames } from '@v-c/util'
+import { useFocusBoundary } from '@v-c/util/dist/Dom/focusBoundary'
 import { toPropsRefs } from '@v-c/util/dist/props-util'
 import { getTransitionProps } from '@v-c/util/dist/utils/transition'
 import { computed, defineComponent, nextTick, shallowRef, Transition, watchEffect } from 'vue'
@@ -90,6 +91,7 @@ const defaults = {
 
 const Popup = defineComponent<PopupProps>(
   (props = defaults, { attrs, slots, expose }) => {
+    const focusBoundary = useFocusBoundary()
     const {
       offsetX,
       offsetR,
@@ -156,6 +158,11 @@ const Popup = defineComponent<PopupProps>(
       offsetY,
     )
     const popupElementRef = shallowRef<HTMLDivElement>()
+    watchEffect((onCleanup) => {
+      if (props.open && popupElementRef.value && focusBoundary?.registerAllowedElement) {
+        onCleanup(focusBoundary.registerAllowedElement(popupElementRef.value))
+      }
+    })
     expose({
       getElement: () => popupElementRef.value,
       nativeElement: popupElementRef,

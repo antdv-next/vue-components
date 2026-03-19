@@ -100,28 +100,48 @@ let focusElements: HTMLElement[] = []
 const idToElementMap = new Map<string, HTMLElement>()
 // Map stable ID to ignored element
 const ignoredElementMap = new Map<string, HTMLElement | null>()
+// Map stable ID to allowed external roots, e.g. teleported popup containers
+const allowedElementMap = new Map<string, Set<HTMLElement>>()
 
 function getLastElement() {
   return focusElements[focusElements.length - 1]
 }
 
-function isIgnoredElement(element: Element | null): boolean {
+function getLastLockId() {
   const lastElement = getLastElement()
+  if (!lastElement)
+    return undefined
 
-  if (element && lastElement) {
-    let lockId: string | undefined
-    for (const [id, ele] of idToElementMap.entries()) {
-      if (ele === lastElement) {
-        lockId = id
-        break
-      }
+  for (const [id, ele] of idToElementMap.entries()) {
+    if (ele === lastElement) {
+      return id
     }
+  }
+  return undefined
+}
 
-    if (!lockId)
-      return false
+function isIgnoredElement(element: Element | null): boolean {
+  const lockId = getLastLockId()
+  if (!lockId || !element)
+    return false
 
-    const ignoredEle = ignoredElementMap.get(lockId)
-    return !!ignoredEle && (ignoredEle === element || ignoredEle.contains(element))
+  const ignoredEle = ignoredElementMap.get(lockId)
+  return !!ignoredEle && (ignoredEle === element || ignoredEle.contains(element))
+}
+
+function isAllowedElement(element: Element | null): boolean {
+  const lockId = getLastLockId()
+  if (!lockId || !element)
+    return false
+
+  const allowedElements = allowedElementMap.get(lockId)
+  if (!allowedElements?.size)
+    return false
+
+  for (const allowedElement of allowedElements) {
+    if (allowedElement === element || allowedElement.contains(element)) {
+      return true
+    }
   }
 
   return false
@@ -137,7 +157,7 @@ function syncFocus() {
   const { activeElement } = document
 
   // If current focus is on an ignored element, don't force it back
-  if (isIgnoredElement(activeElement))
+  if (isIgnoredElement(activeElement) || isAllowedElement(activeElement))
     return
 
   if (lastElement && !hasFocus(lastElement)) {
@@ -197,6 +217,7 @@ export function lockFocus(element: HTMLElement, id: string): VoidFunction {
     focusElements = focusElements.filter(ele => ele !== element)
     idToElementMap.delete(id)
     ignoredElementMap.delete(id)
+    allowedElementMap.delete(id)
     if (focusElements.length === 0) {
       window.removeEventListener('focusin', syncFocus)
       window.removeEventListener('keydown', onWindowKeyDown, true)
@@ -213,7 +234,10 @@ export function lockFocus(element: HTMLElement, id: string): VoidFunction {
 export function useLockFocus(
   lock: Ref<boolean>,
   getElement: () => HTMLElement | null,
-): [ignoreElement: (ele: HTMLElement) => void] {
+): [
+  ignoreElement: (ele: HTMLElement) => void,
+  registerAllowedElement: (ele: HTMLElement) => VoidFunction,
+] {
   const id = useId()
 
   watch(
@@ -236,5 +260,26 @@ export function useLockFocus(
       ignoredElementMap.set(id, ele)
   }
 
-  return [ignoreElement]
+  const registerAllowedElement = (ele: HTMLElement) => {
+    if (!ele) {
+      return () => {}
+    }
+
+    let allowedElements = allowedElementMap.get(id)
+    if (!allowedElements) {
+      allowedElements = new Set()
+      allowedElementMap.set(id, allowedElements)
+    }
+    allowedElements.add(ele)
+
+    return () => {
+      const nextAllowedElements = allowedElementMap.get(id)
+      nextAllowedElements?.delete(ele)
+      if (!nextAllowedElements?.size) {
+        allowedElementMap.delete(id)
+      }
+    }
+  }
+
+  return [ignoreElement, registerAllowedElement]
 }

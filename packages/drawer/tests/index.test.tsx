@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 import motionProps from '../docs/assets/motion.ts'
 import Drawer from '../src'
+import Trigger from '../../trigger/src'
 
 Object.defineProperty(window, 'getComputedStyle', {
   value: () => ({
@@ -70,6 +71,50 @@ describe('vc-drawer', () => {
     await nextTick()
     expect(wrapper.find('.vc-drawer-content-wrapper').exists()).toBeTruthy()
     expect(wrapper.find('.vc-drawer-content-wrapper').attributes('style')).toContain('display: none')
+    wrapper.unmount()
+    await nextTick()
+  })
+
+  it('keeps focus on a body-mounted popup input', async () => {
+    const wrapper = mount(Drawer, {
+      attachTo: document.body,
+      props: {
+        open: true,
+        getContainer: false,
+        placement: 'right',
+        width: 378,
+        mask: true,
+        maskClosable: true,
+        ...motionProps,
+      },
+      slots: {
+        default: () => (
+          <Trigger
+            popupVisible
+            popup={<input id="drawer-portal-input" />}
+          >
+            <button id="drawer-trigger" type="button">
+              trigger
+            </button>
+          </Trigger>
+        ),
+      },
+    })
+
+    await nextTick()
+    await nextTick()
+
+    const popupInput = document.getElementById('drawer-portal-input') as HTMLInputElement | null
+    const drawerElement = document.querySelector('.vc-drawer')
+
+    expect(popupInput).not.toBeNull()
+    expect(drawerElement?.contains(popupInput!)).toBe(false)
+
+    popupInput!.focus()
+    await nextTick()
+
+    expect(document.activeElement).toBe(popupInput)
+
     wrapper.unmount()
     await nextTick()
   })

@@ -1,5 +1,6 @@
 import type { Ref } from 'vue'
 import { useLockFocus } from '@v-c/util/dist/Dom/focus'
+import { useFocusBoundaryProvider } from '@v-c/util/dist/Dom/focusBoundary'
 import { computed, watch } from 'vue'
 
 export default function useFocusable(
@@ -12,7 +13,10 @@ export default function useFocusable(
   const mergedFocusTrap = computed(() => focusTrap?.value ?? mask?.value !== false)
 
   // Focus lock
-  useLockFocus(computed(() => open.value! && mergedFocusTrap.value), getContainer)
+  const [, registerAllowedElement] = useLockFocus(computed(() => open.value! && mergedFocusTrap.value), getContainer)
+  useFocusBoundaryProvider({
+    registerAllowedElement,
+  })
 
   // Auto Focus
   watch(
