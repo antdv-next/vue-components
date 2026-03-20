@@ -1,4 +1,4 @@
-import { onBeforeUnmount, ref, shallowRef } from 'vue'
+import { onBeforeUnmount, ref, shallowRef, triggerRef } from 'vue'
 import { nextSlice } from '../utils/timeUtil'
 
 const PATH_SPLIT = '__VC_UTIL_PATH_SPLIT__'
@@ -9,17 +9,22 @@ const getPathKeys = (keyPathStr: string) => keyPathStr.split(PATH_SPLIT)
 export const OVERFLOW_KEY = 'vc-menu-more'
 
 export default function useKeyRecords() {
-  const forceUpdateCount = ref(0)
   const key2pathRef = shallowRef(new Map<string, string>())
   const path2keyRef = shallowRef(new Map<string, string>())
   const overflowKeys = ref<string[]>([])
   const updateRef = ref(0)
   const destroyRef = ref(false)
 
-  const forceUpdate = () => {
-    if (!destroyRef.value) {
-      forceUpdateCount.value += 1
-    }
+  const schedulePathRegisterUpdate = () => {
+    updateRef.value += 1
+    const id = updateRef.value
+
+    nextSlice(() => {
+      if (!destroyRef.value && id === updateRef.value) {
+        triggerRef(key2pathRef)
+        triggerRef(path2keyRef)
+      }
+    })
   }
 
   const registerPath = (key: string, keyPath: string[]) => {
@@ -36,21 +41,14 @@ export default function useKeyRecords() {
     const connectedPath = getPathStr(keyPath)
     path2keyRef.value.set(connectedPath, key)
     key2pathRef.value.set(key, connectedPath)
-
-    updateRef.value += 1
-    const id = updateRef.value
-
-    nextSlice(() => {
-      if (id === updateRef.value) {
-        forceUpdate()
-      }
-    })
+    schedulePathRegisterUpdate()
   }
 
   const unregisterPath = (key: string, keyPath: string[]) => {
     const connectedPath = getPathStr(keyPath)
     path2keyRef.value.delete(connectedPath)
     key2pathRef.value.delete(key)
+    schedulePathRegisterUpdate()
   }
 
   const refreshOverflowKeys = (keys: string[]) => {
