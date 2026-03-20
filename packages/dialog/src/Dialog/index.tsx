@@ -4,7 +4,7 @@ import type { ContentRef } from './Content/Panel'
 import { warning } from '@v-c/util'
 import contains from '@v-c/util/dist/Dom/contains'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
-import { defineComponent, nextTick, onUnmounted, shallowRef, useId, watch } from 'vue'
+import { defineComponent, nextTick, shallowRef, useId, watch } from 'vue'
 import { getMotionName } from '../util'
 import Content from './Content'
 import Mask from './Mask'
@@ -75,8 +75,9 @@ const Dialog = defineComponent<IDialogPropTypes>(
         if (_animatedVisible) {
           props?.afterClose?.()
         }
-        props?.afterOpenChange?.(newVisible)
       }
+
+      props?.afterOpenChange?.(newVisible)
     }
 
     function onInternalClose(e: any) {
@@ -84,19 +85,7 @@ const Dialog = defineComponent<IDialogPropTypes>(
     }
 
     // >>> Content
-    const contentClickRef = shallowRef(false)
-    const contentTimeoutRef = shallowRef<ReturnType<typeof setTimeout>>()
-    // We need record content click incase content popup out of dialog
-    const onContentMouseDown = () => {
-      clearTimeout(contentTimeoutRef.value)
-      contentClickRef.value = true
-    }
-
-    const onContentMouseUp = () => {
-      contentTimeoutRef.value = setTimeout(() => {
-        contentClickRef.value = false
-      })
-    }
+    const mouseDownOnMaskRef = shallowRef(false)
 
     // >>> Wrapper
     // Close only when element not on dialog
@@ -106,19 +95,23 @@ const Dialog = defineComponent<IDialogPropTypes>(
       () => {
         if (props.maskClosable) {
           onWrapperClick = (e: any) => {
-            if (contentClickRef.value) {
-              contentClickRef.value = false
-            }
-            else if (wrapperRef.value === e.target) {
+            if (wrapperRef.value === e.target && mouseDownOnMaskRef.value) {
               onInternalClose(e)
             }
           }
+        }
+        else {
+          onWrapperClick = null
         }
       },
       {
         immediate: true,
       },
     )
+
+    function onWrapperMouseDown(e: MouseEvent) {
+      mouseDownOnMaskRef.value = e.target === wrapperRef.value
+    }
     // function onWrapperKeyDown(e: any) {
     //   if (props.keyboard && e === KeyCode.ESC) {
     //     e.stopPropagation()
@@ -131,6 +124,7 @@ const Dialog = defineComponent<IDialogPropTypes>(
       () => props.visible,
       () => {
         if (props.visible) {
+          mouseDownOnMaskRef.value = false
           animatedVisible.value = true
           saveLastOutSideActiveElementRef()
           nextTick(() => {
@@ -140,16 +134,21 @@ const Dialog = defineComponent<IDialogPropTypes>(
               isFixedPos.value = computedStyle.position === 'fixed'
             }
           })
+
+          if (!getMotionName(props.prefixCls!, props.transitionName, props.animation)) {
+            nextTick(() => {
+              onDialogVisibleChanged(true)
+            })
+          }
+        }
+        else if (animatedVisible.value && !getMotionName(props.prefixCls!, props.transitionName, props.animation)) {
+          onDialogVisibleChanged(false)
         }
       },
       {
         immediate: true,
       },
     )
-
-    onUnmounted(() => {
-      clearTimeout(contentTimeoutRef.value)
-    })
 
     expose({})
     return () => {
@@ -172,6 +171,7 @@ const Dialog = defineComponent<IDialogPropTypes>(
         maskStyle,
         maskProps,
         classNames: modalClassNames,
+        rootStyle,
       } = props
       const mergedStyle: CSSProperties = {
         zIndex,
@@ -184,6 +184,7 @@ const Dialog = defineComponent<IDialogPropTypes>(
       return (
         <div
           class={[`${prefixCls}-root`, rootClassName]}
+          style={rootStyle}
           {...pickAttrs(props, { data: true })}
         >
           <Mask
@@ -198,6 +199,7 @@ const Dialog = defineComponent<IDialogPropTypes>(
             class={[`${prefixCls}-wrap`, wrapClassName, modalClassNames?.wrapper]}
             ref={wrapperRef}
             onClick={onWrapperClick}
+            onMousedown={onWrapperMouseDown}
             style={mergedStyle}
             {...wrapProps}
           >
@@ -205,8 +207,6 @@ const Dialog = defineComponent<IDialogPropTypes>(
               {
                 ...{
                   ...props,
-                  onMouseDown: onContentMouseDown,
-                  onMouseUp: onContentMouseUp,
                   onClose: onInternalClose,
                   onVisibleChanged: onDialogVisibleChanged,
                 }

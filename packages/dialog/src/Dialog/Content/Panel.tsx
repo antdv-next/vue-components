@@ -127,7 +127,8 @@ const Panel = defineComponent<PanelProps & { animationVisible: boolean }>(
               onClick={onClose}
               aria-label="Close"
               {...ariaProps}
-              class={`${prefixCls}-close`}
+              class={classNames(`${prefixCls}-close`, modalClassNames?.close)}
+              style={modalStyles?.close}
               disabled={closeBtnIsDisabled}
             >
               {closableObj.closeIcon}

@@ -2,11 +2,17 @@ import type { GetContainer } from '@v-c/util/dist/PortalWrapper'
 import type { VueNode } from '@v-c/util/dist/type'
 import type { CSSProperties } from 'vue'
 
-export type SemanticName = 'header' | 'body' | 'footer' | 'container' | 'title' | 'wrapper' | 'mask'
+export type SemanticName = 'header' | 'body' | 'footer' | 'container' | 'title' | 'wrapper' | 'mask' | 'close'
 
 export type ModalClassNames = Partial<Record<SemanticName, string>>
 
 export type ModalStyles = Partial<Record<SemanticName, CSSProperties>>
+
+export type ClosableType = {
+  closeIcon?: VueNode
+  disabled?: boolean
+  afterClose?: () => any
+}
 
 export interface IDialogPropTypes {
   className?: string
@@ -18,7 +24,7 @@ export interface IDialogPropTypes {
   afterClose?: () => any
   afterOpenChange?: (open: boolean) => void
   onClose?: (e: any) => any
-  closable?: boolean | ({ closeIcon?: VueNode, disabled?: boolean } & Record<string, any>)
+  closable?: boolean | (ClosableType & Record<string, any>)
   maskClosable?: boolean
   visible?: boolean
   destroyOnHidden?: boolean

@@ -75,6 +75,8 @@ const DialogWrap = defineComponent<IDialogPropTypes>(
             v-slots={slots}
             destroyOnHidden={destroyOnHidden}
             afterClose={() => {
+              const closableObj = props.closable && typeof props.closable === 'object' ? props.closable : {}
+              closableObj.afterClose?.()
               afterClose?.()
               animatedVisible.value = false
             }}
