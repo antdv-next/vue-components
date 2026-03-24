@@ -139,6 +139,12 @@ export interface InputProps extends Omit<CommonInputProps, 'classNames' | 'style
   onKeyUp?: KeyboardEventHandler
   onCompositionStart?: CompositionEventHandler
   onCompositionEnd?: CompositionEventHandler
+  /**
+   * Whether to trigger onChange during IME composition.
+   * When false (default), onChange only fires after compositionEnd with the final value.
+   * When true, onChange fires on every keystroke including intermediate IME values.
+   */
+  changeOnComposing?: boolean
   components?: BaseInputProps['components']
   dataAttrs?: BaseInputProps['dataAttrs']
 }
@@ -156,6 +162,3 @@ export interface InputRef {
   nativeElement: HTMLElement | null
 }
 
-export interface ChangeEventInfo {
-  source: 'compositionEnd' | 'change'
-}

@@ -1,6 +1,6 @@
 import type { InputFocusOptions } from '@v-c/util/dist/Dom/focus'
 import type { HolderRef } from './BaseInput'
-import type { ChangeEventInfo, InputProps } from './interface'
+import type { InputProps } from './interface'
 import { clsx } from '@v-c/util'
 import { triggerFocus } from '@v-c/util/dist/Dom/focus'
 import { KeyCodeStr } from '@v-c/util/dist/KeyCode'
@@ -101,14 +101,17 @@ const Input = defineComponent<
     const triggerChange = (
       e: Event | CompositionEvent,
       currentValue: string,
-      info: ChangeEventInfo,
     ) => {
+      // Skip during IME composition to avoid emitting intermediate values
+      if (compositionRef.value && !props.changeOnComposing) {
+        return
+      }
+
       let cutValue = currentValue
       const config = countConfig.value
 
       if (
-        !compositionRef.value
-        && config?.exceedFormatter
+        config?.exceedFormatter
         && config.max
         && config.strategy(currentValue) > config.max
       ) {
@@ -123,9 +126,6 @@ const Input = defineComponent<
           ]
         }
       }
-      else if (info.source === 'compositionEnd') {
-        return
-      }
 
       if (props.value === undefined) {
         value.value = cutValue
@@ -137,9 +137,7 @@ const Input = defineComponent<
     }
 
     const onInternalChange = (e: Event) => {
-      triggerChange(e, (e.target as HTMLInputElement).value, {
-        source: 'change',
-      })
+      triggerChange(e, (e.target as HTMLInputElement).value)
     }
 
     const onInternalCompositionStart = (e: CompositionEvent) => {
@@ -149,9 +147,10 @@ const Input = defineComponent<
 
     const onInternalCompositionEnd = (e: CompositionEvent) => {
       compositionRef.value = false
-      triggerChange(e, (e.target as HTMLInputElement).value, {
-        source: 'compositionEnd',
-      })
+      // Must trigger change here because in Chrome/Safari the final input event
+      // fires BEFORE compositionend (while compositionRef is still true),
+      // and no additional input event fires after compositionend.
+      triggerChange(e, (e.target as HTMLInputElement).value)
       props?.onCompositionEnd?.(e as any)
     }
 
@@ -305,6 +304,7 @@ const Input = defineComponent<
           'onCompositionStart',
           'onCompositionEnd',
           'onInput',
+          'changeOnComposing',
         ],
       )
 
