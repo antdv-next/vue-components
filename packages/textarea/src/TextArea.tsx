@@ -23,6 +23,8 @@ const TextArea = defineComponent<TextAreaProps>(
     const formatValue = computed(() => value.value === undefined || value.value === null ? '' : String(value.value))
     const focused = shallowRef(false)
     const compositionRef = shallowRef(false)
+    // Track the value emitted by compositionEnd to dedup Firefox's subsequent input event
+    const compositionEndValueRef = shallowRef<string | null>(null)
 
     const textareaResized = shallowRef<boolean>()
 
@@ -78,8 +80,23 @@ const TextArea = defineComponent<TextAreaProps>(
 
     // ============================== Change ==============================
     const triggerChange = (e: any, currentValue: string) => {
+      // Skip during IME composition to avoid emitting intermediate values
+      if (compositionRef.value && !props.changeOnComposing) {
+        return
+      }
+
+      // Dedup: Firefox fires input event(s) AFTER compositionend with the same value.
+      // Keep blocking until a genuinely different value arrives.
+      if (compositionEndValueRef.value !== null) {
+        if (currentValue === compositionEndValueRef.value) {
+          return
+        }
+        compositionEndValueRef.value = null
+      }
+
       let cutValue = currentValue
-      if (!compositionRef.value
+      if (
+        !compositionRef.value
         && countConfig.value.exceedFormatter
         && countConfig.value.max
         && countConfig.value.strategy(currentValue) > countConfig.value.max
@@ -101,7 +118,7 @@ const TextArea = defineComponent<TextAreaProps>(
         }
       }
       const textarea = getTextArea()
-      if (!compositionRef.value && textarea && textarea.value !== cutValue) {
+      if (textarea && textarea.value !== cutValue) {
         textarea.value = cutValue
       }
 
@@ -113,12 +130,26 @@ const TextArea = defineComponent<TextAreaProps>(
     // =========================== Value Update ===========================
     const onInternalCompositionStart = () => {
       compositionRef.value = true
+      // Clear stale dedup marker from previous composition cycle
+      compositionEndValueRef.value = null
     }
 
     const onInternalCompositionEnd = (e: any) => {
       compositionRef.value = false
-      // Trigger change event after composition end
-      triggerChange(e, e.currentTarget.value)
+      const currentValue = e.currentTarget.value
+      // When changeOnComposing is true, the input event before compositionend
+      // already fired onChange with the final value — skip to avoid duplicate.
+      // When guard is on (default), the input event was blocked, so we must
+      // trigger here as Chrome/Safari fire input BEFORE compositionend.
+      // Also skip if value hasn't changed (e.g. composition cancelled via Esc).
+      if (!props.changeOnComposing && currentValue !== formatValue.value) {
+        triggerChange(e, currentValue)
+      }
+      // Always set dedup ref after compositionend: Firefox fires input event(s)
+      // after compositionend regardless of whether value changed or not
+      if (!props.changeOnComposing) {
+        compositionEndValueRef.value = currentValue
+      }
     }
 
     const onInternalChange = (e: any) => {
@@ -144,6 +175,7 @@ const TextArea = defineComponent<TextAreaProps>(
 
     // ============================== Reset ===============================
     const handleReset = (e: MouseEvent) => {
+      compositionEndValueRef.value = null
       value.value = ''
       focus()
       resolveOnChange(getTextArea(), e, props.onChange as unknown as any)
@@ -258,6 +290,7 @@ const TextArea = defineComponent<TextAreaProps>(
               'onPressEnter',
               'onFocus',
               'onBlur',
+              'changeOnComposing',
             ])}
             autoSize={autoSize}
             maxLength={maxLength}

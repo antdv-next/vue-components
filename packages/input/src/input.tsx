@@ -1,6 +1,6 @@
 import type { InputFocusOptions } from '@v-c/util/dist/Dom/focus'
 import type { HolderRef } from './BaseInput'
-import type { ChangeEventInfo, InputProps } from './interface'
+import type { InputProps } from './interface'
 import { clsx } from '@v-c/util'
 import { triggerFocus } from '@v-c/util/dist/Dom/focus'
 import { KeyCodeStr } from '@v-c/util/dist/KeyCode'
@@ -22,6 +22,8 @@ const Input = defineComponent<
     const focused = shallowRef(false)
     const compositionRef = shallowRef(false)
     const keyLockRef = shallowRef(false)
+    // Track the value emitted by compositionEnd to dedup Firefox's subsequent input event
+    const compositionEndValueRef = shallowRef<string | null>(null)
     const { count, showCount } = toPropsRefs(props, 'count', 'showCount')
 
     const onChange = (e: Event) => {
@@ -101,8 +103,21 @@ const Input = defineComponent<
     const triggerChange = (
       e: Event | CompositionEvent,
       currentValue: string,
-      info: ChangeEventInfo,
     ) => {
+      // Skip during IME composition to avoid emitting intermediate values
+      if (compositionRef.value && !props.changeOnComposing) {
+        return
+      }
+
+      // Dedup: Firefox fires input event(s) AFTER compositionend with the same value.
+      // Keep blocking until a genuinely different value arrives.
+      if (compositionEndValueRef.value !== null) {
+        if (currentValue === compositionEndValueRef.value) {
+          return
+        }
+        compositionEndValueRef.value = null
+      }
+
       let cutValue = currentValue
       const config = countConfig.value
 
@@ -123,9 +138,6 @@ const Input = defineComponent<
           ]
         }
       }
-      else if (info.source === 'compositionEnd') {
-        return
-      }
 
       if (props.value === undefined) {
         value.value = cutValue
@@ -137,21 +149,32 @@ const Input = defineComponent<
     }
 
     const onInternalChange = (e: Event) => {
-      triggerChange(e, (e.target as HTMLInputElement).value, {
-        source: 'change',
-      })
+      triggerChange(e, (e.target as HTMLInputElement).value)
     }
 
     const onInternalCompositionStart = (e: CompositionEvent) => {
       compositionRef.value = true
+      // Clear stale dedup marker from previous composition cycle
+      compositionEndValueRef.value = null
       props?.onCompositionStart?.(e as any)
     }
 
     const onInternalCompositionEnd = (e: CompositionEvent) => {
       compositionRef.value = false
-      triggerChange(e, (e.target as HTMLInputElement).value, {
-        source: 'compositionEnd',
-      })
+      const currentValue = (e.target as HTMLInputElement).value
+      // When changeOnComposing is true, the input event before compositionend
+      // already fired onChange with the final value — skip to avoid duplicate.
+      // When guard is on (default), the input event was blocked, so we must
+      // trigger here as Chrome/Safari fire input BEFORE compositionend.
+      // Also skip if value hasn't changed (e.g. composition cancelled via Esc).
+      if (!props.changeOnComposing && currentValue !== formatValue.value) {
+        triggerChange(e, currentValue)
+      }
+      // Always set dedup ref after compositionend: Firefox fires input event(s)
+      // after compositionend regardless of whether value changed or not
+      if (!props.changeOnComposing) {
+        compositionEndValueRef.value = currentValue
+      }
       props?.onCompositionEnd?.(e as any)
     }
 
@@ -187,6 +210,7 @@ const Input = defineComponent<
     }
 
     const handleReset = (e: MouseEvent) => {
+      compositionEndValueRef.value = null
       if (props.value === undefined) {
         value.value = ''
       }
@@ -305,6 +329,7 @@ const Input = defineComponent<
           'onCompositionStart',
           'onCompositionEnd',
           'onInput',
+          'changeOnComposing',
         ],
       )
 
