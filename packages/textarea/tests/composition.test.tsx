@@ -63,6 +63,34 @@ describe('textarea IME composition guard', () => {
     expect(onChange).toHaveBeenCalledTimes(3)
   })
 
+  it('should dedup Firefox compositionend→input sequence (default mode)', async () => {
+    const onChange = vi.fn()
+    const wrapper = mount(TextArea, {
+      props: { onChange },
+    })
+    const textarea = wrapper.find('textarea')
+    const el = textarea.element as HTMLTextAreaElement
+
+    await textarea.trigger('compositionstart')
+    el.value = 'h'
+    await textarea.trigger('input')
+    el.value = 'hei'
+    await textarea.trigger('input')
+
+    expect(onChange).not.toHaveBeenCalled()
+
+    // Firefox: compositionend first
+    el.value = '黑'
+    await textarea.trigger('compositionend')
+    await nextTick()
+    expect(onChange).toHaveBeenCalledTimes(1)
+
+    // Firefox: then input with same value — should be deduped
+    await textarea.trigger('input')
+    await nextTick()
+    expect(onChange).toHaveBeenCalledTimes(1)
+  })
+
   it('should trigger onChange normally for non-IME input', async () => {
     const onChange = vi.fn()
     const wrapper = mount(TextArea, {

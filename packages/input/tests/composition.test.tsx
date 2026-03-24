@@ -62,6 +62,61 @@ describe('input IME composition guard', () => {
     expect(onChange).toHaveBeenCalledTimes(3)
   })
 
+  it('should dedup Firefox compositionend→input sequence (default mode)', async () => {
+    const onChange = vi.fn()
+    const wrapper = mount(Input, {
+      props: { onChange },
+    })
+    const input = wrapper.find('input')
+    const inputEl = input.element as HTMLInputElement
+
+    // Simulate Firefox event order: compositionend fires BEFORE the final input
+    await input.trigger('compositionstart')
+    inputEl.value = 'h'
+    await input.trigger('input')
+    inputEl.value = 'he'
+    await input.trigger('input')
+    inputEl.value = 'hei'
+    await input.trigger('input')
+
+    expect(onChange).not.toHaveBeenCalled()
+
+    // Firefox: compositionend first
+    inputEl.value = '黑'
+    await input.trigger('compositionend')
+    await nextTick()
+    expect(onChange).toHaveBeenCalledTimes(1)
+
+    // Firefox: then input with same value — should be deduped
+    await input.trigger('input')
+    await nextTick()
+    expect(onChange).toHaveBeenCalledTimes(1)
+  })
+
+  it('should not run exceedFormatter during composition (changeOnComposing=true)', async () => {
+    const onChange = vi.fn()
+    const exceedFormatter = vi.fn((val: string) => val.slice(0, 2))
+    const wrapper = mount(Input, {
+      props: {
+        onChange,
+        changeOnComposing: true,
+        count: { max: 2, strategy: (v: string) => v.length, exceedFormatter },
+      },
+    })
+    const input = wrapper.find('input')
+    const inputEl = input.element as HTMLInputElement
+
+    await input.trigger('compositionstart')
+    inputEl.value = 'hei'
+    await input.trigger('input')
+
+    // exceedFormatter should NOT be called during composition
+    // even though 'hei' exceeds max=2
+    expect(exceedFormatter).not.toHaveBeenCalled()
+    // onChange still fires (changeOnComposing=true)
+    expect(onChange).toHaveBeenCalledTimes(1)
+  })
+
   it('should trigger onChange normally for non-IME input', async () => {
     const onChange = vi.fn()
     const wrapper = mount(Input, {
