@@ -78,9 +78,14 @@ const TextArea = defineComponent<TextAreaProps>(
 
     // ============================== Change ==============================
     const triggerChange = (e: any, currentValue: string) => {
+      // Skip during IME composition to avoid emitting intermediate values
+      if (compositionRef.value && !props.changeOnComposing) {
+        return
+      }
+
       let cutValue = currentValue
-      if (!compositionRef.value
-        && countConfig.value.exceedFormatter
+      if (
+        countConfig.value.exceedFormatter
         && countConfig.value.max
         && countConfig.value.strategy(currentValue) > countConfig.value.max
       ) {
@@ -101,7 +106,7 @@ const TextArea = defineComponent<TextAreaProps>(
         }
       }
       const textarea = getTextArea()
-      if (!compositionRef.value && textarea && textarea.value !== cutValue) {
+      if (textarea && textarea.value !== cutValue) {
         textarea.value = cutValue
       }
 
@@ -117,7 +122,9 @@ const TextArea = defineComponent<TextAreaProps>(
 
     const onInternalCompositionEnd = (e: any) => {
       compositionRef.value = false
-      // Trigger change event after composition end
+      // Must trigger change here because in Chrome/Safari the final input event
+      // fires BEFORE compositionend (while compositionRef is still true),
+      // and no additional input event fires after compositionend.
       triggerChange(e, e.currentTarget.value)
     }
 
@@ -258,6 +265,7 @@ const TextArea = defineComponent<TextAreaProps>(
               'onPressEnter',
               'onFocus',
               'onBlur',
+              'changeOnComposing',
             ])}
             autoSize={autoSize}
             maxLength={maxLength}

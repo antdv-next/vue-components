@@ -43,6 +43,12 @@ export interface TextAreaProps {
   onKeyup?: (e: KeyboardEvent) => void
   onFocus?: (e: FocusEvent) => void
   onBlur?: (e: FocusEvent) => void
+  /**
+   * Whether to trigger onChange during IME composition.
+   * When false (default), onChange only fires after compositionEnd with the final value.
+   * When true, onChange fires on every keystroke including intermediate IME values.
+   */
+  changeOnComposing?: boolean
 }
 
 export interface TextAreaRef {
