@@ -109,13 +109,13 @@ const Input = defineComponent<
         return
       }
 
-      // Dedup: Firefox fires input AFTER compositionend with the same value
+      // Dedup: Firefox fires input event(s) AFTER compositionend with the same value.
+      // Keep blocking until a genuinely different value arrives.
       if (compositionEndValueRef.value !== null) {
-        const lastValue = compositionEndValueRef.value
-        compositionEndValueRef.value = null
-        if (currentValue === lastValue) {
+        if (currentValue === compositionEndValueRef.value) {
           return
         }
+        compositionEndValueRef.value = null
       }
 
       let cutValue = currentValue
@@ -167,7 +167,10 @@ const Input = defineComponent<
       // Also skip if value hasn't changed (e.g. composition cancelled via Esc).
       if (!props.changeOnComposing && currentValue !== formatValue.value) {
         triggerChange(e, currentValue)
-        // Mark for dedup: Firefox fires input AFTER compositionend with same value
+      }
+      // Always set dedup ref after compositionend: Firefox fires input event(s)
+      // after compositionend regardless of whether value changed or not
+      if (!props.changeOnComposing) {
         compositionEndValueRef.value = currentValue
       }
       props?.onCompositionEnd?.(e as any)
