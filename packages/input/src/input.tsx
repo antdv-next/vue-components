@@ -154,6 +154,8 @@ const Input = defineComponent<
 
     const onInternalCompositionStart = (e: CompositionEvent) => {
       compositionRef.value = true
+      // Clear stale dedup marker from previous composition cycle
+      compositionEndValueRef.value = null
       props?.onCompositionStart?.(e as any)
     }
 
@@ -208,6 +210,7 @@ const Input = defineComponent<
     }
 
     const handleReset = (e: MouseEvent) => {
+      compositionEndValueRef.value = null
       if (props.value === undefined) {
         value.value = ''
       }

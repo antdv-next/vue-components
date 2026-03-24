@@ -130,6 +130,8 @@ const TextArea = defineComponent<TextAreaProps>(
     // =========================== Value Update ===========================
     const onInternalCompositionStart = () => {
       compositionRef.value = true
+      // Clear stale dedup marker from previous composition cycle
+      compositionEndValueRef.value = null
     }
 
     const onInternalCompositionEnd = (e: any) => {
@@ -173,6 +175,7 @@ const TextArea = defineComponent<TextAreaProps>(
 
     // ============================== Reset ===============================
     const handleReset = (e: MouseEvent) => {
+      compositionEndValueRef.value = null
       value.value = ''
       focus()
       resolveOnChange(getTextArea(), e, props.onChange as unknown as any)
