@@ -58,8 +58,9 @@ describe('textarea IME composition guard', () => {
     await textarea.trigger('compositionend')
     await nextTick()
 
-    // compositionend also triggers onChange
-    expect(onChange).toHaveBeenCalledTimes(4)
+    // compositionend skips triggerChange when changeOnComposing is true
+    // (the input event before compositionend already handled the final value)
+    expect(onChange).toHaveBeenCalledTimes(3)
   })
 
   it('should trigger onChange normally for non-IME input', async () => {

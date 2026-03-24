@@ -147,10 +147,15 @@ const Input = defineComponent<
 
     const onInternalCompositionEnd = (e: CompositionEvent) => {
       compositionRef.value = false
-      // Must trigger change here because in Chrome/Safari the final input event
-      // fires BEFORE compositionend (while compositionRef is still true),
-      // and no additional input event fires after compositionend.
-      triggerChange(e, (e.target as HTMLInputElement).value)
+      const currentValue = (e.target as HTMLInputElement).value
+      // When changeOnComposing is true, the input event before compositionend
+      // already fired onChange with the final value — skip to avoid duplicate.
+      // When guard is on (default), the input event was blocked, so we must
+      // trigger here as Chrome/Safari fire input BEFORE compositionend.
+      // Also skip if value hasn't changed (e.g. composition cancelled via Esc).
+      if (!props.changeOnComposing && currentValue !== formatValue.value) {
+        triggerChange(e, currentValue)
+      }
       props?.onCompositionEnd?.(e as any)
     }
 
