@@ -22,6 +22,8 @@ const Input = defineComponent<
     const focused = shallowRef(false)
     const compositionRef = shallowRef(false)
     const keyLockRef = shallowRef(false)
+    // Track the value emitted by compositionEnd to dedup Firefox's subsequent input event
+    const compositionEndValueRef = shallowRef<string | null>(null)
     const { count, showCount } = toPropsRefs(props, 'count', 'showCount')
 
     const onChange = (e: Event) => {
@@ -107,11 +109,21 @@ const Input = defineComponent<
         return
       }
 
+      // Dedup: Firefox fires input AFTER compositionend with the same value
+      if (compositionEndValueRef.value !== null) {
+        const lastValue = compositionEndValueRef.value
+        compositionEndValueRef.value = null
+        if (currentValue === lastValue) {
+          return
+        }
+      }
+
       let cutValue = currentValue
       const config = countConfig.value
 
       if (
-        config?.exceedFormatter
+        !compositionRef.value
+        && config?.exceedFormatter
         && config.max
         && config.strategy(currentValue) > config.max
       ) {
@@ -155,6 +167,8 @@ const Input = defineComponent<
       // Also skip if value hasn't changed (e.g. composition cancelled via Esc).
       if (!props.changeOnComposing && currentValue !== formatValue.value) {
         triggerChange(e, currentValue)
+        // Mark for dedup: Firefox fires input AFTER compositionend with same value
+        compositionEndValueRef.value = currentValue
       }
       props?.onCompositionEnd?.(e as any)
     }

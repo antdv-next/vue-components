@@ -23,6 +23,8 @@ const TextArea = defineComponent<TextAreaProps>(
     const formatValue = computed(() => value.value === undefined || value.value === null ? '' : String(value.value))
     const focused = shallowRef(false)
     const compositionRef = shallowRef(false)
+    // Track the value emitted by compositionEnd to dedup Firefox's subsequent input event
+    const compositionEndValueRef = shallowRef<string | null>(null)
 
     const textareaResized = shallowRef<boolean>()
 
@@ -83,9 +85,19 @@ const TextArea = defineComponent<TextAreaProps>(
         return
       }
 
+      // Dedup: Firefox fires input AFTER compositionend with the same value
+      if (compositionEndValueRef.value !== null) {
+        const lastValue = compositionEndValueRef.value
+        compositionEndValueRef.value = null
+        if (currentValue === lastValue) {
+          return
+        }
+      }
+
       let cutValue = currentValue
       if (
-        countConfig.value.exceedFormatter
+        !compositionRef.value
+        && countConfig.value.exceedFormatter
         && countConfig.value.max
         && countConfig.value.strategy(currentValue) > countConfig.value.max
       ) {
@@ -130,6 +142,8 @@ const TextArea = defineComponent<TextAreaProps>(
       // Also skip if value hasn't changed (e.g. composition cancelled via Esc).
       if (!props.changeOnComposing && currentValue !== formatValue.value) {
         triggerChange(e, currentValue)
+        // Mark for dedup: Firefox fires input AFTER compositionend with same value
+        compositionEndValueRef.value = currentValue
       }
     }
 
