@@ -75,6 +75,7 @@ export interface ImageProps extends Partial<Omit<ImageElementProps, 'src'>> {
   // Events
   onClick?: (e: MouseEvent) => void
   onError?: (e: Event) => void
+  onKeydown?: (e: KeyboardEvent) => void
 
   width?: string | number
   height?: string | number
@@ -185,6 +186,33 @@ const Image = defineComponent<ImageProps>(
       props.onError?.(e)
     }
 
+    // ======================= Keyboard Preview =====================
+  const onPreviewKeyDown = (event: KeyboardEvent) => {
+    props.onKeydown?.(event);
+
+    if (!canPreview) {
+      return;
+    }
+
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+
+      const rect = (event.target as HTMLDivElement).getBoundingClientRect();
+      const left = rect.x + rect.width / 2;
+      const top = rect.y + rect.height / 2;
+
+      if (groupContext) {
+        groupContext.onPreview(imageId, src.value || '', left, top);
+      } else {
+        mousePosition.value = {
+          x: left,
+          y: top,
+        }
+        triggerPreviewOpen(true);
+      }
+    }
+  };
+
     // =========================== Render ===========================
     return () => {
       const { width, height } = props
@@ -261,6 +289,10 @@ const Image = defineComponent<ImageProps>(
             {...pickAttrs(restAttrs, false)}
             class={rootCls}
             onClick={canPreview.value ? onPreview : onInternalClick}
+            role={canPreview ? 'button' : restAttrs.role}
+            tabindex={canPreview && restAttrs.tabIndex == null ? 0 : restAttrs.tabIndex}
+            aria-label={canPreview ? restAttrs['aria-label'] ?? restAttrs.alt : restAttrs['aria-label']}
+            onKeydown={onPreviewKeyDown}
             style={rootStyle}
           >
             <img

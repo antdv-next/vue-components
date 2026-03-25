@@ -7,6 +7,7 @@ import type { FooterSemanticName } from './Footer'
 import Portal from '@v-c/portal'
 import { clsx } from '@v-c/util'
 import canUseDom from '@v-c/util/dist/Dom/canUseDom'
+import { useLockFocus } from '@v-c/util/dist/Dom/focus'
 import { KeyCodeStr } from '@v-c/util/dist/KeyCode'
 import { getTransitionProps } from '@v-c/util/dist/utils/transition'
 import { computed, defineComponent, nextTick, shallowRef, Transition, watch, watchEffect } from 'vue'
@@ -155,6 +156,7 @@ const defaults = {
 const Preview = defineComponent<PreviewProps>(
   (props = defaults, { attrs, slots }) => {
     const imgEl = shallowRef<HTMLImageElement>()
+    const wrapperRef =shallowRef<HTMLDivElement | null>(null);
     const groupContext = usePreviewGroupContext()
 
     const showLeftOrRightSwitches = computed(() => !!groupContext && (props.count ?? 1) > 1)
@@ -329,6 +331,8 @@ const Preview = defineComponent<PreviewProps>(
       src: computed(() => props.src),
       fallback: computed(() => props.fallback),
     })
+    // =========================== Focus ============================
+    useLockFocus(portalRender, () => wrapperRef.value);
 
     // ========================== Render ==========================
     return () => {
@@ -353,6 +357,7 @@ const Preview = defineComponent<PreviewProps>(
         mousePosition,
         zIndex,
         icons = {},
+        movable = true
       } = props
 
       const bodyStyle: CSSProperties = {
@@ -409,6 +414,7 @@ const Preview = defineComponent<PreviewProps>(
         rootClassName,
         classNames.root,
         {
+          [`${prefixCls}-movable`]: movable,
           [`${prefixCls}-moving`]: isMoving.value,
         },
       )
@@ -432,7 +438,15 @@ const Preview = defineComponent<PreviewProps>(
               }
 
               return (
-                <div class={mergedRootCls} style={mergedRootStyle}>
+                <div
+                  ref={wrapperRef}
+                  class={mergedRootCls}
+                  style={mergedRootStyle}
+                  role="dialog"
+                  aria-modal="true"
+                  aria-label={alt}
+                  tabindex={-1}
+                >
                   {/* Mask */}
                   <div
                     class={clsx(`${prefixCls}-mask`, classNames.mask)}

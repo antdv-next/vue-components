@@ -50,7 +50,8 @@ const Footer = defineComponent<FooterProps>(
     const renderOperation = ({ type, disabled, onClick, icon }: RenderOperationParams) => {
       const actionCls = `${props.prefixCls}-actions-action`
       return (
-        <div
+        <button
+          type="button"
           key={type}
           class={clsx(actionCls, `${actionCls}-${type}`, {
             [`${actionCls}-disabled`]: !!disabled,
@@ -60,9 +61,11 @@ const Footer = defineComponent<FooterProps>(
               onClick()
             }
           }}
+          disabled={!!disabled}
+          aria-label={type}
         >
           {icon}
-        </div>
+        </button>
       )
     }
 

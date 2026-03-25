@@ -20,35 +20,37 @@ const PrevNext = defineComponent<PrevNextProps>(
       const prevIcon = (icons.prev ?? icons.left) as VueNode
       const nextIcon = (icons.next ?? icons.right) as VueNode
 
-      const isPrevDisabled = current === 0
-      const isNextDisabled = current === count - 1
+      const prevDisabled = current === 0
+      const nextDisabled = current === count - 1
 
       return (
         <>
-          <div
+          <button
+            type='button'
             class={clsx(switchCls, `${switchCls}-prev`, {
-              [`${switchCls}-disabled`]: isPrevDisabled,
+              [`${switchCls}-disabled`]: prevDisabled,
             })}
             onClick={() => {
-              if (!isPrevDisabled) {
+              if (!prevDisabled) {
                 onActive(-1)
               }
             }}
           >
             {prevIcon}
-          </div>
-          <div
+          </button>
+          <button
+            type='button'
             class={clsx(switchCls, `${switchCls}-next`, {
-              [`${switchCls}-disabled`]: isNextDisabled,
+              [`${switchCls}-disabled`]: nextDisabled,
             })}
             onClick={() => {
-              if (!isNextDisabled) {
+              if (!nextDisabled) {
                 onActive(1)
               }
             }}
           >
             {nextIcon}
-          </div>
+          </button>
         </>
       )
     }
