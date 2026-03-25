@@ -8,7 +8,7 @@ const entry = resolveBuildEntries(packageRoot, ['src/**/*.ts', 'src/**/*.tsx', '
 export default defineConfig({
   ...mergeConfig(buildCommon({
     packageRoot,
-    external: ['vue', '@v-c/portal', '@v-c/util'],
+    external: ['vue', '@v-c/portal', /^@v-c\//],
   }), {
     build: {
       lib: {
