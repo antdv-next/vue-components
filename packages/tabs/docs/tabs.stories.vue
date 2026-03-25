@@ -8,7 +8,8 @@ import Indicator from './indicator.vue'
 import Mix from './mix.vue'
 import Overflow from './overflow.vue'
 import Position from './position.vue'
-import RenderTabBarDragable from './renderTabBar-dragable.vue'
+import RenderTabBarDraggableSlot from './renderTabBar-draggable-slot.vue'
+import RenderTabBarDraggable from './renderTabBar-draggable.vue'
 import RenderTabBarSticky from './renderTabBar-sticky.vue'
 </script>
 
@@ -50,8 +51,12 @@ import RenderTabBarSticky from './renderTabBar-sticky.vue'
       <Overflow />
     </Variant>
 
-    <Variant title="RenderTabBar-Dragable">
-      <RenderTabBarDragable />
+    <Variant title="RenderTabBar-Draggable-Slot">
+      <RenderTabBarDraggableSlot />
+    </Variant>
+
+    <Variant title="RenderTabBar-Draggable">
+      <RenderTabBarDraggable />
     </Variant>
 
     <Variant title="RenderTabBar-Sticky">
