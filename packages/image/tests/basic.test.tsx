@@ -70,4 +70,14 @@ describe('basic', () => {
     expect(wrapperBottom.find('.vc-image-cover.vc-image-cover-center').exists()).toBe(false)
     expect(wrapperBottom.find('.vc-image-cover.vc-image-cover-top').exists()).toBe(false)
   })
+
+  it('should pass fetchPriority to img element', () => {
+    const wrapper = mount(Image, {
+      props: {
+        src: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
+        fetchPriority: 'high'
+      }
+    })
+    expect(wrapper.html()).toContain('fetchpriority="high"');
+  });
 })

@@ -78,6 +78,7 @@ export interface ImageProps extends Partial<Omit<ImageElementProps, 'src'>> {
 
   width?: string | number
   height?: string | number
+  fetchPriority?: HTMLImageElement['fetchPriority']
 }
 
 const defaults = {
