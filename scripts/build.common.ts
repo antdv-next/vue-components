@@ -1,17 +1,62 @@
 import type { Plugin, PluginOption, UserConfig } from 'vite'
+import { resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
+import fg from 'fast-glob'
+import { normalizePath } from 'vite'
 import dts from 'vite-plugin-dts'
 import tsxResolveTypes from 'vite-plugin-tsx-resolve-types'
 
 export interface BuildCommonOptions {
   external?: string[] | RegExp[] | ((id: string) => boolean) | (string | RegExp)[]
+  packageRoot?: string | URL
   inputDir?: string
   dts?: boolean
   plugins?: PluginOption[] | Plugin[]
 }
+
+export interface ResolvedBuildPaths {
+  packageRoot: string
+  inputDir: string
+  outDir: string
+  tsconfigPath: string
+}
+
+function resolvePackageRoot(packageRoot: string | URL) {
+  if (packageRoot instanceof URL) {
+    const rootPath = packageRoot.protocol === 'file:'
+      ? fileURLToPath(packageRoot)
+      : decodeURIComponent(packageRoot.pathname).replace(/^\/@fs(?=\/)/, '')
+
+    return normalizePath(rootPath)
+  }
+
+  return normalizePath(resolve(packageRoot))
+}
+
+export function resolveBuildPaths(packageRoot: string | URL, inputDir = 'src'): ResolvedBuildPaths {
+  const normalizedPackageRoot = resolvePackageRoot(packageRoot)
+
+  return {
+    packageRoot: normalizedPackageRoot,
+    inputDir: normalizePath(resolve(normalizedPackageRoot, inputDir)),
+    outDir: normalizePath(resolve(normalizedPackageRoot, 'dist')),
+    tsconfigPath: normalizePath(resolve(normalizedPackageRoot, 'tsconfig.json')),
+  }
+}
+
+export function resolveBuildEntries(packageRoot: string | URL, patterns: string[]) {
+  return fg.sync(patterns, {
+    absolute: true,
+    cwd: resolvePackageRoot(packageRoot),
+    onlyFiles: true,
+  }).map(entry => normalizePath(entry))
+}
+
 export function buildCommon(opt: BuildCommonOptions) {
   const { dts: dtsOpen = true } = opt
+  const paths = resolveBuildPaths(opt.packageRoot ?? process.cwd(), opt.inputDir)
   const plugins = [
     vue(),
     vueJsx(),
@@ -22,8 +67,10 @@ export function buildCommon(opt: BuildCommonOptions) {
   ]
   if (dtsOpen) {
     plugins.push(dts({
-      root: process.cwd(),
-      entryRoot: opt.inputDir ?? 'src',
+      entryRoot: paths.inputDir,
+      outDir: paths.outDir,
+      root: paths.packageRoot,
+      tsconfigPath: paths.tsconfigPath,
       exclude: [
         '**/tests/**/*',
         '**/*.test.ts',
@@ -40,10 +87,10 @@ export function buildCommon(opt: BuildCommonOptions) {
         output: [
           {
             preserveModules: true,
-            preserveModulesRoot: opt.inputDir ?? 'src',
+            preserveModulesRoot: paths.inputDir,
             format: 'esm',
             entryFileNames: '[name].js',
-            dir: 'dist',
+            dir: paths.outDir,
           },
         ],
       },
