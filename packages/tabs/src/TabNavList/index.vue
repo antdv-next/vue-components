@@ -3,7 +3,7 @@ import type { CSSProperties, Ref } from 'vue'
 import type { SizeInfo, Tab, TabNavListProps } from '../interface'
 import ResizeObserver from '@v-c/resize-observer'
 import RenderComponent from '@v-c/util/dist/RenderComponent'
-import { computed, h, nextTick, onUnmounted, ref, shallowRef, toRefs, watch } from 'vue'
+import { computed, Fragment, h, nextTick, onUnmounted, ref, shallowRef, toRefs, useSlots, watch } from 'vue'
 import useIndicator from '../hooks/useIndicator'
 import useOffsets from '../hooks/useOffsets'
 import useTouchMove from '../hooks/useTouchMove'
@@ -47,6 +47,31 @@ const {
 } = toRefs(props)
 
 const tabBarGutter = computed(() => tabBarGutterProp.value ? `${tabBarGutterProp.value}px` : undefined)
+
+// Support scoped default slot as `children` wrapper function.
+// When consumer uses `<template #default="node">...</template>`,
+// we invoke the slot for each internal `TabNode`.
+const slots = useSlots()
+const defaultSlotWrapper = computed(() => {
+  if (!slots.default)
+    return undefined
+
+  return (node: any) => {
+    // Pass the tab node directly so `#default="node"` works.
+    const slotResult = slots.default?.(node)
+    if (!slotResult)
+      return node
+
+    // Preserve fragment semantics (no extra wrapper element).
+    if (Array.isArray(slotResult))
+      return slotResult.length ? h(Fragment, null, slotResult) : node
+
+    // Slot can return a single VNode.
+    return slotResult
+  }
+})
+
+const renderWrapper = computed(() => children.value ?? defaultSlotWrapper.value)
 
 // const { tabs, prefixCls } = toRefs(useTabContext()?.value || {})
 const ctx = useTabContext()
@@ -562,7 +587,7 @@ watch(rtl, () => {
                   editable,
                   active: tab.key === activeKey,
                   focus: tab.key === focusKey,
-                  renderWrapper: children,
+                  renderWrapper,
                   removeAriaLabel: locale?.removeAriaLabel,
                   tabCount: tabs.filter(t => !t.disabled).length,
                   currentPosition: i + 1,
@@ -602,7 +627,6 @@ watch(rtl, () => {
       />
 
       <ExtraContent ref="extraRightRef" position="right" :prefix-cls="prefixCls" :extra="extra" />
-      <RenderComponent :render="children" />
     </div>
   </ResizeObserver>
 </template>
