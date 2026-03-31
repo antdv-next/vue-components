@@ -51,6 +51,12 @@ export default defineComponent({
         component: Component = 'div',
         style,
       } = props
+      const {
+        class: classAttr,
+        className,
+        style: styleAttr,
+        ...restAttrs
+      } = attrs as HTMLAttributes & { className?: any }
 
       const children = slots.default?.()
       const childNode
@@ -74,13 +80,14 @@ export default defineComponent({
       }
       const itemNode = (
         <Component
-          class={classNames(!invalidate && prefixCls, props.class)}
+          class={classNames(!invalidate && prefixCls, props.class, classAttr, className)}
           style={{
             ...overflowStyle,
             ...(style as CSSProperties),
+            ...(styleAttr as CSSProperties),
           }}
           {...overflowProps}
-          {...attrs}
+          {...restAttrs}
         >
           {childNode}
         </Component>

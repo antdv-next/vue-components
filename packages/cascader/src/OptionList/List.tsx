@@ -260,7 +260,6 @@ const RawOptionList = defineComponent<RawOptionListProps>(
       ]
 
       const columnProps = {
-        ...props,
         multiple: !isEmpty && props.multiple,
         onSelect: onPathSelect,
         onActive: onPathOpen,
@@ -269,6 +268,7 @@ const RawOptionList = defineComponent<RawOptionListProps>(
         halfCheckedSet: halfCheckedSet.value,
         loadingKeys: loadingKeys.value,
         isSelectable,
+        disabled: props.disabled,
       }
 
       // >>>>> Columns

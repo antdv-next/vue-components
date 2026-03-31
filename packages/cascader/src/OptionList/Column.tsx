@@ -248,6 +248,9 @@ const Column = defineComponent<ColumnProps>((props = columnDefaults) => {
       </ul>
     )
   }
+}, {
+  name: 'Column',
+  inheritAttrs: false,
 })
 
 export default Column
