@@ -257,7 +257,7 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
       const targetRef = scrollBodyRef.value
       const targetElement = getDOM(targetRef)
       if (targetElement instanceof HTMLElement) {
-        const { index, top, key, offset } = config || {}
+        const { index, top, key, offset, align = 'nearest' } = config || {}
         if (validNumberValue(top)) {
           targetElement.scrollTo({ top })
         }
@@ -265,11 +265,9 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
           const mergedKey = key ?? getRowKey.value(mergedData.value[index])
           const rowElement = targetElement.querySelector(`[data-row-key="${mergedKey}"]`) as HTMLElement | null
           if (rowElement) {
-            if (!offset) {
-              rowElement.scrollIntoView()
-            }
-            else {
-              targetElement.scrollTo({ top: rowElement.offsetTop + offset })
+            rowElement.scrollIntoView({ block: align })
+            if (offset) {
+              targetElement.scrollTo({ top: targetElement.scrollTop + offset })
             }
           }
         }

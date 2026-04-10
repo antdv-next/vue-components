@@ -1,6 +1,6 @@
 import type { ListRef } from '@v-c/virtual-list'
 import type { CSSProperties } from 'vue'
-import type { ColumnType, Key, OnCustomizeScroll, ScrollConfig } from '../interface'
+import type { ColumnType, Key, OnCustomizeScroll, ScrollConfig, VirtualScrollConfig } from '../interface'
 import { getStylePxValue } from '@v-c/util/dist/props-util'
 import VirtualList from '@v-c/virtual-list'
 import { computed, defineComponent, reactive, ref, toRaw, watch, watchEffect } from 'vue'
@@ -18,6 +18,12 @@ export interface GridRef {
   scrollLeft: number
   nativeElement: HTMLDivElement
   scrollTo: (scrollConfig: ScrollConfig) => void
+}
+
+const ALIGN_MAP: Record<string, 'top' | 'bottom' | 'auto'> = {
+  start: 'top',
+  end: 'bottom',
+  nearest: 'auto',
 }
 
 const BodyGrid = defineComponent<GridProps>({
@@ -173,17 +179,18 @@ const BodyGrid = defineComponent<GridProps>({
     }
 
     const exposed: any = {
-      scrollTo: (config: ScrollConfig) => {
+      scrollTo: (config: VirtualScrollConfig) => {
         if (!listRef.value) {
           return
         }
-        const { offset, ...restConfig } = config || {}
-        if (offset) {
-          listRef.value.scrollTo({ ...restConfig, offset, align: 'top' } as any)
-        }
-        else {
-          listRef.value.scrollTo(config as any)
-        }
+        const { align, offset, ...restConfig } = config || {}
+        const virtualAlign = ALIGN_MAP[align] ?? (offset ? 'top' : 'auto')
+
+        listRef.value.scrollTo({
+          ...restConfig,
+          offset,
+          align: virtualAlign,
+        } as any)
       },
       get nativeElement() {
         const native = listRef.value?.nativeElement as any

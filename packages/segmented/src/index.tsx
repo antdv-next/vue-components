@@ -205,14 +205,18 @@ const Segmented = defineComponent<SegmentedProps>(
     }
     // ======================= Keyboard ========================
     const onOffset = (offset: number) => {
-      const currentIndex = segmentedOptions.value.findIndex(
+      const validOptions = segmentedOptions.value.filter(
+        option => option.value === rawValue.value || !option.disabled,
+      )
+
+      const currentIndex = validOptions.findIndex(
         option => option?.value === rawValue.value,
       )
 
-      const total = segmentedOptions.value.length
+      const total = validOptions.length
       const nextIndex = (currentIndex + offset + total) % total
-      const nextOption = segmentedOptions.value[nextIndex]
-      if (nextOption) {
+      const nextOption = validOptions[nextIndex]
+      if (nextOption && nextOption.value !== rawValue.value) {
         rawValue.value = nextOption.value
         props?.onChange?.(nextOption.value)
       }
