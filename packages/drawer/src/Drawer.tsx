@@ -122,8 +122,7 @@ const Drawer = defineComponent<DrawerProps>({
     return () => {
       mergedOpen.value = !!rawProps.open
       const mp = mergedProps.value
-      const shouldRenderPopup = mp.forceRender || animatedVisible.value || mergedOpen.value
-      if (!shouldRenderPopup) {
+      if (!mp.forceRender && !animatedVisible.value && !mergedOpen.value && mp.destroyOnHidden) {
         return null
       }
 
