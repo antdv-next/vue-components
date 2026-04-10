@@ -26,7 +26,7 @@ const PrevNext = defineComponent<PrevNextProps>(
       return (
         <>
           <button
-            type='button'
+            type="button"
             class={clsx(switchCls, `${switchCls}-prev`, {
               [`${switchCls}-disabled`]: prevDisabled,
             })}
@@ -39,7 +39,7 @@ const PrevNext = defineComponent<PrevNextProps>(
             {prevIcon}
           </button>
           <button
-            type='button'
+            type="button"
             class={clsx(switchCls, `${switchCls}-next`, {
               [`${switchCls}-disabled`]: nextDisabled,
             })}

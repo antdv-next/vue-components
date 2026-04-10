@@ -188,28 +188,28 @@ const Image = defineComponent<ImageProps>(
 
     // ======================= Keyboard Preview =====================
     const onPreviewKeyDown = (event: KeyboardEvent) => {
-      props.onKeydown?.(event);
+      props.onKeydown?.(event)
 
       if (!canPreview.value) {
-        return;
+        return
       }
 
       if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
+        event.preventDefault()
 
-        const rect = (event.target as HTMLDivElement).getBoundingClientRect();
-        const left = rect.x + rect.width / 2;
-        const top = rect.y + rect.height / 2;
+        const rect = (event.target as HTMLDivElement).getBoundingClientRect()
+        const left = rect.x + rect.width / 2
+        const top = rect.y + rect.height / 2
 
         if (groupContext) {
-          groupContext.onPreview(imageId, src.value || '', left, top);
+          groupContext.onPreview(imageId, src.value || '', left, top)
         }
         else {
           mousePosition.value = {
             x: left,
             y: top,
           }
-          triggerPreviewOpen(true);
+          triggerPreviewOpen(true)
         }
       }
     }
