@@ -23,7 +23,7 @@ import PrevNext from './PrevNext'
 
 // Note: if you want to add `action`,
 // pls contact @zombieJ or @thinkasany first.
-export type PreviewSemanticName = 'root' | 'mask' | 'body' | FooterSemanticName
+export type PreviewSemanticName = 'root' | 'mask' | 'body' | 'close' | FooterSemanticName
 
 export interface OperationIcons {
   rotateLeft?: VueNode
@@ -90,7 +90,11 @@ export interface InternalPreviewConfig {
   open?: boolean
   getContainer?: PortalProps['getContainer']
   zIndex?: number
+  maskClosable?: boolean
   afterOpenChange?: (open: boolean) => void
+
+  // Focus
+  focusTrap?: boolean
 
   // Operation
   movable?: boolean
@@ -156,7 +160,8 @@ const defaults = {
 const Preview = defineComponent<PreviewProps>(
   (props = defaults, { attrs, slots }) => {
     const imgEl = shallowRef<HTMLImageElement>()
-    const wrapperRef =shallowRef<HTMLDivElement | null>(null);
+    const wrapperRef = shallowRef<HTMLDivElement | null>(null)
+    const triggerRef = shallowRef<HTMLElement | null>(null)
     const groupContext = usePreviewGroupContext()
 
     const showLeftOrRightSwitches = computed(() => !!groupContext && (props.count ?? 1) > 1)
@@ -201,6 +206,12 @@ const Preview = defineComponent<PreviewProps>(
     watch(() => props.open, (open) => {
       if (!open) {
         resetTransform('close')
+      }
+    })
+
+    watch(() => props.open, (open) => {
+      if (open && canUseDom()) {
+        triggerRef.value = document.activeElement as HTMLElement | null
       }
     })
 
@@ -272,11 +283,6 @@ const Preview = defineComponent<PreviewProps>(
 
       const { key } = event
 
-      if (key === KeyCodeStr.Escape) {
-        props.onClose?.()
-        return
-      }
-
       if (showLeftOrRightSwitches.value) {
         if (key === KeyCodeStr.ArrowLeft) {
           onActive(-1)
@@ -320,6 +326,8 @@ const Preview = defineComponent<PreviewProps>(
       if (!nextVisible) {
         animatedVisible.value = false
         portalRender.value = false
+        triggerRef.value?.focus?.()
+        triggerRef.value = null
       }
       props.afterOpenChange?.(nextVisible)
     }
@@ -332,7 +340,8 @@ const Preview = defineComponent<PreviewProps>(
       fallback: computed(() => props.fallback),
     })
     // =========================== Focus ============================
-    useLockFocus(portalRender, () => wrapperRef.value);
+    const focusTrap = computed(() => props.focusTrap ?? true)
+    useLockFocus(computed(() => !!(focusTrap.value && props.open && portalRender.value)), () => wrapperRef.value)
 
     // ========================== Render ==========================
     return () => {
@@ -357,7 +366,8 @@ const Preview = defineComponent<PreviewProps>(
         mousePosition,
         zIndex,
         icons = {},
-        movable = true
+        movable = true,
+        maskClosable = true,
       } = props
 
       const bodyStyle: CSSProperties = {
@@ -426,6 +436,11 @@ const Preview = defineComponent<PreviewProps>(
           open={open || animatedVisible.value || portalRender.value}
           getContainer={getContainer}
           autoLock={open || animatedVisible.value}
+          onEsc={({ top }) => {
+            if (top) {
+              props.onClose?.()
+            }
+          }}
         >
           <Transition
             {...transitionProps}
@@ -451,7 +466,7 @@ const Preview = defineComponent<PreviewProps>(
                   <div
                     class={clsx(`${prefixCls}-mask`, classNames.mask)}
                     style={styles.mask}
-                    onClick={() => props.onClose?.()}
+                    onClick={maskClosable ? () => props.onClose?.() : undefined}
                   />
 
                   {/* Body */}
@@ -470,6 +485,8 @@ const Preview = defineComponent<PreviewProps>(
                       prefixCls={prefixCls}
                       icon={(closeIcon === true ? icons.close : (closeIcon || icons.close)) as any}
                       onClick={() => props.onClose?.()}
+                      className={classNames.close}
+                      style={styles.close}
                     />
                   )}
 

@@ -187,31 +187,32 @@ const Image = defineComponent<ImageProps>(
     }
 
     // ======================= Keyboard Preview =====================
-  const onPreviewKeyDown = (event: KeyboardEvent) => {
-    props.onKeydown?.(event);
+    const onPreviewKeyDown = (event: KeyboardEvent) => {
+      props.onKeydown?.(event);
 
-    if (!canPreview) {
-      return;
-    }
+      if (!canPreview.value) {
+        return;
+      }
 
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
 
-      const rect = (event.target as HTMLDivElement).getBoundingClientRect();
-      const left = rect.x + rect.width / 2;
-      const top = rect.y + rect.height / 2;
+        const rect = (event.target as HTMLDivElement).getBoundingClientRect();
+        const left = rect.x + rect.width / 2;
+        const top = rect.y + rect.height / 2;
 
-      if (groupContext) {
-        groupContext.onPreview(imageId, src.value || '', left, top);
-      } else {
-        mousePosition.value = {
-          x: left,
-          y: top,
+        if (groupContext) {
+          groupContext.onPreview(imageId, src.value || '', left, top);
         }
-        triggerPreviewOpen(true);
+        else {
+          mousePosition.value = {
+            x: left,
+            y: top,
+          }
+          triggerPreviewOpen(true);
+        }
       }
     }
-  };
 
     // =========================== Render ===========================
     return () => {
@@ -289,9 +290,9 @@ const Image = defineComponent<ImageProps>(
             {...pickAttrs(restAttrs, false)}
             class={rootCls}
             onClick={canPreview.value ? onPreview : onInternalClick}
-            role={canPreview ? 'button' : restAttrs.role}
-            tabindex={canPreview && restAttrs.tabIndex == null ? 0 : restAttrs.tabIndex}
-            aria-label={canPreview ? restAttrs['aria-label'] ?? restAttrs.alt : restAttrs['aria-label']}
+            role={canPreview.value ? 'button' : restAttrs.role}
+            tabindex={canPreview.value && restAttrs.tabIndex == null ? 0 : restAttrs.tabIndex}
+            aria-label={canPreview.value ? restAttrs['aria-label'] ?? restAttrs.alt : restAttrs['aria-label']}
             onKeydown={onPreviewKeyDown}
             style={rootStyle}
           >
