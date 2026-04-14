@@ -11,6 +11,7 @@
     "story:dev": "histoire dev",
     "story:build": "histoire build",
     "story:preview": "histoire preview",
+    "build": "pnpm -r build",
     "test": "vitest",
     "test:u": "vitest -u",
     "lint": "eslint . --fix"

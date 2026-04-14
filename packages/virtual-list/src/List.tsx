@@ -379,6 +379,7 @@ export default defineComponent({
     const isScrollAtBottom = computed(() => offsetTop.value + props.height! >= scrollHeight.value)
     const isScrollAtLeft = computed(() => offsetLeft.value === 0)
     const isScrollAtRight = computed(() => offsetLeft.value >= horizontalRange.value)
+    const hasHorizontalScroll = computed(() => horizontalRange.value > 0)
 
     const keepInHorizontalRange = (nextOffsetLeft: number) => {
       const max = horizontalRange.value
@@ -397,7 +398,7 @@ export default defineComponent({
       isScrollAtBottom,
       isScrollAtLeft,
       isScrollAtRight,
-      horizontalRange.value > 0,
+      hasHorizontalScroll,
       (offsetY, isHorizontal) => {
         if (isHorizontal) {
           const next = isRTL.value ? offsetLeft.value - offsetY : offsetLeft.value + offsetY
