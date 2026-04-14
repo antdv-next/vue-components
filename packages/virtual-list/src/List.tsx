@@ -415,7 +415,8 @@ export default defineComponent({
           return
         }
 
-        const onMozMousePixelScroll = (event: WheelEvent & { detail?: number }) => {
+        const onMozMousePixelScroll: EventListener = (rawEvent) => {
+          const event = rawEvent as WheelEvent & { detail?: number }
           const detail = event.detail ?? 0
           const scrollingUpAtTop = isScrollAtTop.value && detail < 0
           const scrollingDownAtBottom = isScrollAtBottom.value && detail > 0
@@ -425,14 +426,14 @@ export default defineComponent({
           }
         }
 
-        element.addEventListener('wheel', onWheel as EventListener, { passive: false })
-        element.addEventListener('DOMMouseScroll', onFireFoxScroll as EventListener, { passive: true })
-        element.addEventListener('MozMousePixelScroll', onMozMousePixelScroll as EventListener, { passive: false })
+        element.addEventListener('wheel', onWheel, { passive: false })
+        element.addEventListener('DOMMouseScroll', onFireFoxScroll, { passive: true })
+        element.addEventListener('MozMousePixelScroll', onMozMousePixelScroll, { passive: false })
 
         onCleanup(() => {
-          element.removeEventListener('wheel', onWheel as EventListener)
-          element.removeEventListener('DOMMouseScroll', onFireFoxScroll as EventListener)
-          element.removeEventListener('MozMousePixelScroll', onMozMousePixelScroll as EventListener)
+          element.removeEventListener('wheel', onWheel)
+          element.removeEventListener('DOMMouseScroll', onFireFoxScroll)
+          element.removeEventListener('MozMousePixelScroll', onMozMousePixelScroll)
         })
       },
       {

@@ -3,9 +3,8 @@ import { onUnmounted, ref } from 'vue'
 import isFF from '../utils/isFirefox'
 import useOriginScroll from './useOriginScroll'
 
-interface FireFoxDOMMouseScrollEvent {
-  detail: number
-  preventDefault: VoidFunction
+type FireFoxDOMMouseScrollEvent = Event & {
+  detail?: number
 }
 
 export default function useFrameWheel(
@@ -19,7 +18,7 @@ export default function useFrameWheel(
    * Return `true` when you need to prevent default event
    */
   onWheelDelta: (offset: number, horizontal: boolean) => void,
-): [(e: WheelEvent) => void, (e: FireFoxDOMMouseScrollEvent) => void] {
+): [(e: WheelEvent) => void, EventListener] {
   const offsetRef = ref(0)
   let nextFrame: number | null = null
 
@@ -124,11 +123,11 @@ export default function useFrameWheel(
   }
 
   // A patch for firefox
-  function onFireFoxScroll(event: FireFoxDOMMouseScrollEvent) {
+  const onFireFoxScroll: EventListener = (event) => {
     if (!inVirtual.value)
       return
 
-    isMouseScrollRef.value = event.detail === wheelValueRef.value
+    isMouseScrollRef.value = (event as FireFoxDOMMouseScrollEvent).detail === wheelValueRef.value
   }
 
   onUnmounted(() => {
