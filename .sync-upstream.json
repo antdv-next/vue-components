@@ -1,0 +1,723 @@
+{
+  "version": "1",
+  "downstream": {
+    "name": "vue-components",
+    "local_path": "./"
+  },
+  "upstreams": [
+    {
+      "name": "@rc-component/async-validator",
+      "remote_url": "https://github.com/react-component/async-validator.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/async-validator",
+          "description": "@rc-component/async-validator -> @v-c/async-validator"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    },
+    {
+      "name": "@rc-component/cascader",
+      "remote_url": "https://github.com/react-component/cascader.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/cascader",
+          "description": "@rc-component/cascader -> @v-c/cascader"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    },
+    {
+      "name": "@rc-component/checkbox",
+      "remote_url": "https://github.com/react-component/checkbox.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/checkbox",
+          "description": "@rc-component/checkbox -> @v-c/checkbox"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    },
+    {
+      "name": "@rc-component/collapse",
+      "remote_url": "https://github.com/react-component/collapse.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/collapse",
+          "description": "@rc-component/collapse -> @v-c/collapse"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    },
+    {
+      "name": "@rc-component/color-picker",
+      "remote_url": "https://github.com/react-component/color-picker.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/color-picker",
+          "description": "@rc-component/color-picker -> @v-c/color-picker"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    },
+    {
+      "name": "@rc-component/dialog",
+      "remote_url": "https://github.com/react-component/dialog.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/dialog",
+          "description": "@rc-component/dialog -> @v-c/dialog"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    },
+    {
+      "name": "@rc-component/drawer",
+      "remote_url": "https://github.com/react-component/drawer.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/drawer",
+          "description": "@rc-component/drawer -> @v-c/drawer"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    },
+    {
+      "name": "@rc-component/dropdown",
+      "remote_url": "https://github.com/react-component/dropdown.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/dropdown",
+          "description": "@rc-component/dropdown -> @v-c/dropdown"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    },
+    {
+      "name": "@ant-design/fast-color",
+      "remote_url": "https://github.com/ant-design/fast-color.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/fast-color",
+          "description": "@ant-design/fast-color -> @v-c/fast-color"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    },
+    {
+      "name": "@rc-component/image",
+      "remote_url": "https://github.com/react-component/image.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/image",
+          "description": "@rc-component/image -> @v-c/image"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    },
+    {
+      "name": "@rc-component/input",
+      "remote_url": "https://github.com/react-component/input.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/input",
+          "description": "@rc-component/input -> @v-c/input"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    },
+    {
+      "name": "@rc-component/input-number",
+      "remote_url": "https://github.com/react-component/input-number.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/input-number",
+          "description": "@rc-component/input-number -> @v-c/input-number"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    },
+    {
+      "name": "@rc-component/mentions",
+      "remote_url": "https://github.com/react-component/mentions.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/mentions",
+          "description": "@rc-component/mentions -> @v-c/mentions"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    },
+    {
+      "name": "@rc-component/menu",
+      "remote_url": "https://github.com/react-component/menu.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/menu",
+          "description": "@rc-component/menu -> @v-c/menu"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    },
+    {
+      "name": "@rc-component/mini-decimal",
+      "remote_url": "https://github.com/react-component/mini-decimal.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/mini-decimal",
+          "description": "@rc-component/mini-decimal -> @v-c/mini-decimal"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    },
+    {
+      "name": "@rc-component/mutate-observer",
+      "remote_url": "https://github.com/react-component/mutate-observer.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/mutate-observer",
+          "description": "@rc-component/mutate-observer -> @v-c/mutate-observer"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    },
+    {
+      "name": "@rc-component/notification",
+      "remote_url": "https://github.com/react-component/notification.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/notification",
+          "description": "@rc-component/notification -> @v-c/notification"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    },
+    {
+      "name": "@rc-component/overflow",
+      "remote_url": "https://github.com/react-component/overflow.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/overflow",
+          "description": "@rc-component/overflow -> @v-c/overflow"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    },
+    {
+      "name": "@rc-component/pagination",
+      "remote_url": "https://github.com/react-component/pagination.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/pagination",
+          "description": "@rc-component/pagination -> @v-c/pagination"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    },
+    {
+      "name": "@rc-component/picker",
+      "remote_url": "https://github.com/react-component/picker.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/picker",
+          "description": "@rc-component/picker -> @v-c/picker"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    },
+    {
+      "name": "@rc-component/portal",
+      "remote_url": "https://github.com/react-component/portal.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/portal",
+          "description": "@rc-component/portal -> @v-c/portal"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    },
+    {
+      "name": "@rc-component/progress",
+      "remote_url": "https://github.com/react-component/progress.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/progress",
+          "description": "@rc-component/progress -> @v-c/progress"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    },
+    {
+      "name": "@rc-component/qrcode",
+      "remote_url": "https://github.com/react-component/qrcode.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/qrcode",
+          "description": "@rc-component/qrcode -> @v-c/qrcode"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    },
+    {
+      "name": "@rc-component/rate",
+      "remote_url": "https://github.com/react-component/rate.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/rate",
+          "description": "@rc-component/rate -> @v-c/rate"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    },
+    {
+      "name": "@rc-component/resize-observer",
+      "remote_url": "https://github.com/react-component/resize-observer.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/resize-observer",
+          "description": "@rc-component/resize-observer -> @v-c/resize-observer"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    },
+    {
+      "name": "@rc-component/segmented",
+      "remote_url": "https://github.com/react-component/segmented.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/segmented",
+          "description": "@rc-component/segmented -> @v-c/segmented"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    },
+    {
+      "name": "@rc-component/select",
+      "remote_url": "https://github.com/react-component/select.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/select",
+          "description": "@rc-component/select -> @v-c/select"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    },
+    {
+      "name": "@ant-design/react-slick",
+      "remote_url": "https://github.com/ant-design/react-slick.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/slick",
+          "description": "@ant-design/react-slick -> @v-c/slick"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    },
+    {
+      "name": "@rc-component/slider",
+      "remote_url": "https://github.com/react-component/slider.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/slider",
+          "description": "@rc-component/slider -> @v-c/slider"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    },
+    {
+      "name": "@rc-component/steps",
+      "remote_url": "https://github.com/react-component/steps.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/steps",
+          "description": "@rc-component/steps -> @v-c/steps"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    },
+    {
+      "name": "@rc-component/switch",
+      "remote_url": "https://github.com/react-component/switch.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/switch",
+          "description": "@rc-component/switch -> @v-c/switch"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    },
+    {
+      "name": "@rc-component/table",
+      "remote_url": "https://github.com/react-component/table.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/table",
+          "description": "@rc-component/table -> @v-c/table"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    },
+    {
+      "name": "@rc-component/tabs",
+      "remote_url": "https://github.com/react-component/tabs.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/tabs",
+          "description": "@rc-component/tabs -> @v-c/tabs"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    },
+    {
+      "name": "@rc-component/textarea",
+      "remote_url": "https://github.com/react-component/textarea.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/textarea",
+          "description": "@rc-component/textarea -> @v-c/textarea"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    },
+    {
+      "name": "@rc-component/tooltip",
+      "remote_url": "https://github.com/react-component/tooltip.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/tooltip",
+          "description": "@rc-component/tooltip -> @v-c/tooltip"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    },
+    {
+      "name": "@rc-component/tour",
+      "remote_url": "https://github.com/react-component/tour.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/tour",
+          "description": "@rc-component/tour -> @v-c/tour"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    },
+    {
+      "name": "@rc-component/tree",
+      "remote_url": "https://github.com/react-component/tree.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/tree",
+          "description": "@rc-component/tree -> @v-c/tree"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    },
+    {
+      "name": "@rc-component/tree-select",
+      "remote_url": "https://github.com/react-component/tree-select.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/tree-select",
+          "description": "@rc-component/tree-select -> @v-c/tree-select"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    },
+    {
+      "name": "@rc-component/trigger",
+      "remote_url": "https://github.com/react-component/trigger.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/trigger",
+          "description": "@rc-component/trigger -> @v-c/trigger"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    },
+    {
+      "name": "@rc-component/upload",
+      "remote_url": "https://github.com/react-component/upload.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/upload",
+          "description": "@rc-component/upload -> @v-c/upload"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    },
+    {
+      "name": "@rc-component/util",
+      "remote_url": "https://github.com/react-component/util.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/util",
+          "description": "@rc-component/util -> @v-c/util"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    },
+    {
+      "name": "@rc-component/virtual-list",
+      "remote_url": "https://github.com/react-component/virtual-list.git",
+      "local_path": null,
+      "packages": [
+        {
+          "upstream_path": ".",
+          "downstream_path": "packages/virtual-list",
+          "description": "@rc-component/virtual-list -> @v-c/virtual-list"
+        }
+      ],
+      "last_synced_commit": "",
+      "last_synced_commit_short": "",
+      "last_synced_at": "",
+      "last_synced_tag": "",
+      "sync_count": 0
+    }
+  ]
+}
