@@ -6,7 +6,7 @@ import type { ExtraRenderInfo } from './interface'
 import type { ScrollBarDirectionType, ScrollBarRef } from './ScrollBar'
 import ResizeObserver from '@v-c/resize-observer'
 import { pureAttrs } from '@v-c/util/dist/props-util'
-import { computed, defineComponent, ref, shallowRef, toRaw, unref, watch } from 'vue'
+import { computed, defineComponent, onBeforeUnmount, ref, shallowRef, toRaw, unref, watch } from 'vue'
 import Filler from './Filler'
 import useChildren from './hooks/useChildren'
 import useDiffItem from './hooks/useDiffItem'
@@ -52,6 +52,10 @@ export interface ScrollTarget {
 }
 
 export type ScrollConfig = ScrollTarget | ScrollPos
+
+interface MozMousePixelScrollEvent extends Event {
+  detail?: number
+}
 
 export interface ListProps {
   prefixCls?: string
@@ -387,7 +391,7 @@ export default defineComponent({
       horizontalScrollBarRef.value?.delayHidden()
     }
 
-    const [onWheel] = useFrameWheel(
+    const [onWheel, onFireFoxScroll] = useFrameWheel(
       inVirtual,
       isScrollAtTop,
       isScrollAtBottom,
@@ -406,6 +410,61 @@ export default defineComponent({
         }
       },
     )
+
+    const onMozMousePixelScroll = (event: Event) => {
+      if (!inVirtual.value) {
+        return
+      }
+
+      const wheelDirection = (event as MozMousePixelScrollEvent).detail || 0
+      const originScroll
+        = (wheelDirection < 0 && isScrollAtTop.value)
+          || (wheelDirection > 0 && isScrollAtBottom.value)
+
+      if (!originScroll) {
+        event.preventDefault()
+      }
+    }
+    const onDOMMouseScroll: EventListener = (event) => {
+      onFireFoxScroll(event as unknown as Parameters<typeof onFireFoxScroll>[0])
+    }
+
+    const wheelEventOptions = { passive: false } as AddEventListenerOptions
+    const firefoxScrollEventOptions = { passive: true } as AddEventListenerOptions
+
+    let removeWheelEvents: (() => void) | undefined
+    watch(
+      componentRef,
+      (holderEl, _oldHolderEl, onCleanup) => {
+        removeWheelEvents?.()
+        removeWheelEvents = undefined
+
+        if (!holderEl) {
+          return
+        }
+
+        holderEl.addEventListener('wheel', onWheel as EventListener, wheelEventOptions)
+        holderEl.addEventListener('DOMMouseScroll', onDOMMouseScroll, firefoxScrollEventOptions)
+        holderEl.addEventListener('MozMousePixelScroll', onMozMousePixelScroll as EventListener, wheelEventOptions)
+
+        removeWheelEvents = () => {
+          holderEl.removeEventListener('wheel', onWheel as EventListener)
+          holderEl.removeEventListener('DOMMouseScroll', onDOMMouseScroll)
+          holderEl.removeEventListener('MozMousePixelScroll', onMozMousePixelScroll as EventListener)
+        }
+
+        onCleanup(() => {
+          removeWheelEvents?.()
+          removeWheelEvents = undefined
+        })
+      },
+      { flush: 'post' },
+    )
+
+    onBeforeUnmount(() => {
+      removeWheelEvents?.()
+      removeWheelEvents = undefined
+    })
 
     useMobileTouchMove(
       inVirtual,
@@ -650,7 +709,6 @@ export default defineComponent({
               style={componentStyle}
               ref={componentRef}
               onScroll={onFallbackScroll}
-              onWheel={onWheel}
               onMouseenter={delayHideScrollBar}
             >
               <Filler
