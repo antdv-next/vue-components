@@ -370,6 +370,7 @@ export default defineComponent({
     const horizontalRange = computed(() =>
       Math.max(0, (contentScrollWidth.value || 0) - size.value.width),
     )
+    const hasHorizontalScroll = computed(() => horizontalRange.value > 0)
 
     const isScrollAtTop = computed(() => offsetTop.value === 0)
     const isScrollAtBottom = computed(() => offsetTop.value + props.height! >= scrollHeight.value)
@@ -387,13 +388,13 @@ export default defineComponent({
       horizontalScrollBarRef.value?.delayHidden()
     }
 
-    const [onWheel] = useFrameWheel(
+    const [onWheel, onFireFoxScroll] = useFrameWheel(
       inVirtual,
       isScrollAtTop,
       isScrollAtBottom,
       isScrollAtLeft,
       isScrollAtRight,
-      horizontalRange.value > 0,
+      hasHorizontalScroll,
       (offsetY, isHorizontal) => {
         if (isHorizontal) {
           const next = isRTL.value ? offsetLeft.value - offsetY : offsetLeft.value + offsetY
@@ -404,6 +405,39 @@ export default defineComponent({
         else {
           syncScrollTop(top => top + offsetY)
         }
+      },
+    )
+
+    watch(
+      componentRef,
+      (element, _prevElement, onCleanup) => {
+        if (!element) {
+          return
+        }
+
+        const onMozMousePixelScroll = (event: WheelEvent & { detail?: number }) => {
+          const detail = event.detail ?? 0
+          const scrollingUpAtTop = isScrollAtTop.value && detail < 0
+          const scrollingDownAtBottom = isScrollAtBottom.value && detail > 0
+
+          if (inVirtual.value && !scrollingUpAtTop && !scrollingDownAtBottom) {
+            event.preventDefault()
+          }
+        }
+
+        element.addEventListener('wheel', onWheel as EventListener, { passive: false })
+        element.addEventListener('DOMMouseScroll', onFireFoxScroll as EventListener, { passive: true })
+        element.addEventListener('MozMousePixelScroll', onMozMousePixelScroll as EventListener, { passive: false })
+
+        onCleanup(() => {
+          element.removeEventListener('wheel', onWheel as EventListener)
+          element.removeEventListener('DOMMouseScroll', onFireFoxScroll as EventListener)
+          element.removeEventListener('MozMousePixelScroll', onMozMousePixelScroll as EventListener)
+        })
+      },
+      {
+        immediate: true,
+        flush: 'post',
       },
     )
 
@@ -650,7 +684,6 @@ export default defineComponent({
               style={componentStyle}
               ref={componentRef}
               onScroll={onFallbackScroll}
-              onWheel={onWheel}
               onMouseenter={delayHideScrollBar}
             >
               <Filler

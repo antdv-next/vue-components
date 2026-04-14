@@ -103,4 +103,39 @@ describe('virtualList', () => {
     // When `inVirtual` is false, the list should keep native scrolling and not clamp back to 0.
     expect(holderEl.scrollTop).toBe(50)
   })
+
+  it('should prevent firefox pixel scroll from bubbling when virtual scrolling in middle range', async () => {
+    const data = Array.from({ length: 100 }, (_, i) => ({ id: i, text: `Item ${i}` }))
+
+    const wrapper = mount(VirtualList, {
+      props: {
+        data,
+        height: 100,
+        itemHeight: 20,
+        itemKey: 'id',
+      },
+      slots: {
+        default: ({ item }: any) => h('div', `${item.text}`),
+      },
+    })
+
+    const holder = wrapper.find('.vc-virtual-list-holder')
+    const holderEl = holder.element as HTMLDivElement
+
+    holderEl.scrollTop = 40
+    await holder.trigger('scroll')
+
+    const event = new Event('MozMousePixelScroll', {
+      bubbles: true,
+      cancelable: true,
+    })
+    Object.defineProperty(event, 'detail', {
+      value: 1,
+      configurable: true,
+    })
+
+    holderEl.dispatchEvent(event)
+
+    expect(event.defaultPrevented).toBe(true)
+  })
 })

@@ -14,7 +14,7 @@ export default function useFrameWheel(
   isScrollAtBottom: Ref<boolean>,
   isScrollAtLeft: Ref<boolean>,
   isScrollAtRight: Ref<boolean>,
-  horizontalScroll: boolean,
+  horizontalScroll: Ref<boolean>,
   /**
    * Return `true` when you need to prevent default event
    */
@@ -112,7 +112,7 @@ export default function useFrameWheel(
     const absY = Math.abs(mergedDeltaY)
 
     if (wheelDirectionRef.value === null) {
-      wheelDirectionRef.value = horizontalScroll && absX > absY ? 'x' : 'y'
+      wheelDirectionRef.value = horizontalScroll.value && absX > absY ? 'x' : 'y'
     }
 
     if (wheelDirectionRef.value === 'y') {
