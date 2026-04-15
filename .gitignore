@@ -11,6 +11,8 @@ node_modules
 dist
 dist-ssr
 *.local
+.sync-upstream.local.json
+.sync-checklist-*.md
 
 # Editor directories and files
 .vscode/*
