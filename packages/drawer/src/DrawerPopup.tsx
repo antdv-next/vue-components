@@ -305,7 +305,7 @@ const DrawerPopup = defineComponent<DrawerPopupProps>(
       const panelNode = (
         <Transition
           {...panelMotionProps}
-          onBeforeEnter={() => {
+          onAfterEnter={() => {
             props?.afterOpenChange?.(true)
           }}
           onAfterLeave={() => {
