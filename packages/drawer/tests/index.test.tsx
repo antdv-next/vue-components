@@ -1,9 +1,9 @@
 import { mount } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
+import Trigger from '../../trigger/src'
 import motionProps from '../docs/assets/motion.ts'
 import Drawer from '../src'
-import Trigger from '../../trigger/src'
 
 Object.defineProperty(window, 'getComputedStyle', {
   value: () => ({
@@ -40,6 +40,29 @@ describe('vc-drawer', () => {
     expect(wrapper.find('.vc-drawer').exists()).toBeTruthy()
     expect(wrapper.find('.vc-drawer-open').exists()).toBeTruthy()
     // expect(wrapper.find('.vc-drawer').element.parentElement === document.body).toBeTruthy()
+    wrapper.unmount()
+    await nextTick()
+  })
+
+  it('closes on Escape when getContainer is false', async () => {
+    const onClose = vi.fn()
+    const wrapper = mount(Drawer, {
+      attachTo: document.body,
+      props: {
+        open: true,
+        getContainer: false,
+        onClose,
+        ...motionProps,
+      },
+    })
+
+    await nextTick()
+
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+    await nextTick()
+
+    expect(onClose).toHaveBeenCalledTimes(1)
+
     wrapper.unmount()
     await nextTick()
   })

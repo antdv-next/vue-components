@@ -156,10 +156,6 @@ const Drawer = defineComponent<DrawerProps>({
         />
       )
 
-      if (mp.getContainer === false) {
-        return popupNode
-      }
-
       return (
         <Portal
           open={mergedOpen.value || mp.forceRender || animatedVisible.value}
