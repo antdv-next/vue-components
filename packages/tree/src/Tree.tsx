@@ -572,7 +572,6 @@ const Tree = defineComponent<TreeProps>(
     }
 
     function triggerExpandActionExpand(e: MouseEvent, treeNode: EventDataNode<any>) {
-      const expanded = treeNode.expanded
       const key = treeNode.key
 
       if (treeNode.isLeaf || e.shiftKey || e.metaKey || e.ctrlKey)
@@ -587,7 +586,6 @@ const Tree = defineComponent<TreeProps>(
         data: node.data,
       } as any)
 
-      setExpandedKeys(expanded ? arrDel(expandedKeys.value, key) : arrAdd(expandedKeys.value, key))
       onNodeExpand(e, eventNode)
     }
 
