@@ -68,7 +68,7 @@ export function buildCommon(opt: BuildCommonOptions) {
   if (dtsOpen) {
     plugins.push(dts({
       entryRoot: paths.inputDir,
-      outDir: paths.outDir,
+      outDirs: paths.outDir,
       root: paths.packageRoot,
       tsconfigPath: paths.tsconfigPath,
       exclude: [
