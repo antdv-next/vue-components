@@ -3,7 +3,7 @@ import type { CSSProperties } from 'vue'
 import type { TransformType } from './hooks/useImageTransform'
 import type { ImageElementProps } from './interface'
 import type { InternalPreviewConfig, PreviewSemanticName, ToolbarRenderInfoType } from './Preview'
-import { clsx } from '@v-c/util'
+import { clsx, omit } from '@v-c/util'
 import useMergedState from '@v-c/util/dist/hooks/useMergedState'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
 import { getAttrStyleAndClass, getStylePxValue } from '@v-c/util/dist/props-util'
@@ -145,8 +145,11 @@ const Image = defineComponent<ImageProps>(
     const imgCommonProps = computed(() => {
       const obj: ImageElementProps = {} as any
       COMMON_PROPS.forEach((prop) => {
-        if ((props as any)[prop] !== undefined) {
-          (obj as any)[prop] = (props as any)[prop]
+        const fromProps = (props as any)[prop]
+        const fromAttrs = (attrs as any)[prop]
+        const val = fromProps !== undefined ? fromProps : fromAttrs
+        if (val !== undefined) {
+          (obj as any)[prop] = val
         }
       })
       return obj
@@ -218,6 +221,7 @@ const Image = defineComponent<ImageProps>(
     return () => {
       const { width, height } = props
       const { className, style: attrStyle, restAttrs } = getAttrStyleAndClass(attrs)
+      const rootAttrs = pickAttrs(omit(restAttrs, COMMON_PROPS), false)
 
       const coverPlacement
         = typeof cover.value === 'object' && cover.value && (cover.value as any).placement
@@ -287,12 +291,12 @@ const Image = defineComponent<ImageProps>(
       return (
         <>
           <div
-            {...pickAttrs(restAttrs, false)}
+            {...rootAttrs}
             class={rootCls}
             onClick={canPreview.value ? onPreview : onInternalClick}
             role={canPreview.value ? 'button' : restAttrs.role}
             tabindex={canPreview.value && restAttrs.tabIndex == null ? 0 : restAttrs.tabIndex}
-            aria-label={canPreview.value ? restAttrs['aria-label'] ?? restAttrs.alt : restAttrs['aria-label']}
+            aria-label={canPreview.value ? restAttrs['aria-label'] ?? imgCommonProps.value.alt : restAttrs['aria-label']}
             onKeydown={onPreviewKeyDown}
             style={rootStyle}
           >
@@ -337,7 +341,7 @@ const Image = defineComponent<ImageProps>(
               onClose={onPreviewClose}
               mousePosition={mousePosition.value}
               src={src.value}
-              alt={props.alt as any}
+              alt={imgCommonProps.value.alt as any}
               imageInfo={{ width: props.width as any, height: props.height as any }}
               fallback={props.fallback}
               imgCommonProps={imgCommonProps.value as any}

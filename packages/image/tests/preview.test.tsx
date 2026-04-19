@@ -93,4 +93,23 @@ describe('preview', () => {
 
     wrapper.unmount()
   })
+
+  it('should set alt on preview img', async () => {
+    const wrapper = mount(() => (
+      <Image
+        src="src"
+        alt="preview alt"
+        preview={{ open: true, getContainer: false } as any}
+      />
+    ), {
+      attachTo: document.body,
+    })
+
+    await flushPreview()
+
+    const previewImg = document.body.querySelector('.vc-image-preview-img') as HTMLImageElement | null
+    expect(previewImg?.getAttribute('alt')).toBe('preview alt')
+
+    wrapper.unmount()
+  })
 })

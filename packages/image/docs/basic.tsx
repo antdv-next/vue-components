@@ -12,6 +12,7 @@ export default defineComponent(() => {
         onClick={() => {
           console.log('click')
         }}
+        alt="basic"
         preview={{
           icons: defaultIcons,
           onOpenChange: (open) => {
