@@ -1,7 +1,7 @@
 import type { Ref } from 'vue'
 import { useLockFocus } from '@v-c/util/dist/Dom/focus'
 import { useFocusBoundaryProvider } from '@v-c/util/dist/Dom/focusBoundary'
-import { computed, watch } from 'vue'
+import { computed, nextTick, watch } from 'vue'
 
 export default function useFocusable(
   getContainer: () => HTMLElement,
@@ -23,8 +23,11 @@ export default function useFocusable(
     open,
     (val) => {
       if (val && autoFocus?.value === true) {
-        getContainer()?.focus({ preventScroll: true })
+        nextTick(() => {
+          getContainer()?.focus({ preventScroll: true })
+        })
       }
     },
+    { flush: 'post', immediate: true },
   )
 }
