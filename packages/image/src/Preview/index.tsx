@@ -370,6 +370,8 @@ const Preview = defineComponent<PreviewProps>(
         maskClosable = true,
       } = props
 
+      const mergedAlt = alt ?? (imgCommonProps as any)?.alt
+
       const bodyStyle: CSSProperties = {
         ...(styles.body ?? {}),
       }
@@ -379,7 +381,7 @@ const Preview = defineComponent<PreviewProps>(
 
       const image: ImgInfo = {
         url: src || '',
-        alt: alt || '',
+        alt: mergedAlt || '',
         ...(imageInfo as any),
       }
 
@@ -394,7 +396,7 @@ const Preview = defineComponent<PreviewProps>(
           width={props.width}
           height={props.height}
           class={`${prefixCls}-img`}
-          alt={alt}
+          alt={mergedAlt}
           onLoad={(srcAndOnload.value as any).onLoad}
           style={{
             transform: `translate3d(${transform.value.x}px, ${transform.value.y}px, 0) scale3d(${transform.value.flipX ? '-' : ''
@@ -460,7 +462,7 @@ const Preview = defineComponent<PreviewProps>(
                   style={mergedRootStyle}
                   role="dialog"
                   aria-modal="true"
-                  aria-label={alt}
+                  aria-label={mergedAlt}
                   tabindex={-1}
                 >
                   {/* Mask */}

@@ -75,9 +75,22 @@ describe('basic', () => {
     const wrapper = mount(Image, {
       props: {
         src: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
-        fetchPriority: 'high'
-      }
+        fetchPriority: 'high',
+      },
     })
-    expect(wrapper.html()).toContain('fetchpriority="high"');
-  });
+    expect(wrapper.html()).toContain('fetchpriority="high"')
+  })
+
+  it('should put alt on img, not on root wrapper', () => {
+    const wrapper = mount(() => (
+      <Image
+        src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
+        alt="desc"
+      />
+    ))
+    const root = wrapper.get('.vc-image')
+    const img = wrapper.get('.vc-image-img')
+    expect(img.attributes('alt')).toBe('desc')
+    expect(root.attributes('alt')).toBeUndefined()
+  })
 })
