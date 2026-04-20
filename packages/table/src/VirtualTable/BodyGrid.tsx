@@ -184,7 +184,7 @@ const BodyGrid = defineComponent<GridProps>({
           return
         }
         const { align, offset, ...restConfig } = config || {}
-        const virtualAlign = ALIGN_MAP[align] ?? (offset ? 'top' : 'auto')
+        const virtualAlign = (align ? ALIGN_MAP[align] : undefined) ?? (offset ? 'top' : 'auto')
 
         listRef.value.scrollTo({
           ...restConfig,
