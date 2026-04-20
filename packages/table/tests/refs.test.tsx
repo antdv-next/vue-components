@@ -52,7 +52,7 @@ const data = [
 let scrollParam: any = null
 let scrollIntoViewArgs: any[] = []
 let scrollIntoViewElement: HTMLElement | null = null
-let originalGetComputedStyle: typeof window.getComputedStyle
+const nativeGetComputedStyle = window.getComputedStyle.bind(window)
 
 function findScrollContainer(element: HTMLElement | null) {
   let current = element?.parentElement || null
@@ -76,13 +76,12 @@ describe('table refs', () => {
     scrollIntoViewArgs = []
     scrollIntoViewElement = null
     virtualListScrollTo.mockReset()
-    originalGetComputedStyle = window.getComputedStyle.bind(window)
 
     Object.defineProperty(window, 'getComputedStyle', {
       configurable: true,
       writable: true,
       value(element: Element) {
-        return originalGetComputedStyle(element)
+        return nativeGetComputedStyle(element)
       },
     })
 
@@ -175,6 +174,37 @@ describe('table refs', () => {
 
     ;(wrapper.vm as any).scrollTo({ index: 50, offset: 20, align: 'end' })
     expect(virtualListScrollTo).toHaveBeenLastCalledWith({ index: 50, offset: 20, align: 'bottom' })
+
+    wrapper.unmount()
+  })
+
+  it('keeps fallthrough attrs on the table root when horizontal scroll is enabled', async () => {
+    const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+    const wrapper = mount(Table, {
+      attachTo: document.body,
+      attrs: {
+        custom: '123',
+        class: 'custom-table',
+        style: { opacity: '0.5' },
+      },
+      props: {
+        data,
+        columns,
+        scroll: { x: 300 },
+      },
+    })
+
+    await nextTick()
+
+    const tableRoot = wrapper.find('.vc-table')
+
+    expect(tableRoot.attributes('custom')).toBe('123')
+    expect(tableRoot.classes()).toContain('custom-table')
+    expect(tableRoot.attributes('style')).toContain('opacity: 0.5')
+    expect(consoleWarn).not.toHaveBeenCalledWith(
+      expect.stringContaining('Extraneous non-props attributes'),
+    )
 
     wrapper.unmount()
   })

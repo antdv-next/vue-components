@@ -53,7 +53,7 @@ import { getDOM } from '@v-c/util/dist/Dom/findDOMNode'
 import { getTargetScrollBarSize } from '@v-c/util/dist/getScrollBarSize'
 import isEqual from '@v-c/util/dist/isEqual'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
-import { filterEmpty } from '@v-c/util/dist/props-util'
+import { filterEmpty, getAttrStyleAndClass } from '@v-c/util/dist/props-util'
 import {
   computed,
   defineComponent,
@@ -522,7 +522,6 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
     return emptyText
   })
 
-  const dataProps = pickAttrs(attrs, { data: true })
   const ariaProps = pickAttrs(attrs, { aria: true })
 
   const fixedInfoList = useFixedInfo(flattenColumns, mergedStickyOffsets)
@@ -580,6 +579,7 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
   }
   return () => {
     slotChildren.value = slots.default?.()
+    const { className: attrClassName, style: attrStyle, restAttrs } = getAttrStyleAndClass(attrs)
     const renderFixedHeaderTable = (fixedHolderPassProps: FixedHeaderProps<any>) => {
       return (
         <>
@@ -751,11 +751,11 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
           [`${mergedPrefixCls.value}-scroll-horizontal`]: horizonScroll.value,
           [`${mergedPrefixCls.value}-has-fix-start`]: flattenColumns.value[0]?.fixed,
           [`${mergedPrefixCls.value}-has-fix-end`]: flattenColumns.value[flattenColumns.value.length - 1]?.fixed === 'end',
-        })}
-        style={tableStyle}
+        }, attrClassName)}
+        style={[tableStyle, attrStyle]}
         id={props.id}
         ref={fullTableRef}
-        {...dataProps}
+        {...restAttrs}
       >
         {props.title && (
           <Panel
@@ -792,7 +792,7 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
     }
     return fullTable
   }
-})
+}, { inheritAttrs: false })
 
 const ImmutableTable = Table
 
