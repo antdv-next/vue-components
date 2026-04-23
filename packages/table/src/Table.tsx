@@ -366,8 +366,19 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
       target(scrollLeft)
       return
     }
-    // Try to get native element first (for VirtualList refs that expose nativeElement)
-    // This avoids calling scrollTo which can cause race conditions with momentum scrolling on Mac
+
+    // Prefer the exposed `scrollLeft` proxy when available, e.g. virtual table body refs.
+    // Falling back to native elements here would bypass the virtual list horizontal sync logic.
+    if ('scrollLeft' in target && target.scrollLeft !== scrollLeft) {
+      target.scrollLeft = scrollLeft
+      if (target.scrollLeft !== scrollLeft) {
+        setTimeout(() => {
+          target.scrollLeft = scrollLeft
+        }, 0)
+      }
+      return
+    }
+
     const element = (target.nativeElement ? getDOM(target.nativeElement) : getDOM(target)) as HTMLElement | null
     if (element && element.scrollLeft !== scrollLeft) {
       element.scrollLeft = scrollLeft

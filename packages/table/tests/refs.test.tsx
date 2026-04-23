@@ -178,6 +178,39 @@ describe('table refs', () => {
     wrapper.unmount()
   })
 
+  it('syncs virtual table body when header scrolls horizontally', async () => {
+    const wrapper = mount(VirtualTable, {
+      attachTo: document.body,
+      props: {
+        data,
+        columns,
+        scroll: { x: 300, y: 120 },
+      },
+    })
+
+    await nextTick()
+
+    const header = wrapper.find('.vc-table-header').element as HTMLDivElement
+    Object.defineProperty(header, 'scrollWidth', {
+      configurable: true,
+      value: 600,
+    })
+    Object.defineProperty(header, 'clientWidth', {
+      configurable: true,
+      value: 240,
+    })
+
+    header.dispatchEvent(new WheelEvent('wheel', {
+      deltaX: 48,
+      bubbles: true,
+      cancelable: true,
+    }))
+
+    expect(virtualListScrollTo).toHaveBeenLastCalledWith({ left: 48 })
+
+    wrapper.unmount()
+  })
+
   it('keeps fallthrough attrs on the table root when horizontal scroll is enabled', async () => {
     const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
