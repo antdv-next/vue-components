@@ -89,8 +89,6 @@ const defaults = {
   autoDestroy: true,
 } as any
 
-const OVERFLOW_AXIS_KEYS = ['overflowX', 'overflowY', 'overflow-x', 'overflow-y'] as const
-
 const Popup = defineComponent<PopupProps>(
   (props = defaults, { attrs, slots, expose }) => {
     const focusBoundary = useFocusBoundary()
@@ -159,18 +157,6 @@ const Popup = defineComponent<PopupProps>(
       offsetX,
       offsetY,
     )
-    const filteredPopupStyle = computed(() => {
-      const style = props.style as Record<string, any> | undefined
-      if (!style) {
-        return undefined
-      }
-
-      const nextStyle: Record<string, any> = { ...style }
-      OVERFLOW_AXIS_KEYS.forEach((key) => {
-        delete nextStyle[key]
-      })
-      return nextStyle
-    })
     const popupElementRef = shallowRef<HTMLDivElement>()
     watchEffect((onCleanup) => {
       if (props.open && popupElementRef.value && focusBoundary?.registerAllowedElement) {
@@ -303,7 +289,7 @@ const Popup = defineComponent<PopupProps>(
                   boxSizing: 'border-box',
                   zIndex,
                 },
-                filteredPopupStyle.value,
+                props.style,
               ]}
               onMouseenter={onMouseEnter}
               onMouseleave={onMouseLeave}
