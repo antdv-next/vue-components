@@ -1,0 +1,39 @@
+{
+  "name": "@v-c/listy",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "",
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./dist/*": "./dist/*",
+    "./package.json": "./package.json"
+  },
+  "main": "dist/index.js",
+  "files": [
+    "dist",
+    "package.json"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "prepublish": "pnpm build",
+    "test": "vitest run",
+    "patch": "bumpp --release patch",
+    "bump": "bumpp"
+  },
+  "peerDependencies": {
+    "vue": "^3.0.0"
+  },
+  "dependencies": {
+    "@v-c/portal": "workspace:^",
+    "@v-c/resize-observer": "workspace:^",
+    "@v-c/util": "workspace:^",
+    "@v-c/virtual-list": "workspace:^"
+  }
+}
