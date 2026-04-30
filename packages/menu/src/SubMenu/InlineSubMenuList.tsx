@@ -72,11 +72,9 @@ const InlineSubMenuList = defineComponent<InlineSubMenuListProps>(
           <Transition
             {...getTransitionProps(mergedMotion.value?.name, mergedMotion.value)}
           >
-            {mergedOpen.value && (
-              <SubMenuList id={props.id}>
-                {slots?.default?.()}
-              </SubMenuList>
-            )}
+            <SubMenuList v-show={mergedOpen.value} id={props.id}>
+              {slots?.default?.()}
+            </SubMenuList>
           </Transition>
         </InheritableContextProvider>
       )
