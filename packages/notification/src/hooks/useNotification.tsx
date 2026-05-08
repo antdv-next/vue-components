@@ -1,36 +1,29 @@
 import type { VueNode } from '@v-c/util/dist/type'
 import type { CSSProperties, MaybeRef, TransitionGroupProps } from 'vue'
-import type { Key, OpenConfig, Placement, StackConfig } from '../interface'
+import type { NotificationListConfig, Placement, StackInput } from '../NotificationList'
 import type { NotificationsProps, NotificationsRef } from '../Notifications'
 import { computed, onMounted, shallowRef, unref, watch } from 'vue'
 import Notifications from '../Notifications'
 
+type Key = string | number | symbol
+
 const defaultGetContainer = () => document.body
 
-type OptionalConfig = Partial<OpenConfig>
+type OptionalConfig = Partial<NotificationListConfig>
+type SharedConfig = Pick<
+  NotificationListConfig,
+  'placement' | 'closable' | 'duration' | 'showProgress'
+>
 
-export interface NotificationConfig {
-  prefixCls?: string
-  /** Customize container. It will repeat call which means you should return same container element. */
+export interface NotificationConfig extends Omit<NotificationsProps, 'container'> {
+  // UI
+  placement?: Placement
   getContainer?: () => HTMLElement | ShadowRoot
-  motion?: TransitionGroupProps | ((placement: Placement) => TransitionGroupProps)
-  closeIcon?: VueNode
-  closable?:
-    | boolean
-    | ({ closeIcon?: VueNode, onClose?: VoidFunction } & Record<string, any>)
-  maxCount?: number
+
+  // Behavior
+  closable?: NotificationListConfig['closable']
   duration?: number | false | null
-  showProgress?: boolean
-  pauseOnHover?: boolean
-  /** @private. Config for notification holder style. Safe to remove if refactor */
-  className?: (placement: Placement) => string
-  /** @private. Config for notification holder style. Safe to remove if refactor */
-  style?: (placement: Placement) => CSSProperties
-  /** @private Trigger when all the notification closed. */
-  onAllRemoved?: VoidFunction
-  stack?: StackConfig
-  /** @private Slot for style in Notifications */
-  renderNotifications?: NotificationsProps['renderNotifications']
+  showProgress?: NotificationListConfig['showProgress']
 }
 
 export interface NotificationAPI {
@@ -41,7 +34,7 @@ export interface NotificationAPI {
 
 interface OpenTask {
   type: 'open'
-  config: OpenConfig
+  config: NotificationListConfig
 }
 
 interface CloseTask {
@@ -58,46 +51,34 @@ type Task = OpenTask | CloseTask | DestroyTask
 let uniqueKey = 0
 
 function mergeConfig<T>(...objList: Partial<T>[]): T {
-  const clone: any = {}
-
-  objList.forEach((obj: any) => {
+  const clone = {} as T
+  objList.forEach((obj) => {
     if (obj) {
       Object.keys(obj).forEach((key) => {
-        const val = obj[key]
-
-        if (val !== undefined) {
-          clone[key] = val
+        const value = (obj as any)[key]
+        if (value !== undefined) {
+          ;(clone as any)[key] = value
         }
       })
     }
   })
-
   return clone
 }
 
-export default function useNotification(rootConfig: MaybeRef<NotificationConfig> = {}) {
+export default function useNotification(
+  rootConfig: MaybeRef<NotificationConfig> = {},
+): [NotificationAPI, () => VueNode] {
   const configRef = computed(() => unref(rootConfig) || {})
   const container = shallowRef<HTMLElement | ShadowRoot>()
+  const notificationsRef = shallowRef<NotificationsRef>()
+  const taskQueue = shallowRef<Task[]>([])
 
-  const notificationRef = shallowRef<NotificationsRef>()
-
-  const shareConfig = computed(() => {
-    const {
-      getContainer,
-      motion,
-      prefixCls,
-      maxCount,
-      className,
-      style,
-      onAllRemoved,
-      stack,
-      renderNotifications,
-      ...restConfig
-    } = configRef.value
-    return restConfig
+  const shareConfig = computed<SharedConfig>(() => {
+    const { placement, closable, duration, showProgress } = configRef.value
+    return { placement, closable, duration, showProgress }
   })
 
-  const resolveContainer = () => {
+  function resolveContainer() {
     const getContainer = configRef.value.getContainer || defaultGetContainer
     return getContainer()
   }
@@ -105,31 +86,30 @@ export default function useNotification(rootConfig: MaybeRef<NotificationConfig>
   const contextHolder = () => (
     <Notifications
       container={container.value}
-      ref={notificationRef}
+      ref={notificationsRef as any}
       prefixCls={configRef.value.prefixCls}
-      motion={configRef.value.motion}
+      motion={configRef.value.motion as TransitionGroupProps | ((p: Placement) => TransitionGroupProps) | undefined}
       maxCount={configRef.value.maxCount}
+      pauseOnHover={configRef.value.pauseOnHover}
+      classNames={configRef.value.classNames}
+      styles={configRef.value.styles}
+      components={configRef.value.components}
       className={configRef.value.className}
-      style={configRef.value.style}
+      style={configRef.value.style as ((p: Placement) => CSSProperties) | undefined}
       onAllRemoved={configRef.value.onAllRemoved}
-      stack={configRef.value.stack}
+      stack={configRef.value.stack as StackInput | undefined}
       renderNotifications={configRef.value.renderNotifications}
     />
   )
 
-  const taskQueue = shallowRef<Task[]>([])
-
-  // ========================= Refs =========================
-
   const api: NotificationAPI = {
     open(config) {
-      const mergedConfig = mergeConfig(shareConfig.value, config)
-      if (mergedConfig.key === null || mergedConfig.key === undefined) {
-        mergedConfig.key = `vc-notification-${uniqueKey}`
+      const merged = mergeConfig<NotificationListConfig>(shareConfig.value, config as any)
+      if (merged.key === null || merged.key === undefined) {
+        merged.key = `vc-notification-${uniqueKey}`
         uniqueKey += 1
       }
-
-      taskQueue.value = [...taskQueue.value, { type: 'open', config: mergedConfig }]
+      taskQueue.value = [...taskQueue.value, { type: 'open', config: merged }]
     },
     close(key) {
       taskQueue.value = [...taskQueue.value, { type: 'close', key }]
@@ -139,41 +119,35 @@ export default function useNotification(rootConfig: MaybeRef<NotificationConfig>
     },
   }
 
-  // ======================= Container ======================
-  // React 18 should all in effect that we will check container in each render
-  // Which means getContainer should be stable.
-  onMounted(
-    () => {
-      container.value = resolveContainer()
-    },
-  )
+  onMounted(() => {
+    container.value = resolveContainer()
+  })
   watch(
     () => configRef.value.getContainer,
     () => {
       container.value = resolveContainer()
     },
   )
+
   watch(taskQueue, () => {
-    if (notificationRef.value && taskQueue.value.length) {
-      taskQueue.value.forEach((task) => {
+    if (notificationsRef.value && taskQueue.value.length) {
+      const tasks = taskQueue.value
+      tasks.forEach((task) => {
         switch (task.type) {
           case 'open':
-            notificationRef.value?.open(task.config)
+            notificationsRef.value?.open(task.config)
             break
           case 'close':
-            notificationRef.value?.close(task.key)
+            notificationsRef.value?.close(task.key)
             break
           case 'destroy':
-            notificationRef.value?.destroy()
-            break
-          default:
+            notificationsRef.value?.destroy()
             break
         }
       })
-      taskQueue.value = taskQueue.value.filter(task => !taskQueue.value.includes(task))
+      taskQueue.value = taskQueue.value.filter(task => !tasks.includes(task))
     }
   })
 
-  // ======================== Return ========================
-  return [api, contextHolder] as [NotificationAPI, () => VueNode]
+  return [api, contextHolder]
 }

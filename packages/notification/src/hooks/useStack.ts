@@ -1,32 +1,40 @@
-import type { ComputedRef, MaybeRef, ToRefs } from 'vue'
-import type { StackConfig } from '../interface'
-import { computed, reactive, toRefs, unref, watchEffect } from 'vue'
+import type { ComputedRef, MaybeRef } from 'vue'
+import { computed, unref } from 'vue'
+
+export interface StackConfig {
+  threshold?: number
+  offset?: number
+}
 
 const DEFAULT_OFFSET = 8
 const DEFAULT_THRESHOLD = 3
-const DEFAULT_GAP = 16
 
-type StackParams = Exclude<StackConfig, boolean>
+type StackParams = Required<StackConfig>
 
-type UseStack = (config?: MaybeRef<StackConfig | undefined>) => [ComputedRef<boolean>, ToRefs<StackParams>]
+export type StackInput = boolean | StackConfig
+
+type UseStack = (
+  config?: MaybeRef<StackInput | undefined>,
+) => [ComputedRef<boolean>, ComputedRef<StackParams>]
 
 const useStack: UseStack = (config) => {
-  const result: StackParams = reactive({
-    offset: DEFAULT_OFFSET,
-    threshold: DEFAULT_THRESHOLD,
-    gap: DEFAULT_GAP,
-  })
+  const enabled = computed(() => !!unref(config))
 
-  watchEffect(() => {
-    const _config = unref(config)
-    if (_config && typeof _config === 'object') {
-      result.offset = _config.offset ?? DEFAULT_OFFSET
-      result.threshold = _config.threshold ?? DEFAULT_THRESHOLD
-      result.gap = _config.gap ?? DEFAULT_GAP
+  const params = computed<StackParams>(() => {
+    const value = unref(config)
+    if (value && typeof value === 'object') {
+      return {
+        offset: value.offset ?? DEFAULT_OFFSET,
+        threshold: value.threshold ?? DEFAULT_THRESHOLD,
+      }
+    }
+    return {
+      offset: DEFAULT_OFFSET,
+      threshold: DEFAULT_THRESHOLD,
     }
   })
 
-  return [computed(() => !!unref(config)), toRefs(result)]
+  return [enabled, params]
 }
 
 export default useStack

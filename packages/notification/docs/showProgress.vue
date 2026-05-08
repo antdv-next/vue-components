@@ -10,7 +10,7 @@ const [notice, contextHolder] = useNotification({ showProgress: true, motion })
   <button
     @click="() => {
       notice.open({
-        content: `${new Date().toISOString()}`,
+        description: `${new Date().toISOString()}`,
       });
     }"
   >
@@ -19,7 +19,7 @@ const [notice, contextHolder] = useNotification({ showProgress: true, motion })
   <button
     @click="() => {
       notice.open({
-        content: `${new Date().toISOString()}`,
+        description: `${new Date().toISOString()}`,
         pauseOnHover: false,
       });
     }"

@@ -1,18 +1,34 @@
 import type { VueNode } from '@v-c/util/dist/type'
-import type { CSSProperties, TransitionGroupProps } from 'vue'
-import type { InnerOpenConfig, Key, OpenConfig, Placement, Placements, StackConfig } from './interface.ts'
+import type { CSSProperties, PropType, TransitionGroupProps } from 'vue'
+import type {
+  ComponentsType,
+  NotificationClassNames,
+  NotificationListConfig,
+  NotificationStyles,
+  Placement,
+  StackInput,
+} from './NotificationList'
 import { defineComponent, shallowRef, Teleport, watch } from 'vue'
-import NoticeList from './NoticeList.tsx'
+import NotificationList from './NotificationList'
+
+type Key = string | number | symbol
 
 export interface NotificationsProps {
   prefixCls?: string
-  motion?: TransitionGroupProps | ((placement: Placement) => TransitionGroupProps)
-  container?: HTMLElement | ShadowRoot
-  maxCount?: number
+  classNames?: NotificationClassNames
+  styles?: NotificationStyles
+  components?: ComponentsType
   className?: (placement: Placement) => string
   style?: (placement: Placement) => CSSProperties
+
+  container?: HTMLElement | ShadowRoot
+  motion?: TransitionGroupProps | ((placement: Placement) => TransitionGroupProps)
+
+  maxCount?: number
+  pauseOnHover?: boolean
+  stack?: StackInput
+
   onAllRemoved?: VoidFunction
-  stack?: StackConfig
   renderNotifications?: (
     node: VueNode,
     info: { prefixCls: string, key: Key },
@@ -20,41 +36,50 @@ export interface NotificationsProps {
 }
 
 export interface NotificationsRef {
-  open: (config: OpenConfig) => void
+  open: (config: NotificationListConfig) => void
   close: (key: Key) => void
   destroy: () => void
 }
 
-const defaults = {
-  prefixCls: 'vc-notification',
-} as NotificationsProps
+type Placements = Partial<Record<Placement, NotificationListConfig[]>>
 
-const Notifications = defineComponent<NotificationsProps>(
-  (props = defaults, { expose }) => {
-    const configList = shallowRef<OpenConfig[]>([])
-    // ======================== Close =========================
-    const onNoticeClose = (key: Key) => {
-      // Trigger close event
-      const config = configList.value.find(item => item.key === key)
-      const closable = config?.closable
-      const closableObj = closable && typeof closable === 'object' ? closable : {}
-      closableObj.onClose?.()
-      config?.onClose?.()
-      configList.value = configList.value.filter(item => item.key !== key)
-    }
+const Notifications = defineComponent({
+  name: 'Notifications',
+  inheritAttrs: false,
+  props: {
+    prefixCls: { type: String, default: 'vc-notification' },
+    classNames: { type: Object as PropType<NotificationClassNames>, default: undefined },
+    styles: { type: Object as PropType<NotificationStyles>, default: undefined },
+    components: { type: Object as PropType<ComponentsType>, default: undefined },
+    className: { type: Function as PropType<(p: Placement) => string>, default: undefined },
+    style: { type: Function as PropType<(p: Placement) => CSSProperties>, default: undefined },
+    container: { type: Object as PropType<HTMLElement | ShadowRoot>, default: undefined },
+    motion: {
+      type: [Object, Function] as PropType<NotificationsProps['motion']>,
+      default: undefined,
+    },
+    maxCount: { type: Number, default: undefined },
+    pauseOnHover: { type: Boolean, default: undefined },
+    stack: { type: [Boolean, Object] as PropType<StackInput>, default: undefined },
+    onAllRemoved: { type: Function as PropType<VoidFunction>, default: undefined },
+    renderNotifications: {
+      type: Function as PropType<NotificationsProps['renderNotifications']>,
+      default: undefined,
+    },
+  },
+  setup(props, { expose }) {
+    const configList = shallowRef<NotificationListConfig[]>([])
+    const placements = shallowRef<Placements>({})
+    const emptyRef = shallowRef(false)
 
-    // ========================= Refs =========================
     expose({
-      open: (config: OpenConfig) => {
+      open: (config: NotificationListConfig) => {
         const list = configList.value
-        let clone = [...configList.value]
-        // Replace if exist
+        let clone = [...list]
         const index = clone.findIndex(item => item.key === config.key)
-        const innerConfig: InnerOpenConfig = {
-          ...config,
-        }
+        const innerConfig: NotificationListConfig = { ...config }
         if (index >= 0) {
-          innerConfig.times = ((list[index] as InnerOpenConfig)?.times || 0) + 1
+          innerConfig.times = (list[index]?.times ?? 0) + 1
           clone[index] = innerConfig
         }
         else {
@@ -67,98 +92,89 @@ const Notifications = defineComponent<NotificationsProps>(
         }
         configList.value = clone
       },
-      close: onNoticeClose,
+      close: (key: Key) => {
+        configList.value = configList.value.filter(item => item.key !== key)
+      },
       destroy: () => {
         configList.value = []
       },
-    })
-
-    // ====================== Placements ======================
-
-    const placements = shallowRef<Placements>({})
+    } as NotificationsRef)
 
     watch(
       configList,
       () => {
-        const nextPlacements: Placements = {}
+        const next: Placements = {}
         configList.value.forEach((config) => {
-          const { placement = 'topRight' } = config
-          if (placement) {
-            nextPlacements[placement] = nextPlacements[placement] || []
-            nextPlacements[placement].push(config)
-          }
+          const placement = config.placement ?? 'topRight'
+          next[placement] = next[placement] || []
+          next[placement]!.push(config)
         })
-        // Fill exist placements to avoid empty list causing remove without motion
-        Object.keys(placements.value).forEach((_placement) => {
-          const placement = _placement as Placement
-          nextPlacements[placement] = nextPlacements[placement] || []
+        Object.keys(placements.value).forEach((placement) => {
+          next[placement as Placement] = next[placement as Placement] || []
         })
-        placements.value = nextPlacements
+        placements.value = next
       },
+      { immediate: true },
     )
 
-    // Clean up container if all notices fade out
-    const onAllNoticeRemoved = (placement: Placement) => {
+    function onAllNoticeRemoved(placement: Placement) {
       const clone = { ...placements.value }
-      const list = clone[placement] || []
-      if (!list.length) {
+      if (!(clone[placement] || []).length) {
         delete clone[placement]
       }
       placements.value = clone
     }
 
-    // Effect tell that placements is empty now
-    const emptyRef = shallowRef(false)
-
-    watch(
-      placements,
-      () => {
-        if (Object.keys(placements.value).length > 0) {
-          emptyRef.value = true
-        }
-        else if (emptyRef.value) {
-        // Trigger only when from exist to empty
-          props?.onAllRemoved?.()
-          emptyRef.value = false
-        }
-      },
-    )
+    watch(placements, () => {
+      if (Object.keys(placements.value).length > 0) {
+        emptyRef.value = true
+      }
+      else if (emptyRef.value) {
+        props.onAllRemoved?.()
+        emptyRef.value = false
+      }
+    })
 
     return () => {
-      const { container } = props
-      const prefixCls = props.prefixCls ?? defaults.prefixCls ?? ''
-      // ======================== Render ========================
+      const { container, prefixCls = 'vc-notification' } = props
       if (!container) {
         return null
       }
 
+      const placementList = Object.keys(placements.value) as Placement[]
+
       return (
         <Teleport to={container}>
-          {Object.keys(placements.value).map((placement) => {
-            const placementConfigList = placements.value[placement as Placement]
+          {placementList.map((placement) => {
             const list = (
-              <NoticeList
+              <NotificationList
                 key={placement}
-                configList={placementConfigList}
-                placement={placement as Placement}
+                configList={placements.value[placement]}
+                placement={placement}
                 prefixCls={prefixCls}
-                class={props.className?.(placement as Placement)}
-                style={props.style?.(placement as Placement)}
+                pauseOnHover={props.pauseOnHover}
+                classNames={props.classNames}
+                styles={props.styles}
+                components={props.components}
+                class={props.className?.(placement)}
+                style={props.style?.(placement)}
                 motion={props.motion}
                 stack={props.stack}
-                onAllNoticeRemoved={() => onAllNoticeRemoved(placement as Placement)}
-                onNoticeClose={onNoticeClose}
+                onNoticeClose={(key) => {
+                  configList.value = configList.value.filter(item => item.key !== key)
+                }}
+                onAllRemoved={onAllNoticeRemoved}
               />
             )
-            return props.renderNotifications ? props.renderNotifications(list, { prefixCls, key: placement }) : list
+
+            return props.renderNotifications
+              ? props.renderNotifications(list, { prefixCls, key: placement })
+              : list
           })}
         </Teleport>
       )
     }
   },
-  {
-    name: 'Notifications',
-  },
-)
+})
 
 export default Notifications
