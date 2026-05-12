@@ -426,6 +426,11 @@ export const BaseSelect = defineComponent<
     // If menu is open, OptionList will take charge
     // If mode isn't tags, press enter is not meaningful when you can't see any option
     const onInternalSearchSubmit = (searchText: string) => {
+      const { maxCount } = props
+      // fix https://github.com/antdv-next/antdv-next/issues/529
+      if (multiple.value && isValidCount(maxCount) && displayValues.value.length >= maxCount!) {
+        return
+      }
       // prevent empty tags from appearing when you click the Enter button
       if (!searchText || !searchText.trim()) {
         return
