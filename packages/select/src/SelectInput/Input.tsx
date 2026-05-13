@@ -148,7 +148,7 @@ const Input = defineComponent<InputProps>(
         autoComplete,
         className,
         value,
-        ...resetProps
+        readOnly,
       } = props
       const {
         prefixCls,
@@ -171,11 +171,11 @@ const Input = defineComponent<InputProps>(
 
       // ============================= Render =============================
       // Extract shared input props
-
+      
       const sharedInputProps = {
         id,
         'type': mode === 'combobox' ? 'text' : 'search',
-        ...resetProps,
+        readOnly,
         ...attrs,
         'ref': inputRef,
         'style': {
