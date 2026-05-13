@@ -67,7 +67,7 @@ const VirtualCell = defineComponent<VirtualCellProps<any>>({
       const { render, dataIndex, className: columnClassName, width: colWidth } = column
       const columnsOffset = gridContext.columnsOffset || []
 
-      const { key, fixedInfo, appendCellNode, additionalCellProps } = getCellProps(
+      const { key, fixedInfo, appendCellNode, additionalCellProps, hoverRowSpan } = getCellProps(
         rowInfo,
         record,
         column,
@@ -132,6 +132,7 @@ const VirtualCell = defineComponent<VirtualCellProps<any>>({
           shouldCellUpdate={column.shouldCellUpdate}
           {...fixedInfo}
           appendNode={appendCellNode}
+          hoverRowSpan={hoverRowSpan}
           additionalProps={{
             ...additionalCellProps,
             style: mergedStyle,
