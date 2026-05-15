@@ -1,4 +1,4 @@
-import type { ComputedRef, Ref } from 'vue'
+import type { ComputedRef, Ref, ShallowRef } from 'vue'
 import type { GenerateConfig } from '../../generate'
 import type { BaseInfo, FormatType, Locale } from '../../interface'
 import { computed, ref, shallowRef, watch } from 'vue'
@@ -9,6 +9,13 @@ import useLockEffect from './useLockEffect'
 const EMPTY_VALUE: any[] = []
 
 type TriggerCalendarChange<ValueType extends object[]> = (calendarValues: ValueType) => void
+type UseInnerValueReturn<ValueType extends object[]> = readonly [
+  ShallowRef<ValueType>,
+  (val: ValueType) => void,
+  Ref<ValueType>,
+  TriggerCalendarChange<ValueType>,
+  () => void,
+]
 
 function useUtil<MergedValueType extends object[], DateType extends MergedValueType[number] = any>(
   generateConfig: Ref<GenerateConfig<DateType>>,
@@ -70,8 +77,9 @@ export function useInnerValue<ValueType extends DateType[], DateType extends obj
     info: BaseInfo,
   ) => void,
   onOk?: (dates: ValueType) => void,
-) {
-  const mergedValue = shallowRef((value.value === undefined ? defaultValue.value : value.value) || (EMPTY_VALUE as ValueType))
+): UseInnerValueReturn<ValueType> {
+  const initialValue = ((value.value === undefined ? defaultValue.value : value.value) || EMPTY_VALUE) as ValueType
+  const mergedValue = shallowRef(initialValue) as ShallowRef<ValueType>
 
   watch(value, (value) => {
     mergedValue.value = value || (EMPTY_VALUE as ValueType)

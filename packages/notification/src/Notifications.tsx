@@ -42,11 +42,6 @@ const Notifications = defineComponent<NotificationsProps>(
     const configList = shallowRef<NotificationListConfig[]>([])
 
     const onNoticeClose = (key: Key) => {
-      const config = configList.value.find(item => item.key === key)
-      const closable = config?.closable
-      const closableObj = closable && typeof closable === 'object' ? closable : null
-      closableObj?.onClose?.()
-      config?.onClose?.()
       configList.value = configList.value.filter(item => item.key !== key)
     }
 
