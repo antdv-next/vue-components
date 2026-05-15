@@ -582,7 +582,9 @@ watch(rtl, () => {
                   key: tab.key,
                   tab,
                   className: tabsClassNames?.item,
-                  style: i === 0 ? styles?.item : { ...(isHorizontal ? { marginInlineStart: tabBarGutter } : { marginTop: tabBarGutter }), ...(styles?.item || {}) },
+                  style: i === 0 ? undefined : (isHorizontal ? { marginInlineStart: tabBarGutter } : { marginTop: tabBarGutter }),
+                  classNames: { item: tabsClassNames?.item, remove: tabsClassNames?.remove },
+                  styles: { item: styles?.item, remove: styles?.remove },
                   closable: tab.closable,
                   editable,
                   active: tab.key === activeKey,
@@ -623,6 +625,8 @@ watch(rtl, () => {
         :tabs="hiddenTabs"
         :class-name="[tabsClassNames?.operations, !hasDropdown ? operationsHiddenClassName : undefined]"
         :popup-style="styles?.popup" :tab-moving="!!lockAnimation"
+        :class-names="{ remove: tabsClassNames?.remove }"
+        :styles="{ remove: styles?.remove }"
         v-bind="{ id, rtl, tabBarGutter: tabBarGutterProp, activeKey, mobile, more, editable, locale, onTabClick, getPopupContainer, popupClassName }"
       />
 
