@@ -1,7 +1,7 @@
 {
   "name": "@v-c/table",
   "type": "module",
-  "version": "1.0.7",
+  "version": "1.10.0",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
