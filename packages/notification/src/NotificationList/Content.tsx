@@ -39,9 +39,14 @@ const Content = defineComponent<ContentProps>(
       prevHeight = height
 
       const contentPrefixCls = `${listPrefixCls}-content`
+      // Force height to a string so Vue's style patcher always re-applies the
+      // unit. Passing a plain number (e.g. 0 → 216) was getting silently
+      // skipped during patch — the CSS variables on the same vnode style
+      // were applied, but `height: 216` was not patched onto the DOM until
+      // a manual `inst.update()` was invoked.
       const contentStyle: ContentStyle = {
         ...style,
-        height,
+        height: `${height}px`,
         '--top-notificiation-height': `${topNoticeHeight}px`,
         '--top-notificiation-width': `${topNoticeWidth}px`,
       }
@@ -60,6 +65,11 @@ const Content = defineComponent<ContentProps>(
   {
     name: 'NotificationListContent',
     inheritAttrs: false,
+    // Declare runtime props so Vue tracks reactive reads inside the render
+    // closure. Without this, `props.height` in `const { height } = props`
+    // does not subscribe to updates, so the rendered `height: 0px` stays
+    // stale even after position recomputes with measured node sizes.
+    props: ['listPrefixCls', 'height', 'topNoticeHeight', 'topNoticeWidth', 'className', 'style'] as any,
   },
 )
 
