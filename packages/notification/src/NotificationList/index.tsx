@@ -7,9 +7,37 @@ import type {
   NotificationStyles as NoticeStyles,
 } from '../Notification'
 import { clsx } from '@v-c/util'
-import { getTransitionGroupProps } from '@v-c/util/dist/utils/transition'
 import { unrefElement } from '@v-c/util/dist/vueuse/unref-element'
 import { computed, defineComponent, ref, shallowRef, toRef, TransitionGroup, watch, watchEffect } from 'vue'
+
+/**
+ * Map Vue's TransitionGroup enter/leave class hooks onto the rc-motion
+ * style class names that antdv-next 6.4.0 notification styles target
+ * (-enter-start / -enter-active / -leave-start / -leave-active).
+ *
+ * The shared @v-c/util getTransitionGroupProps puts -leave-active in the
+ * leaveActiveClass, which means the notice jumps straight to opacity:0
+ * on leave without animating. Wire each phase to the correct rc-motion
+ * suffix so the opacity/transform transition runs.
+ */
+function buildMotionGroupProps(name: string, override?: Partial<TransitionGroupProps>): TransitionGroupProps {
+  return {
+    name,
+    appear: true,
+    // ENTER: from = opacity 0 (-enter-start / -appear-start)
+    //        to   = opacity 1 (-enter-active / -appear-active)
+    enterFromClass: `${name} ${name}-enter ${name}-appear ${name}-enter-start ${name}-appear-start`,
+    enterActiveClass: `${name} ${name}-enter ${name}-appear`,
+    enterToClass: `${name} ${name}-enter ${name}-appear ${name}-enter-active ${name}-appear-active`,
+    // LEAVE: from = opacity 1 (-leave-start)
+    //        to   = opacity 0 (-leave-active)
+    leaveFromClass: `${name} ${name}-leave ${name}-leave-start`,
+    leaveActiveClass: `${name} ${name}-leave`,
+    leaveToClass: `${name} ${name}-leave ${name}-leave-active`,
+    moveClass: `${name} ${name}-move`,
+    ...override,
+  }
+}
 import useListPosition from '../hooks/useListPosition'
 import useStack from '../hooks/useStack'
 import Notification from '../Notification'
@@ -185,8 +213,8 @@ const NotificationList = defineComponent<NotificationListProps>(
       const positionResult = position.value
 
       let motionGroupProps: TransitionGroupProps = {}
-      if (placementMotion.value) {
-        motionGroupProps = getTransitionGroupProps(placementMotion.value.name!, placementMotion.value)
+      if (placementMotion.value?.name) {
+        motionGroupProps = buildMotionGroupProps(placementMotion.value.name, placementMotion.value)
       }
 
       const renderItems = () =>
