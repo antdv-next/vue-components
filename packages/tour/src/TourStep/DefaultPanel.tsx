@@ -42,7 +42,8 @@ const DefaultPanel = defineComponent<DefaultPanelProps>(
                 onClick={onClose}
                 aria-label="Close"
                 {...ariaProps}
-                class={`${prefixCls}-close`}
+                class={clsx(`${prefixCls}-close`, tourClassNames?.close)}
+                style={styles?.close}
               >
                 {closeIcon}
               </button>
