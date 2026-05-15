@@ -36,7 +36,6 @@ describe('tree', () => {
   it('does not activate a node when tree receives focus from mouse', async () => {
     const onActiveChange = vi.fn()
     const onMouseDown = vi.fn()
-    const onMouseUp = vi.fn()
 
     const wrapper = mount(() => (
       <Tree
@@ -49,17 +48,15 @@ describe('tree', () => {
         itemHeight={24}
         onActiveChange={onActiveChange}
         onMouseDown={onMouseDown}
-        onMouseUp={onMouseUp}
       />
     ))
 
     const treeList = wrapper.get('.vc-tree-list')
     await treeList.trigger('mousedown')
     await treeList.trigger('focus')
-    await treeList.trigger('mouseup')
+    window.dispatchEvent(new MouseEvent('mouseup'))
 
     expect(onMouseDown).toHaveBeenCalledTimes(1)
-    expect(onMouseUp).toHaveBeenCalledTimes(1)
     expect(onActiveChange).not.toHaveBeenCalled()
   })
 })

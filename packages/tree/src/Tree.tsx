@@ -21,7 +21,7 @@ import useMergedState from '@v-c/util/dist/hooks/useMergedState'
 import KeyCode from '@v-c/util/dist/KeyCode'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
 import warning from '@v-c/util/dist/warning'
-import { computed, defineComponent, onBeforeUnmount, provide, reactive, ref, shallowRef, watch, watchEffect } from 'vue'
+import { computed, defineComponent, onBeforeUnmount, onMounted, provide, reactive, ref, shallowRef, watch, watchEffect } from 'vue'
 import { TreeContextKey } from './contextTypes'
 import DropIndicator from './DropIndicator'
 import NodeList, { MOTION_KEY, MotionEntity } from './NodeList'
@@ -106,7 +106,6 @@ export interface TreeProps<TreeDataType extends BasicDataNode = DataNode> {
     direction: Direction
   }) => any
   onMouseDown?: (e: MouseEvent) => void
-  onMouseUp?: (e: MouseEvent) => void
   onFocus?: (e: FocusEvent) => void
   onBlur?: (e: FocusEvent) => void
   onKeyDown?: (e: KeyboardEvent) => void
@@ -478,7 +477,6 @@ const Tree = defineComponent<TreeProps>(
     }
 
     function onBlur(e: FocusEvent) {
-      focusedByMouse = false
       onActiveChange(null)
       props.onBlur?.(e)
     }
@@ -488,9 +486,8 @@ const Tree = defineComponent<TreeProps>(
       props.onMouseDown?.(e)
     }
 
-    function onMouseUp(e: MouseEvent) {
+    function onGlobalMouseUp() {
       focusedByMouse = false
-      props.onMouseUp?.(e)
     }
 
     function onNodeLoad(treeNode: EventDataNode<any>) {
@@ -752,8 +749,13 @@ const Tree = defineComponent<TreeProps>(
       window.removeEventListener('dragend', onWindowDragEnd)
     }
 
+    onMounted(() => {
+      window.addEventListener('mouseup', onGlobalMouseUp)
+    })
+
     onBeforeUnmount(() => {
       window.removeEventListener('dragend', onWindowDragEnd)
+      window.removeEventListener('mouseup', onGlobalMouseUp)
       Object.keys(delayedDragEnterLogic).forEach((key) => {
         clearTimeout(delayedDragEnterLogic[key])
       })
@@ -1227,7 +1229,6 @@ const Tree = defineComponent<TreeProps>(
             activeItem={getActiveItem.value as any}
             onFocus={onFocus}
             onMouseDown={onMouseDown}
-            onMouseUp={onMouseUp}
             onBlur={onBlur}
             onKeyDown={onKeyDown}
             onActiveChange={onActiveChange}
