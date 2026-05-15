@@ -209,6 +209,11 @@ const Tour = defineComponent<TourProps>(
     watch(
       mergedOpen,
       (open, _, onCleanup) => {
+        // Guard against SSR — the immediate run fires during component setup
+        // on the server where `window` is undefined.
+        if (typeof window === 'undefined') {
+          return
+        }
         if (open) {
           window.addEventListener('keydown', keyboardHandler)
           onCleanup(() => {
@@ -223,6 +228,9 @@ const Tour = defineComponent<TourProps>(
     )
 
     onBeforeUnmount(() => {
+      if (typeof window === 'undefined') {
+        return
+      }
       window.removeEventListener('keydown', keyboardHandler)
     })
 
