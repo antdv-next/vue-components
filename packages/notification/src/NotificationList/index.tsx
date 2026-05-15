@@ -191,7 +191,20 @@ const NotificationList = defineComponent<NotificationListProps>(
 
       const renderItems = () =>
         keys.value.map((config) => {
-          const { key, placement: _itemPlacement, classNames: configClassNames, styles: configStyles, className: configClassName, style: configStyle, ...notificationConfig } = config
+          const {
+            key,
+            placement: _itemPlacement,
+            classNames: configClassNames,
+            styles: configStyles,
+            className: configClassName,
+            style: configStyle,
+            // Extract onClose so the spread below does not also bind it.
+            // Vue would otherwise merge our `onClose={...}` and the spread's
+            // `onClose` into an Array, breaking `props.onClose?.()` in the
+            // notice itself.
+            onClose: configOnClose,
+            ...notificationConfig
+          } = config
           const strKey = String(key)
           const notificationIndex = getIndex(keys.value, key)
           const stackInThreshold
@@ -220,7 +233,7 @@ const NotificationList = defineComponent<NotificationListProps>(
               notificationIndex={notificationIndex}
               stackInThreshold={stackInThreshold}
               onClose={() => {
-                (config as NotificationListConfig).onClose?.()
+                configOnClose?.()
                 onNoticeClose?.(key)
               }}
             />
@@ -261,7 +274,6 @@ const NotificationList = defineComponent<NotificationListProps>(
             style={nss?.listContent}
           >
             <TransitionGroup
-              tag={false as any}
               appear
               {...motionGroupProps}
               onAfterLeave={checkAllClosed}
