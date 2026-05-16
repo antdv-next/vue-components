@@ -60,11 +60,18 @@ export default function useResizeObserver(
     }
   }
 
-  // Dynamic observe
+  // Dynamic observe.
+  // rc-resize-observer#226: when `getTarget` is a function that resolves to an
+  // element which isn't ready yet (e.g. a portal target that mounts after the
+  // parent renders), bump this counter so the watcher re-runs on the next
+  // tick instead of silently never wiring up.
+  const funcTargetIdRef = shallowRef(0)
+  const isFuncTarget = typeof getTarget === 'function'
+
   watch(
-    [enabled, getTarget],
+    [enabled, isFuncTarget ? funcTargetIdRef : (getTarget as Ref<Element | undefined>)],
     (_, _o, onCleanup) => {
-      const target = typeof getTarget === 'function' ? getTarget() : unref(getTarget)
+      const target = isFuncTarget ? (getTarget as () => HTMLElement)() : unref(getTarget as Ref<Element | undefined>)
       const isEnabled = unref(enabled)
       if (target && isEnabled) {
         observe(target, onInternalResize as any)
@@ -73,6 +80,9 @@ export default function useResizeObserver(
             unobserve(target, onInternalResize as any)
           }
         })
+      }
+      else if (isEnabled && isFuncTarget) {
+        funcTargetIdRef.value += 1
       }
     },
     {
