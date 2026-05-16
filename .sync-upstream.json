@@ -254,9 +254,9 @@
           "description": "@rc-component/mini-decimal -> @v-c/mini-decimal"
         }
       ],
-      "last_synced_commit": "abf117997877f7c0fd9c684dc98bdf37f9623d83",
-      "last_synced_commit_short": "abf11799",
-      "last_synced_at": "2026-04-14T13:45:25Z",
+      "last_synced_commit": "2f43401c8809ebe6190a947839cd6d054ce5c739",
+      "last_synced_commit_short": "2f43401c",
+      "last_synced_at": "2026-05-16T08:22:17Z",
       "last_synced_tag": "v1.1.0",
       "sync_count": 1
     },
@@ -322,9 +322,9 @@
           "description": "@rc-component/pagination -> @v-c/pagination"
         }
       ],
-      "last_synced_commit": "44f5e655577f5adf288d97d448ea7eb33f8a1584",
-      "last_synced_commit_short": "44f5e655",
-      "last_synced_at": "2026-04-14T13:45:25Z",
+      "last_synced_commit": "a85aa10168fcc137c52930b0d429b0c88587f3ee",
+      "last_synced_commit_short": "a85aa101",
+      "last_synced_at": "2026-05-16T08:22:17Z",
       "last_synced_tag": "@rc-component/pagination@1.2.0",
       "sync_count": 1
     },
