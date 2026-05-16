@@ -1,5 +1,6 @@
 import type { ComputedRef, Ref, ShallowRef } from 'vue'
 import type { Direction, OnStartMove } from '../interface'
+import type { IsHandleDisabled } from './useDisabled'
 import type { OffsetValues } from './useOffset'
 import { computed, inject, onUnmounted, ref, watch } from 'vue'
 import { defaultUnstableContextValue, UnstableContextKey } from '../context'
@@ -25,6 +26,7 @@ function useDrag(
   offsetValues: Ref<OffsetValues> | ComputedRef<OffsetValues>,
   editable: ShallowRef<boolean> | ComputedRef<boolean>,
   minCount: ShallowRef<number> | ComputedRef<number>,
+  isHandleDisabled: IsHandleDisabled,
 ): [
     draggingIndex: Ref<number>,
     draggingValue: Ref<number>,
@@ -91,6 +93,12 @@ function useDrag(
 
   const updateCacheValue = (valueIndex: number, offsetPercent: number, deleteMark: boolean) => {
     if (valueIndex === -1) {
+      // rc-slider#1069 defensive: Tracks/index.tsx already blocks track-drag
+      // when any handle is disabled. Mirror the guard here in case a future
+      // caller invokes the hook directly.
+      if (originValues.value.some((_, index) => isHandleDisabled(index)))
+        return
+
       // >>>> Dragging on the track
       const startValue = originValues.value[0]
       const endValue = originValues.value[originValues.value.length - 1]
@@ -124,6 +132,11 @@ function useDrag(
 
   const onStartMove: OnStartMove = (e, valueIndex, startValues?: number[]) => {
     e.stopPropagation()
+    // rc-slider#1069 defensive: Handle.tsx already blocks `onStartMove`
+    // when the handle is disabled. Mirror the guard so the hook is safe
+    // even if a caller bypasses the Handle wrapper.
+    if (isHandleDisabled(valueIndex))
+      return
     // 如果是点击 track 触发的，需要传入变化后的初始值，而不能直接用 rawValues
     const initialValues = startValues || rawValues.value
     const originValue = initialValues[valueIndex]

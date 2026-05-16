@@ -1,7 +1,7 @@
 {
   "name": "@v-c/tabs",
   "type": "module",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "tabs ui component for react",
   "publishConfig": {
     "access": "public"

@@ -32,6 +32,14 @@ import SingleSelector from './Selector/SingleSelector'
 
 // TODO: isInvalidateDate with showTime.disabledTime should not provide `range` prop
 
+export interface CustomTagProps<DateType extends object = any> {
+  label: any
+  value: DateType
+  disabled: boolean
+  onClose: (event?: MouseEvent) => void
+  closable: boolean
+}
+
 export interface BasePickerProps<
   DateType extends object = any,
 > extends SharedPickerProps<DateType> {
@@ -43,6 +51,8 @@ export interface BasePickerProps<
   removeIcon?: any
   /** Only work when `multiple` is in used */
   maxTagCount?: number | 'responsive'
+  /** Only works when `multiple` is in use */
+  tagRender?: (props: CustomTagProps<DateType>) => any
 
   // Value
   value?: DateType | DateType[] | string | string[] | null

@@ -69,7 +69,8 @@ const BaseInput = defineComponent<
 
         // ================== Clear Icon ================== //
         if (allowClear) {
-          const needClear = !disabled && !readOnly && value
+          const clearDisabled = typeof allowClear === 'object' && allowClear?.disabled
+          const needClear = !disabled && !readOnly && value && !clearDisabled
           const clearIconCls = `${prefixCls}-clear-icon`
           const iconNode
             = typeof allowClear === 'object' && allowClear?.clearIcon
@@ -77,20 +78,24 @@ const BaseInput = defineComponent<
               : '✖'
 
           clearIcon = (
+            // rc-input#168: keep clear button reachable by keyboard.
             <button
               type="button"
-              tabindex={-1}
+              disabled={clearDisabled || undefined}
               onClick={(event) => {
+                if (clearDisabled)
+                  return
                 handleReset?.(event)
                 onClear?.()
               }}
               // Do not trigger onBlur when clear input
               // https://github.com/ant-design/ant-design/issues/31200
               onMousedown={e => e.preventDefault()}
-              class={clsx(clearIconCls, {
+              class={clsx(clearIconCls, classNames?.clear, {
                 [`${clearIconCls}-hidden`]: !needClear,
                 [`${clearIconCls}-has-suffix`]: !!suffix,
               })}
+              style={styles?.clear}
             >
               {iconNode}
             </button>

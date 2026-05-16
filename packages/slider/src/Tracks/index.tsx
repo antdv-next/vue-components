@@ -57,7 +57,13 @@ const Tracks = defineComponent({
       if (!included) {
         return null
       }
-      const { classNames, styles } = sliderContext.value
+      const { classNames, styles, isHandleDisabled } = sliderContext.value
+
+      // rc-slider#1069: any disabled handle locks the whole track-drag path,
+      // since dragging the track moves every handle in lock-step and we cannot
+      // honour the disabled-anchor semantics there.
+      const hasDisabledHandle = props.values.some((_, index) => isHandleDisabled(index))
+      const trackOnStartMove = hasDisabledHandle ? undefined : props.onStartMove
 
       // ========================== Render ==========================
       const tracksNode
@@ -84,7 +90,7 @@ const Tracks = defineComponent({
               start={start}
               end={end}
               key={index}
-              onStartMove={props.onStartMove}
+              onStartMove={trackOnStartMove}
             />
           ))}
         </>

@@ -1,27 +1,32 @@
-import type { VueNode } from '@v-c/util/dist/type'
 import type { CSSProperties, MaybeRef, TransitionGroupProps } from 'vue'
-import type { Key, OpenConfig, Placement, StackConfig } from '../interface'
+import type { VueNode } from '@v-c/util/dist/type'
+import type { ClosableType, Key, NotificationListConfig, Placement, StackConfig } from '../interface'
+import type {
+  ComponentsType,
+} from '../Notification'
+import type { NotificationClassNames, NotificationStyles } from '../NotificationList'
 import type { NotificationsProps, NotificationsRef } from '../Notifications'
 import { computed, onMounted, shallowRef, unref, watch } from 'vue'
 import Notifications from '../Notifications'
 
 const defaultGetContainer = () => document.body
 
-type OptionalConfig = Partial<OpenConfig>
+type OptionalConfig = Partial<NotificationListConfig>
 
 export interface NotificationConfig {
   prefixCls?: string
   /** Customize container. It will repeat call which means you should return same container element. */
   getContainer?: () => HTMLElement | ShadowRoot
   motion?: TransitionGroupProps | ((placement: Placement) => TransitionGroupProps)
-  closeIcon?: VueNode
-  closable?:
-    | boolean
-    | ({ closeIcon?: VueNode, onClose?: VoidFunction } & Record<string, any>)
+  closable?: ClosableType
   maxCount?: number
   duration?: number | false | null
   showProgress?: boolean
   pauseOnHover?: boolean
+  placement?: Placement
+  classNames?: NotificationClassNames
+  styles?: NotificationStyles
+  components?: ComponentsType
   /** @private. Config for notification holder style. Safe to remove if refactor */
   className?: (placement: Placement) => string
   /** @private. Config for notification holder style. Safe to remove if refactor */
@@ -41,7 +46,7 @@ export interface NotificationAPI {
 
 interface OpenTask {
   type: 'open'
-  config: OpenConfig
+  config: NotificationListConfig
 }
 
 interface CloseTask {
@@ -59,26 +64,24 @@ let uniqueKey = 0
 
 function mergeConfig<T>(...objList: Partial<T>[]): T {
   const clone: any = {}
-
   objList.forEach((obj: any) => {
     if (obj) {
       Object.keys(obj).forEach((key) => {
         const val = obj[key]
-
         if (val !== undefined) {
           clone[key] = val
         }
       })
     }
   })
-
   return clone
 }
 
-export default function useNotification(rootConfig: MaybeRef<NotificationConfig> = {}) {
+export default function useNotification(
+  rootConfig: MaybeRef<NotificationConfig> = {},
+): [NotificationAPI, () => VueNode] {
   const configRef = computed(() => unref(rootConfig) || {})
   const container = shallowRef<HTMLElement | ShadowRoot>()
-
   const notificationRef = shallowRef<NotificationsRef>()
 
   const shareConfig = computed(() => {
@@ -92,6 +95,10 @@ export default function useNotification(rootConfig: MaybeRef<NotificationConfig>
       onAllRemoved,
       stack,
       renderNotifications,
+      pauseOnHover,
+      classNames,
+      styles,
+      components,
       ...restConfig
     } = configRef.value
     return restConfig
@@ -109,6 +116,10 @@ export default function useNotification(rootConfig: MaybeRef<NotificationConfig>
       prefixCls={configRef.value.prefixCls}
       motion={configRef.value.motion}
       maxCount={configRef.value.maxCount}
+      pauseOnHover={configRef.value.pauseOnHover}
+      classNames={configRef.value.classNames}
+      styles={configRef.value.styles}
+      components={configRef.value.components}
       className={configRef.value.className}
       style={configRef.value.style}
       onAllRemoved={configRef.value.onAllRemoved}
@@ -119,16 +130,13 @@ export default function useNotification(rootConfig: MaybeRef<NotificationConfig>
 
   const taskQueue = shallowRef<Task[]>([])
 
-  // ========================= Refs =========================
-
   const api: NotificationAPI = {
     open(config) {
-      const mergedConfig = mergeConfig(shareConfig.value, config)
+      const mergedConfig = mergeConfig<NotificationListConfig>(shareConfig.value as any, config)
       if (mergedConfig.key === null || mergedConfig.key === undefined) {
         mergedConfig.key = `vc-notification-${uniqueKey}`
         uniqueKey += 1
       }
-
       taskQueue.value = [...taskQueue.value, { type: 'open', config: mergedConfig }]
     },
     close(key) {
@@ -139,14 +147,9 @@ export default function useNotification(rootConfig: MaybeRef<NotificationConfig>
     },
   }
 
-  // ======================= Container ======================
-  // React 18 should all in effect that we will check container in each render
-  // Which means getContainer should be stable.
-  onMounted(
-    () => {
-      container.value = resolveContainer()
-    },
-  )
+  onMounted(() => {
+    container.value = resolveContainer()
+  })
   watch(
     () => configRef.value.getContainer,
     () => {
@@ -170,10 +173,9 @@ export default function useNotification(rootConfig: MaybeRef<NotificationConfig>
             break
         }
       })
-      taskQueue.value = taskQueue.value.filter(task => !taskQueue.value.includes(task))
+      taskQueue.value = []
     }
   })
 
-  // ======================== Return ========================
-  return [api, contextHolder] as [NotificationAPI, () => VueNode]
+  return [api, contextHolder]
 }

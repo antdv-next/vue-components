@@ -1,5 +1,6 @@
 import type { InjectionKey, Ref } from 'vue'
 import type { AriaValueFormat, Direction, SliderClassNames, SliderStyles } from './interface'
+import type { IsHandleDisabled } from './hooks/useDisabled'
 import { defineComponent, inject, provide, ref } from 'vue'
 
 export interface SliderContextProps {
@@ -20,11 +21,13 @@ export interface SliderContextProps {
   ariaValueTextFormatterForHandle?: AriaValueFormat | AriaValueFormat[]
   classNames: SliderClassNames
   styles: SliderStyles
+  /** rc-slider#1069: per-handle disabled lookup. */
+  isHandleDisabled: IsHandleDisabled
 }
 
 const SliderContextKey: InjectionKey<Ref<SliderContextProps>> = Symbol('SliderContext')
 
-export const defaultSliderContextValue = {
+export const defaultSliderContextValue: SliderContextProps = {
   min: 0,
   max: 0,
   direction: 'ltr',
@@ -35,6 +38,7 @@ export const defaultSliderContextValue = {
   keyboard: true,
   styles: {},
   classNames: {},
+  isHandleDisabled: () => false,
 }
 
 export function useProviderSliderContext(ctx: Ref<SliderContextProps>) {

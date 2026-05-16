@@ -65,7 +65,8 @@ const menuNode = computed(() => {
                 'type': 'button',
                 'aria-label': removeAriaLabel.value || 'remove',
                 'tabindex': 0,
-                'class': `${dropdownPrefix.value}-menu-item-remove`,
+                'class': clsx(`${dropdownPrefix.value}-menu-item-remove`, props.classNames?.remove),
+                'style': props.styles?.remove,
                 'onClick': (e: MouseEvent | KeyboardEvent) => {
                   e.stopPropagation()
                   onRemoveTab(e, key)

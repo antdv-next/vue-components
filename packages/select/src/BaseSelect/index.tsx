@@ -175,7 +175,7 @@ export interface BaseSelectProps extends BaseSelectPrivateProps {
   maxTagPlaceholder?: VueNode | ((omittedValues: DisplayValueType[]) => any)
 
   // >>> Search
-  tokenSeparators?: string[]
+  tokenSeparators?: string[] | ((input: string) => string[])
 
   // >>> Icons
   allowClear?: boolean | { clearIcon?: VueNode }
@@ -378,8 +378,28 @@ export const BaseSelect = defineComponent<
 
     // ============================= Search =============================
     const tokenWithEnter = computed(() => {
-      return (tokenSeparators.value || []).some((tokenSeparator: string) => ['\n', '\r\n'].includes(tokenSeparator))
+      const value = tokenSeparators.value
+      return typeof value === 'function'
+        || (value || []).some((tokenSeparator: string) => ['\n', '\r\n'].includes(tokenSeparator))
     })
+
+    /**
+     * ant-design#57391 / rc-select#1220: when `tokenSeparators` is a
+     * function, defer the split decision to the user callback. Otherwise
+     * fall back to the static-string-array behaviour via getSeparatedContent.
+     */
+    const splitByTokenSeparators = (input: string, end?: number): string[] | null => {
+      const value = tokenSeparators.value
+      if (typeof value === 'function') {
+        const tokens = value(input)
+        const isUnchanged = Array.isArray(tokens) && tokens.length === 1 && tokens[0] === input
+        if (!Array.isArray(tokens) || !tokens.length || isUnchanged) {
+          return null
+        }
+        return typeof end !== 'undefined' ? tokens.slice(0, end) : tokens
+      }
+      return getSeparatedContent(input, value as string[] | undefined, end)
+    }
 
     const onInternalSearch = (searchText: string, fromTyping: boolean, isCompositing: boolean) => {
       const { maxCount } = props
@@ -390,14 +410,9 @@ export const BaseSelect = defineComponent<
       let newSearchText = searchText
       props?.onActiveValueChange?.(null)
 
-      const separatedList = getSeparatedContent(
-        searchText,
-        tokenSeparators.value as string[],
-        isValidCount(maxCount) ? maxCount! - displayValues.value.length : undefined,
-      )
-
+      const cap = isValidCount(maxCount) ? maxCount! - displayValues.value.length : undefined
       // Check if match the `tokenSeparators`
-      const patchLabels: string[] | null = isCompositing ? null : separatedList
+      const patchLabels: string[] | null = isCompositing ? null : splitByTokenSeparators(searchText, cap)
 
       // Ignore combobox since it's not split-able
       if (mode.value !== 'combobox' && patchLabels) {

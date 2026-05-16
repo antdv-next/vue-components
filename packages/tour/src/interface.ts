@@ -12,6 +12,7 @@ export type SemanticName = 'section'
   | 'title'
   | 'description'
   | 'mask'
+  | 'close'
 
 export type HTMLAriaDataAttributes = AriaAttributes & {
   [key: `data-${string}`]: unknown

@@ -27,6 +27,7 @@ export interface TextAreaProps {
   styles?: {
     textarea?: CSSProperties
     count?: CSSProperties
+    clear?: CSSProperties
   }
   allowClear?: BaseInputProps['allowClear']
   suffix?: BaseInputProps['suffix']

@@ -1,10 +1,23 @@
-import { resolve } from 'node:path'
+import { existsSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
 import { normalizePath } from 'vite'
 import { afterEach, describe, expect, it } from 'vitest'
 // @ts-expect-error exported as part of the build path fix.
 import { buildCommon, resolveBuildEntries, resolveBuildPaths } from '../../../scripts/build.common'
 
-const repoRoot = process.cwd()
+function findRepoRoot(start: string) {
+  let current = start
+  while (!existsSync(resolve(current, 'pnpm-workspace.yaml'))) {
+    const parent = dirname(current)
+    if (parent === current) {
+      throw new Error('Unable to locate repository root')
+    }
+    current = parent
+  }
+  return current
+}
+
+const repoRoot = findRepoRoot(process.cwd())
 const packageRoot = resolve(repoRoot, 'packages/input')
 const originalCwd = process.cwd()
 

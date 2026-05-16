@@ -38,12 +38,15 @@ function getLocale(locale: string): Locale {
 }
 
 function localeParse(format: string) {
+  // rc-picker#965: when `use12Hours` is enabled the moment-style uppercase
+  // `A` AM/PM token leaks into the format string; date-fns expects `a`.
   return format
     .replace(/Y/g, 'y')
     .replace(/D/g, 'd')
     .replace(/gggg/, 'yyyy')
     .replace(/g/g, 'G')
     .replace(/([Ww])o/g, 'wo')
+    .replace(/A/g, 'a')
 }
 
 function parse(text: string, format: string, locale: string) {

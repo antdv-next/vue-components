@@ -130,7 +130,9 @@ const DropdownMenu = defineComponent<DropdownMenuProps>(
                 style={style}
                 {...{
                   onMouseenter: () => {
-                    setActiveIndex(index)
+                    if (!disabled) {
+                      setActiveIndex(index)
+                    }
                   },
                 } as any}
               >

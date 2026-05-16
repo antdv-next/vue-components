@@ -98,6 +98,8 @@ export interface OperationNodeProps {
   getPopupContainer?: (node: HTMLElement) => HTMLElement
   popupClassName?: string
   popupStyle?: CSSProperties
+  classNames?: Partial<Record<'remove', string>>
+  styles?: Partial<Record<'remove', CSSProperties>>
 }
 
 export interface TabNodeProps {
@@ -122,13 +124,15 @@ export interface TabNodeProps {
   onBlur: FocusEventHandler
   style?: CSSProperties
   className?: string
+  classNames?: Partial<Record<'item' | 'remove', string>>
+  styles?: Partial<Record<'item' | 'remove', CSSProperties>>
 }
 
 export type TabPosition = 'left' | 'right' | 'top' | 'bottom'
 
 export type GetIndicatorSize = number | ((origin: number) => number)
 
-export type SemanticName = string
+export type SemanticName = 'popup' | 'item' | 'indicator' | 'content' | 'header' | 'remove'
 
 export type RenderTabBar = (props: Record<string, any>, TabNavListComponent: any) => VueNode
 

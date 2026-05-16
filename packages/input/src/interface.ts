@@ -28,13 +28,15 @@ export interface CommonInputProps {
     groupWrapper?: string
     wrapper?: string
     variant?: string
+    clear?: string
   }
   styles?: {
     affixWrapper?: CSSProperties
     prefix?: CSSProperties
     suffix?: CSSProperties
+    clear?: CSSProperties
   }
-  allowClear?: boolean | { clearIcon?: VueNode }
+  allowClear?: boolean | { clearIcon?: VueNode, disabled?: boolean }
 }
 
 type DataAttr = Record<`data-${string}`, string>
