@@ -22,6 +22,7 @@ describe('table hover with expandedRowOffset', () => {
       { key: '1', team: 'Team A', name: 'John', age: 32, description: 'John details' },
       { key: '2', team: 'Team A', name: 'Jim', age: 42, description: 'Jim details' },
       { key: '3', team: 'Team B', name: 'Joe', age: 22, description: 'Joe details' },
+      { key: '4', team: 'Team B', name: 'Jay', age: 28, description: 'Jay details' },
     ]
 
     const wrapper = mount(Table, {

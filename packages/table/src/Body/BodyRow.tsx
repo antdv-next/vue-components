@@ -55,7 +55,6 @@ export function getCellProps<RecordType>(
   const fixedInfo = fixedInfoList[colIndex]
 
   let appendCellNode: any
-  let hoverRowSpan: number | undefined
   if (colIndex === (expandIconColumnIndex || 0) && nestExpandable.value) {
     appendCellNode = (
       <>
@@ -76,18 +75,18 @@ export function getCellProps<RecordType>(
 
   const additionalCellProps = column.onCell?.(record, index) || {}
 
-  if (expandedRowOffset) {
+  let hoverRowSpan: number | undefined
+  if (expandedRowOffset && expandable.value && colIndex < expandedRowOffset) {
     const { rowSpan = 1 } = additionalCellProps
-    if (expandable.value && rowSpan && colIndex < expandedRowOffset) {
+    if (rowSpan) {
       hoverRowSpan = rowSpan
-      let currentRowSpan = rowSpan
+      let expandedCount = 0
       for (let i = index; i < index + rowSpan; i += 1) {
-        const keyInRow = rowKeys[i]
-        if (expandedKeys.has(keyInRow)) {
-          currentRowSpan += 1
+        if (expandedKeys.has(rowKeys[i])) {
+          expandedCount += 1
         }
       }
-      additionalCellProps.rowSpan = currentRowSpan
+      additionalCellProps.rowSpan = rowSpan + expandedCount
     }
   }
 
