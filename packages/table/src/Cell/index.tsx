@@ -37,6 +37,7 @@ export interface CellProps<RecordType extends DefaultRecordType> {
   children?: any
   colSpan?: number
   rowSpan?: number
+  hoverRowSpan?: number
   scope?: ScopeType
   ellipsis?: CellEllipsisType
   align?: AlignType
@@ -166,6 +167,7 @@ const Cell = defineComponent<CellProps<any>>({
     'children',
     'colSpan',
     'rowSpan',
+    'hoverRowSpan',
     'scope',
     'ellipsis',
     'align',
@@ -233,6 +235,7 @@ const Cell = defineComponent<CellProps<any>>({
         rowType,
         colSpan,
         rowSpan,
+        hoverRowSpan,
         fixStart,
         fixEnd,
         fixedStartShadow,
@@ -270,12 +273,13 @@ const Cell = defineComponent<CellProps<any>>({
 
       const mergedColSpan = legacyCellProps?.colSpan ?? additionalProps.colSpan ?? colSpan ?? 1
       const mergedRowSpan = legacyCellProps?.rowSpan ?? additionalProps.rowSpan ?? rowSpan ?? 1
+      const mergedHoverRowSpan = hoverRowSpan ?? mergedRowSpan
 
-      const [hovering, onHover] = useHoverState(index!, mergedRowSpan, tableContext)
+      const [hovering, onHover] = useHoverState(index!, mergedHoverRowSpan, tableContext)
 
       const onMouseEnter = (event: MouseEvent) => {
         if (record) {
-          onHover(index!, index! + mergedRowSpan - 1)
+          onHover(index!, index! + mergedHoverRowSpan - 1)
         }
         const onMouseEnterHandler = additionalProps.onMouseEnter || additionalProps.onMouseenter
         onMouseEnterHandler?.(event)

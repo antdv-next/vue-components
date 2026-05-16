@@ -55,6 +55,7 @@ export function getCellProps<RecordType>(
   const fixedInfo = fixedInfoList[colIndex]
 
   let appendCellNode: any
+  let hoverRowSpan: number | undefined
   if (colIndex === (expandIconColumnIndex || 0) && nestExpandable.value) {
     appendCellNode = (
       <>
@@ -78,6 +79,7 @@ export function getCellProps<RecordType>(
   if (expandedRowOffset) {
     const { rowSpan = 1 } = additionalCellProps
     if (expandable.value && rowSpan && colIndex < expandedRowOffset) {
+      hoverRowSpan = rowSpan
       let currentRowSpan = rowSpan
       for (let i = index; i < index + rowSpan; i += 1) {
         const keyInRow = rowKeys[i]
@@ -94,6 +96,7 @@ export function getCellProps<RecordType>(
     fixedInfo,
     appendCellNode,
     additionalCellProps,
+    hoverRowSpan,
   }
 }
 
@@ -188,7 +191,7 @@ const BodyRow = defineComponent<BodyRowProps<any>>({
           {flattenColumns.map((column: ColumnType<any>, colIndex) => {
             const { render, dataIndex, className: columnClassName } = column
 
-            const { key, fixedInfo, appendCellNode, additionalCellProps } = getCellProps(
+            const { key, fixedInfo, appendCellNode, additionalCellProps, hoverRowSpan } = getCellProps(
               rowInfo,
               record,
               column,
@@ -219,6 +222,7 @@ const BodyRow = defineComponent<BodyRowProps<any>>({
                 rowType="body"
                 {...fixedInfo}
                 additionalProps={additionalCellProps}
+                hoverRowSpan={hoverRowSpan}
                 column={column}
                 appendNode={appendCellNode}
               />
