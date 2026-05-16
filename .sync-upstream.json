@@ -492,11 +492,11 @@
           "description": "@rc-component/slider -> @v-c/slider"
         }
       ],
-      "last_synced_commit": "6c5610526d9639f01d45f7cae289f9d7c596589b",
-      "last_synced_commit_short": "6c561052",
-      "last_synced_at": "2026-04-14T13:45:25Z",
-      "last_synced_tag": "@rc-component/slider@1.0.1",
-      "sync_count": 1
+      "last_synced_commit": "0477cdb569719a1528354072812ba7ab7e351fd5",
+      "last_synced_commit_short": "0477cdb5",
+      "last_synced_at": "2026-05-16T03:21:46Z",
+      "last_synced_tag": "@rc-component/slider@1.1.0",
+      "sync_count": 2
     },
     {
       "name": "@rc-component/steps",

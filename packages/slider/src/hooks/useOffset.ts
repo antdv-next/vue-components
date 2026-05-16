@@ -1,5 +1,6 @@
 import type { Ref } from 'vue'
 import type { InternalMarkObj } from '../Marks'
+import type { IsHandleDisabled } from './useDisabled'
 
 /** Format the value in the range of [min, max] */
 type FormatRangeValue = (value: number) => number
@@ -29,6 +30,81 @@ export type OffsetValues = (
   values: number[]
 }
 
+/**
+ * Get the effective moving range for a handle, treating disabled handles as
+ * fixed anchors and applying `pushable` as the gap that enabled handles must
+ * keep away from those anchors. Mirrors rc-slider#1069.
+ */
+export function getDisabledBoundaryValues(
+  values: number[],
+  valueIndex: number,
+  min: number,
+  max: number,
+  pushable: false | number | null,
+  isHandleDisabled: IsHandleDisabled,
+): [number, number] {
+  const pushGap = typeof pushable === 'number' ? pushable : 0
+  let minBound = min
+  let maxBound = max
+
+  for (let i = valueIndex - 1; i >= 0; i -= 1) {
+    if (isHandleDisabled(i)) {
+      minBound = values[i] + pushGap
+      break
+    }
+  }
+
+  for (let i = valueIndex + 1; i < values.length; i += 1) {
+    if (isHandleDisabled(i)) {
+      maxBound = values[i] - pushGap
+      break
+    }
+  }
+
+  return [minBound, maxBound]
+}
+
+/**
+ * Find the nearest enabled handle that can accept the target value. A handle
+ * is only considered when the target value falls inside its disabled-anchor
+ * boundaries, so clicking outside an enabled segment becomes a no-op.
+ */
+export function getClosestEnabledHandleIndex(
+  values: number[],
+  targetValue: number,
+  min: number,
+  max: number,
+  pushable: false | number | null,
+  isHandleDisabled: IsHandleDisabled,
+): number {
+  let closestIndex = -1
+  let closestDist = max - min
+
+  values.forEach((value, index) => {
+    if (isHandleDisabled(index))
+      return
+
+    const [minBound, maxBound] = getDisabledBoundaryValues(
+      values,
+      index,
+      min,
+      max,
+      pushable,
+      isHandleDisabled,
+    )
+
+    if (minBound <= targetValue && targetValue <= maxBound) {
+      const dist = Math.abs(targetValue - value)
+      if (dist <= closestDist) {
+        closestDist = dist
+        closestIndex = index
+      }
+    }
+  })
+
+  return closestIndex
+}
+
 export default function useOffset(
   min: Ref<number>,
   max: Ref<number>,
@@ -36,6 +112,7 @@ export default function useOffset(
   markList: Ref<InternalMarkObj[]>,
   allowCross: Ref<boolean>,
   pushable: Ref<false | number | null>,
+  isHandleDisabled: IsHandleDisabled,
 ): [FormatValue, OffsetValues] {
   const formatRangeValue: FormatRangeValue = val => Math.max(min.value, Math.min(max.value, val))
 
@@ -209,8 +286,25 @@ export default function useOffset(
   const offsetValues: OffsetValues = (values, offset, valueIndex, mode = 'unit') => {
     const nextValues = values.map<number>(formatValue)
     const originValue = nextValues[valueIndex]
+
+    // rc-slider#1069: disabled handles act as fixed anchors; enabled handles
+    // cannot cross them and must keep `pushable` gap away.
+    const [minBound, maxBound] = getDisabledBoundaryValues(
+      nextValues,
+      valueIndex,
+      min.value,
+      max.value,
+      pushable.value,
+      isHandleDisabled,
+    )
+
     const nextValue = offsetValue(nextValues, offset, valueIndex, mode)
     nextValues[valueIndex] = nextValue
+
+    if (minBound <= maxBound)
+      nextValues[valueIndex] = Math.max(minBound, Math.min(maxBound, nextValues[valueIndex]))
+    else
+      nextValues[valueIndex] = originValue
 
     if (!allowCross.value) {
       // >>>>> Allow Cross
@@ -236,37 +330,82 @@ export default function useOffset(
       // =============== Push ==================
 
       // >>>>>> Basic push
-      // End values
+      // End values — stop pushing once we hit a disabled anchor; the anchor
+      // cannot move, and handles past it stay where they are.
       for (let i = valueIndex + 1; i < nextValues.length; i += 1) {
+        if (isHandleDisabled(i))
+          break
         let changed = true
         while (needPush(nextValues[i] - nextValues[i - 1]) && changed) {
           ({ value: nextValues[i], changed } = offsetChangedValue(nextValues, 1, i))
         }
+        const [, itemMaxBound] = getDisabledBoundaryValues(
+          nextValues,
+          i,
+          min.value,
+          max.value,
+          pushable.value,
+          isHandleDisabled,
+        )
+        nextValues[i] = Math.min(nextValues[i], itemMaxBound)
       }
 
       // Start values
       for (let i = valueIndex; i > 0; i -= 1) {
+        if (isHandleDisabled(i - 1))
+          break
         let changed = true
         while (needPush(nextValues[i] - nextValues[i - 1]) && changed) {
           ({ value: nextValues[i - 1], changed } = offsetChangedValue(nextValues, -1, i - 1))
         }
+        const [itemMinBound] = getDisabledBoundaryValues(
+          nextValues,
+          i - 1,
+          min.value,
+          max.value,
+          pushable.value,
+          isHandleDisabled,
+        )
+        nextValues[i - 1] = Math.max(nextValues[i - 1], itemMinBound)
       }
 
       // >>>>> Revert back to safe push range
       // End to Start
       for (let i = nextValues.length - 1; i > 0; i -= 1) {
+        if (isHandleDisabled(i) || isHandleDisabled(i - 1))
+          continue
         let changed = true
         while (needPush(nextValues[i] - nextValues[i - 1]) && changed) {
           ({ value: nextValues[i - 1], changed } = offsetChangedValue(nextValues, -1, i - 1))
         }
+        const [itemMinBound] = getDisabledBoundaryValues(
+          nextValues,
+          i - 1,
+          min.value,
+          max.value,
+          pushable.value,
+          isHandleDisabled,
+        )
+        nextValues[i - 1] = Math.max(nextValues[i - 1], itemMinBound)
       }
 
       // Start to End
       for (let i = 0; i < nextValues.length - 1; i += 1) {
+        if (isHandleDisabled(i) || isHandleDisabled(i + 1))
+          continue
         let changed = true
         while (needPush(nextValues[i + 1] - nextValues[i]) && changed) {
           ({ value: nextValues[i + 1], changed } = offsetChangedValue(nextValues, 1, i + 1))
         }
+        const [, itemMaxBound] = getDisabledBoundaryValues(
+          nextValues,
+          i + 1,
+          min.value,
+          max.value,
+          pushable.value,
+          isHandleDisabled,
+        )
+        nextValues[i + 1] = Math.min(nextValues[i + 1], itemMaxBound)
       }
     }
 

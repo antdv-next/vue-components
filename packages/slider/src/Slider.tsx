@@ -14,8 +14,9 @@ import warning from '@v-c/util/dist/warning'
 import { computed, defineComponent, isVNode, ref, shallowRef, watch } from 'vue'
 import { useProviderSliderContext } from './context'
 import Handles from './Handles'
+import useDisabled from './hooks/useDisabled'
 import useDrag from './hooks/useDrag'
-import useOffset from './hooks/useOffset'
+import useOffset, { getClosestEnabledHandleIndex } from './hooks/useOffset'
 import useRange from './hooks/useRange'
 import Marks from './Marks'
 import Steps from './Steps'
@@ -52,7 +53,13 @@ export interface SliderProps<Value extends ValueType = ValueType> {
   id?: string
 
   // Status
-  disabled?: boolean
+  /**
+   * `boolean` disables the whole slider (legacy). `boolean[]` disables a
+   * specific handle by index (rc-slider#1069); missing entries are treated
+   * as `false`. Disabled handles act as fixed anchors enabled handles
+   * cannot cross or push past.
+   */
+  disabled?: boolean | boolean[]
   keyboard?: boolean
   autoFocus?: boolean
   onFocus?: (e: FocusEvent) => void
@@ -137,7 +144,11 @@ const Slider = defineComponent<SliderProps>((props = sliderDefaults, {
   expose,
 }) => {
   const prefixCls = computed(() => props.prefixCls ?? sliderDefaults.prefixCls!)
-  const disabled = computed(() => props.disabled ?? sliderDefaults.disabled!)
+  // rc-slider#1069: `disabled` is now `boolean | boolean[]`. `useDisabled`
+  // gives us a stable per-handle lookup plus a `getDisabledState` derived
+  // from the current value list (set further below).
+  const rawDisabled = computed(() => props.disabled ?? sliderDefaults.disabled!)
+  const { isHandleDisabled, getDisabledState } = useDisabled(rawDisabled)
   const keyboard = computed(() => props.keyboard ?? sliderDefaults.keyboard!)
   const included = computed(() => props.included ?? sliderDefaults.included!)
   const tabIndex = computed(() => props.tabIndex ?? sliderDefaults.tabIndex!)
@@ -230,6 +241,7 @@ const Slider = defineComponent<SliderProps>((props = sliderDefaults, {
     markList,
     allowCross,
     mergedPush,
+    isHandleDisabled,
   )
   const formatValueRef = computed(() => formatValue)
   const offsetValuesRef = computed(() => offsetValues)
@@ -320,8 +332,19 @@ const Slider = defineComponent<SliderProps>((props = sliderDefaults, {
     props.onChangeComplete?.(finishValue)
   }
 
+  // rc-slider#1069: derive whole-slider `disabled` and `hasDisabledHandle` from
+  // the per-handle map. When any handle is disabled, range edit / delete are
+  // suppressed because we can't keep boundary semantics straight under those
+  // operations.
+  const disabledState = computed(() => getDisabledState(rawValues.value))
+  const disabled = computed(() => disabledState.value[0])
+  const hasDisabledHandle = computed(() => disabledState.value[1])
+  const effectiveRangeEditable = computed(
+    () => rangeEditable.value && !hasDisabledHandle.value,
+  )
+
   const onDelete = (index: number) => {
-    if (disabled.value || !rangeEditable.value || rawValues.value.length <= minCount.value) {
+    if (disabled.value || !effectiveRangeEditable.value || rawValues.value.length <= minCount.value) {
       return
     }
 
@@ -354,8 +377,9 @@ const Slider = defineComponent<SliderProps>((props = sliderDefaults, {
     triggerChange,
     finishChange,
     offsetValuesRef,
-    rangeEditable,
+    effectiveRangeEditable,
     minCount,
+    isHandleDisabled,
   )
 
   /**
@@ -364,19 +388,32 @@ const Slider = defineComponent<SliderProps>((props = sliderDefaults, {
    */
   const changeToCloseValue = (newValue: number, e?: MouseEvent) => {
     if (!disabled.value) {
+      // rc-slider#1069: when the click target falls into a segment fenced off
+      // by disabled handles (with no enabled handle reachable), bail instead
+      // of forcing an enabled handle to a boundary value.
+      const valueIndex = rawValues.value.length
+        ? getClosestEnabledHandleIndex(
+            rawValues.value,
+            newValue,
+            mergedMin.value,
+            mergedMax.value,
+            mergedPush.value,
+            isHandleDisabled,
+          )
+        : 0
+
+      if (valueIndex === -1) {
+        return
+      }
+
       const cloneNextValues = [...rawValues.value]
 
-      let valueIndex = 0
       let valueBeforeIndex = 0
-      let valueDist = mergedMax.value - mergedMin.value
+      const valueDist = rawValues.value.length
+        ? Math.abs(newValue - rawValues.value[valueIndex])
+        : mergedMax.value - mergedMin.value
 
       rawValues.value.forEach((val, index) => {
-        const dist = Math.abs(newValue - val)
-        if (dist <= valueDist) {
-          valueDist = dist
-          valueIndex = index
-        }
-
         if (val < newValue) {
           valueBeforeIndex = index
         }
@@ -385,7 +422,7 @@ const Slider = defineComponent<SliderProps>((props = sliderDefaults, {
       let focusIndex = valueIndex
 
       if (
-        rangeEditable.value
+        effectiveRangeEditable.value
         && valueDist !== 0
         && (!maxCount.value || rawValues.value.length < maxCount.value)
       ) {
@@ -394,6 +431,7 @@ const Slider = defineComponent<SliderProps>((props = sliderDefaults, {
       }
       else {
         cloneNextValues[valueIndex] = newValue
+        focusIndex = valueIndex
       }
 
       if (rangeEnabled.value && !rawValues.value.length && props.count === undefined) {
@@ -458,10 +496,13 @@ const Slider = defineComponent<SliderProps>((props = sliderDefaults, {
   }
 
   // =========================== Keyboard ===========================
-  const keyboardValue = shallowRef<number | null>(null)
+  // rc-slider#1069: remember the offset target's handle index so the focus
+  // re-target after re-render finds the right slot even when the value list
+  // shifts past it.
+  const keyboardValue = shallowRef<{ value: number, index: number } | null>(null)
 
   const onHandleOffsetChange = (offset: number | 'min' | 'max', valueIndex: number) => {
-    if (!disabled.value) {
+    if (!disabled.value && !isHandleDisabled(valueIndex)) {
       const next = offsetValues(rawValues.value, offset, valueIndex)
 
       const currentValue = getTriggerValue(rawValues.value)
@@ -469,13 +510,15 @@ const Slider = defineComponent<SliderProps>((props = sliderDefaults, {
       props.onBeforeChange?.(currentValue)
       triggerChange(next.values)
 
-      keyboardValue.value = next.value
+      keyboardValue.value = { value: next.value, index: valueIndex }
     }
   }
 
   watch(keyboardValue, (val) => {
     if (val !== null) {
-      const valueIndex = rawValues.value.indexOf(val)
+      const valueIndex = rawValues.value[val.index] === val.value
+        ? val.index
+        : rawValues.value.indexOf(val.value)
       if (valueIndex >= 0) {
         handlesRef.value?.focus(valueIndex)
       }
@@ -573,6 +616,7 @@ const Slider = defineComponent<SliderProps>((props = sliderDefaults, {
     ariaValueTextFormatterForHandle: props.ariaValueTextFormatterForHandle,
     styles: props.styles || {},
     classNames: props.classNames || {},
+    isHandleDisabled,
   })))
 
   // ============================ Render ============================
@@ -653,7 +697,7 @@ const Slider = defineComponent<SliderProps>((props = sliderDefaults, {
           handleRender={handleRender}
           activeHandleRender={activeHandleRender}
           onChangeComplete={finishChange}
-          onDelete={rangeEditable.value ? onDelete : () => {}}
+          onDelete={effectiveRangeEditable.value ? onDelete : () => {}}
         />
 
         <Marks

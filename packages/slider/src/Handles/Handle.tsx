@@ -45,10 +45,15 @@ export default defineComponent({
 
     // ============================ Events ============================
     const onInternalStartMove = (e: MouseEvent | TouchEvent) => {
-      const disabled = sliderContext.value.disabled
-      if (!disabled) {
-        emit('startMove', e, props.valueIndex)
+      // rc-slider#1069: a single handle can be disabled even when the
+      // slider-wide `disabled` flag is false. Check both before moving.
+      const mergedDisabled = sliderContext.value.disabled
+        || sliderContext.value.isHandleDisabled(props.valueIndex ?? 0)
+      if (mergedDisabled) {
+        e.stopPropagation()
+        return
       }
+      emit('startMove', e, props.valueIndex)
     }
 
     const onInternalFocus = (e: FocusEvent) => {
@@ -61,8 +66,9 @@ export default defineComponent({
 
     // =========================== Keyboard ===========================
     const onKeyDown = (e: KeyboardEvent) => {
-      const { keyboard, direction, disabled } = sliderContext.value
-      if (!disabled && keyboard) {
+      const { keyboard, direction, disabled, isHandleDisabled } = sliderContext.value
+      const mergedDisabled = disabled || isHandleDisabled(props.valueIndex ?? 0)
+      if (!mergedDisabled && keyboard) {
         let offset: number | 'min' | 'max' | null = null
 
         // Change the value
@@ -164,19 +170,21 @@ export default defineComponent({
         ariaValueTextFormatterForHandle,
         classNames,
         styles,
+        isHandleDisabled,
       } = sliderContext.value
+      const mergedDisabled = disabled || isHandleDisabled(valueIndex ?? 0)
       // ============================ Offset ============================
       const positionStyle = getDirectionStyle(direction, value, min, max)
       // ============================ Render ============================
 
       if (valueIndex !== null) {
         divProps.value = {
-          'tabindex': disabled ? null : getIndex(tabIndex, valueIndex!),
+          'tabindex': mergedDisabled ? null : getIndex(tabIndex, valueIndex!),
           'role': 'slider',
           'aria-valuemin': min,
           'aria-valuemax': max,
           'aria-valuenow': value,
-          'aria-disabled': disabled,
+          'aria-disabled': mergedDisabled,
           'aria-label': getIndex(ariaLabelForHandle, valueIndex!),
           'aria-labelledby': getIndex(ariaLabelledByForHandle, valueIndex!),
           'aria-required': getIndex(ariaRequired, valueIndex!),
@@ -203,6 +211,7 @@ export default defineComponent({
           [`${handlePrefixCls}-${valueIndex! + 1}`]: valueIndex !== null && range,
           [`${handlePrefixCls}-dragging`]: dragging,
           [`${handlePrefixCls}-dragging-delete`]: draggingDelete,
+          [`${handlePrefixCls}-disabled`]: mergedDisabled,
         },
         classNames?.handle,
       )
