@@ -78,9 +78,9 @@ const BaseInput = defineComponent<
               : '✖'
 
           clearIcon = (
+            // rc-input#168: keep clear button reachable by keyboard.
             <button
               type="button"
-              tabindex={-1}
               disabled={clearDisabled || undefined}
               onClick={(event) => {
                 if (clearDisabled)
