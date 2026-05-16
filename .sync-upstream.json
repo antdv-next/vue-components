@@ -288,10 +288,10 @@
           "description": "@rc-component/notification -> @v-c/notification"
         }
       ],
-      "last_synced_commit": "068c953fdb6944c6ba079c99cc9ad2e44ec3d7b5",
-      "last_synced_commit_short": "068c953f",
-      "last_synced_at": "2026-04-14T13:45:25Z",
-      "last_synced_tag": "@rc-component/notification@1.2.0",
+      "last_synced_commit": "9e08c025cc4986f4f360b2a894a94b1a56211dff",
+      "last_synced_commit_short": "9e08c025",
+      "last_synced_at": "2026-05-16T08:21:19Z",
+      "last_synced_tag": "@rc-component/notification@2.0.7",
       "sync_count": 1
     },
     {
@@ -696,9 +696,9 @@
           "description": "@rc-component/util -> @v-c/util"
         }
       ],
-      "last_synced_commit": "f7020ecea4a34aa1b8ba32910d102596289c7432",
-      "last_synced_commit_short": "f7020ece",
-      "last_synced_at": "2026-05-16T08:16:37Z",
+      "last_synced_commit": "6dba3e18057cc33cd3e2347de0f8e07c186d0b43",
+      "last_synced_commit_short": "6dba3e18",
+      "last_synced_at": "2026-05-16T08:21:19Z",
       "last_synced_tag": "@rc-component/util@1.10.0",
       "sync_count": 2
     },
