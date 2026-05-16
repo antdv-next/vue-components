@@ -186,11 +186,11 @@
           "description": "@rc-component/input -> @v-c/input"
         }
       ],
-      "last_synced_commit": "841fcc0c08c9cb52810a1968eed06e0e3a2fde26",
-      "last_synced_commit_short": "841fcc0c",
-      "last_synced_at": "2026-04-14T13:45:25Z",
+      "last_synced_commit": "0215da50f7182c619b5a7ab206a3ef82f061fafe",
+      "last_synced_commit_short": "0215da50",
+      "last_synced_at": "2026-05-16T03:02:39Z",
       "last_synced_tag": "@rc-component/input@1.3.0",
-      "sync_count": 1
+      "sync_count": 2
     },
     {
       "name": "@rc-component/input-number",
@@ -305,11 +305,11 @@
           "description": "@rc-component/overflow -> @v-c/overflow"
         }
       ],
-      "last_synced_commit": "6efcec0cbbae1ba9e514ef2e54cc0332cf239867",
-      "last_synced_commit_short": "6efcec0c",
-      "last_synced_at": "2026-04-14T13:45:25Z",
+      "last_synced_commit": "3636d9e68493d6937e050363e5e24d9d380d3acd",
+      "last_synced_commit_short": "3636d9e6",
+      "last_synced_at": "2026-05-16T03:02:39Z",
       "last_synced_tag": "@rc-component/overflow@1.0.0",
-      "sync_count": 1
+      "sync_count": 2
     },
     {
       "name": "@rc-component/pagination",
@@ -339,11 +339,11 @@
           "description": "@rc-component/picker -> @v-c/picker"
         }
       ],
-      "last_synced_commit": "738bcac43f1943b38e427fc0f73a4e73e29584c8",
-      "last_synced_commit_short": "738bcac4",
-      "last_synced_at": "2026-04-14T13:45:25Z",
+      "last_synced_commit": "00872133928498185b0a2309a0abcea92c60496f",
+      "last_synced_commit_short": "00872133",
+      "last_synced_at": "2026-05-16T03:02:39Z",
       "last_synced_tag": "@rc-component/picker@1.10.0",
-      "sync_count": 1
+      "sync_count": 2
     },
     {
       "name": "@rc-component/portal",
@@ -458,11 +458,11 @@
           "description": "@rc-component/select -> @v-c/select"
         }
       ],
-      "last_synced_commit": "0c61753285051a0c85f6b892d425f29c5ce90bf7",
-      "last_synced_commit_short": "0c617532",
-      "last_synced_at": "2026-04-14T13:45:25Z",
-      "last_synced_tag": "@rc-component/select@1.6.15",
-      "sync_count": 1
+      "last_synced_commit": "6fe40e33ebe6440d11612f3cd0d45a2c63f842f4",
+      "last_synced_commit_short": "6fe40e33",
+      "last_synced_at": "2026-05-16T03:02:39Z",
+      "last_synced_tag": "@rc-component/select@1.7.0",
+      "sync_count": 2
     },
     {
       "name": "@ant-design/react-slick",
@@ -543,11 +543,11 @@
           "description": "@rc-component/table -> @v-c/table"
         }
       ],
-      "last_synced_commit": "d22a20d82f345b18f82b68b84ff2829ba562adf3",
-      "last_synced_commit_short": "d22a20d8",
-      "last_synced_at": "2026-04-14T13:37:31Z",
+      "last_synced_commit": "d5b5bb1a7c1587281482808203e456959fdae7d7",
+      "last_synced_commit_short": "d5b5bb1a",
+      "last_synced_at": "2026-05-16T03:02:39Z",
       "last_synced_tag": "@rc-component/table@1.10.0",
-      "sync_count": 1
+      "sync_count": 2
     },
     {
       "name": "@rc-component/tabs",
