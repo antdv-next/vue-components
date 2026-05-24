@@ -200,12 +200,14 @@ const Cell = defineComponent<CellProps<any>>({
     })
 
     const shadowInfo = computed(() => {
-      const { fixedEndShadow, offsetFixedStartShadow, offsetFixedEndShadow, fixedStartShadow } = props
-      const [absScroll = 0, scrollWidth = 0] = tableContext.scrollInfo || []
-
+      // Skip scrollInfo subscription for non-fixed cells. Reading
+      // tableContext.scrollInfo before this early return made every cell
+      // re-render on horizontal scroll, even though the result was constant.
       if (!isFixStart.value && !isFixEnd.value) {
         return [false, false]
       }
+      const { fixedEndShadow, offsetFixedStartShadow, offsetFixedEndShadow, fixedStartShadow } = props
+      const [absScroll = 0, scrollWidth = 0] = tableContext.scrollInfo || []
       const showStartShadow = isFixStart.value && fixedStartShadow
         ? absScroll - (offsetFixedStartShadow || 0) >= 1
         : false
