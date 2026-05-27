@@ -10,22 +10,22 @@ export type SwitchChangeEventHandler = (
 ) => void
 export type SwitchClickEventHandler = SwitchChangeEventHandler
 export interface SwitchProps {
-  'className'?: string
-  'prefixCls'?: string
-  'disabled'?: boolean
-  'checkedChildren'?: VNodeChild | (() => VNodeChild)
-  'unCheckedChildren'?: VNodeChild | (() => VNodeChild)
-  'onChange'?: SwitchChangeEventHandler
+  className?: string
+  prefixCls?: string
+  disabled?: boolean
+  checkedChildren?: VNodeChild | (() => VNodeChild)
+  unCheckedChildren?: VNodeChild | (() => VNodeChild)
+  onChange?: SwitchChangeEventHandler
   'onUpdate:checked'?: (value: boolean) => void
-  'onKeyDown'?: KeyboardEventHandler
-  'onClick'?: SwitchClickEventHandler
-  'tabIndex'?: number
-  'checked'?: boolean
-  'defaultChecked'?: boolean
-  'loadingIcon'?: VNodeChild | (() => VNodeChild)
-  'title'?: string
-  'styles'?: { content?: CSSProperties }
-  'classNames'?: { content?: string }
+  onKeyDown?: KeyboardEventHandler
+  onClick?: SwitchClickEventHandler
+  tabIndex?: number
+  checked?: boolean
+  defaultChecked?: boolean
+  loadingIcon?: VNodeChild | (() => VNodeChild)
+  title?: string
+  styles?: { content?: CSSProperties }
+  classNames?: { content?: string }
 }
 
 const defaults = {
@@ -61,8 +61,7 @@ const Switch = defineComponent<SwitchProps>(
     function onInternalKeyDown(e: KeyboardEvent) {
       if (e.which === KeyCode.LEFT) {
         triggerChange(false, e)
-      }
-      else if (e.which === KeyCode.RIGHT) {
+      } else if (e.which === KeyCode.RIGHT) {
         triggerChange(true, e)
       }
       props?.onKeyDown?.(e)
@@ -87,18 +86,26 @@ const Switch = defineComponent<SwitchProps>(
         unCheckedChildren,
         classNames,
         styles,
+        onChange: _onChange,
+        onClick: _onClick,
+        onKeyDown: _onKeyDown,
+        'onUpdate:checked': _onUpdateChecked,
         ...restProps
       } = props
-      const switchClassName = [prefixCls, className, {
-        [`${prefixCls}-checked`]: innerChecked.value,
-        [`${prefixCls}-disabled`]: disabled,
-      }]
+      const switchClassName = [
+        prefixCls,
+        className,
+        {
+          [`${prefixCls}-checked`]: innerChecked.value,
+          [`${prefixCls}-disabled`]: disabled,
+        },
+      ]
       return (
         <button
-          {...restProps as any}
+          {...(restProps as any)}
           {...attrs}
-          type="button"
-          role="switch"
+          type='button'
+          role='switch'
           aria-checked={innerChecked.value}
           disabled={disabled}
           class={switchClassName}
