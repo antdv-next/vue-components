@@ -180,6 +180,8 @@ export default function useAlign(
       const originRight = popupElement.style.right
       const originBottom = popupElement.style.bottom
       const originOverflow = popupElement.style.overflow
+      const originOverflowX = popupElement.style.overflowX
+      const originOverflowY = popupElement.style.overflowY
       // Placement
       const placementInfo: AlignType = {
         ...builtinPlacements.value[placement.value],
@@ -291,6 +293,8 @@ export default function useAlign(
       popupElement.style.right = originRight
       popupElement.style.bottom = originBottom
       popupElement.style.overflow = originOverflow
+      popupElement.style.overflowX = originOverflowX
+      popupElement.style.overflowY = originOverflowY
 
       popupElement.parentElement?.removeChild(placeholderElement)
 
