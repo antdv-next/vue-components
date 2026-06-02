@@ -1,5 +1,5 @@
 import type { HTMLAttributes } from 'vue'
-import type { MenuItemType } from './interface.ts'
+import type { ItemData, MenuItemType } from './interface.ts'
 import Overflow from '@v-c/overflow'
 import { clsx, warning } from '@v-c/util'
 import KeyCode from '@v-c/util/dist/KeyCode'
@@ -24,6 +24,9 @@ export interface MenuItemProps extends Omit<MenuItemType, 'label' | 'key'> {
 
   /** @deprecated No place to use this. Should remove */
   attribute?: Record<string, string>
+
+  /** @private Origin item config from items prop */
+  itemData?: ItemData
 
   onKeyDown?: (e: KeyboardEvent) => void
   onFocus?: (e: FocusEvent) => void
@@ -91,11 +94,20 @@ const InternalMenuItem = defineComponent<MenuItemProps>(
     }
     // ============================= Info =============================
     const getEventInfo = (e: MouseEvent | KeyboardEvent) => {
+      // If itemData exists (items mode), use it; otherwise build from props (children mode)
+      const itemData: ItemData = props.itemData || {
+        key: eventKey.value || '',
+        label: slots?.default?.(),
+        itemIcon: props.itemIcon,
+        extra: props.extra,
+      }
+
       return {
         key: eventKey.value,
         keyPath: connectedKeys.value,
         item: legacyMenuItemRef.value,
         domEvent: e,
+        itemData,
       }
     }
 

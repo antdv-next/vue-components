@@ -64,6 +64,14 @@ export interface MenuItemType extends ItemSharedProps {
   onClick?: MenuClickEventHandler
 }
 
+/** Info item type passed to onSelect/onClick callbacks, excluding event handlers */
+export interface ItemData {
+  label?: VueNode
+  itemIcon?: RenderIconType
+  extra?: VueNode
+  key: Key
+}
+
 export interface MenuItemGroupType extends ItemSharedProps {
   type: 'group'
 
@@ -100,6 +108,7 @@ export interface MenuInfo {
   /** @deprecated This will not support in future. You should avoid to use this */
   item: VueNode
   domEvent: MouseEvent
+  itemData: ItemData
 }
 
 export interface MenuTitleInfo {
