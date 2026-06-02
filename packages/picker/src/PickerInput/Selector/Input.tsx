@@ -380,7 +380,6 @@ const Input = defineComponent<InputProps>(
             onInput={onInternalChange}
             class={classNames.value.input}
             style={styles.value.input}
-            readonly={props.inputReadOnly}
           />
           <Icon type="suffix" icon={props.suffixIcon} />
           {props.clearIcon}
