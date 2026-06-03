@@ -2,6 +2,7 @@ import type { Key } from '@v-c/util/dist/type'
 
 import type { CSSProperties, PropType, VNode } from 'vue'
 import type { InnerProps } from './Filler'
+import type { ScrollOffset, ScrollOffsetInfo } from './hooks/useScrollTo'
 import type { ExtraRenderInfo } from './interface'
 import type { ScrollBarDirectionType, ScrollBarRef } from './ScrollBar'
 import ResizeObserver from '@v-c/resize-observer'
@@ -48,10 +49,12 @@ export interface ScrollTarget {
   index?: number
   key?: Key
   align?: 'top' | 'bottom' | 'auto'
-  offset?: number
+  offset?: ScrollOffset
 }
 
 export type ScrollConfig = ScrollTarget | ScrollPos
+
+export type { ScrollOffset, ScrollOffsetInfo }
 
 export interface ListProps {
   prefixCls?: string
@@ -537,12 +540,15 @@ export default defineComponent({
     }
 
     // ================================= Ref ==================================
+    const getSize = useGetSize(mergedData, getKey, heights, itemHeight as any)
+
     const [scrollTo, getTotalHeight] = useScrollTo(
       componentRef as any,
       mergedData,
       heights,
       itemHeight as any,
       getKey,
+      getSize,
       () => collectHeight(true),
       (newTop: number) => {
         // Use getTotalHeight to get more accurate max scroll height
@@ -590,8 +596,6 @@ export default defineComponent({
         flush: 'post',
       },
     )
-
-    const getSize = useGetSize(mergedData, getKey, heights, itemHeight as any)
 
     const listChildren = useChildren(
       mergedData,
