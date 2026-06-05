@@ -23,7 +23,7 @@ export interface ContentRef {
   focus: () => void
 }
 
-const Panel = defineComponent<PanelProps & { animationVisible: boolean }>(
+const Panel = defineComponent<PanelProps>(
   (props, { expose, slots }) => {
     // ================================= Refs =================================
     const { setPanel } = useGetRefContext()
@@ -66,7 +66,6 @@ const Panel = defineComponent<PanelProps & { animationVisible: boolean }>(
         onMouseDown,
         onMouseUp,
         modalRender,
-        animationVisible,
       } = props
       // ================================ Style =================================
       const contentStyle: CSSProperties = {}
@@ -156,9 +155,6 @@ const Panel = defineComponent<PanelProps & { animationVisible: boolean }>(
       )
 
       const renderContent = () => {
-        if (!animationVisible && forceRender) {
-          return null
-        }
         return modalRender ? modalRender(content) : content
       }
 

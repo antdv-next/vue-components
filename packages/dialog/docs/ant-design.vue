@@ -173,7 +173,7 @@ watchEffect(() => {
     </Dialog>
 
     <Dialog
-      :force-render="true"
+      force-render
       title="dialog3"
       :visible="visible3"
       @close="onClose3"
