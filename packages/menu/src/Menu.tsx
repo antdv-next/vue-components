@@ -542,71 +542,32 @@ const Menu = defineComponent<MenuProps>(
       },
     })
 
-    // Cache the parsed children like rc-menu `useMemo([children, items, _internalComponents])`.
-    // Re-parsing on every render recreates the whole vnode tree (visible + measure list)
-    // and forces a full re-patch of every item, which is the main jank source for large menus.
-    let parseCache: {
-      children: any[]
-      items?: any[]
-      internalComponents?: any
-      prefixCls?: string
-      labelRender?: any
-      extraRender?: any
-      iconRender?: any
-      childList: any[]
-      measureChildList: any[]
-    } | undefined
-
     return () => {
       const { prefixCls, rootClass } = props
       // 在 render 函数中获取 slots
       const children = filterEmpty(slots.default?.())
-      const mergedPrefixCls = props?.prefixCls || defaults.prefixCls
 
-      const cacheHit = !!parseCache
-        && parseCache.items === props?.items
-        && parseCache.internalComponents === props?._internalComponents
-        && parseCache.prefixCls === mergedPrefixCls
-        && parseCache.labelRender === props?.labelRender
-        && parseCache.extraRender === props?.extraRender
-        && parseCache.iconRender === props?.iconRender
-        && parseCache.children.length === children.length
-        && parseCache.children.every((child, index) => child === children[index])
-
-      if (!cacheHit) {
-        parseCache = {
-          children,
-          items: props?.items,
-          internalComponents: props?._internalComponents,
-          prefixCls: mergedPrefixCls,
+      childList.value = parseItems(
+        children,
+        props?.items,
+        EMPTY_LIST,
+        props?._internalComponents || {},
+        props?.prefixCls || defaults.prefixCls,
+        {
           labelRender: props?.labelRender,
           extraRender: props?.extraRender,
           iconRender: props?.iconRender,
-          childList: parseItems(
-            children,
-            props?.items,
-            EMPTY_LIST,
-            props?._internalComponents || {},
-            mergedPrefixCls,
-            {
-              labelRender: props?.labelRender,
-              extraRender: props?.extraRender,
-              iconRender: props?.iconRender,
-            },
-          ),
-          // Measure child list for path registration
-          measureChildList: parseItems(
-            children,
-            props?.items,
-            EMPTY_LIST,
-            {},
-            mergedPrefixCls,
-          ),
-        }
-      }
+        },
+      )
 
-      childList.value = parseCache!.childList
-      const measureChildList = parseCache!.measureChildList
+      // Measure child list for path registration
+      const measureChildList = parseItems(
+        children,
+        props?.items,
+        EMPTY_LIST,
+        {},
+        props?.prefixCls || defaults.prefixCls,
+      )
 
       // >>>>> Children
       const wrappedChildList
