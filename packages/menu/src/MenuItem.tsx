@@ -178,6 +178,10 @@ const InternalMenuItem = defineComponent<MenuItemProps>(
         onMouseleave: ret.onMouseLeave,
       }
 
+      // Internally re-dispatched handlers must not also be spread onto the DOM
+      // node: Vue `mergeProps` stacks same-name listeners (unlike JSX override
+      // in rc-menu), so the user callback would fire twice — once with the raw
+      // event and once via the internal info dispatch.
       let renderNode = (
         <LegacyMenuItem
           ref={legacyMenuItemRef}
@@ -185,7 +189,14 @@ const InternalMenuItem = defineComponent<MenuItemProps>(
           role={role === null ? 'none' : role || 'menuitem'}
           tabIndex={disabled ? null : -1}
           data-menu-id={overflowDisabled && domDataId.value ? null : domDataId.value}
-          {...omit({ ...restProps, ...attrs }, ['extra'])}
+          {...omit({ ...restProps, ...attrs }, [
+            'extra',
+            'onClick',
+            'onKeyDown',
+            'onFocus',
+            'onMouseEnter',
+            'onMouseLeave',
+          ])}
           {...activeProps}
           {...optionRoleProps as any}
           component="li"
