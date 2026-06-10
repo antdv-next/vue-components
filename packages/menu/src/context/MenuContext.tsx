@@ -9,6 +9,7 @@ import type {
   TriggerSubMenuAction,
 } from '../interface.ts'
 import type { SubMenuProps } from '../SubMenu'
+import isEqual from '@v-c/util/dist/isEqual'
 import omit from '@v-c/util/dist/omit'
 import { computed, defineComponent, inject, provide } from 'vue'
 
@@ -92,8 +93,26 @@ export function useMenuContextProvider(context: Ref<MenuContextProps>) {
 const InheritableContextProvider = defineComponent<InheritableContextProps>(
   (props, { slots }) => {
     const context = useMenuContext()
+    // Mirror rc-menu's custom `useMemo` shouldUpdate:
+    // keep the previous merged value while `locked`, and reuse the previous
+    // reference when parent context and own props are unchanged so descendants
+    // do not get invalidated by identity churn.
+    let prevParent: MenuContextProps | undefined
+    let prevRest: Partial<MenuContextProps> | undefined
+    let prevMerged: MenuContextProps | undefined
     const inheritContext = computed(() => {
-      return mergeProps((context?.value ?? {}) as any, omit(props, ['locked']))
+      const parent = context?.value
+      const rest = omit(props, ['locked'])
+      if (
+        prevMerged
+        && (props.locked || (parent === prevParent && isEqual(prevRest, rest, true)))
+      ) {
+        return prevMerged
+      }
+      prevParent = parent
+      prevRest = rest
+      prevMerged = mergeProps((parent ?? {}) as any, rest)
+      return prevMerged
     })
     useMenuContextProvider(inheritContext)
     return () => {
