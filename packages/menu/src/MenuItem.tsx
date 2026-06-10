@@ -185,7 +185,7 @@ const InternalMenuItem = defineComponent<MenuItemProps>(
           role={role === null ? 'none' : role || 'menuitem'}
           tabIndex={disabled ? null : -1}
           data-menu-id={overflowDisabled && domDataId.value ? null : domDataId.value}
-          {...omit({ ...restProps, ...attrs }, ['extra'])}
+          {...omit({ ...restProps, ...attrs }, ['extra', 'onClick', 'onKeyDown', 'onFocus'])}
           {...activeProps}
           {...optionRoleProps as any}
           component="li"
