@@ -493,6 +493,17 @@ export const BaseSelect = defineComponent<
     // KeyDown
     const onInternalKeyDown = (event: KeyboardEvent) => {
       const clearLock = getClearLock()
+      // React reads the pre-render `mergedOpen` inside the whole event, while
+      // Vue refs update synchronously. `SelectInput.onInternalInputKeyDown`
+      // runs first on the input element and may already have opened the
+      // dropdown via `toggleOpen(true)`, so prefer the open state it recorded
+      // before that. This keeps the Enter key that opens the dropdown from
+      // being forwarded to OptionList (which would instantly select the
+      // active option and close the dropdown again).
+      // see https://github.com/antdv-next/antdv-next/issues/594
+      const wasOpen = (event as any)._select_open_before !== undefined
+        ? (event as any)._select_open_before as boolean
+        : mergedOpen.value
       const { key } = event
       const isEnterKey = key === KeyCodeStr.Enter
       const isSpaceKey = key === KeyCodeStr.Space
@@ -540,7 +551,7 @@ export const BaseSelect = defineComponent<
       }
 
       // Lock other operations until key up
-      if (mergedOpen.value && (!isEnterKey || !keyLockRef.value) && !isSpaceKey) {
+      if (wasOpen && (!isEnterKey || !keyLockRef.value) && !isSpaceKey) {
         // Lock the Enter key after it is pressed to avoid repeated triggering of the onChange event.
         if (isEnterKey) {
           keyLockRef.value = true
