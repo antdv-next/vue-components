@@ -398,7 +398,7 @@ export const BaseSelect = defineComponent<
         }
         return typeof end !== 'undefined' ? tokens.slice(0, end) : tokens
       }
-      return getSeparatedContent(input, value as string[] | undefined, end)
+      return getSeparatedContent(input, value as string[], end)
     }
 
     const onInternalSearch = (searchText: string, fromTyping: boolean, isCompositing: boolean) => {
