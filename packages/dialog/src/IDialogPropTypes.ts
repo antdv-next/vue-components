@@ -8,7 +8,7 @@ export type ModalClassNames = Partial<Record<SemanticName, string>>
 
 export type ModalStyles = Partial<Record<SemanticName, CSSProperties>>
 
-export type ClosableType = {
+export interface ClosableType {
   closeIcon?: VueNode
   disabled?: boolean
   afterClose?: () => any
@@ -60,6 +60,8 @@ export interface IDialogPropTypes {
   // https://github.com/react-component/dialog/issues/95
   focusTriggerAfterClose?: boolean
   focusTrap?: boolean
+  /** Control whether to lock body scroll when modal opens. Default is true. */
+  scrollLock?: boolean
 
   // Refs
   panelRef?: any

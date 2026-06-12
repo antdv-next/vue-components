@@ -100,6 +100,7 @@ const InternalMenuItem = defineComponent<MenuItemProps>(
         label: slots?.default?.(),
         itemIcon: props.itemIcon,
         extra: props.extra,
+        title: typeof attrs.title === 'string' ? attrs.title : undefined,
       }
 
       return {

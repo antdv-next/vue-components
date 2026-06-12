@@ -70,6 +70,7 @@ export interface ItemData {
   itemIcon?: RenderIconType
   extra?: VueNode
   key: Key
+  title?: string
 }
 
 export interface MenuItemGroupType extends ItemSharedProps {

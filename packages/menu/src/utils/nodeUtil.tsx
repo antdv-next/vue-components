@@ -89,7 +89,7 @@ function convertItemsToNodes(
             {...restProps}
             extra={extra}
             icon={icon}
-            itemData={{ label, key: mergedKey, itemIcon: icon ?? restProps?.itemIcon, extra }}
+            itemData={{ ...(opt as any), itemIcon: icon ?? restProps?.itemIcon, key: mergedKey }}
           >
             {hasExtra
               ? <span class={`${prefixCls}-item-label`}>{label}</span>

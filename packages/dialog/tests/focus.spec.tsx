@@ -1,8 +1,8 @@
 import { mount } from '@vue/test-utils'
 import { afterEach, describe, expect, it } from 'vitest'
 import { nextTick } from 'vue'
-import Dialog from '../src'
 import Trigger from '../../trigger/src'
+import Dialog from '../src'
 
 describe('@v-c/dialog focus boundary', () => {
   afterEach(() => {

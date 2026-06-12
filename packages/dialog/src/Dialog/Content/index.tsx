@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'vue'
 import type { PanelProps } from './Panel'
 import { getTransitionProps } from '@v-c/util/dist/utils/transition'
-import { defineComponent, nextTick, shallowRef, Transition, watch } from 'vue'
+import { defineComponent, nextTick, shallowRef, Transition } from 'vue'
 
 import { offset } from '../../util'
 import Panel from './Panel'
@@ -38,7 +38,7 @@ const Content = defineComponent<ContentProps>(
         ariaId,
         title,
         motionName,
-        forceRender
+        forceRender,
       } = props
       // ============================= Style ==============================
       const contentStyle: CSSProperties = {}
