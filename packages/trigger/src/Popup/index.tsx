@@ -239,7 +239,13 @@ const Popup = defineComponent<PopupProps>(
           baseTransitionProps?.onAfterEnter?.(element)
 
           requestAnimationFrame(() => {
-            onVisibleChanged?.(true)
+            // The popup may already be toggling closed again (rapid open/close).
+            // Let the pending leave motion own the bookkeeping — clearing
+            // `inMotion` here would make re-align measure the mid-leave
+            // transform.
+            if (props.open) {
+              onVisibleChanged?.(true)
+            }
           })
         },
         onAfterLeave: (element: Element) => {

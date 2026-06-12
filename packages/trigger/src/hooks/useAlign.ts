@@ -40,6 +40,65 @@ function splitPoints(points: string = ''): Points {
   return [points[0] as any, points[1] as any]
 }
 
+interface SelfTransform {
+  scaleX: number
+  scaleY: number
+  translateX: number
+  translateY: number
+}
+
+/**
+ * Extract the scale/translate applied by the popup element's OWN computed
+ * transform. Scale compensation in `_onAlign` exists for ancestor transforms
+ * (e.g. a zoomed container), which scale the rect while the element's computed
+ * `transform` stays `none`. A motion keyframe mid-flight (ant-slide-up holds
+ * `scaleY(0.8)` at frame 0) also shrinks the rect, but shows up in the
+ * element's computed transform — it must NOT be compensated, otherwise every
+ * offset is divided by the motion scale and the popup lands off by that ratio.
+ */
+function getSelfTransform(transform: string | undefined): SelfTransform | null {
+  if (!transform || transform === 'none') {
+    return null
+  }
+  let v: number[] | null = null
+  const matrix3d = transform.match(/^matrix3d\(([^)]+)\)$/)
+  const matrix = transform.match(/^matrix\(([^)]+)\)$/)
+  if (matrix3d) {
+    const m = matrix3d[1].split(',').map(Number)
+    v = [Math.hypot(m[0], m[1], m[2]), Math.hypot(m[4], m[5], m[6]), m[12], m[13]]
+  }
+  else if (matrix) {
+    const m = matrix[1].split(',').map(Number)
+    v = [Math.hypot(m[0], m[1]), Math.hypot(m[2], m[3]), m[4], m[5]]
+  }
+  if (!v || v.some(n => Number.isNaN(n))) {
+    return null
+  }
+  return {
+    scaleX: v[0] || 1,
+    scaleY: v[1] || 1,
+    translateX: v[2] || 0,
+    translateY: v[3] || 0,
+  }
+}
+
+/**
+ * Map a rect measured under the element's own transform back to its layout
+ * (untransformed) space, so align math works with the position the popup will
+ * occupy once its motion finishes.
+ */
+function unscaleSelfRect(rect: Rect, self: SelfTransform, transformOrigin: string): Rect {
+  const [oxStr, oyStr] = (transformOrigin || '').split(' ')
+  const ox = parseFloat(oxStr) || 0
+  const oy = parseFloat(oyStr) || 0
+  return {
+    x: rect.x - self.translateX - ox * (1 - self.scaleX),
+    y: rect.y - self.translateY - oy * (1 - self.scaleY),
+    width: rect.width / self.scaleX,
+    height: rect.height / self.scaleY,
+  }
+}
+
 function getAlignPoint(rect: Rect, points: Points) {
   const topBottom = points[0]
   const leftRight = points[1]
@@ -300,16 +359,46 @@ export default function useAlign(
 
       // Use the same logic as React version:
       // Get popup dimensions from getBoundingClientRect and computedStyle
-      const popupRect = rawPopupRect
-      popupRect.x = popupRect.x ?? popupRect.left
-      popupRect.y = popupRect.y ?? popupRect.top
-
       const { height, width } = popupComputedStyle
+
+      // React aligns in rc-motion's prepare phase, before motion start classes
+      // apply their transform, and React re-renders interrupted motions back
+      // to a clean className. Vue's <Transition> mutates classes imperatively,
+      // so the popup may carry its motion transform (e.g. ant-slide-up's
+      // scaleY(0.8) keyframe, or classes stuck by an interrupted enter) while
+      // we measure. Map the rects back to layout space so only ancestor
+      // transforms remain in the scale compensation below.
+      const selfTransform = getSelfTransform(popupComputedStyle.transform)
+      let popupRect: Rect = {
+        x: rawPopupRect.x ?? (rawPopupRect as DOMRect).left,
+        y: rawPopupRect.y ?? (rawPopupRect as DOMRect).top,
+        width: rawPopupRect.width,
+        height: rawPopupRect.height,
+      }
+      let popupMirrorRect = {
+        right: rawPopupMirrorRect.right,
+        bottom: rawPopupMirrorRect.bottom,
+      }
+      if (selfTransform) {
+        popupRect = unscaleSelfRect(popupRect, selfTransform, popupComputedStyle.transformOrigin)
+        const mirror = unscaleSelfRect(
+          {
+            x: rawPopupMirrorRect.x ?? (rawPopupMirrorRect as DOMRect).left,
+            y: rawPopupMirrorRect.y ?? (rawPopupMirrorRect as DOMRect).top,
+            width: rawPopupMirrorRect.width,
+            height: rawPopupMirrorRect.height,
+          },
+          selfTransform,
+          popupComputedStyle.transformOrigin,
+        )
+        popupMirrorRect = {
+          right: mirror.x + mirror.width,
+          bottom: mirror.y + mirror.height,
+        }
+      }
 
       const popupHeight = popupRect.height
       const popupWidth = popupRect.width
-
-      const popupMirrorRect = rawPopupMirrorRect
 
       // Calculate scale
       const scaleX = (cache && cacheScale)
