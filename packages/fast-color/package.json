@@ -5,6 +5,11 @@
   "description": "fast and small color class",
   "author": "",
   "license": "MIT",
+  "homepage": "https://github.com/antdv-next/vue-components/tree/next/packages/fast-color",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/antdv-next/vue-components.git"
+  },
   "keywords": [
     "dropdown"
   ],

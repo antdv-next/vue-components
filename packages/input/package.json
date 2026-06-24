@@ -3,6 +3,12 @@
   "type": "module",
   "version": "1.1.1",
   "description": "",
+  "license": "MIT",
+  "homepage": "https://github.com/antdv-next/vue-components/tree/next/packages/input",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/antdv-next/vue-components.git"
+  },
   "publishConfig": {
     "access": "public"
   },

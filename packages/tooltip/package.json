@@ -8,6 +8,11 @@
   "description": "tooltip",
   "author": "",
   "license": "MIT",
+  "homepage": "https://github.com/antdv-next/vue-components/tree/next/packages/tooltip",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/antdv-next/vue-components.git"
+  },
   "keywords": [
     "tooltip"
   ],

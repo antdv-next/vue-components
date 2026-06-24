@@ -2,12 +2,17 @@
   "name": "@v-c/mini-decimal",
   "type": "module",
   "version": "1.0.1",
-  "publishConfig": {
-    "access": "public"
-  },
   "description": "Lite lib to only support decimal add calculation",
   "author": "",
   "license": "MIT",
+  "homepage": "https://github.com/antdv-next/vue-components/tree/next/packages/mini-decimal",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/antdv-next/vue-components.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "keywords": [
     "decimal"
   ],

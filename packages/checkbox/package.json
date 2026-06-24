@@ -2,6 +2,12 @@
   "name": "@v-c/checkbox",
   "type": "module",
   "version": "1.0.1",
+  "license": "MIT",
+  "homepage": "https://github.com/antdv-next/vue-components/tree/next/packages/checkbox",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/antdv-next/vue-components.git"
+  },
   "publishConfig": {
     "access": "public"
   },

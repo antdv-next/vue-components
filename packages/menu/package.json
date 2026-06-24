@@ -3,6 +3,12 @@
   "type": "module",
   "version": "1.2.0",
   "description": "menu ui component for vue",
+  "license": "MIT",
+  "homepage": "https://github.com/antdv-next/vue-components/tree/next/packages/menu",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/antdv-next/vue-components.git"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

@@ -5,6 +5,11 @@
   "description": "dropdown ui component for vue",
   "author": "",
   "license": "MIT",
+  "homepage": "https://github.com/antdv-next/vue-components/tree/next/packages/dropdown",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/antdv-next/vue-components.git"
+  },
   "publishConfig": {
     "access": "public"
   },
