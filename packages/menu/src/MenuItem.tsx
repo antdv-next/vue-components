@@ -197,6 +197,7 @@ const InternalMenuItem = defineComponent<MenuItemProps>(
             'onFocus',
             'onMouseEnter',
             'onMouseLeave',
+            'class',
           ])}
           {...activeProps}
           {...optionRoleProps as any}
