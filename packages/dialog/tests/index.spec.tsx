@@ -125,4 +125,33 @@ describe('@v-c/dialog', () => {
     expect(afterClose).toHaveBeenCalledTimes(1)
     expect(closableAfterClose.mock.invocationCallOrder[0]).toBeLessThan(afterClose.mock.invocationCallOrder[0])
   })
+
+  it('locks body scroll when scrollLock is true (default)', async () => {
+    const wrapper = mount(Dialog, {
+      props: {
+        visible: true,
+      },
+    })
+
+    await flushDialog()
+
+    const lockStyles = Array.from(document.querySelectorAll('style')).map(node => node.innerHTML).join('\n')
+    expect(lockStyles).toContain('overflow-y: hidden')
+    wrapper.unmount()
+  })
+
+  it('does not lock body scroll when scrollLock is false', async () => {
+    const wrapper = mount(Dialog, {
+      props: {
+        visible: true,
+        scrollLock: false,
+      },
+    })
+
+    await flushDialog()
+
+    const lockStyles = Array.from(document.querySelectorAll('style')).map(node => node.innerHTML).join('\n')
+    expect(lockStyles).not.toContain('overflow-y: hidden')
+    wrapper.unmount()
+  })
 })

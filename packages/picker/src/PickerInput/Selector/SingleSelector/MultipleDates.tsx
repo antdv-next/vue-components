@@ -12,6 +12,13 @@ export interface MultipleDatesProps<DateType extends object = any> {
   disabled?: boolean
   placeholder?: VueNode
   maxTagCount?: number | 'responsive'
+  tagRender?: (props: {
+    label: VueNode
+    value: DateType
+    disabled: boolean
+    onClose: (event?: MouseEvent) => void
+    closable: boolean
+  }) => VueNode
 }
 
 const MultipleDates = defineComponent<MultipleDatesProps>((props) => {
@@ -25,6 +32,7 @@ const MultipleDates = defineComponent<MultipleDatesProps>((props) => {
       disabled,
       maxTagCount,
       placeholder,
+      tagRender,
     } = props
 
     const selectorCls = `${prefixCls}-selector`
@@ -60,7 +68,18 @@ const MultipleDates = defineComponent<MultipleDatesProps>((props) => {
       const onClose = (event?: MouseEvent) => {
         if (event)
           event.stopPropagation()
-        onRemove(date)
+        if (!disabled)
+          onRemove(date)
+      }
+
+      if (tagRender) {
+        return tagRender({
+          label: displayLabel,
+          value: date,
+          disabled: !!disabled,
+          onClose,
+          closable: !disabled,
+        })
       }
 
       return renderSelector(displayLabel, onClose)

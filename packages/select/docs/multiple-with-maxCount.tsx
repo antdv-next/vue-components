@@ -6,6 +6,7 @@ const MaxCountDemo = defineComponent({
   name: 'MaxCountDemo',
   setup() {
     const value = ref<string[]>(['jack', 'lucy'])
+    const value2 = ref<string[]>([])
 
     return () => (
       <div style={{ margin: '20px' }}>
@@ -33,6 +34,17 @@ const MaxCountDemo = defineComponent({
           Selected:
           {value.value.join(', ')}
         </p>
+        <Select
+          mode="tags"
+          value={value2}
+          style={{ width: '400px' }}
+          placeholder="Max 3 items, panel open is false"
+          maxCount={3}
+          onChange={(val: string[]) => {
+            value2.value = val
+          }}
+          open={false}
+        />
       </div>
     )
   },

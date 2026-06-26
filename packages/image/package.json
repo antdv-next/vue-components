@@ -1,10 +1,15 @@
 {
   "name": "@v-c/image",
   "type": "module",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "image component",
   "author": "",
   "license": "MIT",
+  "homepage": "https://github.com/antdv-next/vue-components/tree/next/packages/image",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/antdv-next/vue-components.git"
+  },
   "keywords": [
     "image",
     "vue-image",

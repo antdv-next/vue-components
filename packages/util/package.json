@@ -3,6 +3,12 @@
   "type": "module",
   "version": "1.0.19",
   "description": "Vue3 components utils",
+  "license": "MIT",
+  "homepage": "https://github.com/antdv-next/vue-components/tree/next/packages/util",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/antdv-next/vue-components.git"
+  },
   "publishConfig": {
     "access": "public"
   },

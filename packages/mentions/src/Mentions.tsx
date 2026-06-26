@@ -260,6 +260,36 @@ const InternalMentions = defineComponent<InternalMentionsProps>(
 
     const mergedOptions = computed(() => getOptions(mergedMeasureText.value))
 
+    // Walk options skipping disabled ones; return -1 if none enabled.
+    const getEnabledActiveIndex = (index: number, offset: 1 | -1 = 1): number => {
+      const optionLen = mergedOptions.value.length
+      if (optionLen === 0) {
+        return -1
+      }
+      for (let i = 0; i < optionLen; i += 1) {
+        const current = (index + i * offset + optionLen) % optionLen
+        if (!mergedOptions.value[current]?.disabled) {
+          return current
+        }
+      }
+      return -1
+    }
+
+    // When options change during measuring, ensure activeIndex still points
+    // to a valid enabled option.
+    watch([mergedMeasuring, mergedOptions], () => {
+      if (!mergedMeasuring.value) {
+        return
+      }
+      const current = mergedOptions.value[activeIndex.value]
+      if (!current || current.disabled) {
+        const next = getEnabledActiveIndex(0)
+        if (next !== activeIndex.value) {
+          activeIndex.value = next
+        }
+      }
+    })
+
     // ============================= Measure ==============================
     // Mark that we will reset input selection to target position when user select option
     const onSelectionEffect = useEffectState()
@@ -273,7 +303,7 @@ const InternalMentions = defineComponent<InternalMentionsProps>(
       measureText.value = nextMeasureText
       measurePrefix.value = nextMeasurePrefix
       measureLocation.value = nextMeasureLocation
-      activeIndex.value = 0
+      activeIndex.value = getEnabledActiveIndex(0)
     }
 
     const stopMeasure = (callback?: VoidFunction) => {
@@ -294,7 +324,10 @@ const InternalMentions = defineComponent<InternalMentionsProps>(
       triggerChange(nextValue)
     }
 
-    const selectOption = (option: OptionProps) => {
+    const selectOption = (option?: OptionProps) => {
+      if (!option || option.disabled) {
+        return
+      }
       const { value: mentionValue = '' } = option
       const textArea = getTextArea()!
       const { text, selectionLocation } = replaceWithMeasure(mergedValue.value, {
@@ -323,10 +356,16 @@ const InternalMentions = defineComponent<InternalMentionsProps>(
         return
       }
       if (which === KeyCode.UP || which === KeyCode.DOWN) {
-        // Control arrow function
         const optionLen = mergedOptions.value.length
+        if (optionLen === 0) {
+          event.preventDefault()
+          return
+        }
         const offset = which === KeyCode.UP ? -1 : 1
-        activeIndex.value = (activeIndex.value + offset + optionLen) % optionLen
+        const nextIndex = getEnabledActiveIndex(activeIndex.value + offset, offset)
+        if (nextIndex !== -1) {
+          activeIndex.value = nextIndex
+        }
         event.preventDefault()
       }
       else if (which === KeyCode.ESC) {
@@ -345,7 +384,17 @@ const InternalMentions = defineComponent<InternalMentionsProps>(
           return
         }
 
-        const option = mergedOptions.value[activeIndex.value]
+        let currentIndex = activeIndex.value
+        let option = mergedOptions.value[currentIndex]
+        if (!option || option.disabled) {
+          currentIndex = getEnabledActiveIndex(0)
+          if (currentIndex === -1) {
+            stopMeasure()
+            return
+          }
+          activeIndex.value = currentIndex
+          option = mergedOptions.value[currentIndex]
+        }
         selectOption(option)
       }
     }

@@ -98,14 +98,29 @@ const BodyLine = defineComponent<BodyLineProps<any>>({
         ...rowStyle,
         ...(typeof rowPropsStyle === 'object' ? rowPropsStyle : {}),
       }
+      // rc-table#1487 / #1482: thread `classNames.body.row|cell` and
+      // `styles.body.row|cell` plus `expandedRowClassName` into the virtual
+      // BodyLine so virtual-mode tables get the same semantic targets as
+      // the regular table.
+      const expandedClsName = (tableContext as any)?.expandedRowClassName?.(record, index, indent)
+      const tableClassNames = (tableContext as any).classNames
+      const tableStyles = (tableContext as any).styles
       const rowNode = (
         <RowComponent
           {...rowProps.value}
           data-row-key={rowKey}
-          class={clsx(className, `${tableContext.prefixCls}-row`, rowProps.value?.className, rowProps.value?.class, {
-            [`${tableContext.prefixCls}-row-extra`]: extra,
-          })}
-          style={mergedRowStyle}
+          class={clsx(
+            className,
+            `${tableContext.prefixCls}-row`,
+            rowProps.value?.className,
+            rowProps.value?.class,
+            tableClassNames?.body?.row,
+            {
+              [expandedClsName]: indent >= 1 && expandedClsName,
+              [`${tableContext.prefixCls}-row-extra`]: extra,
+            },
+          )}
+          style={{ ...mergedRowStyle, ...tableStyles?.body?.row }}
         >
           {tableContext.flattenColumns.map((column, colIndex) => {
             return (
@@ -121,6 +136,8 @@ const BodyLine = defineComponent<BodyLineProps<any>>({
                 record={record}
                 inverse={extra}
                 getHeight={getHeight}
+                className={tableClassNames?.body?.cell}
+                style={tableStyles?.body?.cell}
               />
             )
           })}

@@ -42,6 +42,16 @@ const InlineSubMenuList = defineComponent<InlineSubMenuListProps>(
     )
     const mergedOpen = computed(() => sameModeRef.value ? props?.open : false)
 
+    // Lazy mount like rc-menu's CSSMotion (`forceRender` + `removeOnLeave: false`):
+    // keep the sub list out of the DOM until it is opened for the first time,
+    // then keep it mounted and toggle visibility with `v-show`.
+    const everOpen = shallowRef(mergedOpen.value)
+    watch(mergedOpen, (open) => {
+      if (open) {
+        everOpen.value = true
+      }
+    })
+
     const mergedMotion = computed(() => {
       const { motion, defaultMotions } = menuContext?.value ?? {}
 
@@ -64,6 +74,7 @@ const InlineSubMenuList = defineComponent<InlineSubMenuListProps>(
       if (destroy.value) {
         return null
       }
+      const shouldRender = everOpen.value || !!menuContext?.value?.forceSubMenuRender
       return (
         <InheritableContextProvider
           mode={fixedMode}
@@ -72,11 +83,13 @@ const InlineSubMenuList = defineComponent<InlineSubMenuListProps>(
           <Transition
             {...getTransitionProps(mergedMotion.value?.name, mergedMotion.value)}
           >
-            {mergedOpen.value && (
-              <SubMenuList id={props.id}>
-                {slots?.default?.()}
-              </SubMenuList>
-            )}
+            {shouldRender
+              ? (
+                  <SubMenuList v-show={mergedOpen.value} id={props.id}>
+                    {slots?.default?.()}
+                  </SubMenuList>
+                )
+              : null}
           </Transition>
         </InheritableContextProvider>
       )

@@ -123,6 +123,18 @@ const SelectInput = defineComponent<SelectInputProps>(
     const onInternalInputKeyDown = (event: KeyboardEvent) => {
       const { keyCode } = event
 
+      // Vue refs update synchronously (unlike React state which keeps the
+      // pre-render value inside the same event). Record the open state before
+      // `toggleOpen(true)` below so that `BaseSelect.onInternalKeyDown` (which
+      // receives this same bubbled event later) can tell whether the dropdown
+      // was open BEFORE this keydown. Otherwise the Enter key that opens the
+      // dropdown would immediately be forwarded to OptionList and select the
+      // active option, closing the dropdown again.
+      // see https://github.com/antdv-next/antdv-next/issues/594
+      if ((event as any)._select_open_before === undefined) {
+        (event as any)._select_open_before = triggerOpen.value
+      }
+
       // Compatible with multiple lines in TextArea
       const isTextAreaElement = inputRef.value?.input instanceof HTMLTextAreaElement
 
@@ -245,9 +257,24 @@ const SelectInput = defineComponent<SelectInputProps>(
         return <Component {...mergedProps} ref={rootRef} />
       }
 
+      // `domProps` already carries the focus/keyboard/mouse handlers for the
+      // custom root component branch above. They MUST be excluded here since
+      // Vue's `mergeProps` would merge a spread handler and an explicit one
+      // into an array, invoking the same handler twice per event.
+      // see https://github.com/antdv-next/antdv-next/issues/594
+      const divProps = omit(domProps as any, [
+        'onFocus',
+        'onBlur',
+        'onFocusin',
+        'onFocusout',
+        'onKeydown',
+        'onKeyup',
+        'onMousedown',
+      ])
+
       return (
         <div
-          {...domProps}
+          {...divProps}
           // Style
           ref={rootRef}
           class={className.value}

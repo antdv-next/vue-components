@@ -20,12 +20,10 @@ function createPatchedTarget<
   return patched
 }
 
-function cloneEvent<
+function buildSafeEvent<
   EventType extends Event,
   Element extends HTMLInputElement | HTMLTextAreaElement,
->(event: EventType, target: Element, value: any): EventType {
-  const patchedTarget = createPatchedTarget(target, value)
-
+>(event: EventType, target: Element): EventType {
   const safeEvent: any = {
     type: (event as any)?.type,
     timeStamp: (event as any)?.timeStamp,
@@ -33,8 +31,8 @@ function cloneEvent<
     cancelable: (event as any)?.cancelable,
     composed: (event as any)?.composed,
 
-    target: patchedTarget,
-    currentTarget: patchedTarget,
+    target,
+    currentTarget: target,
 
     preventDefault: (event as any)?.preventDefault
       ? (event as any).preventDefault.bind(event)
@@ -50,6 +48,24 @@ function cloneEvent<
   }
 
   return safeEvent as EventType
+}
+
+// 需要修改 value 时，克隆一个带有新 value 的 target（detached），避免污染真实节点
+function cloneEvent<
+  EventType extends Event,
+  Element extends HTMLInputElement | HTMLTextAreaElement,
+>(event: EventType, target: Element, value: any): EventType {
+  const patchedTarget = createPatchedTarget(target, value)
+  return buildSafeEvent(event, patchedTarget)
+}
+
+// value 无需修改时，保持真实 target 挂载，避免使用 detached clone
+// https://github.com/react-component/input/pull/175
+function cloneEventWithTarget<
+  EventType extends Event,
+  Element extends HTMLInputElement | HTMLTextAreaElement,
+>(event: EventType, target: Element): EventType {
+  return buildSafeEvent(event, target)
 }
 
 export function hasAddon(props: BaseInputProps | InputProps) {
@@ -75,7 +91,12 @@ export function resolveOnChange<E extends HTMLInputElement | HTMLTextAreaElement
   }
 
   if (target.type !== 'file' && targetValue !== undefined) {
-    onChange(cloneEvent(e as any, target, targetValue))
+    if (target.value !== targetValue) {
+      onChange(cloneEvent(e as any, target, targetValue))
+    }
+    else {
+      onChange(cloneEventWithTarget(e as any, target))
+    }
     return
   }
 

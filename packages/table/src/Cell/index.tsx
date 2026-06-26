@@ -13,7 +13,7 @@ import type {
 import { clsx, warning } from '@v-c/util'
 import { filterEmpty, getStylePxValue } from '@v-c/util/dist/props-util'
 import getValue from '@v-c/util/dist/utils/get'
-import { computed, defineComponent, isVNode } from 'vue'
+import { computed, defineComponent, isVNode, shallowRef, toRaw, watch } from 'vue'
 import { useInjectPerfContext } from '../context/PerfContext'
 import { useInjectTableContext } from '../context/TableContext'
 import { validateValue } from '../utils/valueUtil'
@@ -37,6 +37,7 @@ export interface CellProps<RecordType extends DefaultRecordType> {
   children?: any
   colSpan?: number
   rowSpan?: number
+  hoverRowSpan?: number
   scope?: ScopeType
   ellipsis?: CellEllipsisType
   align?: AlignType
@@ -166,6 +167,7 @@ const Cell = defineComponent<CellProps<any>>({
     'children',
     'colSpan',
     'rowSpan',
+    'hoverRowSpan',
     'scope',
     'ellipsis',
     'align',
@@ -198,12 +200,14 @@ const Cell = defineComponent<CellProps<any>>({
     })
 
     const shadowInfo = computed(() => {
-      const { fixedEndShadow, offsetFixedStartShadow, offsetFixedEndShadow, fixedStartShadow } = props
-      const [absScroll = 0, scrollWidth = 0] = tableContext.scrollInfo || []
-
+      // Skip scrollInfo subscription for non-fixed cells. Reading
+      // tableContext.scrollInfo before this early return made every cell
+      // re-render on horizontal scroll, even though the result was constant.
       if (!isFixStart.value && !isFixEnd.value) {
         return [false, false]
       }
+      const { fixedEndShadow, offsetFixedStartShadow, offsetFixedEndShadow, fixedStartShadow } = props
+      const [absScroll = 0, scrollWidth = 0] = tableContext.scrollInfo || []
       const showStartShadow = isFixStart.value && fixedStartShadow
         ? absScroll - (offsetFixedStartShadow || 0) >= 1
         : false
@@ -213,6 +217,109 @@ const Cell = defineComponent<CellProps<any>>({
 
       return [showStartShadow, showEndShadow]
     })
+
+    // ====================== Render Memo ======================
+    // The expensive part of a cell is the user `render` / `bodyCell` (`headerCell`)
+    // call. Without memoization every unrelated ancestor re-render (e.g. toggling
+    // table `loading`) re-runs them for every cell. We cache the produced child
+    // node and only recompute when the inputs that actually feed the render change.
+    // This mirrors rc-table's `useCellRender` + `React.memo(Cell)` behavior.
+    const computeContent = (): { rawChildNode: any, legacyCellProps: CellType<any> | undefined } => {
+      const { record, dataIndex, index, renderIndex, render, rowType } = props
+      // `column` / `colIndex` are only forwarded as context to `bodyCell` /
+      // `headerCell`. Upstream `useColumns` rebuilds the column objects on every
+      // table render, so tracking them would invalidate the memo on unrelated
+      // re-renders (e.g. `loading`). Their content is stable, so read them raw to
+      // avoid tracking their identity churn (rc-table keeps `column` out of the
+      // cell render memo deps for the same reason).
+      const rawProps = toRaw(props)
+      const column = rawProps.column
+      const colIndex = rawProps.colIndex
+      const mergedRenderIndex = renderIndex ?? index ?? 0
+      const slotChildren = props.children ?? slots?.default?.()
+      const [childNode, legacyCellProps] = resolveCellRender({
+        record,
+        dataIndex,
+        renderIndex: mergedRenderIndex,
+        children: slotChildren,
+        render,
+        perfRecord,
+      })
+
+      let rawChildNode: any = childNode
+      const renderCell = rowType === 'header'
+        ? tableContext.headerCell
+        : rowType === 'body'
+          ? tableContext.bodyCell
+          : undefined
+
+      if (renderCell && column) {
+        const ctxIndex = rowType === 'header' ? (colIndex ?? 0) : mergedRenderIndex
+        const renderCellNode = rowType === 'body'
+          ? renderCell({ column, index: ctxIndex, text: childNode, record })
+          : renderCell({ column, index: ctxIndex, text: childNode } as any)
+        if (Array.isArray(renderCellNode)) {
+          const filteredNodes = filterEmpty(renderCellNode)
+          if (filteredNodes.length > 0) {
+            rawChildNode = filteredNodes
+          }
+        }
+        else if (renderCellNode !== null && renderCellNode !== undefined) {
+          rawChildNode = renderCellNode
+        }
+      }
+
+      return { rawChildNode, legacyCellProps }
+    }
+
+    let readContent: () => { rawChildNode: any, legacyCellProps: CellType<any> | undefined }
+
+    if (typeof props.shouldCellUpdate === 'function') {
+      // Explicit opt-out: recompute only when `shouldCellUpdate(next, prev)` allows
+      // it (compared by record), gating every other input as well. Computed lazily
+      // during render so slot invocations stay inside the render phase.
+      let dirty = true
+      let cached: { rawChildNode: any, legacyCellProps: CellType<any> | undefined }
+      const tick = shallowRef(0)
+      watch(
+        [
+          () => props.record,
+          () => props.dataIndex,
+          () => props.index,
+          () => props.renderIndex,
+          () => props.render,
+          () => props.rowType,
+          () => props.children,
+          () => tableContext.bodyCell,
+          () => tableContext.headerCell,
+        ],
+        (next, prev) => {
+          const nextRecord = next[0]
+          const prevRecord = prev[0]
+          if (props.shouldCellUpdate && !props.shouldCellUpdate(nextRecord, prevRecord)) {
+            return
+          }
+          dirty = true
+          tick.value += 1
+        },
+      )
+      readContent = () => {
+        // Subscribe the render effect to recompute decisions.
+        void tick.value
+        if (dirty || !cached) {
+          cached = computeContent()
+          dirty = false
+        }
+        return cached
+      }
+    }
+    else {
+      // Default path: a computed auto-tracks the reactive state actually read while
+      // rendering (record fields, slot deps, ...), so it never goes stale yet skips
+      // recomputation when nothing relevant changed.
+      const contentMemo = computed(computeContent)
+      readContent = () => contentMemo.value
+    }
 
     return () => {
       const {
@@ -225,14 +332,10 @@ const Cell = defineComponent<CellProps<any>>({
         align,
         record,
         index,
-        colIndex,
-        renderIndex,
-        dataIndex,
-        render,
-        column,
         rowType,
         colSpan,
         rowSpan,
+        hoverRowSpan,
         fixStart,
         fixEnd,
         fixedStartShadow,
@@ -245,16 +348,7 @@ const Cell = defineComponent<CellProps<any>>({
       } = props
       const cellPrefixCls = `${prefixCls}-cell`
       const mergedAppendNode = appendNode ?? slots?.appendNode?.()
-      const mergedRenderIndex = renderIndex ?? index ?? 0
-      const slotChildren = props.children ?? slots?.default?.()
-      const [childNode, legacyCellProps] = resolveCellRender({
-        record,
-        dataIndex,
-        renderIndex: mergedRenderIndex,
-        children: slotChildren,
-        render,
-        perfRecord,
-      })
+      const { rawChildNode, legacyCellProps } = readContent()
       const fixedStyle: CSSProperties = {}
       const [showFixStartShadow, showFixEndShadow] = shadowInfo.value
       if (isFixStart.value) {
@@ -270,12 +364,13 @@ const Cell = defineComponent<CellProps<any>>({
 
       const mergedColSpan = legacyCellProps?.colSpan ?? additionalProps.colSpan ?? colSpan ?? 1
       const mergedRowSpan = legacyCellProps?.rowSpan ?? additionalProps.rowSpan ?? rowSpan ?? 1
+      const mergedHoverRowSpan = hoverRowSpan ?? mergedRowSpan
 
-      const [hovering, onHover] = useHoverState(index!, mergedRowSpan, tableContext)
+      const [hovering, onHover] = useHoverState(index!, mergedHoverRowSpan, tableContext)
 
       const onMouseEnter = (event: MouseEvent) => {
         if (record) {
-          onHover(index!, index! + mergedRowSpan - 1)
+          onHover(index!, index! + mergedHoverRowSpan - 1)
         }
         const onMouseEnterHandler = additionalProps.onMouseEnter || additionalProps.onMouseenter
         onMouseEnterHandler?.(event)
@@ -293,28 +388,7 @@ const Cell = defineComponent<CellProps<any>>({
         return null
       }
 
-      let mergedChildNode: any = childNode
-      const renderCell = rowType === 'header'
-        ? tableContext.headerCell
-        : rowType === 'body'
-          ? tableContext.bodyCell
-          : undefined
-
-      if (renderCell && column) {
-        const ctxIndex = rowType === 'header' ? (colIndex ?? 0) : mergedRenderIndex
-        const renderCellNode = rowType === 'body'
-          ? renderCell({ column, index: ctxIndex, text: childNode, record })
-          : renderCell({ column, index: ctxIndex, text: childNode } as any)
-        if (Array.isArray(renderCellNode)) {
-          const filteredNodes = filterEmpty(renderCellNode)
-          if (filteredNodes.length > 0) {
-            mergedChildNode = filteredNodes
-          }
-        }
-        else if (renderCellNode !== null && renderCellNode !== undefined) {
-          mergedChildNode = renderCellNode
-        }
-      }
+      let mergedChildNode: any = rawChildNode
 
       const title = additionalProps.title ?? getTitleFromCellRenderChildren({
         rowType,

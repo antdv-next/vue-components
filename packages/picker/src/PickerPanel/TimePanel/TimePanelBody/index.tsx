@@ -87,8 +87,8 @@ const TimePanelBody = defineComponent<SharedTimeProps<any>>(
           return []
         }
         const base = generateConfig.value.getNow()
-        const amDate = generateConfig.value.setHour(base, 6)
-        const pmDate = generateConfig.value.setHour(base, 18)
+        const amDate = generateConfig.value.setHour(base, 9)
+        const pmDate = generateConfig.value.setHour(base, 15)
 
         const formatMeridiem = (date: any, defaultLabel: string) => {
           const { cellMeridiemFormat } = locale ?? {} as any

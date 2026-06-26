@@ -6,6 +6,7 @@ import { warning } from '@v-c/util'
 import { computed } from 'vue'
 import useLocale from '../../hooks/useLocale'
 import { fillShowTimeConfig, getTimeProps } from '../../hooks/useTimeConfig'
+import { isSameTimestamp } from '../../utils/dateUtil'
 import { toArray } from '../../utils/miscUtil'
 import { parseValue } from '../../utils/valueUtil'
 import { fillClearIcon } from '../Selector/hooks/useClearIcon'
@@ -31,10 +32,16 @@ function useList<T, M = T>(
   value: Ref<T | T[] | undefined>,
   fillMode = false,
   transform?: (item: T) => M,
+  isSameItem?: (prev: M, next: M) => boolean,
 ) {
+  // React `useList` memoizes on the raw `value` prop only, so an unrelated
+  // re-render never produces a new array. The Vue computed also tracks the
+  // transform deps (locale/generateConfig), so keep the previous array when
+  // items are equivalent to avoid downstream watchers resetting draft state.
+  let cache: M[] | undefined
   return computed(() => {
     const val = value.value
-    const list
+    let list
       = val === null || val === undefined
         ? val
         : toArray(val).map(item => (transform ? transform(item) : item))
@@ -42,9 +49,17 @@ function useList<T, M = T>(
     if (fillMode && list && Array.isArray(list)) {
       const clone = [...list]
       clone[1] = clone[1] || clone[0]
-      return clone
+      list = clone
     }
 
+    if (isSameItem && cache && Array.isArray(list)
+      && cache.length === list.length
+      && list.every((item, index) => item === cache![index] || isSameItem(cache![index], item as M))
+    ) {
+      return cache
+    }
+
+    cache = Array.isArray(list) ? (list as M[]) : undefined
     return list
   })
 }
@@ -154,13 +169,17 @@ export default function useFilledProps<
     ),
   )
 
-  const values = useList(computed(() => props.value.value), false, parseByValueFormat)
-  const defaultValues = useList(computed(() => props.value.defaultValue), false, parseByValueFormat)
-  const pickerValues = useList(computed(() => props.value.pickerValue), false, parseByValueFormat)
+  const isSameParsedDate = (prev: any, next: any) =>
+    isSameTimestamp(props.value.generateConfig, prev, next)
+
+  const values = useList(computed(() => props.value.value), false, parseByValueFormat, isSameParsedDate)
+  const defaultValues = useList(computed(() => props.value.defaultValue), false, parseByValueFormat, isSameParsedDate)
+  const pickerValues = useList(computed(() => props.value.pickerValue), false, parseByValueFormat, isSameParsedDate)
   const defaultPickerValues = useList(
     computed(() => props.value.defaultPickerValue),
     false,
     parseByValueFormat,
+    isSameParsedDate,
   )
 
   // ======================= Warning ========================

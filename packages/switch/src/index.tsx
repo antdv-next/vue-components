@@ -87,15 +87,23 @@ const Switch = defineComponent<SwitchProps>(
         unCheckedChildren,
         classNames,
         styles,
+        onChange: _onChange,
+        onClick: _onClick,
+        onKeyDown: _onKeyDown,
+        'onUpdate:checked': _onUpdateChecked,
         ...restProps
       } = props
-      const switchClassName = [prefixCls, className, {
-        [`${prefixCls}-checked`]: innerChecked.value,
-        [`${prefixCls}-disabled`]: disabled,
-      }]
+      const switchClassName = [
+        prefixCls,
+        className,
+        {
+          [`${prefixCls}-checked`]: innerChecked.value,
+          [`${prefixCls}-disabled`]: disabled,
+        },
+      ]
       return (
         <button
-          {...restProps as any}
+          {...(restProps as any)}
           {...attrs}
           type="button"
           role="switch"

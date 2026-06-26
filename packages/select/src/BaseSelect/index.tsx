@@ -175,7 +175,7 @@ export interface BaseSelectProps extends BaseSelectPrivateProps {
   maxTagPlaceholder?: VueNode | ((omittedValues: DisplayValueType[]) => any)
 
   // >>> Search
-  tokenSeparators?: string[]
+  tokenSeparators?: string[] | ((input: string) => string[])
 
   // >>> Icons
   allowClear?: boolean | { clearIcon?: VueNode }
@@ -378,8 +378,28 @@ export const BaseSelect = defineComponent<
 
     // ============================= Search =============================
     const tokenWithEnter = computed(() => {
-      return (tokenSeparators.value || []).some((tokenSeparator: string) => ['\n', '\r\n'].includes(tokenSeparator))
+      const value = tokenSeparators.value
+      return typeof value === 'function'
+        || (value || []).some((tokenSeparator: string) => ['\n', '\r\n'].includes(tokenSeparator))
     })
+
+    /**
+     * ant-design#57391 / rc-select#1220: when `tokenSeparators` is a
+     * function, defer the split decision to the user callback. Otherwise
+     * fall back to the static-string-array behaviour via getSeparatedContent.
+     */
+    const splitByTokenSeparators = (input: string, end?: number): string[] | null => {
+      const value = tokenSeparators.value
+      if (typeof value === 'function') {
+        const tokens = value(input)
+        const isUnchanged = Array.isArray(tokens) && tokens.length === 1 && tokens[0] === input
+        if (!Array.isArray(tokens) || !tokens.length || isUnchanged) {
+          return null
+        }
+        return typeof end !== 'undefined' ? tokens.slice(0, end) : tokens
+      }
+      return getSeparatedContent(input, value as string[], end)
+    }
 
     const onInternalSearch = (searchText: string, fromTyping: boolean, isCompositing: boolean) => {
       const { maxCount } = props
@@ -390,14 +410,9 @@ export const BaseSelect = defineComponent<
       let newSearchText = searchText
       props?.onActiveValueChange?.(null)
 
-      const separatedList = getSeparatedContent(
-        searchText,
-        tokenSeparators.value as string[],
-        isValidCount(maxCount) ? maxCount! - displayValues.value.length : undefined,
-      )
-
+      const cap = isValidCount(maxCount) ? maxCount! - displayValues.value.length : undefined
       // Check if match the `tokenSeparators`
-      const patchLabels: string[] | null = isCompositing ? null : separatedList
+      const patchLabels: string[] | null = isCompositing ? null : splitByTokenSeparators(searchText, cap)
 
       // Ignore combobox since it's not split-able
       if (mode.value !== 'combobox' && patchLabels) {
@@ -426,6 +441,11 @@ export const BaseSelect = defineComponent<
     // If menu is open, OptionList will take charge
     // If mode isn't tags, press enter is not meaningful when you can't see any option
     const onInternalSearchSubmit = (searchText: string) => {
+      const { maxCount } = props
+      // fix https://github.com/antdv-next/antdv-next/issues/529
+      if (multiple.value && isValidCount(maxCount) && displayValues.value.length >= maxCount!) {
+        return
+      }
       // prevent empty tags from appearing when you click the Enter button
       if (!searchText || !searchText.trim()) {
         return
@@ -473,6 +493,17 @@ export const BaseSelect = defineComponent<
     // KeyDown
     const onInternalKeyDown = (event: KeyboardEvent) => {
       const clearLock = getClearLock()
+      // React reads the pre-render `mergedOpen` inside the whole event, while
+      // Vue refs update synchronously. `SelectInput.onInternalInputKeyDown`
+      // runs first on the input element and may already have opened the
+      // dropdown via `toggleOpen(true)`, so prefer the open state it recorded
+      // before that. This keeps the Enter key that opens the dropdown from
+      // being forwarded to OptionList (which would instantly select the
+      // active option and close the dropdown again).
+      // see https://github.com/antdv-next/antdv-next/issues/594
+      const wasOpen = (event as any)._select_open_before !== undefined
+        ? (event as any)._select_open_before as boolean
+        : mergedOpen.value
       const { key } = event
       const isEnterKey = key === KeyCodeStr.Enter
       const isSpaceKey = key === KeyCodeStr.Space
@@ -520,7 +551,7 @@ export const BaseSelect = defineComponent<
       }
 
       // Lock other operations until key up
-      if (mergedOpen.value && (!isEnterKey || !keyLockRef.value) && !isSpaceKey) {
+      if (wasOpen && (!isEnterKey || !keyLockRef.value) && !isSpaceKey) {
         // Lock the Enter key after it is pressed to avoid repeated triggering of the onChange event.
         if (isEnterKey) {
           keyLockRef.value = true

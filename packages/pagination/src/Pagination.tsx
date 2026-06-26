@@ -615,6 +615,20 @@ const Pagination = defineComponent<PaginationProps>(
           left = allPages.value - pageBufferSize * 2
         }
 
+        const hasJumpPrev = !!jumpPrev
+          && current.value - 1 >= pageBufferSize * 2
+          && current.value !== 1 + 2
+        const hasJumpNext = !!jumpNext
+          && allPages.value - current.value >= pageBufferSize * 2
+          && current.value !== allPages.value - 2
+
+        if (!showLessItems && hasJumpPrev && right !== allPages.value) {
+          left += 1
+        }
+        if (!showLessItems && hasJumpNext && left !== 1) {
+          right -= 1
+        }
+
         for (let i = left; i <= right; i += 1) {
           pagerList.push(
             <Pager
@@ -626,10 +640,7 @@ const Pagination = defineComponent<PaginationProps>(
           )
         }
 
-        if (
-          current.value - 1 >= pageBufferSize * 2
-          && current.value !== 1 + 2
-        ) {
+        if (hasJumpPrev) {
           if (pagerList[0]) {
             pagerList[0] = cloneElement(pagerList[0], {
               className: classNames(
@@ -641,10 +652,7 @@ const Pagination = defineComponent<PaginationProps>(
           pagerList.unshift(jumpPrev)
         }
 
-        if (
-          allPages.value - current.value >= pageBufferSize * 2
-          && current.value !== allPages.value - 2
-        ) {
+        if (hasJumpNext) {
           const lastOne = pagerList[pagerList.length - 1]
           if (lastOne) {
             pagerList[pagerList.length - 1] = cloneElement(lastOne, {

@@ -1,7 +1,13 @@
 {
   "name": "@v-c/progress",
   "type": "module",
-  "version": "1.0.0",
+  "version": "1.0.1",
+  "license": "MIT",
+  "homepage": "https://github.com/antdv-next/vue-components/tree/next/packages/progress",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/antdv-next/vue-components.git"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -12,6 +18,10 @@
     "./package.json": "./package.json"
   },
   "main": "dist/index.js",
+  "files": [
+    "dist",
+    "package.json"
+  ],
   "scripts": {
     "build": "vite build",
     "test": "vitest run",

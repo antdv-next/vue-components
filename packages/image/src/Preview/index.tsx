@@ -203,6 +203,27 @@ const Preview = defineComponent<PreviewProps>(
       dispatchZoomChange,
     )
 
+    // Attach wheel/touch listeners with `passive: true` so the browser does not
+    // emit `[Violation] Added non-passive event listener to a scroll-blocking ...`.
+    // None of these handlers call `preventDefault()`, so passive is safe.
+    watch(imgEl, (el, _old, onCleanup) => {
+      if (!el)
+        return
+      const opts = { passive: true } as AddEventListenerOptions
+      el.addEventListener('wheel', onWheel, opts)
+      el.addEventListener('touchstart', onTouchStart as EventListener, opts)
+      el.addEventListener('touchmove', onTouchMove as EventListener, opts)
+      el.addEventListener('touchend', onTouchEnd as EventListener, opts)
+      el.addEventListener('touchcancel', onTouchEnd as EventListener, opts)
+      onCleanup(() => {
+        el.removeEventListener('wheel', onWheel)
+        el.removeEventListener('touchstart', onTouchStart as EventListener)
+        el.removeEventListener('touchmove', onTouchMove as EventListener)
+        el.removeEventListener('touchend', onTouchEnd as EventListener)
+        el.removeEventListener('touchcancel', onTouchEnd as EventListener)
+      })
+    })
+
     watch(() => props.open, (open) => {
       if (!open) {
         resetTransform('close')
@@ -404,13 +425,8 @@ const Preview = defineComponent<PreviewProps>(
             transitionDuration: (!enableTransition.value || isTouching.value) ? '0s' : undefined,
           }}
 
-          onWheel={onWheel}
           onMousedown={onMouseDown}
           onDblclick={onDoubleClick}
-          onTouchstart={onTouchStart as any}
-          onTouchmove={onTouchMove as any}
-          onTouchend={onTouchEnd as any}
-          onTouchcancel={onTouchEnd as any}
         />
       )
 

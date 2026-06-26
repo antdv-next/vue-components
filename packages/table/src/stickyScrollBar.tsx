@@ -2,7 +2,7 @@ import { clsx } from '@v-c/util'
 import { getDOM } from '@v-c/util/dist/Dom/findDOMNode'
 import getScrollBarSize from '@v-c/util/dist/getScrollBarSize'
 import raf from '@v-c/util/dist/raf'
-import { computed, defineComponent, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, defineComponent, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useInjectTableContext } from './context/TableContext'
 import { useLayoutState } from './hooks/useFrame'
 import { getOffset } from './utils/offsetUtil'
@@ -26,6 +26,7 @@ const StickyScrollBar = defineComponent<StickyScrollBarProps>({
   setup(props, { expose }) {
     const { prefixCls } = useInjectTableContext()
     const scrollBarRef = ref<HTMLDivElement | null>(null)
+
     const [scrollState, setScrollState] = useLayoutState<{ scrollLeft: number, isHiddenScrollBar: boolean }>({
       scrollLeft: 0,
       isHiddenScrollBar: true,
@@ -34,8 +35,14 @@ const StickyScrollBar = defineComponent<StickyScrollBarProps>({
     const isActive = ref(false)
     const rafRef = ref<number | null>(null)
 
-    const bodyScrollWidth = computed(() => props.scrollBodyRef.value?.scrollWidth || 0)
-    const bodyWidth = computed(() => props.scrollBodyRef.value?.clientWidth || 0)
+    const bodyScrollWidth = ref(0)
+    const bodyWidth = ref(0)
+    const syncBodySize = () => {
+      const bodyNode = props.scrollBodyRef.value
+      bodyScrollWidth.value = bodyNode?.scrollWidth || 0
+      bodyWidth.value = bodyNode?.clientWidth || 0
+    }
+
     const scrollBarWidth = computed(() => {
       const totalWidth = bodyScrollWidth.value
       const clientWidth = bodyWidth.value
@@ -81,6 +88,7 @@ const StickyScrollBar = defineComponent<StickyScrollBarProps>({
     const checkScrollBarVisible = () => {
       raf.cancel(rafRef.value as any)
       rafRef.value = raf(() => {
+        syncBodySize()
         if (!props.scrollBodyRef.value || !props.container) {
           return
         }
@@ -119,7 +127,7 @@ const StickyScrollBar = defineComponent<StickyScrollBarProps>({
     onMounted(() => {
       document.body.addEventListener(MOUSEUP_EVENT, onMouseUp, false)
       document.body.addEventListener(MOUSEMOVE_EVENT, onMouseMove, false)
-      checkScrollBarVisible()
+      nextTick(checkScrollBarVisible)
     })
 
     const removeScrollListeners = ref<(() => void) | null>(null)
@@ -130,6 +138,17 @@ const StickyScrollBar = defineComponent<StickyScrollBarProps>({
       raf.cancel(rafRef.value as any)
       removeScrollListeners.value?.()
     })
+
+    watch(
+      () => props.scrollBodyRef.value,
+      () => {
+        nextTick(checkScrollBarVisible)
+      },
+      {
+        immediate: true,
+        flush: 'post',
+      },
+    )
 
     watch(
       () => [scrollBarWidth.value, isActive.value],

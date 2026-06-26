@@ -314,10 +314,11 @@ const OverflowImpl = defineComponent({
 
       let suffixStyle: CSSProperties = {}
       if (suffixFixedStart.value !== null && shouldResponsive.value) {
+        // rc-overflow#60: use logical inset start so RTL layouts mirror correctly.
         suffixStyle = {
           position: 'absolute',
-          left: `${suffixFixedStart.value}px`,
           top: 0,
+          insetInlineStart: `${suffixFixedStart.value}px`,
         }
       }
 

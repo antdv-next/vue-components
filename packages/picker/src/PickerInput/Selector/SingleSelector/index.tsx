@@ -34,6 +34,13 @@ export interface SingleSelectorProps<DateType extends object = any> extends Sele
   // Vue specific
   maxTagCount?: number | 'responsive'
   multiple?: boolean
+  tagRender?: (props: {
+    label: any
+    value: DateType
+    disabled: boolean
+    onClose: (event?: MouseEvent) => void
+    closable: boolean
+  }) => any
 
   onMouseDown?: (e: MouseEvent) => void
 
@@ -122,6 +129,7 @@ const SingleSelector = defineComponent<SingleSelectorProps>(
         multiple,
         maxTagCount,
         removeIcon,
+        tagRender,
         onMouseDown,
         value,
         disabled,
@@ -145,6 +153,7 @@ const SingleSelector = defineComponent<SingleSelectorProps>(
                 disabled={disabled}
                 removeIcon={removeIcon}
                 placeholder={placeholder}
+                tagRender={tagRender}
               />
               <input
                 class={`${prefixCls.value}-multiple-input`}

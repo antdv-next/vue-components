@@ -1,5 +1,5 @@
 import type { HTMLAttributes } from 'vue'
-import type { MenuItemType } from './interface.ts'
+import type { ItemData, MenuItemType } from './interface.ts'
 import Overflow from '@v-c/overflow'
 import { clsx, warning } from '@v-c/util'
 import KeyCode from '@v-c/util/dist/KeyCode'
@@ -24,6 +24,9 @@ export interface MenuItemProps extends Omit<MenuItemType, 'label' | 'key'> {
 
   /** @deprecated No place to use this. Should remove */
   attribute?: Record<string, string>
+
+  /** @private Origin item config from items prop */
+  itemData?: ItemData
 
   onKeyDown?: (e: KeyboardEvent) => void
   onFocus?: (e: FocusEvent) => void
@@ -91,11 +94,21 @@ const InternalMenuItem = defineComponent<MenuItemProps>(
     }
     // ============================= Info =============================
     const getEventInfo = (e: MouseEvent | KeyboardEvent) => {
+      // If itemData exists (items mode), use it; otherwise build from props (children mode)
+      const itemData: ItemData = props.itemData || {
+        key: eventKey.value || '',
+        label: slots?.default?.(),
+        itemIcon: props.itemIcon,
+        extra: props.extra,
+        title: typeof attrs.title === 'string' ? attrs.title : undefined,
+      }
+
       return {
         key: eventKey.value,
         keyPath: connectedKeys.value,
         item: legacyMenuItemRef.value,
         domEvent: e,
+        itemData,
       }
     }
 
@@ -166,6 +179,10 @@ const InternalMenuItem = defineComponent<MenuItemProps>(
         onMouseleave: ret.onMouseLeave,
       }
 
+      // Internally re-dispatched handlers must not also be spread onto the DOM
+      // node: Vue `mergeProps` stacks same-name listeners (unlike JSX override
+      // in rc-menu), so the user callback would fire twice — once with the raw
+      // event and once via the internal info dispatch.
       let renderNode = (
         <LegacyMenuItem
           ref={legacyMenuItemRef}
@@ -173,7 +190,15 @@ const InternalMenuItem = defineComponent<MenuItemProps>(
           role={role === null ? 'none' : role || 'menuitem'}
           tabIndex={disabled ? null : -1}
           data-menu-id={overflowDisabled && domDataId.value ? null : domDataId.value}
-          {...omit({ ...restProps, ...attrs }, ['extra'])}
+          {...omit({ ...restProps, ...attrs }, [
+            'extra',
+            'onClick',
+            'onKeyDown',
+            'onFocus',
+            'onMouseEnter',
+            'onMouseLeave',
+            'class',
+          ])}
           {...activeProps}
           {...optionRoleProps as any}
           component="li"

@@ -1,6 +1,6 @@
-import type { MenuInfo, SubMenuType } from '../interface'
 import type { VueNode } from '@v-c/util/dist/type'
 import type { CSSProperties } from 'vue'
+import type { MenuInfo, SubMenuType } from '../interface'
 import Overflow from '@v-c/overflow'
 import { classNames } from '@v-c/util'
 import warning from '@v-c/util/dist/warning'
@@ -193,15 +193,32 @@ const InternalSubMenu = defineComponent<SubMenuProps>(
       { immediate: true },
     )
     return () => {
+      // Mirror rc-menu's destructure: keep internally handled props (the
+      // handlers are re-dispatched with info objects) and private props out of
+      // the DOM spread, otherwise Vue `mergeProps` stacks same-name listeners
+      // and user callbacks fire twice.
       const {
         style,
         title,
         class: className,
+        eventKey,
+        warnKey,
+        disabled,
+        internalPopupClose,
+        itemIcon,
+        expandIcon,
         popupClassName,
         popupOffset,
         popupStyle,
+        popupRender,
         classes,
         styles,
+        onClick,
+        onMouseEnter,
+        onMouseLeave,
+        onTitleClick,
+        onTitleMouseEnter,
+        onTitleMouseLeave,
         ...restProps
       } = props
 

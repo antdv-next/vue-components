@@ -33,6 +33,7 @@ function onInternalClick(e: MouseEvent | KeyboardEvent) {
 const cls = computed(() => [
   tabPrefix.value,
   props.className,
+  props.classNames?.item,
   {
     [`${tabPrefix.value}-with-remove`]: removable.value,
     [`${tabPrefix.value}-active`]: active.value,
@@ -40,6 +41,11 @@ const cls = computed(() => [
     [`${tabPrefix.value}-focus`]: focus.value,
   },
 ])
+
+const mergedStyle = computed(() => ({
+  ...props.styles?.item,
+  ...props.style,
+}))
 
 function onRemove(event: MouseEvent | KeyboardEvent) {
   event.preventDefault()
@@ -112,7 +118,8 @@ const node = computed(() => {
         'type': 'button',
         'aria-label': props.removeAriaLabel || 'remove',
         'tabindex': active.value ? 0 : -1,
-        'class': [`${tabPrefix.value}-remove`],
+        'class': [`${tabPrefix.value}-remove`, props.classNames?.remove],
+        'style': props.styles?.remove,
         'onClick': (e: any) => {
           e.stopPropagation()
           onRemove(e)
@@ -127,7 +134,7 @@ const node = computed(() => {
     'key': tab.value.key,
     'data-node-key': genDataNodeKey(tab.value.key),
     'class': cls.value,
-    'style': props.style,
+    'style': mergedStyle.value,
     'onClick': onInternalClick,
   }, children)
 })

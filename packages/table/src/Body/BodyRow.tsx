@@ -75,17 +75,18 @@ export function getCellProps<RecordType>(
 
   const additionalCellProps = column.onCell?.(record, index) || {}
 
-  if (expandedRowOffset) {
+  let hoverRowSpan: number | undefined
+  if (expandedRowOffset && expandable.value && colIndex < expandedRowOffset) {
     const { rowSpan = 1 } = additionalCellProps
-    if (expandable.value && rowSpan && colIndex < expandedRowOffset) {
-      let currentRowSpan = rowSpan
+    if (rowSpan) {
+      hoverRowSpan = rowSpan
+      let expandedCount = 0
       for (let i = index; i < index + rowSpan; i += 1) {
-        const keyInRow = rowKeys[i]
-        if (expandedKeys.has(keyInRow)) {
-          currentRowSpan += 1
+        if (expandedKeys.has(rowKeys[i])) {
+          expandedCount += 1
         }
       }
-      additionalCellProps.rowSpan = currentRowSpan
+      additionalCellProps.rowSpan = rowSpan + expandedCount
     }
   }
 
@@ -94,6 +95,7 @@ export function getCellProps<RecordType>(
     fixedInfo,
     appendCellNode,
     additionalCellProps,
+    hoverRowSpan,
   }
 }
 
@@ -188,7 +190,7 @@ const BodyRow = defineComponent<BodyRowProps<any>>({
           {flattenColumns.map((column: ColumnType<any>, colIndex) => {
             const { render, dataIndex, className: columnClassName } = column
 
-            const { key, fixedInfo, appendCellNode, additionalCellProps } = getCellProps(
+            const { key, fixedInfo, appendCellNode, additionalCellProps, hoverRowSpan } = getCellProps(
               rowInfo,
               record,
               column,
@@ -215,10 +217,12 @@ const BodyRow = defineComponent<BodyRowProps<any>>({
                 renderIndex={renderIndex}
                 dataIndex={dataIndex}
                 render={render}
+                shouldCellUpdate={column.shouldCellUpdate}
                 scope={scope}
                 rowType="body"
                 {...fixedInfo}
                 additionalProps={additionalCellProps}
+                hoverRowSpan={hoverRowSpan}
                 column={column}
                 appendNode={appendCellNode}
               />

@@ -93,7 +93,6 @@ export interface NodeListProps {
   onFocus?: (e: FocusEvent) => void
   onBlur?: (e: FocusEvent) => void
   onMouseDown?: (e: MouseEvent) => void
-  onMouseUp?: (e: MouseEvent) => void
   onActiveChange?: (key: Key | null) => void
 
   onListChangeStart?: () => void
@@ -236,7 +235,6 @@ const NodeList = defineComponent<NodeListProps>(
         onFocus,
         onBlur,
         onMouseDown,
-        onMouseUp,
         onListChangeStart,
         onActiveChange,
       } = props
@@ -281,7 +279,6 @@ const NodeList = defineComponent<NodeListProps>(
             onFocus={onFocus}
             onBlur={onBlur}
             onMousedown={onMouseDown}
-            onMouseup={onMouseUp}
             onVisibleChange={(originList: FlattenNode[]) => {
               // The best match is using `fullList` - `originList` = `restList`
               // and check the `restList` to see if has the MOTION_KEY node

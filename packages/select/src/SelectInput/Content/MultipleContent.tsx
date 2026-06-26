@@ -9,6 +9,7 @@ import { computed, defineComponent, shallowRef } from 'vue'
 import useBaseProps from '../../hooks/useBaseProps'
 import TransBtn from '../../TransBtn'
 import { getTitle } from '../../utils/commonUtil'
+import { isValidCount } from '../../utils/valueUtil'
 import { useSelectInputContext } from '../context'
 import Input from '../Input'
 import Placeholder from './Placeholder'
@@ -46,6 +47,7 @@ const MultipleContent = defineComponent<SharedContentProps>(
     const maxTagPlaceholderFromContext = computed(() => baseProps.value?.maxTagPlaceholder)
     const maxTagTextLength = computed(() => baseProps.value?.maxTagTextLength)
     const maxTagCount = computed(() => baseProps.value?.maxTagCount)
+    const maxCount = computed(() => baseProps.value?.maxCount)
     const classNamesConfig = computed(() => baseProps.value?.classNames)
     const stylesConfig = computed(() => baseProps.value?.styles)
 
@@ -60,8 +62,14 @@ const MultipleContent = defineComponent<SharedContentProps>(
       return searchValue.value
     })
 
+    const reachedMaxCount = computed(() =>
+      mode.value !== 'combobox'
+      && isValidCount(maxCount.value)
+      && displayValues.value.length >= maxCount.value!,
+    )
     const inputValue = computed(() => showSearch.value ? (computedSearchValue.value || '') : '')
-    const inputEditable = computed(() => showSearch.value && !disabled.value)
+    // fix https://github.com/antdv-next/antdv-next/issues/529 的连锁问题，当达到 maxCount 时，仍能输入与antd表现不一致
+    const inputEditable = computed(() => showSearch.value && !disabled.value && !reachedMaxCount.value)
 
     // Props from context with safe defaults
     const removeIcon = computed<RenderNode>(() => removeIconFromContext.value ?? '×')
