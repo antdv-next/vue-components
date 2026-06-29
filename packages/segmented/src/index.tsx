@@ -173,7 +173,9 @@ const Segmented = defineComponent<SegmentedProps>(
 
     // Note: We should not auto switch value when value not exist in options
     // which may break single source of truth.
-    const rawValue = shallowRef(props?.value ?? props?.defaultValue ?? (props?.options?.[0] as any)?.value)
+    const rawValue = shallowRef(
+      props?.value ?? props?.defaultValue ?? segmentedOptions.value[0]?.value,
+    )
     watch(() => props.value, () => {
       rawValue.value = props.value as any
     })
