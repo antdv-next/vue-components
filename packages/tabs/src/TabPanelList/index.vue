@@ -25,7 +25,9 @@ const tabs = computed<Tab[]>(() => ctx?.value.tabs || [])
 const prefixCls = computed(() => ctx?.value.prefixCls || '')
 
 const tabPaneAnimated = computed(() => animated.value?.tabPane === true)
-const tabPanePrefixCls = computed(() => `${prefixCls.value}-tabpane`)
+// rc-tabs 1.11.0 semantic rename: each pane is now `${prefixCls}-content`
+// (was `${prefixCls}-tabpane`); the inner wrapper became `${prefixCls}-body`.
+const tabPanePrefixCls = computed(() => `${prefixCls.value}-content`)
 const transitionProps = computed(() => {
   if (!tabPaneAnimated.value)
     return {}
@@ -70,12 +72,12 @@ function shouldRender(item: Tab) {
 </script>
 
 <template>
-  <div :class="[`${prefixCls}-content-holder`]">
+  <div :class="[`${prefixCls}-body-holder`]">
     <div
       :class="[
-        `${prefixCls}-content`,
-        `${prefixCls}-content-${tabPosition}`,
-        { [`${prefixCls}-content-animated`]: tabPaneAnimated }]
+        `${prefixCls}-body`,
+        `${prefixCls}-body-${tabPosition}`,
+        { [`${prefixCls}-body-animated`]: tabPaneAnimated }]
       "
     >
       <template v-for="item in tabs" :key="item.key">
