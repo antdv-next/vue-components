@@ -393,6 +393,8 @@ export interface SharedPickerProps<DateType extends object = any>
   // Active
   onFocus?: PickerFocusEventHandler
   onBlur?: PickerFocusEventHandler
+  /** Trigger when the clear icon is clicked. */
+  onClear?: VoidFunction
   /** `preventDefault` is deprecated which will remove from future version. */
   onKeyDown?: LegacyOnKeyDown
 

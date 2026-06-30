@@ -449,6 +449,7 @@ const SinglePicker = defineComponent<PickerProps>(
     const onSelectorClear = () => {
       triggerSubmitChange(null as any)
       triggerOpen(false, { force: true })
+      fp.value.onClear?.()
     }
 
     // ======================== Hover =========================
@@ -572,6 +573,7 @@ const SinglePicker = defineComponent<PickerProps>(
         ...(Object.keys(domProps) as any[]),
         'onChange',
         'onCalendarChange',
+        'onClear',
         'style',
         'className',
         'onPanelChange',
