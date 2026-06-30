@@ -441,6 +441,10 @@ const Select = defineComponent<SelectProps>({
       )) {
         return filteredOptions.value
       }
+      // Skip creating temp tag option if it matches a disabled option value
+      if (valueOptions.value.get(mergedSearchValue.value)?.disabled) {
+        return filteredOptions.value
+      }
       // Fill search value as option
       return [createTagOption(mergedSearchValue.value), ...filteredOptions.value]
     })
@@ -597,6 +601,11 @@ const Select = defineComponent<SelectProps>({
         const formatted = (searchText || '').trim()
         // prevent empty tags from appearing when you click the Enter button
         if (formatted) {
+          // Skip disabled options in tags mode
+          if (valueOptions.value.get(formatted)?.disabled) {
+            setSearchValue('')
+            return
+          }
           const newRawValues = Array.from(new Set<RawValueType>([...rawValues.value, formatted]))
           triggerChange(newRawValues)
           triggerSelect(formatted, true)
@@ -625,6 +634,11 @@ const Select = defineComponent<SelectProps>({
             return opt?.[mergedFieldNames.value.value] as RawValueType
           })
           .filter(val => val !== undefined)
+      }
+
+      // Filter out disabled option values in tags mode
+      if (props.mode === 'tags') {
+        patchValues = patchValues.filter(val => !valueOptions.value.get(val)?.disabled)
       }
 
       const newRawValues = Array.from(new Set<RawValueType>([...rawValues.value, ...patchValues]))
