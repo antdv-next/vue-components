@@ -13,12 +13,14 @@ interface TabPanelListProps {
   animated?: AnimatedConfig
   tabPosition?: TabPosition
   destroyOnHidden?: boolean
+  bodyStyle?: CSSProperties
+  bodyClassName?: string
   contentStyle?: CSSProperties
   contentClassName?: string
 }
 
 const props = defineProps<TabPanelListProps>()
-const { id, activeKey, animated, tabPosition, destroyOnHidden, contentStyle, contentClassName } = toRefs(props)
+const { id, activeKey, animated, tabPosition, destroyOnHidden, bodyStyle, bodyClassName, contentStyle, contentClassName } = toRefs(props)
 
 const ctx = useTabContext()
 const tabs = computed<Tab[]>(() => ctx?.value.tabs || [])
@@ -77,8 +79,10 @@ function shouldRender(item: Tab) {
       :class="[
         `${prefixCls}-body`,
         `${prefixCls}-body-${tabPosition}`,
-        { [`${prefixCls}-body-animated`]: tabPaneAnimated }]
+        { [`${prefixCls}-body-animated`]: tabPaneAnimated },
+        bodyClassName]
       "
+      :style="bodyStyle"
     >
       <template v-for="item in tabs" :key="item.key">
         <Transition v-if="tabPaneAnimated" v-bind="transitionProps">

@@ -173,6 +173,8 @@ provideTabContext(memoizedValue)
     <TabPanelList
       :destroy-on-hidden="destroyOnHidden"
       v-bind="sharedProps"
+      :body-style="styles?.body"
+      :body-class-name="tabsClassNames?.body"
       :content-style="styles?.content"
       :content-class-name="tabsClassNames?.content"
       :animated="mergedAnimated"
