@@ -10,7 +10,7 @@ import { useResizeObserver } from '@v-c/resize-observer'
 import { classNames } from '@v-c/util'
 import { getShadowRoot } from '@v-c/util/dist/Dom/shadow'
 import { filterEmpty } from '@v-c/util/dist/props-util'
-import { resolveToElement } from '@v-c/util/dist/vnode'
+import { createElementRef } from '@v-c/util/dist/vnode'
 import { computed, createVNode, defineComponent, nextTick, reactive, ref, shallowRef, useId, watch, watchEffect } from 'vue'
 import { TriggerContextProvider, useTriggerContext, useUniqueContext } from './context.ts'
 import useAction from './hooks/useAction.ts'
@@ -166,53 +166,29 @@ export function generateTrigger(PortalComponent: any = Portal) {
       const popupEle = shallowRef<HTMLDivElement | null>(null)
       // Used for forwardRef popup. Not use internal
       const externalPopupRef = shallowRef<HTMLDivElement | null>(null)
-      let setPopupRefSeq = 0
-      const setPopupRef = (node: any) => {
-        const seq = ++setPopupRefSeq
-        const apply = (element: HTMLDivElement | null) => {
-          externalPopupRef.value = element
-          if (popupEle.value !== element) {
-            popupEle.value = element
-          }
-          parentContext?.value?.registerSubPopup(id, element ?? null)
+      const setPopupRef = createElementRef<HTMLDivElement>((element) => {
+        externalPopupRef.value = element
+        if (popupEle.value !== element) {
+          popupEle.value = element
         }
-        const element = resolveToElement(node) as HTMLDivElement | null
-        // Vue invokes function refs synchronously at patch time but assigns
-        // template-ref objects (Popup's exposed `nativeElement`) in a post
-        // job, so on mount the exposed element is not resolvable yet. Before
-        // vue 3.5.39 the read of that not-yet-set ref was accidentally
-        // tracked by our render effect, which re-invoked this callback once
-        // the ref landed. vuejs/core#14985 pauses tracking inside function
-        // refs, so writing `null` here would now stick (and clobber the
-        // element seeded by `onPrepare`) — re-resolve after the flush
-        // instead, unless a newer invocation (e.g. unmount) superseded us.
-        if (node && !element) {
-          nextTick(() => {
-            if (seq === setPopupRefSeq) {
-              apply(resolveToElement(node) as HTMLDivElement | null)
-            }
-          })
-          return
-        }
-        apply(element)
-      }
+        parentContext?.value?.registerSubPopup(id, element ?? null)
+      })
 
       // =========================== Target ===========================
       // Use state to control here since `useRef` update not trigger render
       const targetEle = shallowRef<HTMLElement>()
       // Used for forwardRef target. Not use internal
       const externalForwardRef = shallowRef<HTMLElement | null>(null)
-      const setTargetRef = (node: any) => {
-        const element = resolveToElement(node)
+      const setTargetRef = createElementRef((element) => {
         if (element && targetEle.value !== element) {
-          targetEle.value = element as HTMLElement
-          externalForwardRef.value = element as HTMLElement
+          targetEle.value = element
+          externalForwardRef.value = element
         }
         else if (!element) {
           targetEle.value = undefined
           externalForwardRef.value = null
         }
-      }
+      })
 
       const originChildProps = reactive<Record<string, any>>({})
       const baseActionProps = shallowRef<Record<string, any>>({})

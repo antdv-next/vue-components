@@ -1,6 +1,7 @@
 import type { ResizeObserverProps } from '../index.tsx'
 import findDOMNode from '@v-c/util/dist/Dom/findDOMNode'
 import { filterEmpty } from '@v-c/util/dist/props-util'
+import { createElementRef } from '@v-c/util/dist/vnode'
 import {
   computed,
   createVNode,
@@ -26,7 +27,9 @@ const SingleObserver = defineComponent<ResizeObserverProps>({
         return (dom as any).nextElementSibling as HTMLElement
       return dom
     }
-    const setWrapperRef = (el: any) => {
+    const setWrapperRef = createElementRef((dom) => {
+      wrapperRef.value = dom
+    }, (el) => {
       let _wrapper = el
       if (el?.elementEl && typeof el.elementEl === 'object') {
         _wrapper = el.elementEl
@@ -35,8 +38,8 @@ const SingleObserver = defineComponent<ResizeObserverProps>({
         _wrapper = el.__$el
       }
 
-      wrapperRef.value = getDom(_wrapper)
-    }
+      return getDom(_wrapper)
+    })
     const onCollectionResize = inject(CollectionContext, () => {})
 
     const enabled = computed(() => !props.disabled)

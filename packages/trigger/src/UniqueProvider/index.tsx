@@ -1,7 +1,7 @@
 import type { TriggerContextProps, UniqueShowOptions } from '../context'
 import Portal from '@v-c/portal'
 import { classNames } from '@v-c/util'
-import { isDOM } from '@v-c/util/dist/Dom/findDOMNode'
+import { createElementRef } from '@v-c/util/dist/vnode'
 import { computed, defineComponent, ref, shallowRef, watch } from 'vue'
 import { TriggerContextProvider, UniqueContextProvider, useTriggerContext } from '../context'
 import useAlign from '../hooks/useAlign.ts'
@@ -36,34 +36,7 @@ const UniqueProvider = defineComponent<UniqueProviderProps>(
     } | null>(null)
     // Used for forwardRef popup. Not use internal
     const externalPopupRef = shallowRef<HTMLDivElement | null>(null)
-    const resolveToElement = (node: any) => {
-      if (!node) {
-        return null
-      }
-      if (isDOM(node)) {
-        return node as HTMLElement
-      }
-      const exposed = node as any
-      if (isDOM(exposed?.$el)) {
-        return exposed.$el
-      }
-      const nativeEl = exposed?.nativeElement
-      if (isDOM(nativeEl?.value)) {
-        return nativeEl.value
-      }
-      if (isDOM(nativeEl)) {
-        return nativeEl
-      }
-      if (typeof exposed?.getElement === 'function') {
-        const el = exposed.getElement()
-        if (isDOM(el)) {
-          return el as HTMLElement
-        }
-      }
-      return null
-    }
-    const setPopupRef = (node: any) => {
-      const element = resolveToElement(node) as HTMLDivElement | null
+    const setPopupRef = createElementRef<HTMLDivElement>((element) => {
       if (!element) {
         return
       }
@@ -72,7 +45,7 @@ const UniqueProvider = defineComponent<UniqueProviderProps>(
       if (popupEle.value !== element) {
         popupEle.value = element
       }
-    }
+    })
 
     // ========================== Register ==========================
     // Store the isOpen function from the latest show call
@@ -182,7 +155,14 @@ const UniqueProvider = defineComponent<UniqueProviderProps>(
     )
 
     // =========================== Motion ===========================
-    const onPrepare = () => {
+    const onPrepare = (element?: Element) => {
+      // Same as Trigger's onPrepare: on the first open the appear hook fires
+      // before `setPopupRef` can resolve Popup's exposed element, so seed
+      // `popupEle` from the transition element to keep the prepare-time
+      // align working (https://github.com/antdv-next/antdv-next/issues/623).
+      if (element && !popupEle.value) {
+        popupEle.value = element as HTMLDivElement
+      }
       onAlign()
       return Promise.resolve()
     }

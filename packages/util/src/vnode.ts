@@ -1,6 +1,6 @@
 import type { Slots, VNode, VNodeArrayChildren, VNodeProps } from 'vue'
 import type { RefObject } from './createRef'
-import { cloneVNode, Comment, Fragment, isVNode, render as VueRender } from 'vue'
+import { cloneVNode, Comment, Fragment, isVNode, nextTick, render as VueRender } from 'vue'
 import { isDOM } from './Dom/findDOMNode'
 import { filterEmpty } from './props-util'
 import warning from './warning'
@@ -127,4 +127,36 @@ export function resolveToElement(node: any) {
       return (dom as any).nextElementSibling as HTMLElement
   }
   return null
+}
+
+/**
+ * Create a function-ref callback that resolves the referenced node to a DOM
+ * element before handing it to `apply`.
+ *
+ * Vue invokes function refs synchronously at patch time, while a component's
+ * exposed template ref only lands in a post job — and since vue 3.5.39
+ * function refs run with tracking paused (vuejs/core#14985), the callback is
+ * no longer re-invoked reactively once that ref lands. So when the node is
+ * present but not resolvable yet, re-resolve after the current flush instead
+ * of applying `null`. A later invocation (e.g. unmount) supersedes the
+ * pending retry.
+ */
+export function createElementRef<T extends Element = HTMLElement>(
+  apply: (element: T | null, node: any) => void,
+  resolve: (node: any) => T | null = resolveToElement,
+): (node: any) => void {
+  let seq = 0
+  return (node: any) => {
+    const current = ++seq
+    const element = resolve(node)
+    if (node && !element) {
+      nextTick(() => {
+        if (current === seq) {
+          apply(resolve(node), node)
+        }
+      })
+      return
+    }
+    apply(element, node)
+  }
 }
