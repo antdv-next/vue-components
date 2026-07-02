@@ -19,7 +19,7 @@ export function useTriggerContext() {
   return inject(TriggerContextKey, undefined)
 }
 
-export const TriggerContextProvider = defineComponent(
+export const TriggerContextProvider = defineComponent<TriggerContextProps>(
   (props, { slots }) => {
     provide(TriggerContextKey, computed(() => props))
     return () => {
@@ -67,7 +67,7 @@ export function useUniqueContext() {
   return inject(UniqueContextKey, undefined)
 }
 
-export const UniqueContextProvider = defineComponent(
+export const UniqueContextProvider = defineComponent<UniqueContextProps>(
   (props, { slots }) => {
     provide(UniqueContextKey, props)
     return () => {
