@@ -9,7 +9,7 @@ import { classNames } from '@v-c/util'
 import { useFocusBoundary } from '@v-c/util/dist/Dom/focusBoundary'
 import { toPropsRefs } from '@v-c/util/dist/props-util'
 import { getTransitionProps } from '@v-c/util/dist/utils/transition'
-import { computed, defineComponent, nextTick, shallowRef, Transition, watchEffect } from 'vue'
+import { computed, defineComponent, nextTick, shallowRef, Transition, watch, watchEffect } from 'vue'
 import useOffsetStyle from '../hooks/useOffsetStyle.ts'
 import { Arrow } from './Arrow.tsx'
 import Mask from './Mask.tsx'
@@ -80,6 +80,14 @@ export interface PopupProps {
 
   // Resize
   onResize?: ResizeObserverProps['onResize']
+
+  // Element ref
+  /**
+   * Report the popup inner element once it mounts / unmounts.
+   * Function refs may be invoked before the teleported element is mounted,
+   * so we notify the parent explicitly when the element becomes available.
+   */
+  onPopupElement?: (element: HTMLDivElement | null) => void
 
   // Mobile
   mobile?: MobileConfig
@@ -158,6 +166,13 @@ const Popup = defineComponent<PopupProps>(
       offsetY,
     )
     const popupElementRef = shallowRef<HTMLDivElement>()
+    // Report the popup element to the parent whenever it changes. Function refs
+    // on teleported content can run before the element is actually mounted
+    // (Vue >= 3.5.39 pauses dependency tracking inside function refs), so we
+    // notify explicitly here to guarantee the parent gets the real element.
+    watch(popupElementRef, (element) => {
+      props.onPopupElement?.(element ?? null)
+    })
     watchEffect((onCleanup) => {
       if (props.open && popupElementRef.value && focusBoundary?.registerAllowedElement) {
         onCleanup(focusBoundary.registerAllowedElement(popupElementRef.value))

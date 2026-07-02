@@ -166,13 +166,21 @@ export function generateTrigger(PortalComponent: any = Portal) {
       const popupEle = shallowRef<HTMLDivElement | null>(null)
       // Used for forwardRef popup. Not use internal
       const externalPopupRef = shallowRef<HTMLDivElement | null>(null)
-      const setPopupRef = (node: any) => {
-        const element = resolveToElement(node) as HTMLDivElement | null
+      const updatePopupElement = (element: HTMLDivElement | null) => {
         externalPopupRef.value = element
         if (popupEle.value !== element) {
           popupEle.value = element
         }
         parentContext?.value?.registerSubPopup(id, element ?? null)
+      }
+      const setPopupRef = (node: any) => {
+        const element = resolveToElement(node) as HTMLDivElement | null
+        // Function refs may fire before the teleported popup element is mounted,
+        // so `element` can be null here. In that case we rely on Popup's
+        // `onPopupElement` callback to report the real element later.
+        if (element) {
+          updatePopupElement(element)
+        }
       }
 
       // =========================== Target ===========================
@@ -758,6 +766,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
                 <Popup
                   portal={PortalComponent}
                   ref={setPopupRef}
+                  onPopupElement={updatePopupElement}
                   prefixCls={prefixCls!}
                   popup={popup!}
                   className={classNames(popupClassName, !isMobile.value && alignedClassName.value)}

@@ -64,9 +64,15 @@ const UniqueProvider = defineComponent<UniqueProviderProps>(
     }
     const setPopupRef = (node: any) => {
       const element = resolveToElement(node) as HTMLDivElement | null
+      // Function refs may fire before the teleported popup element is mounted,
+      // so `element` can be null here. In that case we rely on Popup's
+      // `onPopupElement` callback to report the real element later.
       if (!element) {
         return
       }
+      updatePopupElement(element)
+    }
+    const updatePopupElement = (element: HTMLDivElement | null) => {
       externalPopupRef.value = element
 
       if (popupEle.value !== element) {
@@ -213,6 +219,7 @@ const UniqueProvider = defineComponent<UniqueProviderProps>(
             <TriggerContextProvider {...triggerContextValue.value}>
               <Popup
                 ref={setPopupRef}
+                onPopupElement={updatePopupElement}
                 portal={Portal}
                 prefixCls={prefixCls!}
                 popup={mergedOptions.value?.popup}
