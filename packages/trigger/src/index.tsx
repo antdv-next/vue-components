@@ -166,13 +166,35 @@ export function generateTrigger(PortalComponent: any = Portal) {
       const popupEle = shallowRef<HTMLDivElement | null>(null)
       // Used for forwardRef popup. Not use internal
       const externalPopupRef = shallowRef<HTMLDivElement | null>(null)
+      let setPopupRefSeq = 0
       const setPopupRef = (node: any) => {
-        const element = resolveToElement(node) as HTMLDivElement | null
-        externalPopupRef.value = element
-        if (popupEle.value !== element) {
-          popupEle.value = element
+        const seq = ++setPopupRefSeq
+        const apply = (element: HTMLDivElement | null) => {
+          externalPopupRef.value = element
+          if (popupEle.value !== element) {
+            popupEle.value = element
+          }
+          parentContext?.value?.registerSubPopup(id, element ?? null)
         }
-        parentContext?.value?.registerSubPopup(id, element ?? null)
+        const element = resolveToElement(node) as HTMLDivElement | null
+        // Vue invokes function refs synchronously at patch time but assigns
+        // template-ref objects (Popup's exposed `nativeElement`) in a post
+        // job, so on mount the exposed element is not resolvable yet. Before
+        // vue 3.5.39 the read of that not-yet-set ref was accidentally
+        // tracked by our render effect, which re-invoked this callback once
+        // the ref landed. vuejs/core#14985 pauses tracking inside function
+        // refs, so writing `null` here would now stick (and clobber the
+        // element seeded by `onPrepare`) — re-resolve after the flush
+        // instead, unless a newer invocation (e.g. unmount) superseded us.
+        if (node && !element) {
+          nextTick(() => {
+            if (seq === setPopupRefSeq) {
+              apply(resolveToElement(node) as HTMLDivElement | null)
+            }
+          })
+          return
+        }
+        apply(element)
       }
 
       // =========================== Target ===========================
@@ -459,7 +481,19 @@ export function generateTrigger(PortalComponent: any = Portal) {
       }
 
       // We will trigger align when motion is in prepare
-      const onPrepare = () => {
+      const onPrepare = (element?: Element) => {
+        // https://github.com/antdv-next/antdv-next/issues/623
+        // On the first open the motion runs as an *appear*, whose before-hook
+        // fires during the popup's beforeMount — before the popup's function ref
+        // (`setPopupRef`) has assigned `popupEle`. On vue 3.5.39 the post-flush
+        // prepare align then runs while `popupEle` is still empty, so `_onAlign`
+        // bails and the enter animation starts off-screen (first animation is
+        // "lost" and the popup flashes). The transition hook hands us the popup
+        // element, so seed `popupEle` from it to keep the prepare-time align
+        // working. `setPopupRef` still runs post-mount for full registration.
+        if (element && !popupEle.value) {
+          popupEle.value = element as HTMLDivElement
+        }
         syncTargetSize()
         return new Promise<void>((resolve) => {
           motionPrepareResolve.value = resolve

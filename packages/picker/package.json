@@ -89,6 +89,6 @@
     "@v-c/util": "workspace:^"
   },
   "devDependencies": {
-    "@types/luxon": "^3.7.1"
+    "@types/luxon": "^3.7.2"
   }
 }

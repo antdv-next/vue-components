@@ -71,7 +71,7 @@ export interface PopupProps {
   offsetR: number
   offsetB: number
   onAlign: VoidFunction
-  onPrepare: () => Promise<void>
+  onPrepare: (element?: Element) => Promise<void>
 
   // stretch
   stretch?: string
@@ -232,8 +232,12 @@ const Popup = defineComponent<PopupProps>(
         appear: true,
         ...baseTransitionProps,
         onBeforeEnter: (element: Element) => {
-          onPrepare?.()
+          onPrepare?.(element)
           baseTransitionProps?.onBeforeEnter?.(element)
+        },
+        onBeforeAppear: (element: Element) => {
+          onPrepare?.(element)
+          ;(baseTransitionProps?.onBeforeAppear ?? baseTransitionProps?.onBeforeEnter)?.(element)
         },
         onAfterEnter: (element: Element) => {
           baseTransitionProps?.onAfterEnter?.(element)
@@ -243,6 +247,14 @@ const Popup = defineComponent<PopupProps>(
             // Let the pending leave motion own the bookkeeping — clearing
             // `inMotion` here would make re-align measure the mid-leave
             // transform.
+            if (props.open) {
+              onVisibleChanged?.(true)
+            }
+          })
+        },
+        onAfterAppear: (element: Element) => {
+          ;(baseTransitionProps?.onAfterAppear ?? baseTransitionProps?.onAfterEnter)?.(element)
+          requestAnimationFrame(() => {
             if (props.open) {
               onVisibleChanged?.(true)
             }

@@ -41,7 +41,7 @@
     "vue": "^3.0.0"
   },
   "dependencies": {
-    "@ant-design/fast-color": "^3.0.0",
+    "@ant-design/fast-color": "^3.0.1",
     "@v-c/util": "workspace:^"
   }
 }
