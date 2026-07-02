@@ -23,6 +23,7 @@
     "@types/node": "^20.19.43",
     "@vitejs/plugin-vue": "^6.0.7",
     "@vitejs/plugin-vue-jsx": "^5.1.6",
+    "@vue/language-core": "^3.3.6",
     "@vue/test-utils": "^2.4.11",
     "axios": "^1.18.1",
     "bootstrap": "^5.3.8",
