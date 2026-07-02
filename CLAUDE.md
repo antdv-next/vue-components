@@ -39,6 +39,7 @@ Each package versioned independently via `bumpp`. No monorepo-wide release.
 - All packages peer-depend on `vue` and may depend on `@v-c/util`
 - TypeScript strict mode, ES2020 target
 - Path aliases: `@v-c/*` → `packages/*/src` (configured in tsconfig.json)
+- Function refs that resolve a component's exposed element MUST use `createElementRef` from `@v-c/util/dist/vnode` — never resolve eagerly in the callback (breaks on vue ≥3.5.39). See `docs/function-ref-element-resolve.md`
 
 ## Relationship to antdv-next
 
