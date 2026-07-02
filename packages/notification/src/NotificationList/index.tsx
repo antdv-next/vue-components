@@ -3,12 +3,18 @@ import type { Key, StackConfig } from '../interface'
 import type {
   ComponentsType,
   NotificationClassNames as NoticeClassNames,
-  NotificationProps,
   NotificationStyles as NoticeStyles,
+  NotificationProps,
 } from '../Notification'
 import { clsx } from '@v-c/util'
+import { createElementRef } from '@v-c/util/dist/vnode'
 import { unrefElement } from '@v-c/util/dist/vueuse/unref-element'
 import { computed, defineComponent, ref, shallowRef, toRef, TransitionGroup, watch, watchEffect } from 'vue'
+import useListPosition from '../hooks/useListPosition'
+import useStack from '../hooks/useStack'
+import Notification from '../Notification'
+import { useNotificationContext } from '../NotificationProvider'
+import Content from './Content'
 
 /**
  * Map Vue's TransitionGroup enter/leave class hooks onto the rc-motion
@@ -38,11 +44,6 @@ function buildMotionGroupProps(name: string, override?: Partial<TransitionGroupP
     ...override,
   }
 }
-import useListPosition from '../hooks/useListPosition'
-import useStack from '../hooks/useStack'
-import Notification from '../Notification'
-import { useNotificationContext } from '../NotificationProvider'
-import Content from './Content'
 
 export type Placement = 'top' | 'topLeft' | 'topRight' | 'bottom' | 'bottomLeft' | 'bottomRight'
 
@@ -242,10 +243,14 @@ const NotificationList = defineComponent<NotificationListProps>(
             <Notification
               key={strKey}
               {...notificationConfig}
-              ref={(el: any) => {
-                const node = unrefElement<HTMLDivElement>(el?.nativeElement as any)
+              // vue >=3.5.39 no longer re-invokes function refs reactively, so
+              // resolving the exposed `nativeElement` inline would read null on the
+              // first render and record a 0 height — making the notices stack on top
+              // of each other. `createElementRef` retries once the element resolves.
+              // sync antdv-next#623 pattern
+              ref={createElementRef<HTMLDivElement>((node) => {
                 setNodeSize(strKey, node ?? null)
-              }}
+              }, (el: any) => unrefElement<HTMLDivElement>(el?.nativeElement as any) ?? null)}
               prefixCls={prefixCls}
               class={clsx((ctx.value as any)?.classNames?.notice, configClassName)}
               style={configStyle}

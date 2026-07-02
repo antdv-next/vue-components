@@ -7,7 +7,7 @@ const [{ open }, contextHolder] = useNotification({ motion, stack: true })
 
 function getConfig() {
   return {
-    content: `${Array.from({ length: Math.round(Math.random() * 5) + 1 })
+    description: `${Array.from({ length: Math.round(Math.random() * 5) + 1 })
       .fill(1)
       .map(() => new Date().toISOString())
       .join('\n')}`,

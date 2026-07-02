@@ -10,7 +10,7 @@ const [notice, contextHolder] = useNotification({ maxCount: 3, motion })
   <button
     @click="() => {
       notice.open({
-        content: `${new Date().toISOString()}`,
+        description: `${new Date().toISOString()}`,
       });
     }"
   >

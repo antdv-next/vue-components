@@ -5,7 +5,7 @@ import motion from './motion'
 
 const [{ open }, holder] = useNotification({ motion })
 const NOTICE = {
-  content: h('span', ['simple show']),
+  description: h('span', ['simple show']),
   onclose() {
     console.log('simple close')
   },

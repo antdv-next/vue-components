@@ -11,7 +11,7 @@ const [notice, contextHolder] = useNotification({ motion, closable: true })
     <button
       @click="() => {
         notice.open({
-          content: `${new Date().toISOString()}`,
+          description: `${new Date().toISOString()}`,
         })
       }"
     >
@@ -20,7 +20,7 @@ const [notice, contextHolder] = useNotification({ motion, closable: true })
     <button
       @click="() => {
         notice.open({
-          content: `${Array(Math.round(Math.random() * 5) + 1)
+          description: `${Array(Math.round(Math.random() * 5) + 1)
             .fill(1)
             .map(() => new Date().toISOString())
             .join('\n')}`,
@@ -34,7 +34,7 @@ const [notice, contextHolder] = useNotification({ motion, closable: true })
     <button
       @click="() => {
         notice.open({
-          content: `${Array(5)
+          description: `${Array(5)
             .fill(1)
             .map(() => new Date().toISOString())
             .join('\n')}`,
@@ -50,7 +50,7 @@ const [notice, contextHolder] = useNotification({ motion, closable: true })
     <button
       @click="() => {
         notice.open({
-          content: `No Close! ${new Date().toISOString()}`,
+          description: `No Close! ${new Date().toISOString()}`,
           duration: null,
           closable: false,
           key: 'No Close',
