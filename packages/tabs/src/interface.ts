@@ -132,7 +132,7 @@ export type TabPosition = 'left' | 'right' | 'top' | 'bottom'
 
 export type GetIndicatorSize = number | ((origin: number) => number)
 
-export type SemanticName = 'popup' | 'item' | 'indicator' | 'content' | 'header' | 'remove'
+export type SemanticName = 'popup' | 'item' | 'indicator' | 'body' | 'content' | 'header' | 'remove'
 
 export type RenderTabBar = (props: Record<string, any>, TabNavListComponent: any) => VueNode
 

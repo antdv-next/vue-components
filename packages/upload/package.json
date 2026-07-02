@@ -2,6 +2,12 @@
   "name": "@v-c/upload",
   "type": "module",
   "version": "1.0.0",
+  "license": "MIT",
+  "homepage": "https://github.com/antdv-next/vue-components/tree/next/packages/upload",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/antdv-next/vue-components.git"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -33,7 +39,7 @@
   },
   "devDependencies": {
     "@types/nise": "^1.4.5",
-    "nise": "^6.1.1",
-    "vue": "^3.5.22"
+    "nise": "^6.1.5",
+    "vue": "^3.5.39"
   }
 }

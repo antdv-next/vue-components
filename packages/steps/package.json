@@ -2,6 +2,12 @@
   "name": "@v-c/steps",
   "type": "module",
   "version": "1.0.0",
+  "license": "MIT",
+  "homepage": "https://github.com/antdv-next/vue-components/tree/next/packages/steps",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/antdv-next/vue-components.git"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

@@ -283,7 +283,9 @@ describe('useAlign', () => {
     setMockComputedStyle(popup, {
       width: `${popupWidth}px`,
       height: `${popupHeight}px`,
-      transformOrigin: '50% 50%',
+      transform: `matrix(${scale}, 0, 0, ${scale}, 0, 0)`,
+      // computed style resolves percentages to px: center of 80x40
+      transformOrigin: `${popupWidth / 2}px ${popupHeight / 2}px`,
     })
 
     document.body.appendChild(target)
@@ -319,7 +321,91 @@ describe('useAlign', () => {
     await nextTick()
     await runAlign(triggerAlign)
 
-    expect(scaleXRef.value).toBeCloseTo(scale, 3)
+    // The popup's own transform is factored out — no ancestor scale remains
+    expect(scaleXRef.value).toBeCloseTo(1, 3)
     expect(offsetXRef.value).toBeCloseTo(target.getBoundingClientRect().right, 3)
+  })
+
+  it('does not compensate the popup own motion transform (ant-slide-up scaleY)', async () => {
+    // Models antdv-next select: ant-slide-up holds `scaleY(0.8)` with
+    // transform-origin top at keyframe 0. When stuck motion classes (from an
+    // interrupted enter) leave that transform applied at align time, offsets
+    // must NOT be divided by 0.8 — the bug placed the dropdown 25% lower
+    // (inset 508px -> 635px).
+    const placements: BuildInPlacements = {
+      bottomLeft: {
+        points: ['tl', 'bl'],
+        offset: [0, 4],
+        targetOffset: [0, 0],
+        overflow: {},
+      },
+    }
+
+    const { element: target } = createRectElement({
+      x: 50,
+      y: 100,
+      width: 120,
+      height: 32,
+    })
+    setMockComputedStyle(target, { width: '120px', height: '32px' })
+
+    const popupWidth = 120
+    const popupHeight = 136
+    const motionScaleY = 0.8
+    const { element: popup } = createRectElement({
+      x: 0,
+      y: 0,
+      width: popupWidth,
+      height: popupHeight,
+      rectWidth: popupWidth,
+      // transform-origin is top: y stays, height shrinks
+      rectHeight: popupHeight * motionScaleY,
+      rectX: 0,
+      rectY: 0,
+    })
+    setMockComputedStyle(popup, {
+      width: `${popupWidth}px`,
+      height: `${popupHeight}px`,
+      transform: `matrix(1, 0, 0, ${motionScaleY}, 0, 0)`,
+      transformOrigin: '0% 0%',
+    })
+
+    document.body.appendChild(target)
+    document.body.appendChild(popup)
+
+    const open = ref(true)
+    const targetRef = shallowRef(target)
+    const popupRef = shallowRef(popup)
+    const placement = ref('bottomLeft')
+    const builtinPlacements = ref(placements)
+
+    scope = effectScope()
+    let offsetYRef!: ReturnType<typeof useAlign>[2]
+    let scaleYRef!: ReturnType<typeof useAlign>[8]
+    let triggerAlign!: VoidFunction
+
+    scope.run(() => {
+      const result = useAlign(
+        open,
+        popupRef,
+        targetRef,
+        placement,
+        builtinPlacements,
+        ref(),
+        undefined,
+        ref(false),
+      )
+      offsetYRef = result[2]
+      scaleYRef = result[8]
+      triggerAlign = result[10]
+    })
+
+    await nextTick()
+    await runAlign(triggerAlign)
+
+    // Self transform factored out: no ancestor scale detected
+    expect(scaleYRef.value).toBeCloseTo(1, 3)
+    // offsetY = target bottom (132) + offset (4) = 136, NOT 136 / 0.8 = 170
+    expect(offsetYRef.value).toBeCloseTo(136, 3)
   })
 })

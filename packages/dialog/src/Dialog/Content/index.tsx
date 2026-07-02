@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'vue'
 import type { PanelProps } from './Panel'
 import { getTransitionProps } from '@v-c/util/dist/utils/transition'
-import { defineComponent, nextTick, shallowRef, Transition, watch } from 'vue'
+import { defineComponent, nextTick, shallowRef, Transition } from 'vue'
 
 import { offset } from '../../util'
 import Panel from './Panel'
@@ -27,12 +27,6 @@ const Content = defineComponent<ContentProps>(
         }
       })
     }
-    const animationVisible = shallowRef(props.visible)
-    watch(() => props.visible, () => {
-      if (props.visible) {
-        animationVisible.value = true
-      }
-    })
     return () => {
       const {
         prefixCls,
@@ -44,6 +38,7 @@ const Content = defineComponent<ContentProps>(
         ariaId,
         title,
         motionName,
+        forceRender,
       } = props
       // ============================= Style ==============================
       const contentStyle: CSSProperties = {}
@@ -60,16 +55,14 @@ const Content = defineComponent<ContentProps>(
           onAfterEnter={() => onVisibleChanged?.(true)}
           onAfterLeave={() => {
             onVisibleChanged?.(false)
-            animationVisible.value = false
           }}
         >
           {
-            (visible || !destroyOnHidden)
+            (visible || !destroyOnHidden || forceRender)
               ? (
                   <Panel
                     v-show={visible}
                     {...props}
-                    animationVisible={animationVisible.value!}
                     v-slots={slots}
                     title={title}
                     ariaId={ariaId}

@@ -2,6 +2,12 @@
   "name": "@v-c/portal",
   "type": "module",
   "version": "1.0.8",
+  "license": "MIT",
+  "homepage": "https://github.com/antdv-next/vue-components/tree/next/packages/portal",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/antdv-next/vue-components.git"
+  },
   "publishConfig": {
     "access": "public"
   },

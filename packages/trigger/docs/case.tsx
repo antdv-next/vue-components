@@ -247,9 +247,6 @@ export default defineComponent(() => {
           }}
           popup={() => <div>i am a popup</div>}
           popupMotion={motion.value ? Motion : undefined}
-          onPopupAlign={() => {
-            console.warn('Aligned!')
-          }}
         >
           <div
             style={{

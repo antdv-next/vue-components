@@ -55,8 +55,10 @@ const DialogWrap = defineComponent<IDialogPropTypes>(
         getContainer,
         forceRender,
         destroyOnHidden = false,
+        scrollLock = true,
         afterClose,
       } = props
+      const { scrollLock: _, ...restProps } = props
 
       // Destroy on close will remove wrapped div
       if (!forceRender && destroyOnHidden && !animatedVisible.value) {
@@ -68,10 +70,10 @@ const DialogWrap = defineComponent<IDialogPropTypes>(
           autoDestroy={false}
           onEsc={onEsc}
           getContainer={getContainer}
-          autoLock={(visible || animatedVisible.value)}
+          autoLock={scrollLock && (visible || animatedVisible.value)}
         >
           <Dialog
-            {...props}
+            {...restProps}
             v-slots={slots}
             destroyOnHidden={destroyOnHidden}
             afterClose={() => {

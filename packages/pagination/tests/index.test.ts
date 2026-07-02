@@ -25,3 +25,26 @@ describe('default Pagination', () => {
     expect(onChange).not.toHaveBeenCalled()
   })
 })
+
+describe('pager item count', () => {
+  const currentList = [1, 2, 3, 4, 5, 6, 50, 95, 96, 97, 98, 99, 100]
+
+  it('should keep pager item count when jumpers appear', () => {
+    currentList.forEach((current) => {
+      const wrapper = mount(Pagination, {
+        props: {
+          total: 1000,
+          current,
+          showQuickJumper: true,
+          onChange: vi.fn(),
+        },
+      })
+
+      const pagerItems = wrapper.findAll(
+        'li:not(.vc-pagination-prev):not(.vc-pagination-next):not(.vc-pagination-options)',
+      )
+      expect(pagerItems.length, `current page ${current}`).toBe(7)
+      wrapper.unmount()
+    })
+  })
+})

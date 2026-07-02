@@ -16,7 +16,8 @@ vi.mock('@v-c/trigger', () => {
     setup(props, { slots }) {
       return () => {
         triggerPropsSpy(props)
-        return slots.default?.()
+        // Real Trigger invokes the default slot with `{ open }`
+        return slots.default?.({ open: false })
       }
     },
   })

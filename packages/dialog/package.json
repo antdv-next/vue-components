@@ -1,7 +1,13 @@
 {
   "name": "@v-c/dialog",
   "type": "module",
-  "version": "1.1.0",
+  "version": "1.2.0",
+  "license": "MIT",
+  "homepage": "https://github.com/antdv-next/vue-components/tree/next/packages/dialog",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/antdv-next/vue-components.git"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

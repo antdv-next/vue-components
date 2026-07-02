@@ -275,4 +275,47 @@ describe('select react sync', () => {
 
     wrapper.unmount()
   })
+
+  // sync ant-design#58518 / rc-select: do not create a tag for a disabled option value
+  it('does not create a tag matching a disabled option value', async () => {
+    const changes: any[] = []
+
+    const App = defineComponent(() => {
+      const value = ref<string[]>([])
+      return () => (
+        <Select
+          open
+          mode="tags"
+          value={value.value}
+          options={[
+            { value: 'a', label: 'A' },
+            { value: 'disabled', label: 'Disabled', disabled: true },
+          ]}
+          onChange={(nextValue) => {
+            const mergedValue = Array.isArray(nextValue) ? nextValue : [nextValue]
+            changes.push(mergedValue)
+            value.value = mergedValue
+          }}
+        />
+      )
+    })
+
+    const wrapper = mount(App, { attachTo: document.body })
+    await flushSelect()
+
+    const input = wrapper.get('input')
+    await input.setValue('disabled')
+    await flushSelect()
+
+    const event = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })
+    Object.defineProperty(event, 'which', { value: 13 })
+    Object.defineProperty(event, 'keyCode', { value: 13 })
+    input.element.dispatchEvent(event)
+    await flushSelect()
+
+    // Disabled option value must not become a tag
+    expect(changes).toEqual([])
+
+    wrapper.unmount()
+  })
 })

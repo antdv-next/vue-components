@@ -1,6 +1,6 @@
 import type { Key } from '@v-c/util/dist/type'
 import type { Ref } from 'vue'
-import type { GetKey } from '../interface'
+import type { GetKey, GetSize } from '../interface'
 import type CacheMap from '../utils/CacheMap'
 import { warning } from '@v-c/util'
 import { shallowRef, watch } from 'vue'
@@ -14,14 +14,30 @@ export interface ScrollPos {
   top?: number
 }
 
+export interface ScrollOffsetInfo {
+  /**
+   * Get item size range by key.
+   * 通过 key 获取元素在虚拟列表中的尺寸范围。
+   */
+  getSize: GetSize
+}
+
+export type ScrollOffset = number | ((info: ScrollOffsetInfo) => number)
+
 export type ScrollTarget = {
   index: number
   align?: ScrollAlign
-  offset?: number
+  offset?: ScrollOffset
 } | {
   key: Key
   align?: ScrollAlign
-  offset?: number
+  offset?: ScrollOffset
+}
+
+function getOffset(rawOffset: ScrollOffset, info: ScrollOffsetInfo) {
+  const resolvedOffset = typeof rawOffset === 'function' ? rawOffset(info) : rawOffset
+
+  return Number.isFinite(resolvedOffset) ? resolvedOffset : 0
 }
 
 export default function useScrollTo(
@@ -30,6 +46,7 @@ export default function useScrollTo(
   heights: CacheMap,
   itemHeight: Ref<number>,
   getKey: GetKey<any>,
+  getSize: GetSize,
   collectHeight: () => void,
   syncScrollTop: (newTop: number) => void,
   triggerFlash: () => void,
@@ -37,7 +54,7 @@ export default function useScrollTo(
   const syncState = shallowRef<{
     times: number
     index: number
-    offset: number
+    offset: ScrollOffset
     originAlign: ScrollAlign
     targetAlign?: 'top' | 'bottom'
     lastTop?: number
@@ -68,7 +85,8 @@ export default function useScrollTo(
 
         collectHeight()
 
-        const { targetAlign, originAlign, index, offset } = syncState.value
+        const { targetAlign, originAlign, index, offset: rawOffset } = syncState.value
+        const offset = getOffset(rawOffset, { getSize })
 
         const height = containerRef.value.clientHeight
         let needCollectHeight = false
@@ -191,12 +209,12 @@ export default function useScrollTo(
         index = data.value.findIndex(item => getKey(item) === arg.key)
       }
 
-      const { offset = 0 } = arg
+      const { offset: rawOffset = 0 } = arg
 
       syncState.value = {
         times: 0,
         index,
-        offset,
+        offset: rawOffset,
         originAlign: align!,
       }
     }

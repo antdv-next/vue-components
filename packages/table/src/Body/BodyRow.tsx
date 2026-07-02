@@ -217,6 +217,7 @@ const BodyRow = defineComponent<BodyRowProps<any>>({
                 renderIndex={renderIndex}
                 dataIndex={dataIndex}
                 render={render}
+                shouldCellUpdate={column.shouldCellUpdate}
                 scope={scope}
                 rowType="body"
                 {...fixedInfo}

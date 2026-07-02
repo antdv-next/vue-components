@@ -484,6 +484,7 @@ const RangePicker = defineComponent(
     const onSelectorClear = () => {
       triggerSubmitChange(null as any)
       triggerOpen(false, { force: true })
+      fp.value.onClear?.()
     }
 
     // ======================== Hover =========================
@@ -633,6 +634,7 @@ const RangePicker = defineComponent(
         ...(Object.keys(domProps) as any[]),
         'onChange',
         'onCalendarChange',
+        'onClear',
         'style',
         'className',
         'onPanelChange',
