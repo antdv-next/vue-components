@@ -122,8 +122,19 @@ export function resolveToElement(node: any) {
     return exposed.$el
   }
   else if (exposed.$el) {
+    // A text/comment `$el` usually means a fragment/transition placeholder
+    // whose real content is the next element sibling. But when the component
+    // exposes an element contract (`nativeElement` / `el` / `getElement`)
+    // that is simply not fulfilled yet — e.g. trigger's Popup before its
+    // portal content mounts — the placeholder's sibling is an unrelated
+    // host-tree element (the next Space.Compact item), so guessing there
+    // steals the wrong element. Return null and let the caller retry.
+    const hasElementContract
+      = exposed.nativeElement != null
+        || exposed.el != null
+        || typeof exposed.getElement === 'function'
     const dom = exposed.$el
-    if (dom && (dom.nodeType === 3 || dom.nodeType === 8) && (dom as any).nextElementSibling)
+    if (!hasElementContract && (dom.nodeType === 3 || dom.nodeType === 8) && (dom as any).nextElementSibling)
       return (dom as any).nextElementSibling as HTMLElement
   }
   return null
