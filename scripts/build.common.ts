@@ -71,6 +71,13 @@ export function buildCommon(opt: BuildCommonOptions) {
       outDirs: paths.outDir,
       root: paths.packageRoot,
       tsconfigPath: paths.tsconfigPath,
+      // Keep cross-package imports as package specifiers. Without this the
+      // root tsconfig paths (@v-c/* -> packages/*/src) get rewritten into
+      // monorepo-relative paths like '../../textarea/src' in the emitted
+      // d.ts, which don't exist in the published tarball — consumers with
+      // skipLibCheck silently resolve those types as `any` (and mapped
+      // types like Omit<Props, ...> then degrade every field to any).
+      aliasesExclude: [/^@v-c\//],
       exclude: [
         '**/tests/**/*',
         '**/*.test.ts',
