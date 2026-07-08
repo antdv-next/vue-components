@@ -25,7 +25,7 @@ export default defineComponent({
         <OverflowContextProvider value={null}>
           <Item
             {...restContext}
-            {...restAttrs}
+            {...restAttrs as any}
             class={classNames(contextClassName, classAttr as any)}
             component={props.component}
             v-slots={slots}

@@ -267,7 +267,9 @@ const MenuItem = defineComponent<MenuItemProps>(
         return null
       }
       // ======================== Render ========================
-      return <InternalMenuItem {...{ ...attrs, ...props }} v-slots={slots} />
+      // attrs.class is ClassValue (may be null) while MenuItemProps#class is
+      // the items-config string — cast the merged spread for the passthrough
+      return <InternalMenuItem {...{ ...attrs, ...props } as any} v-slots={slots} />
     }
   },
   {
