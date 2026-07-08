@@ -56,6 +56,7 @@ const InlineSubMenuList = defineComponent<InlineSubMenuListProps>(
       const { motion, defaultMotions } = menuContext?.value ?? {}
 
       const motionData = { ...getMotion(fixedMode, motion, defaultMotions) } as CSSMotionProps
+      // No need appear since nest inlineCollapse changed (align with rc-menu)
       if (props.keyPath && props.keyPath.length > 1) {
         motionData.appear = false
       }
