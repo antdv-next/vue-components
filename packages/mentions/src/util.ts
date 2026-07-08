@@ -123,21 +123,14 @@ export function setInputSelection(
   input.focus()
 }
 
-export function validateSearch(): typeof validateSearch
-export function validateSearch(text: string, split: MentionsProps['split']): boolean
-export function validateSearch(text?: string, split?: MentionsProps['split']) {
-  if (text === undefined && split === undefined) {
-    return validateSearch
-  }
+// Plain signatures on purpose: an overloaded function type (the previous
+// zero-arg self-returning overload) breaks contextual parameter inference
+// for user callbacks typed as `typeof filterOption` downstream.
+export function validateSearch(text: string, split: MentionsProps['split']): boolean {
   return !split || !(text ?? '').includes(split)
 }
 
-export function filterOption(): typeof filterOption
-export function filterOption(input: string, option: OptionProps): boolean
-export function filterOption(input?: string, option?: OptionProps): boolean | typeof filterOption {
-  if (input === undefined && option === undefined) {
-    return filterOption
-  }
+export function filterOption(input: string, option: OptionProps): boolean {
   const inputText = typeof input === 'string' ? input : String(input ?? '')
   const lowerCase = inputText.toLowerCase()
   const value = option?.value ?? ''
