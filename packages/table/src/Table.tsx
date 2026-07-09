@@ -357,6 +357,29 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
   }
 
   const [setScrollTarget, getScrollTarget] = useTimeoutLock<HTMLElement | null>(null)
+  const scrollRetryTimeoutMap = new WeakMap<object, ReturnType<typeof setTimeout>>()
+
+  function syncScrollLeft(target: { scrollLeft: number }, scrollLeft: number) {
+    // A pending retry may hold a stale scrollLeft; always cancel it first.
+    const scrollRetryTimeout = scrollRetryTimeoutMap.get(target)
+    if (scrollRetryTimeout) {
+      clearTimeout(scrollRetryTimeout)
+    }
+
+    if (target.scrollLeft !== scrollLeft) {
+      target.scrollLeft = scrollLeft
+
+      // Delay to force scroll position if not sync
+      // ref: https://github.com/ant-design/ant-design/issues/37179
+      const retryTimeout = setTimeout(() => {
+        if (target.scrollLeft !== scrollLeft) {
+          target.scrollLeft = scrollLeft
+        }
+      }, 0)
+
+      scrollRetryTimeoutMap.set(target, retryTimeout)
+    }
+  }
 
   function forceScroll(scrollLeft: number, target: any) {
     if (!target) {
@@ -369,24 +392,14 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
 
     // Prefer the exposed `scrollLeft` proxy when available, e.g. virtual table body refs.
     // Falling back to native elements here would bypass the virtual list horizontal sync logic.
-    if ('scrollLeft' in target && target.scrollLeft !== scrollLeft) {
-      target.scrollLeft = scrollLeft
-      if (target.scrollLeft !== scrollLeft) {
-        setTimeout(() => {
-          target.scrollLeft = scrollLeft
-        }, 0)
-      }
+    if ('scrollLeft' in target) {
+      syncScrollLeft(target, scrollLeft)
       return
     }
 
     const element = (target.nativeElement ? getDOM(target.nativeElement) : getDOM(target)) as HTMLElement | null
-    if (element && element.scrollLeft !== scrollLeft) {
-      element.scrollLeft = scrollLeft
-      if (element.scrollLeft !== scrollLeft) {
-        setTimeout(() => {
-          element.scrollLeft = scrollLeft
-        }, 0)
-      }
+    if (element) {
+      syncScrollLeft(element, scrollLeft)
     }
   }
 
