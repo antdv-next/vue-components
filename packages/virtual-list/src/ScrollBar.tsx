@@ -32,6 +32,25 @@ function getPageXY(
   return obj[horizontal ? 'pageX' : 'pageY'] - window[horizontal ? 'scrollX' : 'scrollY']
 }
 
+function getScrollOffsetByThumbTop(
+  thumbTop: number,
+  enabledScrollRange: number,
+  enabledOffsetRange: number,
+): number {
+  if (enabledScrollRange <= 0 || enabledOffsetRange <= 0) {
+    return 0
+  }
+
+  const mergedThumbTop = Math.max(Math.min(thumbTop, enabledOffsetRange), 0)
+  const ptg: number = mergedThumbTop / enabledOffsetRange
+
+  let nextScrollOffset = Math.ceil(ptg * enabledScrollRange)
+  nextScrollOffset = Math.max(nextScrollOffset, 0)
+  nextScrollOffset = Math.min(nextScrollOffset, enabledScrollRange)
+
+  return nextScrollOffset
+}
+
 export default defineComponent<ScrollBarProps>({
   name: 'ScrollBar',
   setup(props, { expose }) {
@@ -91,9 +110,58 @@ export default defineComponent<ScrollBarProps>({
       }
     })
 
+    const isThumbTarget = (target: EventTarget | null) => {
+      return !!target && !!thumbRef.value?.contains(target as Node)
+    }
+
+    const scrollToTrackPosition = (e: MouseEvent) => {
+      const scrollbarEle = scrollbarRef.value
+
+      if (!scrollbarEle) {
+        return
+      }
+
+      const rect = scrollbarEle.getBoundingClientRect()
+      const pagePosition = getPageXY(e, props.horizontal || false)
+      let nextTop: number
+
+      if (!Number.isFinite(pagePosition)) {
+        return
+      }
+
+      if (props.horizontal) {
+        const horizontalStart = isLTR.value ? rect.left : rect.right
+
+        if (!Number.isFinite(horizontalStart)) {
+          return
+        }
+
+        nextTop
+          = (isLTR.value ? pagePosition - horizontalStart : horizontalStart - pagePosition) - props.spinSize / 2
+      }
+      else {
+        if (!Number.isFinite(rect.top)) {
+          return
+        }
+
+        nextTop = pagePosition - rect.top - props.spinSize / 2
+      }
+
+      props.onScroll?.(
+        getScrollOffsetByThumbTop(nextTop, enableScrollRange.value, enableOffsetRange.value),
+        props.horizontal,
+      )
+    }
+
     const onContainerMouseDown = (e: MouseEvent) => {
       e.stopPropagation()
       e.preventDefault()
+
+      if (e.button !== 0 || isThumbTarget(e.target)) {
+        return
+      }
+
+      scrollToTrackPosition(e)
     }
 
     const onThumbMouseDown = (e: MouseEvent | TouchEvent) => {
@@ -157,14 +225,11 @@ export default defineComponent<ScrollBarProps>({
               newTop += offset
             }
 
-            const tmpEnableScrollRange = enableScrollRange.value
-            const tmpEnableOffsetRange = enableOffsetRange.value
-
-            const ptg: number = tmpEnableOffsetRange ? newTop / tmpEnableOffsetRange : 0
-
-            let newScrollTop = Math.ceil(ptg * tmpEnableScrollRange)
-            newScrollTop = Math.max(newScrollTop, 0)
-            newScrollTop = Math.min(newScrollTop, tmpEnableScrollRange)
+            const newScrollTop = getScrollOffsetByThumbTop(
+              newTop,
+              enableScrollRange.value,
+              enableOffsetRange.value,
+            )
 
             moveRafId = raf(() => {
               props?.onScroll?.(newScrollTop, props.horizontal)
