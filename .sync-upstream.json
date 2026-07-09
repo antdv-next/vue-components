@@ -543,11 +543,11 @@
           "description": "@rc-component/table -> @v-c/table"
         }
       ],
-      "last_synced_commit": "b611eb2623f4891a4ff4dc7a27a1305425196fb8",
-      "last_synced_commit_short": "b611eb2623",
-      "last_synced_at": "2026-06-02T09:19:58Z",
-      "last_synced_tag": "@rc-component/table@1.10.2",
-      "sync_count": 3
+      "last_synced_commit": "0a343c89daba986c7d526b9ef473cd59b7e56dd3",
+      "last_synced_commit_short": "0a343c89da",
+      "last_synced_at": "2026-07-09T06:22:28Z",
+      "last_synced_tag": "@rc-component/table@1.10.4",
+      "sync_count": 4
     },
     {
       "name": "@rc-component/tabs",
@@ -713,11 +713,11 @@
           "description": "@rc-component/virtual-list -> @v-c/virtual-list"
         }
       ],
-      "last_synced_commit": "2e032d44fac868a86b1e3eabc6c16f3ef2545868",
-      "last_synced_commit_short": "2e032d44fa",
-      "last_synced_at": "2026-06-02T09:19:58Z",
-      "last_synced_tag": "@rc-component/virtual-list@1.2.0",
-      "sync_count": 2
+      "last_synced_commit": "cdb09b80ecb5621050d39f357fa76786a5daf56e",
+      "last_synced_commit_short": "cdb09b80ec",
+      "last_synced_at": "2026-07-09T06:22:28Z",
+      "last_synced_tag": "@rc-component/virtual-list@1.3.0",
+      "sync_count": 3
     }
   ]
 }
