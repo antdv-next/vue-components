@@ -450,7 +450,10 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
       const bodyElement = getDOM(scrollBodyRef.value) as HTMLElement
       onInternalScroll({
         currentTarget: bodyElement,
-        scrollLeft: bodyElement?.scrollLeft,
+        // Read from the body ref instead of the native element: the virtual table body
+        // exposes a `scrollLeft` proxy backed by the virtual list horizontal offset,
+        // while its native element always reports 0 (offset is transform-based).
+        scrollLeft: (scrollBodyRef.value as any)?.scrollLeft,
       })
     }
     else {
