@@ -61,9 +61,12 @@ const ExpandedRow = defineComponent<ExpandedRowProps>({
       }
       return (
         <Component class={className} style={{ display: expanded ? null : 'none' }}>
-          <Cell component={cellComponent} prefixCls={prefixCls} colSpan={colSpan}>
-            {contentNode}
-          </Cell>
+          <Cell
+            component={cellComponent}
+            prefixCls={prefixCls}
+            colSpan={colSpan}
+            children={contentNode}
+          />
         </Component>
       )
     }
