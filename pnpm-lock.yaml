@@ -242,6 +242,24 @@ importers:
         specifier: ^3.5.39
         version: 3.5.39(typescript@5.9.3)
 
+  packages/listy:
+    dependencies:
+      '@v-c/portal':
+        specifier: workspace:^
+        version: link:../portal
+      '@v-c/resize-observer':
+        specifier: workspace:^
+        version: link:../resize-observer
+      '@v-c/util':
+        specifier: workspace:^
+        version: link:../util
+      '@v-c/virtual-list':
+        specifier: workspace:^
+        version: link:../virtual-list
+      vue:
+        specifier: ^3.0.0
+        version: 3.5.25(typescript@5.9.3)
+
   packages/mentions:
     dependencies:
       '@v-c/input':
