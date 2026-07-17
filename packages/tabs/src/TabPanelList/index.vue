@@ -88,12 +88,13 @@ function shouldRender(item: Tab) {
         <!--
           动画模式下不能绑定 `-hidden`(display: none):它会在切换瞬间生效,
           离场面板的 leave 过渡(绝对定位交叉淡出)会被直接杀掉。
-          隐藏交给 v-show 在 leave 结束后处理,对齐 rc-tabs 的 leavedClassName 时机。
+          可见性统一交给 v-show(含 forceRender 的非激活面板),由它在
+          leave 结束后写入 display:none,对齐 rc-tabs 的 leavedClassName 时机。
         -->
         <Transition v-if="tabPaneAnimated" v-bind="transitionProps">
           <TabPane
             v-if="shouldRender(item)"
-            v-show="shouldDestroyOnHidden(item) ? true : (item.key === activeKey || item.forceRender)"
+            v-show="shouldDestroyOnHidden(item) ? true : item.key === activeKey"
             :id="id"
             :prefix-cls="tabPanePrefixCls"
             :tab-key="item.key"

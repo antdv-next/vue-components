@@ -73,6 +73,32 @@ describe('@v-c/tabs forceRender / lazy render', () => {
     expect(unmounted).toEqual([])
   })
 
+  it('hides an inactive forceRender pane when animated', () => {
+    const mounted: string[] = []
+    const T = makeTracker(mounted)
+    const items: NonNullable<TabsProps['items']> = [
+      { key: '1', label: 'tab 1', children: h(T('1')) },
+      { key: '2', label: 'tab 2', children: h(T('2')), forceRender: true },
+    ]
+
+    const wrapper = mount(Tabs, {
+      props: { activeKey: '1', items, animated: { tabPane: true, tabPaneMotion: { name: 'test-switch' } } },
+    })
+
+    // forceRender 面板保持挂载
+    expect(mounted.slice().sort()).toEqual(['1', '2'])
+
+    const panes = wrapper.findAll('[role="tabpanel"]')
+    expect(panes).toHaveLength(2)
+
+    // 非激活时必须不可见(由 v-show 隐藏,动画分支不再依赖 -hidden 类)
+    const hiddenPane = panes.find(p => p.attributes('aria-hidden') === 'true')!
+    expect((hiddenPane.element as HTMLElement).style.display).toBe('none')
+
+    const activePane = panes.find(p => p.attributes('aria-hidden') === 'false')!
+    expect((activePane.element as HTMLElement).style.display).not.toBe('none')
+  })
+
   it('destroyOnHidden unmounts the pane when it becomes inactive', async () => {
     const mounted: string[] = []
     const unmounted: string[] = []
