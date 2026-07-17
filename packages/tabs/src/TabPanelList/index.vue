@@ -85,6 +85,11 @@ function shouldRender(item: Tab) {
       :style="bodyStyle"
     >
       <template v-for="item in tabs" :key="item.key">
+        <!--
+          动画模式下不能绑定 `-hidden`(display: none):它会在切换瞬间生效,
+          离场面板的 leave 过渡(绝对定位交叉淡出)会被直接杀掉。
+          隐藏交给 v-show 在 leave 结束后处理,对齐 rc-tabs 的 leavedClassName 时机。
+        -->
         <Transition v-if="tabPaneAnimated" v-bind="transitionProps">
           <TabPane
             v-if="shouldRender(item)"
@@ -95,7 +100,7 @@ function shouldRender(item: Tab) {
             :animated="tabPaneAnimated"
             :active="item.key === activeKey"
             :style="{ ...(contentStyle || {}), ...(item.style || {}) }"
-            :class-name="[contentClassName, item.className, item.key !== activeKey && `${tabPanePrefixCls}-hidden`]"
+            :class-name="[contentClassName, item.className]"
           >
             <RenderComponent :render="item.children" />
           </TabPane>
