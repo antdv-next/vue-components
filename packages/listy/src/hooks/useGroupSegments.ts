@@ -4,53 +4,46 @@ import type { Group } from '../interface'
 import { computed } from 'vue'
 
 export interface GroupSegment {
-  key: Key;
-  startIndex: number;
-  endIndex: number;
+  key: Key
+  startIndex: number
+  endIndex: number
+}
+
+export interface GroupSegmentItem {
+  item: any
+  index: number
 }
 
 /**
  * segments representing consecutive runs of items that share the same group key.
  */
 export default function useGroupSegments(
-  items: ComputedRef<any[]>,
-  group: ComputedRef<Group | undefined>,
-): ComputedRef<GroupSegment[]> {
+  data: any[],
+  group: Group | undefined,
+): ComputedRef<Map<any, GroupSegmentItem[]>> {
   return computed(() => {
-    if (!group.value || !items.value?.length) {
-      return [];
+    // ============================== Init ================================
+    const map = new Map<any, GroupSegmentItem[]>()
+    // ============================ No Group ==============================
+    if (!group) {
+      return map
     }
 
-    const segments: GroupSegment[] = [];
-    let currentKey: Key | null = null;
-    let currentStart = -1;
+    // ============================= Collect ==============================
+    data.forEach((item, index) => {
+      const groupKey = typeof group.key === 'function' ? group.key(item) : group.key
+      const groupItems = map.get(groupKey)
+      const groupSegmentItem = { item, index }
 
-    const getGroupKey = (item: any): Key =>
-      typeof group.value!.key === 'function' ? group.value!.key(item) : group.value!.key;
-
-    for (let i = 0; i < items.value.length; i += 1) {
-      const gk = getGroupKey(items.value[i]);
-      if (currentKey === null) {
-        currentKey = gk;
-        currentStart = i;
-      } else if (gk !== currentKey) {
-        segments.push({
-          key: currentKey,
-          startIndex: currentStart,
-          endIndex: i - 1,
-        });
-        currentKey = gk;
-        currentStart = i;
+      if (groupItems) {
+        groupItems.push(groupSegmentItem)
       }
-    }
+      else {
+        map.set(groupKey, [groupSegmentItem])
+      }
+    })
 
-    if (currentKey !== null) {
-      segments.push({
-        key: currentKey,
-        startIndex: currentStart,
-        endIndex: items.value.length - 1,
-      });
-    }
-    return segments;
+    // ============================== Return ==============================
+    return map
   })
 }

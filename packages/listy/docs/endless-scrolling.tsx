@@ -4,53 +4,59 @@ import { defineComponent, ref } from 'vue'
 import Listy from '../src'
 
 interface RowItem {
-  id: number;
-  name: string;
+  id: number
+  name: string
 }
 
-const BATCH_SIZE = 40;
-const LOAD_DELAY = 600;
+const BATCH_SIZE = 40
+const LOAD_DELAY = 600
 
 function createBatch(startId: number, count: number): RowItem[] {
   return Array.from({ length: count }, (_, index) => {
-    const id = startId + index;
+    const id = startId + index
     return {
       id,
       name: `Row ${id}`,
-    };
-  });
+    }
+  })
 }
 
 export default defineComponent(() => {
-  const listRef = ref<ListyRef | null>(null);
-  const nextIdRef = ref(BATCH_SIZE + 1);
+  const listRef = ref<ListyRef | null>(null)
+  const nextIdRef = ref(BATCH_SIZE + 1)
 
-  const items = ref<RowItem[]>(createBatch(1, BATCH_SIZE));
-  const loading = ref(false);
+  const items = ref<RowItem[]>(createBatch(1, BATCH_SIZE))
+  const loading = ref(false)
 
   const loadMore = () => {
     if (loading.value) {
-      return;
+      return
     }
 
     loading.value = true
 
     window.setTimeout(() => {
-      const nextItems = createBatch(nextIdRef.value, BATCH_SIZE);
-      nextIdRef.value += nextItems.length;
+      const nextItems = createBatch(nextIdRef.value, BATCH_SIZE)
+      nextIdRef.value += nextItems.length
       items.value = [...items.value, ...nextItems]
 
       loading.value = false
-    }, LOAD_DELAY);
+    }, LOAD_DELAY)
   }
 
   const itemStyle: CSSProperties = {
-      padding: '0 12px',
-      height: '32px',
-      lineHeight: '32px',
-      borderBottom: '1px solid #efefef',
-      background: '#fff',
+    padding: '0 12px',
+    height: '32px',
+    lineHeight: '32px',
+    borderBottom: '1px solid #efefef',
+    background: '#fff',
+  }
+  const handleScroll = (e: Event) => {
+    const holder = e.currentTarget as HTMLDivElement
+    if (holder.scrollHeight - (holder.scrollTop + holder.clientHeight) <= 0) {
+      loadMore()
     }
+  }
   return () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
       <Listy
@@ -59,27 +65,30 @@ export default defineComponent(() => {
         itemHeight={32}
         items={items.value}
         rowKey="id"
-        itemRender={(item) => (
+        itemRender={item => (
           <div style={itemStyle}>{item.name}</div>
         )}
-        onEndReached={loadMore}
+        onScroll={handleScroll}
       />
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         <button
           onClick={() => {
-            const lastItem = items.value[items.value.length - 1];
+            const lastItem = items.value[items.value.length - 1]
             if (!lastItem) {
-              return;
+              return
             }
-            listRef.value?.scrollTo({ key: lastItem.id, align: 'bottom' });
+            listRef.value?.scrollTo({ key: lastItem.id, align: 'bottom' })
           }}
         >
           Scroll To Latest
         </button>
-        <span>Count: {items.value.length}</span>
+        <span>
+          Count:
+          {items.value.length}
+        </span>
         {loading.value && <span>Loading…</span>}
       </div>
     </div>
   )
-})  
+})

@@ -1,40 +1,82 @@
-
 import type { VueNode } from '@v-c/util'
 import type { Key } from '@v-c/util/dist/type'
-import type { GetKey, ScrollTo } from '@v-c/virtual-list'
+import type { GetKey } from '@v-c/virtual-list'
+import type { CSSProperties } from 'vue'
 
-export type ScrollAlign = 'top' | 'bottom' | 'auto';
+export type RowKey<T> = keyof T | ((item: T) => Key)
 
-export type ListyScrollToConfig =
-  | Parameters<ScrollTo>[0]
-  | {
-      groupKey: string;
-      align?: ScrollAlign;
-      offset?: number;
-    };
+export type ScrollAlign = 'top' | 'bottom' | 'auto'
 
-export interface ListyRef {
-  scrollTo: (config?: ListyScrollToConfig) => void;
+export type ListySemanticName = 'root' | 'item' | 'groupHeader'
+
+export type ListyClassNames = Partial<Record<ListySemanticName, string>>
+
+export type ListyStyles = Partial<
+  Record<ListySemanticName, CSSProperties>
+>
+
+export interface GroupScrollToConfig {
+  groupKey: string
+  align?: ScrollAlign
+  offset?: number
 }
 
-type RowKey<T> = keyof T | ((item: T) => Key);
+export interface KeyScrollToConfig {
+  key: string
+  align?: ScrollAlign
+  offset?: number
+}
+
+export interface PositionScrollToConfig {
+  left?: number
+  top?: number
+}
+
+export type ListyScrollToConfig
+  = | number
+    | null
+    | KeyScrollToConfig
+    | PositionScrollToConfig
+    | GroupScrollToConfig
+
+export interface ListyRef {
+  scrollTo: (config?: ListyScrollToConfig) => void
+}
 
 export interface Group {
-  key: ((item: any) => Key) | Key;
-  title: (groupKey: Key, items: any[]) => VueNode;
+  key: ((item: any) => Key) | Key
+  title: (groupKey: Key, items: any[]) => VueNode
 }
 
 export interface ListyProps {
-  items?: any[];
-  sticky?: boolean;
-  itemHeight?: number;
-  height?: number;
-  group?: Group;
-  virtual?: boolean;
-  prefixCls?: string;
-  rowKey: RowKey<any>;
-  onEndReached?: () => void;
-  itemRender: (item: any, index: number) => VueNode;
+  items?: any[]
+  sticky?: boolean
+  itemHeight?: number
+  height?: number
+  group?: Group
+  virtual?: boolean
+  direction?: 'ltr' | 'rtl'
+  prefixCls?: string
+  rowKey: RowKey<any>
+  classNames?: ListyClassNames
+  styles?: ListyStyles
+  onScroll?: (e: Event) => void
+  itemRender: (item: any, index: number) => VueNode
 }
 
-export type { GetKey };
+export interface ListComponentProps {
+  data: any[]
+  sticky?: boolean
+  itemHeight?: number
+  height?: number
+  group?: Group
+  direction?: 'ltr' | 'rtl'
+  prefixCls: string
+  rowKey: RowKey<any>
+  classNames?: ListyClassNames
+  styles?: ListyStyles
+  onScroll?: (e: Event) => void
+  itemRender: (item: any, index: number) => VueNode
+}
+
+export type { GetKey }

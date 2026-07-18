@@ -664,6 +664,7 @@ export default defineComponent({
         end: end.value,
         virtual: inVirtual.value,
         offsetX: offsetLeft.value,
+        scrollTop: offsetTop.value,
         offsetY: fillerOffset.value || 0,
         rtl: isRTL.value,
         getSize,

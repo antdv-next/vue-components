@@ -1,5 +1,5 @@
-import Listy from './List';
+import Listy from './List'
 
-export type { ListyProps, ListyRef } from './interface';
+export type { ListyProps, ListyRef } from './interface'
 
-export default Listy;
+export default Listy

@@ -19,14 +19,14 @@ const GROUP_META = {
     description: 'Sweet & Baked',
     accent: '#f0f5ff',
   },
-} as const;
+} as const
 
-type GroupId = keyof typeof GROUP_META;
+type GroupId = keyof typeof GROUP_META
 
 interface ProduceItem {
-  id: string;
-  name: string;
-  groupId: GroupId;
+  id: string
+  name: string
+  groupId: GroupId
 }
 
 const items: ProduceItem[] = [
@@ -63,26 +63,29 @@ const items: ProduceItem[] = [
   { id: 'desserts-14', name: 'Donut', groupId: 'desserts' },
   { id: 'desserts-15', name: 'Cupcake', groupId: 'desserts' },
   { id: 'desserts-16', name: 'Souffle', groupId: 'desserts' },
-];
+]
 
 const GROUP_IDS = Object.keys(GROUP_META) as GroupId[]
 
 export default defineComponent(() => {
-  const listRef = ref<ListyRef | null>(null);
+  const listRef = ref<ListyRef | null>(null)
 
   const itemStyle: CSSProperties = {
-      padding: '0 16px',
-      height: 40,
-      lineHeight: '40px',
-      borderBottom: '1px solid #f0f0f0',
-      background: '#fff',
-    }
+    padding: '0 16px',
+    height: 40,
+    lineHeight: '40px',
+    borderBottom: '1px solid #f0f0f0',
+    background: '#fff',
+  }
 
   const getGroupMeta = (groupId: GroupId) => GROUP_META[groupId]
 
   const handleScrollToGroup = (groupId: GroupId) => {
-      listRef.value?.scrollTo({ groupKey: groupId, align: 'top' });
-    }
+    listRef.value?.scrollTo({ groupKey: groupId, align: 'top' })
+  }
+  const handleScrollToItem = (itemId: string) => {
+    listRef.value?.scrollTo({ key: itemId, align: 'top' })
+  }
 
   return () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -95,8 +98,8 @@ export default defineComponent(() => {
         sticky
         rowKey="id"
         itemRender={(item, index) => {
-          const baseHeight = 40;
-          const height = baseHeight + (index % 2 === 0 ? 0 : 10);
+          const baseHeight = 40
+          const height = baseHeight + (index % 2 === 0 ? 0 : 10)
           return (
             <div
               style={{
@@ -107,13 +110,13 @@ export default defineComponent(() => {
             >
               {item.name}
             </div>
-          );
+          )
         }}
         group={{
-          key: (item) => item.groupId,
+          key: item => item.groupId,
           title: (groupKey, groupItems) => {
-            const metadata = getGroupMeta(groupKey);
-            const accent = metadata?.accent ?? '#fafafa';
+            const metadata = getGroupMeta(groupKey)
+            const accent = metadata?.accent ?? '#fafafa'
             return (
               <div
                 style={{
@@ -130,24 +133,34 @@ export default defineComponent(() => {
                   {metadata?.description ?? 'Group items'}
                 </div>
                 <div style={{ marginTop: '4px', fontSize: '12px', color: '#888' }}>
-                  {groupItems.length} items
+                  {groupItems.length}
+                  {' '}
+                  items
                 </div>
               </div>
-            );
+            )
           },
         }}
       />
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         {GROUP_IDS.map((groupId) => {
-          const meta = GROUP_META[groupId];
+          const meta = GROUP_META[groupId]
           return (
             <button key={groupId} onClick={() => handleScrollToGroup(groupId)}>
-              Scroll to {meta.title}
+              Scroll to
+              {' '}
+              {meta.title}
             </button>
-          );
+          )
         })}
-        <span>Total Items: {items.length}</span>
+        <button onClick={() => handleScrollToItem('desserts-3')}>
+          Scroll to Panna Cotta
+        </button>
+        <span>
+          Total Items:
+          {items.length}
+        </span>
       </div>
     </div>
   )
