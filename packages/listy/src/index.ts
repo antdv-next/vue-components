@@ -1,5 +1,13 @@
 import Listy from './List'
 
-export type { ListyProps, ListyRef } from './interface'
+export type {
+  ListyClassNames,
+  ListyProps, 
+  ListyRef,
+  ListyScrollToConfig,
+  ListySemanticName,
+  ListyStyles,
+  ScrollAlign,
+} from './interface'
 
 export default Listy

@@ -61,7 +61,7 @@ export interface ListyProps {
   classNames?: ListyClassNames
   styles?: ListyStyles
   onScroll?: (e: Event) => void
-  itemRender: (item: any, index: number) => VueNode
+  itemRender?: (item: any, index: number) => VueNode
 }
 
 export interface ListComponentProps {
