@@ -356,6 +356,7 @@ const OptionList = defineComponent({
             </div>
           )}
           <List
+            prefixCls={`${baseProps.value?.prefixCls}-dropdown-list`}
             itemKey="key"
             ref={(el: any) => { listRef.value = el }}
             data={memoFlattenOptions.value}

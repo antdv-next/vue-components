@@ -25,6 +25,7 @@ export interface SelectInputProps {
   prefix?: VueNode
   suffix?: VueNode
   clearIcon?: VueNode
+  clearLabel?: string
   removeIcon?: RenderNode
   multiple?: boolean
   displayValues: DisplayValueType[]
@@ -105,6 +106,7 @@ const SelectInput = defineComponent<SelectInputProps>(
     const prefix = computed(() => props.prefix)
     const suffix = computed(() => props.suffix)
     const clearIcon = computed(() => props.clearIcon)
+    const clearLabel = computed(() => props.clearLabel)
     const multiple = computed(() => props.multiple)
     const mode = computed(() => props.mode)
     const onClearMouseDown = computed(() => props.onClearMouseDown)
@@ -208,8 +210,8 @@ const SelectInput = defineComponent<SelectInputProps>(
             toggleOpen.value?.()
           }
         }
-        else if (triggerOpen.value) {
-          // Lazy should also close when click clear icon
+        else if (triggerOpen.value && !multiple.value) {
+          // Lazy should also close when click clear icon in single select.
           toggleOpen.value?.(false)
         }
       }
@@ -311,17 +313,25 @@ const SelectInput = defineComponent<SelectInputProps>(
 
           {/* Clear Icon */}
           {clearIcon.value && (
-            <Affix
+            <button
+              type="button"
+              aria-label={clearLabel.value}
               class={clsx(`${prefixCls.value}-clear`, classNamesConfig.value?.clear)}
               style={stylesConfig.value?.clear}
               onMousedown={(e: MouseEvent) => {
-                // Mark to tell not trigger open or focus
+                // Keep focus on the input and mark the native event so the root
+                // `onInternalMouseDown` handler does not open the dropdown.
+                // This must run on mousedown because the root handler fires
+                // before the button's onClick.
+                e.preventDefault();
                 (e as any)._select_lazy = true
-                onClearMouseDown.value?.(e)
               }}
+              // Clearing happens on click so it works for both pointer and
+              // keyboard (Enter/Space) activation.
+              onClick={(e: MouseEvent) => onClearMouseDown.value?.(e)}
             >
               {clearIcon.value}
-            </Affix>
+            </button>
           )}
 
           {slots.default?.()}

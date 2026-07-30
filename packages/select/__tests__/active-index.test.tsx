@@ -66,7 +66,9 @@ describe('select active index', () => {
       await new Promise(resolve => setTimeout(resolve))
       await nextTick()
 
-      const holder = document.body.querySelector('.vc-virtual-list-holder') as HTMLDivElement | null
+      // OptionList names its virtual list after the select prefix, so the
+      // holder is `-dropdown-list-holder` rather than the generic one.
+      const holder = document.body.querySelector('.vc-select-dropdown-list-holder') as HTMLDivElement | null
       expect(holder).toBeTruthy()
       expect((holder as HTMLDivElement).scrollTop).toBeGreaterThan(0)
 

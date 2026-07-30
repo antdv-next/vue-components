@@ -178,7 +178,7 @@ export interface BaseSelectProps extends BaseSelectPrivateProps {
   tokenSeparators?: string[] | ((input: string) => string[])
 
   // >>> Icons
-  allowClear?: boolean | { clearIcon?: VueNode }
+  allowClear?: boolean | { clearIcon?: VueNode, label?: string }
   prefix?: VueNode
   /** @deprecated Please use `suffix` instead. */
   suffixIcon?: RenderNode
@@ -727,6 +727,7 @@ export const BaseSelect = defineComponent<
       } = props
       const mergedAllowClear = allowClearConfig.value.allowClear
       const clearNode = allowClearConfig.value.clearIcon
+      const clearLabel = allowClearConfig.value.label
       // ========================== Custom Input ==========================
       // Only works in `combobox`
       const customizeInputElement = (mode.value === 'combobox' && typeof getInputElement.value === 'function' && getInputElement.value()) || null
@@ -787,6 +788,7 @@ export const BaseSelect = defineComponent<
           prefix={prefix}
           suffix={mergedSuffixIcon}
           clearIcon={clearNode}
+          clearLabel={clearLabel}
           // Type or mode
           multiple={multiple.value}
           mode={mode.value}

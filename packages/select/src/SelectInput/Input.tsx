@@ -152,7 +152,6 @@ const Input = defineComponent<InputProps>(
       } = props
       const {
         prefixCls,
-        mode,
         autoFocus,
         placeholder,
       } = selectInputContext.value ?? {}
@@ -174,7 +173,7 @@ const Input = defineComponent<InputProps>(
       
       const sharedInputProps = {
         id,
-        'type': mode === 'combobox' ? 'text' : 'search',
+        'type': 'text',
         readOnly,
         ...attrs,
         'ref': inputRef,
@@ -184,7 +183,7 @@ const Input = defineComponent<InputProps>(
           '--select-input-width': widthCssVar.value,
         },
         autoFocus,
-        'autocomplete': autoComplete || 'off',
+        'autocomplete': autoComplete || 'new-password',
         'class': inputCls,
         disabled,
         'value': value || '',

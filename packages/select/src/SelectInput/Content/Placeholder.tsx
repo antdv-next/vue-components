@@ -22,7 +22,9 @@ const Placeholder = defineComponent<PlaceholderProps>(
         <div
           class={clsx(`${prefixCls}-placeholder`, classNames?.placeholder)}
           style={{
-            visibility: show ? 'visible' : 'hidden',
+            // Only pin `hidden`; emitting an explicit `visible` would break
+            // inheritance from an ancestor that hides the whole control.
+            ...(show ? {} : { visibility: 'hidden' }),
             ...styles?.placeholder,
           }}
         >
