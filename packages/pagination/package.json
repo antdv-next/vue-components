@@ -1,7 +1,7 @@
 {
   "name": "@v-c/pagination",
   "type": "module",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "license": "MIT",
   "homepage": "https://github.com/antdv-next/vue-components/tree/next/packages/pagination",
   "repository": {

@@ -1,7 +1,7 @@
 {
   "name": "@v-c/util",
   "type": "module",
-  "version": "1.0.21",
+  "version": "1.1.0",
   "description": "Vue3 components utils",
   "license": "MIT",
   "homepage": "https://github.com/antdv-next/vue-components/tree/next/packages/util",
