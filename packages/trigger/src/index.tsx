@@ -45,6 +45,8 @@ export interface TriggerProps {
   action?: ActionType | ActionType[]
   showAction?: ActionType[]
   hideAction?: ActionType[]
+  /** Temporarily suppress popup visibility without resetting the current open state. */
+  disabled?: boolean
 
   prefixCls?: string
 
@@ -130,6 +132,7 @@ export interface TriggerProps {
 const defaults = {
   prefixCls: 'vc-trigger-popup',
   action: 'hover',
+  disabled: false,
   mouseLeaveDelay: 0.1,
   maskClosable: true,
   builtinPlacements: {},
@@ -231,9 +234,14 @@ export function generateTrigger(PortalComponent: any = Portal) {
       }
 
       // Render still use props as first priority
-      const mergedOpen = computed(() => {
+      // `rawOpen` is the open state the trigger actually tracks; `disabled` only
+      // suppresses the popup's visibility, so state transitions must keep flowing
+      // through while it is set (see `internalTriggerOpen`).
+      const rawOpen = computed(() => {
         return props?.popupVisible ?? internalOpen.value
       })
+
+      const mergedOpen = computed(() => rawOpen.value && !props.disabled)
 
       const isOpen = () => mergedOpen.value
 
@@ -295,7 +303,10 @@ export function generateTrigger(PortalComponent: any = Portal) {
       })
 
       const internalTriggerOpen = (nextOpen: boolean) => {
-        if (mergedOpen.value !== nextOpen) {
+        // Compare against `rawOpen`, not `mergedOpen`: while `disabled` forces
+        // `mergedOpen` to false, the underlying open state must still be able to
+        // change so it is correct once `disabled` is lifted again.
+        if (rawOpen.value !== nextOpen) {
           internalOpen.value = nextOpen
           props?.onOpenChange?.(nextOpen)
           props?.onPopupVisibleChange?.(nextOpen)
