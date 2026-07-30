@@ -17,7 +17,12 @@ const eventsName = `onCopy onCut onPaste onCompositionEnd onCompositionStart onC
     onMouseEnter onMouseLeave onMouseMove onMouseOut onMouseOver onMouseUp onSelect onTouchCancel
     onTouchEnd onTouchMove onTouchStart onScroll onWheel onAbort onCanPlay onCanPlayThrough
     onDurationChange onEmptied onEncrypted onEnded onError onLoadedData onLoadedMetadata
-    onLoadStart onPause onPlay onPlaying onProgress onRateChange onSeeked onSeeking onStalled onSuspend onTimeUpdate onVolumeChange onWaiting onLoad onError`
+    onLoadStart onPause onPlay onPlaying onProgress onRateChange onSeeked onSeeking onStalled onSuspend onTimeUpdate onVolumeChange onWaiting onLoad
+    onPointerDown onPointerMove onPointerUp onPointerCancel onPointerEnter onPointerLeave onPointerOver onPointerOut onGotPointerCapture onLostPointerCapture
+    onAnimationStart onAnimationEnd onAnimationIteration
+    onTransitionEnd onTransitionRun onTransitionStart onTransitionCancel
+    onBeforeInput onReset onInvalid
+    onAuxClick onToggle onBeforeToggle onCancel onClose onResize onScrollEnd`
 
 const propList = `${attributes} ${eventsName}`.split(/\s+/)
 
