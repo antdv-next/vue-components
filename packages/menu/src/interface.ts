@@ -14,6 +14,8 @@ export interface SubMenuType extends ItemSharedProps {
 
   label?: VueNode
 
+  title?: string
+
   children: ItemType[]
 
   disabled?: boolean

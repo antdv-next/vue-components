@@ -20,10 +20,12 @@ import PopupTrigger from './PopupTrigger'
 import SubMenuList from './SubMenuList'
 
 export type SemanticName = 'list' | 'listTitle'
-export interface SubMenuProps extends Omit<SubMenuType, 'key' | 'children' | 'label'> {
+export interface SubMenuProps extends Omit<SubMenuType, 'key' | 'children' | 'label' | 'title'> {
   classes?: Partial<Record<SemanticName, string>>
   styles?: Partial<Record<SemanticName, CSSProperties>>
   title?: VueNode
+  /** Native `title` attribute for the submenu title element. */
+  itemTitle?: string
 
   /** @private Used for rest popup. Do not use in your prod */
   internalPopupClose?: boolean
@@ -200,6 +202,7 @@ const InternalSubMenu = defineComponent<SubMenuProps>(
       const {
         style,
         title,
+        itemTitle,
         class: className,
         eventKey,
         warnKey,
@@ -251,7 +254,7 @@ const InternalSubMenu = defineComponent<SubMenuProps>(
           style={directionStyle.value}
           class={`${subMenuPrefixCls.value}-title`}
           tabindex={mergedDisabled.value ? undefined : -1}
-          title={typeof title === 'string' ? title : undefined}
+          title={itemTitle ?? (typeof title === 'string' ? title : undefined)}
           data-menu-id={overflowDisabled.value && domDataId.value ? undefined : domDataId.value}
           aria-expanded={open.value}
           aria-haspopup

@@ -70,8 +70,18 @@ function convertItemsToNodes(
           }
 
           // Sub Menu
+          // `title` on the item config is the native tooltip text, while the
+          // rendered title comes from `label` — keep them apart.
+          const { title: itemTitle, ...subMenuRestProps } = restProps
+
           return (
-            <MergedSubMenu key={mergedKey} {...restProps} title={label} icon={icon}>
+            <MergedSubMenu
+              key={mergedKey}
+              {...subMenuRestProps}
+              title={label}
+              itemTitle={typeof itemTitle === 'string' ? itemTitle : undefined}
+              icon={icon}
+            >
               {convertItemsToNodes(children, components, prefixCls, slots)}
             </MergedSubMenu>
           )
