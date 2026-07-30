@@ -107,8 +107,12 @@ const Dropdown = defineComponent<DropdownProps>(
         showAction,
         overlayStyle,
         align,
+        // Pulled out so it is not forwarded to Trigger: Trigger's own `disabled`
+        // suppresses the popup entirely, which is not what a disabled Dropdown
+        // means.
+        disabled: _disabled,
         ...otherProps
-      } = props
+      } = props as typeof props & { disabled?: boolean }
 
       const getMenuElement = () => (
         <Overlay
