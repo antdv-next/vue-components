@@ -272,7 +272,14 @@ const Tree = defineComponent<TreeProps>(
 
     const expandedKeys = shallowRef<Key[]>(getInitExpandedKeys())
 
+    /**
+     * Set the uncontrolled `expandedKeys`. Guarded centrally so a controlled
+     * `expandedKeys` is never clobbered — the watcher below owns it in that case.
+     */
     const setExpandedKeys = (keys: Key[]) => {
+      if (props.expandedKeys !== undefined) {
+        return
+      }
       expandedKeys.value = keys
     }
     watch(() => props.expandedKeys, () => {
@@ -830,9 +837,7 @@ const Tree = defineComponent<TreeProps>(
             newExpandedKeys = arrAdd(expandedKeys.value, nodeProps.eventKey!)
           }
 
-          if (props.expandedKeys === undefined) {
-            setExpandedKeys(newExpandedKeys)
-          }
+          setExpandedKeys(newExpandedKeys)
 
           props.onExpand?.(newExpandedKeys, {
             node: convertNodePropsToEventData(nodeProps as any),
