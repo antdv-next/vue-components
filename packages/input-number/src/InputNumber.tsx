@@ -18,6 +18,25 @@ import { getDecupleSteps } from './utils/numberUtil'
 
 export type { ValueType }
 
+/** Accumulated wheel distance that adds up to a single step. */
+const WHEEL_STEP_DISTANCE = 100
+const WHEEL_LINE_HEIGHT = 40
+const WHEEL_PAGE_HEIGHT = 800
+/** Idle gap after which a new wheel gesture starts from scratch. */
+const WHEEL_DELTA_RESET_INTERVAL = 200
+
+/** Normalize `deltaY` to pixels — browsers may report it in lines or pages. */
+function getWheelDeltaY(event: WheelEvent) {
+  switch (event.deltaMode) {
+    case 1:
+      return event.deltaY * WHEEL_LINE_HEIGHT
+    case 2:
+      return event.deltaY * WHEEL_PAGE_HEIGHT
+    default:
+      return event.deltaY
+  }
+}
+
 type SemanticName = 'root' | 'actions' | 'input' | 'action' | 'prefix' | 'suffix'
 
 export interface InputNumberProps<T extends ValueType = ValueType> {
@@ -431,14 +450,54 @@ const InputNumber = defineComponent<InputNumberProps>(
     }
 
     // ============================ Wheel ============================
+    // Accumulate wheel distance instead of stepping per event: high-resolution
+    // trackpads emit many tiny deltas, which would otherwise race the value.
+    let wheelDelta = 0
+    let wheelTimestamp = 0
+
+    const resetWheel = () => {
+      wheelDelta = 0
+      wheelTimestamp = 0
+    }
+
+    const onInternalWheel = (event: WheelEvent) => {
+      const delta = getWheelDeltaY(event)
+      if (!delta) {
+        return
+      }
+
+      const eventTimestamp = event.timeStamp || Date.now()
+      if (eventTimestamp - wheelTimestamp > WHEEL_DELTA_RESET_INTERVAL) {
+        wheelDelta = 0
+      }
+      wheelTimestamp = eventTimestamp
+
+      // Reversing direction mid-gesture should not be damped by leftover travel.
+      if (wheelDelta && Math.sign(wheelDelta) !== Math.sign(delta)) {
+        wheelDelta = 0
+      }
+
+      wheelDelta += delta
+
+      if (Math.abs(wheelDelta) >= WHEEL_STEP_DISTANCE) {
+        // moving mouse wheel rises wheel event with deltaY < 0
+        // scroll value grows from top to bottom, as screen Y coordinate
+        onInternalStep(wheelDelta < 0, 'wheel')
+        wheelDelta -= Math.sign(wheelDelta) * WHEEL_STEP_DISTANCE
+      }
+    }
+
     watchEffect((onCleanup) => {
       if (props.changeOnWheel && focus.value && inputRef.value) {
         const onWheel = (event: WheelEvent) => {
-          onInternalStep(event.deltaY < 0, 'wheel')
+          onInternalWheel(event)
           event.preventDefault()
         }
         inputRef.value.addEventListener('wheel', onWheel, { passive: false })
-        onCleanup(() => inputRef.value?.removeEventListener('wheel', onWheel))
+        onCleanup(() => {
+          inputRef.value?.removeEventListener('wheel', onWheel)
+          resetWheel()
+        })
       }
     })
 
@@ -450,6 +509,7 @@ const InputNumber = defineComponent<InputNumberProps>(
 
       focus.value = false
       userTypingRef.value = false
+      resetWheel()
       props.onBlur?.(e)
     }
 
@@ -508,7 +568,7 @@ const InputNumber = defineComponent<InputNumberProps>(
         readOnly,
         controls = defaults.controls,
         mode = defaults.mode,
-        placeholder
+        placeholder,
       } = props
 
       const mergedPrefixCls = prefixCls || defaults.prefixCls!
