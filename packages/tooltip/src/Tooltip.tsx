@@ -16,6 +16,7 @@ export interface TooltipProps
     TriggerProps,
     | 'onPopupAlign'
     | 'builtinPlacements'
+    | 'disabled'
     | 'fresh'
     | 'mouseLeaveDelay'
     | 'mouseEnterDelay'
