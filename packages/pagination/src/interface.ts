@@ -56,9 +56,13 @@ export interface PaginationData {
   jumpNextIcon: VueNode
 }
 
+export interface PaginationOnChangeInfo {
+  recommendPage?: number
+}
+
 export interface PaginationProps
   extends Partial<PaginationData> {
-  onChange?: (page: number, pageSize: number) => void
+  onChange?: (page: number, pageSize: number, info?: PaginationOnChangeInfo) => void
   onShowSizeChange?: (current: number, size: number) => void
   itemRender?: (
     page: number,

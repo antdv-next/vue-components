@@ -17,6 +17,7 @@ import {
   toRef,
   watchEffect,
 } from 'vue'
+import isEnterOrSpaceKey from './isEnterOrSpaceKey'
 import zhCN from './locale/zh_CN'
 import Options from './Options.tsx'
 import Pager from './Pager'
@@ -136,12 +137,17 @@ const Pagination = defineComponent<PaginationProps>(
       )
     }
 
-    function getItemIcon(icon: VueNode, label: string) {
+    // The accessible name now lives on the wrapping `li` (which carries
+    // `role="button"`), so the inner control is hidden from the a11y tree to
+    // avoid announcing it twice. `title` is the visual tooltip only.
+    function getItemIcon(icon: VueNode, _label: string, title?: string) {
       const prefixCls = mergedPrefixCls.value
       let iconNode = icon || (
         <button
           type="button"
-          aria-label={label}
+          tabindex={-1}
+          aria-hidden="true"
+          title={title}
           class={`${prefixCls}-item-link`}
         />
       )
@@ -222,42 +228,41 @@ const Pagination = defineComponent<PaginationProps>(
       handleChange(jumpNextPage.value)
     }
 
-    function runIfEnter(
+    function runIfEnterOrSpace(
       event: KeyboardEvent,
       callback: (...args: any[]) => void,
       ...restParams: any[]
     ) {
-      if (
-        event.key === 'Enter'
-        || event.charCode === KeyCode.ENTER
-        || event.keyCode === KeyCode.ENTER
-      ) {
+      if (isEnterOrSpaceKey(event)) {
+        // These are `li`s acting as buttons; Space would otherwise scroll.
+        event.preventDefault()
         callback(...restParams)
       }
     }
 
     function runIfEnterPrev(event: KeyboardEvent) {
-      runIfEnter(event, prevHandle)
+      runIfEnterOrSpace(event, prevHandle)
     }
 
     function runIfEnterNext(event: KeyboardEvent) {
-      runIfEnter(event, nextHandle)
+      runIfEnterOrSpace(event, nextHandle)
     }
 
     function runIfEnterJumpPrev(event: KeyboardEvent) {
-      runIfEnter(event, jumpPrevHandle)
+      runIfEnterOrSpace(event, jumpPrevHandle)
     }
 
     function runIfEnterJumpNext(event: KeyboardEvent) {
-      runIfEnter(event, jumpNextHandle)
+      runIfEnterOrSpace(event, jumpNextHandle)
     }
 
     function renderPrev(prevPage: number) {
       const itemRender = props.itemRender || defaultItemRender
+      const prevPageTitle = mergedLocale.value.prev_page || 'prev page'
       const prevButton = itemRender?.(
         prevPage,
         'prev',
-        getItemIcon(props.prevIcon, 'prev page'),
+        getItemIcon(props.prevIcon, prevPageTitle, mergedShowTitle.value ? prevPageTitle : undefined),
       )
       const nextProps: Record<string, any> = {}
       if (!hasPrev.value) {
@@ -270,10 +275,11 @@ const Pagination = defineComponent<PaginationProps>(
 
     function renderNext(nextPage: number) {
       const itemRender = props.itemRender || defaultItemRender
+      const nextPageTitle = mergedLocale.value.next_page || 'next page'
       const nextButton = itemRender?.(
         nextPage,
         'next',
-        getItemIcon(props.nextIcon, 'next page'),
+        getItemIcon(props.nextIcon, nextPageTitle, mergedShowTitle.value ? nextPageTitle : undefined),
       )
       const nextProps: Record<string, any> = {}
       if (!hasNext.value) {
@@ -329,7 +335,12 @@ const Pagination = defineComponent<PaginationProps>(
     }
 
     function changePageSize(size: number) {
+      // The page that keeps the first currently-visible record in view after the
+      // resize — reported as `recommendPage` so callers can opt into following it.
+      const preservedPage = Math.floor(((current.value - 1) * pageSize.value) / size) + 1
       const newCurrent = calculatePage(size, pageSize.value, mergedTotal.value)
+      const recommendPage = newCurrent === 0 ? 1 : Math.min(preservedPage, newCurrent)
+
       const nextCurrent
         = current.value > newCurrent && newCurrent !== 0
           ? newCurrent
@@ -339,7 +350,7 @@ const Pagination = defineComponent<PaginationProps>(
       internalInputVal.value = nextCurrent
       props.onShowSizeChange?.(current.value, size)
       setCurrent(nextCurrent)
-      props.onChange?.(nextCurrent, size)
+      props.onChange?.(nextCurrent, size, { recommendPage })
     }
 
     const shouldDisplayQuickJumper = computed(() =>
@@ -396,7 +407,6 @@ const Pagination = defineComponent<PaginationProps>(
         const prevDisabled = !hasPrev.value || !allPages.value
         prev = (
           <li
-            title={showTitle ? locale?.prev_page : undefined}
             onClick={prevHandle}
             tabindex={prevDisabled ? undefined : 0}
             onKeydown={runIfEnterPrev}
@@ -405,6 +415,8 @@ const Pagination = defineComponent<PaginationProps>(
             })}
             style={itemStyle}
             aria-disabled={prevDisabled}
+            role="button"
+            aria-label={locale?.prev_page}
           >
             {prev}
           </li>
@@ -426,7 +438,6 @@ const Pagination = defineComponent<PaginationProps>(
 
         next = (
           <li
-            title={showTitle ? locale?.next_page : undefined}
             onClick={nextHandle}
             tabindex={nextTabIndex ?? undefined}
             onKeydown={runIfEnterNext}
@@ -435,6 +446,8 @@ const Pagination = defineComponent<PaginationProps>(
             })}
             style={itemStyle}
             aria-disabled={nextDisabled}
+            role="button"
+            aria-label={locale?.next_page}
           >
             {next}
           </li>
@@ -520,9 +533,10 @@ const Pagination = defineComponent<PaginationProps>(
       const pagerProps: any = {
         rootPrefixCls: prefixCls,
         onClick: handleChange,
-        onKeyPress: runIfEnter,
+        onKeyPress: runIfEnterOrSpace,
         showTitle,
         itemRender: mergedItemRender,
+        pageLabel: locale?.page,
         page: -1,
         className: itemClassName,
         style: itemStyle,
@@ -560,12 +574,12 @@ const Pagination = defineComponent<PaginationProps>(
         const jumpPrevContent = mergedItemRender(
           jumpPrevPage.value,
           'jump-prev',
-          getItemIcon(jumpPrevIcon, 'prev page'),
+          getItemIcon(jumpPrevIcon, prevItemTitle!, showTitle ? prevItemTitle : undefined),
         )
         const jumpNextContent = mergedItemRender(
           jumpNextPage.value,
           'jump-next',
-          getItemIcon(jumpNextIcon, 'next page'),
+          getItemIcon(jumpNextIcon, nextItemTitle!, showTitle ? nextItemTitle : undefined),
         )
         let jumpPrev = null
         let jumpNext = null
@@ -574,7 +588,6 @@ const Pagination = defineComponent<PaginationProps>(
           jumpPrev = jumpPrevContent
             ? (
                 <li
-                  title={showTitle ? prevItemTitle : undefined}
                   key="prev"
                   onClick={jumpPrevHandle}
                   tabindex={0}
@@ -582,6 +595,8 @@ const Pagination = defineComponent<PaginationProps>(
                   class={classNames(`${prefixCls}-jump-prev`, {
                     [`${prefixCls}-jump-prev-custom-icon`]: !!jumpPrevIcon,
                   })}
+                  role="button"
+                  aria-label={prevItemTitle}
                 >
                   {jumpPrevContent}
                 </li>
@@ -591,7 +606,6 @@ const Pagination = defineComponent<PaginationProps>(
           jumpNext = jumpNextContent
             ? (
                 <li
-                  title={showTitle ? nextItemTitle : undefined}
                   key="next"
                   onClick={jumpNextHandle}
                   tabindex={0}
@@ -599,6 +613,8 @@ const Pagination = defineComponent<PaginationProps>(
                   class={classNames(`${prefixCls}-jump-next`, {
                     [`${prefixCls}-jump-next-custom-icon`]: !!jumpNextIcon,
                   })}
+                  role="button"
+                  aria-label={nextItemTitle}
                 >
                   {jumpNextContent}
                 </li>
