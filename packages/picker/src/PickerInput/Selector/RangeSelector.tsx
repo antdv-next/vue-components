@@ -6,9 +6,10 @@ import ResizeObserver from '@v-c/resize-observer'
 import { clsx } from '@v-c/util'
 import { computed, defineComponent, ref, watch } from 'vue'
 import { usePickerContext } from '../context'
+import ClearIcon from './ClearIcon'
 import useInputProps from './hooks/useInputHooks'
 import useRootProps from './hooks/useRootProps'
-import Icon, { ClearIcon } from './Icon'
+import Icon from './Icon'
 import Input from './Input'
 
 export type SelectorIdType
@@ -67,6 +68,15 @@ const RangeSelector = defineComponent(
 
     expose({
       nativeElement: rootRef,
+      // Exposed so `useFocusLock` can compare the actually focused element
+      // against each field and pull focus back to the expected one.
+      // 暴露给 `useFocusLock`，用于比较实际聚焦元素并把焦点拉回预期 field。
+      get startInput() {
+        return inputStartRef.value?.inputElement
+      },
+      get endInput() {
+        return inputEndRef.value?.inputElement
+      },
       focus: (options?: any) => {
         if (typeof options === 'object') {
           const { index = 0, ...rest } = options || {}
@@ -215,7 +225,7 @@ const RangeSelector = defineComponent(
               data-range="end"
             />
             <div class={`${prefixCls.value}-active-bar`} style={activeBarStyle.value} />
-            <Icon type="suffix" icon={suffixIcon} />
+            <Icon icon={suffixIcon} />
             {showClear.value && <ClearIcon icon={clearIcon} onClear={onClear!} />}
           </div>
         </ResizeObserver>

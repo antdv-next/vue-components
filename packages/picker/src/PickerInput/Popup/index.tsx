@@ -1,7 +1,7 @@
 import type { OnResize } from '@v-c/resize-observer'
 import type { MouseEventHandler } from '@v-c/util/dist/EventInterface'
 import type { VueNode } from '@v-c/util/dist/type'
-import type { InputHTMLAttributes } from 'vue'
+import type { InputHTMLAttributes, Ref } from 'vue'
 import type { RangeTimeProps, SharedPickerProps, SharedTimeProps, ValueDate } from '../../interface'
 import type { FooterProps } from './Footer'
 import type { PopupPanelProps } from './PopupPanel'
@@ -41,6 +41,13 @@ export type PopupProps<DateType extends object = any, PresetValue = DateType>
       onOk: VoidFunction
 
       onPanelMouseDown?: MouseEventHandler
+
+      /**
+       * Expose the popup container element so the Picker can tell whether focus
+       * is still inside the popup.
+       * 暴露 popup 容器元素，供 Picker 判断焦点是否仍在 popup 内。
+       */
+      popupContainerRef?: Ref<HTMLDivElement | undefined>
 
       classNames?: SharedPickerProps['classNames']
       styles?: SharedPickerProps['styles']
@@ -240,7 +247,17 @@ const Popup = defineComponent<PopupProps>(
       // Container
       let renderNode = (
         <div
-          ref={range ? containerRef : undefined}
+          ref={(el: any) => {
+            const node = (el ?? undefined) as HTMLDivElement | undefined
+            // `containerRef` drives the range resize observer; the prop lets the
+            // owning Picker read the same node for focus containment checks.
+            if (range) {
+              containerRef.value = node
+            }
+            if (props.popupContainerRef) {
+              props.popupContainerRef.value = node
+            }
+          }}
           onMousedown={onPanelMouseDown}
           tabindex={-1}
           class={clsx(

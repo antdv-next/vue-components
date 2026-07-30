@@ -85,18 +85,14 @@ export function getRowFormat(
 
 export function getFromDate<DateType>(
   calendarValues: DateType[],
-  activeIndexList: number[],
-  activeIndex?: number,
+  triggeredFields: number[],
+  activeIndex: number,
 ) {
-  const mergedActiveIndex
-    = activeIndex !== undefined
-      ? activeIndex
-      : activeIndexList[activeIndexList.length - 1]
-  const firstValuedIndex = activeIndexList.find(
+  const firstValuedIndex = triggeredFields.find(
     index => calendarValues[index],
   )
 
-  return mergedActiveIndex !== firstValuedIndex
+  return activeIndex !== firstValuedIndex
     ? calendarValues[firstValuedIndex!]
     : undefined
 }

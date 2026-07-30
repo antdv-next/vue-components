@@ -1,6 +1,7 @@
 import type { VueNode } from '@v-c/util/dist/type'
 import type { ComputedRef, SetupContext } from 'vue'
 import type { BaseInfo, InternalMode, OpenConfig, PanelMode, RangeTimeProps, SelectorProps, SharedPickerProps, ValueDate } from '../interface'
+import type { RangeValueChangeSource } from './hooks/useRangeValueChange'
 import type { PopupShowTimeConfig } from './Popup'
 import type { SelectorIdType } from './Selector/RangeSelector'
 import { clsx } from '@v-c/util'
@@ -17,12 +18,14 @@ import { providePickerContext } from './context'
 import useCellRender from './hooks/useCellRender'
 import useFieldsInvalidate from './hooks/useFieldsInvalidate'
 import useFilledProps from './hooks/useFilledProps'
+import useFocusEvents, { isTargetInContainers } from './hooks/useFocusEvents'
+import useFocusLock from './hooks/useFocusLock'
 import useOpen from './hooks/useOpen'
 import usePresets from './hooks/usePresets'
-import useRangeActive from './hooks/useRangeActive'
 import useRangeDisabledDate from './hooks/useRangeDisabledDate'
 import useRangePickerValue from './hooks/useRangePickerValue'
 import useRangeValue, { useInnerValue } from './hooks/useRangeValue'
+import useRangeValueChange from './hooks/useRangeValueChange'
 import useShowNow from './hooks/useShowNow'
 import Popup from './Popup'
 import RangeSelector from './Selector/RangeSelector'
@@ -261,34 +264,102 @@ const RangePicker = defineComponent(
 
     const calendarValue = computed(() => getCalendarValue.value) as ComputedRef<RangeValueType<any>>
 
-    // ======================== Active ========================
+    // ======================== Focus =========================
+    const popupRef = ref<HTMLDivElement>()
+
+    const isInternalPickerElement = (element: EventTarget | null) =>
+      isTargetInContainers(element, [selectorRef.value?.nativeElement, popupRef.value])
+
+    const [focused, onFieldFocus, onFieldBlur] = useFocusEvents(
+      isInternalPickerElement,
+      (index, event) => {
+        onFocus.value?.(event, {
+          range: getActiveRange(index),
+        })
+      },
+      (index, event) => {
+        onBlur.value?.(event, {
+          range: getActiveRange(index),
+        })
+      },
+      () => {
+        triggerOpen(false)
+      },
+    )
+
+    // ======================== Value =========================
     const [
-      focused,
-      triggerFocus,
-      lastOperation,
+      /** Trigger `onChange` by check `disabledDate` */
+      flushSubmit,
+      /** Trigger `onChange` directly without check `disabledDate` */
+      triggerSubmitChange,
+      /** Reset uncommitted values */
+      resetValue,
+    ] = useRangeValue<RangeValueType<any>, any>(
+      computed(() => ({
+        ...fp.value,
+        onChange: (dates: any, dateStrings: any) => {
+          fp.value.onChange?.(
+            formatValuesByValueFormat(dates, {
+              generateConfig: generateConfig.value,
+              locale: locale.value,
+              valueFormat: valueFormat.value,
+            }) as any,
+            dateStrings,
+          )
+        },
+      })) as any,
+      mergedValue as ComputedRef<any>,
+      setInnerValue,
+      () => getCalendarValue.value as any,
+      triggerCalendarChange,
+      disabled,
+      formatList,
+      isInvalidateDate,
+    )
+
+    const triggerFieldCalendarChange = (index: number, date: any) => {
+      triggerCalendarChange(fillIndex(getCalendarValue.value as any, index, date) as any)
+    }
+
+    const flushFieldSubmit = (index: number, needTriggerChange: boolean) => {
+      flushSubmit(index, needTriggerChange)
+
+      if (needTriggerChange) {
+        triggerOpen(false, { force: true })
+      }
+    }
+
+    const enabledFieldCount = computed(
+      () => disabled.value.filter(fieldDisabled => !fieldDisabled).length,
+    )
+
+    const [
+      rangeValueIndex,
       activeIndex,
-      setActiveIndex,
-      nextActiveIndex,
-      activeIndexList,
-      updateSubmitIndex,
-      hasActiveSubmitValue,
-    ] = useRangeActive(disabled, allowEmpty, mergedOpen)
+      forceFocus,
+      triggeredFields,
+      triggerRangeValueChange,
+      resetRangeValueChange,
+    ] = useRangeValueChange<any>(
+      enabledFieldCount,
+      needConfirm as any,
+      allowEmpty as any,
+      () => getCalendarValue.value as any,
+      triggerFieldCalendarChange,
+      flushFieldSubmit,
+      resetValue,
+    )
 
-    const onSharedFocus = (event: FocusEvent, index?: number) => {
-      triggerFocus(true)
+    useFocusLock(rangeValueIndex, forceFocus, selectorRef as any, popupRef, triggerOpen)
 
-      onFocus.value?.(event, {
-        range: getActiveRange(index ?? activeIndex.value),
-      })
-    }
-
-    const onSharedBlur = (event: FocusEvent, index?: number) => {
-      triggerFocus(false)
-
-      onBlur.value?.(event, {
-        range: getActiveRange(index ?? activeIndex.value),
-      })
-    }
+    // Finalize the current interaction only after the popup is actually closed.
+    // 仅在 popup 实际关闭后，统一收口当前交互。
+    watch(mergedOpen, (open) => {
+      if (!open) {
+        triggerRangeValueChange(rangeValueIndex.value ?? activeIndex.value, 'popupClose')
+      }
+    })
 
     // ======================= ShowTime =======================
     /** Used for Popup panel */
@@ -304,7 +375,7 @@ const RangePicker = defineComponent(
       const proxyDisabledTime = disabledTime
         ? (date: any) => {
             const range = getActiveRange(activeIndex.value)
-            const fromDate = getFromDate(calendarValue.value, activeIndexList.value, activeIndex.value)
+            const fromDate = getFromDate(calendarValue.value, triggeredFields.value, activeIndex.value)
             return disabledTime(date, range, {
               from: fromDate,
             })
@@ -336,42 +407,12 @@ const RangePicker = defineComponent(
     // ======================= Show Now =======================
     const mergedShowNow = useShowNow(picker as any, mergedMode as any, showNow, showToday, ref(true))
 
-    // ======================== Value =========================
-    const [
-      /** Trigger `onChange` by check `disabledDate` */
-      flushSubmit,
-      /** Trigger `onChange` directly without check `disabledDate` */
-      triggerSubmitChange,
-    ] = useRangeValue<RangeValueType<any>, any>(
-      computed(() => ({
-        ...fp.value,
-        onChange: (dates: any, dateStrings: any) => {
-          fp.value.onChange?.(
-            formatValuesByValueFormat(dates, {
-              generateConfig: generateConfig.value,
-              locale: locale.value,
-              valueFormat: valueFormat.value,
-            }) as any,
-            dateStrings,
-          )
-        },
-      })) as any,
-      mergedValue as ComputedRef<any>,
-      setInnerValue,
-      () => getCalendarValue.value as any,
-      triggerCalendarChange,
-      disabled,
-      formatList,
-      focused,
-      mergedOpen,
-      isInvalidateDate,
-    )
-
     // ===================== DisabledDate =====================
     const mergedDisabledDate = useRangeDisabledDate(
       calendarValue as any,
       disabled,
-      activeIndexList,
+      activeIndex,
+      triggeredFields,
       generateConfig,
       locale,
       disabledDate,
@@ -391,6 +432,7 @@ const RangePicker = defineComponent(
       calendarValue,
       modes as any,
       mergedOpen,
+      focused,
       activeIndex,
       internalPicker,
       multiplePanel,
@@ -436,26 +478,8 @@ const RangePicker = defineComponent(
      * - Selector: enter key
      * - Panel: OK button
      */
-    const triggerPartConfirm = (date?: any, skipFocus?: boolean) => {
-      let nextValue = calendarValue.value
-
-      if (date) {
-        nextValue = fillCalendarValue(date, activeIndex.value)
-      }
-      updateSubmitIndex(activeIndex.value)
-      // Get next focus index
-      const nextIndex = nextActiveIndex(nextValue as RangeValueType<any>)
-
-      // Change calendar value and tell flush it
-      triggerCalendarChange(nextValue)
-      flushSubmit(activeIndex.value, nextIndex === null)
-
-      if (nextIndex === null) {
-        triggerOpen(false, { force: true })
-      }
-      else if (!skipFocus) {
-        selectorRef.value?.focus({ index: nextIndex } as any)
-      }
+    const triggerPartConfirm = (date?: any, source: RangeValueChangeSource = 'confirm') => {
+      triggerRangeValueChange(activeIndex.value, source, date ?? undefined)
     }
 
     // ======================== Click =========================
@@ -482,6 +506,7 @@ const RangePicker = defineComponent(
     }
 
     const onSelectorClear = () => {
+      resetRangeValueChange()
       triggerSubmitChange(null as any)
       triggerOpen(false, { force: true })
       fp.value.onClear?.()
@@ -546,41 +571,33 @@ const RangePicker = defineComponent(
     // >>> Focus
     const onPanelFocus = (event: FocusEvent) => {
       triggerOpen(true)
-      onSharedFocus(event)
+      onFieldFocus(activeIndex.value, 'panel', event)
     }
 
-    // >>> MouseDown
-    const onPanelMouseDown = () => {
-      lastOperation('panel')
-    }
     // ========================================================
     // ==                      Selector                      ==
     // ========================================================
 
     // ======================== Change ========================
     const onSelectorChange = (date: any, index: number) => {
-      const clone = fillCalendarValue(date, index)
-
-      triggerCalendarChange(clone)
+      triggerRangeValueChange(index, 'input', date)
     }
 
     const onSelectorInputChange = () => {
-      lastOperation('input')
+      triggerRangeValueChange(activeIndex.value, 'input')
     }
 
     const onSelectorBlur: SelectorProps['onBlur'] = (event, index) => {
-      triggerOpen(false)
-      if (!needConfirm.value && lastOperation() === 'input') {
-        const nextIndex = nextActiveIndex(calendarValue.value as RangeValueType<any>)
-        flushSubmit(activeIndex.value, nextIndex === null)
-      }
-
-      onSharedBlur(event, index)
+      onFieldBlur(index!, 'input', event)
     }
 
     const onSelectorKeyDown: SelectorProps['onKeyDown'] = (event, preventDefault) => {
       if (event.key === 'Tab') {
-        triggerPartConfirm(null, true)
+        triggerPartConfirm(null, 'keyboard-submit-weak')
+      }
+      else if (event.key === 'Escape') {
+        triggerRangeValueChange(activeIndex.value, 'esc')
+        triggerOpen(false)
       }
 
       onKeyDown.value?.(event, preventDefault)
@@ -588,20 +605,14 @@ const RangePicker = defineComponent(
 
     // >>> Calendar
     const onPanelSelect = (date: any) => {
-      const clone = fillIndex(
-        calendarValue.value,
+      const panelFinished
+        = !complexPicker.value && internalPicker.value === internalMode.value
+
+      triggerRangeValueChange(
         activeIndex.value,
+        panelFinished ? 'panel-final' : 'panel-intermediate',
         date,
-      ) as RangeValueType<any>
-
-      // Only trigger calendar event but not update internal `calendarValue` state
-      triggerCalendarChange(clone)
-
-      // >>> Trigger next active if !needConfirm
-      // Fully logic check `useRangeValue` hook
-      if (!needConfirm.value && !complexPicker.value && internalPicker.value === internalMode.value) {
-        triggerPartConfirm(date)
-      }
+      )
     }
 
     // >>> Close
@@ -672,56 +683,15 @@ const RangePicker = defineComponent(
       }
     }, { flush: 'post' })
 
-    // >>> For complex picker, we need check if need to focus next one
-    watch(mergedOpen, () => {
-      const lastOp = lastOperation()
-
-      // Trade as confirm on field leave
-      if (!mergedOpen.value && lastOp === 'input') {
-        triggerOpen(false)
-        triggerPartConfirm(null, true)
-      }
-
-      // Submit with complex picker
-      if (!mergedOpen.value && complexPicker.value && !needConfirm.value && lastOp === 'panel') {
-        triggerOpen(true)
-        triggerPartConfirm()
-      }
-    }, { flush: 'post' })
     // ======================= Selector =======================
     const onSelectorFocus: SelectorProps['onFocus'] = (event, index) => {
-    // Check if `needConfirm` but user not submit yet
-      const activeListLen = activeIndexList.value.length
-      const lastActiveIndex = activeIndexList.value[activeListLen - 1]
-      if (
-        activeListLen
-        && lastActiveIndex !== index
-        && needConfirm.value
-        // Not change index if is not filled
-        && !allowEmpty.value[lastActiveIndex]
-        && !hasActiveSubmitValue(lastActiveIndex)
-        && calendarValue.value[lastActiveIndex]
-      ) {
-        selectorRef.value?.focus({ index: lastActiveIndex } as any)
-        return
-      }
-
-      lastOperation('input')
+      triggerRangeValueChange(index!, 'field-switch')
 
       triggerOpen(true, {
         inherit: true,
       })
 
-      // When click input to switch the field, it will not trigger close.
-      // Which means it will lose the part confirm and we need fill back.
-      // ref: https://github.com/ant-design/ant-design/issues/49512
-      if (activeIndex.value !== index && mergedOpen.value && !needConfirm.value && complexPicker.value) {
-        triggerPartConfirm(null, true)
-      }
-
-      setActiveIndex(index!)
-
-      onSharedFocus(event, index)
+      onFieldFocus(index!, 'input', event)
     }
     // ====================== DevWarning ======================
     if (process.env.NODE_ENV !== 'production') {
@@ -764,7 +734,7 @@ const RangePicker = defineComponent(
         onFocus: onSelectorFocus,
         onBlur: onSelectorBlur,
         onKeyDown: onSelectorKeyDown,
-        onSubmit: triggerPartConfirm,
+        onSubmit: () => triggerPartConfirm(null, 'keyboard-submit'),
         value: hoverValues.value,
         maskFormat: maskFormat.value,
         onChange: onSelectorChange,
@@ -790,6 +760,7 @@ const RangePicker = defineComponent(
 
       const popupProps = {
         ...panelProps.value,
+        popupContainerRef: popupRef,
         showNow: mergedShowNow.value,
         showTime: mergedShowTime.value,
         range: true,
@@ -797,8 +768,7 @@ const RangePicker = defineComponent(
         activeInfo: activeInfo.value,
         disabledDate: mergedDisabledDate,
         onFocus: onPanelFocus,
-        onBlur: onSharedBlur,
-        onPanelMouseDown,
+        onBlur: (event: FocusEvent) => onFieldBlur(activeIndex.value, 'panel', event),
         picker: picker.value as any,
         mode: mergedMode.value,
         internalMode: internalMode.value,
@@ -814,7 +784,7 @@ const RangePicker = defineComponent(
         hoverValue: hoverValues.value,
         onHover: onPanelHover,
         needConfirm: needConfirm.value!,
-        onSubmit: triggerPartConfirm,
+        onSubmit: (date?: any) => triggerPartConfirm(date, 'confirm'),
         onOk: triggerOk,
         presets: presetList.value,
         onPresetHover,

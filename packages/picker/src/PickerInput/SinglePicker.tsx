@@ -7,6 +7,7 @@ import type {
   SharedTimeProps,
   ValueDate,
 } from '../interface'
+import type { RangeValueChangeSource } from './hooks/useRangeValueChange'
 import { clsx } from '@v-c/util'
 import omit from '@v-c/util/dist/omit'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
@@ -21,11 +22,12 @@ import { providePickerContext } from './context'
 import useCellRender from './hooks/useCellRender'
 import useFieldsInvalidate from './hooks/useFieldsInvalidate'
 import useFilledProps from './hooks/useFilledProps'
+import useFocusEvents, { isTargetInContainers } from './hooks/useFocusEvents'
 import useOpen from './hooks/useOpen'
 import usePresets from './hooks/usePresets'
-import useRangeActive from './hooks/useRangeActive'
 import useRangePickerValue from './hooks/useRangePickerValue'
 import useRangeValue, { useInnerValue } from './hooks/useRangeValue'
+import useRangeValueChange from './hooks/useRangeValueChange'
 import useShowNow from './hooks/useShowNow'
 import Popup from './Popup'
 import SingleSelector from './Selector/SingleSelector'
@@ -291,21 +293,24 @@ const SinglePicker = defineComponent<PickerProps>(
 
     const calendarValue = computed(() => getCalendarValue.value)
 
-    // ======================== Active ========================
-    // In SinglePicker, we will always get `activeIndex` is 0.
-    const [focused, triggerFocus, lastOperation, activeIndex] = useRangeActive(
-      computed(() => [disabled.value]),
+    // ======================== Focus =========================
+    const popupRef = ref<HTMLDivElement>()
+
+    const isInternalPickerElement = (element: EventTarget | null) =>
+      isTargetInContainers(element, [selectorRef.value?.nativeElement, popupRef.value])
+
+    const [focused, onFieldFocus, onFieldBlur] = useFocusEvents(
+      isInternalPickerElement,
+      (_index, event) => {
+        onFocus.value?.(event, {})
+      },
+      (_index, event) => {
+        onBlur.value?.(event, {})
+      },
+      () => {
+        triggerOpen(false)
+      },
     )
-
-    const onSharedFocus = (event: FocusEvent) => {
-      triggerFocus(true)
-      onFocus.value?.(event, {})
-    }
-
-    const onSharedBlur = (event: FocusEvent) => {
-      triggerFocus(false)
-      onBlur.value?.(event, {})
-    }
 
     // ========================= Mode =========================
     const mergedMode = ref<PanelMode>(picker.value ?? mode.value)
@@ -348,6 +353,8 @@ const SinglePicker = defineComponent<PickerProps>(
       ,
       /** Trigger `onChange` directly without check `disabledDate` */
       triggerSubmitChange,
+      /** Reset uncommitted values */
+      resetValue,
     ] = useRangeValue(
       // @ts-expect-error: FIXME
       rangeValueInfo,
@@ -357,10 +364,51 @@ const SinglePicker = defineComponent<PickerProps>(
       triggerCalendarChange,
       computed(() => []), // disabled
       formatList,
-      focused,
-      mergedOpen,
       isInvalidateDate,
     )
+
+    // Treat the complete SinglePicker value list as one field value. This keeps
+    // multiple dates inside field `0` instead of exposing them as extra fields.
+    // 将 SinglePicker 的整组值视为一个 field value；multiple 日期仍属于
+    // field `0` 内部，不会被当成额外的 field。
+    const getFieldCalendarValue = () => {
+      const values = getCalendarValue.value
+      return [values.length ? values : null]
+    }
+
+    const triggerFieldCalendarChange = (_index: number, nextValues: any[]) => {
+      triggerCalendarChange(nextValues)
+    }
+
+    const flushFieldSubmit = (_index: number, needTriggerChange: boolean) => {
+      if (needTriggerChange) {
+        triggerSubmitChange(getCalendarValue.value)
+        triggerOpen(false, { force: true })
+      }
+    }
+
+    const resetFieldValue = () => {
+      resetValue()
+    }
+
+    const [, activeIndex, , , triggerSingleValueChange, resetSingleValueChange]
+      = useRangeValueChange<any[]>(
+        ref(1),
+        needConfirm as any,
+        ref([false]),
+        getFieldCalendarValue,
+        triggerFieldCalendarChange,
+        flushFieldSubmit,
+        resetFieldValue,
+      )
+
+    // Finalize the current interaction only after the popup is actually closed.
+    // 仅在 popup 实际关闭后，统一收口当前交互。
+    watch(mergedOpen, (open) => {
+      if (!open) {
+        triggerSingleValueChange(0, 'popupClose')
+      }
+    })
 
     // ======================= Validate =======================
     const [submitInvalidates, onSelectorInvalid] = useFieldsInvalidate(
@@ -394,6 +442,7 @@ const SinglePicker = defineComponent<PickerProps>(
       calendarValue,
       computed(() => [mergedMode.value]),
       mergedOpen,
+      ref(false), // preserveOnFieldChange — SinglePicker has a single field
       activeIndex,
       internalPicker,
       ref(false), // multiplePanel,
@@ -423,12 +472,12 @@ const SinglePicker = defineComponent<PickerProps>(
 
     // ======================== Submit ========================
     /**
-     * Different with RangePicker, confirm should check `multiple` logic.
-     * This will never provide `date` instead.
+     * Submit the complete value list stored in SinglePicker field `0`.
+     * 提交 SinglePicker field `0` 内保存的整组值。
      */
-    const triggerConfirm = () => {
-      triggerSubmitChange(getCalendarValue.value)
-      triggerOpen(false, { force: true })
+    const triggerConfirm = (source: RangeValueChangeSource = 'confirm') => {
+      triggerSingleValueChange(0, source)
+      resetSingleValueChange()
     }
 
     // ======================== Click =========================
@@ -522,13 +571,11 @@ const SinglePicker = defineComponent<PickerProps>(
     // >>> Focus
     const onPanelFocus = (event: FocusEvent) => {
       triggerOpen(true)
-      onSharedFocus(event)
+      onFieldFocus(0, 'panel', event)
     }
 
     // >>> Calendar
     const onPanelSelect = (date: any) => {
-      lastOperation('panel')
-
       // Not change values if multiple and current panel is to match with picker
       if (multiple.value && internalMode.value !== picker.value) {
         return
@@ -538,18 +585,14 @@ const SinglePicker = defineComponent<PickerProps>(
         ? toggleDates(getCalendarValue.value, date)
         : [date]
 
-      // Only trigger calendar event but not update internal `calendarValue` state
-      triggerCalendarChange(nextValues)
+      const panelFinished
+        = !complexPicker.value && internalPicker.value === internalMode.value
 
-      // >>> Trigger next active if !needConfirm
-      // Fully logic check `useRangeValue` hook
-      if (
-        !needConfirm.value
-        && !complexPicker.value
-        && internalPicker.value === internalMode.value
-      ) {
-        triggerConfirm()
-      }
+      triggerSingleValueChange(
+        0,
+        panelFinished ? 'panel-final' : 'panel-intermediate',
+        nextValues,
+      )
     }
 
     // >>> Close
@@ -591,36 +634,36 @@ const SinglePicker = defineComponent<PickerProps>(
     // ========================================================
 
     // ======================== Change ========================
-    const onSelectorChange = (date: any[]) => {
-      triggerCalendarChange(date)
+    const onSelectorChange = (date: any[], source: 'input' | 'remove' = 'input') => {
+      triggerSingleValueChange(0, source, date)
     }
 
     const onSelectorInputChange = () => {
-      lastOperation('input')
+      triggerSingleValueChange(0, 'input')
     }
 
     // ======================= Selector =======================
     const onSelectorFocus: SelectorProps['onFocus'] = (event) => {
-      lastOperation('input')
+      triggerSingleValueChange(0, 'field-switch')
 
       triggerOpen(true, {
         inherit: true,
       })
 
-      // setActiveIndex(index);
-
-      onSharedFocus(event)
+      onFieldFocus(0, 'input', event)
     }
 
     const onSelectorBlur: SelectorProps['onBlur'] = (event) => {
-      triggerOpen(false)
-
-      onSharedBlur(event)
+      onFieldBlur(0, 'input', event)
     }
 
     const onSelectorKeyDown: SelectorProps['onKeyDown'] = (event, preventDefault) => {
       if (event.key === 'Tab') {
-        triggerConfirm()
+        triggerConfirm('keyboard-submit-weak')
+      }
+      else if (event.key === 'Escape') {
+        triggerSingleValueChange(0, 'esc')
+        triggerOpen(false)
       }
 
       onKeyDown.value?.(event, preventDefault)
@@ -656,31 +699,6 @@ const SinglePicker = defineComponent<PickerProps>(
       { flush: 'post' },
     )
 
-    // >>> For complex picker, we need check if need to focus next one
-    watch(
-      mergedOpen,
-      () => {
-        const lastOp = lastOperation()
-
-        // Trade as confirm on field leave
-        if (!mergedOpen.value && lastOp === 'input') {
-          triggerOpen(false)
-          triggerConfirm()
-        }
-
-        // Submit with complex picker
-        if (
-          !mergedOpen.value
-          && complexPicker.value
-          && !needConfirm.value
-          && lastOp === 'panel'
-        ) {
-          triggerConfirm()
-        }
-      },
-      { flush: 'post' },
-    )
-
     const popupProps = computed(() => {
       const [mergedClassNames, mergedStyles] = semanticCtx.value
 
@@ -690,7 +708,7 @@ const SinglePicker = defineComponent<PickerProps>(
         showTime: showTime.value,
         disabledDate: disabledDate.value!,
         onFocus: onPanelFocus,
-        onBlur: onSharedBlur,
+        onBlur: (event: FocusEvent) => onFieldBlur(0, 'panel', event),
         picker: picker.value as any,
         mode: mergedMode.value,
         internalMode: internalMode.value,
@@ -706,7 +724,7 @@ const SinglePicker = defineComponent<PickerProps>(
         hoverValue: hoverValues.value,
         onHover: onPanelHover,
         needConfirm: needConfirm.value!,
-        onSubmit: triggerConfirm,
+        onSubmit: () => triggerConfirm('confirm'),
         onOk: triggerOk,
         presets: presetList.value,
         onPresetHover,
@@ -751,7 +769,7 @@ const SinglePicker = defineComponent<PickerProps>(
         onFocus: onSelectorFocus,
         onBlur: onSelectorBlur,
         onKeyDown: onSelectorKeyDown,
-        onSubmit: triggerConfirm,
+        onSubmit: () => triggerConfirm('keyboard-submit'),
         value: selectorValues.value,
         maskFormat: maskFormat.value,
         onChange: onSelectorChange,

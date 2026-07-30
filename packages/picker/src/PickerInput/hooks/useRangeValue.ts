@@ -4,7 +4,6 @@ import type { BaseInfo, FormatType, Locale } from '../../interface'
 import { computed, ref, shallowRef, watch } from 'vue'
 import { formatValue, isSame, isSameTimestamp } from '../../utils/dateUtil'
 import { fillIndex } from '../../utils/miscUtil'
-import useLockEffect from './useLockEffect'
 
 const EMPTY_VALUE: any[] = []
 
@@ -61,7 +60,7 @@ function orderDates<DateType extends object, DatesType extends DateType[]>(
 
 /**
  * Control the internal `value` align with prop `value` and provide a temp `calendarValue` for ui.
- * `calendarValue` will be reset when blur & focus & open.
+ * The caller controls the temporary `calendarValue` lifecycle through event handlers.
  */
 export function useInnerValue<ValueType extends DateType[], DateType extends object = any>(
   generateConfig: Ref<GenerateConfig<DateType>>,
@@ -153,8 +152,6 @@ export default function useRangeValue<ValueType extends DateType[], DateType ext
   triggerCalendarChange: TriggerCalendarChange<ValueType>,
   disabled: Ref<boolean[]>,
   formatList: Ref<FormatType[]>,
-  focused: Ref<boolean>,
-  open: Ref<boolean>,
   isInvalidateDate: (date: DateType, info?: { from?: DateType, activeIndex: number }) => boolean,
 ) {
   const orderOnChange = computed(() => (disabled.value.some(d => d) ? false : info.value.order))
@@ -279,57 +276,24 @@ export default function useRangeValue<ValueType extends DateType[], DateType ext
     }
   }
 
-  // ============================ Effect ============================
-  // All finished action trigger after 2 frames
-  const interactiveFinished = computed(() => !focused.value && !open.value)
+  // ============================= Reset =============================
+  // Reset calendar and submit values back to the committed value. The caller
+  // owns the temporary `calendarValue` lifecycle, so there is no longer a
+  // blur/open effect that submits on its own.
+  // 将 calendar 与 submit 值重置回已提交值。临时 `calendarValue` 的生命周期
+  // 由调用方掌控，因此不再有基于 blur/open 的自动提交 effect。
+  const resetValue = (index?: number) => {
+    if (index === undefined) {
+      triggerCalendarChange(mergedValue.value)
+      submitValue.value = mergedValue.value
+      return
+    }
 
-  useLockEffect(
-    computed(() => !interactiveFinished.value),
-    (next) => {
-      if (next === false) { // When next is false, it means condition became false -> !interactiveFinished is false -> interactiveFinished is true
-        // Logic in React: useLockEffect(!interactiveFinished, ...)
-        // If !interactiveFinished is true (interactive), it calls callback(true).
-        // If !interactiveFinished is false (finished), it calls callback(false) after delay.
-        // React code checks: if (interactiveFinished) ... which corresponds to callback(false).
+    triggerCalendarChange(
+      fillIndex(getCalendarValue(), index, mergedValue.value[index]) as ValueType,
+    )
+    setSubmitValue(fillIndex(submitValue.value, index, mergedValue.value[index]) as ValueType)
+  }
 
-        // Wait, useLockEffect implementation in Vue:
-        // watch(condition, (val) => { if (val) callback(val) else raf(() => callback(!!val)) })
-        // callback receives boolean.
-
-        // React code:
-        /*
-         useLockEffect(!interactiveFinished, () => {
-             if (interactiveFinished) { ... }
-         }, 2)
-         */
-        // React useLockEffect signature: (value: boolean, callback: (next: boolean) => void)
-
-        // In my Vue implementation:
-        /*
-         watch(condition, (val) => {
-             if (val) callback(val)
-             else raf(() => callback(!!val))
-         })
-         */
-        // If condition is true, callback(true).
-        // If condition is false, callback(false) (after raf).
-
-        // So if !interactiveFinished becomes false (finished), callback(false) is called.
-        // Inside callback(next), if next is false, then interactiveFinished is true.
-
-        if (!next) {
-          // Always try to trigger submit first
-          triggerSubmit()
-
-          // Trigger calendar change since this is a effect reset
-          triggerCalendarChange(mergedValue.value)
-
-          // Sync with value anyway
-          submitValue.value = mergedValue.value
-        }
-      }
-    },
-  )
-
-  return [flushSubmit, triggerSubmit] as const
+  return [flushSubmit, triggerSubmit, resetValue] as const
 }

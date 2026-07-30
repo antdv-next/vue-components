@@ -5,16 +5,17 @@ import { clsx } from '@v-c/util'
 import { computed, defineComponent, ref } from 'vue'
 import { isSame } from '../../../utils/dateUtil'
 import { usePickerContext } from '../../context'
+import ClearIcon from '../ClearIcon'
 import useInputProps from '../hooks/useInputHooks'
 import useRootProps from '../hooks/useRootProps'
-import Icon, { ClearIcon } from '../Icon'
+import Icon from '../Icon'
 import Input from '../Input'
 import MultipleDates from './MultipleDates'
 
 export interface SingleSelectorProps<DateType extends object = any> extends SelectorProps<DateType> {
   id?: string
   value?: DateType[]
-  onChange: (date: DateType[]) => void
+  onChange: (date: DateType[], source?: 'input' | 'remove') => void
 
   internalPicker: InternalMode
 
@@ -81,7 +82,7 @@ const SingleSelector = defineComponent<SingleSelectorProps>(
 
     // ======================== Change ========================
     const onSingleChange = (date: any) => {
-      props.onChange?.([date])
+      props.onChange?.([date], 'input')
     }
 
     const onMultipleRemove = (date: any) => {
@@ -96,12 +97,11 @@ const SingleSelector = defineComponent<SingleSelectorProps>(
             props.internalPicker as InternalMode,
           ),
       )
-      props.onChange?.(nextValues)
-
-      // When `open`, it means user is operating the
-      if (!props.open) {
-        props.onSubmit?.()
-      }
+      // An open popup keeps removal temporary until confirmation. Removing while
+      // closed is final and submits through the explicit `remove` source.
+      // popup 打开时仅保留临时删除值并等待确认；关闭时删除是最终操作，通过
+      // 明确的 `remove` 来源提交。
+      props.onChange?.(nextValues, props.open ? 'input' : 'remove')
     }
 
     // ======================== Inputs ========================
@@ -163,7 +163,7 @@ const SingleSelector = defineComponent<SingleSelectorProps>(
                 autofocus={autoFocus}
                 tabindex={tabIndex as any}
               />
-              <Icon type="suffix" icon={suffixIcon} />
+              <Icon icon={suffixIcon} />
               {showClear && <ClearIcon icon={clearIcon} onClear={onClear as any} />}
             </>
           )

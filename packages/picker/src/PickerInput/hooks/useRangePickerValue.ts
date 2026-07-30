@@ -40,6 +40,12 @@ export default function useRangePickerValue<DateType extends object, ValueType e
   calendarValue: Ref<ValueType>,
   modes: Ref<PanelMode[]>,
   open: Ref<boolean>,
+  /**
+   * Keep the current panels when focus moves between fields inside an open
+   * Picker, instead of jumping to the newly active field's value.
+   * Picker 打开状态下在 field 间移动焦点时保持当前面板，而不是跳到新 field 的值。
+   */
+  preserveOnFieldChange: Ref<boolean>,
   activeIndex: Ref<number>,
   pickerMode: Ref<InternalMode>,
   multiplePanel: Ref<boolean>,
@@ -111,31 +117,35 @@ export default function useRangePickerValue<DateType extends object, ValueType e
     }
   }
 
-  const getEndDatePickerValue = (startDate: DateType, endDate: DateType) => {
-    if (multiplePanel.value) {
-      const SAME_CHECKER: Partial<Record<InternalMode, PanelMode>> = {
-        date: 'month',
-        datetime: 'month',
-        week: 'month',
-        month: 'year',
-        quarter: 'year',
-      }
-
-      const mode = SAME_CHECKER[pickerMode.value]
-      if (mode && !isSame(generateConfig.value, locale.value, startDate, endDate, mode as any)) {
-        return offsetPanelDate(generateConfig.value, pickerMode.value, endDate, -1)
-      }
-
-      if (pickerMode.value === 'year' && startDate && endDate) {
-        const srcYear = Math.floor(generateConfig.value.getYear(startDate) / 10)
-        const tgtYear = Math.floor(generateConfig.value.getYear(endDate) / 10)
-        if (srcYear !== tgtYear) {
-          return offsetPanelDate(generateConfig.value, pickerMode.value, endDate, -1)
-        }
-      }
+  // Check whether two dates belong to the same panel.
+  // 判断两个日期是否属于同一个面板。
+  const isSamePanel = (date1: DateType, date2: DateType) => {
+    if (pickerMode.value === 'year') {
+      return (
+        Math.floor(generateConfig.value.getYear(date1) / 10)
+        === Math.floor(generateConfig.value.getYear(date2) / 10)
+      )
     }
 
-    return endDate
+    const panelMode: PanelMode
+      = pickerMode.value === 'month' || pickerMode.value === 'quarter' ? 'year' : 'month'
+    return isSame(generateConfig.value, locale.value, date1, date2, panelMode)
+  }
+
+  // Keep both values in the two visible panels when possible. Otherwise put
+  // the end value in the second panel.
+  // 尽量在双面板内同时展示两个值；无法容纳时，将 end 值放在右侧面板。
+  const getEndDatePickerValue = (startDate: DateType, endDate: DateType) => {
+    if (!multiplePanel.value || !startDate) {
+      return endDate
+    }
+
+    const nextPanelDate = offsetPanelDate(generateConfig.value, pickerMode.value, startDate, 1)
+    const endInPanels = isSamePanel(startDate, endDate) || isSamePanel(nextPanelDate, endDate)
+
+    return endInPanels
+      ? startDate
+      : offsetPanelDate(generateConfig.value, pickerMode.value, endDate, -1)
   }
 
   const prevActiveIndexRef = ref<number | null>(null)
@@ -154,7 +164,8 @@ export default function useRangePickerValue<DateType extends object, ValueType e
       let nextPickerValue: DateType | null = isTimePicker.value ? null : generateConfig.value.getNow()
 
       if (
-        prevActiveIndexRef.value !== null
+        preserveOnFieldChange.value
+        && prevActiveIndexRef.value !== null
         && prevActiveIndexRef.value !== mergedActiveIndex.value
       ) {
         nextPickerValue = [getStartPickerValue(true), getEndPickerValue(true)][mergedActiveIndex.value ^ 1]
