@@ -75,8 +75,18 @@ export interface Tab extends Omit<TabPaneProps, 'tab'> {
 }
 
 export type moreIcon = VueNode
+
+export type PopupRender = (
+  menu: VueNode,
+  info: {
+    restTabs: Tab[]
+    onClose: () => void
+  },
+) => VueNode
+
 export type MoreProps = {
   icon?: moreIcon
+  popupRender?: PopupRender
 } & Omit<DropdownProps, 'children'>
 
 export interface OperationNodeProps {

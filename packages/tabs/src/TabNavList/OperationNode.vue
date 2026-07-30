@@ -88,6 +88,21 @@ const overlayClassName = computed(() => {
 
 const moreIconNode = computed(() => moreProps.value?.icon || 'More')
 
+// `popupRender` lets consumers wrap or replace the generated menu (e.g. to add a
+// header or footer) while still receiving the overflowed tabs and a close handle.
+const overlayNode = computed(() => {
+  const popupRender = moreProps.value?.popupRender
+  if (!popupRender) {
+    return menuNode.value
+  }
+  return popupRender(menuNode.value, {
+    restTabs: props.tabs,
+    onClose: () => {
+      open.value = false
+    },
+  })
+})
+
 const moreStyle = computed(() => {
   const style: CSSProperties = {
     marginInlineStart: tabBarGutter.value ? `${tabBarGutter.value}px` : '0px',
@@ -173,7 +188,7 @@ defineExpose({
     <DropDown
       v-if="!mobile"
       :prefix-cls="dropdownPrefix"
-      :overlay="menuNode"
+      :overlay="overlayNode"
       :visible="tabs.length ? open : false"
       :overlay-class-name="overlayClassName"
       :overlay-style="popupStyle"
