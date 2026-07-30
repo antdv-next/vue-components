@@ -381,7 +381,7 @@ const Input = defineComponent<InputProps>(
             class={classNames.value.input}
             style={styles.value.input}
           />
-          <Icon type="suffix" icon={props.suffixIcon} />
+          <Icon icon={props.suffixIcon} />
           {props.clearIcon}
         </div>
       )

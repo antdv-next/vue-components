@@ -6,14 +6,13 @@ import { usePickerContext } from '../context'
 
 export interface IconProps {
   icon?: VueNode
-  type: 'suffix' | 'clear'
 }
 
 const Icon = defineComponent<IconProps>((props, { attrs }) => {
   const ctx = usePickerContext()
 
   return () => {
-    const { icon, type } = props
+    const { icon } = props
 
     if (!icon) {
       return null
@@ -30,7 +29,7 @@ const Icon = defineComponent<IconProps>((props, { attrs }) => {
     return (
       <span
         {...restAttrs}
-        class={clsx(`${prefixCls}-${type}`, classNames.suffix, attrClass)}
+        class={clsx(`${prefixCls}-suffix`, classNames.suffix, attrClass)}
         style={{ ...(styles.suffix || {}), ...mergedAttrStyle }}
       >
         {icon}
@@ -43,30 +42,3 @@ const Icon = defineComponent<IconProps>((props, { attrs }) => {
 })
 
 export default Icon
-
-export interface ClearIconProps extends Omit<IconProps, 'type'> {
-  onClear: VoidFunction
-}
-
-export const ClearIcon = defineComponent<ClearIconProps>((props, { attrs }) => {
-  return () => {
-    return (
-      <Icon
-        {...(attrs as any)}
-        icon={props.icon}
-        type="clear"
-        role="button"
-        onMousedown={(e: MouseEvent) => {
-          e.preventDefault()
-        }}
-        onClick={(e: MouseEvent) => {
-          e.stopPropagation()
-          props.onClear()
-        }}
-      />
-    )
-  }
-}, {
-  name: 'ClearIcon',
-  inheritAttrs: false,
-})
