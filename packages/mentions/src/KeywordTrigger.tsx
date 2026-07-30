@@ -1,3 +1,4 @@
+import type { VueNode } from '@v-c/util/dist/type'
 import type { CSSProperties } from 'vue'
 import type { DataDrivenOptionProps, Direction, Placement } from './Mentions'
 import Trigger from '@v-c/trigger'
@@ -50,6 +51,7 @@ interface KeywordTriggerProps {
   getPopupContainer?: () => HTMLElement
   popupClassName?: string
   popupStyle?: CSSProperties
+  popupRender?: (menu: VueNode) => VueNode
 }
 
 const KeywordTrigger = defineComponent<KeywordTriggerProps>(
@@ -70,6 +72,7 @@ const KeywordTrigger = defineComponent<KeywordTriggerProps>(
         getPopupContainer,
         popupClassName,
         popupStyle,
+        popupRender,
       } = props
 
       const dropdownPrefix = `${prefixCls}-dropdown`
@@ -82,11 +85,13 @@ const KeywordTrigger = defineComponent<KeywordTriggerProps>(
         />
       )
 
+      const dropdownPopup = popupRender ? popupRender(dropdownElement) : dropdownElement
+
       return (
         <Trigger
           prefixCls={dropdownPrefix}
           popupVisible={visible}
-          popup={dropdownElement}
+          popup={dropdownPopup}
           popupPlacement={dropdownPlacement.value}
           popupMotion={{ name: transitionName }}
           builtinPlacements={BUILT_IN_PLACEMENTS}

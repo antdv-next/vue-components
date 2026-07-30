@@ -70,6 +70,12 @@ export interface MentionsProps extends BaseTextareaAttrs {
     popup?: CSSProperties
   }
   onPopupScroll?: (event: UIEvent) => void
+  /**
+   * Customize the dropdown menu rendering
+   * @param menu The default dropdown menu
+   * @returns The customized dropdown menu
+   */
+  popupRender?: (menu: VueNode) => VueNode
   rows?: HTMLTextAreaElement['rows']
 }
 
@@ -112,6 +118,7 @@ const omitKeys = [
   'rows',
   'visible',
   'onPopupScroll',
+  'popupRender',
 ]
 
 export interface MentionsRef {
@@ -581,6 +588,7 @@ const InternalMentions = defineComponent<InternalMentionsProps>(
                   getPopupContainer={props.getPopupContainer}
                   popupClassName={clsx(props.popupClassName, mentionClassNames?.popup)}
                   popupStyle={styles?.popup}
+                  popupRender={props.popupRender}
                 >
                   <span>{mergedMeasurePrefix.value}</span>
                 </KeywordTrigger>
