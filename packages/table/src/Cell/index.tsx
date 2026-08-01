@@ -364,7 +364,7 @@ const Cell = defineComponent<CellProps<any>>({
 
       const mergedColSpan = legacyCellProps?.colSpan ?? additionalProps.colSpan ?? colSpan ?? 1
       const mergedRowSpan = legacyCellProps?.rowSpan ?? additionalProps.rowSpan ?? rowSpan ?? 1
-      const mergedHoverRowSpan = hoverRowSpan ?? mergedRowSpan
+      const mergedHoverRowSpan = legacyCellProps?.rowSpan ?? hoverRowSpan ?? mergedRowSpan
 
       const [hovering, onHover] = useHoverState(index!, mergedHoverRowSpan, tableContext)
 
