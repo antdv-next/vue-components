@@ -97,7 +97,7 @@ export default defineComponent<ListComponentProps>((props, { expose }) => {
         )}
         dir={direction}
         style={{
-          maxHeight: height,
+          maxHeight: `${height}px`,
           overflowY: height === undefined ? undefined : 'auto',
           overflowAnchor: 'none',
           ...styles?.root,
