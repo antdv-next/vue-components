@@ -1,13 +1,43 @@
 import { mount } from '@vue/test-utils'
 import dayjs from 'dayjs'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 import Picker, { RangePicker } from '../src'
 import generateConfig from '../src/generate/dayjs'
 import enUS from '../src/locale/en_US'
 
-describe('Picker uncontrolled components', () => {
-  it('SinglePicker clears internal value by clear button', async () => {
+describe('picker uncontrolled components', () => {
+  it('keeps the popup open when switching panel mode', async () => {
+    const onOpenChange = vi.fn()
+    const wrapper = mount(Picker as any, {
+      attachTo: document.body,
+      props: {
+        generateConfig,
+        locale: enUS,
+        open: true,
+        onOpenChange,
+      },
+    })
+
+    const input = wrapper.find('input')
+    await nextTick()
+    await input.trigger('focus')
+    await nextTick()
+
+    const yearButton = document.querySelector('.vc-picker-year-btn') as HTMLButtonElement
+    const mouseDownEvent = new MouseEvent('mousedown', { bubbles: true, cancelable: true })
+    yearButton.dispatchEvent(mouseDownEvent)
+    yearButton.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    await nextTick()
+
+    expect(mouseDownEvent.defaultPrevented).toBe(true)
+    expect(document.querySelector('.vc-picker-year-panel')).not.toBeNull()
+    expect(onOpenChange).not.toHaveBeenCalledWith(false)
+
+    wrapper.unmount()
+  })
+
+  it('singlePicker clears internal value by clear button', async () => {
     const wrapper = mount(Picker as any, {
       attachTo: document.body,
       props: {
@@ -29,7 +59,7 @@ describe('Picker uncontrolled components', () => {
     wrapper.unmount()
   })
 
-  it('RangePicker clears internal values by clear button', async () => {
+  it('rangePicker clears internal values by clear button', async () => {
     const wrapper = mount(RangePicker as any, {
       attachTo: document.body,
       props: {

@@ -213,6 +213,11 @@ const Popup = defineComponent<PopupProps>(
         onBlur?.(event)
       }
 
+      const onInternalPanelMouseDown: MouseEventHandler = (event) => {
+        onPanelMouseDown?.(event)
+        event.preventDefault()
+      }
+
       const prefixCls = ctx.value.prefixCls
       let mergedNodes: VueNode = (
         <div class={`${prefixCls}-panel-layout`}>
@@ -258,7 +263,7 @@ const Popup = defineComponent<PopupProps>(
               props.popupContainerRef.value = node
             }
           }}
-          onMousedown={onPanelMouseDown}
+          onMousedown={onInternalPanelMouseDown}
           tabindex={-1}
           class={clsx(
             containerPrefixCls,
@@ -271,10 +276,6 @@ const Popup = defineComponent<PopupProps>(
             [rtl.value ? marginLeft : marginRight]: 'auto',
             ...styles?.popup?.container,
           }}
-          // Still wish not to lose focus on mouse down
-          // onMouseDown={(e) => {
-          //   // e.preventDefault();
-          // }}
           onFocusin={onPanelFocusIn}
           onFocusout={onPanelFocusOut}
         >

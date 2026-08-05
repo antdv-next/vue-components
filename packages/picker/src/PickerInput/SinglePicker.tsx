@@ -733,7 +733,6 @@ const SinglePicker = defineComponent<PickerProps>(
         cellRender: onInternalCellRender,
         classNames: mergedClassNames,
         styles: mergedStyles,
-        popupContainerRef: popupRef.value
       }
     })
 
@@ -743,6 +742,7 @@ const SinglePicker = defineComponent<PickerProps>(
       const panel = (
         <Popup
           {...popupProps.value as any}
+          popupContainerRef={popupRef}
         />
       )
       const singleSelectorProps: Record<string, any> = {
