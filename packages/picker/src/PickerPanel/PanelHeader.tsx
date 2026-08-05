@@ -185,6 +185,7 @@ const PanelHeader = defineComponent<PanelHeaderProps<any>>(
   },
   {
     name: 'PanelHeader',
+    inheritAttrs: false
   },
 )
 

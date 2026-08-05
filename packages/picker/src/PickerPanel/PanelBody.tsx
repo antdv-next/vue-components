@@ -187,6 +187,7 @@ const PanelBody = defineComponent<PanelBodyProps<any>>(
   },
   {
     name: 'PanelBody',
+    inheritAttrs: false
   },
 )
 
