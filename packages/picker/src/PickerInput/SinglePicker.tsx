@@ -733,6 +733,7 @@ const SinglePicker = defineComponent<PickerProps>(
         cellRender: onInternalCellRender,
         classNames: mergedClassNames,
         styles: mergedStyles,
+        popupContainerRef: popupRef.value
       }
     })
 
