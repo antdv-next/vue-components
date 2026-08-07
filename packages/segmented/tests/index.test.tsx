@@ -26,6 +26,49 @@ describe('segmented', () => {
     expect((inputs[1].element as HTMLInputElement).checked).toBe(false)
   })
 
+  it('should keep selected item when controlled value is not updated after click', async () => {
+    const onChange = vitest.fn()
+    const wrapper = mount(
+      <Segmented
+        value="a"
+        options={['a', 'b', 'c']}
+        onChange={onChange}
+      />,
+    )
+
+    const inputs = wrapper.findAll('.vc-segmented-item-input')
+    const nextInput = inputs[1].element as HTMLInputElement
+    nextInput.checked = true
+    await inputs[1].trigger('change')
+    await nextTick()
+    await nextTick()
+
+    const updatedInputs = wrapper.findAll('.vc-segmented-item-input')
+    expect(onChange).toHaveBeenCalledWith('b')
+    expect((updatedInputs[0].element as HTMLInputElement).checked).toBe(true)
+    expect((updatedInputs[1].element as HTMLInputElement).checked).toBe(false)
+  })
+
+  it('should keep selected item when controlled value is not updated after keyboard change', async () => {
+    const onChange = vitest.fn()
+    const wrapper = mount(
+      <Segmented
+        value="a"
+        options={['a', 'b', 'c']}
+        onChange={onChange}
+      />,
+    )
+
+    const inputs = wrapper.findAll('.vc-segmented-item-input')
+    await inputs[0].trigger('keydown', { key: 'ArrowRight' })
+    await nextTick()
+    await nextTick()
+
+    expect(onChange).toHaveBeenCalledWith('b')
+    expect((inputs[0].element as HTMLInputElement).checked).toBe(true)
+    expect((inputs[1].element as HTMLInputElement).checked).toBe(false)
+  })
+
   it('should not select a disabled option when it is the only next item', async () => {
     const onChange = vitest.fn()
     const wrapper = mount(

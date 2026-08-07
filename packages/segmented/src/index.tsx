@@ -3,7 +3,7 @@ import type { VueNode } from '@v-c/util/dist/type'
 import type { CSSProperties } from 'vue'
 import { clsx } from '@v-c/util'
 import omit from '@v-c/util/dist/omit'
-import { computed, defineComponent, ref, shallowRef, watch } from 'vue'
+import { computed, defineComponent, nextTick, ref, shallowRef, watch } from 'vue'
 import MotionThumb from './MotionThumb'
 
 export type SemanticName = 'item' | 'label'
@@ -171,19 +171,32 @@ const Segmented = defineComponent<SegmentedProps>(
       return normalizeOptions(props?.options ?? [])
     })
 
-    // Note: We should not auto switch value when value not exist in options
-    // which may break single source of truth.
-    const rawValue = shallowRef(
-      props?.value ?? props?.defaultValue ?? segmentedOptions.value[0]?.value,
+    const internalValue = shallowRef<SegmentedRawOption | undefined>(
+      props?.defaultValue ?? segmentedOptions.value[0]?.value,
     )
-    watch(() => props.value, () => {
-      rawValue.value = props.value as any
+    const mergedValue = computed(() => props.value ?? internalValue.value)
+    const controlRerender = shallowRef(0)
+
+    watch(() => props.value, (value) => {
+      if (value === undefined) {
+        internalValue.value = value
+      }
     })
     // ======================= Change ========================
     const thumbShow = shallowRef(false)
     const handleChange = (_event: ChangeEvent, val: SegmentedRawOption) => {
-      rawValue.value = val
+      const prevControlledValue = props.value
+      if (prevControlledValue === undefined) {
+        internalValue.value = val
+      }
       props?.onChange?.(val)
+      if (prevControlledValue !== undefined) {
+        nextTick(() => {
+          if (props.value === prevControlledValue && props.value !== val) {
+            controlRerender.value += 1
+          }
+        })
+      }
     }
 
     // ======================= Focus ========================
@@ -208,19 +221,18 @@ const Segmented = defineComponent<SegmentedProps>(
     // ======================= Keyboard ========================
     const onOffset = (offset: number) => {
       const validOptions = segmentedOptions.value.filter(
-        option => option.value === rawValue.value || !option.disabled,
+        option => option.value === mergedValue.value || !option.disabled,
       )
 
       const currentIndex = validOptions.findIndex(
-        option => option?.value === rawValue.value,
+        option => option?.value === mergedValue.value,
       )
 
       const total = validOptions.length
       const nextIndex = (currentIndex + offset + total) % total
       const nextOption = validOptions[nextIndex]
-      if (nextOption && nextOption.value !== rawValue.value) {
-        rawValue.value = nextOption.value
-        props?.onChange?.(nextOption.value)
+      if (nextOption && nextOption.value !== mergedValue.value) {
+        handleChange(null as any, nextOption.value)
       }
     }
 
@@ -256,21 +268,21 @@ const Segmented = defineComponent<SegmentedProps>(
             name={name}
             data={segmentedOption}
             itemRender={itemRender}
-            key={optionValue}
+            key={`${optionValue}-${controlRerender.value}`}
             prefixCls={prefixCls!}
             class={clsx(
               segmentedOption.class,
               `${prefixCls}-item`,
               segmentedClassNames?.item,
               {
-                [`${prefixCls}-item-selected`]: optionValue === rawValue.value && !thumbShow.value,
-                [`${prefixCls}-item-focused`]: isFocused.value && isKeyboard.value && optionValue === rawValue.value,
+                [`${prefixCls}-item-selected`]: optionValue === mergedValue.value && !thumbShow.value,
+                [`${prefixCls}-item-focused`]: isFocused.value && isKeyboard.value && optionValue === mergedValue.value,
               },
             )}
             style={styles?.item}
             classNames={segmentedClassNames}
             styles={styles}
-            checked={optionValue === rawValue.value}
+            checked={optionValue === mergedValue.value}
             onChange={handleChange}
             onFocus={handleFocus}
             onBlur={handleBlur}
@@ -308,7 +320,7 @@ const Segmented = defineComponent<SegmentedProps>(
             <MotionThumb
               vertical={vertical}
               prefixCls={prefixCls!}
-              value={rawValue.value as any}
+              value={mergedValue.value as any}
               containerRef={containerRef.value!}
               motionName={`${prefixCls}-${motionName}`}
               direction={direction}
