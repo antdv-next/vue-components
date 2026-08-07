@@ -257,8 +257,8 @@ importers:
         specifier: workspace:^
         version: link:../virtual-list
       vue:
-        specifier: ^3.0.0
-        version: 3.5.25(typescript@5.9.3)
+        specifier: ^3.5.39
+        version: 3.5.39(typescript@5.9.3)
 
   packages/mentions:
     dependencies:
