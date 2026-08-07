@@ -29,10 +29,11 @@ describe('table hover with expandedRowOffset', () => {
       props: {
         columns,
         data,
-        expandable: { defaultExpandedRowKeys: ['1'], expandedRowOffset: 3 },
-      },
-      slots: {
-        expandedRowRender: ({ record }: any) => h('div', { class: 'expanded-content' }, record.description),
+        expandable: {
+          defaultExpandedRowKeys: ['1'],
+          expandedRowOffset: 3,
+          expandedRowRender: record => h('div', { class: 'expanded-content' }, record.description),
+        },
       },
     })
 
@@ -72,10 +73,11 @@ describe('table hover with expandedRowOffset', () => {
       props: {
         columns,
         data,
-        expandable: { defaultExpandedRowKeys: ['1', '2', '3', '4'], expandedRowOffset: 3 },
-      },
-      slots: {
-        expandedRowRender: ({ record }: any) => h('div', { class: 'expanded-content' }, record.description),
+        expandable: {
+          defaultExpandedRowKeys: ['1', '2', '3', '4'],
+          expandedRowOffset: 3,
+          expandedRowRender: record => h('div', { class: 'expanded-content' }, record.description),
+        },
       },
     })
 
@@ -94,6 +96,51 @@ describe('table hover with expandedRowOffset', () => {
     expect(notExpandableAgeCell!.classes()).toContain('vc-table-cell-row-hover')
     expect(teamACell!.classes()).not.toContain('vc-table-cell-row-hover')
     expect(jimNameCell!.classes()).not.toContain('vc-table-cell-row-hover')
+
+    wrapper.unmount()
+  })
+
+  it('uses legacy render rowSpan for the hover range', async () => {
+    const columns = [
+      Table.EXPAND_COLUMN,
+      {
+        title: 'Team',
+        dataIndex: 'team',
+        key: 'team',
+        render: (value: string, _record: any, index: number) => ({
+          children: value,
+          props: { rowSpan: index % 2 === 0 ? 2 : 0 },
+        }),
+      },
+      { title: 'Name', dataIndex: 'name', key: 'name' },
+    ]
+    const data = [
+      { key: '1', team: 'Team A', name: 'John' },
+      { key: '2', team: 'Team A', name: 'Jim' },
+    ]
+
+    const wrapper = mount(Table, {
+      props: {
+        columns,
+        data,
+        expandable: {
+          expandedRowOffset: 2,
+          expandedRowRender: record => h('div', record.name),
+        },
+      },
+    })
+
+    const firstRow = wrapper.find('tbody tr[data-row-key="1"]')
+    const secondRow = wrapper.find('tbody tr[data-row-key="2"]')
+    const teamCell = firstRow.findAll('td').find(cell => cell.text() === 'Team A')
+
+    expect(teamCell).toBeTruthy()
+    expect(teamCell!.attributes('rowspan')).toBe('2')
+
+    await teamCell!.trigger('mouseenter')
+    await nextTick()
+
+    expect(secondRow.findAll('td').some(cell => cell.classes().includes('vc-table-cell-row-hover'))).toBe(true)
 
     wrapper.unmount()
   })
