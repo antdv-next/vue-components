@@ -12,10 +12,19 @@ import type {
 } from '../../interface'
 import { warning } from '@v-c/util'
 import { flattenChildren } from '@v-c/util/dist/props-util'
-import { computed, isVNode, unref } from 'vue'
+import { computed, isVNode, toRaw, unref } from 'vue'
 import { EXPAND_COLUMN } from '../../constant'
 import { INTERNAL_COL_DEFINE } from '../../utils/legacyUtil'
 import useWidthColumns from './useWidthColumns'
+
+/**
+ * `EXPAND_COLUMN` is a sentinel matched by reference. When `columns` comes from a deep
+ * reactive source (component props, `reactive()` or `ref()`), every entry is handed out
+ * as a proxy, so the raw value must be unwrapped before comparing identity.
+ */
+function isExpandColumn(column: any): boolean {
+  return toRaw(column) === EXPAND_COLUMN
+}
 
 export function convertChildrenToColumns<RecordType>(children: any): ColumnsType<RecordType> {
   return flattenChildren(children)
@@ -131,7 +140,7 @@ export default function useColumns<RecordType>(
         )
       }
 
-      if (!cloneColumns.includes(EXPAND_COLUMN)) {
+      if (!cloneColumns.some(isExpandColumn)) {
         const expandColIndex = expandIconColumnIndex || 0
         const fixed = unref(options.fixed)
         const insertIndex
@@ -145,14 +154,14 @@ export default function useColumns<RecordType>(
 
       if (
         process.env.NODE_ENV !== 'production'
-        && cloneColumns.filter(c => c === EXPAND_COLUMN).length > 1
+        && cloneColumns.filter(c => isExpandColumn(c)).length > 1
       ) {
         warning(false, 'There exist more than one `EXPAND_COLUMN` in `columns`.')
       }
 
-      const expandColumnIndex = cloneColumns.indexOf(EXPAND_COLUMN)
+      const expandColumnIndex = cloneColumns.findIndex(isExpandColumn)
       cloneColumns = cloneColumns.filter(
-        (column, index) => column !== EXPAND_COLUMN || index === expandColumnIndex,
+        (column, index) => !isExpandColumn(column) || index === expandColumnIndex,
       )
 
       const prevColumn = baseColumns.value[expandColumnIndex]
@@ -200,7 +209,7 @@ export default function useColumns<RecordType>(
       }
 
       return cloneColumns.map((col, index) => {
-        const column = col === EXPAND_COLUMN ? expandColumn : col
+        const column = isExpandColumn(col) ? expandColumn : col
         if ((options.expandedRowOffset || 0) && index < (options.expandedRowOffset || 0)) {
           return {
             ...column,
@@ -211,11 +220,11 @@ export default function useColumns<RecordType>(
       })
     }
 
-    if (process.env.NODE_ENV !== 'production' && baseColumns.value.includes(EXPAND_COLUMN)) {
+    if (process.env.NODE_ENV !== 'production' && baseColumns.value.some(isExpandColumn)) {
       warning(false, '`expandable` is not config but there exist `EXPAND_COLUMN` in `columns`.')
     }
 
-    return baseColumns.value.filter(col => col !== EXPAND_COLUMN)
+    return baseColumns.value.filter(col => !isExpandColumn(col))
   })
 
   const mergedColumns = computed(() => {

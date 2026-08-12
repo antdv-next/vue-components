@@ -52,6 +52,7 @@ export interface TableContextProps<RecordType = any> {
   expandableType: ExpandableType
   expandRowByClick: boolean
   expandedRowRender: ExpandedRowRender<RecordType>
+  forceRender: boolean
   expandIcon: RenderExpandIcon<RecordType>
   onTriggerExpand: TriggerEventHandler<RecordType>
   expandIconColumnIndex: number

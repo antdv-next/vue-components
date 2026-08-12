@@ -428,6 +428,12 @@ const Tree = defineComponent<TreeProps>(
     })
 
     const scrollTo: ScrollTo = (scroll) => {
+      // `autoExpand` only drives the uncontrolled state. When `expandedKeys` is
+      // controlled the caller owns the expansion (see `useTree().getPath`).
+      if (scroll && typeof scroll === 'object' && 'autoExpand' in scroll && scroll.autoExpand && props.expandedKeys === undefined) {
+        setExpandedKeys(arrAdd(expandedKeys.value, scroll.key))
+      }
+
       listRef.value?.scrollTo(scroll)
     }
 

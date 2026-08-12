@@ -1,10 +1,17 @@
 import type { MouseEventHandler } from '@v-c/util/dist/EventInterface'
 import type { Key as VCKey, VueNode } from '@v-c/util/dist/type'
+import type { ScrollTo as VirtualListScrollTo } from '@v-c/virtual-list'
 import type { CSSProperties, VNode } from 'vue'
 
-export type { ScrollTo } from '@v-c/virtual-list'
-
 export type Key = VCKey
+
+type VirtualListScrollConfig = Exclude<NonNullable<Parameters<VirtualListScrollTo>[0]>, number>
+type ScrollTarget = Extract<VirtualListScrollConfig, { key: Key }>
+type TreeScrollConfig
+  = | (Exclude<VirtualListScrollConfig, ScrollTarget> & { autoExpand?: never })
+    | (ScrollTarget & { autoExpand?: boolean })
+
+export type ScrollTo = (scroll?: number | TreeScrollConfig | null) => void
 
 /**
  * Typescript not support `bigint` as index type yet.

@@ -5,7 +5,7 @@ import type { DisplayValueType, Mode, RenderNode } from '../interface'
 import type { InputRef } from './Input.tsx'
 import { clsx } from '@v-c/util'
 import { getDOM } from '@v-c/util/dist/Dom/findDOMNode'
-import KeyCode from '@v-c/util/dist/KeyCode'
+import KeyCode, { KeyCodeStr } from '@v-c/util/dist/KeyCode'
 import omit from '@v-c/util/dist/omit'
 import { cloneVNode, computed, defineComponent, isVNode, shallowRef } from 'vue'
 import useBaseProps from '../hooks/useBaseProps'
@@ -219,6 +219,18 @@ const SelectInput = defineComponent<SelectInputProps>(
       props?.onMouseDown?.(event)
     }
 
+    // ===================== Clear ======================
+    // The clear button lives inside the select root, whose `onKeydown` treats
+    // Enter/Space as "open the dropdown" and calls `preventDefault` on them.
+    // That would cancel the native button activation, so keyboard users would
+    // never get the `click` event which performs the clear. Keep the activation
+    // keys scoped to the button itself.
+    const onClearKeydown = (event: KeyboardEvent) => {
+      if (event.key === KeyCodeStr.Enter || event.key === KeyCodeStr.Space) {
+        event.stopPropagation()
+      }
+    }
+
     // =================== Context ===================
     // Create context value with wrapped callbacks
     const contextValue = computed(() => ({
@@ -326,6 +338,7 @@ const SelectInput = defineComponent<SelectInputProps>(
                 e.preventDefault();
                 (e as any)._select_lazy = true
               }}
+              onKeydown={onClearKeydown}
               // Clearing happens on click so it works for both pointer and
               // keyboard (Enter/Space) activation.
               onClick={(e: MouseEvent) => onClearMouseDown.value?.(e)}

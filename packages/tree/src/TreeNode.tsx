@@ -38,6 +38,9 @@ const TreeNode = defineComponent<TreeNodeProps>(
       return context.selectable
     })
 
+    // If not checkable and selectable is false, show unselectable class for antd to style
+    const isUnselectable = computed(() => !context.checkable && !isSelectable.value)
+
     const hasChildren = computed(() => {
       const { children } = getEntity(context.keyEntities, props.eventKey!) || {}
       return Boolean((children || []).length)
@@ -335,6 +338,7 @@ const TreeNode = defineComponent<TreeNodeProps>(
           aria-disabled={isDisabled.value}
           class={clsx(props.className, `${context.prefixCls}-treenode`, context.classNames?.item, {
             [`${context.prefixCls}-treenode-disabled`]: isDisabled.value,
+            [`${context.prefixCls}-treenode-unselectable`]: isUnselectable.value,
             [`${context.prefixCls}-treenode-switcher-${props.expanded ? 'open' : 'close'}`]: !memoizedIsLeaf.value,
             [`${context.prefixCls}-treenode-checkbox-checked`]: props.checked,
             [`${context.prefixCls}-treenode-checkbox-indeterminate`]: props.halfChecked,

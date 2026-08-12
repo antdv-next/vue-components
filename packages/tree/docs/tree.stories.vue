@@ -11,6 +11,7 @@ import DraggableAllowDrop from './draggableAllowDrop'
 import Dropdown from './dropdown'
 import Dynamic from './dynamic'
 import ExpandAction from './expandAction'
+import ExpandNestNode from './expandNestNode'
 import FieldNames from './fieldNames'
 import Icon from './icon'
 import Selectable from './selectable'
@@ -44,6 +45,9 @@ import Selectable from './selectable'
     </Variant>
     <Variant title="expandAction">
       <ExpandAction />
+    </Variant>
+    <Variant title="expandNestNode">
+      <ExpandNestNode />
     </Variant>
     <Variant title="selectable">
       <Selectable />

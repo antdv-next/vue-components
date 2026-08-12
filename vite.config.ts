@@ -41,6 +41,7 @@ const comps = [
   'color-picker',
   'overflow',
   'menu',
+  'select',
   'tree',
   'tree-select',
 ]

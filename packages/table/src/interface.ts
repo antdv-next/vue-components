@@ -260,6 +260,7 @@ export interface ExpandableConfig<RecordType> {
   expandedRowKeys?: readonly Key[]
   defaultExpandedRowKeys?: readonly Key[]
   expandedRowRender?: ExpandedRowRender<RecordType>
+  forceRender?: boolean
   columnTitle?: VueNode
   expandRowByClick?: boolean
   expandIcon?: RenderExpandIcon<RecordType>

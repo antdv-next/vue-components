@@ -112,4 +112,42 @@ describe('select clear', () => {
 
     wrapper.unmount()
   })
+
+  it.each([
+    ['single', undefined, 'a', undefined],
+    ['multiple', 'multiple', ['a'], []],
+  ] as const)('clears value with keyboard (%s)', async (_name, mode, value, cleared) => {
+    for (const key of ['Enter', ' ']) {
+      const onClear = vi.fn()
+      const onChange = vi.fn()
+      const onDeselect = vi.fn()
+      const wrapper = mount(Select, {
+        attachTo: document.body,
+        props: { mode, value, options, allowClear: true, onClear, onChange, onDeselect },
+      })
+      await flushSelect()
+
+      const clear = wrapper.find('.vc-select-clear')
+      const keydownEvent = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true })
+      clear.element.dispatchEvent(keydownEvent)
+      await flushSelect()
+
+      // The root handler treats Enter/Space as "open the dropdown" and prevents
+      // the default, which would cancel the native button activation and so the
+      // clear would never happen.
+      expect(keydownEvent.defaultPrevented).toBe(false)
+      expect(isOpen()).toBe(false)
+
+      // jsdom does not implement native button activation, so send the click a
+      // browser would have dispatched.
+      await clear.trigger('click')
+      await flushSelect()
+
+      expect(onChange).toHaveBeenCalledWith(cleared, cleared)
+      expect(onDeselect).not.toHaveBeenCalled()
+      expect(onClear).toHaveBeenCalled()
+
+      wrapper.unmount()
+    }
+  })
 })

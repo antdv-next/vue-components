@@ -578,6 +578,7 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
     tableContext.expandableType = expandableType.value
     tableContext.expandRowByClick = expandableConfig.value.expandRowByClick
     tableContext.expandedRowRender = expandableConfig.value.expandedRowRender
+    tableContext.forceRender = expandableConfig.value.forceRender ?? false
     tableContext.expandedRowOffset = expandableConfig.value.expandedRowOffset
     tableContext.onTriggerExpand = onTriggerExpand
     tableContext.expandIconColumnIndex = expandableConfig.value.expandIconColumnIndex

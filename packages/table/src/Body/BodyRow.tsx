@@ -73,7 +73,9 @@ export function getCellProps<RecordType>(
     )
   }
 
-  const additionalCellProps = column.onCell?.(record, index) || {}
+  // Clone so patching `rowSpan` below never mutates the object `onCell` returned,
+  // which users often keep stable across renders.
+  const additionalCellProps = { ...column.onCell?.(record, index) }
 
   let hoverRowSpan: number | undefined
   if (expandedRowOffset && expandable.value && colIndex < expandedRowOffset) {
@@ -118,6 +120,7 @@ const BodyRow = defineComponent<BodyRowProps<any>>({
     'expandedRowInfo',
   ] as any,
   setup(props) {
+    // Keep the expanded row mounted after it has been expanded
     const expandedRef = ref(false)
 
     const rowInfo = useRowInfo(
@@ -156,6 +159,7 @@ const BodyRow = defineComponent<BodyRowProps<any>>({
       const flattenColumns = tableContext.flattenColumns
       const expandedRowClassName = tableContext.expandedRowClassName
       const expandedRowRender = tableContext.expandedRowRender
+      const forceRender = tableContext.forceRender
 
       const expandedClsName = computedExpandedClassName(
         expandedRowClassName,
@@ -232,7 +236,7 @@ const BodyRow = defineComponent<BodyRowProps<any>>({
       )
 
       let expandRowNode: any
-      if (rowSupportExpand.value && (expandedRef.value || expanded.value)) {
+      if (rowSupportExpand.value && (forceRender || expandedRef.value || expanded.value)) {
         const expandContent = expandedRowRender(
           record,
           index,

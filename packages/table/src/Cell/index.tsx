@@ -37,6 +37,7 @@ export interface CellProps<RecordType extends DefaultRecordType> {
   children?: any
   colSpan?: number
   rowSpan?: number
+  /** @private Original rowSpan before patching it for expanded rows */
   hoverRowSpan?: number
   scope?: ScopeType
   ellipsis?: CellEllipsisType

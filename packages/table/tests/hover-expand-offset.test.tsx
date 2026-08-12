@@ -144,4 +144,52 @@ describe('table hover with expandedRowOffset', () => {
 
     wrapper.unmount()
   })
+
+  it('does not mutate the object returned by `onCell`', async () => {
+    const rowSpanProps: any[] = [{ rowSpan: 2 }, { rowSpan: 0 }, {}]
+    const columns = [
+      {
+        title: 'Group',
+        dataIndex: 'group',
+        key: 'group',
+        onCell: (_record: any, index = 0) => rowSpanProps[index],
+      },
+      { title: 'Name', dataIndex: 'name', key: 'name' },
+    ]
+    const data = [
+      { key: 'a', group: 'Group 1', name: 'Alpha' },
+      { key: 'b', group: 'Group 1', name: 'Beta' },
+      { key: 'c', group: 'Group 2', name: 'Gamma' },
+    ]
+    // The expand column is auto inserted at index 0, so `group` sits at index 1
+    // and needs an offset of 2 to be covered.
+    const expandable = (expandedRowKeys: string[]) => ({
+      expandedRowOffset: 2,
+      expandedRowKeys,
+      expandedRowRender: (record: any) => h('div', record.name),
+    })
+
+    const wrapper = mount(Table, {
+      props: { columns, data, expandable: expandable([]) },
+    })
+
+    const getGroupCell = () => wrapper.findAll('tbody td').find(cell => cell.text() === 'Group 1')!
+
+    expect(rowSpanProps[0].rowSpan).toBe(2)
+    expect(getGroupCell().attributes('rowspan')).toBe('2')
+
+    await wrapper.setProps({ expandable: expandable(['a']) } as any)
+    await nextTick()
+
+    expect(rowSpanProps[0].rowSpan).toBe(2)
+    expect(getGroupCell().attributes('rowspan')).toBe('3')
+
+    await wrapper.setProps({ expandable: expandable([]) } as any)
+    await nextTick()
+
+    expect(rowSpanProps[0].rowSpan).toBe(2)
+    expect(getGroupCell().attributes('rowspan')).toBe('2')
+
+    wrapper.unmount()
+  })
 })

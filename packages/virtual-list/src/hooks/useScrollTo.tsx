@@ -27,7 +27,7 @@ export interface ScrollOffsetInfo {
    *
    * 已解析的对齐方向。auto 在首帧测量时仍是 'auto'，定向后变 'top'/'bottom'。
    */
-  align: ScrollAlign;
+  align: ScrollAlign
 }
 
 export type ScrollOffset = number | ((info: ScrollOffsetInfo) => number)
@@ -62,6 +62,7 @@ export default function useScrollTo(
   const syncState = shallowRef<{
     times: number
     index: number
+    key?: Key
     offset: ScrollOffset
     originAlign: ScrollAlign
     targetAlign?: 'top' | 'bottom'
@@ -93,17 +94,24 @@ export default function useScrollTo(
 
         collectHeight()
 
-        const { targetAlign, originAlign, index, offset: rawOffset } = syncState.value
-        const mergedAlign = targetAlign || originAlign;
+        const { targetAlign, originAlign, offset: rawOffset } = syncState.value
+        // `scrollTo` may be called before `data` is updated (e.g. the owner changes
+        // its state and scrolls in the same tick). Resolve the `key` against the
+        // latest data on every pass instead of trusting the index we captured.
+        const index = syncState.value.index >= 0
+          ? syncState.value.index
+          : data.value.findIndex(item => getKey(item) === syncState.value!.key)
+        const mergedAlign = targetAlign || originAlign
         const offset = getOffset(rawOffset, { getSize, align: mergedAlign })
 
         const height = containerRef.value.clientHeight
-        let needCollectHeight = false
+        // Key is not in the data yet. Keep retrying until data catches up.
+        let needCollectHeight = index < 0
         let newTargetAlign: 'top' | 'bottom' | null = targetAlign ?? null
         let targetTop: number | null = null
 
         // Go to next frame if height not exist
-        if (height) {
+        if (height && index >= 0) {
           const mergedAlign = targetAlign || originAlign
 
           // Get top & bottom
@@ -175,6 +183,7 @@ export default function useScrollTo(
           syncState.value = {
             ...syncState.value,
             times: syncState.value.times + 1,
+            index,
             targetAlign: newTargetAlign as any,
             lastTop: targetTop as any,
           }
@@ -209,13 +218,15 @@ export default function useScrollTo(
     }
     else if (arg && typeof arg === 'object') {
       let index: number
+      let key: Key | undefined
       const { align } = arg
 
       if ('index' in arg) {
         ({ index } = arg)
       }
       else {
-        index = data.value.findIndex(item => getKey(item) === arg.key)
+        key = arg.key
+        index = data.value.findIndex(item => getKey(item) === key)
       }
 
       const { offset: rawOffset = 0 } = arg
@@ -223,6 +234,7 @@ export default function useScrollTo(
       syncState.value = {
         times: 0,
         index,
+        key,
         offset: rawOffset,
         originAlign: align!,
       }

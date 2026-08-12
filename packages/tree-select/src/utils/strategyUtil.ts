@@ -32,7 +32,12 @@ export function formatStrategyValues(
     return values.filter((key) => {
       const entity = keyEntities[String(key)]
       const parent = entity ? entity.parent : null
-      return !parent || isCheckDisabled(parent.node as any) || !valueSet.has(parent.key as any)
+      return (
+        !parent
+        || isCheckDisabled(entity.node as any)
+        || isCheckDisabled(parent.node as any)
+        || !valueSet.has(parent.key as any)
+      )
     })
   }
 

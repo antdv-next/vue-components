@@ -42,9 +42,12 @@ const BodyLine = defineComponent<BodyLineProps<any>>({
       const { rowSupportExpand, expanded, rowProps } = rowInfo
       const expandedRowRender = tableContext.expandedRowRender
       const expandedRowClassName = tableContext.expandedRowClassName
+      const forceRender = tableContext.forceRender
 
       let expandRowNode: any
-      if (rowSupportExpand.value && expanded.value) {
+      // `extra` lines are the absolutely positioned overlay for `rowSpan` cells,
+      // they must not render the expanded content a second time.
+      if (!extra && rowSupportExpand.value && (forceRender || expanded.value)) {
         const expandContent = expandedRowRender(record, index, indent + 1, expanded.value)
         const expandedClsName = computedExpandedClassName(
           expandedRowClassName,
@@ -71,6 +74,7 @@ const BodyLine = defineComponent<BodyLineProps<any>>({
               `${tableContext.prefixCls}-expanded-row-level-${indent + 1}`,
               expandedClsName,
             )}
+            style={{ display: expanded.value ? undefined : 'none' }}
           >
             <Cell
               component={CellComponent}

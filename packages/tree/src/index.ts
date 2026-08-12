@@ -1,3 +1,4 @@
+import type { TreeInstance, UseTreeConfig } from './hooks/useTree'
 import type {
   BasicDataNode,
   DataEntity,
@@ -12,12 +13,13 @@ import type {
   TreeNodeProps,
 } from './interface'
 import type { ExpandAction, TreeProps, TreeRef } from './Tree'
+import useTree from './hooks/useTree'
 import Tree from './Tree'
 import TreeNode from './TreeNode'
 
 export { UnstableContextKey } from './contextTypes'
 
-export { TreeNode }
+export { TreeNode, useTree }
 export { arrAdd, arrDel, calcDropPosition, calcSelectedKeys, conductExpandParent, getDragChildrenKeys, isFirstChild, isLastChild, parseCheckedKeys, posToArr } from './util.ts'
 export { conductCheck } from './utils/conductUtil'
 export { convertDataToEntities, convertTreeToData, fillFieldNames, flattenTreeData } from './utils/treeUtil'
@@ -34,9 +36,11 @@ export type {
   Key,
   KeyEntities,
   ScrollTo,
+  TreeInstance,
   TreeNodeProps,
   TreeProps,
   TreeRef,
+  UseTreeConfig,
 }
 
 type TreeType = typeof Tree & {
