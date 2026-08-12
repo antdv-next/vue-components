@@ -85,6 +85,9 @@ export interface InternalPreviewConfig {
   minScale?: number
   maxScale?: number
 
+  /** Whether to enable mouse wheel zoom. Default is true. */
+  wheel?: boolean
+
   // Display
   motionName?: string
   open?: boolean
@@ -191,6 +194,7 @@ const Preview = defineComponent<PreviewProps>(
       transform as any,
       updateTransform,
       dispatchZoomChange,
+      computed(() => props.wheel ?? true),
     )
 
     const { isTouching, onTouchStart, onTouchMove, onTouchEnd } = useTouchEvent(

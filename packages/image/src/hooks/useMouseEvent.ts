@@ -14,6 +14,7 @@ export default function useMouseEvent(
   transform: Ref<TransformType>,
   updateTransform: UpdateTransformFunc,
   dispatchZoomChange: DispatchZoomChangeFunc,
+  wheel?: Ref<boolean>,
 ) {
   const isMoving = shallowRef(false)
 
@@ -85,7 +86,7 @@ export default function useMouseEvent(
   }
 
   const onWheel = (event: WheelEvent) => {
-    if (!open.value || event.deltaY === 0) {
+    if (!open.value || !(wheel?.value ?? true) || event.deltaY === 0) {
       return
     }
     // Scale ratio depends on the deltaY size

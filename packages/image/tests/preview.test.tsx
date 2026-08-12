@@ -112,4 +112,49 @@ describe('preview', () => {
 
     wrapper.unmount()
   })
+  async function openPreviewWithWheel(wheel?: boolean) {
+    const wrapper = mount(() => (
+      <Image
+        src="src"
+        alt="wheel zoom"
+        preview={{ open: true, getContainer: false, ...(wheel === undefined ? {} : { wheel }) } as any}
+      />
+    ), {
+      attachTo: document.body,
+    })
+
+    await flushPreview()
+
+    const previewImg = document.body.querySelector('.vc-image-preview-img') as HTMLImageElement
+    expect(previewImg).toBeTruthy()
+
+    previewImg.dispatchEvent(new WheelEvent('wheel', { deltaY: -100, clientX: 0, clientY: 0 }))
+    await flushPreview()
+
+    return { wrapper, previewImg }
+  }
+
+  it('zooms on wheel by default', async () => {
+    const { wrapper, previewImg } = await openPreviewWithWheel()
+
+    expect(previewImg.style.transform).toContain('scale3d(1.5, 1.5, 1)')
+
+    wrapper.unmount()
+  })
+
+  it('zooms on wheel when wheel is explicitly true', async () => {
+    const { wrapper, previewImg } = await openPreviewWithWheel(true)
+
+    expect(previewImg.style.transform).toContain('scale3d(1.5, 1.5, 1)')
+
+    wrapper.unmount()
+  })
+
+  it('does not zoom on wheel when wheel is false', async () => {
+    const { wrapper, previewImg } = await openPreviewWithWheel(false)
+
+    expect(previewImg.style.transform).toContain('scale3d(1, 1, 1)')
+
+    wrapper.unmount()
+  })
 })
