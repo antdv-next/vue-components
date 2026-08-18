@@ -259,6 +259,30 @@ const OptionList = defineComponent({
 
     const onKeyUp = () => {}
 
+    // `positions`: skip group headers to match native <select> announcements with <optgroup>
+    // `groups`: owning group header of each option, so lookups stay O(1) while rendering
+    const optionPositionInfo = computed(() => {
+      let count = 0
+      let group: FlattenOptionData<BaseOptionType> | null = null
+
+      const positions: number[] = []
+      const groups: (FlattenOptionData<BaseOptionType> | null)[] = []
+
+      memoFlattenOptions.value.forEach((item) => {
+        if (item.group) {
+          group = item
+          positions.push(count)
+          groups.push(null)
+        }
+        else {
+          positions.push((count += 1))
+          groups.push(item.groupOption ? group : null)
+        }
+      })
+
+      return [positions, groups] as const
+    })
+
     // Expose methods
     expose({
       onKeyDown,
@@ -316,6 +340,8 @@ const OptionList = defineComponent({
         }
       }
 
+      const [optionPositions, itemGroups] = optionPositionInfo.value
+
       const renderItem = (index: number) => {
         const item = memoFlattenOptions.value[index]
         if (!item) {
@@ -323,23 +349,64 @@ const OptionList = defineComponent({
         }
         const itemData = item.data || {}
         const { value, disabled } = itemData
-        const { group } = item
         const attrs = pickAttrs(itemData, true)
         const mergedLabel = getLabel(item)
-        return item
-          ? (
-              <div
-                aria-label={typeof mergedLabel === 'string' && !group ? mergedLabel : undefined}
-                {...attrs}
-                key={index}
-                {...getItemAriaProps(item, index)}
-                aria-selected={isAriaSelected(value)}
-                aria-disabled={disabled}
-              >
-                {value}
-              </div>
-            )
-          : null
+        return (
+          <div
+            aria-label={isTitleType(mergedLabel) ? String(mergedLabel) : undefined}
+            aria-setsize={optionPositions[optionPositions.length - 1] ?? 0}
+            aria-posinset={optionPositions[index]}
+            {...attrs}
+            key={index}
+            {...getItemAriaProps(item, index)}
+            aria-selected={isAriaSelected(value)}
+            aria-disabled={disabled}
+          >
+            {value}
+          </div>
+        )
+      }
+
+      // Nest options inside `role="group"` wrappers
+      const renderHiddenItems = () => {
+        const segments: {
+          group: FlattenOptionData<BaseOptionType> | null
+          indexes: number[]
+        }[] = []
+
+        ;[activeIndex.value - 1, activeIndex.value, activeIndex.value + 1].forEach((index) => {
+          const item = memoFlattenOptions.value[index]
+          if (!item || item.group) {
+            return
+          }
+
+          const groupItem = itemGroups[index]
+          const lastSegment = segments[segments.length - 1]
+
+          if (lastSegment && lastSegment.group === groupItem) {
+            lastSegment.indexes.push(index)
+          }
+          else {
+            segments.push({ group: groupItem, indexes: [index] })
+          }
+        })
+
+        return segments.map(({ group, indexes }) => {
+          if (!group) {
+            return indexes.map(renderItem)
+          }
+
+          const groupLabel = getLabel(group)
+          return (
+            <div
+              key={group.key}
+              role="group"
+              aria-label={group.data.title ?? (isTitleType(groupLabel) ? String(groupLabel) : undefined)}
+            >
+              {indexes.map(renderItem)}
+            </div>
+          )
+        })
       }
 
       const a11yProps = {
@@ -350,9 +417,7 @@ const OptionList = defineComponent({
         <>
           {virtual && (
             <div {...a11yProps} style={{ height: 0, width: 0, overflow: 'hidden' }}>
-              {renderItem(activeIndex.value - 1)}
-              {renderItem(activeIndex.value)}
-              {renderItem(activeIndex.value + 1)}
+              {renderHiddenItems()}
             </div>
           )}
           <List
