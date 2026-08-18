@@ -1,7 +1,7 @@
 import type { AlignType, BuildInPlacements } from '@v-c/trigger'
 import type { VueNode } from '@v-c/util/dist/type'
 import type { ScrollConfig, ScrollTo } from '@v-c/virtual-list'
-import type { CSSProperties } from 'vue'
+import type { CSSProperties, StyleValue } from 'vue'
 import type { ComponentsConfig } from '../hooks'
 import type {
   DisplayInfoType,
@@ -129,7 +129,7 @@ export type BaseSelectPropsWithoutPrivate = Omit<BaseSelectProps, keyof BaseSele
 export interface BaseSelectProps extends BaseSelectPrivateProps {
   // Style
   className?: string
-  style?: CSSProperties
+  style?: StyleValue
   classNames?: Partial<Record<BaseSelectSemanticName, string>>
   styles?: Partial<Record<BaseSelectSemanticName, CSSProperties>>
 

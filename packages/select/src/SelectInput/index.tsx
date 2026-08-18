@@ -1,5 +1,5 @@
 import type { VueNode } from '@v-c/util/dist/type'
-import type { CSSProperties, VNode } from 'vue'
+import type { StyleValue, VNode } from 'vue'
 import type { ComponentsConfig } from '../hooks'
 import type { DisplayValueType, Mode, RenderNode } from '../interface'
 import type { InputRef } from './Input.tsx'
@@ -46,7 +46,7 @@ export interface SelectInputProps {
   tokenWithEnter?: boolean
   // Add other props that need to be passed through
   className?: string
-  style?: CSSProperties
+  style?: StyleValue
   focused?: boolean
   components: ComponentsConfig
   // Events
