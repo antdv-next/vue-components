@@ -33,11 +33,11 @@
           "description": "@rc-component/cascader -> @v-c/cascader"
         }
       ],
-      "last_synced_commit": "b4557cfa7d",
-      "last_synced_commit_short": "b4557cfa7d",
-      "last_synced_at": "2026-08-11T00:00:00Z",
-      "last_synced_tag": "@rc-component/cascader@1.23.0",
-      "sync_count": 4
+      "last_synced_commit": "9d1fa80b1ee8b000592932b1cb3379a0fe125df2",
+      "last_synced_commit_short": "9d1fa80",
+      "last_synced_at": "2026-08-17T00:00:00Z",
+      "last_synced_tag": "@rc-component/cascader@1.24.0",
+      "sync_count": 5
     },
     {
       "name": "@rc-component/checkbox",
@@ -339,11 +339,11 @@
           "description": "@rc-component/pagination -> @v-c/pagination"
         }
       ],
-      "last_synced_commit": "0628beb162",
-      "last_synced_commit_short": "0628beb162",
-      "last_synced_at": "2026-08-11T00:00:00Z",
+      "last_synced_commit": "1eca64e95bf51fa2fddc7661fcc6b22ceca3ae8f",
+      "last_synced_commit_short": "1eca64e",
+      "last_synced_at": "2026-08-17T00:00:00Z",
       "last_synced_tag": "@rc-component/pagination@1.5.0",
-      "sync_count": 5
+      "sync_count": 6
     },
     {
       "name": "@rc-component/picker",
@@ -475,11 +475,11 @@
           "description": "@rc-component/select -> @v-c/select"
         }
       ],
-      "last_synced_commit": "33bd090d4b",
-      "last_synced_commit_short": "33bd090d4b",
-      "last_synced_at": "2026-08-11T00:00:00Z",
-      "last_synced_tag": "@rc-component/select@1.10.1",
-      "sync_count": 5
+      "last_synced_commit": "29e9ddac1b8eb3dba4a6681d7c886b542a9d7425",
+      "last_synced_commit_short": "29e9dda",
+      "last_synced_at": "2026-08-17T00:00:00Z",
+      "last_synced_tag": "@rc-component/select@1.11.0",
+      "sync_count": 6
     },
     {
       "name": "@ant-design/react-slick",
@@ -662,11 +662,11 @@
           "description": "@rc-component/tree-select -> @v-c/tree-select"
         }
       ],
-      "last_synced_commit": "102afed5c4",
-      "last_synced_commit_short": "102afed5c4",
-      "last_synced_at": "2026-08-11T00:00:00Z",
-      "last_synced_tag": "@rc-component/tree-select@1.17.0",
-      "sync_count": 4
+      "last_synced_commit": "7035d290219288bc523673c3454970afde0753c1",
+      "last_synced_commit_short": "7035d29",
+      "last_synced_at": "2026-08-17T00:00:00Z",
+      "last_synced_tag": "@rc-component/tree-select@1.18.0",
+      "sync_count": 5
     },
     {
       "name": "@rc-component/trigger",
