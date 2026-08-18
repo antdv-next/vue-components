@@ -1,7 +1,9 @@
 import type { VueWrapper } from '@vue/test-utils'
 import { mount } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { h } from 'vue'
 import Pagination from '../src/index'
+import zhTW from '../src/locale/zh_TW'
 
 describe('default Pagination', () => {
   let wrapper: VueWrapper
@@ -46,5 +48,35 @@ describe('pager item count', () => {
       expect(pagerItems.length, `current page ${current}`).toBe(7)
       wrapper.unmount()
     })
+  })
+})
+
+describe('locale zh_TW', () => {
+  it('uses the Traditional Chinese page-size terminology', () => {
+    const wrapper = mount(Pagination, {
+      props: {
+        total: 100,
+        locale: zhTW,
+        showSizeChanger: true,
+        sizeChangerRender: ({ size, 'aria-label': ariaLabel, className, options, onSizeChange }) =>
+          h(
+            'select',
+            {
+              'aria-label': ariaLabel,
+              'class': className,
+              'value': size,
+              'onChange': (event: Event) => onSizeChange((event.target as HTMLSelectElement).value),
+            },
+            options.map(option => h('option', { value: option.value }, String(option.label))),
+          ),
+        onChange: vi.fn(),
+      },
+    })
+
+    const sizeChanger = wrapper.find('select.vc-pagination-options-size-changer')
+    expect(sizeChanger.attributes('aria-label')).toBe('每頁筆數')
+    expect(sizeChanger.findAll('option').map(option => option.text())).toContain('10 筆／頁')
+
+    wrapper.unmount()
   })
 })
