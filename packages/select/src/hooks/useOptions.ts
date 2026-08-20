@@ -17,7 +17,7 @@ export default function useOptions<OptionType extends DefaultOptionType = Defaul
   options: Ref<OptionType[] | undefined>,
   childrenOptions: ShallowRef<OptionType[]>,
   fieldNames: Ref<FieldNames>,
-  optionFilterProp: Ref<string | undefined>,
+  optionFilterProp: Ref<string[] | undefined>,
   optionLabelProp: Ref<string | undefined>,
 ): Ref<OptionsResult<OptionType>> {
   return computed<OptionsResult<OptionType>>(() => {
@@ -62,7 +62,12 @@ export default function useOptions<OptionType extends DefaultOptionType = Defaul
           valueOptions.set(option[valueKey] as RawValueType, option)
           setLabelOptions(labelOptions, option, labelKey)
           // https://github.com/ant-design/ant-design/issues/35304
-          setLabelOptions(labelOptions, option, optionFilterProp.value)
+          // Support string[] for optionFilterProp (align with rc-select)
+          if (optionFilterProp.value) {
+            optionFilterProp.value.forEach((prop: string) => {
+              setLabelOptions(labelOptions, option, prop)
+            })
+          }
           setLabelOptions(labelOptions, option, optionLabelProp.value)
         }
         else {

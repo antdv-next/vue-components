@@ -13,7 +13,7 @@ export default function useFilterOptions(
   fieldNames: Ref<FieldNames>,
   searchValue: Ref<string | undefined>,
   filterOption: Ref<SelectProps['filterOption']>,
-  optionFilterProp: Ref<string | undefined>,
+  optionFilterProp: Ref<string[] | undefined>,
 ) {
   return computed<DefaultOptionType[]>(() => {
     if (!searchValue.value || filterOption.value === false) {
@@ -31,9 +31,9 @@ export default function useFilterOptions(
     const upperSearch = searchValue.value.toUpperCase()
 
     const defaultFilter: FilterFunc = (_: string, option?: DefaultOptionType) => {
-      // Use provided `optionFilterProp`
-      if (optionFilterProp.value && option) {
-        return includes(option[optionFilterProp.value], upperSearch)
+      // Use provided `optionFilterProp` - support string[] with OR matching (align with rc-select)
+      if (optionFilterProp.value && optionFilterProp.value.length && option) {
+        return optionFilterProp.value.some((prop: string) => includes(option[prop], upperSearch))
       }
 
       // Auto select `label` or `value` by option type
