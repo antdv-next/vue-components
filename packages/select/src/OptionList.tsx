@@ -43,11 +43,31 @@ const OptionList = defineComponent({
     const itemPrefixCls = computed(() => `${baseProps.value?.prefixCls}-item`)
 
     // Memoized flatten options (only update when open or options change)
+    // Align with rc-select: only update when open is true and not locked.
+    // This prevents the dropdown from flashing full options when searchValue is
+    // cleared synchronously on select (before the close animation finishes).
+    // See https://github.com/react-component/select/blob/master/src/OptionList.tsx
+    const cacheRef = shallowRef<{
+      value: FlattenOptionData<BaseOptionType>[]
+      condition: [boolean, boolean]
+    }>({
+      value: context.value?.flattenOptions || [],
+      condition: [!!baseProps.value?.open, !!baseProps.value?.lockOptions],
+    })
+
     const memoFlattenOptions = computed(() => {
-      if (!baseProps.value?.open) {
-        return context.value?.flattenOptions || []
+      const nextCondition: [boolean, boolean] = [
+        !!baseProps.value?.open,
+        !!baseProps.value?.lockOptions,
+      ]
+      const nextValue = context.value?.flattenOptions || []
+      const shouldUpdate = nextCondition[0] && !nextCondition[1]
+      if (shouldUpdate) {
+        // Only update cache when open && !lock, keep previous options during closing
+        cacheRef.value = { value: nextValue, condition: nextCondition }
+        return nextValue
       }
-      return context.value?.flattenOptions || []
+      return cacheRef.value.value
     })
 
     // =========================== List ===========================
