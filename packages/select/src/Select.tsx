@@ -85,7 +85,7 @@ export interface SearchConfig {
   onSearch?: (value: string) => void
   filterOption?: boolean | FilterFunc
   filterSort?: (optionA: any, optionB: any, info: { searchValue: string }) => number
-  optionFilterProp?: string
+  optionFilterProp?: string | string[]
 }
 export interface SelectProps extends Omit<BaseSelectPropsWithoutPrivate, 'showSearch'> {
   prefixCls?: string
@@ -119,7 +119,7 @@ export interface SelectProps extends Omit<BaseSelectPropsWithoutPrivate, 'showSe
   /**  @deprecated please use  showSearch.filterSort */
   filterSort?: SearchConfig['filterSort']
   /**  @deprecated please use  showSearch.optionFilterProp */
-  optionFilterProp?: string
+  optionFilterProp?: string | string[]
   optionLabelProp?: string
   options?: DefaultOptionType[]
   optionRender?: (oriOption: FlattenOptionData, info: { index: number }) => any
@@ -232,8 +232,11 @@ const Select = defineComponent<SelectProps>({
       toRef(props, 'mode'),
     )
 
-    const normalizedOptionFilterProps = computed(() => {
-      return searchConfig.value?.optionFilterProp
+    const normalizedOptionFilterProps = computed<string[]>(() => {
+      const prop = searchConfig.value?.optionFilterProp
+      if (!prop)
+        return []
+      return Array.isArray(prop) ? prop : [prop]
     })
 
     const mergedFilterOption = computed(() => {
@@ -426,12 +429,16 @@ const Select = defineComponent<SelectProps>({
 
     // Fill options with search value if needed
     const filledSearchOptions = computed(() => {
+      const hasItemMatchingSearch = (item: any) => {
+        if (normalizedOptionFilterProps.value.length) {
+          return normalizedOptionFilterProps.value.some((prop: string) => item?.[prop] === mergedSearchValue.value)
+        }
+        return item?.value === mergedSearchValue.value
+      }
       if (
         props.mode !== 'tags'
         || !mergedSearchValue.value
-        || filteredOptions.value.some(
-          item => item[props.optionFilterProp || 'value'] === mergedSearchValue.value,
-        )
+        || filteredOptions.value.some(item => hasItemMatchingSearch(item))
       ) {
         return filteredOptions.value
       }

@@ -10,7 +10,7 @@ export default function useSearchConfig(
   props: {
     filterOption?: Ref<SelectProps['filterOption']>
     searchValue?: Ref<string | undefined>
-    optionFilterProp?: Ref<string | undefined>
+    optionFilterProp?: Ref<string | string[] | undefined>
     filterSort?: Ref<SelectProps['filterSort']>
     onSearch?: Ref<((value: string) => void) | undefined>
     autoClearSearchValue?: Ref<boolean | undefined>
