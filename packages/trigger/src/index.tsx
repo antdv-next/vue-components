@@ -11,7 +11,7 @@ import { classNames } from '@v-c/util'
 import { getShadowRoot } from '@v-c/util/dist/Dom/shadow'
 import { filterEmpty } from '@v-c/util/dist/props-util'
 import { createElementRef } from '@v-c/util/dist/vnode'
-import { computed, createVNode, defineComponent, nextTick, reactive, ref, shallowRef, useId, watch, watchEffect } from 'vue'
+import { computed, createVNode, defineComponent, nextTick, onBeforeUnmount, reactive, ref, shallowRef, useId, watch, watchEffect } from 'vue'
 import { TriggerContextProvider, useTriggerContext, useUniqueContext } from './context.ts'
 import useAction from './hooks/useAction.ts'
 import useAlign from './hooks/useAlign.ts'
@@ -149,18 +149,68 @@ export function generateTrigger(PortalComponent: any = Portal) {
       // ========================== Context ===========================
       const subPopupElements = ref<Record<string, HTMLElement | null>>({})
       const parentContext = useTriggerContext()
+
+      // `onPopupMouseLeave` is assigned by the hover action watchEffect below.
+      // It is declared here so the sub-popup leave binding can reference it
+      // safely (sub-popups register during mount, i.e. after setup completes).
+      let onPopupMouseLeave: undefined | ((event: MouseEvent) => void)
+
+      // Leave listeners attached to each registered sub-popup element. This is
+      // the symmetric counterpart of the `inPopupOrChild` "enter" protection:
+      // once the cursor is inside a nested popup (a separate portal), the parent
+      // popup's own `mouseleave` can no longer fire, so without this binding the
+      // parent would never learn that the cursor left the nested popup and would
+      // stay open forever (e.g. Dropdown + SubMenu hover). See antdv-next#793.
+      const subPopupLeaveHandlers = new Map<HTMLElement, (event: MouseEvent) => void>()
+
+      const bindSubPopupLeave = (ele: HTMLElement) => {
+        if (subPopupLeaveHandlers.has(ele)) {
+          return
+        }
+        const handler = (event: MouseEvent) => {
+          onPopupMouseLeave?.(event)
+        }
+        subPopupLeaveHandlers.set(ele, handler)
+        ele.addEventListener('mouseleave', handler)
+      }
+
+      const unbindSubPopupLeave = (ele: HTMLElement) => {
+        const handler = subPopupLeaveHandlers.get(ele)
+        if (handler) {
+          ele.removeEventListener('mouseleave', handler)
+          subPopupLeaveHandlers.delete(ele)
+        }
+      }
+
       const context = computed<TriggerContextProps>(() => {
         return {
           registerSubPopup(id, subPopupEle) {
+            const prevEle = subPopupElements.value[id] ?? null
             if (subPopupEle) {
               subPopupElements.value[id] = subPopupEle
+              if (prevEle && prevEle !== subPopupEle) {
+                unbindSubPopupLeave(prevEle)
+              }
+              bindSubPopupLeave(subPopupEle)
             }
             else {
+              if (prevEle) {
+                unbindSubPopupLeave(prevEle)
+              }
               delete subPopupElements.value[id]
             }
             parentContext?.value.registerSubPopup(id, subPopupEle)
           },
         }
+      })
+
+      // Make sure no leave listeners leak when the trigger itself is torn down
+      // while a nested popup is still mounted.
+      onBeforeUnmount(() => {
+        subPopupLeaveHandlers.forEach((handler, ele) => {
+          ele.removeEventListener('mouseleave', handler)
+        })
+        subPopupLeaveHandlers.clear()
       })
       // ======================== UniqueContext =========================
       const uniqueContext = useUniqueContext()
@@ -594,7 +644,6 @@ export function generateTrigger(PortalComponent: any = Portal) {
       const hoverToHide = computed(() => hideActions.value?.has('hover'))
 
       let onPopupMouseEnter: any
-      let onPopupMouseLeave: undefined | ((event: MouseEvent) => void)
 
       const ignoreMouseTrigger = () => {
         return touchedRef.value

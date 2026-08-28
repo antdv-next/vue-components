@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import Arrow from './arrow'
-// import ContextMenu from './context-menu'
-// import DropdownMenuWidth from './dropdown-menu-width'
-// import Multiple from './multiple'
-// import OverlayCallback from './overlay-callback'
-// import Simple from './simple'
+import ContextMenu from './context-menu'
+import DropdownMenuWidth from './dropdown-menu-width'
+import Multiple from './multiple'
+import OverlayCallback from './overlay-callback'
+import Simple from './simple'
 import './assets/index.less'
 </script>
 
@@ -14,19 +14,19 @@ import './assets/index.less'
       <Arrow />
     </Variant>
     <Variant title="contextMenu">
-      <!--      <ContextMenu /> -->
+      <ContextMenu />
     </Variant>
     <Variant title="dropdownMenuWidth">
-      <!--      <DropdownMenuWidth /> -->
+      <DropdownMenuWidth />
     </Variant>
     <Variant title="multiple">
-      <!--      <Multiple /> -->
+      <Multiple />
     </Variant>
     <Variant title="overlayCallback">
-      <!--      <OverlayCallback /> -->
+      <OverlayCallback />
     </Variant>
     <Variant title="simple">
-      <!--      <Simple /> -->
+      <Simple />
     </Variant>
   </Story>
 </template>
