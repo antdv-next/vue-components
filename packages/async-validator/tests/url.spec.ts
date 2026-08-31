@@ -2,6 +2,21 @@ import { describe, expect, it } from 'vitest'
 import Schema from '../src'
 
 describe('url', () => {
+  it('works for a single-label host', () => {
+    new Schema({
+      v: {
+        type: 'url',
+      },
+    }).validate(
+      {
+        v: 'http://intranet/dashboard',
+      },
+      (errors) => {
+        expect(errors).toBe(null)
+      },
+    )
+  })
+
   it('works for empty string', () => {
     new Schema({
       v: {
