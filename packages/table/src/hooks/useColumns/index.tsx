@@ -4,6 +4,9 @@ import type {
   ColumnsType,
   ColumnType,
   Direction,
+  ExpandColumnTitle,
+  ExpandIconComponent,
+  ExpandIconProps,
   FixedType,
   GetRowKey,
   Key,
@@ -12,8 +15,9 @@ import type {
 } from '../../interface'
 import { warning } from '@v-c/util'
 import { flattenChildren } from '@v-c/util/dist/props-util'
-import { computed, isVNode, toRaw, unref } from 'vue'
+import { computed, h, isVNode, toRaw, unref } from 'vue'
 import { EXPAND_COLUMN } from '../../constant'
+import { DefaultExpandIcon } from '../../utils/expandUtil'
 import { INTERNAL_COL_DEFINE } from '../../utils/legacyUtil'
 import useWidthColumns from './useWidthColumns'
 
@@ -102,10 +106,12 @@ export default function useColumns<RecordType>(
     children?: any
     expandable: Ref<boolean> | boolean
     expandedKeys: Ref<Set<Key>> | Set<Key>
-    columnTitle?: Ref<any> | any
+    columnTitle?: Ref<ExpandColumnTitle | undefined> | ExpandColumnTitle
     getRowKey: Ref<GetRowKey<RecordType>> | GetRowKey<RecordType>
     onTriggerExpand: TriggerEventHandler<RecordType>
     expandIcon?: Ref<RenderExpandIcon<RecordType> | undefined> | RenderExpandIcon<RecordType>
+    ExpandIcon?: Ref<ExpandIconComponent<RecordType> | undefined> | ExpandIconComponent<RecordType>
+    expandAllInfo?: Ref<Pick<ExpandIconProps<RecordType>, 'expanded' | 'expandable' | 'onClick'> | undefined>
     rowExpandable?: Ref<((record: RecordType) => boolean) | undefined> | ((record: RecordType) => boolean) | undefined
     expandIconColumnIndex?: Ref<number | undefined> | number
     expandedRowOffset?: number
@@ -175,12 +181,22 @@ export default function useColumns<RecordType>(
       }
 
       const prefixCls = unref(options.prefixCls) || ''
+      const MergedExpandIcon = unref(options.ExpandIcon) || DefaultExpandIcon
+      const expandAllInfo = unref(options.expandAllInfo)
+      const expandAllNode = expandAllInfo
+        ? h(MergedExpandIcon, { type: 'all', prefixCls, ...expandAllInfo } as any)
+        : undefined
+      const columnTitle = unref(options.columnTitle)
+      const mergedColumnTitle = typeof columnTitle === 'function'
+        ? (columnTitle as (props: { expandIcon: any }) => any)({ expandIcon: expandAllNode })
+        : (columnTitle ?? expandAllNode)
+
       const expandColumn = {
         [INTERNAL_COL_DEFINE]: {
           className: `${prefixCls}-expand-icon-col`,
           columnType: 'EXPAND_COLUMN',
         },
-        title: unref(options.columnTitle),
+        title: mergedColumnTitle,
         fixed: fixedColumn,
         className: `${prefixCls}-row-expand-icon-cell`,
         width: unref(options.columnWidth),

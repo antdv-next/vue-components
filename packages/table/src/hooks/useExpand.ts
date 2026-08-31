@@ -2,6 +2,7 @@ import type { Ref } from 'vue'
 import type {
   ExpandableConfig,
   ExpandableType,
+  ExpandIconProps,
   GetRowKey,
   Key,
   RenderExpandIcon,
@@ -11,8 +12,13 @@ import type { TableProps } from '../Table'
 import { warning } from '@v-c/util'
 import { computed, ref, unref } from 'vue'
 import { INTERNAL_HOOKS } from '../constant'
-import { findAllChildrenKeys, renderExpandIcon } from '../utils/expandUtil'
+import { findAllChildrenKeys, renderExpandIcon, renderRowExpandIcon } from '../utils/expandUtil'
 import { getExpandableProps } from '../utils/legacyUtil'
+
+type ExpandAllInfo<RecordType> = Pick<
+  ExpandIconProps<RecordType>,
+  'expanded' | 'expandable' | 'onClick'
+>
 
 export default function useExpand<RecordType>(
   props: TableProps<RecordType>,
@@ -25,12 +31,17 @@ export default function useExpand<RecordType>(
   expandIcon: Ref<RenderExpandIcon<RecordType>>,
   childrenColumnName: Ref<string>,
   onTriggerExpand: TriggerEventHandler<RecordType>,
+  expandAllInfo: Ref<ExpandAllInfo<RecordType> | undefined>,
 ] {
   const expandableConfig = computed(() => getExpandableProps(props))
 
-  const mergedExpandIcon = computed<RenderExpandIcon<RecordType>>(
-    () => expandableConfig.value.expandIcon || renderExpandIcon,
-  )
+  const mergedExpandIcon = computed<RenderExpandIcon<RecordType>>(() => {
+    const customizeExpandIcon = props.components?.ExpandIcon
+    if (customizeExpandIcon) {
+      return iconProps => renderRowExpandIcon(customizeExpandIcon, iconProps)
+    }
+    return expandableConfig.value.expandIcon || renderExpandIcon
+  })
 
   const mergedChildrenColumnName = computed(
     () => expandableConfig.value.childrenColumnName || 'children',
@@ -100,6 +111,62 @@ export default function useExpand<RecordType>(
     event?.stopPropagation?.()
   }
 
+  const expandableRows = computed(() => {
+    if (!expandableConfig.value.showExpandAll || expandableType.value !== 'row') {
+      return []
+    }
+
+    const rowExpandable = expandableConfig.value.rowExpandable
+    return (unref(mergedData) || []).reduce<{ key: Key, record: RecordType }[]>(
+      (rows, record, index) => {
+        if (!rowExpandable || rowExpandable(record)) {
+          rows.push({ key: unref(getRowKey)(record, index), record })
+        }
+        return rows
+      },
+      [],
+    )
+  })
+
+  const allExpanded = computed(() =>
+    expandableRows.value.length > 0
+    && expandableRows.value.every(({ key }) => mergedExpandedKeys.value.has(key)),
+  )
+
+  const onTriggerExpandAll = (event: MouseEvent) => {
+    event.stopPropagation()
+    if (!expandableRows.value.length) {
+      return
+    }
+
+    const nextExpanded = !allExpanded.value
+    const nextExpandedKeys = new Set(mergedExpandedKeys.value)
+    expandableRows.value.forEach(({ key }) => {
+      if (nextExpanded) {
+        nextExpandedKeys.add(key)
+      }
+      else {
+        nextExpandedKeys.delete(key)
+      }
+    })
+
+    const keys = [...nextExpandedKeys]
+    innerExpandedKeys.value = keys
+    expandableConfig.value.onExpandAll?.(nextExpanded)
+    expandableConfig.value.onExpandedRowsChange?.(keys)
+    props['onUpdate:expandedRowKeys']?.(keys)
+  }
+
+  const expandAllInfo = computed<ExpandAllInfo<RecordType> | undefined>(() =>
+    expandableConfig.value.showExpandAll && expandableType.value === 'row'
+      ? {
+          expanded: allExpanded.value,
+          expandable: expandableRows.value.length > 0,
+          onClick: onTriggerExpandAll,
+        }
+      : undefined,
+  )
+
   if (
     process.env.NODE_ENV !== 'production'
     && expandableConfig.value.expandedRowRender
@@ -117,5 +184,6 @@ export default function useExpand<RecordType>(
     mergedExpandIcon as Ref<RenderExpandIcon<RecordType>>,
     mergedChildrenColumnName as Ref<string>,
     onTriggerExpand,
+    expandAllInfo,
   ]
 }

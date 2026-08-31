@@ -1,4 +1,4 @@
-import type { ColumnsType, ColumnType, DataIndex, ExpandableConfig, FixedType, GetComponentProps, GetRowKey, Reference, RenderedCell } from './interface'
+import type { ColumnsType, ColumnType, DataIndex, ExpandableConfig, ExpandIconComponent, ExpandIconProps, FixedType, GetComponentProps, GetRowKey, Reference, RenderedCell } from './interface'
 import type { TableProps } from './Table'
 import type { VirtualTableProps } from './VirtualTable'
 import { EXPAND_COLUMN, INTERNAL_HOOKS } from './constant'
@@ -12,6 +12,8 @@ import VirtualTable from './VirtualTable'
 export type {
   DataIndex,
   ExpandableConfig,
+  ExpandIconComponent,
+  ExpandIconProps,
   FixedType,
   GetComponentProps,
   GetRowKey,

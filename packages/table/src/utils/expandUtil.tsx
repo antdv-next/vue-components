@@ -1,5 +1,46 @@
-import type { ExpandableConfig, GetRowKey, Key, RenderExpandIconProps } from '../interface'
+import type {
+  ExpandableConfig,
+  ExpandIconComponent,
+  ExpandIconProps,
+  GetRowKey,
+  Key,
+  RenderExpandIconProps,
+} from '../interface'
 import { clsx } from '@v-c/util'
+import { h } from 'vue'
+
+export function DefaultExpandIcon<RecordType>({
+  prefixCls,
+  type,
+  onClick,
+  expanded,
+  expandable,
+}: ExpandIconProps<RecordType>) {
+  const expandClassName = `${prefixCls}-row-expand-icon`
+
+  if (!expandable) {
+    return <span class={clsx(expandClassName, `${prefixCls}-row-spaced`)} />
+  }
+
+  const className = clsx(expandClassName, {
+    [`${prefixCls}-row-expanded`]: expanded,
+    [`${prefixCls}-row-collapsed`]: !expanded,
+  })
+
+  if (type === 'all') {
+    return (
+      <button
+        type="button"
+        aria-expanded={expanded}
+        aria-label={expanded ? 'Collapse all rows' : 'Expand all rows'}
+        class={className}
+        onClick={onClick}
+      />
+    )
+  }
+
+  return <span class={className} onClick={onClick} />
+}
 
 export function renderExpandIcon<RecordType>({
   prefixCls,
@@ -8,26 +49,41 @@ export function renderExpandIcon<RecordType>({
   expanded,
   expandable,
 }: RenderExpandIconProps<RecordType>) {
-  const expandClassName = `${prefixCls}-row-expand-icon`
-
-  if (!expandable) {
-    return <span class={clsx(expandClassName, `${prefixCls}-row-spaced`)} />
-  }
-
   const onClick = (event: MouseEvent) => {
     onExpand(record, event)
     event.stopPropagation()
   }
 
   return (
-    <span
-      class={clsx(expandClassName, {
-        [`${prefixCls}-row-expanded`]: expanded,
-        [`${prefixCls}-row-collapsed`]: !expanded,
-      })}
+    <DefaultExpandIcon
+      type="row"
+      prefixCls={prefixCls}
+      record={record}
+      expanded={expanded}
+      expandable={!!expandable}
       onClick={onClick}
     />
   )
+}
+
+export function renderRowExpandIcon<RecordType>(
+  ExpandIcon: ExpandIconComponent<RecordType>,
+  props: RenderExpandIconProps<RecordType>,
+) {
+  const { prefixCls, record, onExpand, expanded, expandable } = props
+  const onClick = (event: MouseEvent) => {
+    onExpand(record, event)
+    event.stopPropagation()
+  }
+
+  return h(ExpandIcon, {
+    type: 'row',
+    prefixCls,
+    record,
+    expanded,
+    expandable: !!expandable,
+    onClick,
+  } as any)
 }
 
 export function findAllChildrenKeys<RecordType>(

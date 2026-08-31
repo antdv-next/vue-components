@@ -15,7 +15,7 @@ import type { VueNode } from '@v-c/util'
  * - onFilter
  * - onFilterDropdownVisibleChange
  */
-import type { CSSProperties, HTMLAttributes, Ref, TdHTMLAttributes } from 'vue'
+import type { CSSProperties, HTMLAttributes, Ref, TdHTMLAttributes, Component as VueComponent } from 'vue'
 import type { DeepNamePath } from './namePathType'
 
 export type Key = string | number
@@ -185,6 +185,7 @@ export type CustomizeScrollBody<RecordType = Record<string, any>> = (
 ) => any
 
 export interface TableComponents<RecordType> {
+  ExpandIcon?: ExpandIconComponent<RecordType>
   table?: CustomizeComponent
   header?: {
     table?: CustomizeComponent
@@ -256,21 +257,48 @@ export type RenderExpandIcon<RecordType> = (
   props: RenderExpandIconProps<RecordType>,
 ) => any
 
+export type ExpandIconProps<RecordType> = {
+  prefixCls: string
+  expanded: boolean
+  expandable: boolean
+  onClick: (event: MouseEvent) => void
+} & (
+  | {
+    type: 'row'
+    record: RecordType
+  }
+  | {
+    type: 'all'
+    record?: never
+  }
+)
+
+export type ExpandIconComponent<RecordType> = VueComponent<ExpandIconProps<RecordType>>
+
+export interface ExpandColumnTitleProps {
+  expandIcon: VueNode
+}
+
+export type ExpandColumnTitle = VueNode | ((props: ExpandColumnTitleProps) => VueNode)
+
 export interface ExpandableConfig<RecordType> {
   expandedRowKeys?: readonly Key[]
   defaultExpandedRowKeys?: readonly Key[]
   expandedRowRender?: ExpandedRowRender<RecordType>
   forceRender?: boolean
-  columnTitle?: VueNode
+  columnTitle?: ExpandColumnTitle
   expandRowByClick?: boolean
+  /** @deprecated Please use `components.ExpandIcon` instead. This only customizes row icons. */
   expandIcon?: RenderExpandIcon<RecordType>
   onExpand?: (expanded: boolean, record: RecordType) => void
+  onExpandAll?: (expanded: boolean) => void
   onExpandedRowsChange?: (expandedKeys: readonly Key[]) => void
   defaultExpandAllRows?: boolean
   indentSize?: number
   /** @deprecated Please use `EXPAND_COLUMN` in `columns` directly */
   expandIconColumnIndex?: number
   showExpandColumn?: boolean
+  showExpandAll?: boolean
   expandedRowClassName?: string | RowClassName<RecordType>
   childrenColumnName?: string
   rowExpandable?: (record: RecordType) => boolean
