@@ -173,7 +173,8 @@ const defaults = {
 const Menu = defineComponent<MenuProps>(
   (props = defaults, { slots, expose, attrs: _attrs }) => {
     const containerRef = shallowRef<HTMLUListElement>()
-    const uuid = useId(props?.id ? `vc-menu-uuid-${props.id}` : 'vc-menu-uuid')
+    const mergedId = useId()
+    const uuid = props.id ?? `vc-menu-uuid-${mergedId}`
     const isRtl = computed(() => props?.direction === 'rtl')
     const childList = shallowRef<any[]>([])
     const mergedOverflowIndicator = computed(
