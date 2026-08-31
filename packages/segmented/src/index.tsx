@@ -276,6 +276,7 @@ const Segmented = defineComponent<SegmentedProps>(
               segmentedClassNames?.item,
               {
                 [`${prefixCls}-item-selected`]: optionValue === mergedValue.value && !thumbShow.value,
+                [`${prefixCls}-item-selected-text`]: optionValue === mergedValue.value,
                 [`${prefixCls}-item-focused`]: isFocused.value && isKeyboard.value && optionValue === mergedValue.value,
               },
             )}
