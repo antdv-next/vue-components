@@ -14,6 +14,7 @@ const Line = defineComponent<ProgressProps>(
 
     return () => {
       const {
+        id,
         className,
         classNames,
         styles,
@@ -50,6 +51,7 @@ const Line = defineComponent<ProgressProps>(
       let stackPtg = 0
       return (
         <svg
+          {...restProps}
           {...restAttrs}
           class={{
             [`${prefixCls}-line`]: true,
@@ -58,7 +60,8 @@ const Line = defineComponent<ProgressProps>(
           preserveAspectRatio="none"
           viewBox={viewBoxString}
           style={style}
-          {...restProps}
+          id={id}
+          role="presentation"
         >
           <path
             class={[
@@ -67,7 +70,7 @@ const Line = defineComponent<ProgressProps>(
             d={pathString}
             stroke-linecap={strokeLinecap}
             stroke={railColor}
-            stroke-width={railWidth || strokeWidth}
+            stroke-width={railWidth ?? strokeWidth}
             fill-opacity="0"
           />
           {
