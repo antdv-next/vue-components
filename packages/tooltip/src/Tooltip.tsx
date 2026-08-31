@@ -63,7 +63,7 @@ const defaults = {
   mouseEnterDelay: 0,
   mouseLeaveDelay: 0.1,
   prefixCls: 'vc-tooltip',
-  trigger: ['hover'],
+  trigger: ['hover', 'focus'],
   placement: 'right',
   align: {},
   showArrow: true,
@@ -106,7 +106,7 @@ const Tooltip = defineComponent<TooltipProps>(
     })
     return () => {
       const {
-        trigger = ['hover'],
+        trigger = ['hover', 'focus'],
         mouseEnterDelay = 0,
         mouseLeaveDelay = 0.1,
         prefixCls = 'vc-tooltip',
@@ -131,8 +131,12 @@ const Tooltip = defineComponent<TooltipProps>(
       const getChildren = ({ open }: any) => {
         const children = filterEmpty(slots?.default?.({ open }))
         const child = children?.[0]
+        const childAriaDescribedBy = child?.props?.['aria-describedby']
+        const ariaDescribedBy = [childAriaDescribedBy, overlay && open ? mergedId : undefined]
+          .filter(Boolean)
+          .join(' ')
         const ariaProps = {
-          'aria-describedby': overlay && open ? mergedId : undefined,
+          'aria-describedby': ariaDescribedBy || undefined,
         }
         return createVNode(child, ariaProps)
       }

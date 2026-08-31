@@ -52,7 +52,7 @@ export default () => {
   const tld = `(?:\\.(?:[a-z\\u00a1-\\uffff]{2,}))`
   const port = '(?::\\d{2,5})?'
   const path = '(?:[/?#][^\\s"]*)?'
-  const regex = `(?:${protocol}|www\\.)${auth}(?:localhost|${ipv4}|${ipv6}|${host}${domain}${tld})${port}${path}`
+  const regex = `(?:${protocol}|www\\.)${auth}(?:localhost|${ipv4}|${ipv6}|${host}(?:${domain}${tld})?)${port}${path}`
   urlReg = new RegExp(`(?:^${regex}$)`, 'i')
   return urlReg
 }

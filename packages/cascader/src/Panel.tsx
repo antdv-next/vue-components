@@ -25,6 +25,7 @@ export type PickType
     | 'options'
     | 'prefixCls'
     | 'checkable'
+    | 'checkStrictly'
     | 'fieldNames'
     | 'showCheckedStrategy'
     | 'loadData'
@@ -87,6 +88,7 @@ const Panel = defineComponent<PanelProps>((props = panelDefaults) => {
   // Fill `rawValues` with checked conduction values
   const valuesInfo = useValues(
     multiple,
+    computed(() => !!props.checkStrictly),
     rawValues,
     getPathKeyEntities,
     getValueByKeyPath,
@@ -121,6 +123,7 @@ const Panel = defineComponent<PanelProps>((props = panelDefaults) => {
   // =========================== Select ===========================
   const handleSelection = useSelect(
     multiple,
+    computed(() => !!props.checkStrictly),
     triggerChange,
     checkedValues,
     halfCheckedValues,

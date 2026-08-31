@@ -32,6 +32,21 @@ function mountTooltip(props: Record<string, any> = {}) {
   )
 }
 
+function mountDescribedTooltip() {
+  return mount(
+    defineComponent({
+      setup() {
+        return () => (
+          <Tooltip visible overlay={<span>tip</span>}>
+            <span class="target" aria-describedby="existing-description">target</span>
+          </Tooltip>
+        )
+      },
+    }),
+    { attachTo: document.body },
+  )
+}
+
 describe('tooltip disabled', () => {
   it('forwards `disabled` to Trigger so the tooltip stays hidden', async () => {
     const wrapper = mountTooltip({ visible: true, disabled: true })
@@ -47,6 +62,29 @@ describe('tooltip disabled', () => {
     await settle()
 
     expect(popupVisible()).toBe(true)
+
+    wrapper.unmount()
+  })
+})
+
+describe('tooltip accessibility', () => {
+  it('opens on focus by default', async () => {
+    const wrapper = mountTooltip()
+
+    await wrapper.find('.target').trigger('focus')
+    await settle()
+
+    expect(popupVisible()).toBe(true)
+
+    wrapper.unmount()
+  })
+
+  it('preserves the child aria-describedby value', async () => {
+    const wrapper = mountDescribedTooltip()
+    await settle()
+
+    expect(wrapper.find('.target').attributes('aria-describedby'))
+      .toMatch(/^existing-description\s+.+/)
 
     wrapper.unmount()
   })

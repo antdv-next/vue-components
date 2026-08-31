@@ -208,6 +208,7 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
     mergedExpandIcon,
     mergedChildrenColumnName,
     onTriggerExpand,
+    expandAllInfo,
   ] = useExpand(props, mergedData, getRowKey)
 
   const componentWidth = ref(0)
@@ -225,6 +226,8 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
       getRowKey,
       onTriggerExpand,
       expandIcon: mergedExpandIcon,
+      ExpandIcon: computed(() => props.components?.ExpandIcon),
+      expandAllInfo,
       rowExpandable: computed(() => expandableConfig.value.rowExpandable),
       expandIconColumnIndex: computed(() => expandableConfig.value.expandIconColumnIndex),
       expandedRowOffset: expandableConfig.value.expandedRowOffset,
