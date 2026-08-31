@@ -1,5 +1,5 @@
-import type { Component, CSSProperties, HTMLAttributes } from 'vue'
 import type { VueNode } from '@v-c/util/dist/type'
+import type { Component, CSSProperties, HTMLAttributes } from 'vue'
 import type { ClosableType } from './hooks/useClosable'
 import type { NotificationProgressProps } from './Progress'
 import { clsx } from '@v-c/util'
@@ -294,6 +294,7 @@ const Notification = defineComponent<NotificationProps>(
 
           {mergedClosable.value && (
             <button
+              type="button"
               class={clsx(`${noticePrefixCls}-close`, ncs?.close)}
               aria-label="Close"
               {...closeBtnAriaProps.value}
