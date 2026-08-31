@@ -8,6 +8,7 @@ import { toPathKeys } from '../utils/commonUtil'
 
 export default function useValues(
   multiple: Ref<boolean>,
+  checkStrictly: Ref<boolean>,
   rawValues: Ref<SingleValueType[]>,
   getPathKeyEntities: () => Record<string, DataEntity>,
   getValueByKeyPath: (pathKeys: LegacyKey[]) => SingleValueType[],
@@ -26,6 +27,11 @@ export default function useValues(
     }
 
     const keyPathValues = toPathKeys(existValues)
+
+    if (checkStrictly.value) {
+      return [getValueByKeyPath(keyPathValues), [], missingValues]
+    }
+
     const keyPathEntities = getPathKeyEntities()
 
     const { checkedKeys, halfCheckedKeys } = conductCheck(keyPathValues, true, keyPathEntities) as {
