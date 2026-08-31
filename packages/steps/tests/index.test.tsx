@@ -480,6 +480,7 @@ describe('steps', () => {
 
   it('key board support', async () => {
     const onChange = vitest.fn()
+    const onClick = vitest.fn()
     const wrapper = mount(
       <Steps
         current={0}
@@ -492,12 +493,14 @@ describe('steps', () => {
           {
             title: 'Waiting',
             description: 'This is a description',
+            onClick,
           },
         ]}
       />,
     )
 
-    await wrapper.findAll('[role="button"]')?.[1].trigger('keydown', { keyCode: 13 })
-    expect(onChange).toHaveBeenCalled()
+    await wrapper.findAll('[role="button"]')?.[1].trigger('keydown', { key: 'Enter' })
+    expect(onChange).toHaveBeenCalledTimes(1)
+    expect(onClick).toHaveBeenCalledTimes(1)
   })
 })
