@@ -44,6 +44,41 @@ describe('vc-drawer', () => {
     await nextTick()
   })
 
+  it('reports drawer sizes when resize starts and ends', async () => {
+    const onResizeStart = vi.fn()
+    const onResizeEnd = vi.fn()
+    const wrapper = mount(Drawer, {
+      props: {
+        open: true,
+        getContainer: false,
+        placement: 'right',
+        defaultSize: 320,
+        resizable: {
+          onResizeStart,
+          onResizeEnd,
+        },
+        ...motionProps,
+      },
+    })
+
+    await nextTick()
+    const contentWrapper = wrapper.find('.vc-drawer-content-wrapper').element as HTMLElement
+    contentWrapper.getBoundingClientRect = vi.fn(() => ({
+      width: 360,
+      height: 0,
+    } as DOMRect))
+
+    await wrapper.find('.vc-drawer-resizable-dragger').trigger('mousedown', { clientX: 100 })
+    await nextTick()
+    document.dispatchEvent(new MouseEvent('mouseup'))
+
+    expect(onResizeStart).toHaveBeenCalledWith(320)
+    expect(onResizeEnd).toHaveBeenCalledWith(360)
+
+    wrapper.unmount()
+    await nextTick()
+  })
+
   it('closes on Escape when getContainer is false', async () => {
     const onClose = vi.fn()
     const wrapper = mount(Drawer, {
