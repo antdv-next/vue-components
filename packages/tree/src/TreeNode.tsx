@@ -108,11 +108,11 @@ const TreeNode = defineComponent<TreeNodeProps>(
     const onDragStart = (e: DragEvent) => {
       e.stopPropagation()
       dragNodeHighlight.value = true
-      context.onNodeDragStart(e, props)
       try {
         e.dataTransfer?.setData('text/plain', '')
       }
       catch {}
+      context.onNodeDragStart(e, props)
     }
 
     const onDragEnter = (e: DragEvent) => {

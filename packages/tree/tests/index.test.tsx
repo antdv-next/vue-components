@@ -3,6 +3,26 @@ import { describe, expect, it, vi } from 'vitest'
 import Tree from '../src'
 
 describe('tree', () => {
+  it('preserves drag text set by consumers', async () => {
+    const dragData = new Map<string, string>()
+    const dataTransfer = {
+      setData: (type: string, value: string) => dragData.set(type, value),
+    }
+    const wrapper = mount(Tree, {
+      props: {
+        draggable: true,
+        treeData: [{ key: '0', title: 'node' }] as any,
+        onDragStart: ({ event }) => event.dataTransfer?.setData('text/plain', 'custom drag text'),
+      },
+    })
+
+    const event = new Event('dragstart', { bubbles: true })
+    Object.defineProperty(event, 'dataTransfer', { value: dataTransfer })
+    wrapper.get('.vc-tree-node-content-wrapper').element.dispatchEvent(event)
+
+    expect(dragData.get('text/plain')).toBe('custom drag text')
+  })
+
   it('supports switcher semantic styles and class names', () => {
     const wrapper = mount(() => (
       <Tree
