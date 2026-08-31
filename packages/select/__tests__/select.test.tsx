@@ -15,6 +15,18 @@ describe('select react sync', () => {
     document.body.innerHTML = ''
   })
 
+  it('forwards autocomplete to the search input', () => {
+    const wrapper = mount(Select, {
+      props: {
+        showSearch: true,
+        autoComplete: 'organization-title',
+      },
+    })
+
+    expect(wrapper.find('input').attributes('autocomplete')).toBe('organization-title')
+    expect(wrapper.attributes('autocomplete')).toBeUndefined()
+  })
+
   it('does not add has-value class when selected label is empty string', async () => {
     const wrapper = mount(Select, {
       attachTo: document.body,

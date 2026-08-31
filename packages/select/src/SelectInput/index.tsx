@@ -42,6 +42,7 @@ export interface SelectInputProps {
   onSelectorRemove?: (value: DisplayValueType) => void
   maxLength?: number
   autoFocus?: boolean
+  autoComplete?: string
   /** Check if `tokenSeparators` contains `\n` or `\r\n` */
   tokenWithEnter?: boolean
   // Add other props that need to be passed through
@@ -70,6 +71,7 @@ const DEFAULT_OMIT_PROPS = [
   'onPopupScroll',
   'tabIndex',
   'activeValue',
+  'autoComplete',
   'onSelectorRemove',
   'focused',
 ] as const
