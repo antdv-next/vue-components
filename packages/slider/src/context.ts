@@ -1,6 +1,6 @@
 import type { InjectionKey, Ref } from 'vue'
-import type { AriaValueFormat, Direction, SliderClassNames, SliderStyles } from './interface'
 import type { IsHandleDisabled } from './hooks/useDisabled'
+import type { AriaValueFormat, Direction, SliderClassNames, SliderStyles } from './interface'
 import { defineComponent, inject, provide, ref } from 'vue'
 
 export interface SliderContextProps {
@@ -17,6 +17,7 @@ export interface SliderContextProps {
   tabIndex: number | number[]
   ariaLabelForHandle?: string | string[]
   ariaLabelledByForHandle?: string | string[]
+  ariaDescribedByForHandle?: string | string[]
   ariaRequired?: boolean
   ariaValueTextFormatterForHandle?: AriaValueFormat | AriaValueFormat[]
   classNames: SliderClassNames
