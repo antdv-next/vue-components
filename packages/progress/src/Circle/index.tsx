@@ -159,6 +159,7 @@ const Circle = defineComponent<ProgressProps>(
       }
       return (
         <svg
+          {...omit(restProps, ['gapDegree', 'steps', 'percent', 'strokeLinecap', 'strokeColor'])}
           {...restAttrs}
           class={[`${prefixCls}-circle`, classNames.root, className]}
           viewBox={`0 0 ${VIEW_BOX_SIZE} ${VIEW_BOX_SIZE}`}
@@ -170,7 +171,6 @@ const Circle = defineComponent<ProgressProps>(
           }
           id={id}
           role="presentation"
-          {...omit(restProps, ['gapDegree', 'steps', 'percent', 'strokeLinecap', 'strokeColor'])}
         >
           {!stepCount && (
             <circle
@@ -180,7 +180,7 @@ const Circle = defineComponent<ProgressProps>(
               cy={halfSize}
               stroke={railColor}
               stroke-linecap={mergedStrokeLinecap.value}
-              stroke-width={railWidth || strokeWidth}
+              stroke-width={railWidth ?? strokeWidth}
               style={{ ...circleStyle, ...styles.rail }}
             />
           )}
