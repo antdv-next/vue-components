@@ -114,6 +114,7 @@ export interface SliderProps<Value extends ValueType = ValueType> {
   tabIndex?: number | number[]
   ariaLabelForHandle?: string | string[]
   ariaLabelledByForHandle?: string | string[]
+  ariaDescribedByForHandle?: string | string[]
   ariaRequired?: boolean
   ariaValueTextFormatterForHandle?: AriaValueFormat | AriaValueFormat[]
 }
@@ -612,6 +613,7 @@ const Slider = defineComponent<SliderProps>((props = sliderDefaults, {
     tabIndex: tabIndex.value,
     ariaLabelForHandle: props.ariaLabelForHandle,
     ariaLabelledByForHandle: props.ariaLabelledByForHandle,
+    ariaDescribedByForHandle: props.ariaDescribedByForHandle,
     ariaRequired: props.ariaRequired,
     ariaValueTextFormatterForHandle: props.ariaValueTextFormatterForHandle,
     styles: props.styles || {},
