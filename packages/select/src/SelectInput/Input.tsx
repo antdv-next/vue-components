@@ -153,6 +153,7 @@ const Input = defineComponent<InputProps>(
       const {
         prefixCls,
         autoFocus,
+        autoComplete: contextAutoComplete,
         placeholder,
       } = selectInputContext.value ?? {}
       const { input: InputComponent = 'input' } = selectInputContext.value?.components ?? {}
@@ -170,7 +171,7 @@ const Input = defineComponent<InputProps>(
 
       // ============================= Render =============================
       // Extract shared input props
-      
+
       const sharedInputProps = {
         id,
         'type': 'text',
@@ -183,7 +184,7 @@ const Input = defineComponent<InputProps>(
           '--select-input-width': widthCssVar.value,
         },
         autoFocus,
-        'autocomplete': autoComplete || 'new-password',
+        'autocomplete': autoComplete ?? contextAutoComplete ?? 'new-password',
         'class': inputCls,
         disabled,
         'value': value || '',

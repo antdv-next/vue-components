@@ -12,6 +12,7 @@ import { formatStrategyValues } from '../utils/treeUtil'
 
 export default function useSelect(
   multiple: Ref<boolean>,
+  checkStrictly: Ref<boolean>,
   triggerChange: (nextValues: InternalValueType) => void,
   checkedValues: Ref<SingleValueType[]>,
   halfCheckedValues: Ref<SingleValueType[]>,
@@ -44,6 +45,11 @@ export default function useSelect(
         nextMissingValues = missingCheckedValues.value.filter(
           valueCells => toPathKey(valueCells) !== pathKey,
         )
+      }
+      else if (checkStrictly.value) {
+        nextCheckedValues = existInChecked
+          ? checkedValues.value.filter(valueCells => toPathKey(valueCells) !== pathKey)
+          : [...checkedValues.value, valuePath]
       }
       else {
         // Update checked key first

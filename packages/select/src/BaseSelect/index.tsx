@@ -138,6 +138,7 @@ export interface BaseSelectProps extends BaseSelectPrivateProps {
   tagRender?: (props: CustomTagProps) => any
   direction?: 'ltr' | 'rtl'
   autoFocus?: boolean
+  autoComplete?: string
   placeholder?: VueNode
   maxCount?: number
 

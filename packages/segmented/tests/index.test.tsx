@@ -4,6 +4,13 @@ import { nextTick } from 'vue'
 import Segmented from '../src'
 
 describe('segmented', () => {
+  it('marks selected item text independently from the animated thumb', () => {
+    const wrapper = mount(<Segmented value="b" options={['a', 'b', 'c']} />)
+
+    expect(wrapper.findAll('.vc-segmented-item')[1].classes())
+      .toContain('vc-segmented-item-selected-text')
+  })
+
   it('should select the first option by default when no value/defaultValue is provided', () => {
     const wrapper = mount(<Segmented options={['a', 'b', 'c']} />)
     const inputs = wrapper.findAll('.vc-segmented-item-input')

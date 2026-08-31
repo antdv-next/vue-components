@@ -93,6 +93,8 @@ interface BaseCascaderProps<
   changeOnSelect?: boolean
   displayRender?: (label: string[], selectedOptions?: OptionType[]) => VueNode
   checkable?: boolean | VueNode
+  /** Check each option independently without parent-child association. */
+  checkStrictly?: boolean
   showCheckedStrategy?: ShowCheckedStrategy
 
   // Search
@@ -220,6 +222,7 @@ const omitKeyList = [
   'changeOnSelect',
   'displayRender',
   'checkable',
+  'checkStrictly',
   'showCheckedStrategy',
 
   // Search
@@ -333,6 +336,7 @@ const Cascader = defineComponent<CascaderProps>(
     // Fill `rawValues` with checked conduction values
     const valuesInfo = useValues(
       multiple,
+      computed(() => !!props.checkStrictly),
       rawValues,
       getPathKeyEntities,
       getValueByKeyPath,
@@ -345,11 +349,13 @@ const Cascader = defineComponent<CascaderProps>(
 
     const deDuplicatedValues = computed(() => {
       const checkedKeys = toPathKeys(checkedValues.value)
-      const deduplicateKeys = formatStrategyValues(
-        checkedKeys,
-        getPathKeyEntities,
-        mergedShowCheckedStrategy.value,
-      )
+      const deduplicateKeys = props.checkStrictly
+        ? checkedKeys
+        : formatStrategyValues(
+            checkedKeys,
+            getPathKeyEntities,
+            mergedShowCheckedStrategy.value,
+          )
 
       return [...missingCheckedValues.value, ...getValueByKeyPath(deduplicateKeys)]
     })
@@ -386,6 +392,7 @@ const Cascader = defineComponent<CascaderProps>(
     // =========================== Select ===========================
     const handleSelection = useSelect(
       multiple,
+      computed(() => !!props.checkStrictly),
       triggerChange,
       checkedValues,
       halfCheckedValues,

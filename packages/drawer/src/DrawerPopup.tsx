@@ -73,8 +73,8 @@ export interface DrawerPopupProps extends DrawerPanelEvents {
     | boolean
     | {
       onResize?: (size: number) => void
-      onResizeStart?: () => void
-      onResizeEnd?: () => void
+      onResizeStart?: (size: number) => void
+      onResizeEnd?: (size: number) => void
     }
 
 }
@@ -215,8 +215,8 @@ const DrawerPopup = defineComponent<DrawerPopupProps>(
       containerRef: wrapperRef,
       currentSize: mergedSize,
       onResize: onInternalResize,
-      onResizeStart: () => resizeConfig?.value?.onResizeStart?.(),
-      onResizeEnd: () => resizeConfig?.value?.onResizeEnd?.(),
+      onResizeStart: size => resizeConfig?.value?.onResizeStart?.(size),
+      onResizeEnd: size => resizeConfig?.value?.onResizeEnd?.(size),
     })
     return () => {
       const {
