@@ -110,7 +110,9 @@ export function calcDropPosition<TreeDataType extends BasicDataNode = DataNode>(
   )
 
   let abstractDropNodeEntity = getEntity(keyEntities, targetNodeProps.eventKey!)
-  if (clientY < top + height / 2) {
+  const dropBeforeTarget = clientY < top + height / 2 && isFirstChild(abstractDropNodeEntity)
+
+  if (clientY < top + height / 2 && !dropBeforeTarget) {
     const nodeIndex = flattenedNodes.findIndex(({ key }) => key === abstractDropNodeEntity.key)
     const prevNodeKey = flattenedNodes[nodeIndex <= 0 ? 0 : nodeIndex - 1].key
     abstractDropNodeEntity = getEntity(keyEntities, prevNodeKey)
@@ -140,9 +142,7 @@ export function calcDropPosition<TreeDataType extends BasicDataNode = DataNode>(
   let dropAllowed = true
 
   if (
-    isFirstChild(abstractDropNodeEntity)
-    && abstractDropNodeEntity.level === 0
-    && clientY < top + height / 2
+    dropBeforeTarget
     && allowDrop({
       dragNode: abstractDragDataNode,
       dropNode: abstractDropDataNode,
