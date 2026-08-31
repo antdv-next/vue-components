@@ -2,7 +2,6 @@ import type { KeyboardEventHandler, MouseEventHandler } from '@v-c/util/dist/Eve
 import type { VueNode } from '@v-c/util/dist/type'
 import type { Status, StepItem, StepsProps } from './Steps'
 import { clsx } from '@v-c/util'
-import KeyCode from '@v-c/util/dist/KeyCode'
 import { defineComponent } from 'vue'
 import { useStepsContext } from './Context'
 import Rail from './Rail.tsx'
@@ -114,9 +113,9 @@ const Step = defineComponent<StepProps>(
         }
 
         accessibilityProps.onKeydown = (e: KeyboardEvent) => {
-          const { which } = e
-          if (which === KeyCode.ENTER || which === KeyCode.SPACE) {
-            onClick?.(index)
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            e.currentTarget.click()
           }
         }
       }
