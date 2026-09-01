@@ -32,18 +32,24 @@ function mountTooltip(props: Record<string, any> = {}) {
   )
 }
 
-function mountDescribedTooltip() {
+function mountDescribedTooltip(visible = false) {
   return mount(
     defineComponent({
-      setup() {
+      props: {
+        visible: Boolean,
+      },
+      setup(props) {
         return () => (
-          <Tooltip visible overlay={<span>tip</span>}>
+          <Tooltip id="tooltip-description" visible={props.visible} overlay={<span>tip</span>}>
             <span class="target" aria-describedby="existing-description">target</span>
           </Tooltip>
         )
       },
     }),
-    { attachTo: document.body },
+    {
+      attachTo: document.body,
+      props: { visible },
+    },
   )
 }
 
@@ -79,12 +85,19 @@ describe('tooltip accessibility', () => {
     wrapper.unmount()
   })
 
-  it('preserves the child aria-describedby value', async () => {
+  it('preserves the child aria-describedby across visibility changes', async () => {
     const wrapper = mountDescribedTooltip()
-    await settle()
 
     expect(wrapper.find('.target').attributes('aria-describedby'))
-      .toMatch(/^existing-description\s+.+/)
+      .toBe('existing-description')
+
+    await wrapper.setProps({ visible: true })
+    expect(wrapper.find('.target').attributes('aria-describedby'))
+      .toBe('existing-description tooltip-description')
+
+    await wrapper.setProps({ visible: false })
+    expect(wrapper.find('.target').attributes('aria-describedby'))
+      .toBe('existing-description')
 
     wrapper.unmount()
   })
