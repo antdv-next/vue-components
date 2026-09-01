@@ -467,7 +467,12 @@ const Tree = defineComponent<TreeProps>(
     }
 
     function onFocus(e: FocusEvent) {
-      if (!focusedByMouse && !mergedDisabled.value && activeKey.value === null) {
+      if (
+        e.target === e.currentTarget
+        && !focusedByMouse
+        && !mergedDisabled.value
+        && activeKey.value === null
+      ) {
         const visibleSelectedKey = selectedKeys.value.find((key) => {
           return flattenNodes.value.some(nodeItem => nodeItem.key === key)
         })

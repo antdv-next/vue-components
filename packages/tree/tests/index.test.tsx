@@ -79,4 +79,36 @@ describe('tree', () => {
     expect(onMouseDown).toHaveBeenCalledTimes(1)
     expect(onActiveChange).not.toHaveBeenCalled()
   })
+
+  it.each([
+    { description: 'a selected node', treeProps: { selectedKeys: ['1'] } },
+    { description: 'selection disabled', treeProps: { selectable: false } },
+  ])('does not activate when a title descendant receives focus with $description', async ({ treeProps }) => {
+    const onActiveChange = vi.fn()
+    const onFocus = vi.fn()
+    const wrapper = mount(() => (
+      <Tree
+        treeData={Array.from({ length: 20 }, (_, index) => ({
+          key: String(index),
+          title: `Node ${index}`,
+        })) as any}
+        height={100}
+        itemHeight={20}
+        titleRender={node => node.key === '0'
+          ? <select aria-label="Node action"><option>Action</option></select>
+          : node.title}
+        onActiveChange={onActiveChange}
+        onFocus={onFocus}
+        {...treeProps}
+      />
+    ))
+
+    const select = wrapper.get('select')
+    await select.trigger('mousedown')
+    window.dispatchEvent(new MouseEvent('mouseup'))
+    select.element.dispatchEvent(new FocusEvent('focus', { bubbles: true }))
+
+    expect(onFocus).toHaveBeenCalledTimes(1)
+    expect(onActiveChange).not.toHaveBeenCalled()
+  })
 })
