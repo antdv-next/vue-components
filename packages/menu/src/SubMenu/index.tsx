@@ -20,9 +20,10 @@ import PopupTrigger from './PopupTrigger'
 import SubMenuList from './SubMenuList'
 
 export type SemanticName = 'list' | 'listTitle'
+export type SubSemanticName = SemanticName | 'subItem' | 'subItemTitle'
 export interface SubMenuProps extends Omit<SubMenuType, 'key' | 'children' | 'label' | 'title'> {
-  classes?: Partial<Record<SemanticName, string>>
-  styles?: Partial<Record<SemanticName, CSSProperties>>
+  classes?: Partial<Record<SubSemanticName, string>>
+  styles?: Partial<Record<SubSemanticName, CSSProperties>>
   title?: VueNode
   /** Native `title` attribute for the submenu title element. */
   itemTitle?: string
@@ -251,8 +252,8 @@ const InternalSubMenu = defineComponent<SubMenuProps>(
       let titleNode = (
         <div
           role="menuitem"
-          style={directionStyle.value}
-          class={`${subMenuPrefixCls.value}-title`}
+          style={{ ...directionStyle.value, ...styles?.subItemTitle }}
+          class={classNames(`${subMenuPrefixCls.value}-title`, classes?.subItemTitle)}
           tabindex={mergedDisabled.value ? undefined : -1}
           title={itemTitle ?? (typeof title === 'string' ? title : undefined)}
           data-menu-id={overflowDisabled.value && domDataId.value ? undefined : domDataId.value}
@@ -320,10 +321,11 @@ const InternalSubMenu = defineComponent<SubMenuProps>(
           {...attrs as any}
           {...restProps}
           component="li"
-          style={style}
+          style={{ ...styles?.subItem, ...style }}
           class={classNames(
             subMenuPrefixCls.value,
             `${subMenuPrefixCls.value}-${mode.value}`,
+            classes?.subItem,
             className,
             {
               [`${subMenuPrefixCls.value}-open`]: open.value,
