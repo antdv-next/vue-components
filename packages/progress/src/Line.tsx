@@ -51,6 +51,7 @@ const Line = defineComponent<ProgressProps>(
       let stackPtg = 0
       return (
         <svg
+          role="presentation"
           {...restProps}
           {...restAttrs}
           class={{
@@ -61,7 +62,6 @@ const Line = defineComponent<ProgressProps>(
           viewBox={viewBoxString}
           style={style}
           id={id}
-          role="presentation"
         >
           <path
             class={[
