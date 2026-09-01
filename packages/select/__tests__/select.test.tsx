@@ -15,6 +15,16 @@ describe('select react sync', () => {
     document.body.innerHTML = ''
   })
 
+  it('suppresses browser autocomplete on the search input by default', () => {
+    const wrapper = mount(Select, {
+      props: {
+        showSearch: true,
+      },
+    })
+
+    expect(wrapper.find('input').attributes('autocomplete')).toBe('new-password')
+  })
+
   it('forwards autocomplete to the search input', () => {
     const wrapper = mount(Select, {
       props: {
