@@ -46,6 +46,7 @@ export interface StickyHeaderParams {
   groupKeyToItems: Map<any, any[]>
   prefixCls: string
   listRef: Ref
+  scrollWidth?: number
   headerClassName?: string
   headerStyle?: CSSProperties
 }
@@ -59,12 +60,13 @@ export default function useStickyGroupHeader(params: StickyHeaderParams) {
     groupKeyToItems,
     prefixCls,
     listRef,
+    scrollWidth,
     headerClassName,
     headerStyle,
   } = params
 
   const extraRender = (info: ExtraRenderInfo) => {
-    const { getSize, scrollTop, virtual } = info
+    const { getSize, scrollTop, virtual, offsetX, rtl } = info
 
     if (!enabled || !group || !groupKeys.length || !virtual) {
       return null
@@ -100,6 +102,13 @@ export default function useStickyGroupHeader(params: StickyHeaderParams) {
           )
         : 0
 
+    const horizontalStyle: CSSProperties | undefined = scrollWidth
+      ? {
+          width: `${scrollWidth}px`,
+          transform: `translateX(${rtl ? offsetX : -offsetX}px)`,
+        }
+      : undefined
+
     // Render a cloned header pinned over the virtual list.
     return (
       <Portal open getContainer={() => container}>
@@ -113,7 +122,7 @@ export default function useStickyGroupHeader(params: StickyHeaderParams) {
             className={headerClassName}
             // `top` is the computed sticky-push offset and must win over any
             // user-supplied top in headerStyle, or the sticky behavior breaks.
-            style={{ ...headerStyle, top }}
+            style={{ ...headerStyle, ...horizontalStyle, top }}
           />
         </div>
       </Portal>
