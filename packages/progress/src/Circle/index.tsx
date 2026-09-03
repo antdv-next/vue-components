@@ -159,6 +159,7 @@ const Circle = defineComponent<ProgressProps>(
       }
       return (
         <svg
+          role="presentation"
           {...omit(restProps, ['gapDegree', 'steps', 'percent', 'strokeLinecap', 'strokeColor'])}
           {...restAttrs}
           class={[`${prefixCls}-circle`, classNames.root, className]}
@@ -170,7 +171,6 @@ const Circle = defineComponent<ProgressProps>(
             }
           }
           id={id}
-          role="presentation"
         >
           {!stepCount && (
             <circle
