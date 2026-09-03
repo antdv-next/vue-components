@@ -219,7 +219,7 @@ export interface LegacyExpandableProps<RecordType> {
   expandedRowRender?: ExpandedRowRender<RecordType>
   /** @deprecated Use `expandable.expandRowByClick` instead */
   expandRowByClick?: boolean
-  /** @deprecated Use `expandable.expandIcon` instead */
+  /** @deprecated Use `components.ExpandIcon` instead */
   expandIcon?: RenderExpandIcon<RecordType>
   /** @deprecated Use `expandable.onExpand` instead */
   onExpand?: (expanded: boolean, record: RecordType) => void
