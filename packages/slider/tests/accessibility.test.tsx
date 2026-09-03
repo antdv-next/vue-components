@@ -5,6 +5,16 @@ import { describe, expect, it } from 'vitest'
 import Slider from '../src'
 
 describe('slider accessibility', () => {
+  it('applies aria-describedby to a single handle', () => {
+    const wrapper = mount(Slider, {
+      props: {
+        ariaDescribedByForHandle: 'value-help',
+      },
+    })
+
+    expect(wrapper.get('[role="slider"]').attributes('aria-describedby')).toBe('value-help')
+  })
+
   it('applies aria-describedby to each handle', () => {
     const wrapper = mount(Slider, {
       props: {
