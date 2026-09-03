@@ -499,8 +499,17 @@ describe('steps', () => {
       />,
     )
 
-    await wrapper.findAll('[role="button"]')?.[1].trigger('keydown', { key: 'Enter' })
-    expect(onChange).toHaveBeenCalledTimes(1)
-    expect(onClick).toHaveBeenCalledTimes(1)
+    const button = wrapper.findAll('[role="button"]')?.[1].element
+    const enterEvent = new KeyboardEvent('keydown', { key: 'Enter', cancelable: true })
+    const spaceEvent = new KeyboardEvent('keydown', { key: ' ', cancelable: true })
+
+    button.dispatchEvent(enterEvent)
+    button.dispatchEvent(spaceEvent)
+
+    expect(onChange).toHaveBeenNthCalledWith(1, 1)
+    expect(onChange).toHaveBeenNthCalledWith(2, 1)
+    expect(onClick).toHaveBeenCalledTimes(2)
+    expect(enterEvent.defaultPrevented).toBe(true)
+    expect(spaceEvent.defaultPrevented).toBe(true)
   })
 })
