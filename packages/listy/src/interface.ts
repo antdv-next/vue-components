@@ -55,6 +55,7 @@ export interface ListyProps {
   height?: number
   group?: Group
   virtual?: boolean
+  scrollWidth?: number
   direction?: 'ltr' | 'rtl'
   prefixCls?: string
   rowKey: RowKey<any>
@@ -70,6 +71,7 @@ export interface ListComponentProps {
   itemHeight?: number
   height?: number
   group?: Group
+  scrollWidth?: number
   direction?: 'ltr' | 'rtl'
   prefixCls: string
   rowKey: RowKey<any>

@@ -110,6 +110,7 @@ export default defineComponent<VirtualListProps>((props, { expose }) => {
       onScroll,
       prefixCls,
       sticky,
+      scrollWidth,
       direction,
       classNames,
       styles,
@@ -122,6 +123,7 @@ export default defineComponent<VirtualListProps>((props, { expose }) => {
       groupKeyToItems: flattenRows.value.groupKeyToItems,
       prefixCls,
       listRef,
+      scrollWidth,
       headerClassName: classNames?.groupHeader,
       headerStyle: styles?.groupHeader,
     })
@@ -136,7 +138,7 @@ export default defineComponent<VirtualListProps>((props, { expose }) => {
           groupItems={groupItems}
           prefixCls={prefixCls}
           className={classNames?.groupHeader}
-          style={styles?.groupHeader}
+          style={{ ...styles?.groupHeader, ...(scrollWidth ? { width: `${scrollWidth}px` } : {}) }}
         />
       )
     }
@@ -150,6 +152,7 @@ export default defineComponent<VirtualListProps>((props, { expose }) => {
         itemHeight={itemHeight}
         itemKey="taggedKey"
         onScroll={onScroll}
+        scrollWidth={scrollWidth}
         prefixCls={prefixCls}
         virtual
         extraRender={extraRender as any}
@@ -163,7 +166,7 @@ export default defineComponent<VirtualListProps>((props, { expose }) => {
           return (
             <div
               class={clsx(`${prefixCls}-item`, classNames?.item)}
-              style={styles?.item}
+              style={{ ...styles?.item, ...(scrollWidth ? { width: `${scrollWidth}px` } : {}) }}
             >
               {itemRender(row.item, row.index)}
             </div>

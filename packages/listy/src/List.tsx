@@ -17,6 +17,7 @@ export default defineComponent<ListyProps>((props, { expose }) => {
   return () => {
     const {
       items,
+      itemRender,
       virtual = true,
       prefixCls = 'vc-listy',
       ...restProps
@@ -24,6 +25,7 @@ export default defineComponent<ListyProps>((props, { expose }) => {
     // ============================== Render ===============================
     const sharedListProps = {
       ...restProps,
+      itemRender: itemRender!,
       data: data.value,
       prefixCls,
     }
