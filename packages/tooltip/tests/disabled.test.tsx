@@ -101,4 +101,27 @@ describe('tooltip accessibility', () => {
 
     wrapper.unmount()
   })
+
+  it('sets aria-describedby for a falsy but valid overlay', async () => {
+    const wrapper = mountTooltip({ visible: true, overlay: 0 })
+    await settle()
+
+    const describedBy = wrapper.find('.target').attributes('aria-describedby')
+    expect(describedBy).toBeTruthy()
+    expect(document.getElementById(describedBy!)?.textContent).toBe('0')
+
+    wrapper.unmount()
+  })
+
+  it.each([null, undefined])(
+    'does not set aria-describedby for a nullish overlay',
+    async (overlay) => {
+      const wrapper = mountTooltip({ visible: true, overlay })
+      await settle()
+
+      expect(wrapper.find('.target').attributes('aria-describedby')).toBeUndefined()
+
+      wrapper.unmount()
+    },
+  )
 })
