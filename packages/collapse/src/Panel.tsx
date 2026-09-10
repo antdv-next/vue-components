@@ -1,6 +1,6 @@
 import type { HTMLAttributes, TransitionProps } from 'vue'
 import type { CollapsePanelProps } from './interface'
-import { classNames as classnames } from '@v-c/util'
+import { classNames as classnames, isNonNullable, isVueRenderable } from '@v-c/util'
 import KeyCode from '@v-c/util/dist/KeyCode'
 import omit from '@v-c/util/dist/omit'
 import { computed, defineComponent, ref, Transition } from 'vue'
@@ -20,9 +20,7 @@ const CollapsePanel = defineComponent<CollapsePanelProps>({
     const refWrapper = ref()
     const ifExtraExist = computed(
       () =>
-        props.extra !== null
-        && props.extra !== undefined
-        && typeof props.extra !== 'boolean',
+        isNonNullable(props.extra) && typeof props.extra !== 'boolean',
     )
 
     const collapsibleProps = computed(() => {
@@ -107,7 +105,7 @@ const CollapsePanel = defineComponent<CollapsePanelProps>({
           : (
               <i class="arrow" />
             )
-      const iconNode = iconNodeInner && (
+      const iconNode = isVueRenderable(iconNodeInner) && (
         <div
           class={classnames(`${prefixCls}-expand-icon`, customizeClassNames?.icon)}
           style={styles?.icon}

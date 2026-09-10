@@ -1,19 +1,13 @@
-import type { CSSProperties } from 'vue'
 import type { VueNode } from '@v-c/util/dist/type'
-import type {
-  RendererElement,
-  RendererNode,
-  VNode,
-  VNodeNormalizedChildren,
-} from 'vue'
+import type { CSSProperties, RendererElement, RendererNode, VNode, VNodeNormalizedChildren } from 'vue'
 import type {
   CollapsePanelProps,
   CollapseProps,
   ItemType,
   Key,
 } from '../interface'
-import { toArray } from '@v-c/util/dist/Children/toArray'
 import { clsx } from '@v-c/util'
+import { toArray } from '@v-c/util/dist/Children/toArray'
 import { isEmptyElement } from '@v-c/util/dist/props-util'
 import { cloneElement } from '@v-c/util/dist/vnode'
 import CollapsePanel from '../Panel'
@@ -23,7 +17,8 @@ function mergeSemantic<T>(
   target: Partial<Record<string, T>> | undefined,
   mergeFunc: (sourceValue: T | undefined, targetValue: T | undefined) => T | undefined,
 ): Partial<Record<string, T>> | undefined {
-  if (!source && !target) return undefined
+  if (!source && !target)
+    return undefined
   const keys = new Set([
     ...Object.keys(source || {}),
     ...Object.keys(target || {}),
@@ -50,7 +45,8 @@ function mergeSemanticStyles(
   target: Partial<Record<string, CSSProperties>> | undefined,
 ) {
   return mergeSemantic(source, target, (s, t) => {
-    if (!s && !t) return undefined
+    if (!s && !t)
+      return undefined
     return { ...s, ...t }
   })
 }
