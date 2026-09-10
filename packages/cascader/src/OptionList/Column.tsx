@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'vue'
 import type { DefaultOptionType, LegacyKey, SingleValueType } from '../Cascader'
-import { clsx } from '@v-c/util'
+import { clsx, isVueRenderable } from '@v-c/util'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
 import { computed, defineComponent, ref, watch } from 'vue'
 import { useCascaderContext } from '../context'
@@ -236,10 +236,10 @@ const Column = defineComponent<ColumnProps>((props = columnDefaults) => {
               <div class={`${menuItemPrefixCls.value}-content`}>
                 {optionRender && value !== '__EMPTY__' ? optionRender(option) : label}
               </div>
-              {!isLoading && expandIcon && !isMergedLeaf && (
+              {!isLoading && isVueRenderable(expandIcon) && !isMergedLeaf && (
                 <div class={`${menuItemPrefixCls.value}-expand-icon`}>{expandIcon}</div>
               )}
-              {isLoading && loadingIcon && (
+              {isLoading && isVueRenderable(loadingIcon) && (
                 <div class={`${menuItemPrefixCls.value}-loading-icon`}>{loadingIcon}</div>
               )}
             </li>
