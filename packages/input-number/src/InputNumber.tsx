@@ -6,7 +6,7 @@ import getMiniDecimal, {
   toFixed,
   validateNumber,
 } from '@v-c/mini-decimal'
-import { clsx } from '@v-c/util'
+import { clsx, isVueRenderable } from '@v-c/util'
 import { triggerFocus } from '@v-c/util/dist/Dom/focus'
 import { KeyCodeStr } from '@v-c/util/dist/KeyCode'
 import omit from '@v-c/util/dist/omit'
@@ -37,7 +37,7 @@ function getWheelDeltaY(event: WheelEvent) {
   }
 }
 
-type SemanticName = 'root' | 'actions' | 'input' | 'action' | 'prefix' | 'suffix'
+type SemanticName = 'root' | 'actions' | 'input' | 'action' | 'prefix' | 'suffix' | 'clear'
 
 export interface InputNumberProps<T extends ValueType = ValueType> {
   mode?: 'input' | 'spinner'
@@ -56,6 +56,13 @@ export interface InputNumberProps<T extends ValueType = ValueType> {
   readOnly?: boolean
   prefix?: any
   suffix?: any
+  allowClear?:
+    | boolean
+    | {
+      clearIcon?: any
+      disabled?: boolean
+      label?: string
+    }
   upHandler?: any
   downHandler?: any
   keyboard?: boolean
@@ -67,6 +74,7 @@ export interface InputNumberProps<T extends ValueType = ValueType> {
   decimalSeparator?: string
   onInput?: (text: string) => void
   onChange?: (value: T | null) => void
+  onClear?: () => void
   onPressEnter?: (e: KeyboardEvent) => void
   onStep?: (value: T, info: { offset: ValueType, type: 'up' | 'down', emitter: 'handler' | 'keyboard' | 'wheel' }) => void
   changeOnBlur?: boolean
@@ -180,6 +188,7 @@ const InputNumber = defineComponent<InputNumberProps>(
 
     const inputValue = shallowRef<string | number>('')
     const inputValueRef = shallowRef<string | number>('')
+    let inputValueUpdateId = 0
 
     const mergedFormatter = (number: string, userTyping: boolean) => {
       if (props.formatter) {
@@ -317,6 +326,9 @@ const InputNumber = defineComponent<InputNumberProps>(
     const onNextPromise = useFrame()
 
     const collectInputValue = (inputStr: string) => {
+      inputValueUpdateId += 1
+      const currentUpdateId = inputValueUpdateId
+
       recordCursor()
 
       inputValueRef.value = inputStr
@@ -333,6 +345,10 @@ const InputNumber = defineComponent<InputNumberProps>(
       props.onInput?.(inputStr)
 
       onNextPromise(() => {
+        if (currentUpdateId !== inputValueUpdateId) {
+          return
+        }
+
         let nextInputStr = inputStr
         if (!props.parser) {
           nextInputStr = inputStr.replace(/。/g, '.')
@@ -503,6 +519,11 @@ const InputNumber = defineComponent<InputNumberProps>(
 
     // >>> Focus & Blur
     const onBlur = (e: FocusEvent) => {
+      // Moving focus between internal controls does not blur InputNumber.
+      if (e.relatedTarget instanceof Node && rootRef.value?.contains(e.relatedTarget)) {
+        return
+      }
+
       if (props.changeOnBlur ?? true) {
         flushInputValue(false)
       }
@@ -526,6 +547,35 @@ const InputNumber = defineComponent<InputNumberProps>(
       }
 
       props.onMouseDown?.(event)
+    }
+
+    // ============================ Clear =============================
+    const onClearKeyDown = (event: KeyboardEvent) => {
+      const isStepKey = ['Up', 'ArrowUp', 'Down', 'ArrowDown'].includes(event.key)
+      if (event.key === KeyCodeStr.Enter || (props.keyboard !== false && isStepKey)) {
+        event.stopPropagation()
+      }
+    }
+
+    const onClearClick = () => {
+      userTypingRef.value = false
+      inputValueRef.value = ''
+      inputValueUpdateId += 1
+
+      const emptyValue = getMiniDecimal(null as any)
+
+      // `triggerValueUpdate` only refreshes the display when the decimal value changes.
+      // Clear raw input such as `-`, or restore the source value in controlled mode.
+      if (props.value !== undefined) {
+        setInputValue(decimalValue.value, false)
+      }
+      else if (decimalValue.value.isEmpty()) {
+        setInputValue(emptyValue, false)
+      }
+
+      inputRef.value?.focus()
+      triggerValueUpdate(emptyValue, false)
+      props.onClear?.()
     }
 
     // ========================== Controlled ==========================
@@ -569,6 +619,7 @@ const InputNumber = defineComponent<InputNumberProps>(
         controls = defaults.controls,
         mode = defaults.mode,
         placeholder,
+        allowClear,
       } = props
 
       const mergedPrefixCls = prefixCls || defaults.prefixCls!
@@ -585,6 +636,34 @@ const InputNumber = defineComponent<InputNumberProps>(
       const suffixNode = slots.suffix?.() ?? props.suffix
       const upNode = slots.upHandler?.() ?? props.upHandler
       const downNode = slots.downHandler?.() ?? props.downHandler
+
+      // >>> Clear
+      const clearConfig = allowClear && typeof allowClear === 'object' ? allowClear : { disabled: allowClear !== true }
+      const showClear = !disabled && !readOnly && clearConfig.disabled !== true && String(inputValue.value).length > 0
+      const hasSuffix = isVueRenderable(suffixNode)
+      const clearIconCls = `${mergedPrefixCls}-clear-icon`
+
+      const clearNode = allowClear && (
+        <button
+          type="button"
+          aria-label={clearConfig.label ?? 'Clear'}
+          disabled={!showClear}
+          class={clsx(
+            clearIconCls,
+            {
+              [`${clearIconCls}-hidden`]: !showClear,
+              [`${clearIconCls}-has-suffix`]: hasSuffix,
+            },
+            classNames?.clear,
+          )}
+          style={styles?.clear}
+          onMousedown={(event: MouseEvent) => event.preventDefault()}
+          onKeydown={onClearKeyDown}
+          onClick={onClearClick}
+        >
+          {slots.clearIcon?.() ?? clearConfig.clearIcon ?? '✖'}
+        </button>
+      )
 
       const upHandlerNode = (
         <StepHandler
@@ -624,6 +703,7 @@ const InputNumber = defineComponent<InputNumberProps>(
           'value',
           'prefix',
           'suffix',
+          'allowClear',
           'upHandler',
           'downHandler',
           'keyboard',
@@ -635,6 +715,7 @@ const InputNumber = defineComponent<InputNumberProps>(
           'precision',
           'decimalSeparator',
           'onChange',
+          'onClear',
           'onInput',
           'onPressEnter',
           'onStep',
@@ -697,7 +778,7 @@ const InputNumber = defineComponent<InputNumberProps>(
         >
           {mode === 'spinner' && controls && downHandlerNode}
 
-          {!!prefixNode && (
+          {isVueRenderable(prefixNode) && (
             <div class={clsx(`${mergedPrefixCls}-prefix`, classNames?.prefix)} style={styles?.prefix}>
               {prefixNode}
             </div>
@@ -728,8 +809,9 @@ const InputNumber = defineComponent<InputNumberProps>(
             {...inputAttrs as any}
           />
 
-          {!!suffixNode && (
+          {(allowClear || hasSuffix) && (
             <div class={clsx(`${mergedPrefixCls}-suffix`, classNames?.suffix)} style={styles?.suffix}>
+              {clearNode}
               {suffixNode}
             </div>
           )}

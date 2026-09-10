@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AllowClear from './allow-clear'
 import CombinationKeyFormat from './combination-key-format'
 import Custom from './custom'
 import Debug from './debug'
@@ -59,6 +60,9 @@ import './assets/index.less'
     </Variant>
     <Variant title="prefix-suffix">
       <PrefixSuffix />
+    </Variant>
+    <Variant title="allow-clear">
+      <AllowClear />
     </Variant>
     <Variant title="spinner">
       <Spinner />
