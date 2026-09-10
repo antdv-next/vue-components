@@ -10,6 +10,7 @@ import type { CSSProperties } from 'vue'
 import { Trigger } from '@v-c/trigger'
 import { clsx } from '@v-c/util'
 import { filterEmpty, removeUndefined, toPropsRefs } from '@v-c/util/dist/props-util'
+import warning from '@v-c/util/dist/warning'
 import { computed, createVNode, defineComponent, shallowRef } from 'vue'
 import useAccessibility from './hooks/useAccessibility.ts'
 import Overlay from './Overlay.tsx'
@@ -27,6 +28,8 @@ export interface DropdownProps
   > {
   minOverlayWidthMatchTrigger?: boolean
   arrow?: boolean
+  onOpenChange?: (open: boolean) => void
+  /** @deprecated Use `onOpenChange` instead */
   onVisibleChange?: (visible: boolean) => void
   onOverlayClick?: (e: Event) => void
   prefixCls?: string
@@ -43,6 +46,8 @@ export interface DropdownProps
   alignPoint?: boolean
   showAction?: ActionType[]
   hideAction?: ActionType[]
+  open?: boolean
+  /** @deprecated Use `open` instead */
   visible?: boolean
   autoFocus?: boolean
 }
@@ -58,9 +63,10 @@ const defaults = {
 const Dropdown = defineComponent<DropdownProps>(
   (props = defaults, { expose, slots }) => {
     const { autoFocus } = toPropsRefs(props, 'autoFocus')
-    const triggerVisible = shallowRef<boolean>()
-    const mergedVisible = computed(() => {
-      return props?.visible ?? triggerVisible.value
+    const triggerOpen = shallowRef<boolean>()
+    // `open` is the preferred API; `visible` is kept for backward compatibility.
+    const mergedOpen = computed(() => {
+      return props?.open ?? props?.visible ?? triggerOpen.value
     })
     const mergedMotionName = computed(() => {
       const { prefixCls, transitionName, animation } = props
@@ -72,28 +78,40 @@ const Dropdown = defineComponent<DropdownProps>(
     expose({
       triggerRef,
     })
-    const handleVisibleChange = (visible: boolean) => {
-      triggerVisible.value = visible
-      props.onVisibleChange?.(visible)
+    const handleOpenChange = (open: boolean) => {
+      triggerOpen.value = open
+      props.onOpenChange?.(open)
+      props.onVisibleChange?.(open)
     }
 
     useAccessibility({
-      visible: mergedVisible as any,
+      open: mergedOpen as any,
       triggerRef: childRef,
-      onVisibleChange: handleVisibleChange,
+      onOpenChange: handleOpenChange,
       autoFocus: autoFocus as any,
       overlayRef,
     })
 
     const onClick = (e: any) => {
       const { onOverlayClick } = props
-      triggerVisible.value = false
+      triggerOpen.value = false
 
       if (onOverlayClick) {
         onOverlayClick(e)
       }
     }
     return () => {
+      if (process.env.NODE_ENV !== 'production') {
+        warning(
+          props.visible === undefined,
+          '`visible` is deprecated. Please use `open` instead.',
+        )
+        warning(
+          props.onVisibleChange === undefined,
+          '`onVisibleChange` is deprecated. Please use `onOpenChange` instead.',
+        )
+      }
+
       const {
         overlay,
         prefixCls,
@@ -111,6 +129,11 @@ const Dropdown = defineComponent<DropdownProps>(
         // suppresses the popup entirely, which is not what a disabled Dropdown
         // means.
         disabled: _disabled,
+        // Consumed here; must not reach Trigger (which has its own `onOpenChange`).
+        open: _open,
+        visible: _visible,
+        onOpenChange: _onOpenChange,
+        onVisibleChange: _onVisibleChange,
         ...otherProps
       } = props as typeof props & { disabled?: boolean }
 
@@ -151,7 +174,7 @@ const Dropdown = defineComponent<DropdownProps>(
       const children = childArr?.[0]
       const childrenNode = createVNode(children, {
         class: clsx(
-          mergedVisible.value && getOpenClassName(),
+          mergedOpen.value && getOpenClassName(),
         ),
         ref: childRef,
       })
@@ -176,10 +199,10 @@ const Dropdown = defineComponent<DropdownProps>(
           popupPlacement={placement}
           popupAlign={align}
           popupMotion={{ name: mergedMotionName.value }}
-          popupVisible={mergedVisible.value}
+          popupVisible={mergedOpen.value}
           stretch={getMinOverlayWidthMatchTrigger() ? 'minWidth' : ''}
           popup={getMenuElementOrLambda()}
-          onOpenChange={handleVisibleChange}
+          onOpenChange={handleOpenChange}
           onPopupClick={onClick}
           getPopupContainer={getPopupContainer}
         >

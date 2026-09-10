@@ -6,25 +6,25 @@ import { shallowRef, watch } from 'vue'
 const { ESC, TAB } = KeyCode
 
 interface UseAccessibilityProps {
-  visible: Ref<boolean>
+  open: Ref<boolean>
   triggerRef: Ref<any>
-  onVisibleChange?: (visible: boolean) => void
+  onOpenChange?: (open: boolean) => void
   autoFocus?: Ref<boolean>
   overlayRef?: Ref<any>
 }
 
 export default function useAccessibility({
-  visible,
+  open,
   triggerRef,
-  onVisibleChange,
+  onOpenChange,
   autoFocus,
   overlayRef,
 }: UseAccessibilityProps) {
   const focusMenuRef = shallowRef(false)
   const handleCloseMenuAndReturnFocus = () => {
-    if (visible.value) {
+    if (open.value) {
       triggerRef.value?.focus?.()
-      onVisibleChange?.(false)
+      onOpenChange?.(false)
     }
   }
 
@@ -58,8 +58,8 @@ export default function useAccessibility({
       }
     }
   }
-  watch(visible, (_n, _o, onCleanup) => {
-    if (visible.value) {
+  watch(open, (_n, _o, onCleanup) => {
+    if (open.value) {
       window.addEventListener('keydown', handleKeyDown)
       if (autoFocus) {
         // FIXME: hack with raf
@@ -75,5 +75,5 @@ export default function useAccessibility({
         focusMenuRef.value = false
       })
     }
-  })
+  }, { immediate: true })
 }

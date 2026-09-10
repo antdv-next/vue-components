@@ -3,12 +3,12 @@ import { defineComponent, ref } from 'vue'
 import Dropdown from '../src'
 
 export default defineComponent(() => {
-  const visible = ref(false)
+  const open = ref(false)
   let selectedKeys: string[] = []
 
-  const onVisibleChange = (nextVisible: boolean) => {
-    console.log('visible', nextVisible)
-    visible.value = nextVisible
+  const onOpenChange = (nextOpen: boolean) => {
+    console.log('open', nextOpen)
+    open.value = nextOpen
   }
 
   const saveSelected = ({ selectedKeys: keys }: { selectedKeys: string[] }) => {
@@ -17,7 +17,7 @@ export default defineComponent(() => {
 
   const confirm = () => {
     console.log(selectedKeys)
-    visible.value = false
+    open.value = false
   }
 
   const dropdownAttrs = { closeOnSelect: false } as any
@@ -52,8 +52,8 @@ export default defineComponent(() => {
       <Dropdown
         {...dropdownAttrs}
         trigger={['click']}
-        onVisibleChange={onVisibleChange}
-        visible={visible.value}
+        onOpenChange={onOpenChange}
+        open={open.value}
         overlay={menu}
         animation="slide-up"
       >

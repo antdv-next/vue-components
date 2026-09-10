@@ -6,8 +6,8 @@ function onSelect({ key }: { key: string }) {
   console.log(`${key} selected`)
 }
 
-function onVisibleChange(visible: boolean) {
-  console.log(visible)
+function onOpenChange(open: boolean) {
+  console.log(open)
 }
 
 function menuCallback() {
@@ -30,7 +30,7 @@ export default defineComponent(() => {
           trigger={['click']}
           overlay={menuCallback}
           animation="slide-up"
-          onVisibleChange={onVisibleChange}
+          onOpenChange={onOpenChange}
         >
           <button style={{ width: '100px' }}>open</button>
         </Dropdown>

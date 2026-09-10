@@ -6,8 +6,8 @@ function onSelect({ key }: { key: string }) {
   console.log(`${key} selected`)
 }
 
-function onVisibleChange(visible: boolean) {
-  console.log(visible)
+function onOpenChange(open: boolean) {
+  console.log(open)
 }
 
 const menu = (
@@ -29,7 +29,7 @@ export default defineComponent(() => {
           trigger={['click']}
           overlay={menu}
           animation="slide-up"
-          onVisibleChange={onVisibleChange}
+          onOpenChange={onOpenChange}
         >
           <button style={{ width: '100px' }}>open</button>
         </Dropdown>
@@ -41,7 +41,7 @@ export default defineComponent(() => {
           trigger={['click']}
           overlay={menu}
           animation="slide-up"
-          onVisibleChange={onVisibleChange}
+          onOpenChange={onOpenChange}
         >
           <button style={{ width: '100px' }}>open</button>
         </Dropdown>
