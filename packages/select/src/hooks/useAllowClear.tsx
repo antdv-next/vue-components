@@ -1,5 +1,6 @@
 import type { Ref } from 'vue'
 import type { DisplayValueType, Mode } from '../interface.ts'
+import { isVueRenderable } from '@v-c/util'
 import { computed } from 'vue'
 
 export interface AllowClearConfig {
@@ -35,7 +36,13 @@ export function useAllowClear(
       && !(mode?.value === 'combobox' && mergedSearchValue?.value === '')
     return {
       allowClear: !!mergedAllowClear,
-      clearIcon: mergedAllowClear ? allowClearConfig.value.clearIcon || clearIcon?.value || '×' : null,
+      clearIcon: mergedAllowClear
+        ? isVueRenderable(allowClearConfig.value.clearIcon)
+          ? allowClearConfig.value.clearIcon
+          : isVueRenderable(clearIcon?.value)
+            ? clearIcon.value
+            : '×'
+        : null,
       label: mergedAllowClear ? (allowClearConfig.value.label ?? 'Clear') : '',
     } as AllowClearConfig
   })

@@ -8,6 +8,7 @@ import type {
   DisplayInfoType,
 } from './BaseSelect'
 import type { DisplayValueType, FlattenOptionData, RawValueType, RenderNode } from './interface'
+import { isNonNullable } from '@v-c/util'
 import useId from '@v-c/util/dist/hooks/useId'
 import omit from '@v-c/util/dist/omit'
 import { filterEmpty } from '@v-c/util/dist/props-util'
@@ -23,7 +24,7 @@ import useRefFunc from './hooks/useRefFunc'
 import useSearchConfig from './hooks/useSearchConfig'
 import OptionList from './OptionList'
 import { useSelectProvider } from './SelectContext'
-import { hasValue, isComboNoValue, toArray } from './utils/commonUtil'
+import { isComboNoValue, toArray } from './utils/commonUtil'
 import { convertChildrenToData } from './utils/legacyUtil.ts'
 import { fillFieldNames, flattenOptions, injectPropsWithOption } from './utils/valueUtil'
 
@@ -379,7 +380,7 @@ const Select = defineComponent<SelectProps>({
     watch(mergedValues, () => {
       if (props.mode === 'combobox') {
         const strValue = mergedValues.value[0]?.value
-        setSearchValue(hasValue(strValue) ? String(strValue) : '')
+        setSearchValue(isNonNullable(strValue) ? String(strValue) : '')
       }
     })
 

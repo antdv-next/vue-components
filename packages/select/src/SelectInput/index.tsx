@@ -3,7 +3,7 @@ import type { StyleValue, VNode } from 'vue'
 import type { ComponentsConfig } from '../hooks'
 import type { DisplayValueType, Mode, RenderNode } from '../interface'
 import type { InputRef } from './Input.tsx'
-import { clsx } from '@v-c/util'
+import { clsx, isVueRenderable } from '@v-c/util'
 import { getDOM } from '@v-c/util/dist/Dom/findDOMNode'
 import KeyCode, { KeyCodeStr } from '@v-c/util/dist/KeyCode'
 import omit from '@v-c/util/dist/omit'
@@ -326,7 +326,7 @@ const SelectInput = defineComponent<SelectInputProps>(
           </Affix>
 
           {/* Clear Icon */}
-          {clearIcon.value && (
+          {isVueRenderable(clearIcon.value) && (
             <button
               type="button"
               aria-label={clearLabel.value}

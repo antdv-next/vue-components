@@ -12,7 +12,7 @@ import type {
   RenderDOMFunc,
   RenderNode,
 } from '../interface'
-import { clsx } from '@v-c/util'
+import { clsx, isNonNullable } from '@v-c/util'
 import { getDOM } from '@v-c/util/dist/Dom/findDOMNode'
 import { KeyCodeStr } from '@v-c/util/dist/KeyCode'
 import omit from '@v-c/util/dist/omit'
@@ -765,7 +765,7 @@ export const BaseSelect = defineComponent<
         [`${prefixCls}-multiple`]: multiple.value,
         [`${prefixCls}-single`]: !multiple.value,
         [`${prefixCls}-allow-clear`]: mergedAllowClear,
-        [`${prefixCls}-show-arrow`]: mergedSuffixIcon !== undefined && mergedSuffixIcon !== null,
+        [`${prefixCls}-show-arrow`]: isNonNullable(mergedSuffixIcon),
         [`${prefixCls}-disabled`]: disabled.value,
         [`${prefixCls}-loading`]: loading,
         [`${prefixCls}-open`]: mergedOpen.value,
