@@ -1,5 +1,5 @@
 import type { BaseInputProps } from './interface'
-import { clsx } from '@v-c/util'
+import { clsx, isVueRenderable } from '@v-c/util'
 import { filterEmpty } from '@v-c/util/dist/props-util'
 import { computed, createVNode, defineComponent, Fragment, shallowRef } from 'vue'
 import { hasAddon, hasPrefixSuffix } from './utils/commonUtils'
@@ -73,7 +73,7 @@ const BaseInput = defineComponent<
           const needClear = !disabled && !readOnly && value && !clearDisabled
           const clearIconCls = `${prefixCls}-clear-icon`
           const iconNode
-            = typeof allowClear === 'object' && allowClear?.clearIcon
+            = typeof allowClear === 'object' && isVueRenderable(allowClear?.clearIcon)
               ? allowClear.clearIcon
               : '✖'
 
@@ -93,7 +93,7 @@ const BaseInput = defineComponent<
               onMousedown={e => e.preventDefault()}
               class={clsx(clearIconCls, classNames?.clear, {
                 [`${clearIconCls}-hidden`]: !needClear,
-                [`${clearIconCls}-has-suffix`]: !!suffix,
+                [`${clearIconCls}-has-suffix`]: isVueRenderable(suffix),
               })}
               style={styles?.clear}
             >
@@ -110,13 +110,13 @@ const BaseInput = defineComponent<
             [`${affixWrapperPrefixCls}-disabled`]: disabled, // Not used, but keep it
             [`${affixWrapperPrefixCls}-focused`]: focused, // Not used, but keep it
             [`${affixWrapperPrefixCls}-readonly`]: readOnly,
-            [`${affixWrapperPrefixCls}-input-with-clear-btn`]: suffix && allowClear && value,
+            [`${affixWrapperPrefixCls}-input-with-clear-btn`]: isVueRenderable(suffix) && allowClear && value,
           },
           classNames?.affixWrapper,
           classNames?.variant,
         )
 
-        const suffixNode = (suffix || allowClear) && (
+        const suffixNode = (isVueRenderable(suffix) || allowClear) && (
           <span
             class={clsx(`${prefixCls}-suffix`, classNames?.suffix)}
             style={styles?.suffix}
@@ -134,7 +134,7 @@ const BaseInput = defineComponent<
             {...dataAttrs?.affixWrapper}
             ref={containerRef}
           >
-            {prefix && (
+            {isVueRenderable(prefix) && (
               <span
                 class={clsx(`${prefixCls}-prefix`, classNames?.prefix)}
                 style={styles?.prefix}
@@ -173,13 +173,13 @@ const BaseInput = defineComponent<
         element = (
           <GroupWrapperComponent class={mergedGroupClassName} ref={groupRef}>
             <WrapperComponent class={mergedWrapperClassName}>
-              {addonBefore && (
+              {isVueRenderable(addonBefore) && (
                 <GroupAddonComponent class={addonCls}>
                   {addonBefore}
                 </GroupAddonComponent>
               )}
               {element}
-              {addonAfter && (
+              {isVueRenderable(addonAfter) && (
                 <GroupAddonComponent class={addonCls}>
                   {addonAfter}
                 </GroupAddonComponent>

@@ -1,4 +1,5 @@
 import type { BaseInputProps, InputProps } from '../interface'
+import { isVueRenderable } from '@v-c/util'
 import { triggerFocus as rcTriggerFocus } from '@v-c/util/dist/Dom/focus'
 
 function createPatchedTarget<
@@ -69,11 +70,11 @@ function cloneEventWithTarget<
 }
 
 export function hasAddon(props: BaseInputProps | InputProps) {
-  return !!(props.addonBefore || props.addonAfter)
+  return isVueRenderable(props.addonBefore) || isVueRenderable(props.addonAfter)
 }
 
 export function hasPrefixSuffix(props: BaseInputProps | InputProps) {
-  return !!(props.prefix || props.suffix || props.allowClear)
+  return isVueRenderable(props.prefix) || isVueRenderable(props.suffix) || Boolean(props.allowClear)
 }
 
 export function resolveOnChange<E extends HTMLInputElement | HTMLTextAreaElement>(

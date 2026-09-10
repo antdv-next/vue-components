@@ -163,4 +163,3 @@ export interface InputRef {
   input: HTMLInputElement | null
   nativeElement: HTMLElement | null
 }
-
