@@ -132,7 +132,7 @@ const Tooltip = defineComponent<TooltipProps>(
         const children = filterEmpty(slots?.default?.({ open }))
         const child = children?.[0]
         const childAriaDescribedBy = child?.props?.['aria-describedby']
-        const ariaDescribedBy = [childAriaDescribedBy, overlay && open ? mergedId : undefined]
+        const ariaDescribedBy = [childAriaDescribedBy, overlay != null && open ? mergedId : undefined]
           .filter(Boolean)
           .join(' ')
         const ariaProps = {
