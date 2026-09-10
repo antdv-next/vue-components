@@ -1,7 +1,7 @@
 import type { MouseEventHandler } from '@v-c/util/dist/EventInterface'
 import type { CSSProperties } from 'vue'
 import type { IDialogPropTypes } from '../../IDialogPropTypes'
-import { classNames, clsx } from '@v-c/util'
+import { classNames, clsx, isVueRenderable } from '@v-c/util'
 import { useLockFocus } from '@v-c/util/dist/Dom/focus'
 import { useFocusBoundaryProvider } from '@v-c/util/dist/Dom/focusBoundary'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
@@ -77,7 +77,10 @@ const Panel = defineComponent<PanelProps>(
       }
 
       // ================================ Render ================================
-      const footerNode = footer
+      const hasFooter = isVueRenderable(footer)
+      const hasTitle = isVueRenderable(title)
+
+      const footerNode = hasFooter
         ? (
             <div
               class={classNames(`${prefixCls}-footer`, modalClassNames?.footer)}
@@ -88,7 +91,7 @@ const Panel = defineComponent<PanelProps>(
           )
         : null
 
-      const headerNode = title
+      const headerNode = hasTitle
         ? (
             <div class={classNames(`${prefixCls}-header`, modalClassNames?.header)} style={{ ...modalStyles?.header }}>
               <div
@@ -164,7 +167,7 @@ const Panel = defineComponent<PanelProps>(
           role="dialog"
           {
             ...{
-              'aria-labelledby': title ? ariaId : null,
+              'aria-labelledby': hasTitle ? ariaId : null,
             } as any
           }
           aria-modal="true"
