@@ -1,7 +1,7 @@
 import type { Key, VueNode } from '@v-c/util/dist/type'
 import type { CSSProperties, HTMLAttributes, PropType } from 'vue'
 import ResizeObserver from '@v-c/resize-observer'
-import { classNames } from '@v-c/util'
+import { classNames, isVueRenderable } from '@v-c/util'
 import { computed, defineComponent, ref, watchEffect } from 'vue'
 import { OverflowContextProvider } from './context'
 import useEffectState, { useBatcher } from './hooks/useEffectState'
@@ -404,7 +404,7 @@ const OverflowImpl = defineComponent({
           style={styleAttr as CSSProperties}
           {...restAttrs}
         >
-          {prefix && (
+          {isVueRenderable(prefix) && (
             <Item
               {...itemSharedProps}
               responsive={isResponsive.value}
@@ -421,7 +421,7 @@ const OverflowImpl = defineComponent({
 
           {showRest.value ? restNode() : null}
 
-          {suffix && (
+          {isVueRenderable(suffix) && (
             <Item
               {...itemSharedProps}
               responsive={isResponsive.value}
