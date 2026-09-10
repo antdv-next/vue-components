@@ -380,6 +380,8 @@ export interface SharedPickerProps<DateType extends object = any>
 
   // Icons
   prefix?: VueNode
+  suffix?: VueNode
+  /** @deprecated Please use `suffix` instead. */
   suffixIcon?: VueNode
   allowClear?:
     | boolean
@@ -505,6 +507,8 @@ export interface SelectorProps<DateType = any> extends Omit<SharedHTMLAttrs, 'on
 
   prefix?: VueNode
   clearIcon?: VueNode
+  suffix?: VueNode
+  /** @deprecated Please use `suffix` instead. */
   suffixIcon?: VueNode
   className?: string
   style?: CSSProperties

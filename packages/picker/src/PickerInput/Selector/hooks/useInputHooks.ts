@@ -23,7 +23,7 @@ export interface InputProps {
   'active'?: boolean
   /** Used for single picker only */
   'showActiveCls'?: boolean
-  'suffixIcon'?: VueNode
+  'suffix'?: VueNode
   'value'?: string
   'onChange': (value: string) => void
   'onSubmit': VoidFunction

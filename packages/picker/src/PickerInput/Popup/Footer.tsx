@@ -6,7 +6,7 @@ import type {
   PanelMode,
   SharedPickerProps,
 } from '../../interface'
-import { clsx } from '@v-c/util'
+import { clsx, isVueRenderable } from '@v-c/util'
 import { computed, defineComponent } from 'vue'
 import useTimeInfo from '../../hooks/useTimeInfo'
 import { usePickerContext } from '../context'
@@ -111,7 +111,7 @@ const Footer = defineComponent<FooterProps>((props) => {
       </ul>
     )
 
-    if (!extraNode && !rangeNode) {
+    if (!isVueRenderable(extraNode) && !isVueRenderable(rangeNode)) {
       return null
     }
 
@@ -120,7 +120,7 @@ const Footer = defineComponent<FooterProps>((props) => {
         class={clsx(`${prefixCls}-footer`, classNames.popup?.footer)}
         style={styles.popup?.footer}
       >
-        {extraNode && (
+        {isVueRenderable(extraNode) && (
           <div class={`${prefixCls}-footer-extra`}>{extraNode}</div>
         )}
         {rangeNode}

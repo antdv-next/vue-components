@@ -48,6 +48,7 @@ const PopupPanel = defineComponent<PopupPanelProps>(
     const onSubmit = computed(() => props.onSubmit)
     const range = computed(() => props.range)
     const hoverValue = computed(() => props.hoverValue)
+    const hoverRangeValue = computed(() => props.hoverRangeValue)
     const multiplePanel = computed(() => props.multiplePanel)
     const onPickerValueChange = computed(() => props.onPickerValueChange)
 
@@ -85,11 +86,9 @@ const PopupPanel = defineComponent<PopupPanelProps>(
         hideHeader: hideHeader.value,
       }
 
+      baseProps.hoverValue = hoverValue?.value as any
       if (range?.value) {
-        baseProps.hoverRangeValue = hoverValue?.value as any
-      }
-      else {
-        baseProps.hoverValue = hoverValue?.value as any
+        baseProps.hoverRangeValue = hoverRangeValue?.value as any
       }
       return baseProps
     })

@@ -174,7 +174,7 @@ const SinglePicker = defineComponent<PickerProps>(
     const pickerValue = computed(() => fp.value.pickerValue)
     const onPickerValueChange = computed(() => fp.value.onPickerValueChange)
     const inputReadOnly = computed(() => fp.value.inputReadOnly)
-    const suffixIcon = computed(() => fp.value.suffixIcon)
+    const suffix = computed(() => fp.value.suffix)
     const removeIcon = computed(() => fp.value.removeIcon)
     const onFocus = computed(() => fp.value.onFocus)
     const onBlur = computed(() => fp.value.onBlur)
@@ -761,7 +761,7 @@ const SinglePicker = defineComponent<PickerProps>(
           mergedClassNames.root,
         ),
         style: { ...mergedStyles.root, ...fp.value.style },
-        suffixIcon: suffixIcon.value,
+        suffix: suffix.value,
         removeIcon: removeIcon.value,
         activeHelp: !!internalHoverValue.value,
         allHelp:

@@ -1,6 +1,6 @@
 import type { SharedTimeProps } from '../../../interface'
 import type { Unit } from './TimeColumn'
-import { clsx } from '@v-c/util'
+import { clsx, isNonNullable } from '@v-c/util'
 import { computed, defineComponent } from 'vue'
 import useTimeInfo from '../../../hooks/useTimeInfo'
 import { formatValue } from '../../../utils/dateUtil'
@@ -123,21 +123,19 @@ const TimePanelBody = defineComponent<SharedTimeProps<any>>(
 
       const triggerDateTmpl = (() => {
         let tmpl = value.value || context.value.pickerValue || generateConfig.value.getNow()
-        const isNotNull = (num: any) => num !== null && num !== undefined
-
-        if (isNotNull(hour)) {
+        if (isNonNullable(hour)) {
           tmpl = generateConfig.value.setHour(tmpl, hour!)
           tmpl = generateConfig.value.setMinute(tmpl, minute!)
           tmpl = generateConfig.value.setSecond(tmpl, second!)
           tmpl = generateConfig.value.setMillisecond(tmpl, millisecond!)
         }
-        else if (isNotNull(pickerHour)) {
+        else if (isNonNullable(pickerHour)) {
           tmpl = generateConfig.value.setHour(tmpl, pickerHour!)
           tmpl = generateConfig.value.setMinute(tmpl, pickerMinute!)
           tmpl = generateConfig.value.setSecond(tmpl, pickerSecond!)
           tmpl = generateConfig.value.setMillisecond(tmpl, pickerMillisecond!)
         }
-        else if (isNotNull(validHour)) {
+        else if (isNonNullable(validHour)) {
           tmpl = generateConfig.value.setHour(tmpl, validHour)
           tmpl = generateConfig.value.setMinute(tmpl, validMinute)
           tmpl = generateConfig.value.setSecond(tmpl, validSecond)

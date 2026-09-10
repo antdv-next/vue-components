@@ -1,6 +1,6 @@
 import type { VueNode } from '@v-c/util/dist/type'
 import type { ComputedRef, Ref } from 'vue'
-import { warning } from '@v-c/util'
+import { isVueRenderable, warning } from '@v-c/util'
 import { computed } from 'vue'
 
 export function fillClearIcon(
@@ -8,7 +8,7 @@ export function fillClearIcon(
   allowClear?: boolean | { clearIcon?: VueNode },
   clearIcon?: VueNode,
 ) {
-  if (process.env.NODE_ENV !== 'production' && clearIcon) {
+  if (process.env.NODE_ENV !== 'production' && isVueRenderable(clearIcon)) {
     warning(false, '`clearIcon` will be removed in future. Please use `allowClear` instead.')
   }
 
@@ -18,7 +18,11 @@ export function fillClearIcon(
 
   const config = allowClear && typeof allowClear === 'object' ? allowClear : {}
 
-  return config.clearIcon || clearIcon || <span class={`${prefixCls}-clear-btn`} />
+  if (isVueRenderable(config.clearIcon)) {
+    return config.clearIcon
+  }
+
+  return isVueRenderable(clearIcon) ? clearIcon : <span class={`${prefixCls}-clear-btn`} />
 }
 
 export default function useClearIcon(

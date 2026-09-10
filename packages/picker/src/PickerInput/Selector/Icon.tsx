@@ -1,6 +1,6 @@
 import type { VueNode } from '@v-c/util/dist/type'
 import type { CSSProperties } from 'vue'
-import { clsx } from '@v-c/util'
+import { clsx, isVueRenderable } from '@v-c/util'
 import { defineComponent } from 'vue'
 import { usePickerContext } from '../context'
 
@@ -14,7 +14,7 @@ const Icon = defineComponent<IconProps>((props, { attrs }) => {
   return () => {
     const { icon } = props
 
-    if (!icon) {
+    if (!isVueRenderable(icon)) {
       return null
     }
 

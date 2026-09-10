@@ -2,7 +2,7 @@ import type { ComputedRef, Ref } from 'vue'
 import type { FormatType, InternalMode, PickerMode } from '../../interface'
 import type { RangePickerProps } from '../RangePicker'
 import type { PickerProps } from '../SinglePicker'
-import { warning } from '@v-c/util'
+import { isVueRenderable, warning } from '@v-c/util'
 import { computed } from 'vue'
 import useLocale from '../../hooks/useLocale'
 import { fillShowTimeConfig, getTimeProps } from '../../hooks/useTimeConfig'
@@ -200,6 +200,17 @@ export default function useFilledProps<
     }
   }
 
+  // ======================== Suffix ========================
+  const mergedSuffix = computed(() => {
+    const { suffix, suffixIcon } = props.value
+
+    if (process.env.NODE_ENV !== 'production' && isVueRenderable(suffixIcon)) {
+      warning(false, '`suffixIcon` is deprecated. Please use `suffix` instead.')
+    }
+
+    return suffix ?? suffixIcon
+  })
+
   // ======================== Props =========================
   const filledProps = computed(() => ({
     ...props.value,
@@ -211,6 +222,7 @@ export default function useFilledProps<
     classNames: mergedClassNames.value,
     order: mergedOrder.value,
     components: mergedComponents.value,
+    suffix: mergedSuffix.value,
     clearIcon: fillClearIcon(
       mergedPrefixCls.value,
       props.value.allowClear,

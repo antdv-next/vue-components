@@ -47,9 +47,10 @@ export function isTargetInContainers(
  * 处理 field 的聚焦与失焦事件。
  *
  * Always forward the actual element focus events. Only the internal Picker
- * blur is skipped when `relatedTarget` still belongs to the Picker.
- * 始终转发元素实际发生的焦点事件。仅当 `relatedTarget` 仍属于 Picker 时，
- * 跳过 Picker 内部的整体失焦逻辑。
+ * blur is skipped when `relatedTarget` still belongs to the Picker or the
+ * focused panel control becomes disabled.
+ * 始终转发元素实际发生的焦点事件。当 `relatedTarget` 仍属于 Picker，或面板中
+ * 获得焦点的控件变为禁用时，跳过 Picker 的整体失焦逻辑。
  */
 export default function useFocusEvents(
   isInternalElement: IsInternalElement,
@@ -67,8 +68,19 @@ export default function useFocusEvents(
     onFocus?.(index, event)
   }
 
-  const onFieldBlur: FieldBlurHandler = (index, _source, event) => {
-    if (!isInternalElement(event.relatedTarget)) {
+  const onFieldBlur: FieldBlurHandler = (index, source, event) => {
+    // A navigation button (prev / next) that becomes disabled after click
+    // drops the focus. Move it back to the panel container so the popup
+    // keeps open instead of treating it as an outside blur.
+    // 面板中的翻页按钮点击后被禁用会丢失焦点，将焦点交还给面板容器，
+    // 避免被视为外部失焦而关闭弹层。
+    const isDisabledTarget
+      = source === 'panel' && (event.target as HTMLElement | null)?.hasAttribute?.('disabled')
+
+    if (isDisabledTarget) {
+      (event.currentTarget as HTMLElement | null)?.focus?.({ preventScroll: true })
+    }
+    else if (!isInternalElement(event.relatedTarget)) {
       focusedIndex.value = null
       onConfirmedBlur?.(index, event)
     }

@@ -12,6 +12,7 @@ import { computed, defineComponent, nextTick, ref, shallowRef, watch } from 'vue
 import useSemantic from '../hooks/useSemantic'
 import PickerTrigger from '../PickerTrigger'
 import { pickTriggerProps } from '../PickerTrigger/util'
+import { isSameTimestamp } from '../utils/dateUtil'
 import { fillIndex, getFromDate, toArray } from '../utils/miscUtil'
 import { formatValues as formatValuesByValueFormat } from '../utils/valueUtil'
 import { providePickerContext } from './context'
@@ -186,7 +187,7 @@ const RangePicker = defineComponent(
     const pickerValue = computed(() => fp.value.pickerValue)
     const onPickerValueChange = computed(() => fp.value.onPickerValueChange)
     const inputReadOnly = computed(() => fp.value.inputReadOnly)
-    const suffixIcon = computed(() => fp.value.suffixIcon)
+    const suffix = computed(() => fp.value.suffix)
     const onFocus = computed(() => fp.value.onFocus)
     const onBlur = computed(() => fp.value.onBlur)
     const presets = computed(() => fp.value.presets)
@@ -520,6 +521,22 @@ const RangePicker = defineComponent(
       return internalHoverValues.value || calendarValue.value
     })
 
+    // "Weak" hover only highlights the hovered cell instead of composing a range.
+    // Use it while choosing the first value so the pending selection remains selected.
+    const showWeakHover = computed(() =>
+      // Preset hover always previews the whole range.
+      hoverSource.value === 'cell'
+      // Once the other field has a value, range hover takes precedence.
+      && !calendarValue.value[(activeIndex.value + 1) % 2]
+      // Only a changed active value needs weak hover.
+      && !isSameTimestamp(
+        generateConfig.value,
+        calendarValue.value[activeIndex.value],
+        mergedValue.value?.[activeIndex.value],
+      ),
+    )
+    const activeHoverValue = computed(() => internalHoverValues.value?.[activeIndex.value])
+
     // Clean up `internalHoverValues` when closed
     watch(mergedOpen, () => {
       if (!mergedOpen.value) {
@@ -725,7 +742,7 @@ const RangePicker = defineComponent(
         class: clsx(fp.value.className, rootClassName.value, mergedClassNames?.root),
         style: { ...mergedStyles?.root, ...fp.value.style },
         // Icon
-        suffixIcon: suffixIcon.value,
+        suffix: suffix.value,
         // Active
         activeIndex: focused.value || mergedOpen.value ? activeIndex.value : null,
         activeHelp: !!internalHoverValues.value,
@@ -781,7 +798,8 @@ const RangePicker = defineComponent(
         pickerValue: currentPickerValue.value,
         defaultOpenValue: toArray(showTime.value?.defaultOpenValue)[activeIndex.value],
         onPickerValueChange: setCurrentPickerValue,
-        hoverValue: hoverValues.value,
+        hoverValue: showWeakHover.value && activeHoverValue.value ? [activeHoverValue.value] : null,
+        hoverRangeValue: showWeakHover.value ? null : hoverValues.value,
         onHover: onPanelHover,
         needConfirm: needConfirm.value!,
         onSubmit: (date?: any) => triggerPartConfirm(date, 'confirm'),

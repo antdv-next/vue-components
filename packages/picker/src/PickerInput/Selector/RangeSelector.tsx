@@ -3,7 +3,7 @@ import type { SetupContext } from 'vue'
 import type { SelectorProps } from '../../interface'
 import type { InputRef } from './Input'
 import ResizeObserver from '@v-c/resize-observer'
-import { clsx } from '@v-c/util'
+import { clsx, isVueRenderable } from '@v-c/util'
 import { computed, defineComponent, ref, watch } from 'vue'
 import { usePickerContext } from '../context'
 import ClearIcon from './ClearIcon'
@@ -140,7 +140,7 @@ const RangeSelector = defineComponent(
 
     // ======================== Clear =========================
     const showClear = computed(() =>
-      props.clearIcon
+      isVueRenderable(props.clearIcon)
       && ((props.value?.[0] && !props.disabled?.[0]) || (props.value?.[1] && !props.disabled?.[1])),
     )
 
@@ -157,7 +157,7 @@ const RangeSelector = defineComponent(
     return () => {
       const {
         prefix,
-        suffixIcon,
+        suffix,
         clearIcon,
         separator,
         disabled,
@@ -202,7 +202,7 @@ const RangeSelector = defineComponent(
             {...rootDivProps}
             ref={rootRef}
           >
-            {prefix && (
+            {isVueRenderable(prefix) && (
               <div class={clsx(`${prefixCls.value}-prefix`, classNames.value.prefix)} style={styles.value.prefix}>
                 {prefix}
               </div>
@@ -225,7 +225,7 @@ const RangeSelector = defineComponent(
               data-range="end"
             />
             <div class={`${prefixCls.value}-active-bar`} style={activeBarStyle.value} />
-            <Icon icon={suffixIcon} />
+            <Icon icon={suffix} />
             {showClear.value && <ClearIcon icon={clearIcon} onClear={onClear!} />}
           </div>
         </ResizeObserver>

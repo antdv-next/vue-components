@@ -322,7 +322,7 @@ const Input = defineComponent<InputProps>(
         className,
         active, // unused in render
         showActiveCls, // unused in render (logic used above)
-        suffixIcon, // unused in render (props.suffixIcon)
+        suffix, // unused in render (props.suffix)
         format, // unused in render
         validateFormat, // unused in render
         onChange, // unused in render
@@ -381,7 +381,7 @@ const Input = defineComponent<InputProps>(
             class={classNames.value.input}
             style={styles.value.input}
           />
-          <Icon icon={props.suffixIcon} />
+          <Icon icon={props.suffix} />
           {props.clearIcon}
         </div>
       )

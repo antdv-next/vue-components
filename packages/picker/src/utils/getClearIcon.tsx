@@ -1,4 +1,5 @@
 import type { VNode } from 'vue'
+import { isVueRenderable } from '@v-c/util'
 
 export function getClearIcon(
   prefixCls: string,
@@ -7,5 +8,7 @@ export function getClearIcon(
 ) {
   const mergedClearIcon = typeof allowClear === 'object' ? allowClear.clearIcon : clearIcon
 
-  return mergedClearIcon || <span class={`${prefixCls}-clear-btn`} />
+  return isVueRenderable(mergedClearIcon)
+    ? mergedClearIcon
+    : <span class={`${prefixCls}-clear-btn`} />
 }

@@ -1,7 +1,7 @@
 import type { SetupContext } from 'vue'
 import type { InternalMode, SelectorProps } from '../../../interface'
 import type { InputRef } from '../Input'
-import { clsx } from '@v-c/util'
+import { clsx, isVueRenderable } from '@v-c/util'
 import { computed, defineComponent, ref } from 'vue'
 import { isSame } from '../../../utils/dateUtil'
 import { usePickerContext } from '../../context'
@@ -122,7 +122,7 @@ const SingleSelector = defineComponent<SingleSelectorProps>(
       const {
         prefix,
         clearIcon,
-        suffixIcon,
+        suffix,
         placeholder,
         onClick,
         onClear,
@@ -138,7 +138,7 @@ const SingleSelector = defineComponent<SingleSelectorProps>(
         tabIndex,
       } = props
 
-      const showClear = !!(clearIcon && value && value.length && !disabled)
+      const showClear = isVueRenderable(clearIcon) && !!value?.length && !disabled
 
       // ======================= Multiple =======================
       const selectorNode = multiple
@@ -163,7 +163,7 @@ const SingleSelector = defineComponent<SingleSelectorProps>(
                 autofocus={autoFocus}
                 tabindex={tabIndex as any}
               />
-              <Icon icon={suffixIcon} />
+              <Icon icon={suffix} />
               {showClear && <ClearIcon icon={clearIcon} onClear={onClear as any} />}
             </>
           )
@@ -173,7 +173,7 @@ const SingleSelector = defineComponent<SingleSelectorProps>(
               {...getInputProps()}
               autofocus={autoFocus}
               tabindex={tabIndex}
-              suffixIcon={suffixIcon}
+              suffix={suffix}
               clearIcon={showClear && <ClearIcon icon={clearIcon} onClear={onClear as any} />}
               showActiveCls={false}
             />
@@ -207,7 +207,7 @@ const SingleSelector = defineComponent<SingleSelectorProps>(
             onMouseDown?.(e)
           }}
         >
-          {prefix && (
+          {isVueRenderable(prefix) && (
             <div
               class={clsx(`${prefixCls.value}-prefix`, classNames.value.prefix)}
               style={styles.value.prefix}
