@@ -3,7 +3,7 @@ import type { CSSProperties } from 'vue'
 import type { TransformType } from './hooks/useImageTransform'
 import type { ImageElementProps } from './interface'
 import type { InternalPreviewConfig, PreviewSemanticName, ToolbarRenderInfoType } from './Preview'
-import { clsx, omit } from '@v-c/util'
+import { clsx, isVueRenderable, omit } from '@v-c/util'
 import useMergedState from '@v-c/util/dist/hooks/useMergedState'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
 import { getAttrStyleAndClass, getStylePxValue } from '@v-c/util/dist/props-util'
@@ -132,7 +132,7 @@ const Image = defineComponent<ImageProps>(
 
     // ========================= ImageProps =========================
     const isCustomPlaceholder = computed(() =>
-      !!slots.placeholder || !!(props.placeholder && props.placeholder !== true),
+      !!slots.placeholder || (isVueRenderable(props.placeholder) && props.placeholder !== true),
     )
 
     const src = computed(() => previewSrc.value ?? props.src)
@@ -312,7 +312,7 @@ const Image = defineComponent<ImageProps>(
               onError={onImgError}
             />
 
-            {status.value === 'loading' && (
+            {status.value === 'loading' && isCustomPlaceholder.value && (
               <div aria-hidden="true" class={`${prefixCls.value}-placeholder`}>
                 {placeholderNode}
               </div>
