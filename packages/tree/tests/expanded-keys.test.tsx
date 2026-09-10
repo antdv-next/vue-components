@@ -117,3 +117,81 @@ describe('tree controlled expandedKeys', () => {
     expect(visibleNodes(wrapper)).toBe(1)
   })
 })
+
+/**
+ * react-component/tree#1069: `undefined` means uncontrolled. Releasing a
+ * controlled key prop (defined -> `undefined`) resets the internal value
+ * instead of keeping the last controlled value.
+ */
+describe('tree controlled -> uncontrolled release', () => {
+  it('resets expandedKeys to empty and becomes uncontrolled', async () => {
+    const wrapper = mount(Tree, {
+      props: { treeData: treeData as any, expandedKeys: ['parent'] },
+    })
+    expect(visibleNodes(wrapper)).toBe(2)
+
+    await wrapper.setProps({ expandedKeys: undefined })
+    expect(visibleNodes(wrapper)).toBe(1)
+
+    // Now uncontrolled, click should expand
+    await wrapper.get('.vc-tree-switcher').trigger('click')
+    expect(visibleNodes(wrapper)).toBe(2)
+  })
+
+  it('resets every controlled key prop', async () => {
+    const wrapper = mount(Tree, {
+      props: {
+        treeData: treeData as any,
+        checkable: true,
+        expandedKeys: ['parent'],
+        selectedKeys: ['parent'],
+        checkedKeys: ['child'],
+        loadedKeys: ['parent'],
+        activeKey: 'parent',
+      },
+    })
+    expect(wrapper.findAll('.vc-tree-node-selected')).toHaveLength(1)
+    expect(wrapper.findAll('.vc-tree-checkbox-checked')).toHaveLength(2)
+    expect(wrapper.findAll('.vc-tree-treenode-active')).toHaveLength(1)
+
+    await wrapper.setProps({
+      selectedKeys: undefined,
+      checkedKeys: undefined,
+      loadedKeys: undefined,
+      activeKey: undefined,
+    })
+    expect(wrapper.findAll('.vc-tree-node-selected')).toHaveLength(0)
+    expect(wrapper.findAll('.vc-tree-checkbox-checked')).toHaveLength(0)
+    expect(wrapper.findAll('.vc-tree-treenode-active')).toHaveLength(0)
+
+    // Focus after release should not crash on `selectedKeys.find`
+    await wrapper.get('[role="tree"]').trigger('focus')
+  })
+
+  it('toggling autoExpandParent while uncontrolled leaves expandedKeys alone', async () => {
+    const wrapper = mount(Tree, {
+      props: { treeData: treeData as any, defaultExpandedKeys: ['parent'], autoExpandParent: false },
+    })
+    expect(visibleNodes(wrapper)).toBe(2)
+
+    await wrapper.setProps({ autoExpandParent: true })
+    expect(visibleNodes(wrapper)).toBe(2)
+  })
+
+  it('re-conducts controlled expandedKeys when autoExpandParent turns on', async () => {
+    const nested = [
+      {
+        key: 'parent',
+        title: 'parent',
+        children: [{ key: 'child', title: 'child', children: [{ key: 'leaf', title: 'leaf' }] }],
+      },
+    ]
+    const wrapper = mount(Tree, {
+      props: { treeData: nested as any, expandedKeys: ['child'], autoExpandParent: false, defaultExpandParent: false },
+    })
+    expect(visibleNodes(wrapper)).toBe(1)
+
+    await wrapper.setProps({ autoExpandParent: true })
+    expect(visibleNodes(wrapper)).toBe(3)
+  })
+})

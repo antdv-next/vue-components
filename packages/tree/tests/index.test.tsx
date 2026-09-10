@@ -112,3 +112,21 @@ describe('tree', () => {
     expect(onActiveChange).not.toHaveBeenCalled()
   })
 })
+
+describe('tree node icon renderable guard', () => {
+  const treeData = [{ key: '0', title: 'node', icon: 0 }]
+
+  it('renders a numeric `0` node icon as customize icon', () => {
+    const wrapper = mount(() => <Tree treeData={treeData as any} showIcon />)
+
+    expect(wrapper.get('.vc-tree-icon__customize').text()).toBe('0')
+  })
+
+  it('falls back to the tree level icon when node icon is not renderable', () => {
+    const wrapper = mount(() => (
+      <Tree treeData={[{ key: '0', title: 'node', icon: '' }] as any} showIcon icon={<span class="tree-icon" />} />
+    ))
+
+    expect(wrapper.find('.vc-tree-icon__customize .tree-icon').exists()).toBe(true)
+  })
+})

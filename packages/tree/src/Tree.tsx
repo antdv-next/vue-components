@@ -275,16 +275,22 @@ const Tree = defineComponent<TreeProps>(
     const setExpandedKeys = (keys: Key[]) => {
       expandedKeys.value = keys
     }
-    watch(() => props.expandedKeys, () => {
-      if (props.expandedKeys === undefined)
-        return
-
-      const keys = props.expandedKeys || []
-      if (props.autoExpandParent) {
-        expandedKeys.value = conductExpandParent(keys, keyEntities.value)
+    // `undefined` means uncontrolled. Controlled -> uncontrolled resets to empty,
+    // while toggling `autoExpandParent` in uncontrolled mode leaves state alone.
+    watch(() => [props.expandedKeys, props.autoExpandParent] as const, ([keys], [prevKeys]) => {
+      if (keys === undefined) {
+        if (prevKeys !== undefined) {
+          expandedKeys.value = []
+        }
         return
       }
-      expandedKeys.value = keys
+
+      const nextKeys = keys ?? []
+      if (props.autoExpandParent) {
+        expandedKeys.value = conductExpandParent(nextKeys, keyEntities.value)
+        return
+      }
+      expandedKeys.value = nextKeys
     })
 
     const flattenNodes = computed(() => flattenTreeData(mergedTreeData.value as any, expandedKeys.value, mergedFieldNames.value))
@@ -294,10 +300,8 @@ const Tree = defineComponent<TreeProps>(
       { multiple: mergedMultiple.value },
     ) || [])
     watch(() => props.selectedKeys, () => {
-      if (props.selectedKeys === undefined) {
-        return
-      }
-      selectedKeys.value = calcSelectedKeys(props.selectedKeys, { multiple: mergedMultiple.value }) || []
+      // Controlled -> uncontrolled resets to empty
+      selectedKeys.value = calcSelectedKeys(props.selectedKeys ?? [], { multiple: mergedMultiple.value }) || []
     })
 
     const setSelectedKeys = (keys: Key[]) => {
@@ -323,10 +327,8 @@ const Tree = defineComponent<TreeProps>(
       rawCheckedKeys.value = keys
     }
     watch(() => props.checkedKeys, () => {
-      if (props.checkedKeys === undefined) {
-        return
-      }
-      const parsed = parseCheckedKeys(props.checkedKeys)
+      // Controlled -> uncontrolled resets to empty
+      const parsed = props.checkedKeys === undefined ? null : parseCheckedKeys(props.checkedKeys)
       rawCheckedKeys.value = parsed?.checkedKeys || []
     })
 
@@ -335,10 +337,7 @@ const Tree = defineComponent<TreeProps>(
       rawHalfCheckedKeys.value = keys
     }
     watch(() => props.checkedKeys, () => {
-      if (props.checkedKeys === undefined) {
-        return
-      }
-      const parsed = parseCheckedKeys(props.checkedKeys)
+      const parsed = props.checkedKeys === undefined ? null : parseCheckedKeys(props.checkedKeys)
       rawHalfCheckedKeys.value = parsed?.halfCheckedKeys || []
     })
 
@@ -369,12 +368,16 @@ const Tree = defineComponent<TreeProps>(
 
     const [loadedKeys, setLoadedKeys] = useMergedState<Key[]>(() => [], {
       value: computed(() => props.loadedKeys === undefined ? undefined : props.loadedKeys) as any,
+      // Controlled -> uncontrolled resets to empty
+      postState: keys => keys ?? [],
     })
     const loadingKeys = ref<Key[]>([])
 
     const listChanging = ref(false)
     const [activeKey, setActiveKey] = useMergedState<Key | null>(null, {
       value: computed(() => props.activeKey === undefined ? undefined : props.activeKey) as any,
+      // Controlled -> uncontrolled resets to `null`
+      postState: key => key ?? null,
     })
 
     function onListChangeStart() {
@@ -403,8 +406,15 @@ const Tree = defineComponent<TreeProps>(
     let dragStartMousePosition: { x: number, y: number } | null = null
     let currentMouseOverDroppableNodeKey: Key | null = null
 
-    const delayedDragEnterLogic: Record<string, number> = {}
+    let delayedDragEnterLogic: Record<string, number> = {}
     const loadingRetryTimes: Record<string, number> = {}
+
+    const clearDelayedDragEnterLogic = () => {
+      Object.values(delayedDragEnterLogic).forEach((timeoutId) => {
+        clearTimeout(timeoutId)
+      })
+      delayedDragEnterLogic = {}
+    }
 
     const listRef = ref<NodeListRef>()
     let focusedByMouse = false
@@ -765,11 +775,9 @@ const Tree = defineComponent<TreeProps>(
     })
 
     onBeforeUnmount(() => {
+      clearDelayedDragEnterLogic()
       window.removeEventListener('dragend', onWindowDragEnd)
       window.removeEventListener('mouseup', onGlobalMouseUp)
-      Object.keys(delayedDragEnterLogic).forEach((key) => {
-        clearTimeout(delayedDragEnterLogic[key])
-      })
     })
 
     const onNodeDragStart = (event: DragEvent, nodeProps: TreeNodeProps<any>) => {
@@ -826,9 +834,8 @@ const Tree = defineComponent<TreeProps>(
         return
       }
 
-      Object.keys(delayedDragEnterLogic).forEach((key) => {
-        clearTimeout(delayedDragEnterLogic[key])
-      })
+      // Side effect for delay drag
+      clearDelayedDragEnterLogic()
 
       if (dragNodeProps.eventKey !== nodeProps.eventKey) {
         delayedDragEnterLogic[pos!] = window.setTimeout(() => {

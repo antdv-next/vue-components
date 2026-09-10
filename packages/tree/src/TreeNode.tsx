@@ -1,5 +1,5 @@
 import type { TreeNodeProps } from './interface'
-import { clsx } from '@v-c/util'
+import { clsx, isVueRenderable } from '@v-c/util'
 import { getId } from '@v-c/util/dist/hooks/useId'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
 import { filterEmpty } from '@v-c/util/dist/props-util'
@@ -257,8 +257,8 @@ const TreeNode = defineComponent<TreeNodeProps>(
 
       let icon
       if (context.showIcon) {
-        const currentIcon = props.icon || context.icon
-        icon = currentIcon
+        const currentIcon = isVueRenderable(props.icon) ? props.icon : context.icon
+        icon = isVueRenderable(currentIcon)
           ? (
               <span
                 class={clsx(
