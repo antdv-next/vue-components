@@ -338,6 +338,140 @@ describe('uploader', () => {
       return promise
     })
 
+    it('retry should make new request', async () => {
+      const wrapper = mount(Upload, { props: { action: '/test' } })
+
+      const file = {
+        name: 'retry.png',
+        toString() {
+          return this.name
+        },
+      }
+
+      const initialRequestCount = requests.length
+
+      ;(wrapper.vm as any).retry(file as any)
+
+      await sleep(100)
+      expect(requests.length).toBe(initialRequestCount + 1)
+      wrapper.unmount()
+    })
+
+    it('retry should not make request when action rejects', async () => {
+      const wrapper = mount(Upload, {
+        props: {
+          action: async () => {
+            throw new Error('action error')
+          },
+        },
+      })
+
+      const file = {
+        name: 'reject.png',
+        toString() {
+          return this.name
+        },
+      }
+
+      const initialRequestCount = requests.length
+
+      ;(wrapper.vm as any).retry(file as any)
+
+      await sleep(100)
+      expect(requests.length).toBe(initialRequestCount)
+      wrapper.unmount()
+    })
+
+    it('retry should not make request when beforeUpload returns false', async () => {
+      const wrapper = mount(Upload, {
+        props: {
+          action: '/test',
+          beforeUpload: () => false,
+        },
+      })
+
+      const file = {
+        name: 'blocked.png',
+        toString() {
+          return this.name
+        },
+      }
+
+      const initialRequestCount = requests.length
+
+      ;(wrapper.vm as any).retry(file as any)
+
+      await sleep(100)
+      expect(requests.length).toBe(initialRequestCount)
+      wrapper.unmount()
+    })
+
+    it('retry should not start overlapping request for the same file', async () => {
+      const wrapper = mount(Upload, { props: { action: '/test' } })
+
+      const file = {
+        name: 'overlap.png',
+        uid: 'fixed-overlap-uid',
+        toString() {
+          return this.name
+        },
+      }
+
+      const initialRequestCount = requests.length
+
+      ;(wrapper.vm as any).retry(file as any)
+      ;(wrapper.vm as any).retry(file as any)
+
+      await sleep(100)
+      expect(requests.length).toBe(initialRequestCount + 1)
+      expect(requests[requests.length - 1].aborted).toBeFalsy()
+
+      ;(wrapper.vm as any).abort(file)
+      expect(requests[requests.length - 1].aborted).toBe(true)
+      wrapper.unmount()
+    })
+
+    it('retry should re-post file after a failed upload', async () => {
+      const onStart = vi.fn()
+      const onError = vi.fn()
+      const wrapper = mount(Upload, {
+        props: { action: '/test', onStart, onError },
+      })
+      const input = wrapper.find('input')!
+      const files = [
+        {
+          name: 'fail-then-retry.png',
+          toString() {
+            return this.name
+          },
+        },
+      ]
+      ;(files as any).item = (i: number) => files[i]
+
+      Object.defineProperty(input.element, 'files', {
+        value: files,
+        writable: false,
+      })
+      await input.trigger('change')
+      await sleep(100)
+
+      expect(requests.length).toBe(1)
+      requests[0].respond(500, {}, 'error 500')
+      await sleep(50)
+      expect(onError).toHaveBeenCalledTimes(1)
+      expect(onStart).toHaveBeenCalledTimes(1)
+
+      // Retry with the origin file passed to `onStart`
+      const originFile = onStart.mock.calls[0][0]
+      ;(wrapper.vm as any).retry(originFile)
+
+      await sleep(100)
+      expect(requests.length).toBe(2)
+      expect(onStart).toHaveBeenCalledTimes(2)
+      expect(onStart.mock.calls[1][0].uid).toBe(originFile.uid)
+      wrapper.unmount()
+    })
+
     it('drag to upload', async () => {
       const input = uploader.find('input')!
 

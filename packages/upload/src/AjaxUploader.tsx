@@ -255,6 +255,25 @@ const AjaxUploader = defineComponent<UploadProps>(
       }
     }
 
+    /**
+     * Retry upload for a file. The origin file passed to `onStart` / `onError`
+     * should be provided so it can be processed and posted again.
+     * A retry is ignored while a request for the same uid is still in flight.
+     */
+    const retry = (originFile: VcFile) => {
+      const { uid } = originFile
+      processFile(originFile, [originFile])
+        .then((fileInfo) => {
+          if (reqs[uid]) {
+            return
+          }
+          if (fileInfo.parsedFile) {
+            post(fileInfo)
+          }
+        })
+        .catch(() => {})
+    }
+
     const onFileDrop = (e: DragEvent) => {
       e.preventDefault()
 
@@ -361,6 +380,7 @@ const AjaxUploader = defineComponent<UploadProps>(
     })
     const instance: AjaxUploaderExpose = {
       abort,
+      retry,
     }
     expose(instance)
     return () => {

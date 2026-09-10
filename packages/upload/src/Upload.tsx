@@ -24,10 +24,13 @@ const defaults = {
 const Upload = defineComponent<UploadProps>(
   (props = defaults, { attrs, expose, slots }) => {
     const uploaderRef = ref<AjaxUploaderExpose>()
-    const abort = (file: VcFile) => {
+    const abort = (file?: VcFile) => {
       uploaderRef.value?.abort(file)
     }
-    expose({ abort })
+    const retry = (file: VcFile) => {
+      uploaderRef.value?.retry(file)
+    }
+    expose({ abort, retry })
 
     const mergedProps = computed(() => ({
       ...defaults,

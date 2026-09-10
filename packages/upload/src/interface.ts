@@ -30,7 +30,8 @@ export interface UploadProgressEvent extends Partial<ProgressEvent> {
 }
 
 export interface AjaxUploaderExpose {
-  abort: (file: any) => void
+  abort: (file?: any) => void
+  retry: (file: VcFile) => void
 }
 
 export interface UploadRequestOption<T = any> {
