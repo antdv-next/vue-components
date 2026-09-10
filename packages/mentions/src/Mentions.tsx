@@ -5,7 +5,7 @@ import type { CSSProperties } from 'vue'
 import type { OptionProps } from './Option'
 import { BaseInput } from '@v-c/input'
 import TextArea from '@v-c/textarea'
-import { clsx, KeyCode, omit, useId } from '@v-c/util'
+import { clsx, isVueRenderable, KeyCode, omit, useId } from '@v-c/util'
 import { toArray } from '@v-c/util/dist/Children/toArray'
 import { filterEmpty, getAttrStyleAndClass } from '@v-c/util/dist/props-util'
 import { computed, defineComponent, shallowRef, watch } from 'vue'
@@ -622,7 +622,7 @@ const InternalMentions = defineComponent<InternalMentionsProps>(
 
 const Mentions = defineComponent<MentionsProps>(
   (props, { expose, attrs }) => {
-    const hasSuffix = computed(() => !!(props.suffix || props.allowClear))
+    const hasSuffix = computed(() => isVueRenderable(props.suffix) || Boolean(props.allowClear))
 
     const holderRef = shallowRef<any>()
     const mentionRef = shallowRef<MentionsRef>()
