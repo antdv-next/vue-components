@@ -47,7 +47,7 @@ import type {
 } from './interface'
 
 import ResizeObserver from '@v-c/resize-observer'
-import { clsx, get, warning } from '@v-c/util'
+import { clsx, get, isNonNullable, isVueRenderable, warning } from '@v-c/util'
 import canUseDom from '@v-c/util/dist/Dom/canUseDom'
 import { getDOM } from '@v-c/util/dist/Dom/findDOMNode'
 import { getTargetScrollBarSize } from '@v-c/util/dist/getScrollBarSize'
@@ -84,7 +84,7 @@ import Panel from './Panel'
 import StickyScrollBar from './stickyScrollBar'
 import Column from './sugar/Column'
 import ColumnGroup from './sugar/ColumnGroup'
-import { getColumnsKey, validateValue, validNumberValue } from './utils/valueUtil'
+import { getColumnsKey, validNumberValue } from './utils/valueUtil'
 
 export const DEFAULT_PREFIX = 'vc-table'
 
@@ -296,9 +296,9 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
     ...stickyOffsets.value,
     isSticky: stickyConfig.value.isSticky,
   }))
-  const fixHeader = computed(() => !!(props.scroll && validateValue(props.scroll.y)))
+  const fixHeader = computed(() => !!(props.scroll && isNonNullable(props.scroll.y)))
   const horizonScroll = computed(
-    () => (!!(props.scroll && validateValue(mergedScrollX.value)) || !!expandableConfig.value.fixed),
+    () => (!!(props.scroll && isNonNullable(mergedScrollX.value)) || !!expandableConfig.value.fixed),
   )
   const fixColumn = computed(() => horizonScroll.value && flattenColumns.value.some(({ fixed }) => fixed))
 
@@ -638,7 +638,7 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
       />
     )
 
-    const captionElement = props.caption !== null && props.caption !== undefined
+    const captionElement = isNonNullable(props.caption)
       ? <caption class={`${mergedPrefixCls.value}-caption`}>{props.caption}</caption>
       : undefined
 
@@ -675,7 +675,7 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
               {captionElement}
               {bodyColGroupNode}
               {bodyTableNode}
-              {!fixFooter.value && summaryNode.value && (
+              {!fixFooter.value && isVueRenderable(summaryNode.value) && (
                 <Footer stickyOffsets={mergedStickyOffsets.value} flattenColumns={flattenColumns.value}>
                   {summaryNode.value}
                 </Footer>
@@ -753,7 +753,7 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
               <Header {...headerProps.value} columns={columns.value} flattenColumns={flattenColumns.value} />
             )}
             {bodyTableNode}
-            {!fixFooter.value && summaryNode.value && (
+            {!fixFooter.value && isVueRenderable(summaryNode.value) && (
               <Footer stickyOffsets={mergedStickyOffsets.value} flattenColumns={flattenColumns.value}>
                 {summaryNode.value}
               </Footer>

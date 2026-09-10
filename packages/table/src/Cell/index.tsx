@@ -10,13 +10,12 @@ import type {
   RenderedCell,
   ScopeType,
 } from '../interface'
-import { clsx, warning } from '@v-c/util'
+import { clsx, isNonNullable, warning } from '@v-c/util'
 import { filterEmpty, getStylePxValue } from '@v-c/util/dist/props-util'
 import getValue from '@v-c/util/dist/utils/get'
 import { computed, defineComponent, isVNode, shallowRef, toRaw, watch } from 'vue'
 import { useInjectPerfContext } from '../context/PerfContext'
 import { useInjectTableContext } from '../context/TableContext'
-import { validateValue } from '../utils/valueUtil'
 import useHoverState from './useHoverState'
 
 export interface CellProps<RecordType extends DefaultRecordType> {
@@ -114,7 +113,7 @@ function resolveCellRender<RecordType>({
   render?: ColumnType<RecordType>['render']
   perfRecord?: { renderWithProps: boolean }
 }): [any, CellType<RecordType>?] | [any] {
-  if (validateValue(children)) {
+  if (isNonNullable(children)) {
     return [children]
   }
 
