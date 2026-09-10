@@ -1,7 +1,7 @@
 import type { VueNode } from '@v-c/util'
 import type { Ref, VNode } from 'vue'
 import type { PaginationProps } from './interface'
-import { classNames } from '@v-c/util'
+import { classNames, isVueRenderable } from '@v-c/util'
 import useMergedState from '@v-c/util/dist/hooks/useMergedState'
 import KeyCode from '@v-c/util/dist/KeyCode'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
@@ -142,15 +142,17 @@ const Pagination = defineComponent<PaginationProps>(
     // avoid announcing it twice. `title` is the visual tooltip only.
     function getItemIcon(icon: VueNode, _label: string, title?: string) {
       const prefixCls = mergedPrefixCls.value
-      let iconNode = icon || (
-        <button
-          type="button"
-          tabindex={-1}
-          aria-hidden="true"
-          title={title}
-          class={`${prefixCls}-item-link`}
-        />
-      )
+      let iconNode = isVueRenderable(icon)
+        ? icon
+        : (
+            <button
+              type="button"
+              tabindex={-1}
+              aria-hidden="true"
+              title={title}
+              class={`${prefixCls}-item-link`}
+            />
+          )
       if (typeof icon === 'function') {
         iconNode = h(icon, { ...props })
       }
@@ -403,7 +405,7 @@ const Pagination = defineComponent<PaginationProps>(
       const itemStyle = styles?.item
 
       let prev = renderPrev(prevPage.value)
-      if (prev) {
+      if (isVueRenderable(prev)) {
         const prevDisabled = !hasPrev.value || !allPages.value
         prev = (
           <li
@@ -424,7 +426,7 @@ const Pagination = defineComponent<PaginationProps>(
       }
 
       let next = renderNext(nextPage.value)
-      if (next) {
+      if (isVueRenderable(next)) {
         let nextDisabled: boolean, nextTabIndex: number | null
 
         if (simple) {
@@ -585,7 +587,7 @@ const Pagination = defineComponent<PaginationProps>(
         let jumpNext = null
 
         if (showPrevNextJumpers) {
-          jumpPrev = jumpPrevContent
+          jumpPrev = isVueRenderable(jumpPrevContent)
             ? (
                 <li
                   key="prev"
@@ -593,7 +595,7 @@ const Pagination = defineComponent<PaginationProps>(
                   tabindex={0}
                   onKeydown={runIfEnterJumpPrev}
                   class={classNames(`${prefixCls}-jump-prev`, {
-                    [`${prefixCls}-jump-prev-custom-icon`]: !!jumpPrevIcon,
+                    [`${prefixCls}-jump-prev-custom-icon`]: isVueRenderable(jumpPrevIcon),
                   })}
                   role="button"
                   aria-label={prevItemTitle}
@@ -603,7 +605,7 @@ const Pagination = defineComponent<PaginationProps>(
               )
             : null
 
-          jumpNext = jumpNextContent
+          jumpNext = isVueRenderable(jumpNextContent)
             ? (
                 <li
                   key="next"
@@ -611,7 +613,7 @@ const Pagination = defineComponent<PaginationProps>(
                   tabindex={0}
                   onKeydown={runIfEnterJumpNext}
                   class={classNames(`${prefixCls}-jump-next`, {
-                    [`${prefixCls}-jump-next-custom-icon`]: !!jumpNextIcon,
+                    [`${prefixCls}-jump-next-custom-icon`]: isVueRenderable(jumpNextIcon),
                   })}
                   role="button"
                   aria-label={nextItemTitle}
