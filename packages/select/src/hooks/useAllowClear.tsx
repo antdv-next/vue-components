@@ -40,7 +40,7 @@ export function useAllowClear(
         ? isVueRenderable(allowClearConfig.value.clearIcon)
           ? allowClearConfig.value.clearIcon
           : isVueRenderable(clearIcon?.value)
-            ? clearIcon.value
+            ? clearIcon?.value
             : '×'
         : null,
       label: mergedAllowClear ? (allowClearConfig.value.label ?? 'Clear') : '',
