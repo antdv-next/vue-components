@@ -2,7 +2,7 @@ import type { VueNode } from '@v-c/util/dist/type'
 import type { Component, CSSProperties, HTMLAttributes } from 'vue'
 import type { ClosableType } from './hooks/useClosable'
 import type { NotificationProgressProps } from './Progress'
-import { clsx } from '@v-c/util'
+import { clsx, isNonNullable, isVueRenderable } from '@v-c/util'
 import { computed, defineComponent, ref, shallowRef, watch } from 'vue'
 import useClosable from './hooks/useClosable'
 import useNoticeTimer from './hooks/useNoticeTimer'
@@ -196,7 +196,7 @@ const Notification = defineComponent<NotificationProps>(
       const noticePrefixCls = `${prefixCls}-notice`
 
       // ======================== Content =========================
-      const titleNode = title !== undefined && title !== null
+      const titleNode = isNonNullable(title)
         ? (
             <div class={clsx(`${noticePrefixCls}-title`, ncs?.title)} style={nss?.title}>
               {title}
@@ -204,7 +204,7 @@ const Notification = defineComponent<NotificationProps>(
           )
         : null
 
-      const descNode = description !== undefined && description !== null
+      const descNode = isNonNullable(description)
         ? (
             <div class={clsx(`${noticePrefixCls}-description`, ncs?.description)} style={nss?.description}>
               {description}
@@ -228,7 +228,7 @@ const Notification = defineComponent<NotificationProps>(
         contentNode = titleNode || descNode
       }
 
-      if (icon !== undefined && icon !== null) {
+      if (isNonNullable(icon)) {
         contentNode = (
           <div class={clsx(`${noticePrefixCls}-wrapper`, ncs?.wrapper)} style={nss?.wrapper}>
             <div class={clsx(`${noticePrefixCls}-icon`, ncs?.icon)} style={nss?.icon}>
@@ -239,7 +239,7 @@ const Notification = defineComponent<NotificationProps>(
         )
       }
 
-      const actionsNode = actions
+      const actionsNode = isVueRenderable(actions)
         ? (
             <div class={clsx(`${noticePrefixCls}-actions`, ncs?.actions)} style={nss?.actions}>
               {actions}
