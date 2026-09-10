@@ -8,7 +8,7 @@ import type {
   SliderStyles,
 } from './interface'
 import type { InternalMarkObj, MarkObj } from './Marks'
-import { classNames as cls } from '@v-c/util'
+import { classNames as cls, isVueRenderable } from '@v-c/util'
 import isEqual from '@v-c/util/dist/isEqual'
 import warning from '@v-c/util/dist/warning'
 import { computed, defineComponent, isVNode, ref, shallowRef, watch } from 'vue'
@@ -230,7 +230,7 @@ const Slider = defineComponent<SliderProps>((props = sliderDefaults, {
 
         return markObj
       })
-      .filter(({ label }) => label || typeof label === 'number')
+      .filter(({ label }) => isVueRenderable(label))
       .sort((a, b) => a.value - b.value)
   })
 
