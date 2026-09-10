@@ -1,5 +1,6 @@
 import type { VueNode } from '@v-c/util/dist/type'
 import type { Components, ItemType } from '../interface'
+import { isVueRenderable } from '@v-c/util'
 import { filterEmpty } from '@v-c/util/dist/props-util'
 import Divider from '../Divider'
 import MenuItem from '../MenuItem'
@@ -92,7 +93,7 @@ function convertItemsToNodes(
           return <MergedDivider key={mergedKey} {...restProps} />
         }
 
-        const hasExtra = !!extra || extra === 0
+        const hasExtra = isVueRenderable(extra)
         return (
           <MergedMenuItem
             key={mergedKey}

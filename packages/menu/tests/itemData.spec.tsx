@@ -73,3 +73,22 @@ describe('menu onClick/onSelect itemData payload', () => {
     expect(itemData.extra).toBe('Y')
   })
 })
+
+// react-component/menu#894
+describe('menu item extra renderable guard', () => {
+  it('renders numeric 0 extra but skips empty string extra', () => {
+    const wrapper = mount(Menu, {
+      props: {
+        mode: 'inline',
+        items: [
+          { key: 'zero', label: 'Zero', extra: 0 },
+          { key: 'empty', label: 'Empty', extra: '' },
+        ],
+      },
+    })
+
+    const extras = wrapper.findAll('.vc-menu-item-extra')
+    expect(extras).toHaveLength(1)
+    expect(extras[0].text()).toBe('0')
+  })
+})
