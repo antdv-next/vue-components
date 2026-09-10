@@ -1,16 +1,12 @@
 import type { KeyboardEventHandler, MouseEventHandler } from '@v-c/util/dist/EventInterface'
 import type { VueNode } from '@v-c/util/dist/type'
 import type { Status, StepItem, StepsProps } from './Steps'
-import { clsx } from '@v-c/util'
+import { clsx, isNonNullable } from '@v-c/util'
 import { defineComponent } from 'vue'
 import { useStepsContext } from './Context'
 import Rail from './Rail.tsx'
 import StepIcon, { StepIconSemanticContextProvider } from './StepIcon.tsx'
 import { useUnstableContext } from './UnstableContext'
-
-function hasContent<T>(value: T) {
-  return value !== undefined && value !== null
-}
 
 export interface StepProps {
   // style
@@ -123,8 +119,8 @@ const Step = defineComponent<StepProps>(
       // ========================= Render =========================
       const mergedStatus = status || 'wait'
 
-      const hasTitle = hasContent(title)
-      const hasSubTitle = hasContent(subTitle)
+      const hasTitle = isNonNullable(title)
+      const hasSubTitle = isNonNullable(subTitle)
 
       const classString = clsx(
         itemCls,
@@ -203,7 +199,7 @@ const Step = defineComponent<StepProps>(
                 />
               )}
             </div>
-            {hasContent(mergedContent) && (
+            {isNonNullable(mergedContent) && (
               <div
                 class={clsx(`${itemCls}-content`, classNames.itemContent, itemClassNames.content)}
                 style={{ ...styles.itemContent, ...itemStyles.content }}
