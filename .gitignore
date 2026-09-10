@@ -36,5 +36,6 @@ docs/.vitepress/cache
 .nitro
 .cache
 .output
+ai-captures
 
 !.vscode/settings.json
