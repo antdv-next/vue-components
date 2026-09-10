@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { AddButtonProps } from '../interface'
-import { RenderComponent } from '@v-c/util'
+import { isVueRenderable, RenderComponent } from '@v-c/util'
 import { ref, toRefs } from 'vue'
 
 defineOptions({
@@ -32,6 +32,6 @@ defineExpose({
     :aria-label="locale?.addAriaLabel || 'Add tab'"
     @click="handleClick"
   >
-    <RenderComponent :render="editable.addIcon || '+'" />
+    <RenderComponent :render="isVueRenderable(editable.addIcon) ? editable.addIcon : '+'" />
   </button>
 </template>

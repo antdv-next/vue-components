@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { TabNodeProps } from '../interface'
+import { isVueRenderable } from '@v-c/util'
 import { isEmptyElement } from '@v-c/util/dist/props-util'
 import RenderComponent from '@v-c/util/dist/RenderComponent'
 import { computed, h, onMounted, ref, toRefs, watch } from 'vue'
@@ -73,7 +74,7 @@ const node = computed(() => {
     )
   }
 
-  if (tab.value.icon) {
+  if (isVueRenderable(tab.value.icon)) {
     btnChildren.push(
       h('span', { class: [`${tabPrefix.value}-icon`] }, [
         h(RenderComponent, { render: tab.value.icon }),
@@ -81,7 +82,7 @@ const node = computed(() => {
     )
   }
 
-  if (tab.value.label) {
+  if (isVueRenderable(tab.value.label)) {
     if (typeof tab.value.label === 'string' && !isEmptyElement(tab.value.icon)) {
       btnChildren.push(h('span', {}, tab.value.label))
     }
@@ -125,7 +126,13 @@ const node = computed(() => {
           onRemove(e)
         },
       }, [
-        h(RenderComponent, { render: tab.value.closeIcon || (editable.value && editable.value.removeIcon) || '×' }),
+        h(RenderComponent, {
+          render: isVueRenderable(tab.value.closeIcon)
+            ? tab.value.closeIcon
+            : isVueRenderable(editable.value?.removeIcon)
+              ? editable.value!.removeIcon
+              : '×',
+        }),
       ]),
     )
   }

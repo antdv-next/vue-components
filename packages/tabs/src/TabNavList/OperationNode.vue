@@ -3,7 +3,7 @@ import type { CSSProperties, VNodeChild } from 'vue'
 import type { MoreProps, OperationNodeProps } from '../interface'
 import DropDown from '@v-c/dropdown'
 import Menu from '@v-c/menu'
-import { clsx } from '@v-c/util'
+import { clsx, isVueRenderable } from '@v-c/util'
 import KeyCode from '@v-c/util/dist/KeyCode'
 import RenderComponent from '@v-c/util/dist/RenderComponent'
 import { computed, h, ref, toRefs, useTemplateRef, watch } from 'vue'
@@ -71,7 +71,13 @@ const menuNode = computed(() => {
                   e.stopPropagation()
                   onRemoveTab(e, key)
                 },
-              }, [(closeIcon || editable.value?.removeIcon || '×') as VNodeChild])
+              }, [(
+                isVueRenderable(closeIcon)
+                  ? closeIcon
+                  : isVueRenderable(editable.value?.removeIcon)
+                    ? editable.value!.removeIcon
+                    : '×'
+              ) as VNodeChild])
             : null,
         ],
       })
@@ -189,14 +195,14 @@ defineExpose({
       v-if="!mobile"
       :prefix-cls="dropdownPrefix"
       :overlay="overlayNode"
-      :visible="tabs.length ? open : false"
+      :open="tabs.length ? open : false"
       :overlay-class-name="overlayClassName"
       :overlay-style="popupStyle"
       :mouse-enter-delay="0.1"
       :mouse-leave-delay="0.1"
       :get-popup-container="getPopupContainer"
       v-bind="moreProps"
-      @visible-change="open = $event"
+      @open-change="open = $event"
     >
       <button
         :id="`${id}-more`"
