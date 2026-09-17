@@ -277,9 +277,14 @@ export default function useOffset(
     }
   }
 
-  const needPush = (dist: number) => {
+  const needPush = (startValue: number, endValue: number) => {
+    const dist = endValue - startValue
+    const tolerance
+      = Number.EPSILON
+        * Math.max(Math.abs(startValue), Math.abs(endValue), Math.abs(Number(pushable.value)))
+
     return (pushable.value === null && dist === 0)
-      || (typeof pushable.value === 'number' && dist < pushable.value)
+      || (typeof pushable.value === 'number' && dist < pushable.value - tolerance)
   }
 
   // Values
@@ -336,7 +341,7 @@ export default function useOffset(
         if (isHandleDisabled(i))
           break
         let changed = true
-        while (needPush(nextValues[i] - nextValues[i - 1]) && changed) {
+        while (needPush(nextValues[i - 1], nextValues[i]) && changed) {
           ({ value: nextValues[i], changed } = offsetChangedValue(nextValues, 1, i))
         }
         const [, itemMaxBound] = getDisabledBoundaryValues(
@@ -355,7 +360,7 @@ export default function useOffset(
         if (isHandleDisabled(i - 1))
           break
         let changed = true
-        while (needPush(nextValues[i] - nextValues[i - 1]) && changed) {
+        while (needPush(nextValues[i - 1], nextValues[i]) && changed) {
           ({ value: nextValues[i - 1], changed } = offsetChangedValue(nextValues, -1, i - 1))
         }
         const [itemMinBound] = getDisabledBoundaryValues(
@@ -375,7 +380,7 @@ export default function useOffset(
         if (isHandleDisabled(i) || isHandleDisabled(i - 1))
           continue
         let changed = true
-        while (needPush(nextValues[i] - nextValues[i - 1]) && changed) {
+        while (needPush(nextValues[i - 1], nextValues[i]) && changed) {
           ({ value: nextValues[i - 1], changed } = offsetChangedValue(nextValues, -1, i - 1))
         }
         const [itemMinBound] = getDisabledBoundaryValues(
@@ -394,7 +399,7 @@ export default function useOffset(
         if (isHandleDisabled(i) || isHandleDisabled(i + 1))
           continue
         let changed = true
-        while (needPush(nextValues[i + 1] - nextValues[i]) && changed) {
+        while (needPush(nextValues[i], nextValues[i + 1]) && changed) {
           ({ value: nextValues[i + 1], changed } = offsetChangedValue(nextValues, 1, i + 1))
         }
         const [, itemMaxBound] = getDisabledBoundaryValues(
