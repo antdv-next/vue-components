@@ -22,7 +22,7 @@ const props = withDefaults(defineProps<TabsProps>(), {
   destroyOnHidden: undefined,
 })
 
-const { id, items, direction, defaultActiveKey, tabPosition, editable, locale, tabBarGutter, more, animated, styles, prefixCls, className, activeKey, tabBarStyle, tabBarExtraContent, destroyOnHidden, renderTabBar, onChange, onTabClick, onTabScroll, getPopupContainer, popupClassName, indicator, classNames: tabsClassNames } = toRefs(props)
+const { id, items, direction, defaultActiveKey, tabPosition, editable, locale, tabBarGutter, more, animated, styles, prefixCls, className, activeKey, tabBarStyle, tabBarExtraContent, destroyOnHidden, renderTabBar, onChange, onTabClick, onTabScroll, getPopupContainer, popupClassName, indicator, scrollPosition, classNames: tabsClassNames } = toRefs(props)
 
 const restProps = computed(() => {
   return omit(props, [
@@ -49,6 +49,7 @@ const restProps = computed(() => {
     'getPopupContainer',
     'popupClassName',
     'indicator',
+    'scrollPosition',
     'classNames',
     'styles',
   ])
@@ -136,6 +137,7 @@ const tabNavBarProps = computed(() => {
     getPopupContainer: getPopupContainer.value,
     popupClassName: clsx([popupClassName.value, tabsClassNames.value?.popup]),
     indicator: indicator.value,
+    scrollPosition: scrollPosition.value,
     styles: styles.value,
     classNames: tabsClassNames.value,
   }
