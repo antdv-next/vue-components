@@ -71,7 +71,6 @@ onMounted(() => {
 const defaultKey = computed(() => defaultActiveKey.value ?? tabs.value[0]?.key)
 const [mergedActiveKey, setMergedActiveKey] = useMergedState('', {
   defaultValue: activeKey.value ?? defaultKey.value,
-  // @ts-expect-error: `toRef`
   value: activeKey,
 })
 
@@ -116,7 +115,7 @@ function onInternalTabClick(key: string, e: MouseEvent | KeyboardEvent) {
 // ======================== Render ========================
 const sharedProps = computed(() => ({
   id: mergedId.value as string,
-  activeKey: mergedActiveKey.value,
+  activeKey: mergedActiveKey.value as string,
   animated: mergedAnimated.value,
   tabPosition: tabPosition.value,
   rtl: rtl.value,
