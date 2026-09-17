@@ -23,33 +23,44 @@ vi.mock('@v-c/resize-observer', async (importOriginal) => {
   }
 })
 
-const TAB_WIDTH = 100
-const VISIBLE_WIDTH = 200
+// 主轴（横向为宽、纵向为高）每个 tab 100，可视区 200，共 6 个 tab。
+const TAB_SIZE = 100
+const VISIBLE_SIZE = 200
+const CROSS_SIZE = 40
 const ITEMS = Array.from({ length: 6 }, (_, i) => ({ key: String(i + 1), label: `Tab ${i + 1}` }))
 
 let wrapper: VueWrapper
 
-function stubSize(el: Element, width: number, height: number, left = 0) {
-  Object.defineProperty(el, 'offsetWidth', { value: width, configurable: true })
-  Object.defineProperty(el, 'offsetHeight', { value: height, configurable: true })
+function stubRect(el: Element, rect: { width: number, height: number, left?: number, top?: number }) {
+  const left = rect.left ?? 0
+  const top = rect.top ?? 0
+  Object.defineProperty(el, 'offsetWidth', { value: rect.width, configurable: true })
+  Object.defineProperty(el, 'offsetHeight', { value: rect.height, configurable: true })
   ;(el as any).getBoundingClientRect = () => ({
     x: left,
-    y: 0,
+    y: top,
     left,
-    top: 0,
-    right: left + width,
-    bottom: height,
-    width,
-    height,
+    top,
+    right: left + rect.width,
+    bottom: top + rect.height,
+    width: rect.width,
+    height: rect.height,
     toJSON: () => ({}),
   })
 }
 
+function isVertical(tabPosition?: string) {
+  return tabPosition === 'left' || tabPosition === 'right'
+}
+
 /**
- * 6 个宽 100 的 tab，可视区 200；默认激活第 3 个（left 200、width 100）。
+ * 默认激活第 3 个 tab（主轴偏移 200、尺寸 100）。
+ * 横向（top/bottom）按 left/width 布局，纵向（left/right）按 top/height 布局。
  * 返回 nav-list 的 inline style，用于读取 transform。
  */
 async function mountTabs(props: Record<string, any> = {}) {
+  const vertical = isVertical(props.tabPosition)
+
   wrapper?.unmount()
   triggers.length = 0
 
@@ -59,10 +70,23 @@ async function mountTabs(props: Record<string, any> = {}) {
 
   await wrapper.vm.$nextTick()
 
-  stubSize(wrapper.find('[role="tablist"]').element, VISIBLE_WIDTH, 40)
-  stubSize(wrapper.find('.vc-tabs-nav-list').element, TAB_WIDTH * ITEMS.length, 40)
+  stubRect(
+    wrapper.find('[role="tablist"]').element,
+    vertical ? { width: CROSS_SIZE, height: VISIBLE_SIZE } : { width: VISIBLE_SIZE, height: CROSS_SIZE },
+  )
+  stubRect(
+    wrapper.find('.vc-tabs-nav-list').element,
+    vertical
+      ? { width: CROSS_SIZE, height: TAB_SIZE * ITEMS.length }
+      : { width: TAB_SIZE * ITEMS.length, height: CROSS_SIZE },
+  )
   wrapper.findAll('[data-node-key]').forEach((node, i) => {
-    stubSize(node.element, TAB_WIDTH, 40, i * TAB_WIDTH)
+    stubRect(
+      node.element,
+      vertical
+        ? { width: CROSS_SIZE, height: TAB_SIZE, top: i * TAB_SIZE }
+        : { width: TAB_SIZE, height: CROSS_SIZE, left: i * TAB_SIZE },
+    )
   })
 
   triggers.forEach(trigger => trigger())
@@ -77,44 +101,62 @@ function translateX(style: string) {
   return matched ? Number(matched[1]) : null
 }
 
+function translateY(style: string) {
+  const matched = /translate\([^,]+,\s*(-?[\d.]+)px/.exec(style)
+  return matched ? Number(matched[1]) : null
+}
+
+/** 读当前朝向下的对齐偏移。 */
+async function align(props: Record<string, any> = {}) {
+  const style = await mountTabs(props)
+  return isVertical(props.tabPosition) ? translateY(style) : translateX(style)
+}
+
 afterEach(() => {
   wrapper?.unmount()
   triggers.length = 0
   vi.restoreAllMocks()
 })
 
+// 手算基准：激活项主轴偏移 200、尺寸 100，可视区 200。
+//   auto   → -(200 + 100 - 200) = -100
+//   start  → -(200 + 100*0   - 200*0)   = -200
+//   center → -(200 + 100*0.5 - 200*0.5) = -150
+//   end    → -(200 + 100*1   - 200*1)   = -100
+// 数值比例会被 clamp 到 [0, 1]；NaN 回落到 auto。
+const LAYOUTS: Array<{ position: any, expected: number }> = [
+  { position: 'start', expected: -200 },
+  { position: 'center', expected: -150 },
+  { position: 'end', expected: -100 },
+  { position: 0, expected: -200 },
+  { position: 0.25, expected: -175 },
+  { position: 0.5, expected: -150 },
+  { position: 1, expected: -100 },
+  { position: 1.5, expected: -100 },
+  { position: -0.5, expected: -200 },
+  { position: Number.NaN, expected: -100 },
+]
+
 describe('tabs scrollPosition', () => {
   // react-component/tabs#1016
   it('keeps the legacy edge alignment when scrollPosition is not set', async () => {
-    expect(translateX(await mountTabs())).toBe(-100)
+    expect(await align()).toBe(-100)
   })
 
-  // react-component/tabs#1016
-  it('aligns the active tab to the start of the viewport', async () => {
-    expect(translateX(await mountTabs({ scrollPosition: 'start' }))).toBe(-200)
+  // react-component/tabs#1016：横向（top / bottom）分支
+  it.each(LAYOUTS)('top: $position', async ({ position, expected }) => {
+    expect(await align({ scrollPosition: position })).toBe(expected)
   })
 
-  // react-component/tabs#1016
-  it('aligns the active tab to the center of the viewport', async () => {
-    expect(translateX(await mountTabs({ scrollPosition: 'center' }))).toBe(-150)
-  })
-
-  // react-component/tabs#1016
-  it('aligns the active tab to the end of the viewport', async () => {
-    expect(translateX(await mountTabs({ scrollPosition: 'end' }))).toBe(-100)
-  })
-
-  // react-component/tabs#1016：数值比例会被 clamp 到 [0, 1]
-  it('clamps a numeric ratio into [0, 1]', async () => {
-    expect(translateX(await mountTabs({ scrollPosition: 1.5 }))).toBe(-100)
-    expect(translateX(await mountTabs({ scrollPosition: -0.5 }))).toBe(-200)
+  // react-component/tabs#1016：纵向（left / right）走的是独立分支，必须单独覆盖
+  it.each(LAYOUTS)('left: $position', async ({ position, expected }) => {
+    expect(await align({ tabPosition: 'left', scrollPosition: position })).toBe(expected)
   })
 
   // react-component/tabs#1016：NaN 必须回落到默认行为，否则会渲染出 translate(NaNpx)
-  it('falls back to the legacy alignment for NaN', async () => {
+  it('never renders a NaN transform', async () => {
     const style = await mountTabs({ scrollPosition: Number.NaN })
 
-    expect(translateX(style)).toBe(-100)
     expect(style).not.toContain('NaN')
   })
 
