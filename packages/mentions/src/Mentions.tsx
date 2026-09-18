@@ -141,7 +141,6 @@ const defaults = {
   split: ' ',
   notFoundContent: 'Not Found',
   validateSearch: defaultValidateSearch,
-  filterOption: defaultFilterOption,
   rows: 1,
 } as any
 
@@ -256,9 +255,6 @@ const InternalMentions = defineComponent<InternalMentionsProps>(
       return list.filter((option: OptionProps) => {
         /** Return all result if `filterOption` is false. */
         if (filterOption === false) {
-          return true
-        }
-        if (typeof filterOption !== 'function') {
           return true
         }
         return filterOption(targetMeasureText, option)
