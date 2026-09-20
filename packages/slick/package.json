@@ -38,7 +38,7 @@
   },
   "dependencies": {
     "@v-c/util": "workspace:^",
-    "es-toolkit": "^1.49.0"
+    "es-toolkit": "^1.52.0"
   },
   "devDependencies": {}
 }

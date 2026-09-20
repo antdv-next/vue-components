@@ -36,6 +36,6 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@ctrl/tinycolor": "^4.2.0"
+    "@ctrl/tinycolor": "^4.2.1"
   }
 }
