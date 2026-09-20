@@ -26,7 +26,7 @@ export default function useMutateObserver(
 
     if ('MutationObserver' in window) {
       ins = new MutationObserver(callback)
-      nodeList.forEach(node => ins.observe(node, options.value))
+      nodeList.forEach(node => ins.observe(node, options.value ?? defaultOptions.value))
     }
 
     onCleanup(() => {
