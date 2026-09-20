@@ -11,6 +11,7 @@ import Position from './position.vue'
 import RenderTabBarDraggableSlot from './renderTabBar-draggable-slot.vue'
 import RenderTabBarDraggable from './renderTabBar-draggable.vue'
 import RenderTabBarSticky from './renderTabBar-sticky.vue'
+import ScrollPosition from './scroll-position.vue'
 </script>
 
 <template>
@@ -61,6 +62,10 @@ import RenderTabBarSticky from './renderTabBar-sticky.vue'
 
     <Variant title="RenderTabBar-Sticky">
       <RenderTabBarSticky />
+    </Variant>
+
+    <Variant title="ScrollPosition">
+      <ScrollPosition />
     </Variant>
   </Story>
 </template>

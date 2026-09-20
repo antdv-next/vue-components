@@ -13,6 +13,19 @@ export function getPageXY(
   return obj[horizontal ? 'pageX' : 'pageY'] - window[horizontal ? 'scrollX' : 'scrollY']
 }
 
+function isDraggable(ele: HTMLElement | null): boolean {
+  let current = ele
+
+  while (current) {
+    if (current.draggable) {
+      return true
+    }
+    current = current.parentElement
+  }
+
+  return false
+}
+
 export default function useScrollDrag(
   inVirtual: Ref<boolean>,
   componentRef: Ref<HTMLElement | null | undefined>,
@@ -47,7 +60,7 @@ export default function useScrollDrag(
 
   const onMouseDown = (e: MouseEvent) => {
     // Skip if element set draggable
-    if ((e.target as HTMLElement).draggable || e.button !== 0) {
+    if (isDraggable(e.target as HTMLElement) || e.button !== 0) {
       return
     }
     // Skip if nest List has handled this event

@@ -61,7 +61,7 @@ function useDrag(
   // Clean up event
   onUnmounted(() => {
     document.removeEventListener('mousemove', mouseMoveEventRef.value!)
-    document.removeEventListener('mouseup', mouseUpEventRef.value!)
+    document.removeEventListener('mouseup', mouseUpEventRef.value!, true)
     if (touchEventTargetRef.value) {
       touchEventTargetRef.value.removeEventListener('touchmove', mouseMoveEventRef.value as any)
       touchEventTargetRef.value.removeEventListener('touchend', mouseUpEventRef.value as any)
@@ -205,9 +205,11 @@ function useDrag(
 
     // End
     const onMouseUp = (event: MouseEvent | TouchEvent) => {
-      event.preventDefault()
+      if (event.type === 'touchend') {
+        event.preventDefault()
+      }
 
-      document.removeEventListener('mouseup', onMouseUp)
+      document.removeEventListener('mouseup', onMouseUp, true)
       document.removeEventListener('mousemove', onMouseMove)
       if (touchEventTargetRef.value) {
         touchEventTargetRef.value.removeEventListener('touchmove', mouseMoveEventRef.value as any)
@@ -223,7 +225,7 @@ function useDrag(
       draggingDelete.value = false
     }
 
-    document.addEventListener('mouseup', onMouseUp)
+    document.addEventListener('mouseup', onMouseUp, true)
     document.addEventListener('mousemove', onMouseMove)
     ;(e as any).currentTarget.addEventListener('touchend', onMouseUp)
     ;(e as any).currentTarget.addEventListener('touchmove', onMouseMove)

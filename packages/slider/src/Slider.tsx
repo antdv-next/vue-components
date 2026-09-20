@@ -421,8 +421,13 @@ const Slider = defineComponent<SliderProps>((props = sliderDefaults, {
       })
 
       let focusIndex = valueIndex
+      let valueOffset = 0
 
-      if (
+      if (!rawValues.value.length) {
+        cloneNextValues.push(newValue)
+        focusIndex = 0
+      }
+      else if (
         effectiveRangeEditable.value
         && valueDist !== 0
         && (!maxCount.value || rawValues.value.length < maxCount.value)
@@ -431,8 +436,18 @@ const Slider = defineComponent<SliderProps>((props = sliderDefaults, {
         focusIndex = valueBeforeIndex + 1
       }
       else {
-        cloneNextValues[valueIndex] = newValue
+        valueOffset = newValue - rawValues.value[valueIndex]
         focusIndex = valueIndex
+      }
+
+      if (rawValues.value.length) {
+        const { values: nextValues } = offsetValues(
+          cloneNextValues,
+          valueOffset,
+          focusIndex,
+          'dist',
+        )
+        cloneNextValues.splice(0, cloneNextValues.length, ...nextValues)
       }
 
       if (rangeEnabled.value && !rawValues.value.length && props.count === undefined) {

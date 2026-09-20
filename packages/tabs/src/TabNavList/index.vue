@@ -38,6 +38,7 @@ const {
   onTabClick,
   onTabScroll,
   indicator,
+  scrollPosition,
   classNames: tabsClassNames,
   styles,
   mobile,
@@ -271,12 +272,31 @@ function scrollToTab(key = activeKey.value) {
     top: 0,
   }
 
+  let ratio: number | null = null
+  if (scrollPosition.value === 'start') {
+    ratio = 0
+  }
+  else if (scrollPosition.value === 'center') {
+    ratio = 0.5
+  }
+  else if (scrollPosition.value === 'end') {
+    ratio = 1
+  }
+  else if (typeof scrollPosition.value === 'number' && !Number.isNaN(scrollPosition.value)) {
+    ratio = Math.min(1, Math.max(0, scrollPosition.value))
+  }
+
   if (tabPositionTopOrBottom.value) {
     // ============ Align with top & bottom ============
     const newTransform = transformLeft
 
+    if (ratio !== null) {
+      newTransform.value = rtl.value
+        ? tabOffset.right + tabOffset.width * ratio - visibleTabContentValue.value * ratio
+        : -(tabOffset.left + tabOffset.width * ratio - visibleTabContentValue.value * ratio)
+    }
     // RTL
-    if (rtl.value) {
+    else if (rtl.value) {
       if (tabOffset.right < transformLeft.value) {
         newTransform.value = tabOffset.right
       }
@@ -300,7 +320,10 @@ function scrollToTab(key = activeKey.value) {
     // ============ Align with left & right ============
     const newTransform = transformTop
 
-    if (tabOffset.top < -transformTop.value) {
+    if (ratio !== null) {
+      newTransform.value = -(tabOffset.top + tabOffset.height * ratio - visibleTabContentValue.value * ratio)
+    }
+    else if (tabOffset.top < -transformTop.value) {
       newTransform.value = -tabOffset.top
     }
     else if (tabOffset.top + tabOffset.height > -transformTop.value + visibleTabContentValue.value) {
@@ -538,7 +561,7 @@ watch(() => tabs.value.map(t => t.key).join('_'), () => {
   })
 })
 
-watch([activeKey, () => transformComputed.value.transformMin, () => transformComputed.value.transformMax, visibleTabContentValue, tabOffsets], () => {
+watch([activeKey, scrollPosition, () => transformComputed.value.transformMin, () => transformComputed.value.transformMax, visibleTabContentValue, tabOffsets], () => {
   scrollToTab()
 })
 

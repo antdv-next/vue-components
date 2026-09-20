@@ -509,11 +509,11 @@
           "description": "@rc-component/slider -> @v-c/slider"
         }
       ],
-      "last_synced_commit": "0a05f30d06dce64ab349b067b3cc0747c5eed575",
-      "last_synced_commit_short": "0a05f30d06",
-      "last_synced_at": "2026-09-10T13:50:17Z",
+      "last_synced_commit": "792f28c1daef02feb345f3128437ff73d06770b8",
+      "last_synced_commit_short": "792f28c1da",
+      "last_synced_at": "2026-09-20T07:05:27Z",
       "last_synced_tag": "@rc-component/slider@1.2.0",
-      "sync_count": 6
+      "sync_count": 7
     },
     {
       "name": "@rc-component/steps",
@@ -577,11 +577,11 @@
           "description": "@rc-component/tabs -> @v-c/tabs"
         }
       ],
-      "last_synced_commit": "479d869c68d289760e271440f4b6d157464b3a41",
-      "last_synced_commit_short": "479d869c68",
-      "last_synced_at": "2026-09-10T13:50:17Z",
-      "last_synced_tag": "@rc-component/tabs@2.0.0",
-      "sync_count": 5
+      "last_synced_commit": "822d74dd7c706777b1dcd47eacdf1f1be555e57e",
+      "last_synced_commit_short": "822d74dd7c",
+      "last_synced_at": "2026-09-20T07:05:27Z",
+      "last_synced_tag": "@rc-component/tabs@2.1.0",
+      "sync_count": 6
     },
     {
       "name": "@rc-component/textarea",
@@ -730,11 +730,11 @@
           "description": "@rc-component/virtual-list -> @v-c/virtual-list"
         }
       ],
-      "last_synced_commit": "a7cdfda33b3d9e38cf3a2880660fb7a83d89881b",
-      "last_synced_commit_short": "a7cdfda33b",
-      "last_synced_at": "2026-09-10T13:50:17Z",
-      "last_synced_tag": "@rc-component/virtual-list@1.5.1",
-      "sync_count": 6
+      "last_synced_commit": "92e18b145b8fe8e44bb5c7a0b242d328cb16b4af",
+      "last_synced_commit_short": "92e18b145b",
+      "last_synced_at": "2026-09-20T07:05:27Z",
+      "last_synced_tag": "@rc-component/virtual-list@1.5.2",
+      "sync_count": 7
     }
   ]
 }
