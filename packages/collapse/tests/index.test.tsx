@@ -131,7 +131,7 @@ describe('collapse', () => {
       {
         label: 'collapse 3',
         key: '3',
-        className: 'important',
+        class: 'important',
         children: 'third',
       },
     ]
@@ -211,7 +211,7 @@ describe('collapse', () => {
       {
         label: 'collapse 3',
         key: '3',
-        className: 'important',
+        class: 'important',
         children: 'third',
       },
     ]
@@ -300,14 +300,14 @@ describe('collapse', () => {
           label: 'collapse 3',
           key: '3',
           children: 'second',
-          className: 'important',
+          class: 'important',
         },
       ]
 
       const wrapper = mount(
         <Collapse
           onChange={onChange}
-          destroyInactivePanel
+          destroyOnHidden
           items={items}
         >
         </Collapse>,
@@ -762,7 +762,7 @@ describe('collapse', () => {
       {
         key: '3',
         label: 'collapse 3',
-        className: 'important',
+        class: 'important',
         children: 'third',
       },
     ]
