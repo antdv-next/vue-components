@@ -75,8 +75,11 @@ function getSelfTransform(transform: string | undefined): SelfTransform | null {
     return null
   }
   return {
-    scaleX: v[0] || 1,
-    scaleY: v[1] || 1,
+    // A zero scale is kept as-is: `unscaleSelfRect` needs to know the rect
+    // collapsed, and coercing it to 1 would silently pass the collapsed rect
+    // through as if it were the layout box.
+    scaleX: v[0],
+    scaleY: v[1],
     translateX: v[2] || 0,
     translateY: v[3] || 0,
   }
@@ -86,16 +89,29 @@ function getSelfTransform(transform: string | undefined): SelfTransform | null {
  * Map a rect measured under the element's own transform back to its layout
  * (untransformed) space, so align math works with the position the popup will
  * occupy once its motion finishes.
+ *
+ * `layout` is the popup's untransformed size from computed style. It is only
+ * consulted when an axis is scaled to exactly 0 — `scale(0)` collapses the rect
+ * onto the transform origin, so its size carries no information to divide back
+ * out. That state is not hypothetical: antd's `-enter`/`-appear` classes hold
+ * `transform: scale(0)` and rely on a `-prepare` class to undo it, so a popup
+ * measured with those classes out of sync measures 0x0 while still occupying a
+ * real layout box.
  */
-function unscaleSelfRect(rect: Rect, self: SelfTransform, transformOrigin: string): Rect {
+function unscaleSelfRect(
+  rect: Rect,
+  self: SelfTransform,
+  transformOrigin: string,
+  layout: { width: number, height: number },
+): Rect {
   const [oxStr, oyStr] = (transformOrigin || '').split(' ')
   const ox = parseFloat(oxStr) || 0
   const oy = parseFloat(oyStr) || 0
   return {
     x: rect.x - self.translateX - ox * (1 - self.scaleX),
     y: rect.y - self.translateY - oy * (1 - self.scaleY),
-    width: rect.width / self.scaleX,
-    height: rect.height / self.scaleY,
+    width: self.scaleX ? rect.width / self.scaleX : layout.width,
+    height: self.scaleY ? rect.height / self.scaleY : layout.height,
   }
 }
 
@@ -241,6 +257,20 @@ export default function useAlign(
       const originOverflow = popupElement.style.overflow
       const originOverflowX = popupElement.style.overflowX
       const originOverflowY = popupElement.style.overflowY
+
+      // Align measures by parking the popup at `left/top: 0` and reading
+      // `getBoundingClientRect()` in the same task. If anything gives the popup
+      // a transition on those properties, the rect still reports the *previous*
+      // position, so every offset is computed against a stale origin and the
+      // popup walks off-screen. Page-level resets do exactly that: a common
+      // `prefers-reduced-motion` block sets `transition-duration: .01ms` on `*`,
+      // and since `transition-property` defaults to `all` that hands every
+      // element a left/top transition it never had. Suppress transitions for the
+      // duration of the measurement; `important` is required to outrank such a
+      // reset.
+      const originTransitionProperty = popupElement.style.getPropertyValue('transition-property')
+      const originTransitionPriority = popupElement.style.getPropertyPriority('transition-property')
+      popupElement.style.setProperty('transition-property', 'none', 'important')
       // Placement
       const placementInfo: AlignType = {
         ...builtinPlacements.value[placement.value],
@@ -355,6 +385,17 @@ export default function useAlign(
       popupElement.style.overflowX = originOverflowX
       popupElement.style.overflowY = originOverflowY
 
+      if (originTransitionProperty) {
+        popupElement.style.setProperty(
+          'transition-property',
+          originTransitionProperty,
+          originTransitionPriority,
+        )
+      }
+      else {
+        popupElement.style.removeProperty('transition-property')
+      }
+
       popupElement.parentElement?.removeChild(placeholderElement)
 
       // Use the same logic as React version:
@@ -369,6 +410,12 @@ export default function useAlign(
       // we measure. Map the rects back to layout space so only ancestor
       // transforms remain in the scale compensation below.
       const selfTransform = getSelfTransform(popupComputedStyle.transform)
+      // Only usable as a fallback when the rect collapsed; `auto` (an unrendered
+      // popup) parses to NaN and is rejected so the bail below still applies.
+      const layoutSize = {
+        width: toNum(parseFloat(width), 0),
+        height: toNum(parseFloat(height), 0),
+      }
       let popupRect: Rect = {
         x: rawPopupRect.x ?? (rawPopupRect as DOMRect).left,
         y: rawPopupRect.y ?? (rawPopupRect as DOMRect).top,
@@ -380,7 +427,12 @@ export default function useAlign(
         bottom: rawPopupMirrorRect.bottom,
       }
       if (selfTransform) {
-        popupRect = unscaleSelfRect(popupRect, selfTransform, popupComputedStyle.transformOrigin)
+        popupRect = unscaleSelfRect(
+          popupRect,
+          selfTransform,
+          popupComputedStyle.transformOrigin,
+          layoutSize,
+        )
         const mirror = unscaleSelfRect(
           {
             x: rawPopupMirrorRect.x ?? (rawPopupMirrorRect as DOMRect).left,
@@ -390,6 +442,7 @@ export default function useAlign(
           },
           selfTransform,
           popupComputedStyle.transformOrigin,
+          layoutSize,
         )
         popupMirrorRect = {
           right: mirror.x + mirror.width,

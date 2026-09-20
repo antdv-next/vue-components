@@ -326,6 +326,69 @@ describe('useAlign', () => {
     expect(offsetXRef.value).toBeCloseTo(target.getBoundingClientRect().right, 3)
   })
 
+  it('suppresses popup transitions while measuring so the rect is not stale', async () => {
+    // A page-wide `prefers-reduced-motion` reset
+    // (`* { transition-duration: .01ms !important }`) gives the popup a left/top
+    // transition it never declared, because `transition-property` defaults to
+    // `all`. Align parks the popup at 0/0 and measures in the same task, so a
+    // live transition makes getBoundingClientRect report the previous position
+    // and the popup walks off-screen. Measurement must therefore run with
+    // transitions disabled, at `important` priority to outrank such a reset.
+    const placements: BuildInPlacements = {
+      bottomLeft: {
+        points: ['tl', 'bl'],
+        offset: [0, 0],
+        targetOffset: [0, 0],
+        overflow: {},
+      },
+    }
+
+    const { element: target } = createRectElement({ x: 20, y: 40, width: 60, height: 20 })
+    const { element: popup } = createRectElement({ x: 0, y: 0, width: 80, height: 30 })
+
+    const seenWhileMeasuring: { value: string, priority: string }[] = []
+    const rect = popup.getBoundingClientRect.bind(popup)
+    Object.defineProperty(popup, 'getBoundingClientRect', {
+      configurable: true,
+      value: () => {
+        seenWhileMeasuring.push({
+          value: popup.style.getPropertyValue('transition-property'),
+          priority: popup.style.getPropertyPriority('transition-property'),
+        })
+        return rect()
+      },
+    })
+
+    document.body.appendChild(target)
+    document.body.appendChild(popup)
+
+    scope = effectScope()
+    let triggerAlign!: VoidFunction
+    scope.run(() => {
+      triggerAlign = useAlign(
+        ref(true),
+        shallowRef(popup),
+        shallowRef(target),
+        ref('bottomLeft'),
+        ref(placements),
+        ref(),
+        undefined,
+        ref(false),
+      )[10]
+    })
+
+    await nextTick()
+    await runAlign(triggerAlign)
+
+    expect(seenWhileMeasuring.length).toBeGreaterThan(0)
+    for (const seen of seenWhileMeasuring) {
+      expect(seen.value).toBe('none')
+      expect(seen.priority).toBe('important')
+    }
+    // and the popup is handed back without a leftover override
+    expect(popup.style.getPropertyValue('transition-property')).toBe('')
+  })
+
   it('does not compensate the popup own motion transform (ant-slide-up scaleY)', async () => {
     // Models antdv-next select: ant-slide-up holds `scaleY(0.8)` with
     // transform-origin top at keyframe 0. When stuck motion classes (from an
@@ -406,6 +469,82 @@ describe('useAlign', () => {
     // Self transform factored out: no ancestor scale detected
     expect(scaleYRef.value).toBeCloseTo(1, 3)
     // offsetY = target bottom (132) + offset (4) = 136, NOT 136 / 0.8 = 170
+    expect(offsetYRef.value).toBeCloseTo(136, 3)
+  })
+
+  it('recovers the layout box when the popup is measured at scale(0)', async () => {
+    // antd's `-enter`/`-appear` classes hold `transform: scale(0)` and rely on a
+    // `-prepare` class to undo it. If the popup is measured while those are out
+    // of sync the rect collapses to 0x0, and the old code bailed at
+    // `scaleX === 0`, leaving `ready` false forever — the popup stayed parked at
+    // its `-1000vw / -1000vh` start position. A collapsed rect must instead fall
+    // back to the layout size from computed style. ResizeObserver cannot rescue
+    // this case: a transform does not change the layout box, so it never fires.
+    const placements: BuildInPlacements = {
+      bottomLeft: {
+        points: ['tl', 'bl'],
+        offset: [0, 4],
+        targetOffset: [0, 0],
+        overflow: {},
+      },
+    }
+
+    const { element: target } = createRectElement({ x: 50, y: 100, width: 120, height: 32 })
+    setMockComputedStyle(target, { width: '120px', height: '32px' })
+
+    const popupWidth = 120
+    const popupHeight = 100
+    // scale(0) collapses the rect onto the transform origin (the box centre)
+    const { element: popup } = createRectElement({
+      x: 0,
+      y: 0,
+      width: popupWidth,
+      height: popupHeight,
+      rectWidth: 0,
+      rectHeight: 0,
+      rectX: popupWidth / 2,
+      rectY: popupHeight / 2,
+    })
+    setMockComputedStyle(popup, {
+      width: `${popupWidth}px`,
+      height: `${popupHeight}px`,
+      transform: 'matrix(0, 0, 0, 0, 0, 0)',
+      transformOrigin: `${popupWidth / 2}px ${popupHeight / 2}px`,
+    })
+
+    document.body.appendChild(target)
+    document.body.appendChild(popup)
+
+    scope = effectScope()
+    let readyRef!: ReturnType<typeof useAlign>[0]
+    let offsetXRef!: ReturnType<typeof useAlign>[1]
+    let offsetYRef!: ReturnType<typeof useAlign>[2]
+    let triggerAlign!: VoidFunction
+
+    scope.run(() => {
+      const result = useAlign(
+        ref(true),
+        shallowRef(popup),
+        shallowRef(target),
+        ref('bottomLeft'),
+        ref(placements),
+        ref(),
+        undefined,
+        ref(false),
+      )
+      readyRef = result[0]
+      offsetXRef = result[1]
+      offsetYRef = result[2]
+      triggerAlign = result[10]
+    })
+
+    await nextTick()
+    await runAlign(triggerAlign)
+
+    // Align ran instead of bailing, so the popup leaves its off-screen parking spot
+    expect(readyRef.value).toBe(true)
+    expect(offsetXRef.value).toBeCloseTo(50, 3)
+    // target bottom (132) + offset (4)
     expect(offsetYRef.value).toBeCloseTo(136, 3)
   })
 })
