@@ -1,6 +1,6 @@
-import type { VueNode } from '@v-c/util/dist/type'
 import type { VNode } from 'vue'
-import type { Step } from '../src'
+import type { StepsProps } from '../src'
+import type { RenderInfo } from '../src/Steps'
 import { mount } from '@vue/test-utils'
 import { describe, expect, it, vitest } from 'vitest'
 import { cloneVNode, defineComponent, ref } from 'vue'
@@ -10,7 +10,7 @@ describe('steps', () => {
   describe('render', () => {
     let description = 'hello'
 
-    const renderSteps = (props: Record<string, unknown>) => {
+    const renderSteps = (props: Partial<StepsProps>) => {
       return mount(
         <Steps
           items={[
@@ -54,27 +54,17 @@ describe('steps', () => {
     })
 
     it('renders vertical correctly', () => {
-      const wrapper = renderSteps({ direction: 'vertical' })
+      const wrapper = renderSteps({ orientation: 'vertical' })
       expect(wrapper.element).toMatchSnapshot()
     })
 
-    it('renders labelPlacement correctly', () => {
-      const wrapper = renderSteps({ labelPlacement: 'vertical' })
+    it('renders titlePlacement correctly', () => {
+      const wrapper = renderSteps({ titlePlacement: 'vertical' })
       expect(wrapper.element).toMatchSnapshot()
     })
 
-    it('renders progressDot correctly', () => {
-      const wrapper = renderSteps({ progressDot: true })
-      expect(wrapper.element).toMatchSnapshot()
-    })
-
-    it('renders progressDot function correctly', () => {
-      const wrapper = renderSteps({ progressDot: () => <span>a</span> })
-      expect(wrapper.element).toMatchSnapshot()
-    })
-
-    it('renders stepIcon function correctly', () => {
-      const wrapper = renderSteps({ stepIcon: () => <span>a</span> })
+    it('renders iconRender correctly', () => {
+      const wrapper = renderSteps({ iconRender: () => <span>a</span> })
       expect(wrapper.element).toMatchSnapshot()
     })
 
@@ -169,41 +159,42 @@ describe('steps', () => {
       expect(wrapper.element).toMatchSnapshot()
     })
 
-    it('renders step with tailContent', () => {
+    it('renders a rail for every item but the last', () => {
       const wrapper = mount(
         <Steps
+          current={1}
           items={[
             {
               title: '已完成',
               description,
-              tailContent: 'text',
             },
             {
               title: '进行中',
               description,
-              tailContent: <div>content</div>,
             },
             {
               title: '待运行',
               description,
-              tailContent: 3,
             },
             {
               title: '待运行',
               description,
-              tailContent: 'text',
             },
           ]}
         />,
       )
-      expect(wrapper.element).toMatchSnapshot()
+
+      const rails = wrapper.findAll('.vc-steps-item-rail')
+      expect(rails).toHaveLength(3)
+      // The rail takes the status of the step it points at.
+      expect(rails[0]!.classes()).toContain('vc-steps-item-rail-process')
+      expect(rails[1]!.classes()).toContain('vc-steps-item-rail-wait')
     })
 
-    it('renders step with type navigation', () => {
+    it('renders step with subTitle and disabled item', () => {
       description = 'This is a description.'
       const wrapper = mount(
         <Steps
-          type="navigation"
           current={1}
           onChange={() => {}}
           items={[
@@ -227,11 +218,10 @@ describe('steps', () => {
       expect(wrapper.element).toMatchSnapshot()
     })
 
-    it('renders step with type inline', () => {
+    it('renders step with itemRender', () => {
       description = 'This is a description.'
       const wrapper = mount(
         <Steps
-          type="inline"
           current={1}
           onChange={() => {}}
           items={[
@@ -249,7 +239,7 @@ describe('steps', () => {
               disabled: true,
             },
           ]}
-          itemRender={(item: InstanceType<typeof Step>['$props'], stepItem: VueNode) => cloneVNode(stepItem as VNode, { title: item.description })}
+          itemRender={(originNode: VNode, info: RenderInfo) => cloneVNode(originNode, { title: info.item.content })}
         />,
       )
       expect(wrapper.element).toMatchSnapshot()
@@ -319,7 +309,8 @@ describe('steps', () => {
         <Steps
           current={1}
           status="error"
-          icons={icons}
+          iconRender={(originNode: VNode, info: RenderInfo) =>
+            icons[info.item.status as keyof typeof icons] ?? originNode}
           items={[
             {
               title: 'Finished',
@@ -400,7 +391,7 @@ describe('steps', () => {
       />,
     )
 
-    const el = wrapper.findAll('.vc-steps-item-container')
+    const el = wrapper.findAll('.vc-steps-item')
     await el?.[1].trigger('click')
     expect(onChange).toHaveBeenCalled()
   })
@@ -423,7 +414,7 @@ describe('steps', () => {
       <Steps current={current.value} onChange={onChange} items={items} key={current.value} />,
     )
 
-    await wrapper.findAll('.vc-steps-item-container')?.[1].trigger('click')
+    await wrapper.findAll('.vc-steps-item')?.[1].trigger('click')
     await wrapper.setProps({ current: current.value })
     const el = wrapper.findAll('.vc-steps-item')?.[1]
     expect(
@@ -455,7 +446,7 @@ describe('steps', () => {
       />,
     )
 
-    await wrapper.find('.vc-steps-item-container').trigger('click')
+    await wrapper.find('.vc-steps-item').trigger('click')
     expect(onClick).toHaveBeenCalled()
   })
 
@@ -474,7 +465,7 @@ describe('steps', () => {
       />,
     )
 
-    await wrapper.findAll('.vc-steps-item-container')?.[2].trigger('click')
+    await wrapper.findAll('.vc-steps-item')?.[2].trigger('click')
     expect(onChange).not.toBeCalled()
   })
 
