@@ -3,6 +3,12 @@
   "type": "module",
   "version": "1.2.0",
   "description": "Vue3 components utils",
+
+  "author": {
+    "name": "aibayanyu20",
+    "email": "aibayanyu@qq.com",
+    "url": "https://yanyu.me"
+  },
   "license": "MIT",
   "homepage": "https://github.com/antdv-next/vue-components/tree/next/packages/util",
   "repository": {
@@ -11,11 +17,6 @@
   },
   "publishConfig": {
     "access": "public"
-  },
-  "author": {
-    "name": "aibayanyu20",
-    "email": "aibayanyu@qq.com",
-    "url": "https://yanyu.me"
   },
   "exports": {
     ".": {
