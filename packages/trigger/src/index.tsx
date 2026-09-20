@@ -16,6 +16,7 @@ import { TriggerContextProvider, useTriggerContext, useUniqueContext } from './c
 import useAction from './hooks/useAction.ts'
 import useAlign from './hooks/useAlign.ts'
 import useDelay from './hooks/useDelay.ts'
+import useTargetMove from './hooks/useTargetMove.ts'
 import useWatch from './hooks/useWatch.ts'
 import useWinClick from './hooks/useWinClick.ts'
 import Popup from './Popup'
@@ -414,6 +415,10 @@ export function generateTrigger(PortalComponent: any = Portal) {
         mousePos.value = [event.clientX, event.clientY]
       }
 
+      const alignTarget = computed(() =>
+        props?.alignPoint && mousePos.value !== null ? mousePos.value : targetEle.value,
+      )
+
       const [
         ready,
         offsetX,
@@ -429,7 +434,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
       ] = useAlign(
         mergedOpen,
         popupEle as any,
-        computed(() => props?.alignPoint && mousePos.value !== null ? mousePos.value : targetEle.value) as any,
+        alignTarget as any,
         computed(() => props?.popupPlacement) as any,
         computed(() => props?.builtinPlacements) as any,
         computed(() => props?.popupAlign) as any,
@@ -460,6 +465,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
       }
 
       useWatch(mergedOpen, targetEle as any, popupEle as any, triggerAlign, onScroll)
+      useTargetMove(mergedOpen, alignTarget as any, triggerAlign, isMobile)
       watch(
         [mousePos, () => props.popupPlacement],
         async () => {
