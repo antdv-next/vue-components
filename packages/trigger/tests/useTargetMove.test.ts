@@ -152,9 +152,72 @@ describe('useTargetMove', () => {
     expect(onAlign).toHaveBeenCalledTimes(1)
 
     // A drag moves the target with no transition and no scroll.
-    document.dispatchEvent(new Event('pointermove', { bubbles: true }))
+    document.dispatchEvent(new Event('pointerdown', { bubbles: true }))
     await frames(2)
     expect(onAlign).toHaveBeenCalledTimes(2)
+  })
+
+  it('keeps sampling for the length of a drag', async () => {
+    // The target moves for as long as the drag lasts, so the ordinary idle
+    // cutoff must not park the loop in the middle of one.
+    const { element, moveTo } = createTarget(50, 100)
+    const onAlign = vi.fn()
+
+    scope = effectScope()
+    scope.run(() => {
+      useTargetMove(ref(true), shallowRef(element) as any, onAlign)
+    })
+
+    document.dispatchEvent(new Event('pointerdown', { bubbles: true }))
+
+    // Well past the cutoff that applies when no pointer is down.
+    await frames(40)
+    moveTo(400, 100)
+    await frames(2)
+    expect(onAlign).toHaveBeenCalledTimes(1)
+  })
+
+  it('parks even if the end of a drag is never seen', async () => {
+    // A release outside the window can leave the drag looking open forever.
+    // The loop has to stop on its own rather than trust that it will hear.
+    const { element, moveTo } = createTarget(50, 100)
+    const onAlign = vi.fn()
+
+    scope = effectScope()
+    scope.run(() => {
+      useTargetMove(ref(true), shallowRef(element) as any, onAlign)
+    })
+
+    document.dispatchEvent(new Event('pointerdown', { bubbles: true }))
+    // No pointerup — nothing moves, so the drag cap is what stops it.
+    await frames(610)
+
+    const parked = rafSpy.mock.calls.length
+    await frames(10)
+    expect(rafSpy.mock.calls.length).toBe(parked)
+
+    moveTo(400, 100)
+    await frames(5)
+    expect(onAlign).not.toHaveBeenCalled()
+  })
+
+  it('a pointer release lets the ordinary cutoff apply again', async () => {
+    const { element, moveTo } = createTarget(50, 100)
+    const onAlign = vi.fn()
+
+    scope = effectScope()
+    scope.run(() => {
+      useTargetMove(ref(true), shallowRef(element) as any, onAlign)
+    })
+
+    document.dispatchEvent(new Event('pointerdown', { bubbles: true }))
+    await frames(2)
+    window.dispatchEvent(new Event('pointerup'))
+
+    await frames(30)
+    moveTo(400, 100)
+    await frames(2)
+    expect(onAlign).not.toHaveBeenCalled()
   })
 
   it('stops listening once closed', async () => {

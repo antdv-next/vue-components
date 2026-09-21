@@ -10,10 +10,13 @@ import { getWin } from '../util.ts'
 const IDLE_FRAMES = 20
 
 /**
- * Something may have started moving the target. These all bubble, so one
- * listener per document catches them wherever they happen.
+ * The same cutoff while a pointer is down. A drag keeps the target moving, so
+ * the count only climbs once the drag has actually stopped — or ended without
+ * us hearing about it, when the release landed somewhere we do not see.
+ * Generous enough not to cut a real pause mid-drag short, hard enough that a
+ * missed release cannot pin the loop open.
  */
-const REARM_EVENTS = ['transitionrun', 'animationstart', 'pointerdown', 'pointermove'] as const
+const DRAG_IDLE_FRAMES = 600
 
 /**
  * Align reacts to scroll and to window/element *resize*, but nothing tells it
@@ -23,10 +26,11 @@ const REARM_EVENTS = ['transitionrun', 'animationstart', 'pointerdown', 'pointer
  * at the position the target had when it opened and never catches up.
  *
  * Sample the target's viewport rect per frame and re-align when it actually
- * moved. Sampling is not open-ended: reading a rect forces a layout, so once
- * the target has held still for `IDLE_FRAMES` the loop parks itself, and the
- * events above bring it back when something might move the target again. A
- * popup that is merely open therefore costs nothing.
+ * moved. Sampling is not open-ended: reading a rect can force a layout, so once
+ * the target has held still the loop parks itself, and the listeners below
+ * bring it back when something might move the target again. A popup that is
+ * merely open costs nothing, and while a transition really is running the
+ * browser is laying out every frame regardless.
  */
 export default function useTargetMove(
   open: Ref<boolean>,
@@ -62,6 +66,7 @@ export default function useTargetMove(
       let lastX: number | null = null
       let lastY: number | null = null
       let idle = 0
+      let dragging = false
 
       const sample = () => {
         const { left, top } = targetElement.getBoundingClientRect()
@@ -81,7 +86,9 @@ export default function useTargetMove(
           idle += 1
         }
 
-        rafId = idle < IDLE_FRAMES ? win.requestAnimationFrame(sample) : undefined
+        rafId = idle < (dragging ? DRAG_IDLE_FRAMES : IDLE_FRAMES)
+          ? win.requestAnimationFrame(sample)
+          : undefined
       }
 
       // Re-arming a parked loop also clears the idle count, so an event that
@@ -93,18 +100,39 @@ export default function useTargetMove(
         }
       }
 
+      const onPointerDown = () => {
+        dragging = true
+        rearm()
+      }
+
+      const onPointerUp = () => {
+        dragging = false
+      }
+
+      // `transitionrun` and `animationstart` bubble, so one listener on the
+      // document catches an ancestor starting to move wherever it sits. The
+      // release of a drag may never reach the document — it can land outside
+      // the window — so those go on the window instead.
+      const listeners: [EventTarget | undefined, string, EventListener][] = [
+        [doc, 'transitionrun', rearm],
+        [doc, 'animationstart', rearm],
+        [doc, 'pointerdown', onPointerDown],
+        [win, 'pointerup', onPointerUp],
+        [win, 'pointercancel', onPointerUp],
+      ]
+
       rearm()
 
-      REARM_EVENTS.forEach((type) => {
-        doc?.addEventListener(type, rearm, { capture: true, passive: true })
+      listeners.forEach(([node, type, handler]) => {
+        node?.addEventListener(type, handler, { capture: true, passive: true })
       })
 
       onCleanup(() => {
         if (rafId !== undefined) {
           win.cancelAnimationFrame(rafId)
         }
-        REARM_EVENTS.forEach((type) => {
-          doc?.removeEventListener(type, rearm, { capture: true })
+        listeners.forEach(([node, type, handler]) => {
+          node?.removeEventListener(type, handler, { capture: true })
         })
       })
     },
