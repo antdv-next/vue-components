@@ -104,6 +104,79 @@ describe('useTargetMove', () => {
     expect(onAlign).not.toHaveBeenCalled()
   })
 
+  it('parks itself once the target has held still', async () => {
+    // Reading a rect forces a layout, so an open popup must not cost one every
+    // frame for as long as it stays open.
+    const { element, moveTo } = createTarget(50, 100)
+    const onAlign = vi.fn()
+
+    scope = effectScope()
+    scope.run(() => {
+      useTargetMove(ref(true), shallowRef(element) as any, onAlign)
+    })
+
+    await frames(30)
+    const sampledWhileMoving = rafSpy.mock.calls.length
+
+    await frames(10)
+    expect(rafSpy.mock.calls.length).toBe(sampledWhileMoving)
+
+    moveTo(400, 100)
+    await frames(5)
+    expect(onAlign).not.toHaveBeenCalled()
+  })
+
+  it('comes back when something may move the target again', async () => {
+    const { element, moveTo } = createTarget(50, 100)
+    const onAlign = vi.fn()
+
+    scope = effectScope()
+    scope.run(() => {
+      useTargetMove(ref(true), shallowRef(element) as any, onAlign)
+    })
+
+    // Park it, then move the target while nothing is watching.
+    await frames(30)
+    moveTo(400, 100)
+    await frames(2)
+    expect(onAlign).not.toHaveBeenCalled()
+
+    // An ancestor starting a transition is exactly the case this exists for.
+    document.dispatchEvent(new Event('transitionrun', { bubbles: true }))
+    await frames(2)
+    expect(onAlign).toHaveBeenCalledTimes(1)
+
+    await frames(30)
+    moveTo(400, 260)
+    await frames(2)
+    expect(onAlign).toHaveBeenCalledTimes(1)
+
+    // A drag moves the target with no transition and no scroll.
+    document.dispatchEvent(new Event('pointermove', { bubbles: true }))
+    await frames(2)
+    expect(onAlign).toHaveBeenCalledTimes(2)
+  })
+
+  it('stops listening once closed', async () => {
+    const { element, moveTo } = createTarget(50, 100)
+    const onAlign = vi.fn()
+    const open = ref(true)
+
+    scope = effectScope()
+    scope.run(() => {
+      useTargetMove(open, shallowRef(element) as any, onAlign)
+    })
+
+    await frames(2)
+    open.value = false
+    await nextTick()
+
+    moveTo(400, 100)
+    document.dispatchEvent(new Event('transitionrun', { bubbles: true }))
+    await frames(5)
+    expect(onAlign).not.toHaveBeenCalled()
+  })
+
   it('does not sample an alignPoint target or in mobile mode', async () => {
     const { element, moveTo } = createTarget(50, 100)
 
