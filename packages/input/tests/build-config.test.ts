@@ -3,7 +3,7 @@ import { dirname, resolve } from 'node:path'
 import { normalizePath } from 'vite'
 import { afterEach, describe, expect, it } from 'vitest'
 // @ts-expect-error exported as part of the build path fix.
-import { buildCommon, resolveBuildEntries, resolveBuildPaths } from '../../../scripts/build.common'
+import { definePackageConfig, resolveBuildEntries, resolveBuildPaths } from '../../../scripts/vite.package'
 
 function findRepoRoot(start: string) {
   let current = start
@@ -58,7 +58,7 @@ describe('build config path resolution', () => {
   })
 
   it('uses normalized absolute build paths in the shared config', () => {
-    const config = buildCommon({
+    const config = definePackageConfig({
       external: [],
       packageRoot,
     })
