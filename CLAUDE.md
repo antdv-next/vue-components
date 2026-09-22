@@ -27,7 +27,11 @@ pnpm lint             # ESLint check + fix (@antfu/eslint-config)
 
 Each package builds independently via Vite (no Turbo). Output: ESM only, `preserveModules: true`.
 
-Build config shared via `scripts/build.common.ts` → `buildCommon()` factory.
+Build config shared via `scripts/vite.package.ts` → `definePackageConfig()`. Each package's `vite.config.ts` is a one-liner: `export default definePackageConfig()`.
+
+- `external` is derived automatically: `vue`, `@v-c/*`, plus every entry in the package's `dependencies`/`peerDependencies`. A dep imported from `src/` but not declared in `package.json` gets bundled into `dist` silently, so always declare it.
+- Entries default to `src/**/*.{ts,tsx,vue}` minus test files. Override with `entries: [...]` (only `overflow` does, single entry).
+- `packageRoot` defaults to `process.cwd()`, so run `vite build` from the package directory (`pnpm run -r build` does).
 
 ## Release
 
