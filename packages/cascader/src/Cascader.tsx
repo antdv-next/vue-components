@@ -257,7 +257,9 @@ const omitKeyList = [
   'styles',
 ]
 
-const Cascader = defineComponent<CascaderProps>(
+// `checkable` takes a boolean or a custom checkbox node; spell `Multiple` out so
+// the runtime prop type is not narrowed to the `false` default.
+const Cascader = defineComponent<CascaderProps<DefaultOptionType, keyof DefaultOptionType, boolean | VueNode>>(
   (props = cascaderDefaults, { attrs, slots, expose }) => {
     const baseSelectRef = shallowRef<BaseSelectRef | null>(null)
 

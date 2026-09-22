@@ -1,3 +1,4 @@
+import type { VueNode } from '@v-c/util'
 import type { CSSProperties } from 'vue'
 import type {
   CascaderProps,
@@ -55,7 +56,8 @@ const panelDefaults: PanelProps = {
   notFoundContent: 'Not Found',
 }
 
-const Panel = defineComponent<PanelProps>((props = panelDefaults) => {
+// See Cascader: keep `checkable` as `boolean | VueNode` at runtime.
+const Panel = defineComponent<PanelProps<DefaultOptionType, keyof DefaultOptionType, boolean | VueNode>>((props = panelDefaults) => {
   // ======================== Multiple ========================
   const multiple = computed(() => !!props.checkable)
   const mergedShowCheckedStrategy = computed(
