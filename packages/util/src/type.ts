@@ -92,3 +92,15 @@ export function someType<T>(types?: any[], defaultVal?: T) {
 export type CustomSlotsType<T extends Record<string, any>> = SlotsType<T>
 
 export type AnyObject = Record<PropertyKey, any>
+
+/**
+ * Identity wrapper understood by `vite-plugin-tsx-resolve-types`: the wrapped
+ * type is excluded from runtime prop inference, the way `/* @vue-ignore *\/`
+ * is, but the marker survives declaration emit so it also works for types
+ * consumed from a published `.d.ts`.
+ *
+ * `interface Props extends Base, VueIgnore<Emits> {}` keeps the `Emits`
+ * members as fallthrough attrs; `x?: VueIgnore<Heavy>` declares `x` with no
+ * runtime type check.
+ */
+export type VueIgnore<T> = T
