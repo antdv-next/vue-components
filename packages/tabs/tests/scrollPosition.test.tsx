@@ -153,6 +153,26 @@ describe('tabs scrollPosition', () => {
     expect(await align({ tabPosition: 'left', scrollPosition: position })).toBe(expected)
   })
 
+  // focus 不能先于 click 移动列表，否则 mouseup 会落到别的元素上，首次点击丢失。
+  it('does not move the list on mouse focus before click', async () => {
+    await mountTabs({ scrollPosition: 'start', defaultActiveKey: '3' })
+
+    const target = wrapper.findAll('[data-node-key]')[3]
+    const targetButton = target.find('[role="tab"]')
+
+    await targetButton.trigger('mousedown', { button: 0 })
+    await targetButton.trigger('focus')
+
+    expect(translateX(wrapper.find('.vc-tabs-nav-list').attributes('style') ?? '')).toBe(-200)
+
+    await targetButton.trigger('mouseup')
+    await targetButton.trigger('click')
+    await wrapper.vm.$nextTick()
+
+    expect(targetButton.attributes('aria-selected')).toBe('true')
+    expect(translateX(wrapper.find('.vc-tabs-nav-list').attributes('style') ?? '')).toBe(-300)
+  })
+
   // react-component/tabs#1016：NaN 必须回落到默认行为，否则会渲染出 translate(NaNpx)
   it('never renders a NaN transform', async () => {
     const style = await mountTabs({ scrollPosition: Number.NaN })
