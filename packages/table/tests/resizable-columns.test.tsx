@@ -386,6 +386,8 @@ describe('table resizable columns', () => {
     const plain = mountTable([{ title: 'Name', dataIndex: 'name', width: 200 }])
     expect(plain.find('.vc-table-resize-handle').exists()).toBe(false)
     expect(plain.find('.vc-table-resize-proxy').exists()).toBe(false)
+    // No `<!---->` placeholder either, so consumer DOM snapshots are unchanged.
+    expect(plain.find('.vc-table').element.lastChild?.nodeType).not.toBe(Node.COMMENT_NODE)
     plain.unmount()
 
     const wrapper = mountTable([

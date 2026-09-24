@@ -886,16 +886,20 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
             {props.footer(mergedData.value)}
           </Panel>
         )}
-        {hasResizableColumns.value && (
-          // Positioned by `useResizableColumns` relative to this root, which must
-          // therefore be a containing block (`position: relative`). Themes supply
-          // the visible border and z-index.
-          <div
-            ref={resizeProxyRef}
-            class={`${mergedPrefixCls.value}-resize-proxy`}
-            style={{ position: 'absolute', display: 'none', width: 0, pointerEvents: 'none' }}
-          />
-        )}
+        {hasResizableColumns.value
+          ? (
+              // Positioned by `useResizableColumns` relative to this root, which must
+              // therefore be a containing block (`position: relative`). Themes supply
+              // the visible border and z-index.
+              <div
+                ref={resizeProxyRef}
+                class={`${mergedPrefixCls.value}-resize-proxy`}
+                style={{ position: 'absolute', display: 'none', width: 0, pointerEvents: 'none' }}
+              />
+            )
+          // `[]` rather than `false`/`null`: Vue renders those as a `<!---->`
+          // placeholder, which would show up in every consumer's DOM snapshot.
+          : []}
       </div>
     )
 
