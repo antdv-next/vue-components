@@ -153,8 +153,8 @@ describe('tabs scrollPosition', () => {
     expect(await align({ tabPosition: 'left', scrollPosition: position })).toBe(expected)
   })
 
-  // focus 不能先于 click 移动列表，否则 mouseup 会落到别的元素上，首次点击丢失。
-  it('does not move the list on mouse focus before click', async () => {
+  // mouse focus 不能移动列表或禁用过渡，否则首次 click 会丢失或产生跳变。
+  it('does not move or lock animation on mouse focus before click', async () => {
     await mountTabs({ scrollPosition: 'start', defaultActiveKey: '3' })
 
     const target = wrapper.findAll('[data-node-key]')[3]
@@ -164,6 +164,7 @@ describe('tabs scrollPosition', () => {
     await targetButton.trigger('focus')
 
     expect(translateX(wrapper.find('.vc-tabs-nav-list').attributes('style') ?? '')).toBe(-200)
+    expect((wrapper.find('.vc-tabs-nav-list').element as HTMLElement).style.transition).toBe('')
 
     await targetButton.trigger('mouseup')
     await targetButton.trigger('click')
@@ -171,6 +172,19 @@ describe('tabs scrollPosition', () => {
 
     expect(targetButton.attributes('aria-selected')).toBe('true')
     expect(translateX(wrapper.find('.vc-tabs-nav-list').attributes('style') ?? '')).toBe(-300)
+  })
+
+  it('scrolls and locks animation on keyboard focus', async () => {
+    await mountTabs({ scrollPosition: 'start', defaultActiveKey: '3' })
+
+    const target = wrapper.findAll('[data-node-key]')[3]
+    const targetButton = target.find('[role="tab"]')
+    const navList = wrapper.find('.vc-tabs-nav-list')
+
+    await targetButton.trigger('focus')
+
+    expect(translateX(navList.attributes('style') ?? '')).toBe(-300)
+    expect((navList.element as HTMLElement).style.transition).toBe('none')
   })
 
   // react-component/tabs#1016：NaN 必须回落到默认行为，否则会渲染出 translate(NaNpx)

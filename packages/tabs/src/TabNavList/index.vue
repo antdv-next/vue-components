@@ -471,10 +471,12 @@ function onItemBlur() {
 function onTabFocus(key: string) {
   if (!isMouse.value) {
     focusKey.value = key
-    // Scroll immediately only on keyboard focus; mouse-triggered focus fires before mouseup/click, so scrolling here can move the clicked tab away and prevent the click from firing.
+    // Keyboard focus needs an immediate, non-animated scroll. Mouse-triggered
+    // focus runs before mouseup/click; scrolling here can move the clicked tab,
+    // and locking animation can make the later click-triggered scroll jump.
     scrollToTab(key)
+    doLockAnimation()
   }
-  doLockAnimation()
   const wrap = tabsWrapperRef.value
   if (!wrap)
     return
