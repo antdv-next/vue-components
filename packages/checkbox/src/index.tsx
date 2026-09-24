@@ -1,6 +1,6 @@
 import { classNames } from '@v-c/util'
 import useMergedState from '@v-c/util/dist/hooks/useMergedState'
-import { computed, defineComponent, shallowRef } from 'vue'
+import { computed, defineComponent, onMounted, shallowRef } from 'vue'
 
 export interface InputHTMLAttributesType {
   checked?: boolean
@@ -27,13 +27,21 @@ export interface CheckBoxInstance {
   focus: () => void
   blur: () => void
   input: HTMLInputElement | null
-  nativeElement: HTMLDivElement | null
+  nativeElement: HTMLSpanElement | null
 }
 
 export interface CheckboxProps extends Omit<InputHTMLAttributesType, 'onChange'> {
   'prefixCls'?: string
   'onChange'?: (e: CheckboxChangeEvent) => void
   'onUpdate:checked'?: (value: boolean) => void
+  'autoFocus'?: boolean
+  'id'?: string
+  'name'?: string
+  'readOnly'?: boolean
+  'required'?: boolean
+  'tabIndex'?: number
+  'onFocus'?: (e: FocusEvent) => void
+  'onBlur'?: (e: FocusEvent) => void
 }
 
 export const Checkbox = defineComponent<
@@ -41,7 +49,7 @@ export const Checkbox = defineComponent<
 >(
   (props, { expose, attrs }) => {
     const inputRef = shallowRef<HTMLInputElement>()
-    const holderRef = shallowRef<HTMLInputElement>()
+    const holderRef = shallowRef<HTMLSpanElement>()
     const [rawValue, setRawValue] = useMergedState(props.defaultChecked, {
       value: computed(() => props.checked),
     })
@@ -55,6 +63,11 @@ export const Checkbox = defineComponent<
       },
       input: inputRef,
       nativeElement: holderRef,
+    })
+
+    onMounted(() => {
+      if (props.autoFocus)
+        inputRef.value?.focus()
     })
 
     const handleChange = (e: any) => {
@@ -83,19 +96,28 @@ export const Checkbox = defineComponent<
 
     return () => {
       const {
-        prefixCls = 'vc-checkbox',
+        checked: _checked,
+        defaultChecked: _defaultChecked,
         disabled,
         type = 'checkbox',
         title,
-
+        prefixCls = 'vc-checkbox',
+        onChange: _onChange,
+        value,
+        'onUpdate:checked': _onUpdateChecked,
+        ...inputProps
       } = props
-      const classString = classNames(prefixCls, attrs.class as any, {
+      const { class: className, style, ...attrInputProps } = attrs as any
+      const classString = classNames(prefixCls, className, {
         [`${prefixCls}-checked`]: rawValue.value,
         [`${prefixCls}-disabled`]: disabled,
       })
       return (
-        <span class={classString} ref={holderRef} title={title} style={[(attrs as any).style]}>
+        <span class={classString} ref={holderRef} title={title} style={[style]}>
           <input
+            {...inputProps}
+            {...attrInputProps}
+            {...(value !== undefined ? { value } : {})}
             class={`${prefixCls}-input`}
             ref={inputRef}
             onChange={e => handleChange(e)}
@@ -107,6 +129,7 @@ export const Checkbox = defineComponent<
       )
     }
   },
+  { inheritAttrs: false },
 )
 
 export default Checkbox

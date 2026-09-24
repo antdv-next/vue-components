@@ -4,6 +4,8 @@ import configShared from '../../vitest.config'
 export default mergeConfig(
   configShared,
   defineProject({
-
+    test: {
+      environment: 'jsdom',
+    },
   }),
 )
