@@ -146,15 +146,12 @@ const memoizedValue = computed(() => {
   return { tabs: tabs.value, prefixCls: prefixCls.value }
 })
 
-const tabRef = ref<HTMLDivElement>()
-
 provideTabContext(memoizedValue)
 </script>
 
 <template>
   <div
     :id="id!"
-    ref="tabRef"
     :class="[
       prefixCls,
       `${prefixCls}-${tabPosition}`,

@@ -144,7 +144,7 @@ export type ScrollPosition = 'auto' | 'start' | 'center' | 'end' | number
 
 export type GetIndicatorSize = number | ((origin: number) => number)
 
-export type SemanticName = 'popup' | 'item' | 'indicator' | 'body' | 'content' | 'header' | 'remove'
+export type SemanticName = 'popup' | 'item' | 'indicator' | 'body' | 'content' | 'header' | 'remove' | 'operations'
 
 export type RenderTabBar = (props: Record<string, any>, TabNavListComponent: any) => VueNode
 

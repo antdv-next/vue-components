@@ -2,7 +2,7 @@
 import type { TabPaneProps } from '../interface'
 import RenderComponent from '@v-c/util/dist/RenderComponent'
 import { ensureValidVNode } from '@v-c/util/dist/vnode'
-import { computed, ref, useSlots } from 'vue'
+import { computed, useSlots } from 'vue'
 
 defineOptions({
   name: 'TabPane',
@@ -14,17 +14,15 @@ defineProps<TabPaneProps>()
 const slots = useSlots()
 const childrenNode = computed(() => ensureValidVNode(slots.default?.() || []))
 
-const TabPaneRef = ref<HTMLDivElement>()
 const hasContent = computed(() => childrenNode.value && childrenNode.value?.length > 0)
 </script>
 
 <template>
   <div
-    :id="id && `${id}-panel-${tabKey}`"
-    ref="TabPaneRef"
+    :id="id ? `${id}-panel-${tabKey}` : undefined"
     role="tabpanel"
     :tabindex="active && hasContent ? 0 : -1"
-    :aria-labelledby="id && `${id}-tab-${tabKey}`"
+    :aria-labelledby="id ? `${id}-tab-${tabKey}` : undefined"
     :aria-hidden="!active"
     :style="style"
     :class="[prefixCls, active && `${prefixCls}-active`, className]"
