@@ -47,6 +47,33 @@
   user-select: none;
 }
 
+// Built-in `resizable` column handle and drag proxy line.
+.@{tablePrefixCls}-resize-handle {
+  position: absolute;
+  top: 0;
+  inset-inline-end: -4px;
+  width: 8px;
+  height: 100%;
+  cursor: col-resize;
+  user-select: none;
+  z-index: 1;
+
+  // Resizable tables scroll horizontally, so a handle sticking out past the
+  // last column would make the container scrollable by a few pixels.
+  th:last-child > & {
+    inset-inline-end: 0;
+  }
+
+  &:hover {
+    background: rgba(24, 144, 255, 0.3);
+  }
+}
+
+.@{tablePrefixCls}-resize-proxy {
+  border-left: 1px dashed #1890ff;
+  z-index: 10;
+}
+
 .drag-over-downward td {
   border-bottom: 2px dashed red;
 }
@@ -228,6 +255,13 @@
   &-body {
     .tableBorder();
     border-top: 0;
+  }
+
+  // The outer border sits on the scroll container, so a horizontal overscroll
+  // bounce (macOS) would shift the cells away from it; keep the bounce off.
+  &-content,
+  &-body {
+    overscroll-behavior-x: none;
   }
 
   &-fixed-column &-body::after {

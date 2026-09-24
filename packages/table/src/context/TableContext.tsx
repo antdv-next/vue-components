@@ -1,5 +1,6 @@
 import type { VueNode } from '@v-c/util'
 import type { InjectionKey, Ref } from 'vue'
+import type { StartColumnResize } from '../hooks/useResizableColumns'
 import type {
   ColumnsType,
   ColumnType,
@@ -63,6 +64,8 @@ export interface TableContextProps<RecordType = any> {
   flattenColumns: readonly ColumnType<RecordType>[]
   onColumnResize: (columnKey: string | number, width: number) => void
   colWidths: number[]
+  /** Set only when some leaf column is `resizable`; header cells render a handle when present. */
+  startColumnResize?: StartColumnResize
 
   // Row
   hoverStartRow: number

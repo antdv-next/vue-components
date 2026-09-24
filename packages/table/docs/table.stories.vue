@@ -31,6 +31,7 @@ import Key from './key.tsx'
 import MeasureRowRender from './measureRowRender.tsx'
 import Nested from './nested.tsx'
 import NoData from './no-data.tsx'
+import ResizableColumn from './resizable-column.tsx'
 import RowHoverable from './row-hoverable.tsx'
 import RowAndCellClick from './rowAndCellClick.tsx'
 import ScopeCol from './scopeCol.tsx'
@@ -93,6 +94,9 @@ import './assets/index.less'
     </Variant>
     <Variant title="column-resize">
       <ColumnResize />
+    </Variant>
+    <Variant title="resizable-column">
+      <ResizableColumn />
     </Variant>
     <Variant title="colspan-rowspan">
       <ColspanRowspan />

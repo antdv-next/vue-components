@@ -39,7 +39,11 @@ const HeaderRow = defineComponent<RowProps<any>>({
     'styles',
   ] as any,
   setup(props) {
-    const { prefixCls } = useInjectTableContext()
+    const context = useInjectTableContext()
+    const { prefixCls } = context
+
+    const stopPropagation = (event: Event) => event.stopPropagation()
+
     return () => {
       const {
         cells,
@@ -60,6 +64,10 @@ const HeaderRow = defineComponent<RowProps<any>>({
       }
 
       const columnsKey = getColumnsKey(rowColumns)
+      // Resize widths are stored by the flattened key (shared with sticky offsets),
+      // which differs from the per-row `columnsKey` above once groups are involved.
+      const { startColumnResize } = context
+      const flattenColumnsKey = startColumnResize ? getColumnsKey(flattenColumns) : undefined
 
       const mergedRowClass = clsx(classNames?.row, rowProps?.className, rowProps?.class)
       const mergedRowStyle = {
@@ -73,6 +81,28 @@ const HeaderRow = defineComponent<RowProps<any>>({
             const { column, colStart, colEnd, colSpan } = cell
             const fixedInfo = getCellFixedInfo(colStart, colEnd, flattenColumns, stickyOffsets)
             const additionalProps = column?.onHeaderCell?.(column) || {}
+
+            // Only a leaf cell spanning exactly one column maps to a single `col`;
+            // group headers and merged headers (`colSpan` from the column or
+            // `onHeaderCell`) resize through their leaves instead.
+            const resizable = !!startColumnResize
+              && !!column?.resizable
+              && !cell.hasSubColumns
+              && (additionalProps.colSpan ?? colSpan ?? 1) === 1
+            const resizeHandle = resizable
+              ? (
+                  <span
+                    class={`${prefixCls}-resize-handle`}
+                    onMousedown={(event: MouseEvent) => {
+                      const headerCell = (event.currentTarget as HTMLElement).parentElement
+                      if (headerCell) {
+                        startColumnResize(event, column, flattenColumnsKey![colStart]!, headerCell)
+                      }
+                    }}
+                    onClick={stopPropagation}
+                  />
+                )
+              : undefined
             return (
               <Cell
                 {...cell}
@@ -85,6 +115,7 @@ const HeaderRow = defineComponent<RowProps<any>>({
                 key={columnsKey[cellIndex]}
                 {...fixedInfo}
                 additionalProps={additionalProps}
+                appendNode={resizeHandle}
                 rowType="header"
               >
                 { cell.children }

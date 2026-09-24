@@ -27,6 +27,8 @@ import type { CSSProperties } from 'vue'
 import type { ScrollInfoType } from './context/TableContext'
 import type { FixedHeaderProps } from './FixedHolder'
 import type { SummaryProps } from './Footer/Summary'
+import type { ResizedWidth } from './hooks/useResizableColumns'
+
 import type {
   ColumnsType,
   ColumnType,
@@ -37,6 +39,7 @@ import type {
   GetComponent,
   GetComponentProps,
   GetRowKey,
+  Key,
   LegacyExpandableProps,
   PanelRender,
   Reference,
@@ -45,7 +48,6 @@ import type {
   TableLayout,
   TableSticky,
 } from './interface'
-
 import ResizeObserver from '@v-c/resize-observer'
 import { clsx, get, isNonNullable, isVueRenderable, warning } from '@v-c/util'
 import canUseDom from '@v-c/util/dist/Dom/canUseDom'
@@ -78,6 +80,7 @@ import useExpand from './hooks/useExpand'
 import useFixedInfo from './hooks/useFixedInfo'
 import { useTimeoutLock } from './hooks/useFrame'
 import useHover from './hooks/useHover'
+import useResizableColumns from './hooks/useResizableColumns'
 import useSticky from './hooks/useSticky'
 import useStickyOffsets from './hooks/useStickyOffsets'
 import Panel from './Panel'
@@ -138,6 +141,12 @@ export interface TableProps<RecordType = any>
   'rowHoverable'?: boolean
 
   'onScroll'?: (event: Event) => void
+  /**
+   * Fired once per drag on a `resizable` column with the committed width.
+   * `columnKey` is the leaf key the width is tracked by: the column's `key`, or
+   * its position (`key-0`, `key-1-0`, ...) when it has none.
+   */
+  'onResizeColumn'?: (width: number, column: ColumnType<RecordType>, columnKey: Key) => void
 
   'internalHooks'?: string
   'transformColumns'?: (columns: ColumnsType<RecordType>) => ColumnsType<RecordType>
@@ -215,7 +224,14 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
 
   const slotChildren = shallowRef<any>(null)
 
-  const [columns, flattenColumns, flattenScrollX] = useColumns(
+  const fullTableRef = ref<HTMLDivElement | null>(null)
+  const scrollHeaderRef = ref<any>(null)
+  const scrollBodyRef = ref<any>(null)
+  const scrollBodyContainerRef = ref<HTMLDivElement | null>(null)
+
+  const resizedWidths = shallowRef(new Map<Key, ResizedWidth>())
+
+  const [columns, flattenColumns, flattenScrollX, sourceFlattenColumns] = useColumns(
     {
       prefixCls: mergedPrefixCls,
       columns: computed(() => props.columns),
@@ -241,16 +257,13 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
           : null,
       ),
       clientWidth: componentWidth,
+      resizedWidths,
     },
     computed(() => (useInternalHooks.value ? (props.transformColumns || null) : null)),
   )
 
   const mergedScrollX = computed(() => flattenScrollX.value ?? props.scroll?.x)
-
-  const fullTableRef = ref<HTMLDivElement | null>(null)
-  const scrollHeaderRef = ref<any>(null)
-  const scrollBodyRef = ref<any>(null)
-  const scrollBodyContainerRef = ref<HTMLDivElement | null>(null)
+  const hasResizableColumns = computed(() => flattenColumns.value.some(column => column.resizable))
 
   expose({
     get nativeElement() {
@@ -292,13 +305,47 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
   const stickyConfig = useSticky(computed(() => props.sticky), mergedPrefixCls)
 
   const stickyOffsets = useStickyOffsets(colWidths, flattenColumns)
+
+  const {
+    proxyRef: resizeProxyRef,
+    startResize: startColumnResize,
+    minTableWidth: resizeMinTableWidth,
+  } = useResizableColumns({
+    direction: mergedDirection,
+    rootRef: fullTableRef,
+    scrollBodyRef,
+    resizedWidths,
+    sourceFlattenColumns,
+    flattenColumns,
+    measuredWidths: colsWidths,
+    getFillWidth: () => {
+      // Virtual tables fill in JS up to the same width `useWidthColumns` uses.
+      const scrollX = props.scroll?.x
+      if (useInternalHooks.value && props.tailor) {
+        return Math.max(typeof scrollX === 'number' ? scrollX : 0, componentWidth.value)
+      }
+      // Otherwise the table has `min-width: 100%` of the body plus `scroll.x`.
+      const clientWidth = (getDOM(scrollBodyRef.value) as HTMLElement | null)?.clientWidth ?? 0
+      let specified = typeof scrollX === 'number' ? scrollX : 0
+      if (typeof scrollX === 'string' && /^\d+(?:\.\d+)?(?:px|%)$/.test(scrollX)) {
+        specified = scrollX.endsWith('%') ? (clientWidth * Number.parseFloat(scrollX)) / 100 : Number.parseFloat(scrollX)
+      }
+      return Math.max(specified, clientWidth)
+    },
+    containerWidth: componentWidth,
+    onResizeColumn: () => props.onResizeColumn,
+  })
   const mergedStickyOffsets = computed(() => ({
     ...stickyOffsets.value,
     isSticky: stickyConfig.value.isSticky,
   }))
   const fixHeader = computed(() => !!(props.scroll && isNonNullable(props.scroll.y)))
+  // Resizable columns can grow past the container; without horizontal scroll
+  // the table would overflow the wrapper instead of scrolling inside it.
   const horizonScroll = computed(
-    () => (!!(props.scroll && isNonNullable(mergedScrollX.value)) || !!expandableConfig.value.fixed),
+    () => (!!(props.scroll && isNonNullable(mergedScrollX.value))
+      || !!expandableConfig.value.fixed
+      || hasResizableColumns.value),
   )
   const fixColumn = computed(() => horizonScroll.value && flattenColumns.value.some(({ fixed }) => fixed))
 
@@ -336,15 +383,26 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
     return undefined
   })
 
+  // Resizing can push the leaves with a `width` past the table width; grow the
+  // table so columns without one keep their width instead of being squeezed.
+  const tableScrollX = computed(() => {
+    const scrollX = mergedScrollX.value
+    const minWidth = resizeMinTableWidth.value
+    if (minWidth === undefined || (scrollX != null && typeof scrollX !== 'number')) {
+      return scrollX
+    }
+    return Math.max(scrollX ?? 0, minWidth)
+  })
+
   const scrollTableStyle = computed<CSSProperties | undefined>(() => {
     if (!horizonScroll.value) {
       return undefined
     }
-    const width = mergedScrollX.value === true
+    const width = tableScrollX.value === true
       ? 'auto'
-      : typeof mergedScrollX.value === 'number'
-        ? `${mergedScrollX.value}px`
-        : mergedScrollX.value
+      : typeof tableScrollX.value === 'number'
+        ? `${tableScrollX.value}px`
+        : tableScrollX.value
     return {
       width,
       minWidth: '100%',
@@ -527,11 +585,27 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
     if (fixColumn.value) {
       return mergedScrollX.value === 'max-content' ? 'auto' : 'fixed'
     }
-    if (fixHeader.value || stickyConfig.value.isSticky || flattenColumns.value.some(({ ellipsis }) => ellipsis)) {
+    if (
+      fixHeader.value
+      || stickyConfig.value.isSticky
+      || hasResizableColumns.value
+      || flattenColumns.value.some(({ ellipsis }) => ellipsis)
+    ) {
       return 'fixed'
     }
     return 'auto'
   })
+
+  if (process.env.NODE_ENV !== 'production') {
+    watch([hasResizableColumns, mergedTableLayout], ([resizable, layout]) => {
+      warning(
+        !resizable || layout === 'fixed',
+        '`resizable` columns need `tableLayout: \'fixed\'`, but the table resolved to \'auto\' '
+        + '(set explicitly, or `scroll.x: \'max-content\'` with fixed columns). '
+        + 'Columns cannot be dragged narrower than their content.',
+      )
+    }, { immediate: true })
+  }
   const headerProps = computed(() => ({
     colWidths: colWidths.value,
     columCount: flattenColumns.value.length,
@@ -592,6 +666,7 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
     tableContext.flattenColumns = flattenColumns.value
     tableContext.onColumnResize = onColumnResize
     tableContext.colWidths = colWidths.value as number[]
+    tableContext.startColumnResize = hasResizableColumns.value ? startColumnResize : undefined
     tableContext.hoverStartRow = startRow.value
     tableContext.hoverEndRow = endRow.value
     tableContext.onHover = onHover
@@ -693,7 +768,7 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
         flattenColumns: flattenColumns.value,
         direction: mergedDirection.value,
         stickyClassName: stickyConfig.value.stickyClassName,
-        scrollX: mergedScrollX.value,
+        scrollX: tableScrollX.value,
         tableLayout: mergedTableLayout.value,
         onScroll: onInternalScroll,
       } as any
@@ -810,6 +885,16 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
           >
             {props.footer(mergedData.value)}
           </Panel>
+        )}
+        {hasResizableColumns.value && (
+          // Positioned by `useResizableColumns` relative to this root, which must
+          // therefore be a containing block (`position: relative`). Themes supply
+          // the visible border and z-index.
+          <div
+            ref={resizeProxyRef}
+            class={`${mergedPrefixCls.value}-resize-proxy`}
+            style={{ position: 'absolute', display: 'none', width: 0, pointerEvents: 'none' }}
+          />
         )}
       </div>
     )

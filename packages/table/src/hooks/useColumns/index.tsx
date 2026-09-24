@@ -13,12 +13,14 @@ import type {
   RenderExpandIcon,
   TriggerEventHandler,
 } from '../../interface'
+import type { ResizedWidth } from '../useResizableColumns'
 import { warning } from '@v-c/util'
 import { flattenChildren } from '@v-c/util/dist/props-util'
 import { computed, h, isVNode, toRaw, unref } from 'vue'
 import { EXPAND_COLUMN } from '../../constant'
 import { DefaultExpandIcon } from '../../utils/expandUtil'
 import { INTERNAL_COL_DEFINE } from '../../utils/legacyUtil'
+import { getColumnsKey } from '../../utils/valueUtil'
 import useWidthColumns from './useWidthColumns'
 
 /**
@@ -121,12 +123,15 @@ export default function useColumns<RecordType>(
     fixed?: Ref<FixedType | undefined> | FixedType
     scrollWidth?: Ref<number | null | undefined> | number | null | undefined
     clientWidth: Ref<number> | number
+    resizedWidths?: Ref<Map<Key, ResizedWidth>>
   },
   transformColumns?: Ref<((columns: ColumnsType<RecordType>) => ColumnsType<RecordType>) | null> | ((columns: ColumnsType<RecordType>) => ColumnsType<RecordType>) | null,
 ): [
   columns: Ref<ColumnsType<RecordType>>,
   flattenColumns: Ref<readonly ColumnType<RecordType>[]>,
   realScrollWidth: Ref<number | undefined>,
+  /** Leaf columns before resize widths and scroll-width filling are applied. */
+  sourceFlattenColumns: Ref<readonly ColumnType<RecordType>[]>,
 ] {
   const baseColumns = computed<ColumnsType<RecordType>>(() => {
     const cols = unref(options.columns)
@@ -256,12 +261,33 @@ export default function useColumns<RecordType>(
     return finalColumns
   })
 
-  const flattenColumns = computed(() => flatColumns(mergedColumns.value))
+  const sourceFlattenColumns = computed(() => flatColumns(mergedColumns.value))
+
+  const flattenColumns = computed(() => {
+    const flat = sourceFlattenColumns.value
+    const resizedWidths = unref(options.resizedWidths)
+    if (!resizedWidths?.size) {
+      return flat
+    }
+
+    // Keys match `getColumnsKey(flattenColumns)` used by the header handles and
+    // sticky offsets. An entry only applies while the source `width` it was
+    // committed against is unchanged (see `ResizedWidth`). Entries are not
+    // limited to `resizable` columns: a commit also pins sibling widths so the
+    // browser does not redistribute the dragged delta across the row.
+    const keys = getColumnsKey(flat)
+    return flat.map((column, index) => {
+      const resized = resizedWidths.get(keys[index]!)
+      return resized && resized.base === column.width
+        ? { ...column, width: resized.width }
+        : column
+    })
+  })
 
   const widthColumns = useWidthColumns(flattenColumns, options.scrollWidth, options.clientWidth)
 
   const filledColumns = computed(() => widthColumns.value[0])
   const realScrollWidth = computed(() => widthColumns.value[1])
 
-  return [mergedColumns, filledColumns, realScrollWidth]
+  return [mergedColumns, filledColumns, realScrollWidth, sourceFlattenColumns]
 }

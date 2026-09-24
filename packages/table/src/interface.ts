@@ -132,6 +132,28 @@ export interface ColumnType<RecordType = Record<string, any>> extends ColumnShar
   rowSpan?: number
   width?: number | string
   minWidth?: number
+  /**
+   * Render a drag handle on the header cell so the user can resize the column.
+   * Only leaf headers spanning a single column get a handle; group headers
+   * resize through their leaves.
+   *
+   * - Widths are tracked by `key`, falling back to the column's position
+   *   (`key-0`, `key-1-0`, ...), so give the column a stable `key` if columns
+   *   can be reordered, added or removed.
+   * - `minWidth` is the drag lower bound (default 40).
+   * - Any `resizable` column switches the whole table to horizontal scrolling
+   *   (as if `scroll.x` were set, so `fixed` columns become sticky) and to
+   *   `tableLayout: 'fixed'` unless `tableLayout` is given. Resizing needs the
+   *   fixed layout: with `'auto'` (explicit, or `scroll.x: 'max-content'` with
+   *   fixed columns) a column cannot be dragged narrower than its content.
+   * - Columns without `width` keep the width they had before the drag (at
+   *   least their `minWidth`) when a sibling is widened: the table grows and
+   *   scrolls instead of squeezing them. Narrowing a sibling still lets them
+   *   take up the freed space.
+   * - Without `onResizeColumn` updating `columns`, the dragged width is kept
+   *   internally until the column's own `width` changes.
+   */
+  resizable?: boolean
   onCell?: GetComponentProps<RecordType>
   /** @deprecated Please use `onCell` instead */
   onCellClick?: (record: RecordType, e: MouseEvent) => void
