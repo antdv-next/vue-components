@@ -28,13 +28,29 @@ export default function useAccessibility({
     }
   }
 
-  const focusMenu = () => {
-    if (overlayRef?.value?.focus) {
-      overlayRef.value.focus()
-      focusMenuRef.value = true
-      return true
+  const focusMenu = (options?: FocusOptions) => {
+    const overlay = overlayRef?.value
+    if (!overlay?.focus) {
+      return false
     }
-    return false
+
+    const activeElement = document.activeElement
+    overlay.focus(options)
+    // The overlay may wrap the real menu (e.g. `<div><Menu /></div>`), so
+    // fall back to its focusable descendants when focus did not move.
+    if (document.activeElement === activeElement) {
+      for (const selector of ['[role="menu"]', '[tabindex]']) {
+        const focusTarget = overlay.querySelector?.(selector) as HTMLElement | null
+        focusTarget?.focus(options)
+        if (document.activeElement !== activeElement) {
+          break
+        }
+      }
+    }
+
+    const focused = document.activeElement !== activeElement
+    focusMenuRef.value = focused
+    return focused
   }
 
   const handleKeyDown = (event: any) => {
@@ -61,9 +77,9 @@ export default function useAccessibility({
   watch(open, (_n, _o, onCleanup) => {
     if (open.value) {
       window.addEventListener('keydown', handleKeyDown)
-      if (autoFocus) {
+      if (autoFocus?.value) {
         // FIXME: hack with raf
-        raf(focusMenu, 3)
+        raf(() => focusMenu({ preventScroll: true }), 3)
       }
       onCleanup(() => {
         window.removeEventListener('keydown', handleKeyDown)
