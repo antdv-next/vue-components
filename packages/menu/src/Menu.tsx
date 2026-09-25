@@ -20,6 +20,7 @@ import { classNames } from '@v-c/util'
 import useId from '@v-c/util/dist/hooks/useId'
 import isEqual from '@v-c/util/dist/isEqual'
 import { filterEmpty } from '@v-c/util/dist/props-util'
+import { createElementRef } from '@v-c/util/dist/vnode'
 import { computed, defineComponent, nextTick, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
 import { useIdContextProvide } from './context/IdContext'
 import InheritableContextProvider, { useMenuContextProvider } from './context/MenuContext'
@@ -173,6 +174,11 @@ const defaults = {
 const Menu = defineComponent<MenuProps>(
   (props = defaults, { slots, expose, attrs: _attrs }) => {
     const containerRef = shallowRef<HTMLUListElement>()
+    // Overflow renders the `<ul>`; resolve its instance to that element so
+    // focus / keyboard navigation can query it (rc-overflow forwards its ref).
+    const setContainerRef = createElementRef<HTMLUListElement>((element) => {
+      containerRef.value = element ?? undefined
+    })
     const mergedId = useId()
     const uuid = props.id ?? `vc-menu-uuid-${mergedId}`
     const isRtl = computed(() => props?.direction === 'rtl')
@@ -588,7 +594,7 @@ const Menu = defineComponent<MenuProps>(
       // >>>>> Container
       const container = (
         <Overflow
-          ref={containerRef}
+          ref={setContainerRef}
           prefixCls={`${prefixCls}-overflow`}
           component="ul"
           itemComponent={MenuItem}
