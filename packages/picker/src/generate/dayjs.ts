@@ -2,12 +2,13 @@ import type { Dayjs } from 'dayjs'
 import type { GenerateConfig } from '.'
 import dayjs from 'dayjs'
 
-import advancedFormat from 'dayjs/plugin/advancedFormat'
-import customParseFormat from 'dayjs/plugin/customParseFormat'
-import localeData from 'dayjs/plugin/localeData'
-import weekday from 'dayjs/plugin/weekday'
-import weekOfYear from 'dayjs/plugin/weekOfYear'
-import weekYear from 'dayjs/plugin/weekYear'
+// dayjs has no `exports` map, so native Node ESM needs the explicit `.js` extension
+import advancedFormat from 'dayjs/plugin/advancedFormat.js'
+import customParseFormat from 'dayjs/plugin/customParseFormat.js'
+import localeData from 'dayjs/plugin/localeData.js'
+import weekday from 'dayjs/plugin/weekday.js'
+import weekOfYear from 'dayjs/plugin/weekOfYear.js'
+import weekYear from 'dayjs/plugin/weekYear.js'
 
 dayjs.extend(customParseFormat)
 dayjs.extend(advancedFormat)
