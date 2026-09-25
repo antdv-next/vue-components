@@ -210,12 +210,15 @@ const PickerPanel = defineComponent<PickerPanelProps>(
     })
 
     const triggerChange = (nextValue: any[] | null) => {
+      // `mergedValue` is a computed: read it before the state update, otherwise
+      // an uncontrolled panel compares the new value with itself.
+      const prevValue = mergedValue.value
       setMergedValue(nextValue)
 
       if (props.onChange && (
         nextValue === null
-        || mergedValue.value.length !== nextValue.length
-        || mergedValue.value.some((ori, index) => !isSame(mergedGenerateConfig.value, filledLocale.value, ori, nextValue[index], internalPicker.value))
+        || prevValue.length !== nextValue.length
+        || prevValue.some((ori, index) => !isSame(mergedGenerateConfig.value, filledLocale.value, ori, nextValue[index], internalPicker.value))
       )) {
         props.onChange(props.multiple ? nextValue : nextValue?.[0])
       }
@@ -224,7 +227,7 @@ const PickerPanel = defineComponent<PickerPanelProps>(
     const onInternalSelect = (newDate: any) => {
       props.onSelect?.(newDate)
 
-      if (mergedMode.value === props.picker) {
+      if (mergedMode.value === (props.picker || 'date')) {
         const nextValues = props.multiple ? toggleDates(mergedValue.value, newDate) : [newDate]
         triggerChange(nextValues)
       }
@@ -267,7 +270,7 @@ const PickerPanel = defineComponent<PickerPanelProps>(
       onInternalSelect(nextValue)
       setPickerValue(nextValue)
 
-      if (mergedMode.value !== props.picker) {
+      if (mergedMode.value !== (props.picker || 'date')) {
         const decadeYearQueue: PanelMode[] = ['decade', 'year']
         const decadeYearMonthQueue: PanelMode[] = [...decadeYearQueue, 'month']
 
