@@ -237,6 +237,44 @@ export default function useAlign(
 
   let cacheScale: any = null
 
+  // ====================== Transitions ======================
+  // The inline `transition-property` the popup had before we suppressed it.
+  // Kept until the aligned position is committed (see `releaseTransition`).
+  let suppressedTransition: { value: string, priority: string } | null = null
+
+  const suppressTransition = (popupElement: HTMLElement) => {
+    if (!suppressedTransition) {
+      suppressedTransition = {
+        value: popupElement.style.getPropertyValue('transition-property'),
+        priority: popupElement.style.getPropertyPriority('transition-property'),
+      }
+    }
+    popupElement.style.setProperty('transition-property', 'none', 'important')
+  }
+
+  // Measuring parks the popup at `left/top: 0` and `right/bottom: 0` and reads
+  // its rect, which makes those parked values the popup's current computed
+  // style. Re-enabling transitions right after restoring the inline style
+  // would let the next style change transition *from* the parked values: with
+  // a page-wide `transition-duration` (e.g. a reduced-motion reset) the first
+  // frame after every align paints a right/bottom-aligned popup at `right: 0`
+  // / `bottom: 0`. So only re-enable once the aligned inset is in the DOM, and
+  // flush it first so it becomes the value later changes transition from.
+  const releaseTransition = (popupElement: HTMLElement) => {
+    if (!suppressedTransition) {
+      return
+    }
+    popupElement.getBoundingClientRect()
+    const { value, priority } = suppressedTransition
+    suppressedTransition = null
+    if (value) {
+      popupElement.style.setProperty('transition-property', value, priority)
+    }
+    else {
+      popupElement.style.removeProperty('transition-property')
+    }
+  }
+
   // ========================= Align =========================
   const _onAlign = (cache = false) => {
     if (cache && !cacheTargetRect) {
@@ -268,9 +306,7 @@ export default function useAlign(
       // element a left/top transition it never had. Suppress transitions for the
       // duration of the measurement; `important` is required to outrank such a
       // reset.
-      const originTransitionProperty = popupElement.style.getPropertyValue('transition-property')
-      const originTransitionPriority = popupElement.style.getPropertyPriority('transition-property')
-      popupElement.style.setProperty('transition-property', 'none', 'important')
+      suppressTransition(popupElement)
       // Placement
       const placementInfo: AlignType = {
         ...builtinPlacements.value[placement.value],
@@ -385,17 +421,6 @@ export default function useAlign(
       popupElement.style.overflowX = originOverflowX
       popupElement.style.overflowY = originOverflowY
 
-      if (originTransitionProperty) {
-        popupElement.style.setProperty(
-          'transition-property',
-          originTransitionProperty,
-          originTransitionPriority,
-        )
-      }
-      else {
-        popupElement.style.removeProperty('transition-property')
-      }
-
       popupElement.parentElement?.removeChild(placeholderElement)
 
       // Use the same logic as React version:
@@ -475,6 +500,7 @@ export default function useAlign(
         || scaleY === 0
         || (isDOM(target) && !isVisible(target))
       ) {
+        releaseTransition(popupElement)
         return
       }
 
@@ -888,6 +914,8 @@ export default function useAlign(
         align: nextAlignInfo,
       }
       Object.assign(offsetInfo, nextOffsetInfo)
+      // The offsets reach the popup's style in the render this schedules
+      nextTick(() => releaseTransition(popupElement))
     }
   }
   // 给onAlign添加一个requestAnimationFrame的效果，合并多次调用

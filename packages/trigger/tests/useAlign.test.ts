@@ -1,6 +1,6 @@
 import type { BuildInPlacements } from '../src/interface.ts'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { effectScope, nextTick, ref, shallowRef } from 'vue'
+import { effectScope, nextTick, ref, shallowRef, watch } from 'vue'
 import useAlign from '../src/hooks/useAlign.ts'
 
 interface RectOptions {
@@ -387,6 +387,91 @@ describe('useAlign', () => {
     }
     // and the popup is handed back without a leftover override
     expect(popup.style.getPropertyValue('transition-property')).toBe('')
+  })
+
+  it('keeps transitions off until the aligned inset is committed and flushed', async () => {
+    // Measuring leaves the parked `right: 0` as the popup's computed style.
+    // If transitions come back before the aligned inset is applied and
+    // flushed, a page-wide `transition-duration` (reduced-motion reset) makes
+    // the first frame transition from `right: 0`, painting a right-aligned
+    // popup against the viewport edge.
+    const placements: BuildInPlacements = {
+      bottomRight: {
+        points: ['tr', 'br'],
+        offset: [0, 4],
+        targetOffset: [0, 0],
+        overflow: {},
+        dynamicInset: true,
+      } as any,
+    }
+
+    const { element: target } = createRectElement({ x: 100, y: 40, width: 60, height: 20 })
+    const { element: popup } = createRectElement({ x: 0, y: 0, width: 80, height: 30 })
+    // A transition the popup declares itself must survive the suppression
+    popup.style.setProperty('transition-property', 'opacity')
+
+    const flushes: { right: string, transition: string }[] = []
+    const rect = popup.getBoundingClientRect.bind(popup)
+    Object.defineProperty(popup, 'getBoundingClientRect', {
+      configurable: true,
+      value: () => {
+        flushes.push({
+          right: popup.style.right,
+          transition: popup.style.getPropertyValue('transition-property'),
+        })
+        return rect()
+      },
+    })
+
+    document.body.appendChild(target)
+    document.body.appendChild(popup)
+
+    scope = effectScope()
+    let triggerAlign!: VoidFunction
+    let offsetRRef!: ReturnType<typeof useAlign>[3]
+    const insetWrites: { right: string, transition: string, priority: string }[] = []
+    scope.run(() => {
+      const result = useAlign(
+        ref(true),
+        shallowRef(popup),
+        shallowRef(target),
+        ref('bottomRight'),
+        ref(placements),
+        ref(),
+        undefined,
+        ref(false),
+      )
+      const [ready, , , offsetR] = result
+      offsetRRef = offsetR
+      triggerAlign = result[10]
+      // Stand-in for the Popup render that applies the offsets to the style
+      watch([ready, offsetR], ([isReady, right]) => {
+        if (!isReady)
+          return
+        popup.style.left = 'auto'
+        popup.style.right = `${right}px`
+        insetWrites.push({
+          right: popup.style.right,
+          transition: popup.style.getPropertyValue('transition-property'),
+          priority: popup.style.getPropertyPriority('transition-property'),
+        })
+      })
+    })
+
+    await nextTick()
+    await runAlign(triggerAlign)
+
+    const alignedRight = `${offsetRRef.value}px`
+    expect(insetWrites.length).toBeGreaterThan(0)
+    for (const write of insetWrites) {
+      expect(write.transition).toBe('none')
+      expect(write.priority).toBe('important')
+    }
+    // The aligned inset was flushed while transitions were still off …
+    expect(flushes).toContainEqual({ right: alignedRight, transition: 'none' })
+    // … and the popup's own transition is handed back untouched
+    expect(popup.style.getPropertyValue('transition-property')).toBe('opacity')
+    expect(popup.style.getPropertyPriority('transition-property')).toBe('')
   })
 
   it('does not compensate the popup own motion transform (ant-slide-up scaleY)', async () => {
