@@ -15,7 +15,7 @@ export interface FlattenRowsResult {
 export default function useFlattenRows(
   data: any[],
   groupData: Map<any, any[]>,
-  getItemKey: (item: any) => Key,
+  getItemKey: (item: any, index: number) => Key,
   group: Group | undefined,
 ): FlattenRowsResult {
   const flatRows: Row[] = []
@@ -28,7 +28,7 @@ export default function useFlattenRows(
     type: 'item',
     item,
     index,
-    taggedKey: toTaggedKey(getItemKey(item), 'item'),
+    taggedKey: toTaggedKey(getItemKey(item, index), 'item'),
   })
 
   if (!group) {

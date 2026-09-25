@@ -3,7 +3,7 @@ import type { Key } from '@v-c/util/dist/type'
 import type { GetKey } from '@v-c/virtual-list'
 import type { CSSProperties } from 'vue'
 
-export type RowKey<T> = keyof T | ((item: T) => Key)
+export type RowKey<T> = keyof T | ((item: T, index: number) => Key)
 
 export type ScrollAlign = 'top' | 'bottom' | 'auto'
 

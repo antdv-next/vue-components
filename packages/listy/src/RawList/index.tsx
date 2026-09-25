@@ -43,7 +43,7 @@ export default defineComponent<ListComponentProps>((props, { expose }) => {
     } = props
 
     const renderItem = (item: unknown, index: number) => {
-      const key = getItemKey(item)
+      const key = getItemKey(item, index)
       const scrollTargetProps = getScrollTargetProps(key, 'item')
 
       return (
