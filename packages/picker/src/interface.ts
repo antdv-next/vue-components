@@ -73,6 +73,11 @@ export interface Locale {
   monthSelect: string
   yearSelect: string
   decadeSelect: string
+  hourSelect?: string
+  minuteSelect?: string
+  secondSelect?: string
+  millisecondSelect?: string
+  meridiemSelect?: string
 
   previousYear: string
   nextYear: string
