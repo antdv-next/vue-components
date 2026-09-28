@@ -32,7 +32,11 @@ export default function useNoticeTimer(
     }
   }
 
+  // Repeat pause calls are ignored: re-syncing would bill the paused span into passTime.
   const onPause = () => {
+    if (!walking.value) {
+      return
+    }
     syncPassTime()
     walking.value = false
   }

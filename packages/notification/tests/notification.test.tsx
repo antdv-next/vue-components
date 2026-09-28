@@ -1,6 +1,7 @@
 import { mount } from '@vue/test-utils'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
+import Notification from '../src/Notification'
 import Notifications from '../src/Notifications'
 
 describe('notification', () => {
@@ -88,5 +89,48 @@ describe('notification', () => {
 
     expect(closableOnClose).not.toHaveBeenCalled()
     expect(onClose).not.toHaveBeenCalled()
+  })
+})
+
+describe('notification stack hover', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation(
+      cb => setTimeout(() => cb(0), 16) as any,
+    )
+    vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(id =>
+      clearTimeout(id as any),
+    )
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+    document.body.innerHTML = ''
+    vi.useRealTimers()
+  })
+
+  it('does not shorten the duration when a paused notice is re-paused', async () => {
+    const onClose = vi.fn()
+    const wrapper = mount(Notification, {
+      props: {
+        prefixCls: 'vc-notification',
+        duration: 1,
+        onClose,
+      },
+    })
+
+    const notice = wrapper.find('.vc-notification-notice')
+    // mouseenter pauses directly; the list hovering watcher pauses again.
+    await notice.trigger('mouseenter')
+    await wrapper.setProps({ hovering: true })
+    await vi.advanceTimersByTimeAsync(2000)
+
+    // Leaving the notice and then the list resumes through the watcher.
+    await notice.trigger('mouseleave')
+    await wrapper.setProps({ hovering: false })
+
+    expect(onClose).not.toHaveBeenCalled()
+    await vi.advanceTimersByTimeAsync(2000)
+    expect(onClose).toHaveBeenCalledTimes(1)
   })
 })
