@@ -1,0 +1,42 @@
+{
+  "trigger": {
+    "computed": 26,
+    "watch": 19,
+    "instances": 1
+  },
+  "tooltip": {
+    "computed": 29,
+    "watch": 19,
+    "instances": 2
+  },
+  "picker": {
+    "computed": 167,
+    "watch": 35,
+    "instances": 6
+  },
+  "range-picker": {
+    "computed": 183,
+    "watch": 40,
+    "instances": 11
+  },
+  "select": {
+    "computed": 112,
+    "watch": 27,
+    "instances": 11
+  },
+  "menu-item": {
+    "computed": 12,
+    "watch": 3,
+    "instances": 9
+  },
+  "table-row": {
+    "computed": 41,
+    "watch": 1,
+    "instances": 7
+  },
+  "tree-node": {
+    "computed": 21,
+    "watch": 2,
+    "instances": 4
+  }
+}
