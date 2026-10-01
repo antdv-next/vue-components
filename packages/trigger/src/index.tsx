@@ -1,7 +1,7 @@
 import type { PortalProps } from '@v-c/portal'
 import type { VueNode } from '@v-c/util/dist/type'
 import type { CSSMotionProps } from '@v-c/util/dist/utils/transition'
-import type { CSSProperties } from 'vue'
+import type { CSSProperties, Ref } from 'vue'
 import type { TriggerContextProps } from './context.ts'
 import type { ActionType, AlignType, AnimationType, ArrowPos, ArrowTypeOuter, BuildInPlacements } from './interface'
 import type { MobileConfig } from './Popup'
@@ -11,7 +11,7 @@ import { classNames } from '@v-c/util'
 import { getShadowRoot } from '@v-c/util/dist/Dom/shadow'
 import { filterEmpty } from '@v-c/util/dist/props-util'
 import { createElementRef } from '@v-c/util/dist/vnode'
-import { computed, createVNode, defineComponent, nextTick, onBeforeUnmount, reactive, ref, shallowRef, toRef, useId, watch, watchEffect } from 'vue'
+import { computed, createVNode, defineComponent, effectScope, nextTick, onBeforeUnmount, reactive, ref, shallowRef, toRef, useId, watch, watchEffect } from 'vue'
 import { TriggerContextProvider, useTriggerContext, useUniqueContext } from './context.ts'
 import useAction from './hooks/useAction.ts'
 import useAlign from './hooks/useAlign.ts'
@@ -140,6 +140,23 @@ const defaults = {
   popupVisible: undefined,
   defaultPopupVisible: undefined,
 } as any
+const EMPTY_ALIGN: AlignType = {}
+
+interface OpenEffects {
+  ready: Ref<boolean>
+  offsetX: Ref<number>
+  offsetY: Ref<number>
+  offsetR: Ref<number>
+  offsetB: Ref<number>
+  arrowX: Ref<number>
+  arrowY: Ref<number>
+  scaleX: Ref<number>
+  scaleY: Ref<number>
+  alignInfo: Ref<AlignType>
+  onAlign: (motionPrepare?: boolean) => void
+  onPopupPointerDown: () => void
+}
+
 export function generateTrigger(PortalComponent: any = Portal) {
   return defineComponent<TriggerProps>(
     (props = defaults, { expose, slots, attrs }) => {
@@ -417,28 +434,16 @@ export function generateTrigger(PortalComponent: any = Portal) {
         props?.alignPoint && mousePos.value !== null ? mousePos.value : targetEle.value,
       )
 
-      const [
-        ready,
-        offsetX,
-        offsetY,
-        offsetR,
-        offsetB,
-        arrowX,
-        arrowY,
-        scaleX,
-        scaleY,
-        alignInfo,
-        onAlign,
-      ] = useAlign(
-        mergedOpen,
-        popupEle as any,
-        alignTarget as any,
-        toRef(() => props?.popupPlacement) as any,
-        toRef(() => props?.builtinPlacements) as any,
-        toRef(() => props?.popupAlign) as any,
-        props?.onPopupAlign,
-        isMobile,
-      )
+      // ================== Open-only effects (lazy) ==================
+      // Alignment, scroll / resize / target-move tracking, outside-click
+      // handling and the motion prepare hook only matter once the popup has
+      // rendered, yet they cost a dozen watchers per closed trigger. They are
+      // created in a child effect scope the first time the popup renders. The
+      // hooks observe `effectOpen`, a mirror of `mergedOpen` that only flips
+      // after the scope exists, so they still see the closed -> open edge.
+      const effectOpen = shallowRef(false)
+      const openEffects = shallowRef<OpenEffects | null>(null)
+      const openScope = effectScope()
 
       const [showActions, hideActions] = useAction(
         toRef(() => props.action!),
@@ -448,11 +453,15 @@ export function generateTrigger(PortalComponent: any = Portal) {
       const clickToShow = toRef(() => showActions.value?.has('click'))
       const clickToHide = toRef(() => hideActions.value?.has('click') || hideActions.value?.has('contextmenu'))
       const triggerAlign = () => {
+        const effects = openEffects.value
+        if (!effects) {
+          return
+        }
         if (!inMotion.value) {
-          onAlign()
+          effects.onAlign()
         }
         else {
-          onAlign(true)
+          effects.onAlign(true)
         }
       }
 
@@ -462,33 +471,17 @@ export function generateTrigger(PortalComponent: any = Portal) {
         }
       }
 
-      useWatch(mergedOpen, targetEle as any, popupEle as any, triggerAlign, onScroll)
-      useTargetMove(mergedOpen, alignTarget as any, triggerAlign, isMobile)
-      watch(
-        [mousePos, () => props.popupPlacement],
-        async () => {
-          await nextTick()
-          triggerAlign()
-        },
-      )
-      watch(
-        () => JSON.stringify(props.popupAlign),
-        async () => {
-          await nextTick()
-          const { builtinPlacements, popupPlacement } = props
-          if (mergedOpen.value && !builtinPlacements?.[popupPlacement!]) {
-            triggerAlign()
-          }
-        },
-      )
+      const getAlignInfo = () =>
+        openEffects.value?.alignInfo.value ?? props.builtinPlacements?.[props.popupPlacement!] ?? EMPTY_ALIGN
       const alignedClassName = computed(() => {
+        const alignInfo = getAlignInfo()
         const baseClassName = getAlignPopupClassName(
           props.builtinPlacements!,
           props.prefixCls!,
-          alignInfo.value,
+          alignInfo,
           props.alignPoint!,
         )
-        return classNames(baseClassName, props?.getPopupClassNameFromAlign?.(alignInfo.value))
+        return classNames(baseClassName, props?.getPopupClassNameFromAlign?.(alignInfo))
       })
       expose({
         nativeElement: externalForwardRef,
@@ -516,7 +509,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
       // ========================== Motion ============================
       const onVisibleChanged = (visible: boolean) => {
         inMotion.value = false
-        onAlign()
+        openEffects.value?.onAlign()
         props?.afterOpenChange?.(visible)
         props?.afterPopupVisibleChange?.(visible)
       }
@@ -541,20 +534,6 @@ export function generateTrigger(PortalComponent: any = Portal) {
           inMotion.value = true
         })
       }
-
-      watch(
-        [motionPrepareResolve],
-        () => {
-          if (motionPrepareResolve.value) {
-            onAlign()
-            motionPrepareResolve.value()
-            motionPrepareResolve.value = undefined
-          }
-        },
-        {
-          flush: 'post',
-        },
-      )
 
       // =========================== Action ===========================
       /**
@@ -630,18 +609,6 @@ export function generateTrigger(PortalComponent: any = Portal) {
         }
         baseActionProps.value = nextCloneProps
       })
-
-      // Click to hide is special action since click popup element should not hide
-      const onPopupPointerDown = useWinClick(
-        mergedOpen,
-        toRef(() => clickToHide.value || touchToHide.value),
-        targetEle as any,
-        popupEle as any,
-        toRef(() => props.mask) as any,
-        toRef(() => props.maskClosable) as any,
-        inPopupOrChild,
-        triggerOpen,
-      )
 
       // ======================= Action: Hover ========================
       const hoverToShow = toRef(() => showActions.value?.has('hover'))
@@ -764,10 +731,116 @@ export function generateTrigger(PortalComponent: any = Portal) {
       watchEffect(() => {
         rendedRef.value ||= props.forceRender || mergedOpen.value || inMotion.value
       })
-      // =================== Resize Observer ===================
-      // Use hook to observe target element resize
-      // Pass targetEle directly instead of a function so the hook will re-observe when target changes
-      useResizeObserver(mergedOpen, targetEle, onTargetResize)
+
+      const ensureOpenEffects = () => {
+        if (openEffects.value) {
+          return
+        }
+        openScope.run(() => {
+          const [
+            ready,
+            offsetX,
+            offsetY,
+            offsetR,
+            offsetB,
+            arrowX,
+            arrowY,
+            scaleX,
+            scaleY,
+            alignInfo,
+            onAlign,
+          ] = useAlign(
+            effectOpen,
+            popupEle as any,
+            alignTarget as any,
+            toRef(() => props?.popupPlacement) as any,
+            toRef(() => props?.builtinPlacements) as any,
+            toRef(() => props?.popupAlign) as any,
+            props?.onPopupAlign,
+            isMobile,
+          )
+
+          useWatch(effectOpen, targetEle as any, popupEle as any, triggerAlign, onScroll)
+          useTargetMove(effectOpen, alignTarget as any, triggerAlign, isMobile)
+          watch(
+            [mousePos, () => props.popupPlacement],
+            async () => {
+              await nextTick()
+              triggerAlign()
+            },
+          )
+          watch(
+            () => JSON.stringify(props.popupAlign),
+            async () => {
+              await nextTick()
+              const { builtinPlacements, popupPlacement } = props
+              if (mergedOpen.value && !builtinPlacements?.[popupPlacement!]) {
+                triggerAlign()
+              }
+            },
+          )
+
+          watch(
+            [motionPrepareResolve],
+            () => {
+              if (motionPrepareResolve.value) {
+                onAlign()
+                motionPrepareResolve.value()
+                motionPrepareResolve.value = undefined
+              }
+            },
+            {
+              flush: 'post',
+            },
+          )
+
+          // Click to hide is special action since click popup element should not hide
+          const onPopupPointerDown = useWinClick(
+            effectOpen,
+            toRef(() => clickToHide.value || touchToHide.value),
+            targetEle as any,
+            popupEle as any,
+            toRef(() => props.mask) as any,
+            toRef(() => props.maskClosable) as any,
+            inPopupOrChild,
+            triggerOpen,
+          )
+
+          // =================== Resize Observer ===================
+          // Use hook to observe target element resize
+          // Pass targetEle directly instead of a function so the hook will re-observe when target changes
+          useResizeObserver(effectOpen, targetEle, onTargetResize)
+
+          openEffects.value = {
+            ready,
+            offsetX,
+            offsetY,
+            offsetR,
+            offsetB,
+            arrowX,
+            arrowY,
+            scaleX,
+            scaleY,
+            alignInfo,
+            onAlign,
+            onPopupPointerDown,
+          }
+        })
+      }
+
+      // Create the effects before the popup first renders (open, forceRender
+      // or still in the leave motion), then let them observe the open state.
+      watch(rendedRef, (rendered) => {
+        if (rendered) {
+          ensureOpenEffects()
+        }
+      }, { immediate: true, flush: 'sync' })
+      watch(mergedOpen, (open) => {
+        if (open) {
+          ensureOpenEffects()
+        }
+        effectOpen.value = open
+      }, { immediate: true, flush: 'sync' })
       return () => {
         // ========================== Children ==========================
         const child = filterEmpty(slots?.default?.({ open: mergedOpen.value }) ?? [])?.[0]
@@ -797,9 +870,10 @@ export function generateTrigger(PortalComponent: any = Portal) {
           }
         })
 
+        const effects = openEffects.value
         const arrowPos: ArrowPos = {
-          x: arrowX.value,
-          y: arrowY.value,
+          x: effects?.arrowX.value ?? 0,
+          y: effects?.arrowY.value ?? 0,
         }
         // Child Node
         const triggerNode = createVNode(child as any, {
@@ -849,7 +923,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
                   // Click
                   onClick={onPopupClick}
                   onEsc={onEsc}
-                  onPointerDownCapture={onPopupPointerDown}
+                  onPointerDownCapture={effects?.onPopupPointerDown}
                   // Mask
                   mask={mask}
                   // Motion
@@ -862,20 +936,20 @@ export function generateTrigger(PortalComponent: any = Portal) {
                   autoDestroy={mergedAutoDestroy.value}
                   getPopupContainer={getPopupContainer}
                   // Arrow
-                  align={alignInfo.value}
+                  align={getAlignInfo()}
                   arrow={innerArrow.value!}
                   arrowPos={arrowPos}
                   // Align
-                  ready={ready.value}
-                  offsetX={offsetX.value}
-                  offsetY={offsetY.value}
-                  offsetR={offsetR.value}
-                  offsetB={offsetB.value}
+                  ready={effects?.ready.value ?? false}
+                  offsetX={effects?.offsetX.value ?? 0}
+                  offsetY={effects?.offsetY.value ?? 0}
+                  offsetR={effects?.offsetR.value ?? 0}
+                  offsetB={effects?.offsetB.value ?? 0}
                   onAlign={triggerAlign}
                   // Stretch
                   stretch={stretch}
-                  targetWidth={targetWidth.value / scaleX.value}
-                  targetHeight={targetHeight.value / scaleY.value}
+                  targetWidth={targetWidth.value / (effects?.scaleX.value ?? 1)}
+                  targetHeight={targetHeight.value / (effects?.scaleY.value ?? 1)}
                   // Mobile
                   mobile={mobile}
                 />
