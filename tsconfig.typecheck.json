@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "composite": false,
+    "incremental": false
+  },
+  "references": [],
+  "include": [
+    "packages/*/src"
+  ],
+  "exclude": [
+    "packages/*/src/**/*.test.*",
+    "packages/*/src/**/__tests__/**",
+    "packages/qrcode/src/libs/**"
+  ]
+}

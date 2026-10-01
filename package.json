@@ -15,6 +15,7 @@
     "build": "pnpm run -r build",
     "test": "vitest",
     "test:u": "vitest -u",
+    "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
     "lint": "eslint . --fix"
   },
   "devDependencies": {
