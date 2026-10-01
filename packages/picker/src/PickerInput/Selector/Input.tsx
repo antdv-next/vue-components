@@ -19,11 +19,11 @@ const Input = defineComponent<InputProps>(
   (props, { attrs, expose }) => {
     const pickerCtx = usePickerContext()
 
-    const prefixCls = computed(() => pickerCtx.value.prefixCls)
-    const classNames = computed(() => pickerCtx.value.classNames)
-    const styles = computed(() => pickerCtx.value.styles)
+    const prefixCls = toRef(() => pickerCtx.value.prefixCls)
+    const classNames = toRef(() => pickerCtx.value.classNames)
+    const styles = toRef(() => pickerCtx.value.styles)
 
-    const inputPrefixCls = computed(() => `${prefixCls.value}-input`)
+    const inputPrefixCls = toRef(() => `${prefixCls.value}-input`)
 
     // ======================== Value =========================
     const focused = ref(false)
@@ -32,7 +32,7 @@ const Input = defineComponent<InputProps>(
     const focusCellIndex = ref<number | null>(null)
     const forceSelectionSyncMark = ref<object | null>(null)
 
-    const inputValue = computed(() => internalInputValue.value || '')
+    const inputValue = toRef(() => internalInputValue.value || '')
 
     // Sync value if needed
     watch(() => props.value, (val) => {
@@ -68,8 +68,8 @@ const Input = defineComponent<InputProps>(
       return maskFormat.value.getSelection(focusCellIndex.value!)
     })
 
-    const selectionStart = computed(() => selectionRange.value[0])
-    const selectionEnd = computed(() => selectionRange.value[1])
+    const selectionStart = toRef(() => selectionRange.value[0])
+    const selectionEnd = toRef(() => selectionRange.value[1])
 
     // ======================== Modify ========================
     // When input modify content, trigger `onHelp` if is not the format

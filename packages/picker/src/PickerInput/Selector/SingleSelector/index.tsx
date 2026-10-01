@@ -2,7 +2,7 @@ import type { SetupContext } from 'vue'
 import type { InternalMode, SelectorProps } from '../../../interface'
 import type { InputRef } from '../Input'
 import { clsx, isVueRenderable } from '@v-c/util'
-import { computed, defineComponent, ref } from 'vue'
+import { computed, defineComponent, ref, toRef } from 'vue'
 import { isSame } from '../../../utils/dateUtil'
 import { usePickerContext } from '../../context'
 import ClearIcon from '../ClearIcon'
@@ -54,13 +54,13 @@ const SingleSelector = defineComponent<SingleSelectorProps>(
     props,
     { attrs, expose }: SetupContext,
   ) => {
-    const rtl = computed(() => props.direction === 'rtl')
+    const rtl = toRef(() => props.direction === 'rtl')
 
     // ======================== Prefix ========================
     const ctx = usePickerContext()
-    const prefixCls = computed(() => ctx.value.prefixCls)
-    const classNames = computed(() => ctx.value.classNames)
-    const styles = computed(() => ctx.value.styles)
+    const prefixCls = toRef(() => ctx.value.prefixCls)
+    const classNames = toRef(() => ctx.value.classNames)
+    const styles = toRef(() => ctx.value.styles)
 
     // ========================= Refs =========================
     const rootRef = ref<HTMLDivElement>()

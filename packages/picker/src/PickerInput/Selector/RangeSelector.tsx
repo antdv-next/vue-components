@@ -4,7 +4,7 @@ import type { SelectorProps } from '../../interface'
 import type { InputRef } from './Input'
 import ResizeObserver from '@v-c/resize-observer'
 import { clsx, isVueRenderable } from '@v-c/util'
-import { computed, defineComponent, ref, watch } from 'vue'
+import { computed, defineComponent, ref, toRef, watch } from 'vue'
 import { usePickerContext } from '../context'
 import ClearIcon from './ClearIcon'
 import useInputProps from './hooks/useInputHooks'
@@ -44,11 +44,11 @@ const RangeSelector = defineComponent(
     { attrs, expose }: SetupContext,
   ) => {
     const pickerContext = usePickerContext()
-    const prefixCls = computed(() => pickerContext.value.prefixCls)
-    const classNames = computed(() => pickerContext.value.classNames)
-    const styles = computed(() => pickerContext.value.styles)
+    const prefixCls = toRef(() => pickerContext.value.prefixCls)
+    const classNames = toRef(() => pickerContext.value.classNames)
+    const styles = toRef(() => pickerContext.value.styles)
 
-    const rtl = computed(() => props.direction === 'rtl')
+    const rtl = toRef(() => props.direction === 'rtl')
 
     // ========================== Id ==========================
     const ids = computed(() => {
@@ -145,14 +145,14 @@ const RangeSelector = defineComponent(
     )
 
     // ======================= Disabled =======================
-    const autoFocus = computed(
+    const autoFocus = toRef(
       () => (props as any).autoFocus ?? (props as any).autofocus,
     )
-    const tabIndex = computed(
+    const tabIndex = toRef(
       () => (props as any).tabIndex ?? (props as any).tabindex,
     )
-    const startAutoFocus = computed(() => autoFocus.value && !props.disabled?.[0])
-    const endAutoFocus = computed(() => autoFocus.value && !startAutoFocus.value && !props.disabled?.[1])
+    const startAutoFocus = toRef(() => autoFocus.value && !props.disabled?.[0])
+    const endAutoFocus = toRef(() => autoFocus.value && !startAutoFocus.value && !props.disabled?.[1])
 
     return () => {
       const {

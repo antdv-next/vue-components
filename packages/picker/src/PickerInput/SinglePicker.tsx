@@ -11,7 +11,7 @@ import type { RangeValueChangeSource } from './hooks/useRangeValueChange'
 import { clsx } from '@v-c/util'
 import omit from '@v-c/util/dist/omit'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
-import { computed, defineComponent, ref, shallowRef, watch } from 'vue'
+import { computed, defineComponent, ref, shallowRef, toRef, watch } from 'vue'
 import useSemantic from '../hooks/useSemantic'
 import useToggleDates from '../hooks/useToggleDates'
 import PickerTrigger from '../PickerTrigger'
@@ -117,6 +117,8 @@ export interface PickerProps<DateType extends object = any> extends
   use12Hours?: boolean
 }
 
+function noop() {}
+
 const SinglePicker = defineComponent<PickerProps>(
   (
     props,
@@ -131,58 +133,59 @@ const SinglePicker = defineComponent<PickerProps>(
       maskFormat,
       isInvalidateDate,
     ] = useFilledProps<PickerProps, any, object>(
-      computed(() => props) as any,
+      toRef(() => props) as any,
     )
 
     // Destructure filledProps using toRefs to keep reactivity?
     // filledProps is a ComputedRef. We can access .value.
     // But we need individual refs for hooks.
     // We can create computed refs for each property.
-    const fp = computed(() => filledProps.value)
+    // `filledProps` is already a computed; alias it instead of wrapping it again.
+    const fp = filledProps
 
-    const prefixCls = computed(() => fp.value.prefixCls)
-    const rootClassName = computed(() => fp.value.rootClassName)
-    const styles = computed(() => fp.value.styles)
-    const classNames = computed(() => fp.value.classNames)
-    const previewValue = computed(() => fp.value.previewValue)
-    const order = computed(() => fp.value.order)
-    const defaultValue = computed(() => fp.value.defaultValue)
-    const value = computed(() => fp.value.value)
-    const needConfirm = computed(() => fp.value.needConfirm)
-    // const onChange = computed(() => fp.value.onChange)
-    const onKeyDown = computed(() => fp.value.onKeyDown)
-    const disabled = computed(() => fp.value.disabled)
-    const disabledDate = computed(() => fp.value.disabledDate)
-    const minDate = computed(() => fp.value.minDate)
-    const maxDate = computed(() => fp.value.maxDate)
-    const defaultOpen = computed(() => fp.value.defaultOpen)
-    const open = computed(() => fp.value.open)
-    const onOpenChange = computed(() => fp.value.onOpenChange)
-    const locale = computed(() => fp.value.locale)
-    const generateConfig = computed(() => fp.value.generateConfig)
-    const picker = computed(() => fp.value.picker)
-    const showNow = computed(() => fp.value.showNow)
-    const showToday = computed(() => fp.value.showToday)
-    const showTime = computed(() => fp.value.showTime)
-    const mode = computed(() => fp.value.mode)
-    const onPanelChange = computed(() => fp.value.onPanelChange)
-    const onCalendarChange = computed(() => fp.value.onCalendarChange)
-    const onOk = computed(() => fp.value.onOk)
-    const valueFormat = computed(() => fp.value.valueFormat)
-    const multiple = computed(() => fp.value.multiple)
-    const defaultPickerValue = computed(() => fp.value.defaultPickerValue)
-    const pickerValue = computed(() => fp.value.pickerValue)
-    const onPickerValueChange = computed(() => fp.value.onPickerValueChange)
-    const inputReadOnly = computed(() => fp.value.inputReadOnly)
-    const suffix = computed(() => fp.value.suffix)
-    const removeIcon = computed(() => fp.value.removeIcon)
-    const onFocus = computed(() => fp.value.onFocus)
-    const onBlur = computed(() => fp.value.onBlur)
-    const presets = computed(() => fp.value.presets)
-    const components = computed(() => fp.value.components)
-    const cellRender = computed(() => fp.value.cellRender)
-    const dateRender = computed(() => fp.value.dateRender)
-    const monthCellRender = computed(() => fp.value.monthCellRender)
+    const prefixCls = toRef(() => fp.value.prefixCls)
+    const rootClassName = toRef(() => fp.value.rootClassName)
+    const styles = toRef(() => fp.value.styles)
+    const classNames = toRef(() => fp.value.classNames)
+    const previewValue = toRef(() => fp.value.previewValue)
+    const order = toRef(() => fp.value.order)
+    const defaultValue = toRef(() => fp.value.defaultValue)
+    const value = toRef(() => fp.value.value)
+    const needConfirm = toRef(() => fp.value.needConfirm)
+    // const onChange = toRef(() => fp.value.onChange)
+    const onKeyDown = toRef(() => fp.value.onKeyDown)
+    const disabled = toRef(() => fp.value.disabled)
+    const disabledDate = toRef(() => fp.value.disabledDate)
+    const minDate = toRef(() => fp.value.minDate)
+    const maxDate = toRef(() => fp.value.maxDate)
+    const defaultOpen = toRef(() => fp.value.defaultOpen)
+    const open = toRef(() => fp.value.open)
+    const onOpenChange = toRef(() => fp.value.onOpenChange)
+    const locale = toRef(() => fp.value.locale)
+    const generateConfig = toRef(() => fp.value.generateConfig)
+    const picker = toRef(() => fp.value.picker)
+    const showNow = toRef(() => fp.value.showNow)
+    const showToday = toRef(() => fp.value.showToday)
+    const showTime = toRef(() => fp.value.showTime)
+    const mode = toRef(() => fp.value.mode)
+    const onPanelChange = toRef(() => fp.value.onPanelChange)
+    const onCalendarChange = toRef(() => fp.value.onCalendarChange)
+    const onOk = toRef(() => fp.value.onOk)
+    const valueFormat = toRef(() => fp.value.valueFormat)
+    const multiple = toRef(() => fp.value.multiple)
+    const defaultPickerValue = toRef(() => fp.value.defaultPickerValue)
+    const pickerValue = toRef(() => fp.value.pickerValue)
+    const onPickerValueChange = toRef(() => fp.value.onPickerValueChange)
+    const inputReadOnly = toRef(() => fp.value.inputReadOnly)
+    const suffix = toRef(() => fp.value.suffix)
+    const removeIcon = toRef(() => fp.value.removeIcon)
+    const onFocus = toRef(() => fp.value.onFocus)
+    const onBlur = toRef(() => fp.value.onBlur)
+    const presets = toRef(() => fp.value.presets)
+    const components = toRef(() => fp.value.components)
+    const cellRender = toRef(() => fp.value.cellRender)
+    const dateRender = toRef(() => fp.value.dateRender)
+    const monthCellRender = toRef(() => fp.value.monthCellRender)
     const onClick = computed(() => {
       const handler = fp.value.onClick as any
       if (Array.isArray(handler)) {
@@ -192,16 +195,16 @@ const SinglePicker = defineComponent<PickerProps>(
       }
       return handler
     })
-    const autoFocus = computed(() => (fp.value as any).autoFocus ?? (fp.value as any).autofocus)
-    const tabIndex = computed(() => (fp.value as any).tabIndex ?? (fp.value as any).tabindex)
-    const onMouseDown = computed(
-      () => (fp.value as any).onMouseDown ?? (fp.value as any).onMousedown ?? (() => {}),
+    const autoFocus = toRef(() => (fp.value as any).autoFocus ?? (fp.value as any).autofocus)
+    const tabIndex = toRef(() => (fp.value as any).tabIndex ?? (fp.value as any).tabindex)
+    const onMouseDown = toRef(
+      () => (fp.value as any).onMouseDown ?? (fp.value as any).onMousedown ?? noop,
     )
 
     // ========================= Refs =========================
     const selectorRef = shallowRef()
     expose({
-      nativeElement: computed(() => selectorRef.value?.nativeElement),
+      nativeElement: toRef(() => selectorRef.value?.nativeElement),
       focus: (options?: FocusOptions) => {
         selectorRef.value?.focus(options)
       },
@@ -291,7 +294,7 @@ const SinglePicker = defineComponent<PickerProps>(
       onInternalOk,
     )
 
-    const calendarValue = computed(() => getCalendarValue.value)
+    const calendarValue = toRef(() => getCalendarValue.value)
 
     // ======================== Focus =========================
     const popupRef = ref<HTMLDivElement>()
@@ -322,7 +325,7 @@ const SinglePicker = defineComponent<PickerProps>(
     }
 
     /** Extends from `mergedMode` to patch `datetime` mode */
-    const internalMode = computed(() =>
+    const internalMode = toRef(() =>
       mergedMode.value === 'date' && showTime.value
         ? 'datetime'
         : mergedMode.value,
@@ -416,7 +419,7 @@ const SinglePicker = defineComponent<PickerProps>(
       isInvalidateDate,
     )
 
-    const submitInvalidate = computed(() =>
+    const submitInvalidate = toRef(() =>
       submitInvalidates.value.some(invalidated => invalidated),
     )
 

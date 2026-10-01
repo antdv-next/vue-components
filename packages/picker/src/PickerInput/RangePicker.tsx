@@ -1,5 +1,5 @@
 import type { VueNode } from '@v-c/util/dist/type'
-import type { ComputedRef, SetupContext } from 'vue'
+import type { ComputedRef, Ref, SetupContext } from 'vue'
 import type { BaseInfo, InternalMode, OpenConfig, PanelMode, RangeTimeProps, SelectorProps, SharedPickerProps, ValueDate } from '../interface'
 import type { RangeValueChangeSource } from './hooks/useRangeValueChange'
 import type { PopupShowTimeConfig } from './Popup'
@@ -8,7 +8,7 @@ import { clsx } from '@v-c/util'
 import omit from '@v-c/util/dist/omit'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
 import warning from '@v-c/util/dist/warning'
-import { computed, defineComponent, nextTick, ref, shallowRef, watch } from 'vue'
+import { computed, defineComponent, nextTick, ref, shallowRef, toRef, watch } from 'vue'
 import useSemantic from '../hooks/useSemantic'
 import PickerTrigger from '../PickerTrigger'
 import { pickTriggerProps } from '../PickerTrigger/util'
@@ -142,7 +142,7 @@ const RangePicker = defineComponent(
         RangePickerProps,
         any,
         { disabled: [boolean, boolean], allowEmpty: [boolean, boolean] }
-      >(computed(() => props) as any, () => {
+      >(toRef(() => props) as any, () => {
         const { disabled, allowEmpty } = props
 
         const mergedDisabled = separateConfig(disabled, false)
@@ -154,55 +154,56 @@ const RangePicker = defineComponent(
         }
       })
 
-    const fp = computed(() => filledProps.value)
-    const prefixCls = computed(() => fp.value.prefixCls)
-    const rootClassName = computed(() => fp.value.rootClassName)
-    const styles = computed(() => fp.value.styles)
-    const classNames = computed(() => fp.value.classNames)
-    const previewValue = computed(() => fp.value.previewValue)
-    const defaultValue = computed(() => fp.value.defaultValue)
-    const value = computed(() => fp.value.value)
-    const needConfirm = computed(() => fp.value.needConfirm)
-    const onKeyDown = computed(() => fp.value.onKeyDown)
-    const disabled = computed(() => fp.value.disabled)
-    const allowEmpty = computed(() => fp.value.allowEmpty)
-    const disabledDate = computed(() => fp.value.disabledDate)
-    const minDate = computed(() => fp.value.minDate)
-    const maxDate = computed(() => fp.value.maxDate)
-    const defaultOpen = computed(() => fp.value.defaultOpen)
-    const open = computed(() => fp.value.open)
-    const onOpenChange = computed(() => fp.value.onOpenChange)
-    const locale = computed(() => fp.value.locale)
-    const generateConfig = computed(() => fp.value.generateConfig)
-    const picker = computed(() => fp.value.picker)
-    const showNow = computed(() => fp.value.showNow)
-    const showToday = computed(() => fp.value.showToday)
-    const showTime = computed(() => fp.value.showTime)
-    const mode = computed(() => fp.value.mode)
-    const onPanelChange = computed(() => fp.value.onPanelChange)
-    const onCalendarChange = computed(() => fp.value.onCalendarChange)
-    const onOk = computed(() => fp.value.onOk)
-    const valueFormat = computed(() => fp.value.valueFormat)
-    const defaultPickerValue = computed(() => fp.value.defaultPickerValue)
-    const pickerValue = computed(() => fp.value.pickerValue)
-    const onPickerValueChange = computed(() => fp.value.onPickerValueChange)
-    const inputReadOnly = computed(() => fp.value.inputReadOnly)
-    const suffix = computed(() => fp.value.suffix)
-    const onFocus = computed(() => fp.value.onFocus)
-    const onBlur = computed(() => fp.value.onBlur)
-    const presets = computed(() => fp.value.presets)
-    const ranges = computed(() => props.ranges)
-    const components = computed(() => fp.value.components)
-    const cellRender = computed(() => fp.value.cellRender)
-    const dateRender = computed(() => fp.value.dateRender)
-    const monthCellRender = computed(() => fp.value.monthCellRender)
-    const onClick = computed(() => fp.value.onClick)
+    // `filledProps` is already a computed; alias it instead of wrapping it again.
+    const fp = filledProps
+    const prefixCls = toRef(() => fp.value.prefixCls)
+    const rootClassName = toRef(() => fp.value.rootClassName)
+    const styles = toRef(() => fp.value.styles)
+    const classNames = toRef(() => fp.value.classNames)
+    const previewValue = toRef(() => fp.value.previewValue)
+    const defaultValue = toRef(() => fp.value.defaultValue)
+    const value = toRef(() => fp.value.value)
+    const needConfirm = toRef(() => fp.value.needConfirm)
+    const onKeyDown = toRef(() => fp.value.onKeyDown)
+    const disabled = toRef(() => fp.value.disabled)
+    const allowEmpty = toRef(() => fp.value.allowEmpty)
+    const disabledDate = toRef(() => fp.value.disabledDate)
+    const minDate = toRef(() => fp.value.minDate)
+    const maxDate = toRef(() => fp.value.maxDate)
+    const defaultOpen = toRef(() => fp.value.defaultOpen)
+    const open = toRef(() => fp.value.open)
+    const onOpenChange = toRef(() => fp.value.onOpenChange)
+    const locale = toRef(() => fp.value.locale)
+    const generateConfig = toRef(() => fp.value.generateConfig)
+    const picker = toRef(() => fp.value.picker)
+    const showNow = toRef(() => fp.value.showNow)
+    const showToday = toRef(() => fp.value.showToday)
+    const showTime = toRef(() => fp.value.showTime)
+    const mode = toRef(() => fp.value.mode)
+    const onPanelChange = toRef(() => fp.value.onPanelChange)
+    const onCalendarChange = toRef(() => fp.value.onCalendarChange)
+    const onOk = toRef(() => fp.value.onOk)
+    const valueFormat = toRef(() => fp.value.valueFormat)
+    const defaultPickerValue = toRef(() => fp.value.defaultPickerValue)
+    const pickerValue = toRef(() => fp.value.pickerValue)
+    const onPickerValueChange = toRef(() => fp.value.onPickerValueChange)
+    const inputReadOnly = toRef(() => fp.value.inputReadOnly)
+    const suffix = toRef(() => fp.value.suffix)
+    const onFocus = toRef(() => fp.value.onFocus)
+    const onBlur = toRef(() => fp.value.onBlur)
+    const presets = toRef(() => fp.value.presets)
+    const ranges = toRef(() => props.ranges)
+    const components = toRef(() => fp.value.components)
+    const cellRender = toRef(() => fp.value.cellRender)
+    const dateRender = toRef(() => fp.value.dateRender)
+    const monthCellRender = toRef(() => fp.value.monthCellRender)
+    const onClick = toRef(() => fp.value.onClick)
 
     // ========================= Refs =========================
     const selectorRef = shallowRef()
 
     expose({
-      nativeElement: computed(() => selectorRef.value?.nativeElement),
+      nativeElement: toRef(() => selectorRef.value?.nativeElement),
       focus: (options?: FocusOptions) => {
         selectorRef.value?.focus(options)
       },
@@ -263,7 +264,7 @@ const RangePicker = defineComponent(
         onInternalOk,
       )
 
-    const calendarValue = computed(() => getCalendarValue.value) as ComputedRef<RangeValueType<any>>
+    const calendarValue = toRef(() => getCalendarValue.value) as Ref<RangeValueType<any>>
 
     // ======================== Focus =========================
     const popupRef = ref<HTMLDivElement>()
@@ -331,7 +332,7 @@ const RangePicker = defineComponent(
       }
     }
 
-    const enabledFieldCount = computed(
+    const enabledFieldCount = toRef(
       () => disabled.value.filter(fieldDisabled => !fieldDisabled).length,
     )
 
@@ -388,22 +389,22 @@ const RangePicker = defineComponent(
 
     // ========================= Mode =========================
     const internalModes = ref<[PanelMode, PanelMode]>([picker.value, picker.value] as any)
-    const modes = computed(() => (mode.value ? mode.value : internalModes.value) as [PanelMode, PanelMode])
+    const modes = toRef(() => (mode.value ? mode.value : internalModes.value) as [PanelMode, PanelMode])
     const setModes = (val: [PanelMode, PanelMode]) => {
       if (mode.value === undefined) {
         internalModes.value = val
       }
     }
 
-    const mergedMode = computed(() => modes.value[activeIndex.value] || picker.value)
+    const mergedMode = toRef(() => modes.value[activeIndex.value] || picker.value)
 
     /** Extends from `mergedMode` to patch `datetime` mode */
-    const internalMode = computed<InternalMode>(() =>
+    const internalMode = toRef((): InternalMode =>
       mergedMode.value === 'date' && mergedShowTime.value ? 'datetime' : mergedMode.value as any,
     )
 
     // ====================== PanelCount ======================
-    const multiplePanel = computed(() => internalMode.value === picker.value && internalMode.value !== 'time')
+    const multiplePanel = toRef(() => internalMode.value === picker.value && internalMode.value !== 'time')
 
     // ======================= Show Now =======================
     const mergedShowNow = useShowNow(picker as any, mergedMode as any, showNow, showToday, ref(true))
@@ -439,7 +440,7 @@ const RangePicker = defineComponent(
       multiplePanel,
       defaultPickerValue,
       pickerValue,
-      computed(() => mergedShowTime.value?.defaultOpenValue as any),
+      toRef(() => mergedShowTime.value?.defaultOpenValue as any),
       onPickerValueChange,
       minDate,
       maxDate,
@@ -535,7 +536,7 @@ const RangePicker = defineComponent(
         mergedValue.value?.[activeIndex.value],
       ),
     )
-    const activeHoverValue = computed(() => internalHoverValues.value?.[activeIndex.value])
+    const activeHoverValue = toRef(() => internalHoverValues.value?.[activeIndex.value])
 
     // Clean up `internalHoverValues` when closed
     watch(mergedOpen, () => {
@@ -643,11 +644,11 @@ const RangePicker = defineComponent(
       cellRender,
       dateRender,
       monthCellRender,
-      computed(() => getActiveRange(activeIndex.value)),
+      toRef(() => getActiveRange(activeIndex.value)),
     )
 
     // >>> Value
-    const panelValue = computed(() => calendarValue.value[activeIndex.value] || null)
+    const panelValue = toRef(() => calendarValue.value[activeIndex.value] || null)
 
     // >>> invalid
     const isPopupInvalidateDate = (date: any) => {
