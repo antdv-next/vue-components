@@ -11,6 +11,7 @@ import useRootProps from '../hooks/useRootProps'
 import Icon from '../Icon'
 import Input from '../Input'
 import MultipleDates from './MultipleDates'
+import { pickProps } from '../../../utils/miscUtil'
 
 export interface SingleSelectorProps<DateType extends object = any> extends SelectorProps<DateType> {
   id?: string
@@ -107,7 +108,7 @@ const SingleSelector = defineComponent<SingleSelectorProps>(
     // ======================== Inputs ========================
     const [getInputProps, getText] = useInputProps(
       computed(() => ({
-        ...props,
+        ...pickProps(props as any),
         'aria-required': !!(props as any)['aria-required'],
         'onChange': onSingleChange,
       })) as any,

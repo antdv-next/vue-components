@@ -7,7 +7,7 @@ import { computed, toRef } from 'vue'
 import useLocale from '../../hooks/useLocale'
 import { fillShowTimeConfig, getTimeProps } from '../../hooks/useTimeConfig'
 import { isSameTimestamp } from '../../utils/dateUtil'
-import { toArray } from '../../utils/miscUtil'
+import { pickProps, toArray } from '../../utils/miscUtil'
 import { parseValue } from '../../utils/valueUtil'
 import { fillClearIcon } from '../Selector/hooks/useClearIcon'
 import useDisabledBoundary from './useDisabledBoundary'
@@ -222,7 +222,9 @@ export default function useFilledProps<
 
   // ======================== Props =========================
   const filledProps = computed(() => ({
-    ...props.value,
+    // Only forward props that are actually set: every downstream layer
+    // (omit / pickAttrs / child initProps) is proportional to the key count.
+    ...pickProps(props.value as any),
     previewValue: mergedPreviewValue.value,
     prefixCls: mergedPrefixCls.value,
     locale: mergedLocale.value,
