@@ -56,18 +56,7 @@ import { getTargetScrollBarSize } from '@v-c/util/dist/getScrollBarSize'
 import isEqual from '@v-c/util/dist/isEqual'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
 import { filterEmpty, getAttrStyleAndClass } from '@v-c/util/dist/props-util'
-import {
-  computed,
-  defineComponent,
-  isVNode,
-  nextTick,
-  onMounted,
-  reactive,
-  ref,
-  shallowRef,
-  watch,
-  watchEffect,
-} from 'vue'
+import { computed, defineComponent, isVNode, nextTick, onMounted, reactive, ref, shallowRef, watch, watchEffect } from 'vue'
 import Body from './Body'
 import ColGroup from './ColGroup'
 import { EXPAND_COLUMN, INTERNAL_HOOKS } from './constant'
@@ -171,6 +160,39 @@ const defaults = {
   emptyText: defaultEmpty,
   rowHoverable: true,
 } as any
+
+function isSameSlotChildren(prev: any, next: any): boolean {
+  if (prev === next) {
+    return true
+  }
+  if (!Array.isArray(prev) || !Array.isArray(next) || prev.length !== next.length) {
+    return false
+  }
+  for (let i = 0; i < prev.length; i += 1) {
+    const a = prev[i]
+    const b = next[i]
+    if (!isVNode(a) || !isVNode(b) || a.type !== b.type || a.key !== b.key) {
+      return false
+    }
+    // Nested column groups carry slot functions as children: those are new on
+    // every render, so a group always counts as changed (same as before).
+    if (a.children !== b.children) {
+      return false
+    }
+    const ap = a.props || {}
+    const bp = b.props || {}
+    const keys = Object.keys(ap)
+    if (keys.length !== Object.keys(bp).length) {
+      return false
+    }
+    for (const key of keys) {
+      if (ap[key] !== bp[key]) {
+        return false
+      }
+    }
+  }
+  return true
+}
 
 const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, { attrs, slots, expose }) => {
   const mergedData = shallowRef(props.data || EMPTY_DATA)
@@ -556,7 +578,11 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
   })
 
   const scrollbarSize = ref(0)
-  onMounted(() => {
+  // Only the fixed header (FixedHolder) and expanded rows under a fixed header
+  // read `scrollbarSize`. Measuring it forces a layout of the whole table, so
+  // skip it for plain tables and measure lazily once a consumer appears.
+  const needScrollbarSize = computed(() => fixHeader.value || stickyConfig.value.isSticky)
+  const measureScrollbarSize = () => {
     if (!props.tailor || !useInternalHooks.value) {
       if (scrollBodyRef.value?.nodeType === 1) {
         scrollbarSize.value = getTargetScrollBarSize(scrollBodyRef.value as HTMLElement).width
@@ -565,7 +591,17 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
         scrollbarSize.value = getTargetScrollBarSize(scrollBodyContainerRef.value as any).width
       }
     }
+  }
+  onMounted(() => {
+    if (needScrollbarSize.value) {
+      measureScrollbarSize()
+    }
   })
+  watch(needScrollbarSize, (need) => {
+    if (need && mounted.value) {
+      measureScrollbarSize()
+    }
+  }, { flush: 'post' })
 
   watchEffect(() => {
     if (!canUseDom()) {
@@ -684,7 +720,13 @@ const Table = defineComponent<TableProps<DefaultRecordType>>((props = defaults, 
     scrollBodyRef.value = el
   }
   return () => {
-    slotChildren.value = slots.default?.()
+    const nextSlotChildren = slots.default?.()
+    // Column children are vnodes recreated on every render. Rebuilding the
+    // column objects for an unchanged list would re-render every row, so only
+    // publish them when their shape (type / key / props) actually differs.
+    if (!isSameSlotChildren(slotChildren.value, nextSlotChildren)) {
+      slotChildren.value = nextSlotChildren
+    }
     const { className: attrClassName, style: attrStyle, restAttrs } = getAttrStyleAndClass(attrs)
     const renderFixedHeaderTable = (fixedHolderPassProps: FixedHeaderProps<any>) => {
       return (
