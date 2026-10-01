@@ -4,6 +4,7 @@ import Overflow from '@v-c/overflow'
 import { clsx, warning } from '@v-c/util'
 import KeyCode from '@v-c/util/dist/KeyCode'
 import omit from '@v-c/util/dist/omit'
+import pickDefined from '@v-c/util/dist/pickDefined'
 import { toPropsRefs } from '@v-c/util/dist/props-util'
 import { computed, defineComponent, shallowRef, watch } from 'vue'
 import { useMenuId } from './context/IdContext.tsx'
@@ -190,7 +191,7 @@ const InternalMenuItem = defineComponent<MenuItemProps>(
           role={role === null ? 'none' : role || 'menuitem'}
           tabIndex={disabled ? null : -1}
           data-menu-id={overflowDisabled && domDataId.value ? null : domDataId.value}
-          {...omit({ ...restProps, ...attrs }, [
+          {...pickDefined({ ...restProps, ...attrs }, [
             'extra',
             'onClick',
             'onKeyDown',
@@ -269,7 +270,9 @@ const MenuItem = defineComponent<MenuItemProps>(
       // ======================== Render ========================
       // attrs.class is ClassValue (may be null) while MenuItemProps#class is
       // the items-config string — cast the merged spread for the passthrough
-      return <InternalMenuItem {...{ ...attrs, ...props } as any} v-slots={slots} />
+      // Forward only props that are set: every undefined key costs a prop
+      // normalisation pass in InternalMenuItem and is spread again onto the DOM.
+      return <InternalMenuItem {...{ ...attrs, ...pickDefined(props) } as any} v-slots={slots} />
     }
   },
   {

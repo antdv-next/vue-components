@@ -4,6 +4,7 @@ import type { CSSProperties } from 'vue'
 import { Trigger } from '@v-c/trigger'
 import { clsx } from '@v-c/util'
 import useId from '@v-c/util/dist/hooks/useId'
+import pickDefined from '@v-c/util/dist/pickDefined'
 import { filterEmpty } from '@v-c/util/dist/props-util'
 import { computed, createVNode, defineComponent, ref } from 'vue'
 import placements from './placements'
@@ -140,7 +141,8 @@ const Tooltip = defineComponent<TooltipProps>(
         }
         return createVNode(child, ariaProps)
       }
-      const extraProps: Partial<TooltipProps & TriggerProps> = { ...restProps }
+      // Forward only props that are set: Trigger normalises every key it receives.
+      const extraProps: Partial<TooltipProps & TriggerProps> = pickDefined(restProps) as any
       if ('visible' in props) {
         extraProps.popupVisible = props.visible
       }
