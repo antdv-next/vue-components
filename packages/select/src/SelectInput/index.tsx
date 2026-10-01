@@ -7,6 +7,7 @@ import { clsx, isVueRenderable } from '@v-c/util'
 import { getDOM } from '@v-c/util/dist/Dom/findDOMNode'
 import KeyCode, { KeyCodeStr } from '@v-c/util/dist/KeyCode'
 import omit from '@v-c/util/dist/omit'
+import pickDefined from '@v-c/util/dist/pickDefined'
 import { cloneVNode, computed, defineComponent, isVNode, shallowRef } from 'vue'
 import useBaseProps from '../hooks/useBaseProps'
 import { isValidateOpenKey } from '../utils/keyUtil'
@@ -236,7 +237,7 @@ const SelectInput = defineComponent<SelectInputProps>(
     // =================== Context ===================
     // Create context value with wrapped callbacks
     const contextValue = computed(() => ({
-      ...props,
+      ...pickDefined(props),
       onInputKeyDown: onInternalInputKeyDown,
     }))
 

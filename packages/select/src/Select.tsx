@@ -10,7 +10,7 @@ import type {
 import type { DisplayValueType, FlattenOptionData, RawValueType, RenderNode } from './interface'
 import { isNonNullable } from '@v-c/util'
 import useId from '@v-c/util/dist/hooks/useId'
-import omit from '@v-c/util/dist/omit'
+import pickDefined from '@v-c/util/dist/pickDefined'
 import { filterEmpty } from '@v-c/util/dist/props-util'
 import { computed, defineComponent, shallowRef, toRef, watch } from 'vue'
 import {
@@ -702,7 +702,8 @@ const Select = defineComponent<SelectProps>({
       }
 
       const restAttrs = { ...attrs }
-      const restProps = omit(props, omitKeyList as any)
+      // Forward only props that are set: BaseSelect re-normalises every key it receives.
+      const restProps = pickDefined(props, omitKeyList as any)
       const {
         prefixCls,
         mode,

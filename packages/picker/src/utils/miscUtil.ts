@@ -1,4 +1,5 @@
 import type { InternalMode, Locale, SharedPickerProps } from '../interface'
+import { toRaw } from 'vue'
 
 export function leftPad(
   str: string | number,
@@ -52,10 +53,13 @@ export function pickProps<T extends object>(
     }
   }
   else {
-    for (const key in props) {
-      const value = props[key]
+    // Enumerate keys on the raw object: `for...in` over a reactive proxy runs
+    // the `ownKeys` trap plus a descriptor lookup per key. Values are still
+    // read through `props` so the caller's effect tracks what it forwards.
+    for (const key in toRaw(props)) {
+      const value = props[key as keyof T]
       if (value !== undefined) {
-        clone[key] = value
+        clone[key as keyof T] = value
       }
     }
   }

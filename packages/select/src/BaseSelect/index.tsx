@@ -15,7 +15,7 @@ import type {
 import { clsx, isNonNullable } from '@v-c/util'
 import { getDOM } from '@v-c/util/dist/Dom/findDOMNode'
 import { KeyCodeStr } from '@v-c/util/dist/KeyCode'
-import omit from '@v-c/util/dist/omit'
+import pickDefined from '@v-c/util/dist/pickDefined'
 import { computed, defineComponent, shallowRef, watch } from 'vue'
 import { useAllowClear, useBaseSelectProvider } from '../hooks'
 import useComponents from '../hooks/useComponents'
@@ -670,7 +670,7 @@ export const BaseSelect = defineComponent<
     // ============================ Context =============================
     const baseSelectContext = computed(() => {
       return {
-        ...props,
+        ...pickDefined(props),
         notFoundContent: mergedNotFoundContent.value,
         open: mergedOpen.value,
         triggerOpen: mergedOpen.value,
@@ -777,7 +777,7 @@ export const BaseSelect = defineComponent<
       let renderNode = (
         <SelectInput
           {...attrs}
-          {...omit(props, omitKeys)}
+          {...pickDefined(props, omitKeys)}
           // Ref
           ref={containerRef}
           // Style
