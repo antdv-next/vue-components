@@ -41,14 +41,23 @@ export function pickProps<T extends object>(
 ) {
   const clone = {} as T
 
-  const mergedKeys = (keys || Object.keys(props)) as typeof keys
-
-  if (Array.isArray(mergedKeys)) {
-    mergedKeys.forEach((key) => {
-      if (props[key] !== undefined) {
-        clone[key] = props[key]
+  // `props` is usually a reactive proxy: read each key exactly once, since
+  // every read goes through the proxy `get` trap and dependency tracking.
+  if (keys) {
+    for (const key of keys) {
+      const value = props[key]
+      if (value !== undefined) {
+        clone[key] = value
       }
-    })
+    }
+  }
+  else {
+    for (const key in props) {
+      const value = props[key]
+      if (value !== undefined) {
+        clone[key] = value
+      }
+    }
   }
 
   return clone
