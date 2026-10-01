@@ -1,27 +1,27 @@
 {
   "trigger": {
-    "computed": 26,
-    "watch": 19,
+    "computed": 7,
+    "watch": 17,
     "instances": 1
   },
   "tooltip": {
-    "computed": 29,
-    "watch": 19,
+    "computed": 10,
+    "watch": 17,
     "instances": 2
   },
   "picker": {
-    "computed": 76,
-    "watch": 35,
+    "computed": 57,
+    "watch": 33,
     "instances": 6
   },
   "range-picker": {
-    "computed": 77,
-    "watch": 40,
+    "computed": 58,
+    "watch": 38,
     "instances": 11
   },
   "select": {
-    "computed": 112,
-    "watch": 27,
+    "computed": 93,
+    "watch": 25,
     "instances": 11
   },
   "menu-item": {
@@ -30,7 +30,7 @@
     "instances": 9
   },
   "table-row": {
-    "computed": 41,
+    "computed": 9,
     "watch": 1,
     "instances": 7
   },

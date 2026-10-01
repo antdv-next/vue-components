@@ -13,10 +13,12 @@ import type {
 import { clsx, isNonNullable, warning } from '@v-c/util'
 import { filterEmpty, getStylePxValue } from '@v-c/util/dist/props-util'
 import getValue from '@v-c/util/dist/utils/get'
-import { computed, defineComponent, isVNode, shallowRef, toRaw, watch } from 'vue'
+import { computed, defineComponent, isVNode, shallowRef, toRaw, toRef, watch } from 'vue'
 import { useInjectPerfContext } from '../context/PerfContext'
 import { useInjectTableContext } from '../context/TableContext'
 import useHoverState from './useHoverState'
+
+const NO_SHADOW: readonly [boolean, boolean] = [false, false]
 
 export interface CellProps<RecordType extends DefaultRecordType> {
   prefixCls?: string
@@ -190,21 +192,20 @@ const Cell = defineComponent<CellProps<any>>({
   setup(props, { slots }) {
     const tableContext = useInjectTableContext()
     const perfRecord = useInjectPerfContext()
+    const [getHovering, onHover] = useHoverState(tableContext)
 
-    const isFixStart = computed(() => {
-      return typeof props.fixStart === 'number' && !tableContext.allColumnsFixedLeft
-    })
+    // Plain getters (no computed bookkeeping): these are cheap column-level
+    // facts read once per render.
+    const isFixStart = toRef(() => typeof props.fixStart === 'number' && !tableContext.allColumnsFixedLeft)
 
-    const isFixEnd = computed(() => {
-      return typeof props.fixEnd === 'number' && !tableContext.allColumnsFixedLeft
-    })
+    const isFixEnd = toRef(() => typeof props.fixEnd === 'number' && !tableContext.allColumnsFixedLeft)
 
-    const shadowInfo = computed(() => {
+    const shadowInfo = toRef(() => {
       // Skip scrollInfo subscription for non-fixed cells. Reading
       // tableContext.scrollInfo before this early return made every cell
       // re-render on horizontal scroll, even though the result was constant.
       if (!isFixStart.value && !isFixEnd.value) {
-        return [false, false]
+        return NO_SHADOW
       }
       const { fixedEndShadow, offsetFixedStartShadow, offsetFixedEndShadow, fixedStartShadow } = props
       const [absScroll = 0, scrollWidth = 0] = tableContext.scrollInfo || []
@@ -366,7 +367,7 @@ const Cell = defineComponent<CellProps<any>>({
       const mergedRowSpan = legacyCellProps?.rowSpan ?? additionalProps.rowSpan ?? rowSpan ?? 1
       const mergedHoverRowSpan = legacyCellProps?.rowSpan ?? hoverRowSpan ?? mergedRowSpan
 
-      const [hovering, onHover] = useHoverState(index!, mergedHoverRowSpan, tableContext)
+      const hovering = getHovering(index!, mergedHoverRowSpan)
 
       const onMouseEnter = (event: MouseEvent) => {
         if (record) {
@@ -411,7 +412,7 @@ const Cell = defineComponent<CellProps<any>>({
           [`${cellPrefixCls}-ellipsis`]: ellipsis,
           [`${cellPrefixCls}-with-append`]: mergedAppendNode,
           [`${cellPrefixCls}-fix-sticky`]: (isFixStart.value || isFixEnd.value) && isSticky,
-          [`${cellPrefixCls}-row-hover`]: !legacyCellProps && hovering.value,
+          [`${cellPrefixCls}-row-hover`]: !legacyCellProps && hovering,
         },
         additionalClassName,
         legacyCellProps?.className,

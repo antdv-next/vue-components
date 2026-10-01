@@ -1,8 +1,19 @@
 import type { Ref } from 'vue'
 import { clsx } from '@v-c/util'
-import { computed, unref } from 'vue'
+import { computed, toRef, unref } from 'vue'
 import { useInjectTableContext } from '../context/TableContext'
 import { getColumnsKey } from '../utils/valueUtil'
+
+const columnsKeyCache = new WeakMap<object, ReturnType<typeof getColumnsKey>>()
+
+function getColumnsKeyMemo(flattenColumns: readonly any[]) {
+  let keys = columnsKeyCache.get(flattenColumns)
+  if (!keys) {
+    keys = getColumnsKey(flattenColumns)
+    columnsKeyCache.set(flattenColumns, keys)
+  }
+  return keys
+}
 
 export default function useRowInfo<RecordType>(
   record: Ref<RecordType> | RecordType,
@@ -12,16 +23,18 @@ export default function useRowInfo<RecordType>(
 ) {
   const tableContext = useInjectTableContext<RecordType>()
 
-  const nestExpandable = computed(() => tableContext.expandableType === 'nest')
-  const rowSupportExpand = computed(() => {
+  // Cheap derivations are plain getters; `expanded` and `rowProps` stay
+  // computeds because they gate re-renders (Set lookup result / built object).
+  const nestExpandable = toRef(() => tableContext.expandableType === 'nest')
+  const rowSupportExpand = toRef(() => {
     const mergedRecord = unref(record)
     return tableContext.expandableType === 'row'
       && (!tableContext.rowExpandable || tableContext.rowExpandable(mergedRecord))
   })
-  const expandable = computed(() => rowSupportExpand.value || nestExpandable.value)
+  const expandable = toRef(() => rowSupportExpand.value || nestExpandable.value)
 
   const expanded = computed(() => tableContext.expandedKeys?.has(unref(rowKey)))
-  const hasNestChildren = computed(() => {
+  const hasNestChildren = toRef(() => {
     const mergedRecord = unref(record) as any
     return !!(tableContext.childrenColumnName && mergedRecord?.[tableContext.childrenColumnName])
   })
@@ -55,7 +68,9 @@ export default function useRowInfo<RecordType>(
     }
   })
 
-  const columnsKey = computed(() => getColumnsKey(tableContext.flattenColumns))
+  // Column keys only depend on the column list, which the table rebuilds as a
+  // whole: memoize per list instance instead of per row.
+  const columnsKey = toRef(() => getColumnsKeyMemo(tableContext.flattenColumns))
 
   return {
     tableContext,

@@ -2,8 +2,9 @@ import type { CSSProperties } from 'vue'
 import type { ColumnType, CustomizeComponent } from '../interface'
 import type { TableProps } from '../Table'
 import { clsx } from '@v-c/util'
-import { computed, defineComponent, ref, watchEffect } from 'vue'
+import { defineComponent, ref, toRef, watchEffect } from 'vue'
 import Cell from '../Cell'
+import { provideRowHover } from '../Cell/useHoverState'
 import useRowInfo from '../hooks/useRowInfo'
 import { computedExpandedClassName } from '../utils/expandUtil'
 import ExpandedRow from './ExpandedRow'
@@ -123,12 +124,15 @@ const BodyRow = defineComponent<BodyRowProps<any>>({
     // Keep the expanded row mounted after it has been expanded
     const expandedRef = ref(false)
 
+    const rowIndex = toRef(() => props.index)
     const rowInfo = useRowInfo(
-      computed(() => props.record),
-      computed(() => props.rowKey),
-      computed(() => props.index),
-      computed(() => props.indent || 0),
+      toRef(() => props.record),
+      toRef(() => props.rowKey),
+      rowIndex,
+      toRef(() => props.indent || 0),
     )
+    // One hover memo per row, shared by every cell of the row.
+    provideRowHover(rowIndex, rowInfo.tableContext)
 
     watchEffect(() => {
       if (rowInfo.expanded.value) {

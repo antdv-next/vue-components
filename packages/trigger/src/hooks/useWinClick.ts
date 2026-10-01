@@ -1,7 +1,7 @@
 import type { Ref } from 'vue'
 import { warning } from '@v-c/util'
 import { getShadowRoot } from '@v-c/util/dist/Dom/shadow'
-import { shallowRef, watch, watchEffect } from 'vue'
+import { shallowRef, watch } from 'vue'
 import { getWin } from '../util.ts'
 
 /**
@@ -18,10 +18,9 @@ export default function useWinClick(
   inPopupOrChild: (target: EventTarget) => boolean,
   triggerOpen: (open: boolean) => void,
 ) {
-  const openRef = shallowRef(open.value)
-  watchEffect(() => {
-    openRef.value = open.value
-  })
+  // Read the open state straight from the ref inside the handlers; a mirror
+  // ref would cost a watcher per trigger for nothing.
+  const openRef = open
   const popupPointerDownRef = shallowRef(false)
   // Click to hide is special action since click popup element should not hide
   watch(

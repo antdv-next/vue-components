@@ -11,7 +11,7 @@ import { classNames } from '@v-c/util'
 import { getShadowRoot } from '@v-c/util/dist/Dom/shadow'
 import { filterEmpty } from '@v-c/util/dist/props-util'
 import { createElementRef } from '@v-c/util/dist/vnode'
-import { computed, createVNode, defineComponent, nextTick, onBeforeUnmount, reactive, ref, shallowRef, useId, watch, watchEffect } from 'vue'
+import { computed, createVNode, defineComponent, nextTick, onBeforeUnmount, reactive, ref, shallowRef, toRef, useId, watch, watchEffect } from 'vue'
 import { TriggerContextProvider, useTriggerContext, useUniqueContext } from './context.ts'
 import useAction from './hooks/useAction.ts'
 import useAlign from './hooks/useAlign.ts'
@@ -143,10 +143,10 @@ const defaults = {
 export function generateTrigger(PortalComponent: any = Portal) {
   return defineComponent<TriggerProps>(
     (props = defaults, { expose, slots, attrs }) => {
-      const mergedAutoDestroy = computed(() => props.autoDestroy ?? false)
-      const openUncontrolled = computed(() => props.popupVisible === undefined)
+      const mergedAutoDestroy = toRef(() => props.autoDestroy ?? false)
+      const openUncontrolled = toRef(() => props.popupVisible === undefined)
       // =========================== Mobile ===========================
-      const isMobile = computed(() => !!props.mobile)
+      const isMobile = toRef(() => !!props.mobile)
       // ========================== Context ===========================
       const subPopupElements = ref<Record<string, HTMLElement | null>>({})
       const parentContext = useTriggerContext()
@@ -348,10 +348,8 @@ export function generateTrigger(PortalComponent: any = Portal) {
         }
       })
 
-      const openRef = shallowRef(mergedOpen.value)
-      watch(mergedOpen, () => {
-        openRef.value = mergedOpen.value
-      })
+      // Handlers read the open state straight from `mergedOpen`; no mirror ref.
+      const openRef = mergedOpen
 
       const internalTriggerOpen = (nextOpen: boolean) => {
         // Compare against `rawOpen`, not `mergedOpen`: while `disabled` forces
@@ -415,7 +413,7 @@ export function generateTrigger(PortalComponent: any = Portal) {
         mousePos.value = [event.clientX, event.clientY]
       }
 
-      const alignTarget = computed(() =>
+      const alignTarget = toRef(() =>
         props?.alignPoint && mousePos.value !== null ? mousePos.value : targetEle.value,
       )
 
@@ -435,20 +433,20 @@ export function generateTrigger(PortalComponent: any = Portal) {
         mergedOpen,
         popupEle as any,
         alignTarget as any,
-        computed(() => props?.popupPlacement) as any,
-        computed(() => props?.builtinPlacements) as any,
-        computed(() => props?.popupAlign) as any,
+        toRef(() => props?.popupPlacement) as any,
+        toRef(() => props?.builtinPlacements) as any,
+        toRef(() => props?.popupAlign) as any,
         props?.onPopupAlign,
         isMobile,
       )
 
       const [showActions, hideActions] = useAction(
-        computed(() => props.action!),
-        computed(() => props.showAction!),
-        computed(() => props.hideAction!),
+        toRef(() => props.action!),
+        toRef(() => props.showAction!),
+        toRef(() => props.hideAction!),
       )
-      const clickToShow = computed(() => showActions.value?.has('click'))
-      const clickToHide = computed(() => hideActions.value?.has('click') || hideActions.value?.has('contextmenu'))
+      const clickToShow = toRef(() => showActions.value?.has('click'))
+      const clickToHide = toRef(() => hideActions.value?.has('click') || hideActions.value?.has('contextmenu'))
       const triggerAlign = () => {
         if (!inMotion.value) {
           onAlign()
@@ -588,8 +586,8 @@ export function generateTrigger(PortalComponent: any = Portal) {
       }
 
       // ======================= Action: Touch ========================
-      const touchToShow = computed(() => showActions.value?.has('touch'))
-      const touchToHide = computed(() => hideActions.value?.has('touch'))
+      const touchToShow = toRef(() => showActions.value?.has('touch'))
+      const touchToHide = toRef(() => hideActions.value?.has('touch'))
       /** Used for prevent `hover` event conflict with mobile env */
       const touchedRef = shallowRef(false)
       watchEffect(() => {
@@ -636,18 +634,18 @@ export function generateTrigger(PortalComponent: any = Portal) {
       // Click to hide is special action since click popup element should not hide
       const onPopupPointerDown = useWinClick(
         mergedOpen,
-        computed(() => clickToHide.value || touchToHide.value),
+        toRef(() => clickToHide.value || touchToHide.value),
         targetEle as any,
         popupEle as any,
-        computed(() => props.mask) as any,
-        computed(() => props.maskClosable) as any,
+        toRef(() => props.mask) as any,
+        toRef(() => props.maskClosable) as any,
         inPopupOrChild,
         triggerOpen,
       )
 
       // ======================= Action: Hover ========================
-      const hoverToShow = computed(() => showActions.value?.has('hover'))
-      const hoverToHide = computed(() => hideActions.value?.has('hover'))
+      const hoverToShow = toRef(() => showActions.value?.has('hover'))
+      const hoverToHide = toRef(() => hideActions.value?.has('hover'))
 
       let onPopupMouseEnter: any
 
