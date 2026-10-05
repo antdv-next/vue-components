@@ -267,7 +267,7 @@ const Pagination = defineComponent<PaginationProps>(
         getItemIcon(props.prevIcon, prevPageTitle, mergedShowTitle.value ? prevPageTitle : undefined),
       )
       const nextProps: Record<string, any> = {}
-      if (!hasPrev.value) {
+      if (!hasPrev.value || props.disabled) {
         nextProps.disabled = true
       }
       return isVNode(prevButton)
@@ -284,7 +284,7 @@ const Pagination = defineComponent<PaginationProps>(
         getItemIcon(props.nextIcon, nextPageTitle, mergedShowTitle.value ? nextPageTitle : undefined),
       )
       const nextProps: Record<string, any> = {}
-      if (!hasNext.value) {
+      if (!hasNext.value || props.disabled) {
         nextProps.disabled = true
       }
       return isVNode(nextButton)
@@ -406,7 +406,7 @@ const Pagination = defineComponent<PaginationProps>(
 
       let prev = renderPrev(prevPage.value)
       if (isVueRenderable(prev)) {
-        const prevDisabled = !hasPrev.value || !allPages.value
+        const prevDisabled = !hasPrev.value || !allPages.value || !!disabled
         prev = (
           <li
             onClick={prevHandle}
@@ -427,21 +427,12 @@ const Pagination = defineComponent<PaginationProps>(
 
       let next = renderNext(nextPage.value)
       if (isVueRenderable(next)) {
-        let nextDisabled: boolean, nextTabIndex: number | null
-
-        if (simple) {
-          nextDisabled = !hasNext.value
-          nextTabIndex = hasPrev.value ? 0 : null
-        }
-        else {
-          nextDisabled = !hasNext.value || !allPages.value
-          nextTabIndex = nextDisabled ? null : 0
-        }
+        const nextDisabled = !hasNext.value || !allPages.value || !!disabled
 
         next = (
           <li
             onClick={nextHandle}
-            tabindex={nextTabIndex ?? undefined}
+            tabindex={nextDisabled ? undefined : 0}
             onKeydown={runIfEnterNext}
             class={classNames(`${prefixCls}-next`, itemClassName, {
               [`${prefixCls}-disabled`]: nextDisabled,
@@ -476,7 +467,12 @@ const Pagination = defineComponent<PaginationProps>(
         if (goButton.value) {
           if (typeof goButton.value === 'boolean') {
             gotoButton = (
-              <button type="button" onClick={handleGoTO} onKeyup={handleGoTO}>
+              <button
+                type="button"
+                disabled={disabled}
+                onClick={handleGoTO}
+                onKeyup={handleGoTO}
+              >
                 {locale?.jump_to_confirm}
               </button>
             )
@@ -542,6 +538,7 @@ const Pagination = defineComponent<PaginationProps>(
         page: -1,
         className: itemClassName,
         style: itemStyle,
+        disabled,
       }
 
       const pagerList: (VNode | null)[] = []
@@ -592,13 +589,14 @@ const Pagination = defineComponent<PaginationProps>(
                 <li
                   key="prev"
                   onClick={jumpPrevHandle}
-                  tabindex={0}
+                  tabindex={disabled ? undefined : 0}
                   onKeydown={runIfEnterJumpPrev}
                   class={classNames(`${prefixCls}-jump-prev`, {
                     [`${prefixCls}-jump-prev-custom-icon`]: isVueRenderable(jumpPrevIcon),
                   })}
                   role="button"
                   aria-label={prevItemTitle}
+                  aria-disabled={disabled || undefined}
                 >
                   {jumpPrevContent}
                 </li>
@@ -610,13 +608,14 @@ const Pagination = defineComponent<PaginationProps>(
                 <li
                   key="next"
                   onClick={jumpNextHandle}
-                  tabindex={0}
+                  tabindex={disabled ? undefined : 0}
                   onKeydown={runIfEnterJumpNext}
                   class={classNames(`${prefixCls}-jump-next`, {
                     [`${prefixCls}-jump-next-custom-icon`]: isVueRenderable(jumpNextIcon),
                   })}
                   role="button"
                   aria-label={nextItemTitle}
+                  aria-disabled={disabled || undefined}
                 >
                   {jumpNextContent}
                 </li>
@@ -710,6 +709,7 @@ const Pagination = defineComponent<PaginationProps>(
           ref={paginationRef}
           class={cls}
           style={style}
+          aria-disabled={disabled || undefined}
           {...dataOrAriaAttributeProps}
         >
           {totalText}

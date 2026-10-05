@@ -12,6 +12,7 @@ export interface PagerProps extends Pick<PaginationProps, 'itemRender'> {
   className?: string
   style?: CSSProperties
   showTitle: boolean
+  disabled?: boolean
   onClick?: (page: number) => void
   onKeyPress?: (
     e: KeyboardEvent,
@@ -37,6 +38,7 @@ const Pager = defineComponent<PagerProps>((props) => {
       active,
       className,
       showTitle,
+      disabled,
       itemRender,
       style,
     } = props
@@ -69,10 +71,11 @@ const Pager = defineComponent<PagerProps>((props) => {
             style={style}
             onClick={handleClick}
             onKeydown={handleKeyPress}
-            tabindex={0}
+            tabindex={disabled ? undefined : 0}
             role="button"
             aria-label={pagerLabel}
             aria-current={active ? 'page' : undefined}
+            aria-disabled={disabled || undefined}
           >
             {pager}
           </li>

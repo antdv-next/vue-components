@@ -80,3 +80,43 @@ describe('locale zh_TW', () => {
     wrapper.unmount()
   })
 })
+
+describe('disabled', () => {
+  it('should remove all pagination items from the tab order and expose aria-disabled', () => {
+    const wrapper = mount(Pagination, {
+      props: {
+        total: 1000,
+        current: 5,
+        disabled: true,
+        showQuickJumper: true,
+        onChange: vi.fn(),
+      },
+    })
+
+    expect(wrapper.find('ul').attributes('aria-disabled')).toBe('true')
+    wrapper.findAll('li[role="button"]').forEach((item) => {
+      expect(item.attributes('aria-disabled'), item.html()).toBe('true')
+      expect(item.attributes('tabindex'), item.html()).toBeUndefined()
+    })
+
+    // The prev/next item-link buttons cloned through itemRender are natively disabled
+    expect(wrapper.find('.vc-pagination-prev button').attributes('disabled')).toBeDefined()
+    expect(wrapper.find('.vc-pagination-next button').attributes('disabled')).toBeDefined()
+
+    wrapper.unmount()
+  })
+})
+
+describe('simple mode next button', () => {
+  it('should be keyboard focusable on the first page', () => {
+    const wrapper = mount(Pagination, {
+      props: { total: 100, simple: true, current: 1, onChange: vi.fn() },
+    })
+
+    const next = wrapper.find('.vc-pagination-next')
+    expect(next.attributes('tabindex')).toBe('0')
+    expect(next.classes()).not.toContain('vc-pagination-disabled')
+
+    wrapper.unmount()
+  })
+})
