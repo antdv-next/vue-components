@@ -48,8 +48,8 @@ function useDrag(
   const { onDragStart, onDragChange } = unstableContext
 
   watch(
-    rawValues,
-    (val) => {
+    [rawValues, draggingIndex],
+    ([val]) => {
       if (draggingIndex.value === -1) {
         cacheValues.value = [...val]
         originValues.value = [...val]

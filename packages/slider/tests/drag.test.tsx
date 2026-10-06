@@ -120,4 +120,25 @@ describe('slider drag', () => {
 
     expect(w.emitted('changeComplete')).toHaveLength(2)
   })
+
+  it('lands focus on the dragged value after the handle crosses another', async () => {
+    const w = mount(Slider, {
+      props: { range: true, defaultValue: [10, 30] },
+      attachTo: document.body,
+    })
+    wrapper = w
+    stubRect(w.element)
+
+    w.findAll(HANDLE_SELECTOR)[0].element.dispatchEvent(createMouseEvent('mousedown', 0))
+    await w.vm.$nextTick()
+
+    document.dispatchEvent(createMouseEvent('mousemove', 60))
+    await w.vm.$nextTick()
+
+    document.dispatchEvent(createMouseEvent('mouseup', 60))
+    await w.vm.$nextTick()
+
+    expect(w.findAll(HANDLE_SELECTOR).map(h => h.attributes('aria-valuenow'))).toEqual(['30', '70'])
+    expect(document.activeElement?.getAttribute('aria-valuenow')).toBe('70')
+  })
 })
