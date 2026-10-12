@@ -2,6 +2,7 @@ import type { BaseInputProps } from './interface'
 import { clsx, isVueRenderable } from '@v-c/util'
 import { filterEmpty } from '@v-c/util/dist/props-util'
 import { computed, createVNode, defineComponent, Fragment, shallowRef } from 'vue'
+import useAllowClear from './hooks/useAllowClear'
 import { hasAddon, hasPrefixSuffix } from './utils/commonUtils'
 
 export interface HolderRef {
@@ -20,6 +21,7 @@ const BaseInput = defineComponent<
       }
     }
     const hasAffix = computed(() => hasPrefixSuffix(props))
+    const allowClearInfo = useAllowClear(() => props.allowClear)
 
     // ======================== Ref ======================== //
     const groupRef = shallowRef<HTMLDivElement>()
@@ -29,7 +31,6 @@ const BaseInput = defineComponent<
     return () => {
       const {
         components,
-        allowClear,
         readOnly,
         disabled,
         value,
@@ -65,25 +66,25 @@ const BaseInput = defineComponent<
       })
       // ================== Prefix & Suffix ================== //
       if (hasAffix.value) {
+        const [showAllowClear, allowClearConfig] = allowClearInfo.value
         let clearIcon: any = null
 
         // ================== Clear Icon ================== //
-        if (allowClear) {
-          const clearDisabled = typeof allowClear === 'object' && allowClear?.disabled
-          const needClear = !disabled && !readOnly && value && !clearDisabled
+        if (showAllowClear) {
+          const needClear = !disabled && !readOnly && value && !allowClearConfig.disabled
           const clearIconCls = `${prefixCls}-clear-icon`
-          const iconNode
-            = typeof allowClear === 'object' && isVueRenderable(allowClear?.clearIcon)
-              ? allowClear.clearIcon
-              : '✖'
+          const iconNode = isVueRenderable(allowClearConfig.clearIcon)
+            ? allowClearConfig.clearIcon
+            : '✖'
 
           clearIcon = (
             // rc-input#168: keep clear button reachable by keyboard.
             <button
               type="button"
-              disabled={clearDisabled || undefined}
+              disabled={allowClearConfig.disabled || undefined}
+              tabindex={allowClearConfig.tabIndex}
               onClick={(event) => {
-                if (clearDisabled)
+                if (allowClearConfig.disabled)
                   return
                 handleReset?.(event)
                 onClear?.()
@@ -110,13 +111,13 @@ const BaseInput = defineComponent<
             [`${affixWrapperPrefixCls}-disabled`]: disabled, // Not used, but keep it
             [`${affixWrapperPrefixCls}-focused`]: focused, // Not used, but keep it
             [`${affixWrapperPrefixCls}-readonly`]: readOnly,
-            [`${affixWrapperPrefixCls}-input-with-clear-btn`]: isVueRenderable(suffix) && allowClear && value,
+            [`${affixWrapperPrefixCls}-input-with-clear-btn`]: isVueRenderable(suffix) && showAllowClear && value,
           },
           classNames?.affixWrapper,
           classNames?.variant,
         )
 
-        const suffixNode = (isVueRenderable(suffix) || allowClear) && (
+        const suffixNode = (isVueRenderable(suffix) || showAllowClear) && (
           <span
             class={clsx(`${prefixCls}-suffix`, classNames?.suffix)}
             style={styles?.suffix}
