@@ -17,7 +17,7 @@ import {
 export const QRCodeSVG = defineComponent<QRPropsSVG>({
   name: 'QRCodeSVG',
   inheritAttrs: false,
-  setup(props = defaults) {
+  setup(props = defaults, { attrs }) {
     const image = shallowRef<VNode | null>(null)
     const fgPath = shallowRef('')
     const numCells = shallowRef(0)
@@ -80,6 +80,7 @@ export const QRCodeSVG = defineComponent<QRPropsSVG>({
       } = props
       return (
         <svg
+          {...attrs}
           height={size}
           width={size}
           viewBox={`0 0 ${numCells.value} ${numCells.value}`}
