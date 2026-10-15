@@ -9,6 +9,9 @@ export interface ContentProps {
   topNoticeWidth?: number
   className?: string
   style?: CSSProperties
+  // Not runtime props: they stay in attrs and are forwarded to the content node.
+  onMouseenter?: (e: MouseEvent) => void
+  onMouseleave?: (e: MouseEvent) => void
 }
 
 interface ContentStyle extends CSSProperties {
@@ -17,7 +20,7 @@ interface ContentStyle extends CSSProperties {
 }
 
 const Content = defineComponent<ContentProps>(
-  (props, { slots, expose }) => {
+  (props, { slots, attrs, expose }) => {
     const contentRef = ref<HTMLDivElement | null>(null)
     let prevHeight = props.height
 
@@ -46,13 +49,14 @@ const Content = defineComponent<ContentProps>(
       // a manual `inst.update()` was invoked.
       const contentStyle: ContentStyle = {
         ...style,
-        height: `${height}px`,
+        'height': `${height}px`,
         '--top-notificiation-height': `${topNoticeHeight}px`,
         '--top-notificiation-width': `${topNoticeWidth}px`,
       }
 
       return (
         <div
+          {...attrs}
           ref={contentRef}
           class={clsx(contentPrefixCls, `${contentPrefixCls}-${heightStatus}`, className)}
           style={contentStyle}

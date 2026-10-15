@@ -69,4 +69,31 @@ describe('useNoticeTimer', () => {
     await vi.advanceTimersByTimeAsync(2000)
     expect(onClose).toHaveBeenCalledTimes(1)
   })
+  it('preserves the remaining duration when paused repeatedly', async () => {
+    const { onUpdate, onClose, resume, pause } = setupTimer(1)
+
+    await vi.advanceTimersByTimeAsync(200)
+    pause()
+    await nextTick()
+    const updateCount = onUpdate.mock.calls.length
+
+    for (let i = 0; i < 3; i += 1) {
+      await vi.advanceTimersByTimeAsync(2000)
+      pause()
+    }
+
+    expect(onUpdate).toHaveBeenCalledTimes(updateCount)
+    expect(onClose).not.toHaveBeenCalled()
+
+    resume()
+    await nextTick()
+    expect(onUpdate.mock.lastCall![0]).toBeCloseTo(0.2, 1)
+
+    await vi.advanceTimersByTimeAsync(700)
+    expect(onClose).not.toHaveBeenCalled()
+
+    await vi.advanceTimersByTimeAsync(200)
+    expect(onUpdate).toHaveBeenLastCalledWith(1)
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
 })
