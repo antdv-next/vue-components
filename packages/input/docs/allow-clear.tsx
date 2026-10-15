@@ -21,6 +21,13 @@ export default defineComponent(() => {
         value={value.value}
         placeholder="controlled"
       />
+      <br />
+      <br />
+      <Input
+        prefixCls="vc-input"
+        allowClear={{ tabIndex: -1 }}
+        placeholder="clear button skipped by Tab navigation"
+      />
     </div>
   )
 })

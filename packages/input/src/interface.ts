@@ -36,7 +36,7 @@ export interface CommonInputProps {
     suffix?: CSSProperties
     clear?: CSSProperties
   }
-  allowClear?: boolean | { clearIcon?: VueNode, disabled?: boolean }
+  allowClear?: boolean | { clearIcon?: VueNode, disabled?: boolean, tabIndex?: number }
 }
 
 type DataAttr = Record<`data-${string}`, string>
