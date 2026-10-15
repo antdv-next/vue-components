@@ -305,11 +305,11 @@
           "description": "@rc-component/notification -> @v-c/notification"
         }
       ],
-      "last_synced_commit": "dd2ba0be94451f1a934a22cf9d63a011bed17a1a",
-      "last_synced_commit_short": "dd2ba0be94",
-      "last_synced_at": "2026-09-10T13:50:17Z",
-      "last_synced_tag": "@rc-component/notification@2.0.8",
-      "sync_count": 4
+      "last_synced_commit": "cea66a122c369b701c0c3d59f8ea329ca3be2220",
+      "last_synced_commit_short": "cea66a122c",
+      "last_synced_at": "2026-10-16T00:00:00Z",
+      "last_synced_tag": "@rc-component/notification@2.1.1",
+      "sync_count": 5
     },
     {
       "name": "@rc-component/overflow",
