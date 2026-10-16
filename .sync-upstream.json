@@ -339,11 +339,11 @@
           "description": "@rc-component/pagination -> @v-c/pagination"
         }
       ],
-      "last_synced_commit": "0a607d1515a91c2ce1d291fe19fe7aa4df6ac6d5",
-      "last_synced_commit_short": "0a607d1515",
-      "last_synced_at": "2026-09-10T13:50:17Z",
-      "last_synced_tag": "@rc-component/pagination@1.5.0",
-      "sync_count": 7
+      "last_synced_commit": "a7dd4cb3d2c223fe7bf20bab94e8db75ae99224c",
+      "last_synced_commit_short": "a7dd4cb3d2",
+      "last_synced_at": "2026-10-16T00:00:00Z",
+      "last_synced_tag": "@rc-component/pagination@1.6.0",
+      "sync_count": 8
     },
     {
       "name": "@rc-component/picker",
