@@ -134,3 +134,83 @@ describe('notification stack hover', () => {
     expect(onClose).toHaveBeenCalledTimes(1)
   })
 })
+
+describe('notification unmount', () => {
+  it.each(['hovered', 'never hovered', 'already left'])(
+    'only calls leave when still hovered: %s',
+    async (state) => {
+      const onMouseLeave = vi.fn()
+      const wrapper = mount(Notification, {
+        props: {
+          prefixCls: 'vc-notification',
+          duration: 0,
+          onMouseLeave,
+        },
+      })
+      const notice = wrapper.find('.vc-notification-notice')
+
+      if (state !== 'never hovered') {
+        await notice.trigger('mouseenter')
+      }
+      if (state === 'already left') {
+        await notice.trigger('mouseleave')
+        expect(onMouseLeave).toHaveBeenCalledTimes(1)
+        onMouseLeave.mockClear()
+      }
+
+      wrapper.unmount()
+      expect(onMouseLeave).toHaveBeenCalledTimes(state === 'hovered' ? 1 : 0)
+      if (state === 'hovered') {
+        expect(onMouseLeave).toHaveBeenCalledWith(undefined)
+      }
+    },
+  )
+})
+
+describe('notification stack', () => {
+  afterEach(() => {
+    document.body.innerHTML = ''
+  })
+
+  async function openNotices(count: number, closable = false) {
+    const wrapper = mount(Notifications, {
+      props: {
+        container: document.body,
+        stack: { threshold: 3 },
+      },
+      attachTo: document.body,
+    })
+    for (let i = 0; i < count; i += 1) {
+      wrapper.vm.open({
+        key: `notice-${i}`,
+        description: 'Test',
+        duration: false,
+        closable,
+      })
+    }
+    await nextTick()
+    await nextTick()
+    return wrapper
+  }
+
+  const fire = async (selector: string, type: 'mouseenter' | 'mouseleave') => {
+    document.querySelector(selector)!.dispatchEvent(new MouseEvent(type))
+    await nextTick()
+  }
+
+  it('expands only when hovering the list content', async () => {
+    await openNotices(5)
+    expect(document.querySelectorAll('.vc-notification-notice')).toHaveLength(5)
+    expect(document.querySelector('.vc-notification-stack')).toBeTruthy()
+    expect(document.querySelector('.vc-notification-stack-expanded')).toBeFalsy()
+
+    await fire('.vc-notification-list', 'mouseenter')
+    expect(document.querySelector('.vc-notification-stack-expanded')).toBeFalsy()
+
+    await fire('.vc-notification-list-content', 'mouseenter')
+    expect(document.querySelector('.vc-notification-stack-expanded')).toBeTruthy()
+
+    await fire('.vc-notification-list-content', 'mouseleave')
+    expect(document.querySelector('.vc-notification-stack-expanded')).toBeFalsy()
+  })
+})

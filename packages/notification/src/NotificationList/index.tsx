@@ -289,12 +289,6 @@ const NotificationList = defineComponent<NotificationListProps>(
               [`${listPrefixCls}-hovered`]: listHovering.value,
             },
           )}
-          onMouseenter={() => {
-            listHovering.value = true
-          }}
-          onMouseleave={() => {
-            listHovering.value = false
-          }}
           style={{ ...nss?.list, ...style, ...((attrs as any).style ?? {}) } as CSSProperties}
         >
           <Content
@@ -305,6 +299,12 @@ const NotificationList = defineComponent<NotificationListProps>(
             topNoticeWidth={positionResult.topNoticeWidth}
             className={ncs?.listContent}
             style={nss?.listContent}
+            onMouseenter={() => {
+              listHovering.value = true
+            }}
+            onMouseleave={() => {
+              listHovering.value = false
+            }}
           >
             <TransitionGroup
               appear

@@ -3,7 +3,7 @@ import type { Component, CSSProperties, HTMLAttributes } from 'vue'
 import type { ClosableType } from './hooks/useClosable'
 import type { NotificationProgressProps } from './Progress'
 import { clsx, isNonNullable, isVueRenderable } from '@v-c/util'
-import { computed, defineComponent, ref, shallowRef, watch } from 'vue'
+import { computed, defineComponent, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
 import useClosable from './hooks/useClosable'
 import useNoticeTimer from './hooks/useNoticeTimer'
 import DefaultProgress from './Progress'
@@ -67,7 +67,7 @@ export interface NotificationProps {
   // Function
   onClick?: (e: MouseEvent) => void
   onMouseEnter?: (e: MouseEvent) => void
-  onMouseLeave?: (e: MouseEvent) => void
+  onMouseLeave?: (e?: MouseEvent) => void
   /** @deprecated Please use `closable.onClose` instead. */
   onClose?: () => void
 }
@@ -158,7 +158,7 @@ const Notification = defineComponent<NotificationProps>(
       ;(props.props?.onMouseenter as any)?.(e)
     }
 
-    const onInternalMouseLeave = (e: MouseEvent) => {
+    const onInternalMouseLeave = (e?: MouseEvent) => {
       hovering.value = false
       const pauseOnHover = props.pauseOnHover ?? true
       if (pauseOnHover && !props.hovering) {
@@ -167,6 +167,13 @@ const Notification = defineComponent<NotificationProps>(
       props.onMouseLeave?.(e)
       ;(props.props?.onMouseleave as any)?.(e)
     }
+
+    // A hovered notice that unmounts never fires mouseleave, so release the hover here.
+    onBeforeUnmount(() => {
+      if (hovering.value) {
+        onInternalMouseLeave()
+      }
+    })
 
     const onInternalCloseClick = (e: MouseEvent) => {
       e.preventDefault()
