@@ -730,11 +730,11 @@
           "description": "@rc-component/virtual-list -> @v-c/virtual-list"
         }
       ],
-      "last_synced_commit": "92e18b145b8fe8e44bb5c7a0b242d328cb16b4af",
-      "last_synced_commit_short": "92e18b145b",
-      "last_synced_at": "2026-09-20T07:05:27Z",
+      "last_synced_commit": "7d5b52a42beb83585dfb3f744100799c673e6612",
+      "last_synced_commit_short": "7d5b52a42b",
+      "last_synced_at": "2026-10-16T00:00:00Z",
       "last_synced_tag": "@rc-component/virtual-list@1.5.2",
-      "sync_count": 7
+      "sync_count": 8
     }
   ]
 }
