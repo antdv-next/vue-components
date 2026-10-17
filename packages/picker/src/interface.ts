@@ -407,6 +407,11 @@ export interface SharedPickerProps<DateType extends object = any>
 
   inputReadOnly?: boolean
 
+  // Native input attrs. Vue `HTMLAttributes` lacks these input-only attrs.
+  name?: string
+  required?: boolean
+  autoComplete?: string
+
   // range
   /** Default will always order of selection after submit */
   order?: boolean
@@ -520,6 +525,11 @@ export interface SelectorProps<DateType = any> extends Omit<SharedHTMLAttrs, 'on
   /** Add `-placeholder` className as a help info */
   activeHelp?: boolean
   focused: boolean
+
+  // Native input attrs
+  name?: string
+  required?: boolean
+  autoComplete?: string
   onFocus: (event: FocusEvent, index?: number) => void
   onBlur: (event: FocusEvent, index?: number) => void
   /** Trigger by `enter` key */

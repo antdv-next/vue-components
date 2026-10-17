@@ -334,6 +334,7 @@ const Input = defineComponent<InputProps>(
         preserveInvalidOnBlur, // unused in render
         invalid, // unused in render
         clearIcon, // unused in render
+        autoComplete,
         // Pass to input
         ...restProps
       } = props as any
@@ -368,9 +369,9 @@ const Input = defineComponent<InputProps>(
           <Component
             ref={inputRef}
             aria-invalid={props.invalid}
-            autoComplete="off"
             {...attrs}
             {...restProps}
+            autoComplete={autoComplete ?? 'off'}
             onKeydown={onSharedKeyDown}
             onBlur={onSharedBlur}
             // Replace with format
