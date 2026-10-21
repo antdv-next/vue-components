@@ -1,10 +1,11 @@
-import type { InjectionKey } from 'vue'
+import type { ComputedRef, InjectionKey } from 'vue'
 import type { OnGroupPreview, RegisterImage } from './interface'
 import { inject, provide } from 'vue'
 
 export interface PreviewGroupContextProps {
   register: RegisterImage
   onPreview: OnGroupPreview
+  canPreview: ComputedRef<boolean>
 }
 
 const PreviewGroupContextKey: InjectionKey<PreviewGroupContextProps> = Symbol('PreviewGroupContext')

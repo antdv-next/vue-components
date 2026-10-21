@@ -54,6 +54,8 @@ const PreviewGroup = defineComponent<PreviewGroupProps>(
     const previewOpen = computed(() => mergedPreviewConfig.value.open)
     const previewCurrent = computed(() => mergedPreviewConfig.value.current)
 
+    const canPreview = computed(() => props.preview !== false && props.preview !== null)
+
     // ========================== Items ===========================
     const [mergedItems, register, fromItems] = usePreviewItems(toRef(props, 'items'))
 
@@ -82,6 +84,10 @@ const PreviewGroup = defineComponent<PreviewGroupProps>(
     const mousePosition = shallowRef<null | { x: number, y: number }>(null)
 
     const onPreviewFromImage: OnGroupPreview = (id, imageSrc, mouseX, mouseY) => {
+      if (!canPreview.value) {
+        return
+      }
+
       const itemsList = mergedItems.value
       const index = fromItems.value
         ? itemsList.findIndex(item => item.data.src === imageSrc)
@@ -105,6 +111,12 @@ const PreviewGroup = defineComponent<PreviewGroupProps>(
       }
     })
 
+    watch(canPreview, (enabled) => {
+      if (!enabled) {
+        setShowPreview(false)
+      }
+    })
+
     // ========================== Events ==========================
     const onInternalChange: GroupPreviewConfig['onChange'] = (next, prev) => {
       setCurrent(next)
@@ -121,6 +133,7 @@ const PreviewGroup = defineComponent<PreviewGroupProps>(
     usePreviewGroupProvider({
       register,
       onPreview: onPreviewFromImage,
+      canPreview,
     })
 
     // ========================== Render ==========================
@@ -145,25 +158,27 @@ const PreviewGroup = defineComponent<PreviewGroupProps>(
       return (
         <>
           {slots.default?.()}
-          <Preview
-            aria-hidden={!isShowPreview.value}
-            open={isShowPreview.value}
-            prefixCls={props.previewPrefixCls}
-            onClose={onPreviewClose}
-            mousePosition={mousePosition.value}
-            imgCommonProps={imgCommonProps}
-            src={src}
-            fallback={props.fallback}
-            icons={props.icons}
-            current={current.value}
-            count={itemsList.length}
-            onChange={onInternalChange as any}
-            {...restPreviewConfig}
-            countRender={countRender}
-            classNames={props.classNames?.popup}
-            styles={props.styles?.popup}
-            v-slots={slots}
-          />
+          {canPreview.value && (
+            <Preview
+              aria-hidden={!isShowPreview.value}
+              open={isShowPreview.value}
+              prefixCls={props.previewPrefixCls}
+              onClose={onPreviewClose}
+              mousePosition={mousePosition.value}
+              imgCommonProps={imgCommonProps}
+              src={src}
+              fallback={props.fallback}
+              icons={props.icons}
+              current={current.value}
+              count={itemsList.length}
+              onChange={onInternalChange as any}
+              {...restPreviewConfig}
+              countRender={countRender}
+              classNames={props.classNames?.popup}
+              styles={props.styles?.popup}
+              v-slots={slots}
+            />
+          )}
         </>
       )
     }

@@ -97,7 +97,9 @@ const Image = defineComponent<ImageProps>(
     const previewPrefixCls = computed(() => props.previewPrefixCls ?? `${prefixCls.value}-preview`)
 
     // ========================== Preview ===========================
-    const canPreview = computed(() => !!props.preview)
+    const canPreview = computed(() =>
+      !!props.preview && (!groupContext || groupContext.canPreview.value),
+    )
 
     const mergedPreviewConfig = computed<PreviewConfig>(() => {
       if (props.preview && typeof props.preview === 'object') {
