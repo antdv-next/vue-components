@@ -279,7 +279,7 @@ const InternalSubMenu = defineComponent<SubMenuProps>(
             styles={styles}
             mode={popupContentTriggerMode === 'horizontal' ? 'vertical' : popupContentTriggerMode}
           >
-            <SubMenuList id={popupId}>
+            <SubMenuList id={popupId} onKeydown={menuContext?.value?.onInternalKeyDown}>
               {children}
             </SubMenuList>
           </MenuContextProvider>

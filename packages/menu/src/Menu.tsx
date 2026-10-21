@@ -517,6 +517,8 @@ const Menu = defineComponent<MenuProps>(
         onItemClick: onInternalClick,
         onOpenChange: onInternalOpenChange,
         popupRender: props.popupRender,
+        // Keyboard
+        onInternalKeyDown,
       }
     })
 

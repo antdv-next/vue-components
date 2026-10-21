@@ -1,5 +1,6 @@
 import type { Ref } from 'vue'
 import type { MenuMode } from '../interface'
+import { getFocusNodeList } from '@v-c/util/dist/Dom/focus'
 import KeyCode from '@v-c/util/dist/KeyCode'
 import { onBeforeUnmount, shallowRef } from 'vue'
 import { getMenuId } from '../context/IdContext'
@@ -85,17 +86,6 @@ function findContainerUL(element: HTMLElement): HTMLUListElement | null {
 }
 
 /**
- * Get focusable node list from container
- */
-function getFocusNodeList(container: HTMLElement, includeDisabled?: boolean): HTMLElement[] {
-  const selector = includeDisabled
-    ? '[tabindex]'
-    : '[tabindex]:not([tabindex="-1"]):not([disabled]):not([aria-disabled="true"])'
-
-  return Array.from(container.querySelectorAll<HTMLElement>(selector))
-}
-
-/**
  * Find focused element within element set provided
  */
 function getFocusElement(activeElement: HTMLElement | null, elements: Set<HTMLElement>): HTMLElement | null {
@@ -118,6 +108,8 @@ function getFocusElement(activeElement: HTMLElement | null, elements: Set<HTMLEl
 export function getFocusableElements(container: HTMLElement | null, elements: Set<HTMLElement>) {
   if (!container)
     return []
+  // `getFocusNodeList` skips nodes hidden by an ancestor (e.g. items of a
+  // closed inline sub menu), which a plain `[tabindex]` selector would include.
   const list = getFocusNodeList(container, true)
   return list.filter(ele => elements.has(ele))
 }
@@ -192,7 +184,6 @@ export default function useAccessibility(
   originOnKeyDown?: (e: KeyboardEvent) => void,
 ): (e: KeyboardEvent) => void {
   const rafRef = shallowRef<number>()
-  const activeRef = shallowRef<string>()
 
   const cleanRaf = () => {
     if (rafRef.value !== undefined) {
@@ -205,8 +196,6 @@ export default function useAccessibility(
   })
 
   return (e: KeyboardEvent) => {
-    activeRef.value = activeKey.value
-
     const { which } = e as any
 
     if ([...ArrowKeys, ENTER, ESC, HOME, END].includes(which)) {
@@ -232,7 +221,10 @@ export default function useAccessibility(
         e.preventDefault()
       }
 
-      const tryFocus = (menuElement: HTMLElement | null | undefined) => {
+      const tryFocus = (
+        menuElement: HTMLElement | null | undefined,
+        elementKeyMap: Map<HTMLElement, string> = element2key,
+      ) => {
         if (menuElement) {
           let focusTargetElement = menuElement
 
@@ -242,19 +234,17 @@ export default function useAccessibility(
             focusTargetElement = link
           }
 
-          const targetKey = element2key.get(menuElement)
+          const targetKey = elementKeyMap.get(menuElement)
           if (targetKey) {
             triggerActiveKey(targetKey)
           }
 
-          /**
-           * Do not use immediate here since `tryFocus` may trigger async
-           * which makes Vue sync update the `activeKey`
-           * that force render before `ref` set the next activeKey
-           */
+          // `triggerActiveKey` updates the active key synchronously, so the
+          // latest value (not the one captured before this keydown) must be
+          // compared here.
           cleanRaf()
           rafRef.value = requestAnimationFrame(() => {
-            if (activeRef.value === targetKey) {
+            if (activeKey.value === targetKey) {
               focusTargetElement.focus()
             }
           })
@@ -302,8 +292,11 @@ export default function useAccessibility(
       else if (offsetObj!.offset! > 0) {
         triggerAccessibilityOpen(focusMenuKey!, true)
 
-        cleanRaf()
-        rafRef.value = requestAnimationFrame(() => {
+        // In Vue the popup is mounted by the trigger on a later frame, so keep
+        // retrying until the sub menu list is in the DOM instead of checking
+        // exactly one frame after opening.
+        let retryCount = 0
+        const focusSubMenuItem = () => {
           // Async should resync elements
           refreshedElements = refreshElements(keys, id)
 
@@ -313,9 +306,19 @@ export default function useAccessibility(
           // Get sub focusable menu item
           const targetElement = getNextFocusElement(subQueryContainer, refreshedElements.elements)
 
+          if (!targetElement && retryCount < 5) {
+            retryCount += 1
+            cleanRaf()
+            rafRef.value = requestAnimationFrame(focusSubMenuItem)
+            return
+          }
+
           // Focus menu item
-          tryFocus(targetElement)
-        })
+          tryFocus(targetElement, refreshedElements.element2key)
+        }
+
+        cleanRaf()
+        rafRef.value = requestAnimationFrame(focusSubMenuItem)
       }
       else if (offsetObj!.offset! < 0) {
         const keyPath = getKeyPath(focusMenuKey!, true)
