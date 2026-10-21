@@ -504,14 +504,17 @@ const InputNumber = defineComponent<InputNumberProps>(
     }
 
     watchEffect((onCleanup) => {
-      if (props.changeOnWheel && focus.value && inputRef.value) {
+      const input = inputRef.value
+      if (props.changeOnWheel && focus.value && input) {
         const onWheel = (event: WheelEvent) => {
           onInternalWheel(event)
           event.preventDefault()
         }
-        inputRef.value.addEventListener('wheel', onWheel, { passive: false })
+        input.addEventListener('wheel', onWheel, { passive: false })
+        // Remove from the element the listener was added to, without reading
+        // reactive state (the cleanup may run inside the parent's render effect).
         onCleanup(() => {
-          inputRef.value?.removeEventListener('wheel', onWheel)
+          input.removeEventListener('wheel', onWheel)
           resetWheel()
         })
       }

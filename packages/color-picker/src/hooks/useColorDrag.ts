@@ -1,7 +1,7 @@
 import type { Ref } from 'vue'
 import type { Color } from '../color'
 import type { TransformOffset } from '../interface'
-import { onWatcherCleanup, ref, shallowRef, watch } from 'vue'
+import { onWatcherCleanup, ref, watch } from 'vue'
 
 type EventType
   = | MouseEvent
@@ -46,16 +46,19 @@ function useColorDrag(
   } = props
 
   const offsetValue = ref({ x: 0, y: 0 })
-  const mouseMoveRef = shallowRef<EventHandle>(() => {})
-  const mouseUpRef = shallowRef<EventHandle>(() => {})
+  // Plain variables (React's `useRef`): `removeEventListener` runs from a
+  // watcher cleanup, which on unmount executes inside the parent's render
+  // effect, where reading and writing a ref would re-trigger that parent.
+  let mouseMoveHandler: EventHandle = () => {}
+  let mouseUpHandler: EventHandle = () => {}
 
   const removeEventListener = () => {
-    document.removeEventListener('mousemove', mouseMoveRef.value)
-    document.removeEventListener('mouseup', mouseUpRef.value)
-    document.removeEventListener('touchmove', mouseMoveRef.value)
-    document.removeEventListener('touchend', mouseUpRef.value)
-    mouseMoveRef.value = () => {}
-    mouseUpRef.value = () => {}
+    document.removeEventListener('mousemove', mouseMoveHandler)
+    document.removeEventListener('mouseup', mouseUpHandler)
+    document.removeEventListener('touchmove', mouseMoveHandler)
+    document.removeEventListener('touchend', mouseUpHandler)
+    mouseMoveHandler = () => {}
+    mouseUpHandler = () => {}
   }
   // Always get position from `color`
   watch(() => props.color, () => {
@@ -121,8 +124,8 @@ function useColorDrag(
 
   const onDragStart: EventHandle = (e) => {
     // https://github.com/ant-design/ant-design/issues/43529
-    // document.removeEventListener('mousemove', mouseMoveRef.value)
-    // document.removeEventListener('mouseup', mouseUpRef.value)
+    // document.removeEventListener('mousemove', mouseMoveHandler)
+    // document.removeEventListener('mouseup', mouseUpHandler)
 
     removeEventListener()
 
@@ -134,8 +137,8 @@ function useColorDrag(
     document.addEventListener('mouseup', onDragStop)
     document.addEventListener('touchmove', onDragMove)
     document.addEventListener('touchend', onDragStop)
-    mouseMoveRef.value = onDragMove
-    mouseUpRef.value = onDragStop
+    mouseMoveHandler = onDragMove
+    mouseUpHandler = onDragStop
   }
 
   return [offsetValue, onDragStart]

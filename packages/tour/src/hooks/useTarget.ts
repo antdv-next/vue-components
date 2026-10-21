@@ -100,17 +100,25 @@ export default function useTarget(
       if (!canUseDom()) {
         return
       }
+      // Register the cleanup before awaiting: a cleanup registered after the
+      // watcher is stopped (unmounted during the tick) would never run and the
+      // window listeners below would leak.
+      let cancelled = false
+      onCleanup(() => {
+        cancelled = true
+        window.removeEventListener('resize', updatePos)
+        window.removeEventListener('scroll', updatePos)
+      })
       await nextTick()
+      if (cancelled) {
+        return
+      }
       updatePos()
       // update when window resize
       window.addEventListener('resize', updatePos)
       // update when `document.body.style.overflow` is set to visible
       // by default, it will be set to hidden
       window.addEventListener('scroll', updatePos)
-      onCleanup(() => {
-        window.removeEventListener('resize', updatePos)
-        window.removeEventListener('scroll', updatePos)
-      })
     },
     {
       immediate: true,

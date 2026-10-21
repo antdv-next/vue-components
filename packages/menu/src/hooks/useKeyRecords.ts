@@ -9,18 +9,25 @@ const getPathKeys = (keyPathStr: string) => keyPathStr.split(PATH_SPLIT)
 export const OVERFLOW_KEY = 'vc-menu-more'
 
 export default function useKeyRecords() {
-  const key2pathRef = shallowRef(new Map<string, string>())
-  const path2keyRef = shallowRef(new Map<string, string>())
+  // The maps are mutated in place and readers are notified via `triggerRef`.
+  // Register / unregister work on the raw maps and plain counters so they never
+  // read reactive state: items unregister from watcher cleanups, which run inside
+  // the parent's render effect on unmount and would otherwise subscribe (and,
+  // through the counter write, re-trigger) that parent.
+  const key2path = new Map<string, string>()
+  const path2key = new Map<string, string>()
+  const key2pathRef = shallowRef(key2path)
+  const path2keyRef = shallowRef(path2key)
   const overflowKeys = ref<string[]>([])
-  const updateRef = ref(0)
-  const destroyRef = ref(false)
+  let updateId = 0
+  let destroyed = false
 
   const schedulePathRegisterUpdate = () => {
-    updateRef.value += 1
-    const id = updateRef.value
+    updateId += 1
+    const id = updateId
 
     nextSlice(() => {
-      if (!destroyRef.value && id === updateRef.value) {
+      if (!destroyed && id === updateId) {
         triggerRef(key2pathRef)
         triggerRef(path2keyRef)
       }
@@ -30,7 +37,7 @@ export default function useKeyRecords() {
   const registerPath = (key: string, keyPath: string[]) => {
     // Warning for invalidate or duplicated `key`
     if (process.env.NODE_ENV !== 'production') {
-      if (key2pathRef.value.has(key)) {
+      if (key2path.has(key)) {
         console.warn(
           `Duplicated key '${key}' used in Menu by path [${keyPath.join(' > ')}]`,
         )
@@ -39,15 +46,15 @@ export default function useKeyRecords() {
 
     // Fill map
     const connectedPath = getPathStr(keyPath)
-    path2keyRef.value.set(connectedPath, key)
-    key2pathRef.value.set(key, connectedPath)
+    path2key.set(connectedPath, key)
+    key2path.set(key, connectedPath)
     schedulePathRegisterUpdate()
   }
 
   const unregisterPath = (key: string, keyPath: string[]) => {
     const connectedPath = getPathStr(keyPath)
-    path2keyRef.value.delete(connectedPath)
-    key2pathRef.value.delete(key)
+    path2key.delete(connectedPath)
+    key2path.delete(key)
     schedulePathRegisterUpdate()
   }
 
@@ -100,7 +107,7 @@ export default function useKeyRecords() {
   }
 
   onBeforeUnmount(() => {
-    destroyRef.value = true
+    destroyed = true
   })
 
   return {
