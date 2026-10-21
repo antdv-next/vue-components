@@ -252,11 +252,18 @@ const MenuItem = defineComponent<MenuItemProps>(
     watch(
       [connectedKeyPath],
       (_n, _o, onCleanup) => {
+        // Capture plain values: the cleanup must unregister what was registered,
+        // and on unmount it runs inside the parent's render effect, where reading
+        // a computed would subscribe the parent to this unmounted item.
+        const key = eventKey.value!
+        const keyPath = connectedKeyPath.value as any
+        // `measure` is the provider's reactive props, so take the function too.
+        const unregisterPath = measure?.unregisterPath
         if (measure) {
-          measure.registerPath(eventKey.value!, connectedKeyPath.value as any)
+          measure.registerPath(key, keyPath)
         }
         onCleanup(() => {
-          measure?.unregisterPath(eventKey.value!, connectedKeyPath.value as any)
+          unregisterPath?.(key, keyPath)
         })
       },
       {

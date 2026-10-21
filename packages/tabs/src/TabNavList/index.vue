@@ -172,7 +172,9 @@ function alignInRange(value: number): number {
 }
 
 // ========================= Mobile ========================
-const touchMovingRef = ref<ReturnType<typeof setTimeout> | null>(null)
+// A plain timer id: `clearTouchMoving` runs from a watcher cleanup, which on
+// unmount executes inside the parent's render effect.
+let touchMovingTimer: ReturnType<typeof setTimeout> | null = null
 
 const lockAnimation = ref<number>()
 function doLockAnimation() {
@@ -180,8 +182,8 @@ function doLockAnimation() {
 }
 
 function clearTouchMoving() {
-  if (touchMovingRef.value) {
-    clearTimeout(touchMovingRef.value)
+  if (touchMovingTimer) {
+    clearTimeout(touchMovingTimer)
   }
 }
 
@@ -213,7 +215,7 @@ watch(
   async (_n, _o, onCleanup) => {
     await nextTick()
     if (lockAnimation.value) {
-      touchMovingRef.value = setTimeout(() => {
+      touchMovingTimer = setTimeout(() => {
         lockAnimation.value = 0
       }, 100)
     }
