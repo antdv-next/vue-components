@@ -3,6 +3,7 @@ import type { FlattenData } from '../hooks/useFlattenRecords'
 import { clsx } from '@v-c/util'
 import { computed, defineComponent } from 'vue'
 import Cell from '../Cell'
+import { provideRowHover } from '../Cell/useHoverState'
 import useRowInfo from '../hooks/useRowInfo'
 import { computedExpandedClassName } from '../utils/expandUtil'
 import { useInjectStaticContext } from './context'
@@ -24,12 +25,16 @@ const BodyLine = defineComponent<BodyLineProps<any>>({
   setup(props) {
     const staticContext = useInjectStaticContext()
 
+    const rowIndex = computed(() => props.index)
     const rowInfo = useRowInfo(
       computed(() => props.data?.record),
       computed(() => props.rowKey),
-      computed(() => props.index),
+      rowIndex,
       computed(() => props.data?.indent || 0),
     )
+    // Virtual rows render BodyLine instead of BodyRow, so they must provide the
+    // same per-row hover memo; otherwise rowSpan=1 cells never hover.
+    provideRowHover(rowIndex, rowInfo.tableContext)
 
     return () => {
       const { data, index, className, rowKey, style, extra, getHeight } = props
