@@ -195,7 +195,17 @@ export default function useAccessibility(
     cleanRaf()
   })
 
+  // The root list and every popup list bind this handler. A popup rendered
+  // inside its parent's DOM (e.g. `getPopupContainer={node => node.parentNode}`)
+  // bubbles the same keydown through several of them, so handle each event once.
+  const handledEvents = new WeakSet<KeyboardEvent>()
+
   return (e: KeyboardEvent) => {
+    if (handledEvents.has(e)) {
+      return
+    }
+    handledEvents.add(e)
+
     const { which } = e as any
 
     if ([...ArrowKeys, ENTER, ESC, HOME, END].includes(which)) {

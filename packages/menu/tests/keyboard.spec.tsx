@@ -348,4 +348,52 @@ describe('menu keyboard', () => {
 
     wrapper.unmount()
   })
+
+  it.each([
+    ['body', undefined],
+    ['parent node', (node: HTMLElement) => node.parentNode as HTMLElement],
+  ])('handles each keydown once with popups rendered in %s', async (_, getPopupContainer) => {
+    const onKeydown = vi.fn()
+    const wrapper = mountMenu(() => (
+      <Menu mode="vertical" getPopupContainer={getPopupContainer} onKeydown={onKeydown}>
+        <SubMenu key="bamboo" title="Bamboo">
+          <MenuItem key="little">Little</MenuItem>
+          <SubMenu key="light" title="Light">
+            <MenuItem key="a">A</MenuItem>
+            <MenuItem key="b">B</MenuItem>
+            <MenuItem key="c">C</MenuItem>
+          </SubMenu>
+        </SubMenu>
+      </Menu>
+    ))
+    await flush()
+
+    // Active first
+    keyDown(document.body, KeyCode.DOWN)
+    await flush()
+
+    // Open and active sub
+    keyDown(document.body, KeyCode.RIGHT)
+    await flush()
+    expect(document.activeElement?.textContent).toEqual('Little')
+
+    // Next sibling inside the first popup
+    keyDown(document.body, KeyCode.DOWN)
+    await flush()
+    expect(document.activeElement?.textContent).toEqual('Light')
+
+    // Open the nested popup
+    keyDown(document.body, KeyCode.RIGHT)
+    await flush()
+    expect(document.activeElement?.textContent).toEqual('A')
+
+    // Moves exactly one item inside the nested popup
+    onKeydown.mockClear()
+    keyDown(document.body, KeyCode.DOWN)
+    await flush()
+    expect(document.activeElement?.textContent).toEqual('B')
+    expect(onKeydown).toHaveBeenCalledTimes(1)
+
+    wrapper.unmount()
+  })
 })
