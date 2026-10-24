@@ -596,7 +596,9 @@ export const BaseSelect = defineComponent<
     // Close when click on non-select element
     useSelectTriggerControl(
       getSelectElements,
-      mergedOpen,
+      // mergedOpen is forced to false when the empty dropdown is hidden.
+      // Use the raw open intent so clicking another control still releases it.
+      rawOpen,
       triggerOpen,
       computed(() => !!mergedComponents.value.root),
     )
@@ -618,7 +620,7 @@ export const BaseSelect = defineComponent<
 
     const onRootBlur = () => {
       // Delay close should check the activeElement
-      if (mergedOpen.value && !internalMouseDownRef.value) {
+      if (rawOpen.value && !internalMouseDownRef.value) {
         triggerOpen(false, {
           cancelFun: () => isInside(getSelectElements(), document.activeElement as HTMLElement),
         })
