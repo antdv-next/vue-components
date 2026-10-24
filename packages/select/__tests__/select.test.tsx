@@ -190,6 +190,50 @@ describe('select react sync', () => {
     wrapper.unmount()
   })
 
+  // Notify other empty combobox instances to drop latent open state.
+  it('keeps only the last focused combobox open when shared options become available', async () => {
+    const options = ref<{ value: string, label: string }[]>([])
+
+    const wrapper = mount(() => (
+      <div>
+        {[0, 1, 2, 3].map(index => (
+          <Select
+            key={index}
+            mode="combobox"
+            notFoundContent={null}
+            options={options.value}
+            onSearch={index === 3
+              ? (text: string) => {
+                  options.value = text
+                    ? [
+                        { value: text, label: text },
+                        { value: text.repeat(2), label: text.repeat(2) },
+                      ]
+                    : []
+                }
+              : undefined}
+          />
+        ))}
+      </div>
+    ), { attachTo: document.body })
+
+    const inputs = wrapper.findAll('input')
+    for (const input of inputs) {
+      await input.trigger('mousedown')
+      await flushSelect()
+    }
+
+    expect(document.querySelectorAll('.vc-select.vc-select-open')).toHaveLength(0)
+
+    await inputs[3].setValue('a')
+    await flushSelect()
+
+    expect(document.querySelectorAll('.vc-select.vc-select-open')).toHaveLength(1)
+    expect(wrapper.findAll('.vc-select')[3].classes()).toContain('vc-select-open')
+
+    wrapper.unmount()
+  })
+
   it('does not render content value in combobox mode with custom input', async () => {
     const wrapper = mount(Select, {
       attachTo: document.body,
