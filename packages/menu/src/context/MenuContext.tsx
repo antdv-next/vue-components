@@ -60,6 +60,12 @@ export interface MenuContextProps {
   onItemClick: MenuClickEventHandler
   onOpenChange: (key: string, open: boolean) => void
   getPopupContainer: (node: HTMLElement) => HTMLElement
+  /**
+   * Keyboard handler shared with popup lists. React portals bubble events
+   * through the component tree, Vue teleports do not, so popup lists need the
+   * same listener as the root list.
+   */
+  onInternalKeyDown?: (e: KeyboardEvent) => void
 }
 
 const MenuContextKey: InjectionKey<Ref<MenuContextProps>> = Symbol('MenuContextKey')
