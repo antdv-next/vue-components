@@ -419,6 +419,11 @@ const Menu = defineComponent<MenuProps>(
       const nextOpen = open ?? !mergedOpenKeys.value.includes(key)
       onInternalOpenChange(key, nextOpen)
     }
+    const triggerAccessibilityClose = () => {
+      if (mergedOpenKeys.value.length) {
+        triggerOpenKeys(EMPTY_LIST, true)
+      }
+    }
     const setMergedActiveKey = (key: string) => {
       mergedActiveKey.value = key
     }
@@ -436,6 +441,7 @@ const Menu = defineComponent<MenuProps>(
 
       setMergedActiveKey,
       triggerAccessibilityOpen,
+      triggerAccessibilityClose,
 
       (...args) => {
         (_attrs as any)?.onKeydown?.(...args)

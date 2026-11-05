@@ -180,6 +180,7 @@ export default function useAccessibility(
 
   triggerActiveKey: (key: string) => void,
   triggerAccessibilityOpen: (key: string, open?: boolean) => void,
+  triggerAccessibilityClose: () => void,
 
   originOnKeyDown?: (e: KeyboardEvent) => void,
 ): (e: KeyboardEvent) => void {
@@ -207,6 +208,13 @@ export default function useAccessibility(
     handledEvents.add(e)
 
     const { which } = e as any
+
+    // Escape on the root list closes every open sub menu.
+    if (which === ESC && mode.value !== 'inline' && e.target === containerRef.value) {
+      triggerAccessibilityClose()
+      originOnKeyDown?.(e)
+      return
+    }
 
     if ([...ArrowKeys, ENTER, ESC, HOME, END].includes(which)) {
       const keys = getKeys()
@@ -335,6 +343,11 @@ export default function useAccessibility(
         const parentKey = keyPath[keyPath.length - 2]
 
         const parentMenuElement = key2element.get(parentKey)
+
+        // A submenu consumes Escape; the surrounding popup handles root Escape.
+        if (which === ESC && parentMenuElement) {
+          e.stopPropagation()
+        }
 
         // Focus menu item
         triggerAccessibilityOpen(parentKey, false)

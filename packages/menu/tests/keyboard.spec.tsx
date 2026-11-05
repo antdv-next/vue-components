@@ -396,4 +396,74 @@ describe('menu keyboard', () => {
 
     wrapper.unmount()
   })
+
+  function escOn(target: HTMLElement) {
+    const event = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true })
+    Object.defineProperty(event, 'which', { value: KeyCode.ESC })
+    Object.defineProperty(event, 'keyCode', { value: KeyCode.ESC })
+    target.dispatchEvent(event)
+  }
+
+  // react-component/menu#899
+  it.each([1, 2])('consumes submenu Escape at depth %s but lets root Escape bubble', async (depth) => {
+    const onOpenChange = vi.fn()
+    const onWindowKeyDown = vi.fn()
+    window.addEventListener('keydown', onWindowKeyDown)
+    const wrapper = mountMenu(() => (
+      <Menu defaultOpenKeys={depth === 2 ? ['sub', 'inner'] : ['sub']} onOpenChange={onOpenChange}>
+        <SubMenu key="sub" title="Submenu">
+          {depth === 2
+            ? (
+                <SubMenu key="inner" title="Inner">
+                  <MenuItem key="child">Child</MenuItem>
+                </SubMenu>
+              )
+            : <MenuItem key="child">Child</MenuItem>}
+        </SubMenu>
+      </Menu>
+    ))
+    await flush()
+    try {
+      const child = Array.from(document.querySelectorAll<HTMLElement>('[role="menuitem"]'))
+        .find(el => el.textContent === 'Child')!
+      child.focus()
+      escOn(child)
+      await flush()
+      expect(onOpenChange).toHaveBeenLastCalledWith(depth === 2 ? ['sub'] : [])
+      expect(onWindowKeyDown).not.toHaveBeenCalled()
+
+      const rootItem = document.querySelector<HTMLElement>('.vc-menu-root > .vc-menu-submenu [role="menuitem"]')!
+      rootItem.focus()
+      escOn(rootItem)
+      expect(onWindowKeyDown).toHaveBeenCalledTimes(1)
+    }
+    finally {
+      window.removeEventListener('keydown', onWindowKeyDown)
+      wrapper.unmount()
+    }
+  })
+
+  // react-component/menu#893
+  it('closes open submenus when Escape is pressed on the root menu', async () => {
+    const onOpenChange = vi.fn()
+    const wrapper = mountMenu(() => (
+      <Menu mode="vertical" triggerSubMenuAction="click" onOpenChange={onOpenChange}>
+        <SubMenu key="sub" title="Submenu">
+          <MenuItem key="child">Child</MenuItem>
+        </SubMenu>
+      </Menu>
+    ))
+    await flush()
+    document.querySelector<HTMLElement>('.vc-menu-submenu-title')!.click()
+    await flush()
+    expect(document.querySelector('.vc-menu-submenu-open')).toBeTruthy()
+
+    const root = document.querySelector<HTMLElement>('ul.vc-menu-root')!
+    root.focus()
+    escOn(root)
+    await flush()
+    expect(onOpenChange).toHaveBeenLastCalledWith([])
+    expect(document.querySelector('.vc-menu-submenu-open')).toBeFalsy()
+    wrapper.unmount()
+  })
 })
