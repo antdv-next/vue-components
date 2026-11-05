@@ -49,8 +49,18 @@ const MeasureRow = defineComponent<MeasureRowProps>({
     const rowRef = ref<HTMLTableRowElement | null>(null)
     const { measureRowRender } = useInjectTableContext()
     return () => {
+      // The row holds copies of the column titles, which may contain controls such as a
+      // select-all checkbox. aria-hidden alone leaves those focusable; visibility: hidden
+      // takes them out of the tab order while the row still lays out for measuring, and
+      // inert also covers a title that sets visibility: visible on itself.
       const measureRow = (
-        <tr aria-hidden="true" class={`${props.prefixCls}-measure-row`} style={{ height: 0 }} ref={rowRef}>
+        <tr
+          aria-hidden="true"
+          class={`${props.prefixCls}-measure-row`}
+          style={{ height: 0, visibility: 'hidden' }}
+          inert
+          ref={rowRef}
+        >
           <ResizeObserver.Collection
             onBatchResize={(infoList) => {
               if (isVisible(rowRef.value as any)) {
