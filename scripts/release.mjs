@@ -90,6 +90,12 @@ function sortByDependencies(list) {
   return sorted
 }
 
+/** The package directory, minus files that never reach the tarball. */
+function publishedPaths(folder) {
+  const dir = `packages/${folder}`
+  return [dir, ...['tests', 'docs', 'bump.config.ts'].map(path => `:(exclude)${dir}/${path}`)]
+}
+
 /** `1.2.0-rc.1` publishes under `rc`, like the earlier manual prereleases. */
 function distTag(version) {
   const prerelease = version.split('-')[1]
@@ -111,7 +117,7 @@ async function plan() {
       console.log(`skip ${tag}: tag is not reachable from HEAD`)
       continue
     }
-    if (!git('diff', '--quiet', `refs/tags/${tag}`, 'HEAD', '--', `packages/${item.folder}`)) {
+    if (!git('diff', '--quiet', `refs/tags/${tag}`, 'HEAD', '--', ...publishedPaths(item.folder))) {
       stale.push({ tag, folder: item.folder })
       continue
     }
@@ -141,10 +147,17 @@ async function publish(dryRun) {
   const packDir = mkdtempSync(join(tmpdir(), 'vc-release-'))
   const failed = []
 
+  if (result.pending.length) {
+    // A fresh checkout has no `dist` anywhere, and packages import their
+    // workspace dependencies from `dist`, so build those too, in topological order.
+    console.log('::group::build')
+    run('pnpm', ['-r', ...result.pending.flatMap(item => ['--filter', `${item.name}...`]), 'run', 'build'], { stdio: 'inherit' })
+    console.log('::endgroup::')
+  }
+
   for (const item of result.pending) {
     console.log(`\n::group::${item.tag}`)
     try {
-      run('pnpm', ['run', 'build'], { cwd: item.dir, stdio: 'inherit' })
       // `pnpm pack` rewrites `workspace:` ranges to the real versions.
       run('pnpm', ['pack', '--pack-destination', packDir], { cwd: item.dir, stdio: 'inherit' })
       const tarball = join(packDir, `${item.name.replace('@', '').replace('/', '-')}-${item.version}.tgz`)
