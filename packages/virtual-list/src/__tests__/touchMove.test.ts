@@ -77,3 +77,26 @@ describe('useMobileTouchMove smooth scroll ease out', () => {
     wrapper.unmount()
   })
 })
+
+// react-component/virtual-list#390
+describe('useMobileTouchMove touchcancel', () => {
+  afterEach(() => {
+    document.body.innerHTML = ''
+  })
+
+  it('ignores moves after a cancelled touch and accepts the next gesture', async () => {
+    const { wrapper, callback, item } = await setupProbe()
+
+    dispatchTouch(item, 'touchstart', 100)
+    dispatchTouch(item, 'touchcancel', 100)
+    dispatchTouch(item, 'touchmove', 50)
+    expect(callback).not.toHaveBeenCalled()
+
+    // A cancelled touch must not leave the hook stuck in the "touched" state.
+    dispatchTouch(item, 'touchstart', 100)
+    dispatchTouch(item, 'touchmove', 50)
+    expect(callback).toHaveBeenCalled()
+
+    wrapper.unmount()
+  })
+})

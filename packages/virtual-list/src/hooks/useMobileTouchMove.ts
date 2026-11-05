@@ -67,8 +67,6 @@ export default function useMobileTouchMove(
   }
 
   const onTouchEnd = () => {
-    touchedRef.value = false
-
     cleanUpEvents()
   }
 
@@ -83,13 +81,17 @@ export default function useMobileTouchMove(
       elementRef = e.target as HTMLElement
       elementRef.addEventListener('touchmove', onTouchMove, { passive: false })
       elementRef.addEventListener('touchend', onTouchEnd, { passive: true } as any)
+      elementRef.addEventListener('touchcancel', onTouchEnd, { passive: true } as any)
     }
   }
 
   cleanUpEvents = () => {
+    touchedRef.value = false
+
     if (elementRef) {
       elementRef.removeEventListener('touchmove', onTouchMove)
       elementRef.removeEventListener('touchend', onTouchEnd)
+      elementRef.removeEventListener('touchcancel', onTouchEnd)
       elementRef = null
     }
   }
