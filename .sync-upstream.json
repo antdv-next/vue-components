@@ -67,11 +67,11 @@
           "description": "@rc-component/collapse -> @v-c/collapse"
         }
       ],
-      "last_synced_commit": "305b30a8e1a7cca516455cd53828bed43073a3d5",
-      "last_synced_commit_short": "305b30a8e1",
-      "last_synced_at": "2026-09-10T13:50:17Z",
-      "last_synced_tag": "@rc-component/collapse@1.2.0",
-      "sync_count": 5
+      "last_synced_commit": "5b797c44ca9ef19ad317f048ab311b06e855012a",
+      "last_synced_commit_short": "5b797c44ca",
+      "last_synced_at": "2026-11-05T08:57:10Z",
+      "last_synced_tag": "@rc-component/collapse@1.3.0",
+      "sync_count": 6
     },
     {
       "name": "@rc-component/color-picker",
@@ -254,11 +254,11 @@
           "description": "@rc-component/menu -> @v-c/menu"
         }
       ],
-      "last_synced_commit": "8dfdef453a24cee1bda115e3249b17289356829d",
-      "last_synced_commit_short": "8dfdef453a",
-      "last_synced_at": "2026-09-10T13:50:17Z",
-      "last_synced_tag": "@rc-component/menu@1.6.0",
-      "sync_count": 6
+      "last_synced_commit": "4bdff45fb0517e9e4beff839fa6e5c03e3e223cf",
+      "last_synced_commit_short": "4bdff45fb0",
+      "last_synced_at": "2026-11-05T08:57:10Z",
+      "last_synced_tag": "@rc-component/menu@1.6.1",
+      "sync_count": 7
     },
     {
       "name": "@rc-component/mini-decimal",
@@ -356,11 +356,11 @@
           "description": "@rc-component/picker -> @v-c/picker"
         }
       ],
-      "last_synced_commit": "7bcf5ebcc6bf1ab47f770dc87de7b07703d30273",
-      "last_synced_commit_short": "7bcf5ebcc6",
-      "last_synced_at": "2026-10-26T23:12:54Z",
-      "last_synced_tag": "@rc-component/picker@1.16.0",
-      "sync_count": 8
+      "last_synced_commit": "9ecb0508645e1c0d9f3181263eecafdd1e262f6b",
+      "last_synced_commit_short": "9ecb050864",
+      "last_synced_at": "2026-11-05T08:57:10Z",
+      "last_synced_tag": "@rc-component/picker@1.17.0",
+      "sync_count": 9
     },
     {
       "name": "@rc-component/portal",
@@ -560,11 +560,11 @@
           "description": "@rc-component/table -> @v-c/table"
         }
       ],
-      "last_synced_commit": "e63fbf5a56f9584c2861bb6c9583a5751bf13f4b",
-      "last_synced_commit_short": "e63fbf5a56",
-      "last_synced_at": "2026-09-10T13:50:17Z",
+      "last_synced_commit": "b1ef288b33a865ee1f6e4a66834ecc6d1d2b09f4",
+      "last_synced_commit_short": "b1ef288b33",
+      "last_synced_at": "2026-11-05T08:57:10Z",
       "last_synced_tag": "@rc-component/table@1.12.0",
-      "sync_count": 7
+      "sync_count": 8
     },
     {
       "name": "@rc-component/tabs",
@@ -713,11 +713,11 @@
           "description": "@rc-component/util -> @v-c/util"
         }
       ],
-      "last_synced_commit": "e12854b74d5e15e01f04f3710bc2d2a81383f806",
-      "last_synced_commit_short": "e12854b74d",
-      "last_synced_at": "2026-10-26T23:12:54Z",
+      "last_synced_commit": "78d258b5546848b665fb22ad07e1d5f99940a0ed",
+      "last_synced_commit_short": "78d258b554",
+      "last_synced_at": "2026-11-05T08:57:10Z",
       "last_synced_tag": "@rc-component/util@1.14.0",
-      "sync_count": 8
+      "sync_count": 9
     },
     {
       "name": "@rc-component/virtual-list",
@@ -730,11 +730,11 @@
           "description": "@rc-component/virtual-list -> @v-c/virtual-list"
         }
       ],
-      "last_synced_commit": "91057da94766140834f0f2d5fab85c2d56e670cf",
-      "last_synced_commit_short": "91057da947",
-      "last_synced_at": "2026-10-26T23:12:54Z",
+      "last_synced_commit": "17ca15ad58f3c628ae038128478496650eca5458",
+      "last_synced_commit_short": "17ca15ad58",
+      "last_synced_at": "2026-11-05T08:57:10Z",
       "last_synced_tag": "@rc-component/virtual-list@1.6.0",
-      "sync_count": 9
+      "sync_count": 10
     }
   ]
 }
