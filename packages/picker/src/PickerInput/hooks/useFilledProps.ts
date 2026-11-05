@@ -208,6 +208,11 @@ export default function useFilledProps<
         )
       }
     }
+
+    warning(
+      !props.value.components?.button,
+      `'components.button' is deprecated. Please use 'components.okButton' instead.`,
+    )
   }
 
   // ======================== Suffix ========================

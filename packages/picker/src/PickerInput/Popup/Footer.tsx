@@ -32,6 +32,14 @@ export interface FooterProps<DateType extends object = any> {
   onNow: (now: DateType) => void
 }
 
+/**
+ * `type` is a native `button` attribute. Custom components (e.g. antdv-next Button) use `type`
+ * as their own variant prop, so only pass it when the intrinsic element is rendered.
+ */
+function getNativeTypeProps(Component: unknown) {
+  return Component === 'button' ? ({ type: 'button' } as const) : null
+}
+
 const Footer = defineComponent<FooterProps>((props) => {
   const mode = computed(() => props.mode)
   const internalMode = computed(() => props.internalMode)
@@ -70,45 +78,46 @@ const Footer = defineComponent<FooterProps>((props) => {
     const {
       prefixCls,
       locale,
-      button: Button = 'button',
+      button = 'button',
+      nowButton,
+      okButton,
       classNames,
       styles,
     } = pickerCtx.value
     // ======================== Extra =========================
     const extraNode = renderExtraFooter.value?.(mode.value)
     // ======================== Ranges ========================
-    const nowPrefixCls = `${prefixCls}-now`
-    const nowBtnPrefixCls = `${nowPrefixCls}-btn`
+    const NowButton: any = nowButton || 'button'
+    const OkButton: any = okButton || button
 
     const presetNode = showNow.value && (
-      <li class={nowPrefixCls}>
-        <a
-          class={clsx(
-            nowBtnPrefixCls,
-            nowDisabled.value && `${nowBtnPrefixCls}-disabled`,
-          )}
-          aria-disabled={nowDisabled.value}
-          onClick={onInternalNow}
-        >
-          {internalMode.value === 'date' ? locale.today : locale.now}
-        </a>
-      </li>
+      <NowButton
+        {...getNativeTypeProps(NowButton)}
+        class={`${prefixCls}-now`}
+        disabled={nowDisabled.value}
+        onClick={onInternalNow}
+      >
+        {internalMode.value === 'date' ? locale.today : locale.now}
+      </NowButton>
     )
 
     // >>> OK
     const okNode = needConfirm.value && (
-      <li class={`${prefixCls}-ok`}>
-        <Button disabled={invalid.value} onClick={onSubmit.value}>
-          {locale.ok}
-        </Button>
-      </li>
+      <OkButton
+        {...getNativeTypeProps(OkButton)}
+        disabled={invalid.value}
+        class={`${prefixCls}-ok`}
+        onClick={onSubmit.value}
+      >
+        {locale.ok}
+      </OkButton>
     )
 
     const rangeNode = (presetNode || okNode) && (
-      <ul class={`${prefixCls}-ranges`}>
+      <div class={`${prefixCls}-ranges`}>
         {presetNode}
         {okNode}
-      </ul>
+      </div>
     )
 
     if (!isVueRenderable(extraNode) && !isVueRenderable(rangeNode)) {

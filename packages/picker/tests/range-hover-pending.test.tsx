@@ -72,7 +72,7 @@ describe('rangePicker pending selection hover', () => {
     await flush()
 
     await selectCell('11')
-    document.querySelector<HTMLButtonElement>('.vc-picker-ok button')!.click()
+    document.querySelector<HTMLButtonElement>('button.vc-picker-ok')!.click()
     await flush()
 
     await selectCell('22')

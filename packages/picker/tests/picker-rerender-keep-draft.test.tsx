@@ -44,7 +44,7 @@ describe('picker re-render keeps draft selection', () => {
 
     // Draft must survive, OK button must stay enabled.
     expect((wrapper.find('input').element as HTMLInputElement).value).toBe(draftText)
-    const okBtn = document.querySelector('.vc-picker-ok button') as HTMLButtonElement
+    const okBtn = document.querySelector('button.vc-picker-ok') as HTMLButtonElement
     expect(okBtn.disabled).toBe(false)
 
     wrapper.unmount()

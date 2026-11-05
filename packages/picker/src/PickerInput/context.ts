@@ -8,8 +8,15 @@ export interface PickerContextProps<DateType = any> {
   prefixCls: string | undefined
   locale: Locale
   generateConfig: GenerateConfig<DateType>
-  /** Customize button component */
+  /**
+   * Customize button component.
+   * @deprecated Please use `okButton` instead.
+   */
   button?: Components['button']
+  /** Customize the `now` / `today` button component */
+  nowButton?: Components['nowButton']
+  /** Customize the `ok` button component */
+  okButton?: Components['okButton']
   input?: Components['input']
   classNames: FilledClassNames
   styles: FilledStyles

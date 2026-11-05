@@ -683,6 +683,8 @@ const RangePicker = defineComponent(
         locale: locale.value,
         generateConfig: generateConfig.value,
         button: components.value?.button,
+        nowButton: components.value?.nowButton,
+        okButton: components.value?.okButton,
         input: components.value?.input,
         classNames: mergedClassNames,
         styles: mergedStyles,

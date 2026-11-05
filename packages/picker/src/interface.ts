@@ -283,7 +283,10 @@ export interface SharedPanelProps<DateType extends object = any> {
 
 export type Components<DateType extends object = any> = Partial<
   Record<InternalMode, DefineComponent<SharedPanelProps<DateType>>> & {
+    /** @deprecated Please use `okButton` instead. Fallback when set. */
     button?: DefineComponent | string
+    nowButton?: DefineComponent | string
+    okButton?: DefineComponent | string
     input?: DefineComponent | string
   }
 >
