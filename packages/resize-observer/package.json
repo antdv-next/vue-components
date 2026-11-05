@@ -8,6 +8,9 @@
     "type": "git",
     "url": "https://github.com/antdv-next/vue-components.git"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

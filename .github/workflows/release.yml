@@ -1,0 +1,79 @@
+name: Release
+
+# Publishes every @v-c/* package whose version is tagged (by bumpp) but not on npm yet.
+# See scripts/release.mjs for the rules.
+#
+# It runs on pushes to `next` rather than only on tag pushes: GitHub creates no
+# events at all when more than three tags are pushed at once, which a normal
+# multi-package release does. Tag pushes are kept as a trigger for small releases.
+#
+# Publishing uses npm trusted publishing (OIDC), so there is no npm token secret.
+# Each package needs a trusted publisher pointing at this workflow file:
+#   npm trust github @v-c/<name> --file release.yml --repo antdv-next/vue-components --allow-publish -y
+
+on:
+  push:
+    branches: [next]
+    tags: ['@v-c/**']
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Build and pack, but run `npm publish --dry-run`
+        type: boolean
+        default: false
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    if: github.repository == 'antdv-next/vue-components'
+    runs-on: ubuntu-latest
+    outputs:
+      count: ${{ steps.plan.outputs.count }}
+      stale: ${{ steps.plan.outputs.stale }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Release tags and their history are needed to check what was tagged.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - id: plan
+        run: node scripts/release.mjs plan
+
+  publish:
+    needs: plan
+    if: needs.plan.outputs.count != '0' || needs.plan.outputs.stale != '0'
+    runs-on: ubuntu-latest
+    environment: npm
+    permissions:
+      contents: read
+      # Required for npm trusted publishing.
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+
+      # Trusted publishing needs npm >= 11.5.1.
+      - run: npm install -g npm@11
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: node scripts/release.mjs publish ${{ inputs.dry_run && '--dry-run' || '' }}

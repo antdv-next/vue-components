@@ -10,6 +10,9 @@
     "type": "git",
     "url": "https://github.com/antdv-next/vue-components.git"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "keywords": [
     "dropdown"
   ],
@@ -29,7 +32,9 @@
   ],
   "scripts": {
     "build": "vite build",
-    "test": "vitest"
+    "test": "vitest",
+    "prepublish": "pnpm build",
+    "bump": "bumpp --release patch"
   },
   "peerDependencies": {
     "vue": "^3.0.0"
