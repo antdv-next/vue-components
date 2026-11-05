@@ -164,11 +164,15 @@ async function publish(dryRun) {
       const args = ['publish', tarball, '--access', 'public', '--tag', distTag(item.version)]
       if (dryRun)
         args.push('--dry-run')
-      run('npm', args, { stdio: 'inherit' })
+      run('npm', args, { stdio: ['ignore', 'inherit', 'pipe'] })
     }
     catch (error) {
-      // A re-run can race npm's delayed visibility of a version it already accepted.
-      if (!dryRun && await isPublished(item.name, item.version).catch(() => false)) {
+      if (error.stderr)
+        process.stderr.write(error.stderr)
+      // A tag push and a branch push start two runs at once, and the second
+      // races npm's delayed visibility of the version the first one published.
+      // npm then answers E409 "Cannot publish over previously staged version".
+      if (!dryRun && (/\bE409\b/.test(error.stderr ?? '') || await isPublished(item.name, item.version).catch(() => false))) {
         console.log(`${item.tag} is already on npm, skipping`)
       }
       else {
