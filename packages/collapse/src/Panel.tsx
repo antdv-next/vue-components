@@ -1,6 +1,7 @@
 import type { HTMLAttributes, TransitionProps } from 'vue'
 import type { CollapsePanelProps } from './interface'
 import { classNames as classnames, isNonNullable, isVueRenderable } from '@v-c/util'
+import useId from '@v-c/util/dist/hooks/useId'
 import KeyCode from '@v-c/util/dist/KeyCode'
 import omit from '@v-c/util/dist/omit'
 import { computed, defineComponent, ref, Transition } from 'vue'
@@ -18,6 +19,7 @@ const CollapsePanel = defineComponent<CollapsePanelProps>({
   setup(props = defaults, { attrs, expose }) {
     const disabled = computed(() => props.collapsible === 'disabled')
     const refWrapper = ref()
+    const panelId = useId()
     const ifExtraExist = computed(
       () =>
         isNonNullable(props.extra) && typeof props.extra !== 'boolean',
@@ -29,6 +31,9 @@ const CollapsePanel = defineComponent<CollapsePanelProps>({
           props.onItemClick?.(props.panelKey!)
         },
         'onKeydown': (e: KeyboardEvent) => {
+          if (disabled.value || e.target !== e.currentTarget) {
+            return
+          }
           if (
             e.key === 'Enter'
             || e.keyCode === KeyCode.ENTER
@@ -36,9 +41,15 @@ const CollapsePanel = defineComponent<CollapsePanelProps>({
           ) {
             props.onItemClick?.(props.panelKey!)
           }
+          else if (e.key === ' ') {
+            e.preventDefault()
+            props.onItemClick?.(props.panelKey!)
+          }
         },
         'role': props.accordion ? 'tab' : 'button',
         'aria-expanded': props.isActive,
+        // The panel content is not mounted while collapsed, so only reference it when expanded
+        'aria-controls': props.isActive ? panelId : undefined,
         'aria-disabled': disabled.value,
         'tabIndex': disabled.value ? -1 : 0,
       }
@@ -125,6 +136,7 @@ const CollapsePanel = defineComponent<CollapsePanelProps>({
           styles={styles}
           isActive={isActive}
           forceRender={forceRender}
+          id={panelId}
           role={accordion ? 'tabpanel' : undefined}
           v-slots={{ default: () => children }}
         />

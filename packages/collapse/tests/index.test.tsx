@@ -523,6 +523,53 @@ describe('collapse', () => {
     )
   })
 
+  // react-component/collapse#457
+  it('should toggle panel with Space and prevent default scroll', async () => {
+    const items: CollapseProps['items'] = [
+      { label: 'collapse 1', key: '1', children: 'first' },
+      { label: 'collapse 2', key: '2', children: 'second', collapsible: 'disabled' },
+    ]
+    const wrapper = mount(<Collapse items={items} />)
+    const headers = wrapper.findAll('.vc-collapse-header')
+
+    const space = new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true })
+    headers[0]!.element.dispatchEvent(space)
+    await wrapper.vm.$nextTick()
+    expect(space.defaultPrevented).toBe(true)
+    expect(wrapper.findAll('.vc-collapse-panel-active')).toHaveLength(1)
+
+    const disabledSpace = new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true })
+    headers[1]!.element.dispatchEvent(disabledSpace)
+    await wrapper.vm.$nextTick()
+    expect(disabledSpace.defaultPrevented).toBe(false)
+    expect(wrapper.findAll('.vc-collapse-panel-active')).toHaveLength(1)
+  })
+
+  it('should ignore keyboard events from nested header controls', async () => {
+    const items: CollapseProps['items'] = [
+      { label: <button class="nested">nested</button>, key: '1', children: 'first' },
+    ]
+    const wrapper = mount(<Collapse items={items} />)
+    await wrapper.find('.nested').trigger('keydown', { key: 'Enter' })
+    await wrapper.find('.nested').trigger('keydown', { key: ' ' })
+    expect(wrapper.findAll('.vc-collapse-panel-active')).toHaveLength(0)
+  })
+
+  // react-component/collapse#458
+  it('should link the header to its content with aria-controls when expanded', async () => {
+    const items: CollapseProps['items'] = [
+      { label: 'collapse 1', key: '1', children: 'first' },
+    ]
+    const wrapper = mount(<Collapse items={items} />)
+    const header = wrapper.find('.vc-collapse-header')
+    expect(header.attributes('aria-controls')).toBeUndefined()
+
+    await header.trigger('click')
+    const controls = wrapper.find('.vc-collapse-header').attributes('aria-controls')
+    expect(controls).toBeTruthy()
+    expect(wrapper.find('.vc-collapse-panel').attributes('id')).toBe(controls)
+  })
+
   it('should support return null icon', () => {
     const items: CollapseProps['items'] = [
       { label: 'title', key: '1', children: 'first' },

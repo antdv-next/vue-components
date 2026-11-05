@@ -26,6 +26,7 @@ const PanelContent = defineComponent<CollapsePanelProps>({
         prefixCls,
         isActive,
         style,
+        id,
         role,
         class: className,
         classNames: customizeClassNames,
@@ -43,6 +44,7 @@ const PanelContent = defineComponent<CollapsePanelProps>({
             className,
           )}
           style={style as any}
+          id={id}
           role={role}
         >
           <div
