@@ -141,7 +141,7 @@ const InternalMenuItem = defineComponent<MenuItemProps>(
 
     const onInternalKeyDown = (e: KeyboardEvent) => {
       props?.onKeyDown?.(e)
-      if (e.which === KeyCode.ENTER) {
+      if (!mergedDisabled.value && e.which === KeyCode.ENTER) {
         const info = getEventInfo(e)
 
         // Legacy. Key will also trigger click event
@@ -203,7 +203,7 @@ const InternalMenuItem = defineComponent<MenuItemProps>(
           {...activeProps}
           {...optionRoleProps as any}
           component="li"
-          aria-disabled={disabled}
+          aria-disabled={mergedDisabled.value}
           style={[
             directionStyle.value,
             props?.style,

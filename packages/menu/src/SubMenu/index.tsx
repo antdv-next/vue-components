@@ -365,6 +365,8 @@ const InternalSubMenu = defineComponent<SubMenuProps>(
         <MenuContextProvider
           classes={classes}
           styles={styles}
+          // Only pass `true`: a `false` would surface as aria-disabled="false" on every child item
+          disabled={mergedDisabled.value || undefined}
           onItemClick={onMergedItemClick}
           mode={mode.value === 'horizontal' ? 'vertical' : mode.value}
           itemIcon={mergedItemIcon.value}
