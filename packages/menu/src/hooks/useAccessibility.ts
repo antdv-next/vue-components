@@ -302,6 +302,13 @@ export default function useAccessibility(
 
         // ======================= InlineTrigger =======================
       }
+      else if (
+        (offsetObj!.inlineTrigger || offsetObj!.offset! > 0)
+        && focusMenuElement.getAttribute('aria-disabled') === 'true'
+      ) {
+        originOnKeyDown?.(e)
+        return
+      }
       else if (offsetObj!.inlineTrigger) {
         // Inline trigger no need switch to sub menu item
         triggerAccessibilityOpen(focusMenuKey!)
