@@ -57,6 +57,7 @@ function useColorDrag(
     document.removeEventListener('mouseup', mouseUpHandler)
     document.removeEventListener('touchmove', mouseMoveHandler)
     document.removeEventListener('touchend', mouseUpHandler)
+    document.removeEventListener('touchcancel', mouseUpHandler)
     mouseMoveHandler = () => {}
     mouseUpHandler = () => {}
   }
@@ -117,9 +118,14 @@ function useColorDrag(
   }
 
   const onDragStop: EventHandle = (e) => {
-    e.preventDefault()
+    const canceled = e.type === 'touchcancel'
+    if (!canceled) {
+      e.preventDefault()
+    }
     removeEventListener()
-    onDragChangeComplete?.()
+    if (!canceled) {
+      onDragChangeComplete?.()
+    }
   }
 
   const onDragStart: EventHandle = (e) => {
@@ -141,6 +147,7 @@ function useColorDrag(
     // out of passive costs nothing for normal scrolling.
     document.addEventListener('touchmove', onDragMove, { passive: false })
     document.addEventListener('touchend', onDragStop)
+    document.addEventListener('touchcancel', onDragStop)
     mouseMoveHandler = onDragMove
     mouseUpHandler = onDragStop
   }
