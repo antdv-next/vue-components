@@ -1,6 +1,8 @@
 import { classNames } from '@v-c/util'
 import useMergedState from '@v-c/util/dist/hooks/useMergedState'
-import { computed, defineComponent, onMounted, shallowRef } from 'vue'
+import { computed, defineComponent, nextTick, onBeforeUnmount, onMounted, shallowRef } from 'vue'
+
+const inputRestorers = new WeakMap<HTMLInputElement, () => void>()
 
 export interface InputHTMLAttributesType {
   checked?: boolean
@@ -54,6 +56,29 @@ export const Checkbox = defineComponent<
       value: computed(() => props.checked),
     })
 
+    const restoreChecked = () => {
+      if (inputRef.value && props.checked !== undefined)
+        inputRef.value.checked = !!props.checked
+    }
+
+    const restoreControlledState = () => {
+      const input = inputRef.value
+      if (!input)
+        return
+
+      restoreChecked()
+      if (input.type !== 'radio' || !input.name)
+        return
+
+      // Native activation also unchecks the previous radio, without firing change.
+      // Match the DOM group rather than component ancestry (including form=).
+      const root = input.getRootNode() as Document | DocumentFragment | HTMLElement
+      root.querySelectorAll<HTMLInputElement>('input[type="radio"]').forEach((other) => {
+        if (other !== input && other.name === input.name && other.form === input.form)
+          inputRestorers.get(other)?.()
+      })
+    }
+
     expose({
       focus: () => {
         inputRef.value?.focus()
@@ -66,32 +91,47 @@ export const Checkbox = defineComponent<
     })
 
     onMounted(() => {
+      if (inputRef.value)
+        inputRestorers.set(inputRef.value, restoreChecked)
       if (props.autoFocus)
         inputRef.value?.focus()
+    })
+
+    onBeforeUnmount(() => {
+      if (inputRef.value)
+        inputRestorers.delete(inputRef.value)
     })
 
     const handleChange = (e: any) => {
       if (props.disabled)
         return
 
+      const checked = e.target.checked
       if (props.checked === undefined)
-        setRawValue(e.target?.checked)
+        setRawValue(checked)
 
-      props?.['onUpdate:checked']?.(e.target.checked)
-      props?.onChange?.({
-        target: {
-          ...attrs,
-          ...props,
-          checked: e.target.checked,
-        },
-        stopPropagation() {
-          e.stopPropagation()
-        },
-        preventDefault() {
-          e.preventDefault()
-        },
-        nativeEvent: e,
-      })
+      try {
+        props?.['onUpdate:checked']?.(checked)
+        props?.onChange?.({
+          target: {
+            ...attrs,
+            ...props,
+            checked,
+          },
+          stopPropagation() {
+            e.stopPropagation()
+          },
+          preventDefault() {
+            e.preventDefault()
+          },
+          nativeEvent: e,
+        })
+      }
+      finally {
+        // Vue does not restore controlled inputs when their prop stays unchanged.
+        // Wait for parent updates before restoring the latest controlled state.
+        nextTick(restoreControlledState)
+      }
     }
 
     return () => {
