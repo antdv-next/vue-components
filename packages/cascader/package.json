@@ -39,6 +39,7 @@
   "dependencies": {
     "@v-c/select": "workspace:^",
     "@v-c/tree": "workspace:^",
+    "@v-c/trigger": "workspace:^",
     "@v-c/util": "workspace:^"
   }
 }

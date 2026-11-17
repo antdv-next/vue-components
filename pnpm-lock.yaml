@@ -104,6 +104,9 @@ importers:
       '@v-c/tree':
         specifier: workspace:^
         version: link:../tree
+      '@v-c/trigger':
+        specifier: workspace:^
+        version: link:../trigger
       '@v-c/util':
         specifier: workspace:^
         version: link:../util
