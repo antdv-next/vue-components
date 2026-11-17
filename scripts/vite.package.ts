@@ -7,6 +7,7 @@ import fg from 'fast-glob'
 import { defineConfig, normalizePath } from 'vite'
 import dts from 'vite-plugin-dts'
 import tsxResolveTypes from 'vite-plugin-tsx-resolve-types'
+import { addDtsExtensions } from './dts-extensions'
 
 export interface PackageConfigOptions {
   /** Extra externals on top of the derived ones (`vue`, `@v-c/*`, package deps). */
@@ -108,6 +109,11 @@ export function definePackageConfig({ entries: entryPatterns, external: extraExt
         // skipLibCheck silently resolve those types as `any` (and mapped
         // types like Omit<Props, ...> then degrade every field to any).
         aliasesExclude: [/^@v-c\//],
+        // The packages are `"type": "module"`, so node16/nodenext consumers
+        // need explicit extensions on every specifier in the emitted d.ts.
+        beforeWriteFile: (filePath, content) => ({
+          content: addDtsExtensions(filePath, content, paths),
+        }),
         exclude: [
           '**/tests/**/*',
           '**/*.test.ts',
