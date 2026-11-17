@@ -7,7 +7,7 @@ import fg from 'fast-glob'
 import { defineConfig, normalizePath } from 'vite'
 import dts from 'vite-plugin-dts'
 import tsxResolveTypes from 'vite-plugin-tsx-resolve-types'
-import { addDtsExtensions } from './dts-extensions'
+import { addDtsExtensions } from './dts-extensions.ts'
 
 export interface PackageConfigOptions {
   /** Extra externals on top of the derived ones (`vue`, `@v-c/*`, package deps). */
