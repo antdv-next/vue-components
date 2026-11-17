@@ -38,7 +38,7 @@ const Upload = defineComponent<UploadProps>(
     }))
 
     return () => (
-      <AjaxUpload ref={uploaderRef} {...mergedProps.value} {...attrs}>
+      <AjaxUpload ref={uploaderRef} {...mergedProps.value} {...attrs as Record<string, unknown>}>
         {slots.default?.()}
       </AjaxUpload>
     )

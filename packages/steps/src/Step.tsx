@@ -111,7 +111,8 @@ const Step = defineComponent<StepProps>(
         accessibilityProps.onKeydown = (e: KeyboardEvent) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault()
-            e.currentTarget.click()
+            const target = e.currentTarget as HTMLElement
+            target.click()
           }
         }
       }

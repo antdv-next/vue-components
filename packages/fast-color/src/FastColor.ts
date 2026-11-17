@@ -3,6 +3,8 @@ import presetColors from './presetColors'
 
 type Constructor<T> = new (...args: any[]) => T
 
+type Channel = 'r' | 'g' | 'b' | 'a'
+
 type ParseNumber = (num: number, txt: string, index: number) => number
 
 const round = Math.round
@@ -131,7 +133,7 @@ export class FastColor {
       }
       else {
         // From preset color
-        const presetColor = presetColors[trimStr.toLowerCase()]
+        const presetColor = presetColors[trimStr.toLowerCase() as keyof typeof presetColors]
         if (presetColor) {
           this.fromHexString(
             // Convert 36 hex to 16 hex
@@ -303,7 +305,7 @@ export class FastColor {
     const color = this._c(input)
 
     const p = amount / 100
-    const calc = (key: string) => (color[key] - this[key]) * p + this[key]
+    const calc = (key: Channel) => (color[key] - this[key]) * p + this[key]
 
     const rgba = {
       r: round(calc('r')),
@@ -335,7 +337,7 @@ export class FastColor {
     const bg = this._c(background)
     const alpha = this.a + bg.a * (1 - this.a)
 
-    const calc = (key: string) => {
+    const calc = (key: Channel) => {
       return round(
         (this[key] * this.a + bg[key] * bg.a * (1 - this.a)) / alpha,
       )
@@ -440,7 +442,7 @@ export class FastColor {
 
   // ====================== Privates ======================
   /** Return a new FastColor object with one channel changed */
-  private _sc(rgb: string, value: number, max?: number) {
+  private _sc(rgb: Channel, value: number, max?: number) {
     const clone = this.clone()
     clone[rgb] = limitRange(value, max)
     return clone

@@ -61,7 +61,6 @@ const Panel = defineComponent<PanelProps>(
         ariaId,
         style,
         className,
-        forceRender,
         onClose,
         onMouseDown,
         onMouseUp,

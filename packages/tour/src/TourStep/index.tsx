@@ -10,7 +10,7 @@ const TourStep = defineComponent<DefaultPanelProps>(
         <>
           {
             typeof renderPanel === 'function'
-              ? (renderPanel({ ...props, ...attrs }, current!))
+              ? (renderPanel({ ...props, ...attrs } as DefaultPanelProps, current!))
               : (<DefaultPanel {...props} />)
           }
         </>
