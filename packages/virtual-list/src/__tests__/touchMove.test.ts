@@ -100,3 +100,53 @@ describe('useMobileTouchMove touchcancel', () => {
     wrapper.unmount()
   })
 })
+
+// react-component/virtual-list#394
+describe('useMobileTouchMove cancelable touchmove', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+    document.body.innerHTML = ''
+  })
+
+  it('registers a non-passive touchmove listener on the list before any touch starts', async () => {
+    const addEventListener = vi.spyOn(HTMLElement.prototype, 'addEventListener')
+    const { wrapper } = await setupProbe()
+    const holder = wrapper.find('.holder').element
+
+    const listMoveOptions = addEventListener.mock.calls
+      .filter(([type], i) => type === 'touchmove' && addEventListener.mock.contexts[i] === holder)
+      .map(([, , options]) => options)
+    expect(listMoveOptions).toContainEqual(expect.objectContaining({ passive: false }))
+
+    const removeEventListener = vi.spyOn(HTMLElement.prototype, 'removeEventListener')
+    wrapper.unmount()
+    expect(
+      removeEventListener.mock.calls.some(
+        ([type], i) => type === 'touchmove' && removeEventListener.mock.contexts[i] === holder,
+      ),
+    ).toBe(true)
+  })
+
+  it('does not preventDefault a non-cancelable touchmove', async () => {
+    const { wrapper, callback, item } = await setupProbe()
+
+    dispatchTouch(item, 'touchstart', 100)
+
+    // The browser already started a native scroll, so the move cannot be cancelled
+    const moveEvent = new Event('touchmove', { bubbles: true, cancelable: false }) as any
+    moveEvent.touches = [{ pageY: 90, pageX: 0 }]
+    const preventDefault = vi.spyOn(moveEvent, 'preventDefault')
+    item.dispatchEvent(moveEvent)
+
+    expect(callback).toHaveBeenCalled()
+    expect(preventDefault).not.toHaveBeenCalled()
+
+    // A cancelable move is still prevented when the list handles it
+    const cancelableMove = new Event('touchmove', { bubbles: true, cancelable: true }) as any
+    cancelableMove.touches = [{ pageY: 80, pageX: 0 }]
+    item.dispatchEvent(cancelableMove)
+    expect(cancelableMove.defaultPrevented).toBe(true)
+
+    wrapper.unmount()
+  })
+})
