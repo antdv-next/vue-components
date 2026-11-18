@@ -2,6 +2,7 @@ import type { Ref } from 'vue'
 import type {
   ColorFormatType,
   ColorGenInput,
+  ColorPickerLocale,
   ColorValueType,
   HsbaColorType,
   TransformOffset,
@@ -18,6 +19,25 @@ export function generateColor(color: ColorGenInput): Color {
 }
 
 export const defaultColor = generateColor('#1677ff')
+
+export const defaultLocale: Required<ColorPickerLocale> = {
+  picker: 'Color picker',
+  pickerDescription: '2D slider',
+  hue: 'Hue',
+  alpha: 'Alpha',
+  saturation: 'Saturation',
+  brightness: 'Brightness',
+}
+
+/** Fill missing (or `undefined`) locale keys with the default English labels. */
+export function mergeLocale(locale?: ColorPickerLocale): Required<ColorPickerLocale> {
+  return Object.fromEntries(
+    Object.entries(defaultLocale).map(([key, value]) => [
+      key,
+      locale?.[key as keyof ColorPickerLocale] ?? value,
+    ]),
+  ) as Required<ColorPickerLocale>
+}
 
 export function formatColorValue(
   color: Color,

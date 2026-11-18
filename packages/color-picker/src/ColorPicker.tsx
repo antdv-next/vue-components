@@ -1,6 +1,6 @@
 import type { CSSProperties, PropType, VNode } from 'vue'
 import type { Components } from './hooks/useComponent'
-import type { BaseColorPickerProps, ColorFormatType, ColorGenInput, ColorValueType, HsbaColorType } from './interface'
+import type { BaseColorPickerProps, ColorFormatType, ColorGenInput, ColorPickerLocale, ColorValueType, HsbaColorType } from './interface'
 import { classNames } from '@v-c/util'
 
 import { toPropsRefs } from '@v-c/util/dist/props-util'
@@ -11,7 +11,7 @@ import ColorBlock from './components/ColorBlock'
 import Picker from './components/Picker'
 import useColorState from './hooks/useColorState'
 import useComponent from './hooks/useComponent'
-import { ColorPickerPrefixCls, defaultColor, formatColorValue } from './util'
+import { ColorPickerPrefixCls, defaultColor, formatColorValue, mergeLocale } from './util'
 
 const HUE_COLORS = [
   {
@@ -81,6 +81,7 @@ function colorPickerProps() {
     disabled: Boolean,
     panelRender: Function as PropType<(panel: VNode) => VNode>,
     components: Object,
+    locale: Object as PropType<ColorPickerLocale>,
   }
 }
 
@@ -99,6 +100,8 @@ const ColorPicker = defineComponent({
       props.defaultValue || defaultColor,
       value,
     )
+
+    const mergedLocale = computed(() => mergeLocale(props.locale))
 
     const alphaColor = computed(() => colorValue.value.setA(1).toRgbString())
 
@@ -176,6 +179,7 @@ const ColorPicker = defineComponent({
           <Picker
             onChange={handleChange}
             {...sharedSliderProps}
+            locale={mergedLocale.value}
             onChangeComplete={onPickerChangeComplete}
           />
           <div class={`${prefixCls}-slider-container`}>
@@ -188,11 +192,11 @@ const ColorPicker = defineComponent({
                 {...sharedSliderProps}
                 type="hue"
                 colors={HUE_COLORS}
-                min={0}
                 max={359}
                 value={colorValue.value.getHue()}
                 onChange={onHueChange}
                 onChangeComplete={onHueChangeComplete}
+                aria-label={mergedLocale.value.hue}
               />
               {!disabledAlpha && (
                 <Slider
@@ -202,11 +206,10 @@ const ColorPicker = defineComponent({
                     { percent: 0, color: 'rgba(255, 0, 4, 0)' },
                     { percent: 100, color: alphaColor.value },
                   ]}
-                  min={0}
-                  max={100}
                   value={colorValue.value.a * 100}
                   onChange={onAlphaChange}
                   onChangeComplete={onAlphaChangeComplete}
+                  aria-label={mergedLocale.value.alpha}
                 />
               )}
             </div>

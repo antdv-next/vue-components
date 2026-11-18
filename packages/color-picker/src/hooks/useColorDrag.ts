@@ -1,7 +1,7 @@
 import type { Ref } from 'vue'
 import type { Color } from '../color'
 import type { TransformOffset } from '../interface'
-import { onWatcherCleanup, ref, watch } from 'vue'
+import { onScopeDispose, ref, watch } from 'vue'
 
 type EventType
   = | MouseEvent
@@ -10,15 +10,16 @@ type EventType
 type EventHandle = (e: EventType) => void
 
 interface useColorDragProps {
-  color: Color
+  /** Getter so the offset follows controlled value changes */
+  color: () => Color
   containerRef: Ref<HTMLDivElement>
   targetRef: Ref<{ transformDomRef: HTMLDivElement }>
   direction?: 'x' | 'y'
   onDragChange?: (offset: TransformOffset) => void
   onDragChangeComplete?: () => void
   calculate?: () => TransformOffset
-  /** Disabled drag */
-  disabledDrag?: boolean
+  /** Getter so toggling `disabled` takes effect without remounting */
+  disabledDrag?: () => boolean
 }
 
 function getPosition(e: EventType) {
@@ -47,7 +48,7 @@ function useColorDrag(
 
   const offsetValue = ref({ x: 0, y: 0 })
   // Plain variables (React's `useRef`): `removeEventListener` runs from a
-  // watcher cleanup, which on unmount executes inside the parent's render
+  // scope disposal, which on unmount executes inside the parent's render
   // effect, where reading and writing a ref would re-trigger that parent.
   let mouseMoveHandler: EventHandle = () => {}
   let mouseUpHandler: EventHandle = () => {}
@@ -61,13 +62,14 @@ function useColorDrag(
     mouseMoveHandler = () => {}
     mouseUpHandler = () => {}
   }
-  // Always get position from `color`
-  watch(() => props.color, () => {
+  // Always get position from `color`, including controlled and keyboard changes.
+  watch(props.color, () => {
     offsetValue.value = calculate!()
-    onWatcherCleanup(() => removeEventListener())
   }, {
     immediate: true,
   })
+  // Only unmount detaches an in-progress drag; color updates during a drag must not.
+  onScopeDispose(removeEventListener)
 
   const updateOffset: EventHandle = (e) => {
     if (!containerRef.value || !targetRef.value) {
@@ -135,7 +137,7 @@ function useColorDrag(
 
     removeEventListener()
 
-    if (disabledDrag) {
+    if (disabledDrag?.()) {
       return
     }
     updateOffset(e)

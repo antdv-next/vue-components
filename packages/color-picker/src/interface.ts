@@ -42,10 +42,20 @@ export interface TransformOffset {
   y: number
 }
 
+export interface ColorPickerLocale {
+  picker?: string
+  pickerDescription?: string
+  hue?: string
+  alpha?: string
+  saturation?: string
+  brightness?: string
+}
+
 export interface BaseColorPickerProps {
   color: Color
   prefixCls?: string
   disabled?: boolean
+  locale?: ColorPickerLocale
   onChange?: (
     color: ColorValueType,
     info?: { type?: HsbaColorType, value?: number },

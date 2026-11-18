@@ -13,16 +13,17 @@ import Palette from './Palette'
 import Transform from './Transform'
 
 export interface BaseSliderProps {
-  prefixCls: string
-  colors: { percent: number, color: string }[]
-  min: number
-  max: number
-  value: number
-  disabled: boolean
-  onChange: (value: number) => void
-  onChangeComplete: (value: number) => void
-  type: HsbaColorType
-  color: Color
+  'prefixCls': string
+  'colors': { percent: number, color: string }[]
+  'min'?: number
+  'max'?: number
+  'value': number
+  'disabled': boolean
+  'onChange': (value: number) => void
+  'onChangeComplete': (value: number) => void
+  'type': HsbaColorType
+  'color': Color
+  'aria-label'?: string
 }
 
 export default defineComponent({
@@ -36,14 +37,9 @@ export default defineComponent({
       type: Array as PropType<{ percent: number, color: string }[]>,
       required: true,
     },
-    min: {
-      type: Number,
-      required: true,
-    },
-    max: {
-      type: Number,
-      required: true,
-    },
+    min: Number,
+    max: Number,
+    ariaLabel: String,
     value: {
       type: Number,
       required: true,
@@ -86,7 +82,7 @@ export default defineComponent({
     })
 
     const [offset, dragStartHandle] = useColorDrag({
-      color: props.color,
+      color: () => props.color,
       targetRef: transformRef,
       containerRef: sliderRef,
       calculate: () => calcOffset(props.color, props.type),
@@ -95,7 +91,7 @@ export default defineComponent({
         emit('changeComplete', getValue(colorRef.value as Color))
       },
       direction: 'x',
-      disabledDrag: props.disabled,
+      disabledDrag: () => props.disabled,
     })
 
     const handleColor = computed(() => {
@@ -118,6 +114,11 @@ export default defineComponent({
         prefixCls,
         colors,
         type,
+        disabled,
+        min,
+        max,
+        value,
+        ariaLabel,
       } = props
 
       // ========================= Gradient =========================
@@ -138,6 +139,15 @@ export default defineComponent({
                 size="small"
                 color={handleColor.value.toHexString()}
                 prefixCls={prefixCls}
+                disabled={disabled}
+                x={{
+                  'aria-label': ariaLabel,
+                  min,
+                  max,
+                  value,
+                  'onChange': (val: number) => emit('change', val),
+                  'onChangeComplete': (val: number) => emit('changeComplete', val),
+                }}
               />
             </Transform>
             <Gradient colors={gradientList} type={type} prefixCls={prefixCls} />
