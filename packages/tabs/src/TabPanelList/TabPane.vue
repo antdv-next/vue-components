@@ -2,7 +2,7 @@
 import type { TabPaneProps } from '../interface'
 import RenderComponent from '@v-c/util/dist/RenderComponent'
 import { ensureValidVNode } from '@v-c/util/dist/vnode'
-import { computed, useSlots } from 'vue'
+import { useSlots } from 'vue'
 
 defineOptions({
   name: 'TabPane',
@@ -12,21 +12,21 @@ defineOptions({
 defineProps<TabPaneProps>()
 
 const slots = useSlots()
-const childrenNode = computed(() => ensureValidVNode(slots.default?.() || []))
-
-const hasContent = computed(() => childrenNode.value && childrenNode.value?.length > 0)
+// Slots are updated independently of reactive dependencies; read the current
+// slot during rendering instead of caching its VNodes in a computed.
+const childrenNode = () => ensureValidVNode(slots.default?.() || [])
 </script>
 
 <template>
   <div
     :id="id ? `${id}-panel-${tabKey}` : undefined"
     role="tabpanel"
-    :tabindex="active && hasContent ? 0 : -1"
+    :tabindex="active && childrenNode()?.length ? 0 : -1"
     :aria-labelledby="id ? `${id}-tab-${tabKey}` : undefined"
     :aria-hidden="!active"
     :style="style"
     :class="[prefixCls, active && `${prefixCls}-active`, className]"
   >
-    <RenderComponent :render="childrenNode" />
+    <RenderComponent :render="childrenNode()" />
   </div>
 </template>
