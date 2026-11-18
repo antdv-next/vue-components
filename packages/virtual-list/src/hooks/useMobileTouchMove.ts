@@ -3,6 +3,10 @@ import { onUnmounted, ref, watch } from 'vue'
 
 const SMOOTH_PTG = 14 / 15
 
+// Handling stays on the touch target (see `onTouchStart`): virtualized items can be unmounted
+// mid-gesture, and events on a detached target never bubble up to the list.
+function onListTouchMove() {}
+
 export default function useMobileTouchMove(
   inVirtual: Ref<boolean>,
   listRef: Ref<HTMLDivElement | null | undefined>,
@@ -40,7 +44,9 @@ export default function useMobileTouchMove(
       }
 
       const scrollHandled = callback(isHorizontal, isHorizontal ? offsetX : offsetY, false, e)
-      if (scrollHandled) {
+      // Once the browser has started a native scroll (e.g. passed through at the list edge),
+      // the rest of the sequence is not cancelable and `preventDefault` only logs a warning.
+      if (scrollHandled && e.cancelable) {
         e.preventDefault()
       }
 
@@ -99,6 +105,7 @@ export default function useMobileTouchMove(
   const removeTouchStartListener = () => {
     if (touchStartElement) {
       touchStartElement.removeEventListener('touchstart', onTouchStart)
+      touchStartElement.removeEventListener('touchmove', onListTouchMove)
       touchStartElement = null
     }
   }
@@ -120,6 +127,12 @@ export default function useMobileTouchMove(
       if (enabled && ele) {
         touchStartElement = ele
         ele.addEventListener('touchstart', onTouchStart, { passive: true } as any)
+        // Browsers decide whether a touch sequence is cancelable by hit-testing for blocking
+        // touch listeners at `touchstart`. The real `touchmove` listener is only attached to the
+        // target inside `onTouchStart`, which is too late, so every `touchmove` would arrive with
+        // `cancelable=false` and the page would scroll along with the list. A persistent
+        // non-passive listener on the list marks its area as blocking up front.
+        ele.addEventListener('touchmove', onListTouchMove, { passive: false })
 
         onCleanup(() => {
           teardown()

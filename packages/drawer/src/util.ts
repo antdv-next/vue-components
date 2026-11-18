@@ -3,7 +3,7 @@ import canUseDom from '@v-c/util/dist/Dom/canUseDom'
 import warning from '@v-c/util/dist/warning'
 
 export function parseWidthHeight(value?: number | string) {
-  if (typeof value === 'string') {
+  if (typeof value === 'string' && value.trim() !== '') {
     const num = Number(value.replace(/px$/i, ''))
     const floatNum = parseFloat(value)
 

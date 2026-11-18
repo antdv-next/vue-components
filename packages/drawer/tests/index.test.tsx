@@ -4,6 +4,7 @@ import { nextTick } from 'vue'
 import Trigger from '../../trigger/src'
 import motionProps from '../docs/assets/motion.ts'
 import Drawer from '../src'
+import { parseWidthHeight } from '../src/util'
 
 Object.defineProperty(window, 'getComputedStyle', {
   value: () => ({
@@ -97,6 +98,27 @@ describe('vc-drawer', () => {
     await nextTick()
 
     expect(onClose).toHaveBeenCalledTimes(1)
+
+    wrapper.unmount()
+    await nextTick()
+  })
+
+  it('should not convert empty string width or height to 0', async () => {
+    expect(parseWidthHeight('')).toBe('')
+    expect(parseWidthHeight('  ')).toBe('  ')
+    expect(parseWidthHeight('100px')).toBe(100)
+
+    const wrapper = mount(Drawer, {
+      props: {
+        open: true,
+        width: '',
+        getContainer: false,
+      },
+    })
+    await nextTick()
+
+    const contentWrapper = wrapper.find('.vc-drawer-content-wrapper').element as HTMLElement
+    expect(contentWrapper.style.width).not.toBe('0px')
 
     wrapper.unmount()
     await nextTick()
