@@ -11,16 +11,7 @@ import ColorBlock from './components/ColorBlock'
 import Picker from './components/Picker'
 import useColorState from './hooks/useColorState'
 import useComponent from './hooks/useComponent'
-import { ColorPickerPrefixCls, defaultColor, formatColorValue } from './util'
-
-const defaultLocale: Required<ColorPickerLocale> = {
-  picker: 'Color picker',
-  pickerDescription: '2D slider',
-  hue: 'Hue',
-  alpha: 'Alpha',
-  saturation: 'Saturation',
-  brightness: 'Brightness',
-}
+import { ColorPickerPrefixCls, defaultColor, formatColorValue, mergeLocale } from './util'
 
 const HUE_COLORS = [
   {
@@ -110,15 +101,7 @@ const ColorPicker = defineComponent({
       value,
     )
 
-    const mergedLocale = computed(() => {
-      const locale = props.locale
-      return Object.fromEntries(
-        Object.entries(defaultLocale).map(([key, value]) => [
-          key,
-          locale?.[key as keyof ColorPickerLocale] ?? value,
-        ]),
-      ) as Required<ColorPickerLocale>
-    })
+    const mergedLocale = computed(() => mergeLocale(props.locale))
 
     const alphaColor = computed(() => colorValue.value.setA(1).toRgbString())
 

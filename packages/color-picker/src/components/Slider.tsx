@@ -91,7 +91,7 @@ export default defineComponent({
         emit('changeComplete', getValue(colorRef.value as Color))
       },
       direction: 'x',
-      disabledDrag: props.disabled,
+      disabledDrag: () => props.disabled,
     })
 
     const handleColor = computed(() => {

@@ -5,7 +5,7 @@ import useEvent from '@v-c/util/dist/hooks/useEvent'
 import { defineComponent, ref } from 'vue'
 import useColorDrag from '../hooks/useColorDrag'
 
-import { calcOffset, calculateColor, generateColor } from '../util'
+import { calcOffset, calculateColor, generateColor, mergeLocale } from '../util'
 import Handler from './Handler'
 import Palette from './Palette'
 import Transform from './Transform'
@@ -27,10 +27,7 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
-    locale: {
-      type: Object as PropType<ColorPickerLocale>,
-      default: () => ({}),
-    },
+    locale: Object as PropType<ColorPickerLocale>,
     onChange: Function,
     onChangeComplete: Function,
   },
@@ -69,7 +66,7 @@ export default defineComponent({
       calculate: () => calcOffset(props.color),
       onDragChange,
       onDragChangeComplete: completeColor,
-      disabledDrag: props.disabled,
+      disabledDrag: () => props.disabled,
     })
 
     // =========================== Keyboard ===========================
@@ -89,8 +86,9 @@ export default defineComponent({
         color,
         prefixCls,
         disabled,
-        locale,
       } = props
+      // Fall back to the default labels when `Picker` is used on its own.
+      const locale = mergeLocale(props.locale)
       const hsb = color.toHsb()
       const saturation = Math.round(hsb.s * 100)
       const brightness = Math.round(hsb.b * 100)

@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { nextTick } from 'vue'
+import { nextTick, ref } from 'vue'
 import ColorPicker from '../src'
 
 function touchEvent(type: string, pageX?: number, pageY?: number) {
@@ -56,6 +56,38 @@ describe('color-picker touch cancel', () => {
     await nextTick()
     expect(onChange).toHaveBeenCalled()
     expect(onChangeComplete).toHaveBeenCalledTimes(1)
+    wrapper.unmount()
+  })
+
+  it('should follow a dynamic disabled prop when starting a drag', async () => {
+    const onChange = vi.fn()
+    const disabled = ref(true)
+    const wrapper = mount(
+      () => <ColorPicker defaultValue="#163cff" disabled={disabled.value} onChange={onChange} />,
+      { attachTo: document.body },
+    )
+    const select = wrapper.find('.vc-color-picker-select').element
+
+    select.dispatchEvent(touchEvent('touchstart', 0, 175))
+    document.dispatchEvent(touchEvent('touchend'))
+    await nextTick()
+    expect(onChange).not.toHaveBeenCalled()
+
+    disabled.value = false
+    await nextTick()
+    select.dispatchEvent(touchEvent('touchstart', 0, 175))
+    document.dispatchEvent(touchEvent('touchmove', 0, 150))
+    document.dispatchEvent(touchEvent('touchend'))
+    await nextTick()
+    expect(onChange).toHaveBeenCalled()
+
+    disabled.value = true
+    await nextTick()
+    onChange.mockClear()
+    select.dispatchEvent(touchEvent('touchstart', 0, 125))
+    document.dispatchEvent(touchEvent('touchmove', 0, 125))
+    await nextTick()
+    expect(onChange).not.toHaveBeenCalled()
     wrapper.unmount()
   })
 })

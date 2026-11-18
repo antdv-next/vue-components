@@ -18,8 +18,8 @@ interface useColorDragProps {
   onDragChange?: (offset: TransformOffset) => void
   onDragChangeComplete?: () => void
   calculate?: () => TransformOffset
-  /** Disabled drag */
-  disabledDrag?: boolean
+  /** Getter so toggling `disabled` takes effect without remounting */
+  disabledDrag?: () => boolean
 }
 
 function getPosition(e: EventType) {
@@ -137,7 +137,7 @@ function useColorDrag(
 
     removeEventListener()
 
-    if (disabledDrag) {
+    if (disabledDrag?.()) {
       return
     }
     updateOffset(e)

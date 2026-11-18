@@ -2,7 +2,7 @@ import type { Color } from '../src'
 import { mount } from '@vue/test-utils'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { defineComponent, nextTick, ref } from 'vue'
-import ColorPicker, { ColorBlock } from '../src'
+import ColorPicker, { ColorBlock, Picker } from '../src'
 import { generateColor } from '../src/util'
 
 const defaultColor = '#1677ff'
@@ -86,6 +86,17 @@ describe('color-picker accessibility', () => {
     expect(byLabel('Alpha')).toHaveLength(1)
     expect(saturation!.getAttribute('aria-valuetext')).toBe('Sat: 91%')
     expect(brightness!.getAttribute('aria-valuetext')).toBe('Lum: 100%')
+  })
+
+  it('falls back to default labels when Picker is used standalone', () => {
+    const { byLabel } = setup(() => (
+      <Picker color={generateColor(defaultColor)} prefixCls="vc-color-picker" />
+    ))
+    const [saturation, brightness] = byLabel('Color picker')
+    expect(byLabel('Color picker')).toHaveLength(2)
+    expect(saturation!.getAttribute('aria-roledescription')).toBe('2D slider')
+    expect(saturation!.getAttribute('aria-valuetext')).toBe('Saturation: 91%')
+    expect(brightness!.getAttribute('aria-valuetext')).toBe('Brightness: 100%')
   })
 
   it('keeps the 2-D picker a single tab stop and exposes only the active axis', async () => {
