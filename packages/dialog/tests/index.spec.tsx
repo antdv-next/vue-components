@@ -102,6 +102,27 @@ describe('@v-c/dialog', () => {
     expect(closeButton.attributes('style')).toContain('color: rgb(255, 0, 0);')
   })
 
+  it('forwards aria and data attributes from closable to the close button', async () => {
+    const wrapper = mount(Dialog, {
+      props: {
+        visible: true,
+        getContainer: false,
+        closable: {
+          'aria-label': 'Close dialog',
+          'data-testid': 'dialog-close',
+          'data-track-id': 'close-1',
+        },
+      },
+    })
+
+    await flushDialog()
+
+    const closeButton = wrapper.find('.vc-dialog-close')
+    expect(closeButton.attributes('aria-label')).toBe('Close dialog')
+    expect(closeButton.attributes('data-testid')).toBe('dialog-close')
+    expect(closeButton.attributes('data-track-id')).toBe('close-1')
+  })
+
   it('calls closable.afterClose before dialog afterClose', async () => {
     const closableAfterClose = vi.fn()
     const afterClose = vi.fn()

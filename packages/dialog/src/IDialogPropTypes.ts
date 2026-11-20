@@ -9,6 +9,7 @@ export type ModalClassNames = Partial<Record<SemanticName, string>>
 export type ModalStyles = Partial<Record<SemanticName, CSSProperties>>
 
 export interface ClosableType {
+  [key: `data-${string}`]: unknown
   closeIcon?: VueNode
   disabled?: boolean
   afterClose?: () => any

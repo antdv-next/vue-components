@@ -1,5 +1,5 @@
-import type { AriaAttributes, ComputedRef } from 'vue'
 import type { VueNode } from '@v-c/util/dist/type'
+import type { AriaAttributes, ComputedRef } from 'vue'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
 import { computed } from 'vue'
 
@@ -43,7 +43,8 @@ export default function useClosable(
     }
   })
 
-  const closableAriaProps = computed(() => pickAttrs(closableConfig.value, true))
+  // Forward aria-* and data-* props from the closable config to the close button.
+  const closableAriaProps = computed(() => pickAttrs(closableConfig.value, { aria: true, data: true }))
 
   return [
     computed(() => !!closable.value),

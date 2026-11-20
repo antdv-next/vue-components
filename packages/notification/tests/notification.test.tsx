@@ -61,6 +61,34 @@ describe('notification', () => {
       .toBe('button')
   })
 
+  it('forwards aria and data attributes from closable to the close button', async () => {
+    const wrapper = mount(Notifications, {
+      props: {
+        container: document.body,
+      },
+      attachTo: document.body,
+    })
+
+    wrapper.vm.open({
+      key: 'notice',
+      title: 'Notice',
+      duration: false,
+      closable: {
+        'closeIcon': 'x',
+        'aria-label': 'Close notice',
+        'data-testid': 'notice-close',
+      },
+    })
+
+    await nextTick()
+    await nextTick()
+
+    const closeButton = document.querySelector<HTMLButtonElement>('.vc-notification-notice-close')!
+    expect(closeButton.getAttribute('aria-label')).toBe('Close notice')
+    expect(closeButton.getAttribute('data-testid')).toBe('notice-close')
+    wrapper.unmount()
+  })
+
   it('does not call notice close callbacks when closed by api', async () => {
     const onClose = vi.fn()
     const closableOnClose = vi.fn()
