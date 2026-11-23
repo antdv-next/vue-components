@@ -27,6 +27,11 @@ dayjs.extend((_, c) => {
   }
 })
 
+function hasOffsetToken(format: string) {
+  // ignore escaped literals such as `[Z]`
+  return /Z/.test(format.replace(/\[[^\]]*\]/g, ''))
+}
+
 type IlocaleMapObject = Record<string, string>
 const localeMap: IlocaleMapObject = {
   // ar_EG:
@@ -180,6 +185,16 @@ const generateConfig: GenerateConfig<Dayjs> = {
         const date = dayjs(formatText, format, localeStr, true)
         if (date.isValid()) {
           return date
+        }
+        // Day.js strict mode re-formats the parsed date and compares it with the
+        // input. Offset tokens (`Z` / `ZZ`) always format to the local offset, so
+        // values like `...000Z` or a non-local `+09:00` never pass. Fall back to
+        // non-strict parsing for formats containing an offset token.
+        if (hasOffsetToken(format)) {
+          const looseDate = dayjs(formatText, format, localeStr)
+          if (looseDate.isValid()) {
+            return looseDate
+          }
         }
       }
 
