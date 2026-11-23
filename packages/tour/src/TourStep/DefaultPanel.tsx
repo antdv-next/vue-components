@@ -24,7 +24,7 @@ const DefaultPanel = defineComponent<DefaultPanelProps>(
         classNames: tourClassNames,
         styles,
       } = props
-      const ariaProps = pickAttrs(closable || {}, true)
+      const ariaProps = pickAttrs(closable || {}, { aria: true, data: true })
       const closeIcon = closable?.closeIcon ?? (
         <span class={`${prefixCls}-close-x`}>&times;</span>
       )
