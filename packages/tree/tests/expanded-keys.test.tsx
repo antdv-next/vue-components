@@ -3,34 +3,6 @@ import { describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 import Tree from '../src'
 
-/**
- * Characterization tests for controlled `expandedKeys`.
- *
- * These pin CURRENT behaviour, which deliberately deviates from upstream.
- *
- * Upstream rc-tree guards centrally inside `setExpandedKeys`:
- *
- *   setExpandedKeys = (expandedKeys) => {
- *     if (this.props.hasOwnProperty('expandedKeys')) return   // react-component/tree#1044
- *     ...
- *   }
- *
- * so a controlled `expandedKeys` is never written by internal handlers, and
- * upstream asserts exactly that in `tests/ExpandedKeys.spec.tsx`.
- *
- * We ported that guard and then reverted it (`5fe098f`); the revert moved the
- * check to individual call sites, and only two of the five got one. The result
- * is "optimistic expansion": the three unguarded handlers below update internal
- * state even when the parent owns `expandedKeys`, so a parent that ignores
- * `onExpand` does NOT keep the tree collapsed the way upstream would.
- *
- * The revert commit records no reason, so these tests do not assert that the
- * deviation is *right* — they assert what it *is*, so that a future upstream
- * sync has to change them consciously instead of silently flipping behaviour.
- * If the guard is ever restored, the three `deviates from upstream` cases below
- * are the ones expected to change.
- */
-
 const treeData = [
   {
     key: 'parent',
@@ -53,7 +25,7 @@ describe('tree controlled expandedKeys', () => {
     expect(visibleNodes(wrapper)).toBe(2)
   })
 
-  it('deviates from upstream: click expands even when expandedKeys is controlled', async () => {
+  it('keeps a controlled tree collapsed when the parent ignores onExpand', async () => {
     const onExpand = vi.fn()
     // The parent never reacts to `onExpand`, so `expandedKeys` stays `[]`.
     const wrapper = mount(() => (
@@ -64,11 +36,10 @@ describe('tree controlled expandedKeys', () => {
     await wrapper.get('.vc-tree-switcher').trigger('click')
 
     expect(onExpand).toHaveBeenCalledWith(['parent'], expect.objectContaining({ expanded: true }))
-    // Upstream would stay at 1 here — the parent owns the expansion.
-    expect(visibleNodes(wrapper)).toBe(2)
+    expect(visibleNodes(wrapper)).toBe(1)
   })
 
-  it('deviates from upstream: a rejected loadData collapses controlled expandedKeys', async () => {
+  it('keeps a controlled node expanded when loadData rejects', async () => {
     const onExpand = vi.fn()
     const loadData = vi.fn(() => Promise.reject(new Error('nope')))
     const wrapper = mount(() => (
@@ -87,11 +58,11 @@ describe('tree controlled expandedKeys', () => {
     await nextTick()
 
     expect(loadData).toHaveBeenCalled()
-    // The rollback writes internal state even though `expandedKeys` is controlled.
-    expect(wrapper.get('.vc-tree-switcher').classes()).not.toContain('vc-tree-switcher_open')
+    // The rollback cannot write `expandedKeys`, so the parent keeps it open.
+    expect(wrapper.get('.vc-tree-switcher').classes()).toContain('vc-tree-switcher_open')
   })
 
-  it('deviates from upstream: dragstart collapses a controlled expanded node', async () => {
+  it('keeps a controlled expanded node expanded on dragstart', async () => {
     const wrapper = mount(() => (
       <Tree treeData={treeData as any} expandedKeys={['parent']} draggable />
     ))
@@ -101,8 +72,7 @@ describe('tree controlled expandedKeys', () => {
       .get('.vc-tree-treenode[role="treeitem"] .vc-tree-node-content-wrapper')
       .trigger('dragstart')
 
-    // Upstream would stay at 2 — `setExpandedKeys` would be a no-op.
-    expect(visibleNodes(wrapper)).toBe(1)
+    expect(visibleNodes(wrapper)).toBe(2)
   })
 
   it('matches upstream: scrollTo autoExpand is a no-op when controlled', async () => {
