@@ -1,5 +1,6 @@
 import type { Ref } from 'vue'
 import type { TourProps, TourStepInfo } from '../interface'
+import { isVueRenderable } from '@v-c/util'
 import { computed } from 'vue'
 
 type ClosableConfig = Exclude<TourStepInfo['closable'], boolean> | null
@@ -32,7 +33,7 @@ function getClosableConfig(
 ): ClosableConfig | 'empty' {
   if (
     closable === false
-    || (closeIcon === false && (!isConfigObj(closable) || !closable?.closeIcon))
+    || (closeIcon === false && (!isConfigObj(closable) || !isVueRenderable(closable?.closeIcon)))
   ) {
     return null
   }
@@ -48,7 +49,7 @@ function getClosableConfig(
   }
 
   // When StepClosable no need auto fill, but RootClosable need this.
-  return preset || closable || closeIcon
+  return preset || closable || isVueRenderable(closeIcon)
     ? {
         closeIcon: mergedCloseIcon,
       }
