@@ -142,3 +142,49 @@ describe('slider drag', () => {
     expect(document.activeElement?.getAttribute('aria-valuenow')).toBe('70')
   })
 })
+
+// ref: react-component/slider#1101
+describe('slider non-cancelable touch events', () => {
+  function createSpiedTouchEvent(type: string, pageX: number, cancelable: boolean) {
+    const event = new Event(type, { bubbles: true, cancelable })
+    const touch = { pageX, pageY: 0 }
+    Object.defineProperty(event, 'targetTouches', { value: [touch] })
+    Object.defineProperty(event, 'touches', { value: [touch] })
+    const preventDefault = vi.fn()
+    Object.defineProperty(event, 'preventDefault', { value: preventDefault })
+    return { event, preventDefault }
+  }
+
+  it('does not prevent default on non-cancelable touch events', async () => {
+    const w = mountSlider()
+    stubRect(w.element)
+    const handle = w.get(HANDLE_SELECTOR).element
+
+    handle.dispatchEvent(createTouchEvent('touchstart', 20))
+    await w.vm.$nextTick()
+
+    // Browser scrolling in progress: subsequent events are not cancelable
+    const move = createSpiedTouchEvent('touchmove', 50, false)
+    handle.dispatchEvent(move.event)
+    expect(move.preventDefault).not.toHaveBeenCalled()
+    expect(w.emitted('change')?.at(-1)).toEqual([50])
+
+    const end = createSpiedTouchEvent('touchend', 50, false)
+    handle.dispatchEvent(end.event)
+    expect(end.preventDefault).not.toHaveBeenCalled()
+    expect(w.emitted('changeComplete')?.at(-1)).toEqual([50])
+  })
+
+  it('prevents default on cancelable touchmove events', async () => {
+    const w = mountSlider()
+    stubRect(w.element)
+    const handle = w.get(HANDLE_SELECTOR).element
+
+    handle.dispatchEvent(createTouchEvent('touchstart', 20))
+    await w.vm.$nextTick()
+
+    const move = createSpiedTouchEvent('touchmove', 30, true)
+    handle.dispatchEvent(move.event)
+    expect(move.preventDefault).toHaveBeenCalledTimes(1)
+  })
+})
