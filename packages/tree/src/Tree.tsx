@@ -273,6 +273,9 @@ const Tree = defineComponent<TreeProps>(
     const expandedKeys = shallowRef<Key[]>(getInitExpandedKeys())
 
     const setExpandedKeys = (keys: Key[]) => {
+      if (props.expandedKeys !== undefined) {
+        return
+      }
       expandedKeys.value = keys
     }
     // `undefined` means uncontrolled. Controlled -> uncontrolled resets to empty,
@@ -305,6 +308,9 @@ const Tree = defineComponent<TreeProps>(
     })
 
     const setSelectedKeys = (keys: Key[]) => {
+      if (props.selectedKeys !== undefined) {
+        return
+      }
       selectedKeys.value = keys
     }
 
@@ -324,6 +330,9 @@ const Tree = defineComponent<TreeProps>(
     const defaultCheckedKeyEntity = getDefaultCheckedKeyEntity()
     const rawCheckedKeys = shallowRef<Key[]>(defaultCheckedKeyEntity.checkedKeys)
     const setRawCheckedKeys = (keys: Key[]) => {
+      if (props.checkedKeys !== undefined) {
+        return
+      }
       rawCheckedKeys.value = keys
     }
     watch(() => props.checkedKeys, () => {
@@ -334,6 +343,9 @@ const Tree = defineComponent<TreeProps>(
 
     const rawHalfCheckedKeys = shallowRef<Key[]>(defaultCheckedKeyEntity.halfCheckedKeys)
     const setRawHalfCheckedKeys = (keys: Key[]) => {
+      if (props.checkedKeys !== undefined) {
+        return
+      }
       rawHalfCheckedKeys.value = keys
     }
     watch(() => props.checkedKeys, () => {
