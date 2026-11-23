@@ -1,7 +1,7 @@
 import type { HTMLAttributes } from 'vue'
 import type { ItemData, MenuItemType } from './interface.ts'
 import Overflow from '@v-c/overflow'
-import { clsx, warning } from '@v-c/util'
+import { clsx, isVueRenderable, warning } from '@v-c/util'
 import KeyCode from '@v-c/util/dist/KeyCode'
 import omit from '@v-c/util/dist/omit'
 import pickDefined from '@v-c/util/dist/pickDefined'
@@ -173,7 +173,7 @@ const InternalMenuItem = defineComponent<MenuItemProps>(
       } = menuContext?.value ?? {}
 
       // ============================= Icon =============================
-      const mergedItemIcon = itemIcon || contextItemIcon
+      const mergedItemIcon = isVueRenderable(itemIcon) ? itemIcon : contextItemIcon
       const itemCls = `${prefixCls}-item`
       const activeProps = {
         onMouseenter: ret.onMouseEnter,
