@@ -43,6 +43,7 @@ describe('useOpen releases lock when delayed close is canceled', () => {
     expect(get()[3].value).toBe(true)
     expect(cancelFun).not.toHaveBeenCalled()
 
+    await vi.waitFor(() => expect(cancelFun).toHaveBeenCalled())
     await flushSelect()
 
     expect(cancelFun).toHaveBeenCalledTimes(1)
@@ -60,7 +61,7 @@ describe('useOpen releases lock when delayed close is canceled', () => {
     expect(get()[1].value).toBe(true)
     expect(get()[3].value).toBe(true)
 
-    await flushSelect()
+    await vi.waitFor(() => expect(onOpen).toHaveBeenCalled())
 
     expect(get()[1].value).toBe(false)
     expect(get()[3].value).toBe(false)
