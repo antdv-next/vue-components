@@ -1,7 +1,7 @@
 import type { KeyboardEventHandler, MouseEventHandler } from '@v-c/util/dist/EventInterface'
 import type { VueNode } from '@v-c/util/dist/type'
 import type { Status, StepItem, StepsProps } from './Steps'
-import { clsx, isNonNullable } from '@v-c/util'
+import { clsx, isNonNullable, isVueRenderable } from '@v-c/util'
 import { defineComponent } from 'vue'
 import { useStepsContext } from './Context'
 import Rail from './Rail.tsx'
@@ -127,7 +127,7 @@ const Step = defineComponent<StepProps>(
         itemCls,
         `${itemCls}-${mergedStatus}`,
         {
-          [`${itemCls}-custom`]: icon,
+          [`${itemCls}-custom`]: isVueRenderable(icon),
           [`${itemCls}-active`]: active,
           [`${itemCls}-disabled`]: disabled === true,
           [`${itemCls}-empty-header`]: !hasTitle && !hasSubTitle,
@@ -228,7 +228,8 @@ const Step = defineComponent<StepProps>(
       )
 
       if (itemRender) {
-        stepNode = (itemRender(stepNode, renderInfo as any) || null) as any
+        const renderedNode = itemRender(stepNode, renderInfo as any)
+        stepNode = (isVueRenderable(renderedNode) ? renderedNode : null) as any
       }
 
       return stepNode
