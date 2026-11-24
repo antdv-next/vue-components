@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'vue'
 import type { FlattenOptionData, RawValueType } from './interface'
 import type { BaseOptionType } from './Select'
-import { clsx } from '@v-c/util'
+import { clsx, isVueRenderable } from '@v-c/util'
 import KeyCode from '@v-c/util/dist/KeyCode'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
 import List from '@v-c/virtual-list'
@@ -516,10 +516,10 @@ const OptionList = defineComponent({
                 const mergedLabel = getLabel(item)
 
                 const iconVisible
-                  = !menuItemSelectedIcon || typeof menuItemSelectedIcon === 'function' || selected
+                  = !isVueRenderable(menuItemSelectedIcon) || typeof menuItemSelectedIcon === 'function' || selected
 
                 // https://github.com/ant-design/ant-design/issues/34145
-                const content = typeof mergedLabel === 'number' ? mergedLabel : mergedLabel || value
+                const content = isVueRenderable(mergedLabel) ? mergedLabel : value
                 // https://github.com/ant-design/ant-design/issues/26717
                 let optionTitle = isTitleType(content) ? content.toString() : undefined
                 if (title !== undefined) {

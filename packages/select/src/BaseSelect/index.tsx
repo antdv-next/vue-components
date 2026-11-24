@@ -13,7 +13,7 @@ import type {
   RenderDOMFunc,
   RenderNode,
 } from '../interface'
-import { clsx, isNonNullable } from '@v-c/util'
+import { clsx, isNonNullable, isVueRenderable } from '@v-c/util'
 import { getDOM } from '@v-c/util/dist/Dom/findDOMNode'
 import { KeyCodeStr } from '@v-c/util/dist/KeyCode'
 import pickDefined from '@v-c/util/dist/pickDefined'
@@ -366,7 +366,7 @@ export const BaseSelect = defineComponent<
 
     // ============================== Open ==============================
     // Not trigger `open` when `notFoundContent` is empty
-    const emptyListContent = computed(() => !props?.notFoundContent && props.emptyOptions)
+    const emptyListContent = computed(() => !isVueRenderable(props?.notFoundContent) && props.emptyOptions)
     const [rawOpen, mergedOpen, triggerOpen, lockOptions] = useOpen(
       props?.defaultOpen || false,
       open as any,
