@@ -9,6 +9,7 @@ import { computed, defineComponent, shallowRef, watch } from 'vue'
 import useBaseProps from './hooks/useBaseProps'
 import { useSelectContext } from './SelectContext'
 import TransBtn from './TransBtn'
+import { getNextActiveIndex } from './utils/keyUtil'
 import { isPlatformMac } from './utils/platformUtil'
 import { isValidCount } from './utils/valueUtil'
 
@@ -235,7 +236,10 @@ const OptionList = defineComponent({
           }
 
           if (offset !== 0) {
-            const nextActiveIndex = getEnabledActiveIndex(activeIndex.value + offset, offset)
+            const nextActiveIndex = getEnabledActiveIndex(
+              getNextActiveIndex(activeIndex.value, offset),
+              offset,
+            )
             scrollIntoView(nextActiveIndex)
             setActive(nextActiveIndex, true)
           }
