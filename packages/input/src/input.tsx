@@ -1,7 +1,7 @@
 import type { InputFocusOptions } from '@v-c/util/dist/Dom/focus'
 import type { HolderRef } from './BaseInput'
 import type { InputProps } from './interface'
-import { clsx } from '@v-c/util'
+import { clsx, isVueRenderable } from '@v-c/util'
 import { triggerFocus } from '@v-c/util/dist/Dom/focus'
 import { KeyCodeStr } from '@v-c/util/dist/KeyCode'
 import omit from '@v-c/util/dist/omit'
@@ -265,7 +265,7 @@ const Input = defineComponent<
       const config = countConfig.value
       const hasMaxLength = Number(mergedMax.value) > 0
       let mergedSuffix = suffixNode
-      if (suffixNode || config?.show) {
+      if (isVueRenderable(suffixNode) || config?.show) {
         const dataCount = config?.showFormatter
           ? config.showFormatter({
               value: formatValue.value,
@@ -281,7 +281,7 @@ const Input = defineComponent<
                 class={clsx(
                   `${prefixCls}-show-count-suffix`,
                   {
-                    [`${prefixCls}-show-count-has-suffix`]: !!suffixNode,
+                    [`${prefixCls}-show-count-has-suffix`]: isVueRenderable(suffixNode),
                   },
                   classNames?.count,
                 )}

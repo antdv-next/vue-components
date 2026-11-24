@@ -171,7 +171,9 @@ export default defineComponent<ScrollBarProps>({
 
       props?.onStartMove?.()
       e.stopPropagation()
-      e.preventDefault()
+      if (e.cancelable) {
+        e.preventDefault()
+      }
     }
 
     // ======================== Effect ========================
@@ -181,7 +183,9 @@ export default defineComponent<ScrollBarProps>({
     // ref: https://github.com/facebook/react/issues/9809
     onMounted(() => {
       const onScrollbarTouchStart = (e: TouchEvent) => {
-        e.preventDefault()
+        if (e.cancelable) {
+          e.preventDefault()
+        }
       }
 
       const scrollbarEle = scrollbarRef.value
@@ -280,6 +284,9 @@ export default defineComponent<ScrollBarProps>({
       const containerStyle: CSSProperties = {
         position: 'absolute',
         visibility: visible.value ? undefined : 'hidden',
+        // Touches on the scrollbar must never pan the page. Unlike `preventDefault` on touchstart,
+        // this also holds when the touchstart is not cancelable (e.g. during a momentum scroll).
+        touchAction: 'none',
       }
 
       const thumbStyle: CSSProperties = {

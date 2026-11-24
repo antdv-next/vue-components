@@ -172,7 +172,9 @@ export default function useTouchEvent(
     }
 
     const preventDefault = (e: TouchEvent) => {
-      e.preventDefault()
+      if (e.cancelable) {
+        e.preventDefault()
+      }
     }
 
     if (open.value && movable.value) {

@@ -1,4 +1,5 @@
 import type { RenderIconInfo, RenderIconType } from './interface.ts'
+import { isVueRenderable } from '@v-c/util'
 import { filterEmpty } from '@v-c/util/dist/props-util'
 import { defineComponent } from 'vue'
 
@@ -28,7 +29,7 @@ const Icon = defineComponent<IconProps>(
       else if (typeof icon !== 'boolean') {
         iconNode = icon
       }
-      return iconNode || children || null
+      return isVueRenderable(iconNode) ? iconNode : (children || null)
     }
   },
 )
