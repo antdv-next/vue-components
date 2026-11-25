@@ -184,7 +184,7 @@ const Input = defineComponent<InputProps>(
           '--select-input-width': widthCssVar.value,
         },
         autoFocus,
-        'autocomplete': autoComplete ?? contextAutoComplete ?? 'new-password',
+        'autocomplete': autoComplete ?? contextAutoComplete ?? 'off',
         'class': inputCls,
         disabled,
         'value': value || '',

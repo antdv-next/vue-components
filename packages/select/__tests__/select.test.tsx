@@ -22,7 +22,7 @@ describe('select react sync', () => {
       },
     })
 
-    expect(wrapper.find('input').attributes('autocomplete')).toBe('new-password')
+    expect(wrapper.find('input').attributes('autocomplete')).toBe('off')
   })
 
   it('forwards autocomplete to the search input', () => {
