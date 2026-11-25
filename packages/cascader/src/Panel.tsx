@@ -43,8 +43,7 @@ export type PickType
 export type PanelProps<
   OptionType extends DefaultOptionType = DefaultOptionType,
   ValueField extends keyof OptionType = keyof OptionType,
-  Multiple extends boolean | any = false,
-  // @ts-expect-error this
+  Multiple extends boolean | VueNode = false,
 > = Pick<CascaderProps<OptionType, ValueField, Multiple>, PickType>
 
 function noop() {}
@@ -57,7 +56,7 @@ const panelDefaults: PanelProps = {
 }
 
 // See Cascader: keep `checkable` as `boolean | VueNode` at runtime.
-const Panel = defineComponent<PanelProps<DefaultOptionType, keyof DefaultOptionType, boolean | VueNode>>((props = panelDefaults) => {
+const Panel = defineComponent<PanelProps<DefaultOptionType, keyof DefaultOptionType, boolean | VueNode>>((props) => {
   // ======================== Multiple ========================
   const multiple = computed(() => !!props.checkable)
   const mergedShowCheckedStrategy = computed(
