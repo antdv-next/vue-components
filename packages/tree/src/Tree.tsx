@@ -251,6 +251,13 @@ const Tree = defineComponent<TreeProps>(
     }))
 
     const getInitExpandedKeys = () => {
+      if (props.expandedKeys !== undefined) {
+        const controlledKeys = props.expandedKeys ?? []
+        return props.autoExpandParent || props.defaultExpandParent
+          ? conductExpandParent(controlledKeys, keyEntities.value)
+          : controlledKeys
+      }
+
       let keys: Key[] = []
       const defaultExpandAll = props.defaultExpandAll
       const defaultExpandParent = props.defaultExpandParent
@@ -261,7 +268,7 @@ const Tree = defineComponent<TreeProps>(
           .map(entity => entity.key)
       }
       else {
-        keys = props?.expandedKeys || props.defaultExpandedKeys || []
+        keys = props.defaultExpandedKeys || []
       }
       if (defaultExpandParent) {
         keys = conductExpandParent(keys, keyEntities.value)
