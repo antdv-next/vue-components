@@ -475,11 +475,11 @@
           "description": "@rc-component/select -> @v-c/select"
         }
       ],
-      "last_synced_commit": "4fd47c4ea564d32395d3dd52488f5a7ce4a7ca96",
-      "last_synced_commit_short": "4fd47c4ea5",
-      "last_synced_at": "2026-11-25T12:51:07Z",
+      "last_synced_commit": "f21e0bdebd36fbdee00191f6eb00e1ba38836ccb",
+      "last_synced_commit_short": "f21e0bdebd",
+      "last_synced_at": "2026-11-26T12:40:28Z",
       "last_synced_tag": "@rc-component/select@1.13.0",
-      "sync_count": 10
+      "sync_count": 11
     },
     {
       "name": "@ant-design/react-slick",
