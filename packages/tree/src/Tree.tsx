@@ -278,6 +278,10 @@ const Tree = defineComponent<TreeProps>(
     }
 
     const expandedKeys = shallowRef<Key[]>(getInitExpandedKeys())
+    // Slot `<TreeNode>` children are only parsed in render, so `keyEntities` is
+    // empty when the initial keys are computed above. Recompute them once the
+    // first non-empty slot tree is parsed, matching the treeData path.
+    let pendingSlotInitExpand = !props.treeData
 
     const setExpandedKeys = (keys: Key[]) => {
       if (props.expandedKeys !== undefined) {
@@ -1232,7 +1236,14 @@ const Tree = defineComponent<TreeProps>(
         if (signature !== slotTreeDataSignature.value) {
           slotTreeDataSignature.value = signature
           slotTreeData.value = parsed as any
+          if (pendingSlotInitExpand && parsed.length) {
+            pendingSlotInitExpand = false
+            expandedKeys.value = getInitExpandedKeys()
+          }
         }
+      }
+      else {
+        pendingSlotInitExpand = false
       }
 
       const domProps = pickAttrs(attrs, { aria: true, data: true })
