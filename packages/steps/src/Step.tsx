@@ -109,6 +109,12 @@ const Step = defineComponent<StepProps>(
         }
 
         accessibilityProps.onKeydown = (e: KeyboardEvent) => {
+          // Only handle keys pressed on the step itself. Events bubbling up from
+          // nested focusable content (e.g. an `<input>` in the step content) must be
+          // left untouched, otherwise Space / Enter would be swallowed there.
+          if (e.target !== e.currentTarget) {
+            return
+          }
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault()
             const target = e.currentTarget as HTMLElement
