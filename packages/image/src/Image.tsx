@@ -3,7 +3,7 @@ import type { CSSProperties } from 'vue'
 import type { TransformType } from './hooks/useImageTransform'
 import type { ImageElementProps } from './interface'
 import type { InternalPreviewConfig, PreviewSemanticName, ToolbarRenderInfoType } from './Preview'
-import { clsx, isVueRenderable, omit } from '@v-c/util'
+import { clsx, isVueRenderable, omit, useScopeIdAttrs } from '@v-c/util'
 import useMergedState from '@v-c/util/dist/hooks/useMergedState'
 import pickAttrs from '@v-c/util/dist/pickAttrs'
 import { getAttrStyleAndClass, getStylePxValue } from '@v-c/util/dist/props-util'
@@ -91,6 +91,7 @@ const defaults = {
 
 const Image = defineComponent<ImageProps>(
   (props = defaults, { attrs, slots }) => {
+    const scopeIdAttrs = useScopeIdAttrs()
     const groupContext = usePreviewGroupContext()
 
     const prefixCls = computed(() => props.prefixCls ?? 'vc-image')
@@ -293,6 +294,7 @@ const Image = defineComponent<ImageProps>(
       return (
         <>
           <div
+            {...scopeIdAttrs}
             {...rootAttrs}
             class={rootCls}
             onClick={canPreview.value ? onPreview : onInternalClick}

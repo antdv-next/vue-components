@@ -44,7 +44,7 @@ const ResizeObserver = defineComponent<ResizeObserverProps>({
           warning(false, '`children` of ResizeObserver is empty. Nothing is in observe.')
         }
       }
-      return childNodes.map((child, index) => {
+      const children = childNodes.map((child, index) => {
         const key = child?.key || `${INTERNAL_PREFIX_KEY}-${index}`
         return (
           <SingleObserver {...props} key={key}>
@@ -52,6 +52,7 @@ const ResizeObserver = defineComponent<ResizeObserverProps>({
           </SingleObserver>
         )
       })
+      return children.length === 1 ? children[0] : children
     }
   },
 })
