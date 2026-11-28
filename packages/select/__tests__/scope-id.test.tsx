@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createVNode, defineComponent, Fragment, Suspense } from 'vue'
 import Select from '../src/Select'
 
-const STABLE_FRAGMENT = 1 << 11
+const DEV_ROOT_FRAGMENT = 1 << 11
 const options = [{ value: 'a', label: 'a' }]
 
 const ScopedDirectParent = Object.assign(defineComponent(() => () => (
@@ -19,7 +19,7 @@ const FragmentSelectWrapper = defineComponent(() => () => createVNode(
   Fragment,
   null,
   [createVNode(Select, { options })],
-  STABLE_FRAGMENT,
+  DEV_ROOT_FRAGMENT,
 ))
 const ScopedFragmentParent = Object.assign(defineComponent(() => () => (
   <FragmentSelectWrapper />
@@ -63,7 +63,7 @@ describe('scoped css id', () => {
     expect(wrapper.get('.vc-select').attributes('data-v-scoped')).toBeDefined()
   })
 
-  it('inherits the scope id through a stable fragment root', () => {
+  it('inherits the scope id through a dev root fragment', () => {
     const wrapper = mount(ScopedFragmentParent)
 
     expect(wrapper.get('.vc-select').attributes('data-v-scoped')).toBeDefined()
@@ -81,7 +81,7 @@ describe('scoped css id', () => {
     expect(wrapper.get('.vc-select').attributes('data-v-slot')).toBeDefined()
   })
 
-  it('does not fold a stable fragment root in production', () => {
+  it('does not fold a dev root fragment in production', () => {
     vi.stubEnv('NODE_ENV', 'production')
     const wrapper = mount(ScopedFragmentParent)
 

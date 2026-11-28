@@ -1,7 +1,7 @@
 import type { ComponentInternalInstance, VNode, VNodeNormalizedChildren } from 'vue'
 import { Comment, getCurrentInstance, isVNode } from 'vue'
 
-const STABLE_FRAGMENT = 1 << 11
+const DEV_ROOT_FRAGMENT = 1 << 11
 
 type ScopeVNode = VNode & {
   slotScopeIds?: string[] | null
@@ -25,7 +25,7 @@ function filterSingleRoot(children: VNodeNormalizedChildren): ScopeVNode | undef
         return
       }
       singleRoot = child
-      if (singleRoot.patchFlag > 0 && singleRoot.patchFlag & STABLE_FRAGMENT) {
+      if (singleRoot.patchFlag > 0 && singleRoot.patchFlag & DEV_ROOT_FRAGMENT) {
         return filterSingleRoot(singleRoot.children)
       }
     }
@@ -40,7 +40,7 @@ function isParentRoot(parent: ComponentInternalInstance, vnode: ScopeVNode) {
   if (!subTree) {
     return false
   }
-  if (process.env.NODE_ENV !== 'production' && subTree.patchFlag > 0 && subTree.patchFlag & STABLE_FRAGMENT) {
+  if (process.env.NODE_ENV !== 'production' && subTree.patchFlag > 0 && subTree.patchFlag & DEV_ROOT_FRAGMENT) {
     subTree = filterSingleRoot(subTree.children) || subTree
   }
 
