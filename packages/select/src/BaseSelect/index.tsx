@@ -13,7 +13,7 @@ import type {
   RenderDOMFunc,
   RenderNode,
 } from '../interface'
-import { clsx, isNonNullable, isVueRenderable } from '@v-c/util'
+import { clsx, isNonNullable, isVueRenderable, useScopeIdAttrs } from '@v-c/util'
 import { getDOM } from '@v-c/util/dist/Dom/findDOMNode'
 import { KeyCodeStr } from '@v-c/util/dist/KeyCode'
 import pickDefined from '@v-c/util/dist/pickDefined'
@@ -319,6 +319,8 @@ export const BaseSelect = defineComponent<
   BaseSelectProps
 >(
   (props = defaults, { expose, attrs }) => {
+    const scopeIdAttrs = useScopeIdAttrs()
+
     // ============================== Refs for props ==============================
     const mode = computed(() => props.mode)
     const getInputElement = computed(() => props.getInputElement)
@@ -780,6 +782,7 @@ export const BaseSelect = defineComponent<
       // >>> Render
       let renderNode = (
         <SelectInput
+          {...scopeIdAttrs}
           {...attrs}
           {...pickDefined(props, omitKeys)}
           // Ref
